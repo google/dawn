@@ -19,49 +19,79 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/builder.h"
-#include "src/ast/call_statement.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/variable_decl_statement.h"
+#include "src/diagnostic/diagnostic.h"
+#include "src/diagnostic/formatter.h"
 #include "src/transform/manager.h"
 
 namespace tint {
 namespace transform {
 namespace {
 
-class EmitVertexPointSizeTransformTest : public testing::Test,
-                                         public ast::BuilderWithModule {
+class EmitVertexPointSizeTransformTest : public testing::Test {
  public:
-  EmitVertexPointSizeTransformTest() {
-    auto transform = std::make_unique<EmitVertexPointSizeTransform>(mod);
-    manager = std::make_unique<Manager>();
-    manager->append(std::move(transform));
+  struct Output {
+    ast::Module module;
+    diag::List diagnostics;
+  };
+  Output Transform(ast::Module mod) {
+    Manager manager;
+    manager.append(std::make_unique<EmitVertexPointSizeTransform>(&mod));
+    manager.Run(&mod);
+    Output out;
+    out.module = std::move(mod);
+    auto err = manager.error();
+    if (!err.empty()) {
+      diag::Diagnostic diag;
+      diag.message = err;
+      diag.severity = diag::Severity::Error;
+      out.diagnostics.add(std::move(diag));
+    }
+    return out;
+  }
+};
+
+struct ModuleBuilder : public ast::BuilderWithModule {
+  ModuleBuilder() {}
+
+  ast::Module Module() {
+    Build();
+    return std::move(*mod);
   }
 
-  std::unique_ptr<Manager> manager;
+ protected:
+  virtual void Build() = 0;
 };
 
 TEST_F(EmitVertexPointSizeTransformTest, VertexStageBasic) {
-  auto* block = create<ast::BlockStatement>(Source{});
-  block->append(create<ast::CallStatement>(create<ast::CallExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(
-          Source{}, "builtin_assignments_should_happen_before_this"),
-      ast::ExpressionList{})));
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      auto* block = create<ast::BlockStatement>(Source{});
 
-  mod->AddFunction(create<ast::Function>(
-      "non_entry_a", ast::VariableList{}, create<ast::type::Void>(),
-      create<ast::BlockStatement>(Source{})));
+      block->append(create<ast::VariableDeclStatement>(
+          Var("builtin_assignments_should_happen_before_this",
+              tint::ast::StorageClass::kFunction, ty.f32)));
 
-  auto* entry = create<ast::Function>("entry", ast::VariableList{},
-                                      create<ast::type::Void>(), block);
-  entry->set_decorations(
-      {create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{})});
-  mod->AddFunction(entry);
+      mod->AddFunction(
+          create<ast::Function>("non_entry_a", ast::VariableList{}, ty.void_,
+                                create<ast::BlockStatement>(Source{})));
 
-  mod->AddFunction(create<ast::Function>(
-      "non_entry_b", ast::VariableList{}, create<ast::type::Void>(),
-      create<ast::BlockStatement>(Source{})));
+      auto* entry =
+          create<ast::Function>("entry", ast::VariableList{}, ty.void_, block);
+      entry->set_decorations({create<ast::StageDecoration>(
+          ast::PipelineStage::kVertex, Source{})});
+      mod->AddFunction(entry);
 
-  manager->Run(mod);
+      mod->AddFunction(
+          create<ast::Function>("non_entry_b", ast::VariableList{}, ty.void_,
+                                create<ast::BlockStatement>(Source{})));
+    }
+  };
+
+  auto result = Transform(Builder{}.Module());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   auto* expected = R"(Module{
   DecoratedVariable{
@@ -84,10 +114,12 @@ TEST_F(EmitVertexPointSizeTransformTest, VertexStageBasic) {
       Identifier[__ptr_out__f32]{tint_pointsize}
       ScalarConstructor[__f32]{1.000000}
     }
-    Call[not set]{
-      Identifier[not set]{builtin_assignments_should_happen_before_this}
-      (
-      )
+    VariableDeclStatement{
+      Variable{
+        builtin_assignments_should_happen_before_this
+        function
+        __f32
+      }
     }
   }
   Function non_entry_b -> __void
@@ -96,26 +128,32 @@ TEST_F(EmitVertexPointSizeTransformTest, VertexStageBasic) {
   }
 }
 )";
-  EXPECT_EQ(expected, mod->to_str());
+  EXPECT_EQ(expected, result.module.to_str());
 }
 
 TEST_F(EmitVertexPointSizeTransformTest, VertexStageEmpty) {
-  mod->AddFunction(create<ast::Function>(
-      "non_entry_a", ast::VariableList{}, create<ast::type::Void>(),
-      create<ast::BlockStatement>(Source{})));
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      mod->AddFunction(
+          create<ast::Function>("non_entry_a", ast::VariableList{}, ty.void_,
+                                create<ast::BlockStatement>(Source{})));
 
-  auto* entry = create<ast::Function>("entry", ast::VariableList{},
-                                      create<ast::type::Void>(),
-                                      create<ast::BlockStatement>(Source{}));
-  entry->set_decorations(
-      {create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{})});
-  mod->AddFunction(entry);
+      auto* entry =
+          create<ast::Function>("entry", ast::VariableList{}, ty.void_,
+                                create<ast::BlockStatement>(Source{}));
+      entry->set_decorations({create<ast::StageDecoration>(
+          ast::PipelineStage::kVertex, Source{})});
+      mod->AddFunction(entry);
 
-  mod->AddFunction(create<ast::Function>(
-      "non_entry_b", ast::VariableList{}, create<ast::type::Void>(),
-      create<ast::BlockStatement>(Source{})));
+      mod->AddFunction(
+          create<ast::Function>("non_entry_b", ast::VariableList{}, ty.void_,
+                                create<ast::BlockStatement>(Source{})));
+    }
+  };
 
-  manager->Run(mod);
+  auto result = Transform(Builder{}.Module());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   auto* expected = R"(Module{
   DecoratedVariable{
@@ -145,25 +183,31 @@ TEST_F(EmitVertexPointSizeTransformTest, VertexStageEmpty) {
   }
 }
 )";
-  EXPECT_EQ(expected, mod->to_str());
+  EXPECT_EQ(expected, result.module.to_str());
 }
 
 TEST_F(EmitVertexPointSizeTransformTest, NonVertexStage) {
-  auto* fragment_entry = create<ast::Function>(
-      "fragment_entry", ast::VariableList{}, create<ast::type::Void>(),
-      create<ast::BlockStatement>(Source{}));
-  fragment_entry->set_decorations(
-      {create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{})});
-  mod->AddFunction(fragment_entry);
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      auto* fragment_entry =
+          create<ast::Function>("fragment_entry", ast::VariableList{}, ty.void_,
+                                create<ast::BlockStatement>(Source{}));
+      fragment_entry->set_decorations({create<ast::StageDecoration>(
+          ast::PipelineStage::kFragment, Source{})});
+      mod->AddFunction(fragment_entry);
 
-  auto* compute_entry = create<ast::Function>(
-      "compute_entry", ast::VariableList{}, create<ast::type::Void>(),
-      create<ast::BlockStatement>(Source{}));
-  compute_entry->set_decorations(
-      {create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{})});
-  mod->AddFunction(compute_entry);
+      auto* compute_entry =
+          create<ast::Function>("compute_entry", ast::VariableList{}, ty.void_,
+                                create<ast::BlockStatement>(Source{}));
+      compute_entry->set_decorations({create<ast::StageDecoration>(
+          ast::PipelineStage::kCompute, Source{})});
+      mod->AddFunction(compute_entry);
+    }
+  };
 
-  manager->Run(mod);
+  auto result = Transform(Builder{}.Module());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   auto* expected = R"(Module{
   Function fragment_entry -> __void
@@ -178,7 +222,7 @@ TEST_F(EmitVertexPointSizeTransformTest, NonVertexStage) {
   }
 }
 )";
-  EXPECT_EQ(expected, mod->to_str());
+  EXPECT_EQ(expected, result.module.to_str());
 }
 
 }  // namespace

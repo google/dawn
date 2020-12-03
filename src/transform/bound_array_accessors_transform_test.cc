@@ -21,6 +21,7 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/block_statement.h"
+#include "src/ast/builder.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
@@ -40,6 +41,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/diagnostic/formatter.h"
 #include "src/transform/manager.h"
 #include "src/type_determiner.h"
 
@@ -47,47 +49,61 @@ namespace tint {
 namespace transform {
 namespace {
 
+template <typename T = ast::Expression>
+T* FindVariable(ast::Module* mod, std::string name) {
+  if (auto* func = mod->FindFunctionByName("func")) {
+    for (auto* stmt : *func->body()) {
+      if (auto* decl = stmt->As<ast::VariableDeclStatement>()) {
+        if (auto* var = decl->variable()) {
+          if (var->name() == name) {
+            return As<T>(var->constructor());
+          }
+        }
+      }
+    }
+  }
+  return nullptr;
+}
+
 class BoundArrayAccessorsTest : public testing::Test {
  public:
-  BoundArrayAccessorsTest() : td_(&mod_) {
-    auto transform = std::make_unique<BoundArrayAccessorsTransform>(&mod_);
-    transform_ = transform.get();
-    manager_.append(std::move(transform));
+  ast::Module Transform(ast::Module mod) {
+    TypeDeterminer td(&mod);
+    if (!td.Determine()) {
+      error = "Type determination failed: " + td.error();
+      return {};
+    }
+
+    Manager manager;
+    manager.append(std::make_unique<BoundArrayAccessorsTransform>(&mod));
+    if (!manager.Run(&mod)) {
+      error = "manager().Run() errored:\n" + manager.error();
+      return {};
+    }
+
+    return mod;
   }
 
-  ast::BlockStatement* SetupFunctionAndBody() {
-    auto* block = create<ast::BlockStatement>();
-    body_ = block;
-    auto* func =
-        create<ast::Function>("func", ast::VariableList{}, &void_type_, block);
-    mod_.AddFunction(func);
-    return body_;
+  std::string error;
+};
+
+struct ModuleBuilder : public ast::BuilderWithModule {
+  ModuleBuilder() : body_(create<ast::BlockStatement>()) {
+    mod->AddFunction(
+        create<ast::Function>("func", ast::VariableList{}, ty.void_, body_));
   }
 
-  void DeclareVariable(ast::Variable* var) {
+  ast::Module Module() {
+    Build();
+    return std::move(*mod);
+  }
+
+ protected:
+  virtual void Build() = 0;
+  void OnVariableBuilt(ast::Variable* var) override {
     ASSERT_NE(body_, nullptr);
     body_->append(create<ast::VariableDeclStatement>(var));
   }
-
-  TypeDeterminer* td() { return &td_; }
-
-  bool Run() { return manager_.Run(&mod_); }
-
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
-  /// @param args the arguments to pass to the type constructor
-  /// @returns the node pointer
-  template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
-    return mod_.create<T>(std::forward<ARGS>(args)...);
-  }
-
- private:
-  ast::Module mod_;
-  TypeDeterminer td_;
-  ast::type::Void void_type_;
-  Manager manager_;
-  BoundArrayAccessorsTransform* transform_;
   ast::BlockStatement* body_ = nullptr;
 };
 
@@ -97,38 +113,25 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   // const b : ptr<function, f32> = a[c]
   //
   //   -> const b : ptr<function, i32> = a[min(u32(c), 2)]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
+      Const("c", ast::StorageClass::kFunction, ty.u32);
+      Const("b", ast::StorageClass::kFunction,
+            ty.pointer<f32>(ast::StorageClass::kFunction))
+          ->set_constructor(Index("a", "c"));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Array ary(&f32, 3);
-  ast::type::Pointer ptr_type(&f32, ast::StorageClass::kFunction);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* c_var = create<ast::Variable>("c", ast::StorageClass::kFunction, &u32);
-  c_var->set_is_const(true);
-  DeclareVariable(c_var);
+  ASSERT_TRUE(b->idx_expr()->Is<ast::CallExpression>());
 
-  auto* access_idx = create<ast::IdentifierExpression>("c");
-
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"), access_idx);
-  auto* ptr = accessor;
-
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &ptr_type);
-  b->set_constructor(accessor);
-  b->set_is_const(true);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
-
-  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  auto* idx = b->idx_expr()->As<ast::CallExpression>();
   ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
@@ -139,7 +142,8 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
-  ASSERT_EQ(tc->values()[0], access_idx);
+  ASSERT_TRUE(tc->values()[0]->Is<ast::IdentifierExpression>());
+  ASSERT_EQ(tc->values()[0]->As<ast::IdentifierExpression>()->name(), "c");
 
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
@@ -147,8 +151,8 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
@@ -158,40 +162,26 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   // var c : f32 = a[b[i]];
   //
   // -> var c : f32 = a[min(u32(b[min(u32(i), 4)]), 2)];
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
+      Var("b", ast::StorageClass::kFunction, ty.array<f32, 5>());
+      Var("i", ast::StorageClass::kFunction, ty.u32);
+      Const("c", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", Index("b", "i")));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Array ary3(&f32, 3);
-  ast::type::Array ary5(&f32, 5);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary3));
-  DeclareVariable(
-      create<ast::Variable>("b", ast::StorageClass::kFunction, &ary5));
-  DeclareVariable(
-      create<ast::Variable>("i", ast::StorageClass::kFunction, &u32));
+  auto* c = FindVariable<ast::ArrayAccessorExpression>(&module, "c");
+  ASSERT_NE(c, nullptr);
 
-  auto* b_access_idx = create<ast::IdentifierExpression>("i");
+  ASSERT_TRUE(c->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(c->idx_expr()->Is<ast::CallExpression>());
 
-  auto* a_access_idx = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("b"), b_access_idx);
-
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"), a_access_idx);
-  auto* ptr = accessor;
-
-  auto* b = create<ast::Variable>("c", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
-
-  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  auto* idx = c->idx_expr()->As<ast::CallExpression>();
   ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
@@ -220,7 +210,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   tc = sub_idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
-  ASSERT_EQ(tc->values()[0], b_access_idx);
+  ASSERT_TRUE(tc->values()[0]->Is<ast::IdentifierExpression>());
+  ASSERT_EQ(tc->values()[0]->As<ast::IdentifierExpression>()->name(), "i");
 
   ASSERT_TRUE(sub_idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(sub_idx->params()[1]->Is<ast::ScalarConstructorExpression>());
@@ -234,8 +225,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(c->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(c->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
@@ -243,38 +234,30 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   // var b : f32 = a[1];
   //
   // -> var b : f32 = a[1];
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.array(ty.f32, 3));
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", 1u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Array ary(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 1u)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
-
-  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  auto* scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
@@ -283,40 +266,25 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   // var b : f32 = a[c + 2 - 3]
   //
   // -> var b : f32 = a[min(u32(c + 2 - 3), 2)]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
+      Var("c", ast::StorageClass::kFunction, ty.u32);
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", Add("c", Sub(2u, 3u))));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Array ary(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
-  DeclareVariable(
-      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* access_idx = create<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
-      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 2)),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 3))));
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::CallExpression>());
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"), access_idx);
-  auto* ptr = accessor;
-
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
-
-  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  auto* idx = b->idx_expr()->As<ast::CallExpression>();
   ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
@@ -327,7 +295,28 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
-  ASSERT_EQ(tc->values()[0], access_idx);
+  auto* add = tc->values()[0]->As<ast::BinaryExpression>();
+  ASSERT_NE(add, nullptr);
+  ASSERT_EQ(add->op(), ast::BinaryOp::kAdd);
+  auto* add_lhs = add->lhs()->As<ast::IdentifierExpression>();
+  ASSERT_NE(add_lhs, nullptr);
+  ASSERT_EQ(add_lhs->name(), "c");
+  auto* add_rhs = add->rhs()->As<ast::BinaryExpression>();
+  ASSERT_NE(add_rhs, nullptr);
+  ASSERT_TRUE(add_rhs->lhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->lhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            2u);
+  ASSERT_TRUE(add_rhs->rhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->rhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            3u);
 
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
@@ -335,8 +324,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
@@ -344,38 +333,30 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   // var b : f32 = a[-1]
   //
   // -> var b : f32 = a[0]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", -1));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Array ary(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, -1)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
-
-  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  auto* scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
@@ -383,38 +364,30 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   // var b : f32 = a[3]
   //
   // -> var b : f32 = a[2]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", 3u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Array ary(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &ary));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 3u)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
-
-  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  auto* scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
@@ -422,38 +395,30 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   // var b : f32 = a[1];
   //
   // -> var b : f32 = a[1]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", 1u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Vector vec(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 1u)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
-
-  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  auto* scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
@@ -462,40 +427,25 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   // var b : f32 = a[c + 2 - 3]
   //
   // -> var b : f32 = a[min(u32(c + 2 - 3), 2)]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
+      Var("c", ast::StorageClass::kFunction, ty.u32);
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", Add("c", Sub(2u, 3u))));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Vector vec(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
-  DeclareVariable(
-      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* access_idx = create<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
-      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 2)),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 3))));
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::CallExpression>());
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"), access_idx);
-  auto* ptr = accessor;
-
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
-
-  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  auto* idx = b->idx_expr()->As<ast::CallExpression>();
   ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
@@ -505,7 +455,27 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
-  ASSERT_EQ(tc->values()[0], access_idx);
+  auto* add = tc->values()[0]->As<ast::BinaryExpression>();
+  ASSERT_NE(add, nullptr);
+  auto* add_lhs = add->lhs()->As<ast::IdentifierExpression>();
+  ASSERT_NE(add_lhs, nullptr);
+  ASSERT_EQ(add_lhs->name(), "c");
+  auto* add_rhs = add->rhs()->As<ast::BinaryExpression>();
+  ASSERT_NE(add_rhs, nullptr);
+  ASSERT_TRUE(add_rhs->lhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->lhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            2u);
+  ASSERT_TRUE(add_rhs->rhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->rhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            3u);
 
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
@@ -513,8 +483,8 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
@@ -522,38 +492,30 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   // var b : f32 = a[-1]
   //
   // -> var b : f32 = a[0]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", -1));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector vec(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, -1)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
-
-  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  auto* scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
@@ -561,38 +523,30 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   // var b : f32 = a[3]
   //
   // -> var b : f32 = a[2]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index("a", 3u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Vector vec(&f32, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &vec));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("a"),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 3u)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
-
-  auto* scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  auto* scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 2u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
@@ -600,35 +554,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   // var b : f32 = a[2][1];
   //
   // -> var b : f32 = a[2][1]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index(Index("a", 2u), 1u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Matrix mat(&f32, 2, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("a"),
-          create<ast::ScalarConstructorExpression>(
-              create<ast::UintLiteral>(&u32, 2u))),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 1u)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-
-  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(b->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = b->array()->As<ast::ArrayAccessorExpression>();
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
@@ -639,15 +582,15 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
@@ -656,43 +599,25 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   // var b : f32 = a[c + 2 - 3][1]
   //
   // -> var b : f32 = a[min(u32(c + 2 - 3), 2)][1]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
+      Var("c", ast::StorageClass::kFunction, ty.u32);
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index(Index("a", Add("c", Sub(2u, 3u))), 1u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Matrix mat(&f32, 2, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
-  DeclareVariable(
-      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* access_idx = create<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
-      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 2)),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 3))));
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("a"), access_idx),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 1u)));
-  auto* ptr = accessor;
-
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-
-  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(b->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = b->array()->As<ast::ArrayAccessorExpression>();
 
   ASSERT_TRUE(ary->idx_expr()->Is<ast::CallExpression>());
   auto* idx = ary->idx_expr()->As<ast::CallExpression>();
@@ -706,7 +631,27 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
-  ASSERT_EQ(tc->values()[0], access_idx);
+  auto* add = tc->values()[0]->As<ast::BinaryExpression>();
+  ASSERT_NE(add, nullptr);
+  auto* add_lhs = add->lhs()->As<ast::IdentifierExpression>();
+  ASSERT_NE(add_lhs, nullptr);
+  ASSERT_EQ(add_lhs->name(), "c");
+  auto* add_rhs = add->rhs()->As<ast::BinaryExpression>();
+  ASSERT_NE(add_rhs, nullptr);
+  ASSERT_TRUE(add_rhs->lhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->lhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            2u);
+  ASSERT_TRUE(add_rhs->rhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->rhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            3u);
 
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
@@ -717,15 +662,15 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
@@ -734,44 +679,25 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   // var b : f32 = a[1][c + 2 - 3]
   //
   // -> var b : f32 = a[1][min(u32(c + 2 - 3), 1)]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
+      Var("c", ast::StorageClass::kFunction, ty.u32);
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index(Index("a", 1u), Add("c", Sub(2u, 3u))));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Matrix mat(&f32, 2, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
-  DeclareVariable(
-      create<ast::Variable>("c", ast::StorageClass::kFunction, &u32));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* access_idx = create<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("c"),
-      create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 2)),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 3))));
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("a"),
-          create<ast::ScalarConstructorExpression>(
-              create<ast::UintLiteral>(&u32, 1u))),
-      access_idx);
-  auto* ptr = accessor;
-
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-
-  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(b->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = b->array()->As<ast::ArrayAccessorExpression>();
 
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -780,8 +706,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::CallExpression>());
-  auto* idx = ptr->idx_expr()->As<ast::CallExpression>();
+  ASSERT_TRUE(b->idx_expr()->Is<ast::CallExpression>());
+  auto* idx = b->idx_expr()->As<ast::CallExpression>();
   ASSERT_TRUE(idx->func()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(idx->func()->As<ast::IdentifierExpression>()->name(), "min");
 
@@ -792,7 +718,27 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   auto* tc = idx->params()[0]->As<ast::TypeConstructorExpression>();
   EXPECT_TRUE(tc->type()->Is<ast::type::U32>());
   ASSERT_EQ(tc->values().size(), 1u);
-  ASSERT_EQ(tc->values()[0], access_idx);
+  auto* add = tc->values()[0]->As<ast::BinaryExpression>();
+  ASSERT_NE(add, nullptr);
+  auto* add_lhs = add->lhs()->As<ast::IdentifierExpression>();
+  ASSERT_NE(add_lhs, nullptr);
+  ASSERT_EQ(add_lhs->name(), "c");
+  auto* add_rhs = add->rhs()->As<ast::BinaryExpression>();
+  ASSERT_NE(add_rhs, nullptr);
+  ASSERT_TRUE(add_rhs->lhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->lhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            2u);
+  ASSERT_TRUE(add_rhs->rhs()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_EQ(add_rhs->rhs()
+                ->As<ast::ScalarConstructorExpression>()
+                ->literal()
+                ->As<ast::UintLiteral>()
+                ->value(),
+            3u);
 
   ASSERT_TRUE(idx->params()[1]->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(idx->params()[1]->Is<ast::ScalarConstructorExpression>());
@@ -803,8 +749,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
@@ -812,34 +758,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   // var b : f32 = a[-1][1]
   //
   // -> var b : f32 = a[0][1]
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 2, 3);
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index(Index("a", -1), 1));
+    }
+  };
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("a"),
-          create<ast::ScalarConstructorExpression>(
-              create<ast::SintLiteral>(&i32, -1))),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1)));
-  auto* ptr = accessor;
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-
-  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(b->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = b->array()->As<ast::ArrayAccessorExpression>();
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
@@ -850,15 +786,15 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32>());
 
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 1);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
@@ -866,34 +802,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   // var b : f32 = a[2][-1]
   //
   // -> var b : f32 = a[2][0]
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 2, 3);
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index(Index("a", 2), -1));
+    }
+  };
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("a"),
-          create<ast::ScalarConstructorExpression>(
-              create<ast::SintLiteral>(&i32, 2))),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, -1)));
-  auto* ptr = accessor;
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-
-  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(b->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = b->array()->As<ast::ArrayAccessorExpression>();
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
@@ -904,15 +830,15 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::I32>());
 
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::SintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::SintLiteral>()->value(), 0);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::I32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::I32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
@@ -920,35 +846,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   // var b : f32 = a[5][1]
   //
   // -> var b : f32 = a[2][1]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index(Index("a", 5u), 1u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Matrix mat(&f32, 2, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("a"),
-          create<ast::ScalarConstructorExpression>(
-              create<ast::UintLiteral>(&u32, 5u))),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 1u)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-
-  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(b->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = b->array()->As<ast::ArrayAccessorExpression>();
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
@@ -959,15 +874,15 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
@@ -975,35 +890,24 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   // var b : f32 = a[2][5]
   //
   // -> var b : f32 = a[2][1]
+  struct Builder : ModuleBuilder {
+    void Build() override {
+      Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
+      Var("b", ast::StorageClass::kFunction, ty.f32)
+          ->set_constructor(Index(Index("a", 2u), 5u));
+    }
+  };
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Matrix mat(&f32, 2, 3);
+  ast::Module module = Transform(Builder{}.Module());
+  ASSERT_EQ(error, "");
 
-  SetupFunctionAndBody();
-  DeclareVariable(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &mat));
+  auto* b = FindVariable<ast::ArrayAccessorExpression>(&module, "b");
+  ASSERT_NE(b, nullptr);
 
-  auto* accessor = create<ast::ArrayAccessorExpression>(
-      create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("a"),
-          create<ast::ScalarConstructorExpression>(
-              create<ast::UintLiteral>(&u32, 2u))),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::UintLiteral>(&u32, 5u)));
-  auto* ptr = accessor;
+  ASSERT_TRUE(b->Is<ast::ArrayAccessorExpression>());
 
-  auto* b = create<ast::Variable>("b", ast::StorageClass::kFunction, &f32);
-  b->set_constructor(accessor);
-  DeclareVariable(b);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  ASSERT_TRUE(Run());
-  ASSERT_TRUE(ptr->Is<ast::ArrayAccessorExpression>());
-
-  ASSERT_TRUE(ptr->array()->Is<ast::ArrayAccessorExpression>());
-  auto* ary = ptr->array()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(b->array()->Is<ast::ArrayAccessorExpression>());
+  auto* ary = b->array()->As<ast::ArrayAccessorExpression>();
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
@@ -1014,15 +918,15 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   ASSERT_NE(ary->idx_expr()->result_type(), nullptr);
   ASSERT_TRUE(ary->idx_expr()->result_type()->Is<ast::type::U32>());
 
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ConstructorExpression>());
-  ASSERT_TRUE(ptr->idx_expr()->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(b->idx_expr()->Is<ast::ScalarConstructorExpression>());
 
-  scalar = ptr->idx_expr()->As<ast::ScalarConstructorExpression>();
+  scalar = b->idx_expr()->As<ast::ScalarConstructorExpression>();
   ASSERT_TRUE(scalar->literal()->Is<ast::UintLiteral>());
   EXPECT_EQ(scalar->literal()->As<ast::UintLiteral>()->value(), 1u);
 
-  ASSERT_NE(ptr->idx_expr()->result_type(), nullptr);
-  ASSERT_TRUE(ptr->idx_expr()->result_type()->Is<ast::type::U32>());
+  ASSERT_NE(b->idx_expr()->result_type(), nullptr);
+  ASSERT_TRUE(b->idx_expr()->result_type()->Is<ast::type::U32>());
 }
 
 // TODO(dsinclair): Implement when constant_id exists
