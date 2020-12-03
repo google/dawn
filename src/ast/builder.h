@@ -19,6 +19,8 @@
 #include <string>
 #include <utility>
 
+#include "src/ast/array_accessor_expression.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/expression.h"
@@ -32,6 +34,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
@@ -150,6 +153,13 @@ class TypesBuilder {
   template <typename T, int N = 0>
   type::Array* array() const {
     return array(Of<T>(), N);
+  }
+
+  /// @return the tint AST pointer to type `T` with the given StorageClass.
+  /// @param storage_class the storage class of the pointer
+  template <typename T>
+  type::Pointer* pointer(StorageClass storage_class) const {
+    return mod_->create<type::Pointer>(Of<T>(), storage_class);
   }
 
  private:
@@ -423,6 +433,14 @@ class Builder {
                 StorageClass storage,
                 type::Type* type);
 
+  /// @param name the variable name
+  /// @param storage the variable storage class
+  /// @param type the variable type
+  /// @returns a constant `Variable` with the given name, storage and type
+  Variable* Const(const std::string& name,
+                  StorageClass storage,
+                  type::Type* type);
+
   /// @param func the function name
   /// @param args the function call arguments
   /// @returns a `CallExpression` to the function `func`, with the
@@ -430,6 +448,35 @@ class Builder {
   template <typename... ARGS>
   CallExpression Call(const std::string& func, ARGS&&... args) {
     return CallExpression{Expr(func), ExprList(std::forward<ARGS>(args)...)};
+  }
+
+  /// @param lhs the left hand argument to the addition operation
+  /// @param rhs the right hand argument to the addition operation
+  /// @returns a `BinaryExpression` summing the arguments `lhs` and `rhs`
+  template <typename LHS, typename RHS>
+  Expression* Add(LHS&& lhs, RHS&& rhs) {
+    return create<BinaryExpression>(ast::BinaryOp::kAdd,
+                                    Expr(std::forward<LHS>(lhs)),
+                                    Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the subtraction operation
+  /// @param rhs the right hand argument to the subtraction operation
+  /// @returns a `BinaryExpression` subtracting `rhs` from `lhs`
+  template <typename LHS, typename RHS>
+  Expression* Sub(LHS&& lhs, RHS&& rhs) {
+    return create<BinaryExpression>(ast::BinaryOp::kSubtract,
+                                    Expr(std::forward<LHS>(lhs)),
+                                    Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param arr the array argument for the array accessor expression
+  /// @param idx the index argument for the array accessor expression
+  /// @returns a `ArrayAccessorExpression` that indexes `arr` with `idx`
+  template <typename ARR, typename IDX>
+  Expression* Index(ARR&& arr, IDX&& idx) {
+    return create<ArrayAccessorExpression>(Expr(std::forward<ARR>(arr)),
+                                           Expr(std::forward<IDX>(idx)));
   }
 
   /// Creates a new `Node` owned by the Module. When the Module is

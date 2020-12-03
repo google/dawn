@@ -37,6 +37,15 @@ Variable* Builder::Var(const std::string& name,
   return var;
 }
 
+Variable* Builder::Const(const std::string& name,
+                         StorageClass storage,
+                         type::Type* type) {
+  auto* var = create<Variable>(name, storage, type);
+  var->set_is_const(true);
+  OnVariableBuilt(var);
+  return var;
+}
+
 BuilderWithModule::BuilderWithModule() : Builder(new Module()) {}
 
 BuilderWithModule::~BuilderWithModule() {
