@@ -28,12 +28,18 @@ namespace ast {
 /// The type manager holds all the pointers to the known types.
 class TypeManager {
  public:
+  /// Constructor
   TypeManager();
+
   /// Move constructor
   TypeManager(TypeManager&&);
-  // Move assignment
+
+  /// Move assignment operator
   /// @param rhs the TypeManager to move
+  /// @return this TypeManager
   TypeManager& operator=(TypeManager&& rhs);
+
+  /// Destructor
   ~TypeManager();
 
   /// Clears all registered types.

@@ -37,12 +37,18 @@ class Module {
       typename std::enable_if<std::is_base_of<BASE, T>::value, T>::type;
 
  public:
+  /// Constructor
   Module();
+
   /// Move constructor
   Module(Module&&);
-  /// Move assignment
+
+  /// Move assignment operator
   /// @param rhs the Module to move
+  /// @return this Module
   Module& operator=(Module&& rhs);
+
+  /// Destructor
   ~Module();
 
   /// @return a deep copy of this module
