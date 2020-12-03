@@ -367,6 +367,7 @@ set(TINT_TEST_SRCS
   ast/call_expression_test.cc
   ast/call_statement_test.cc
   ast/case_statement_test.cc
+  ast/clone_context_test.cc
   ast/constant_id_decoration_test.cc
   ast/continue_statement_test.cc
   ast/discard_statement_test.cc

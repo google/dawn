@@ -758,6 +758,7 @@ source_set("tint_unittests_core_src") {
     "src/ast/call_expression_test.cc",
     "src/ast/call_statement_test.cc",
     "src/ast/case_statement_test.cc",
+    "src/ast/clone_context_test.cc",
     "src/ast/constant_id_decoration_test.cc",
     "src/ast/continue_statement_test.cc",
     "src/ast/decorated_variable_test.cc",
