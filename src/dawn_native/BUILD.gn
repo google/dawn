@@ -261,6 +261,8 @@ source_set("dawn_native_sources") {
     "SpirvUtils.h",
     "StagingBuffer.cpp",
     "StagingBuffer.h",
+    "Subresource.cpp",
+    "Subresource.h",
     "Surface.cpp",
     "Surface.h",
     "SwapChain.cpp",

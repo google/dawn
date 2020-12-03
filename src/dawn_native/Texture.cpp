@@ -211,11 +211,6 @@ namespace dawn_native {
             return {};
         }
 
-        uint8_t GetPlaneIndex(Aspect aspect) {
-            ASSERT(HasOneBit(aspect));
-            return static_cast<uint8_t>(Log2(static_cast<uint32_t>(aspect)));
-        }
-
     }  // anonymous namespace
 
     MaybeError ValidateTextureDescriptor(const DeviceBase* device,
@@ -351,36 +346,6 @@ namespace dawn_native {
         }
     }
 
-    Aspect ConvertSingleAspect(const Format& format, wgpu::TextureAspect aspect) {
-        Aspect aspectMask = ConvertAspect(format, aspect);
-        ASSERT(HasOneBit(aspectMask));
-        return aspectMask;
-    }
-
-    Aspect ConvertAspect(const Format& format, wgpu::TextureAspect aspect) {
-        Aspect aspectMask = TryConvertAspect(format, aspect);
-        ASSERT(aspectMask != Aspect::None);
-        return aspectMask;
-    }
-
-    Aspect TryConvertAspect(const Format& format, wgpu::TextureAspect aspect) {
-        switch (aspect) {
-            case wgpu::TextureAspect::All:
-                return format.aspects;
-            case wgpu::TextureAspect::DepthOnly:
-                return format.aspects & Aspect::Depth;
-            case wgpu::TextureAspect::StencilOnly:
-                return format.aspects & Aspect::Stencil;
-        }
-    }
-
-    // static
-    SubresourceRange SubresourceRange::SingleMipAndLayer(uint32_t baseMipLevel,
-                                                         uint32_t baseArrayLayer,
-                                                         Aspect aspects) {
-        return {baseMipLevel, 1, baseArrayLayer, 1, aspects};
-    }
-
     // TextureBase
 
     TextureBase::TextureBase(DeviceBase* device,
@@ -394,13 +359,7 @@ namespace dawn_native {
           mSampleCount(descriptor->sampleCount),
           mUsage(descriptor->usage),
           mState(state) {
-        uint8_t planeIndex = 0;
-        for (Aspect aspect : IterateEnumMask(mFormat.aspects)) {
-            mPlaneIndices[GetPlaneIndex(aspect)] = planeIndex++;
-        }
-
-        uint32_t subresourceCount =
-            mMipLevelCount * mSize.depth * static_cast<uint32_t>(planeIndex);
+        uint32_t subresourceCount = mMipLevelCount * mSize.depth * GetAspectCount(mFormat.aspects);
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
         // Add readonly storage usage if the texture has a storage usage. The validation rules in
@@ -492,8 +451,7 @@ namespace dawn_native {
                           std::numeric_limits<uint32_t>::max() / kMaxTexture2DArrayLayers,
                       "texture size overflows uint32_t");
         return mipLevel +
-               GetNumMipLevels() *
-                   (arraySlice + GetArrayLayers() * mPlaneIndices[GetPlaneIndex(aspect)]);
+               GetNumMipLevels() * (arraySlice + GetArrayLayers() * GetAspectIndex(aspect));
     }
 
     bool TextureBase::IsSubresourceContentInitialized(const SubresourceRange& range) const {

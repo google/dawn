@@ -148,6 +148,8 @@ target_sources(dawn_native PRIVATE
     "SpirvUtils.h"
     "StagingBuffer.cpp"
     "StagingBuffer.h"
+    "Subresource.cpp"
+    "Subresource.h"
     "Surface.cpp"
     "Surface.h"
     "SwapChain.cpp"

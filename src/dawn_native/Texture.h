@@ -17,42 +17,14 @@
 
 #include "common/ityp_array.h"
 #include "common/ityp_bitset.h"
-#include "dawn_native/EnumClassBitmasks.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
+#include "dawn_native/Subresource.h"
 
 #include "dawn_native/dawn_platform.h"
 
 #include <vector>
-
-namespace dawn_native {
-
-    // Note: Subresource indices are computed by iterating the aspects in increasing order.
-    // D3D12 uses these directly, so the order much match D3D12's indices.
-    //  - Depth/Stencil textures have Depth as Plane 0, and Stencil as Plane 1.
-    enum class Aspect : uint8_t {
-        None = 0x0,
-        Color = 0x1,
-        Depth = 0x2,
-        Stencil = 0x4,
-    };
-
-    template <>
-    struct EnumBitmaskSize<Aspect> {
-        static constexpr unsigned value = 3;
-    };
-
-}  // namespace dawn_native
-
-namespace wgpu {
-
-    template <>
-    struct IsDawnBitmask<dawn_native::Aspect> {
-        static constexpr bool enable = true;
-    };
-
-}  // namespace wgpu
 
 namespace dawn_native {
 
@@ -72,31 +44,6 @@ namespace dawn_native {
     static constexpr wgpu::TextureUsage kWritableTextureUsages =
         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Storage |
         wgpu::TextureUsage::RenderAttachment;
-
-    // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect
-    // does not exist in the format.
-    // Also ASSERTs if "All" is selected and results in more than one aspect.
-    Aspect ConvertSingleAspect(const Format& format, wgpu::TextureAspect aspect);
-
-    // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect
-    // does not exist in the format.
-    Aspect ConvertAspect(const Format& format, wgpu::TextureAspect aspect);
-
-    // Try to convert the TextureAspect to an Aspect mask for the format. May return
-    // Aspect::None.
-    Aspect TryConvertAspect(const Format& format, wgpu::TextureAspect aspect);
-
-    struct SubresourceRange {
-        uint32_t baseMipLevel;
-        uint32_t levelCount;
-        uint32_t baseArrayLayer;
-        uint32_t layerCount;
-        Aspect aspects;
-
-        static SubresourceRange SingleMipAndLayer(uint32_t baseMipLevel,
-                                                  uint32_t baseArrayLayer,
-                                                  Aspect aspects);
-    };
 
     class TextureBase : public ObjectBase {
       public:
@@ -161,7 +108,6 @@ namespace dawn_native {
 
         // TODO(natlee@microsoft.com): Use a more optimized data structure to save space
         std::vector<bool> mIsSubresourceContentInitializedAtIndex;
-        std::array<uint8_t, EnumBitmaskSize<Aspect>::value> mPlaneIndices;
     };
 
     class TextureViewBase : public ObjectBase {
