@@ -271,8 +271,14 @@ namespace dawn_native {
 
             tint::transform::Manager transformManager;
             {
+#    if DAWN_USE_NEW_TINT_TRANSFORM_API  // TODO(bclayton) - Remove once API migration is complete
+                auto transform = std::make_unique<tint::transform::VertexPulling>();
+                tint::transform::VertexStateDescriptor state;
+#    else   // DAWN_USE_NEW_TINT_TRANSFORM_API
                 auto transform = std::make_unique<tint::transform::VertexPullingTransform>(&module);
                 auto state = std::make_unique<tint::transform::VertexStateDescriptor>();
+#    endif  // DAWN_USE_NEW_TINT_TRANSFORM_API
+
                 for (uint32_t i = 0; i < vertexState.vertexBufferCount; ++i) {
                     auto& vertexBuffer = vertexState.vertexBuffers[i];
                     tint::transform::VertexBufferLayoutDescriptor layout;
@@ -289,7 +295,11 @@ namespace dawn_native {
                         layout.attributes.push_back(std::move(attr));
                     }
 
+#    if DAWN_USE_NEW_TINT_TRANSFORM_API  // TODO(bclayton) - Remove once API migration is complete
+                    state.push_back(std::move(layout));
+#    else   // DAWN_USE_NEW_TINT_TRANSFORM_API
                     state->vertex_buffers.push_back(std::move(layout));
+#    endif  // DAWN_USE_NEW_TINT_TRANSFORM_API
                 }
                 transform->SetVertexState(std::move(state));
                 transform->SetEntryPoint(entryPoint);
@@ -297,10 +307,20 @@ namespace dawn_native {
                 transformManager.append(std::move(transform));
             }
 
+#    if DAWN_USE_NEW_TINT_TRANSFORM_API  // TODO(bclayton) - Remove once API migration is complete
+            auto result = transformManager.Run(&module);
+            if (result.diagnostics.contains_errors()) {
+                errorStream << "Vertex pulling transform: "
+                            << tint::diag::Formatter{}.format(result.diagnostics);
+                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+            }
+            module = std::move(result.module);
+#    else   // DAWN_USE_NEW_TINT_TRANSFORM_API
             if (!transformManager.Run(&module)) {
                 errorStream << "Vertex pulling transform: " << transformManager.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
+#    endif  // DAWN_USE_NEW_TINT_TRANSFORM_API
 
             tint::TypeDeterminer type_determiner(&module);
             if (!type_determiner.Determine()) {
