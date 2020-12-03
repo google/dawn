@@ -21,6 +21,14 @@
 #include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 
+namespace {
+    bool OpenGLESSupportsStorageTexture(wgpu::TextureFormat format) {
+        // TODO(crbug.com/dawn/595): 32-bit RG* formats are unsupported on OpenGL ES.
+        return format != wgpu::TextureFormat::RG32Float &&
+               format != wgpu::TextureFormat::RG32Sint && format != wgpu::TextureFormat::RG32Uint;
+    }
+}  // namespace
+
 class StorageTextureTests : public DawnTest {
   public:
     static void FillExpectedData(void* pixelValuePtr,
@@ -707,6 +715,9 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
         }
+        if (IsOpenGLES() && !OpenGLESSupportsStorageTexture(format)) {
+            continue;
+        }
 
         // Prepare the read-only storage texture and fill it with the expected data.
         const std::vector<uint8_t> kInitialTextureData = GetExpectedData(format);
@@ -739,6 +750,9 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
+            continue;
+        }
+        if (IsOpenGLES() && !OpenGLESSupportsStorageTexture(format)) {
             continue;
         }
 
@@ -781,6 +795,9 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
         }
+        if (IsOpenGLES() && !OpenGLESSupportsStorageTexture(format)) {
+            continue;
+        }
 
         // Prepare the read-only storage texture and fill it with the expected data.
         const std::vector<uint8_t> kInitialTextureData = GetExpectedData(format);
@@ -809,6 +826,9 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
 
 // Test that write-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
+    // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -836,6 +856,8 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 // Test that reading from one read-only storage texture then writing into another write-only storage
 // texture in one dispatch are supported in compute shader.
 TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInComputeShader) {
+    // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -868,6 +890,8 @@ TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInCompu
 
 // Test that write-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
+    // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -927,6 +951,8 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
 
 // Verify 2D array write-only storage texture works correctly.
 TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
+    // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     constexpr uint32_t kArrayLayerCount = 3u;
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -947,6 +973,8 @@ TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
 // Test that multiple dispatches to increment values by ping-ponging between a read-only storage
 // texture and a write-only storage texture are synchronized in one pass.
 TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
+    // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
     wgpu::Texture storageTexture1 = CreateTexture(
         kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
@@ -1022,6 +1050,8 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
 // Test that multiple dispatches to increment values by ping-ponging between a sampled texture and
 // a write-only storage texture are synchronized in one pass.
 TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
+    // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
     wgpu::Texture storageTexture1 = CreateTexture(
         kTextureFormat,
@@ -1105,6 +1135,7 @@ DAWN_INSTANTIATE_TEST(StorageTextureTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class StorageTextureZeroInitTests : public StorageTextureTests {
