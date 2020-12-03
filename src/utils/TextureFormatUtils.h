@@ -88,6 +88,7 @@ namespace utils {
         wgpu::TextureFormat::BC7RGBAUnorm,  wgpu::TextureFormat::BC7RGBAUnormSrgb};
 
     const char* GetColorTextureComponentTypePrefix(wgpu::TextureFormat textureFormat);
+    const char* GetColorTextureComponentWGSLType(wgpu::TextureFormat textureFormat);
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format);
 
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);

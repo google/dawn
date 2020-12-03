@@ -64,6 +64,55 @@ namespace utils {
         }
     }
 
+    const char* GetColorTextureComponentWGSLType(wgpu::TextureFormat textureFormat) {
+        switch (textureFormat) {
+            case wgpu::TextureFormat::R8Unorm:
+            case wgpu::TextureFormat::R8Snorm:
+            case wgpu::TextureFormat::R16Float:
+            case wgpu::TextureFormat::RG8Unorm:
+            case wgpu::TextureFormat::RG8Snorm:
+            case wgpu::TextureFormat::R32Float:
+            case wgpu::TextureFormat::RG16Float:
+            case wgpu::TextureFormat::RGBA8Unorm:
+            case wgpu::TextureFormat::RGBA8Snorm:
+            case wgpu::TextureFormat::RGB10A2Unorm:
+            case wgpu::TextureFormat::RG11B10Ufloat:
+            case wgpu::TextureFormat::RGB9E5Ufloat:
+            case wgpu::TextureFormat::RG32Float:
+            case wgpu::TextureFormat::RGBA16Float:
+            case wgpu::TextureFormat::RGBA32Float:
+            case wgpu::TextureFormat::BGRA8Unorm:
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
+                return "f32";
+
+            case wgpu::TextureFormat::R8Uint:
+            case wgpu::TextureFormat::R16Uint:
+            case wgpu::TextureFormat::RG8Uint:
+            case wgpu::TextureFormat::R32Uint:
+            case wgpu::TextureFormat::RG16Uint:
+            case wgpu::TextureFormat::RGBA8Uint:
+            case wgpu::TextureFormat::RG32Uint:
+            case wgpu::TextureFormat::RGBA16Uint:
+            case wgpu::TextureFormat::RGBA32Uint:
+                return "u32";
+
+            case wgpu::TextureFormat::R8Sint:
+            case wgpu::TextureFormat::R16Sint:
+            case wgpu::TextureFormat::RG8Sint:
+            case wgpu::TextureFormat::R32Sint:
+            case wgpu::TextureFormat::RG16Sint:
+            case wgpu::TextureFormat::RGBA8Sint:
+            case wgpu::TextureFormat::RG32Sint:
+            case wgpu::TextureFormat::RGBA16Sint:
+            case wgpu::TextureFormat::RGBA32Sint:
+                return "i32";
+
+            default:
+                UNREACHABLE();
+        }
+    }
+
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format) {
         switch (format) {
             case wgpu::TextureFormat::R32Uint:
