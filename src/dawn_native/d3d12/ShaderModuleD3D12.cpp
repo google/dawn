@@ -196,8 +196,7 @@ namespace dawn_native { namespace d3d12 {
         errorStream << "Tint HLSL failure:" << std::endl;
 
         // TODO: Remove redundant SPIRV step between WGSL and HLSL.
-        tint::Context context;
-        tint::reader::spirv::Parser parser(&context, GetSpirv());
+        tint::reader::spirv::Parser parser(GetSpirv());
 
         if (!parser.Parse()) {
             errorStream << "Parser: " << parser.error() << std::endl;
@@ -210,7 +209,7 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        tint::TypeDeterminer typeDeterminer(&context, &module);
+        tint::TypeDeterminer typeDeterminer(&module);
         if (!typeDeterminer.Determine()) {
             errorStream << "Type Determination: " << typeDeterminer.error();
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -222,10 +221,10 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        tint::transform::Manager transformManager(&context, &module);
+        tint::transform::Manager transformManager;
         transformManager.append(
-            std::make_unique<tint::transform::BoundArrayAccessorsTransform>(&context, &module));
-        if (!transformManager.Run()) {
+            std::make_unique<tint::transform::BoundArrayAccessorsTransform>(&module));
+        if (!transformManager.Run(&module)) {
             errorStream << "Bound Array Accessors Transform: " << transformManager.error()
                         << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());

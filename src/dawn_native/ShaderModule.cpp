@@ -177,9 +177,8 @@ namespace dawn_native {
             std::ostringstream errorStream;
             errorStream << "Tint WGSL failure:" << std::endl;
 
-            tint::Context context;
             tint::Source::File file("", source);
-            tint::reader::wgsl::Parser parser(&context, &file);
+            tint::reader::wgsl::Parser parser(&file);
 
             if (!parser.Parse()) {
                 errorStream << "Parser: " << parser.error() << std::endl;
@@ -192,7 +191,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::TypeDeterminer type_determiner(&context, &module);
+            tint::TypeDeterminer type_determiner(&module);
             if (!type_determiner.Determine()) {
                 errorStream << "Type Determination: " << type_determiner.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -211,9 +210,8 @@ namespace dawn_native {
             std::ostringstream errorStream;
             errorStream << "Tint WGSL->SPIR-V failure:" << std::endl;
 
-            tint::Context context;
             tint::Source::File file("", source);
-            tint::reader::wgsl::Parser parser(&context, &file);
+            tint::reader::wgsl::Parser parser(&file);
 
             // TODO: This is a duplicate parse with ValidateWGSL, need to store
             // state between calls to avoid this.
@@ -228,7 +226,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::TypeDeterminer type_determiner(&context, &module);
+            tint::TypeDeterminer type_determiner(&module);
             if (!type_determiner.Determine()) {
                 errorStream << "Type Determination: " << type_determiner.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -255,9 +253,8 @@ namespace dawn_native {
             std::ostringstream errorStream;
             errorStream << "Tint WGSL->SPIR-V failure:" << std::endl;
 
-            tint::Context context;
             tint::Source::File file("", source);
-            tint::reader::wgsl::Parser parser(&context, &file);
+            tint::reader::wgsl::Parser parser(&file);
 
             // TODO: This is a duplicate parse with ValidateWGSL, need to store
             // state between calls to avoid this.
@@ -272,10 +269,9 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::transform::Manager transformManager(&context, &module);
+            tint::transform::Manager transformManager;
             {
-                auto transform =
-                    std::make_unique<tint::transform::VertexPullingTransform>(&context, &module);
+                auto transform = std::make_unique<tint::transform::VertexPullingTransform>(&module);
                 auto state = std::make_unique<tint::transform::VertexStateDescriptor>();
                 for (uint32_t i = 0; i < vertexState.vertexBufferCount; ++i) {
                     auto& vertexBuffer = vertexState.vertexBuffers[i];
@@ -301,12 +297,12 @@ namespace dawn_native {
                 transformManager.append(std::move(transform));
             }
 
-            if (!transformManager.Run()) {
+            if (!transformManager.Run(&module)) {
                 errorStream << "Vertex pulling transform: " << transformManager.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::TypeDeterminer type_determiner(&context, &module);
+            tint::TypeDeterminer type_determiner(&module);
             if (!type_determiner.Determine()) {
                 errorStream << "Type Determination: " << type_determiner.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -752,8 +748,7 @@ namespace dawn_native {
             std::ostringstream errorStream;
             errorStream << "Tint Reflection failure:" << std::endl;
 
-            tint::Context context;
-            tint::reader::spirv::Parser parser(&context, spirv);
+            tint::reader::spirv::Parser parser(spirv);
 
             if (!parser.Parse()) {
                 errorStream << "Parser: " << parser.error() << std::endl;
@@ -766,7 +761,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::TypeDeterminer typeDeterminer(&context, &module);
+            tint::TypeDeterminer typeDeterminer(&module);
             if (!typeDeterminer.Determine()) {
                 errorStream << "Type Determination: " << typeDeterminer.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -778,7 +773,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::inspector::Inspector inspector(&context, module);
+            tint::inspector::Inspector inspector(module);
             auto entryPoints = inspector.GetEntryPoints();
             if (inspector.has_error()) {
                 errorStream << "Inspector: " << inspector.error() << std::endl;

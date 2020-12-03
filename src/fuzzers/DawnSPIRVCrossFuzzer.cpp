@@ -73,8 +73,7 @@ namespace DawnSPIRVCrossFuzzer {
 
         // Using Tint SPIRV->SPIRV to normalize inputs if supported.
 #ifdef DAWN_ENABLE_WGSL
-        tint::Context context;
-        tint::reader::spirv::Parser parser(&context, input);
+        tint::reader::spirv::Parser parser(input);
 
         if (!parser.Parse()) {
             return 0;
@@ -85,7 +84,7 @@ namespace DawnSPIRVCrossFuzzer {
             return 0;
         }
 
-        tint::TypeDeterminer type_determiner(&context, &module);
+        tint::TypeDeterminer type_determiner(&module);
         if (!type_determiner.Determine()) {
             return 0;
         }
