@@ -19,6 +19,8 @@
 #include "dawn/webgpu.h"
 #include "dawn_native/NullBackend.h"
 
+#include <algorithm>
+
 void ValidationTest::SetUp() {
     instance = std::make_unique<dawn_native::Instance>();
     instance->DiscoverDefaultAdapters();
@@ -95,6 +97,13 @@ bool ValidationTest::HasWGSL() const {
 #else
     return false;
 #endif
+}
+
+bool ValidationTest::HasToggleEnabled(const char* toggle) const {
+    auto toggles = dawn_native::GetTogglesUsed(device.Get());
+    return std::find_if(toggles.begin(), toggles.end(), [toggle](const char* name) {
+               return strcmp(toggle, name) == 0;
+           }) != toggles.end();
 }
 
 wgpu::Device ValidationTest::CreateTestDevice() {

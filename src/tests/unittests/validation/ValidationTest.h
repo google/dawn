@@ -76,6 +76,7 @@ class ValidationTest : public testing::Test {
     };
 
     bool HasWGSL() const;
+    bool HasToggleEnabled(const char* toggle) const;
 
   protected:
     virtual wgpu::Device CreateTestDevice();

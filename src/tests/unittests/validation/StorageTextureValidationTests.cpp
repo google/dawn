@@ -122,6 +122,9 @@ class StorageTextureValidationTests : public ValidationTest {
 // Validate read-only storage textures can be declared in vertex and fragment shaders, while
 // writeonly storage textures cannot be used in vertex shaders.
 TEST_F(StorageTextureValidationTests, RenderPipeline) {
+    // TODO(rharrison): Re-enable once https://dawn-review.googlesource.com/c/tint/+/34424 lands
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_inspector"));
+
     // Readonly storage texture can be declared in a vertex shader.
     {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
@@ -194,6 +197,9 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
 // Validate both read-only and write-only storage textures can be declared in
 // compute shaders.
 TEST_F(StorageTextureValidationTests, ComputePipeline) {
+    // TODO(rharrison): Re-enable once https://dawn-review.googlesource.com/c/tint/+/34424 lands
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_inspector"));
+
     // Read-only storage textures can be declared in a compute shader.
     {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
