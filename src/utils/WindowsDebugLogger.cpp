@@ -89,7 +89,8 @@ namespace utils {
             }
 
             if (mShouldExitHandle != nullptr) {
-                ASSERT(SetEvent(mShouldExitHandle) != 0);
+                BOOL result = SetEvent(mShouldExitHandle);
+                ASSERT(result != 0);
                 CloseHandle(mShouldExitHandle);
             }
 
