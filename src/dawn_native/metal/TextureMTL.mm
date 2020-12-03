@@ -438,12 +438,16 @@ namespace dawn_native { namespace metal {
                             switch (aspect) {
                                 case Aspect::Depth:
                                     descriptor.depthAttachment.texture = GetMTLTexture();
+                                    descriptor.depthAttachment.level = level;
+                                    descriptor.depthAttachment.slice = arrayLayer;
                                     descriptor.depthAttachment.loadAction = MTLLoadActionClear;
                                     descriptor.depthAttachment.storeAction = MTLStoreActionStore;
                                     descriptor.depthAttachment.clearDepth = dClearColor;
                                     break;
                                 case Aspect::Stencil:
                                     descriptor.stencilAttachment.texture = GetMTLTexture();
+                                    descriptor.stencilAttachment.level = level;
+                                    descriptor.stencilAttachment.slice = arrayLayer;
                                     descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
                                     descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
                                     descriptor.stencilAttachment.clearStencil =
