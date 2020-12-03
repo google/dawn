@@ -26,6 +26,7 @@
 #include "src/namer.h"
 #include "src/reader/reader.h"
 #include "src/transform/bound_array_accessors_transform.h"
+#include "src/transform/emit_vertex_point_size_transform.h"
 #include "src/transform/manager.h"
 #include "src/transform/vertex_pulling_transform.h"
 #include "src/type_determiner.h"

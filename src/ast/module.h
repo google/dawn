@@ -83,6 +83,10 @@ class Module {
   /// @returns the associated function or nullptr if none exists
   Function* FindFunctionByNameAndStage(const std::string& name,
                                        PipelineStage stage) const;
+  /// @param stage the pipeline stage
+  /// @returns true if the module contains an entrypoint function with the given
+  /// stage
+  bool HasStage(PipelineStage stage) const;
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const;

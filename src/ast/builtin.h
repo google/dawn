@@ -31,7 +31,11 @@ enum class Builtin {
   kFragDepth,
   kLocalInvocationId,
   kLocalInvocationIdx,
-  kGlobalInvocationId
+  kGlobalInvocationId,
+
+  // Below are not currently WGSL builtins, but are included in this enum as
+  // they are used by certain backends.
+  kPointSize,
 };
 
 std::ostream& operator<<(std::ostream& out, Builtin builtin);

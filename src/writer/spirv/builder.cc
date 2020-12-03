@@ -2766,6 +2766,8 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
       return SpvBuiltInLocalInvocationIndex;
     case ast::Builtin::kGlobalInvocationId:
       return SpvBuiltInGlobalInvocationId;
+    case ast::Builtin::kPointSize:
+      return SpvBuiltInPointSize;
     case ast::Builtin::kNone:
       break;
   }

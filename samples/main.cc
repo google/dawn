@@ -74,6 +74,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   --transform <name list>   -- Runs transformers, name list is comma separated
                                Available transforms:
                                 bound_array_accessors
+                                emit_vertex_point_size
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
   --dawn-validation         -- SPIRV outputs are validated with the same flags
@@ -515,6 +516,10 @@ int main(int argc, const char** argv) {
     if (name == "bound_array_accessors") {
       transform_manager.append(
           std::make_unique<tint::transform::BoundArrayAccessorsTransform>(
+              &mod));
+    } else if (name == "emit_vertex_point_size") {
+      transform_manager.append(
+          std::make_unique<tint::transform::EmitVertexPointSizeTransform>(
               &mod));
     } else {
       std::cerr << "Unknown transform name: " << name << std::endl;

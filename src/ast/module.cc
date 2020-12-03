@@ -65,6 +65,15 @@ Function* Module::FindFunctionByNameAndStage(const std::string& name,
   return nullptr;
 }
 
+bool Module::HasStage(ast::PipelineStage stage) const {
+  for (auto* func : functions_) {
+    if (func->pipeline_stage() == stage) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool Module::IsValid() const {
   for (auto* var : global_variables_) {
     if (var == nullptr || !var->IsValid()) {
