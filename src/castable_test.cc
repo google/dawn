@@ -19,6 +19,9 @@
 
 #include "gtest/gtest.h"
 
+namespace tint {
+namespace {
+
 struct Animal : public tint::Castable<Animal> {
   explicit Animal(std::string n) : name(n) {}
   const std::string name;
@@ -47,16 +50,6 @@ struct Bear : public tint::Castable<Bear, Mammal> {
 struct Gecko : public tint::Castable<Gecko, Reptile> {
   Gecko() : Base("Gecko") {}
 };
-
-TINT_INSTANTIATE_CLASS_ID(Animal);
-TINT_INSTANTIATE_CLASS_ID(Amphibian);
-TINT_INSTANTIATE_CLASS_ID(Mammal);
-TINT_INSTANTIATE_CLASS_ID(Reptile);
-TINT_INSTANTIATE_CLASS_ID(Frog);
-TINT_INSTANTIATE_CLASS_ID(Bear);
-TINT_INSTANTIATE_CLASS_ID(Gecko);
-
-namespace tint {
 
 TEST(CastableBase, Is) {
   std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
@@ -145,5 +138,15 @@ TEST(Castable, As) {
   ASSERT_EQ(bear->As<Reptile>(), nullptr);
   ASSERT_EQ(gecko->As<Reptile>(), static_cast<Reptile*>(gecko.get()));
 }
+
+}  // namespace
+
+TINT_INSTANTIATE_CLASS_ID(Animal);
+TINT_INSTANTIATE_CLASS_ID(Amphibian);
+TINT_INSTANTIATE_CLASS_ID(Mammal);
+TINT_INSTANTIATE_CLASS_ID(Reptile);
+TINT_INSTANTIATE_CLASS_ID(Frog);
+TINT_INSTANTIATE_CLASS_ID(Bear);
+TINT_INSTANTIATE_CLASS_ID(Gecko);
 
 }  // namespace tint

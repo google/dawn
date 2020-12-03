@@ -24,7 +24,7 @@ namespace tint {
 /// Helper macro to instantiate the ClassID for `CLASS`.
 #define TINT_INSTANTIATE_CLASS_ID(CLASS) \
   template <>                            \
-  const char tint::ClassID::Unique<CLASS>::token = 0
+  const char ::tint::ClassID::Unique<CLASS>::token = 0
 
 /// ClassID represents a unique, comparable identifier for a C++ type.
 class ClassID {
