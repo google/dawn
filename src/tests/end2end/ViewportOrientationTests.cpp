@@ -68,4 +68,5 @@ DAWN_INSTANTIATE_TEST(ViewportOrientationTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

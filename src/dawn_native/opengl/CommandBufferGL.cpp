@@ -1173,7 +1173,15 @@ namespace dawn_native { namespace opengl {
 
                 case Command::SetViewport: {
                     SetViewportCmd* cmd = mCommands.NextCommand<SetViewportCmd>();
-                    gl.ViewportIndexedf(0, cmd->x, cmd->y, cmd->width, cmd->height);
+                    if (gl.IsAtLeastGL(4, 1)) {
+                        gl.ViewportIndexedf(0, cmd->x, cmd->y, cmd->width, cmd->height);
+                    } else {
+                        // Floating-point viewport coords are unsupported on OpenGL ES, but
+                        // truncation is ok because other APIs do not guarantee subpixel precision
+                        // either.
+                        gl.Viewport(static_cast<int>(cmd->x), static_cast<int>(cmd->y),
+                                    static_cast<int>(cmd->width), static_cast<int>(cmd->height));
+                    }
                     gl.DepthRangef(cmd->minDepth, cmd->maxDepth);
                     break;
                 }
