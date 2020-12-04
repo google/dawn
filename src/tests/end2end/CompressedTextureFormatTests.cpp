@@ -419,16 +419,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
         return sizeAtLevel;
     }
 
-    const std::array<wgpu::TextureFormat, 14> kBCFormats = {
-        wgpu::TextureFormat::BC1RGBAUnorm, wgpu::TextureFormat::BC1RGBAUnormSrgb,
-        wgpu::TextureFormat::BC2RGBAUnorm, wgpu::TextureFormat::BC2RGBAUnormSrgb,
-        wgpu::TextureFormat::BC3RGBAUnorm, wgpu::TextureFormat::BC3RGBAUnormSrgb,
-        wgpu::TextureFormat::BC4RSnorm,    wgpu::TextureFormat::BC4RUnorm,
-        wgpu::TextureFormat::BC5RGSnorm,   wgpu::TextureFormat::BC5RGUnorm,
-        wgpu::TextureFormat::BC6HRGBFloat, wgpu::TextureFormat::BC6HRGBUfloat,
-        wgpu::TextureFormat::BC7RGBAUnorm, wgpu::TextureFormat::BC7RGBAUnormSrgb};
-
-    // Tthe block width and height in texels are 4 for all BC formats.
+    // The block width and height in texels are 4 for all BC formats.
     static constexpr uint32_t kBCBlockWidthInTexels = 4;
     static constexpr uint32_t kBCBlockHeightInTexels = 4;
 
@@ -454,7 +445,7 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
     config.textureDescriptor.size = {8, 8, 1};
     config.copyExtent3D = config.textureDescriptor.size;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -477,7 +468,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
     config.copyOrigin3D = kOrigin;
     config.copyExtent3D = kExtent3D;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -503,7 +494,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
     config.textureDescriptor.size.depth = kArrayLayerCount;
     config.copyOrigin3D.z = kArrayLayerCount - 1;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -543,7 +534,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 
     config.copyExtent3D = {kCopyWidthAtLevel, kCopyHeightAtLevel, 1};
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -580,7 +571,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
     ASSERT_NE(0u, kVirtualSize.height % kBCBlockHeightInTexels);
 
     config.copyExtent3D = kPhysicalSize;
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         // Create bcTextureSrc as the source texture and initialize it with pre-prepared BC
         // compressed data.
         config.textureDescriptor.format = format;
@@ -643,7 +634,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqua
     ASSERT_LT(srcConfig.copyOrigin3D.x + srcConfig.copyExtent3D.width, kSrcVirtualSize.width);
     ASSERT_LT(srcConfig.copyOrigin3D.y + srcConfig.copyExtent3D.height, kSrcVirtualSize.height);
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         // Create bcTextureSrc as the source texture and initialize it with pre-prepared BC
         // compressed data.
         srcConfig.textureDescriptor.format = format;
@@ -705,7 +696,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqua
     ASSERT_GT(srcConfig.copyOrigin3D.x + srcConfig.copyExtent3D.width, kSrcVirtualSize.width);
     ASSERT_GT(srcConfig.copyOrigin3D.y + srcConfig.copyExtent3D.height, kSrcVirtualSize.height);
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         srcConfig.textureDescriptor.format = dstConfig.textureDescriptor.format = format;
         srcConfig.textureDescriptor.usage =
             wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
@@ -773,7 +764,7 @@ TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVi
     ASSERT_NE(0u, dstVirtualSizes[1].width % kBCBlockWidthInTexels);
     ASSERT_NE(0u, dstVirtualSizes[1].height % kBCBlockHeightInTexels);
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         std::array<wgpu::Texture, kTotalCopyCount> bcSrcTextures;
         std::array<wgpu::Texture, kTotalCopyCount> bcDstTextures;
 
@@ -832,7 +823,7 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
 
     const uint32_t blockCountPerRow = config.textureDescriptor.size.width / kBCBlockWidthInTexels;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
@@ -868,7 +859,7 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
     const uint32_t slicePitchInBytes =
         config.bytesPerRowAlignment * (textureSizeLevel0.height / kBCBlockHeightInTexels);
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
@@ -902,7 +893,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
 
     constexpr uint32_t kExceedRowBlockCount = 1;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
@@ -932,7 +923,7 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
     const uint32_t blockCountPerRow = config.textureDescriptor.size.width / kBCBlockWidthInTexels;
     const uint32_t slicePitchInBytes = config.bytesPerRowAlignment;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
@@ -965,7 +956,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
 
     config.rowsPerImage = config.textureDescriptor.size.height * 2 / kBCBlockHeightInTexels;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -1008,7 +999,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 
     config.rowsPerImage = kCopyHeightAtLevel * 2 / kBCBlockHeightInTexels;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -1036,7 +1027,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
     config.copyExtent3D = config.textureDescriptor.size;
     config.copyExtent3D.depth = kArrayLayerCount;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -1066,7 +1057,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
     config.copyExtent3D = config.textureDescriptor.size;
     config.copyExtent3D.depth = kCopyLayerCount;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -1158,7 +1149,7 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
     config.bytesPerRowAlignment = 511;
     config.rowsPerImage = 5;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestWriteRegionIntoBCFormatTextures(config);
     }
@@ -1179,7 +1170,7 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
     config.bytesPerRowAlignment = 511;
     config.rowsPerImage = 5;
 
-    for (wgpu::TextureFormat format : kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
         TestWriteRegionIntoBCFormatTextures(config);
     }
@@ -1199,7 +1190,7 @@ TEST_P(CompressedTextureWriteTextureTest,
     // the texture physical size, but doesn't fit in the virtual size.
     for (unsigned int w : {12, 16}) {
         for (unsigned int h : {12, 16}) {
-            for (wgpu::TextureFormat format : kBCFormats) {
+            for (wgpu::TextureFormat format : utils::kBCFormats) {
                 CopyConfig config;
                 config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
                 config.textureDescriptor.size = {60, 60, 1};
