@@ -221,7 +221,6 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-#    if DAWN_USE_NEW_TINT_TRANSFORM_API  // TODO(bclayton) - Remove once API migration is complete
         tint::transform::Manager transformManager;
         transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
         auto result = transformManager.Run(&module);
@@ -231,16 +230,6 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
         module = std::move(result.module);
-#    else   // DAWN_USE_NEW_TINT_TRANSFORM_API
-        tint::transform::Manager transformManager;
-        transformManager.append(
-            std::make_unique<tint::transform::BoundArrayAccessorsTransform>(&module));
-        if (!transformManager.Run(&module)) {
-            errorStream << "Bound Array Accessors Transform: " << transformManager.error()
-                        << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-#    endif  // DAWN_USE_NEW_TINT_TRANSFORM_API
 
         ASSERT(remappedEntryPointName != nullptr);
         tint::inspector::Inspector inspector(module);
