@@ -69,7 +69,7 @@ namespace dawn_native {
             if (mDisableBaseInstance && firstInstance != 0) {
                 return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
             }
-            if (mDisableBaseInstance && baseVertex != 0) {
+            if (mDisableBaseVertex && baseVertex != 0) {
                 return DAWN_VALIDATION_ERROR("Non-zero base vertex not supported");
             }
 
