@@ -54,6 +54,10 @@ class Module {
   /// @return a deep copy of this module
   Module Clone();
 
+  /// Clone this module into `ctx->mod` using the provided CloneContext
+  /// @param ctx the clone context
+  void Clone(CloneContext* ctx);
+
   /// Add a global variable to the module
   /// @param var the variable to add
   void AddGlobalVariable(Variable* var) { global_variables_.push_back(var); }

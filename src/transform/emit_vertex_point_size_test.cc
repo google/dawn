@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/emit_vertex_point_size_transform.h"
+#include "src/transform/emit_vertex_point_size.h"
 
 #include <memory>
 #include <utility>
@@ -21,7 +21,6 @@
 #include "src/ast/builder.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
 #include "src/transform/manager.h"
 
@@ -29,26 +28,12 @@ namespace tint {
 namespace transform {
 namespace {
 
-class EmitVertexPointSizeTransformTest : public testing::Test {
+class EmitVertexPointSizeTest : public testing::Test {
  public:
-  struct Output {
-    ast::Module module;
-    diag::List diagnostics;
-  };
-  Output Transform(ast::Module mod) {
+  Transform::Output Transform(ast::Module in) {
     Manager manager;
-    manager.append(std::make_unique<EmitVertexPointSizeTransform>(&mod));
-    manager.Run(&mod);
-    Output out;
-    out.module = std::move(mod);
-    auto err = manager.error();
-    if (!err.empty()) {
-      diag::Diagnostic diag;
-      diag.message = err;
-      diag.severity = diag::Severity::Error;
-      out.diagnostics.add(std::move(diag));
-    }
-    return out;
+    manager.append(std::make_unique<EmitVertexPointSize>());
+    return manager.Run(&in);
   }
 };
 
@@ -64,7 +49,7 @@ struct ModuleBuilder : public ast::BuilderWithModule {
   virtual void Build() = 0;
 };
 
-TEST_F(EmitVertexPointSizeTransformTest, VertexStageBasic) {
+TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
   struct Builder : ModuleBuilder {
     void Build() override {
       auto* block = create<ast::BlockStatement>(Source{});
@@ -131,7 +116,7 @@ TEST_F(EmitVertexPointSizeTransformTest, VertexStageBasic) {
   EXPECT_EQ(expected, result.module.to_str());
 }
 
-TEST_F(EmitVertexPointSizeTransformTest, VertexStageEmpty) {
+TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
   struct Builder : ModuleBuilder {
     void Build() override {
       mod->AddFunction(
@@ -186,7 +171,7 @@ TEST_F(EmitVertexPointSizeTransformTest, VertexStageEmpty) {
   EXPECT_EQ(expected, result.module.to_str());
 }
 
-TEST_F(EmitVertexPointSizeTransformTest, NonVertexStage) {
+TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
   struct Builder : ModuleBuilder {
     void Build() override {
       auto* fragment_entry =

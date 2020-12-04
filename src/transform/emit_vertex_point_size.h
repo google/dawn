@@ -12,34 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_EMIT_VERTEX_POINT_SIZE_TRANSFORM_H_
-#define SRC_TRANSFORM_EMIT_VERTEX_POINT_SIZE_TRANSFORM_H_
+#ifndef SRC_TRANSFORM_EMIT_VERTEX_POINT_SIZE_H_
+#define SRC_TRANSFORM_EMIT_VERTEX_POINT_SIZE_H_
 
-#include "src/transform/transformer.h"
+#include "src/transform/transform.h"
 
 namespace tint {
 namespace transform {
 
-/// EmitVertexPointSizeTransform is a Transformer that adds a PointSize builtin
-/// global output variable to the module which is assigned 1.0 as the new first
+/// EmitVertexPointSize is a Transform that adds a PointSize builtin global
+/// output variable to the module which is assigned 1.0 as the new first
 /// statement for all vertex stage entry points.
 /// If the module does not contain a vertex pipeline stage entry point then then
-/// this transformer is a no-op.
-class EmitVertexPointSizeTransform : public Transformer {
+/// this transform is a no-op.
+class EmitVertexPointSize : public Transform {
  public:
   /// Constructor
-  /// @param mod the module transform
-  explicit EmitVertexPointSizeTransform(ast::Module* mod);
-  ~EmitVertexPointSizeTransform() override;
+  EmitVertexPointSize();
+  /// Destructor
+  ~EmitVertexPointSize() override;
 
-  /// Users of Tint should register the transform with transform manager and
-  /// invoke its Run(), instead of directly calling the transform's Run().
+  /// Runs the transform on `module`, returning the transformation result.
+  /// @note Users of Tint should register the transform with transform manager
+  /// and invoke its Run(), instead of directly calling the transform's Run().
   /// Calling Run() directly does not perform module state cleanup operations.
-  /// @returns true if the transformation was successful
-  bool Run() override;
+  /// @param module the source module to transform
+  /// @returns the transformation result
+  Output Run(ast::Module* module) override;
 };
 
 }  // namespace transform
 }  // namespace tint
 
-#endif  // SRC_TRANSFORM_EMIT_VERTEX_POINT_SIZE_TRANSFORM_H_
+#endif  // SRC_TRANSFORM_EMIT_VERTEX_POINT_SIZE_H_

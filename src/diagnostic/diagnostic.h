@@ -84,9 +84,17 @@ class List {
   /// adds a diagnostic to the end of this list.
   /// @param diag the diagnostic to append to this list.
   void add(Diagnostic&& diag) {
-    entries_.emplace_back(std::move(diag));
     if (diag.severity >= Severity::Error) {
       error_count_++;
+    }
+    entries_.emplace_back(std::move(diag));
+  }
+
+  /// adds a list of diagnostics to the end of this list.
+  /// @param list the diagnostic to append to this list.
+  void add(const List& list) {
+    for (auto diag : list) {
+      add(std::move(diag));
     }
   }
 

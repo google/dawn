@@ -31,19 +31,21 @@ Module::~Module() = default;
 
 Module Module::Clone() {
   Module out;
-
   CloneContext ctx(&out);
+  Clone(&ctx);
+  return out;
+}
+
+void Module::Clone(CloneContext* ctx) {
   for (auto* ty : constructed_types_) {
-    out.constructed_types_.emplace_back(ctx.Clone(ty));
+    ctx->mod->constructed_types_.emplace_back(ctx->Clone(ty));
   }
   for (auto* var : global_variables_) {
-    out.global_variables_.emplace_back(ctx.Clone(var));
+    ctx->mod->global_variables_.emplace_back(ctx->Clone(var));
   }
   for (auto* func : functions_) {
-    out.functions_.emplace_back(ctx.Clone(func));
+    ctx->mod->functions_.emplace_back(ctx->Clone(func));
   }
-
-  return out;
 }
 
 Function* Module::FindFunctionByName(const std::string& name) const {

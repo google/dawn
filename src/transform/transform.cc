@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/transformer.h"
+#include "src/transform/transform.h"
 
 namespace tint {
 namespace transform {
 
-Transformer::Transformer(ast::Module* mod) : mod_(mod) {}
-
-Transformer::~Transformer() = default;
+Transform::Transform() = default;
+Transform::~Transform() = default;
 
 }  // namespace transform
 }  // namespace tint

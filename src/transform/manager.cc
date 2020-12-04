@@ -20,36 +20,29 @@ namespace tint {
 namespace transform {
 
 Manager::Manager() = default;
-
-Manager::Manager(Context*, ast::Module* module) : module_(module) {}
-
 Manager::~Manager() = default;
 
-bool Manager::Run() {
-  return Run(module_);
-}
-
-bool Manager::Run(ast::Module* module) {
-  error_ = "";
-
+Transform::Output Manager::Run(ast::Module* module) {
+  Output out;
   for (auto& transform : transforms_) {
-    if (!transform->Run()) {
-      error_ = transform->error();
-      return false;
+    auto res = transform->Run(module);
+    out.module = std::move(res.module);
+    out.diagnostics.add(std::move(res.diagnostics));
+    if (out.diagnostics.contains_errors()) {
+      return out;
     }
+    module = &out.module;
   }
 
-  if (module != nullptr) {
-    // The transformed have potentially inserted nodes into the AST, so the type
-    // determinater needs to be run.
-    TypeDeterminer td(module);
-    if (!td.Determine()) {
-      error_ = td.error();
-      return false;
-    }
+  TypeDeterminer td(module);
+  if (!td.Determine()) {
+    diag::Diagnostic err;
+    err.severity = diag::Severity::Error;
+    err.message = td.error();
+    out.diagnostics.add(std::move(err));
   }
 
-  return true;
+  return out;
 }
 
 }  // namespace transform

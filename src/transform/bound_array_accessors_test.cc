@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/bound_array_accessors_transform.h"
+#include "src/transform/bound_array_accessors.h"
 
 #include <memory>
 #include <utility>
@@ -67,21 +67,24 @@ T* FindVariable(ast::Module* mod, std::string name) {
 
 class BoundArrayAccessorsTest : public testing::Test {
  public:
-  ast::Module Transform(ast::Module mod) {
-    TypeDeterminer td(&mod);
+  ast::Module Transform(ast::Module in) {
+    TypeDeterminer td(&in);
     if (!td.Determine()) {
       error = "Type determination failed: " + td.error();
       return {};
     }
 
     Manager manager;
-    manager.append(std::make_unique<BoundArrayAccessorsTransform>(&mod));
-    if (!manager.Run(&mod)) {
-      error = "manager().Run() errored:\n" + manager.error();
+    manager.append(std::make_unique<BoundArrayAccessors>());
+    auto result = manager.Run(&in);
+
+    if (result.diagnostics.contains_errors()) {
+      error = "manager().Run() errored:\n" +
+              diag::Formatter().format(result.diagnostics);
       return {};
     }
 
-    return mod;
+    return std::move(result.module);
   }
 
   std::string error;

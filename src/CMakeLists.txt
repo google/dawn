@@ -234,16 +234,16 @@ set(TINT_LIB_SRCS
   scope_stack.h
   source.cc
   source.h
-  transform/emit_vertex_point_size_transform.cc
-  transform/emit_vertex_point_size_transform.h
-  transform/bound_array_accessors_transform.cc
-  transform/bound_array_accessors_transform.h
+  transform/emit_vertex_point_size.cc
+  transform/emit_vertex_point_size.h
+  transform/bound_array_accessors.cc
+  transform/bound_array_accessors.h
   transform/manager.cc
   transform/manager.h
-  transform/transformer.cc
-  transform/transformer.h
-  transform/vertex_pulling_transform.cc
-  transform/vertex_pulling_transform.h
+  transform/transform.cc
+  transform/transform.h
+  transform/vertex_pulling.cc
+  transform/vertex_pulling.h
   type_determiner.cc
   type_determiner.h
   validator/validator.cc
@@ -431,9 +431,9 @@ set(TINT_TEST_SRCS
   inspector/inspector_test.cc
   namer_test.cc
   scope_stack_test.cc
-  transform/emit_vertex_point_size_transform_test.cc
-  transform/bound_array_accessors_transform_test.cc
-  transform/vertex_pulling_transform_test.cc
+  transform/emit_vertex_point_size_test.cc
+  transform/bound_array_accessors_test.cc
+  transform/vertex_pulling_test.cc
   type_determiner_test.cc
   validator/validator_control_block_test.cc
   validator/validator_function_test.cc

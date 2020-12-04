@@ -71,7 +71,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   -ep <compute|fragment|vertex> <name>  -- Output single entry point
   --output-file <name>      -- Output file name.  Use "-" for standard output
   -o <name>                 -- Output file name.  Use "-" for standard output
-  --transform <name list>   -- Runs transformers, name list is comma separated
+  --transform <name list>   -- Runs transforms, name list is comma separated
                                Available transforms:
                                 bound_array_accessors
                                 emit_vertex_point_size
@@ -515,21 +515,23 @@ int main(int argc, const char** argv) {
 
     if (name == "bound_array_accessors") {
       transform_manager.append(
-          std::make_unique<tint::transform::BoundArrayAccessorsTransform>(
-              &mod));
+          std::make_unique<tint::transform::BoundArrayAccessors>());
     } else if (name == "emit_vertex_point_size") {
       transform_manager.append(
-          std::make_unique<tint::transform::EmitVertexPointSizeTransform>(
-              &mod));
+          std::make_unique<tint::transform::EmitVertexPointSize>());
     } else {
       std::cerr << "Unknown transform name: " << name << std::endl;
       return 1;
     }
   }
-  if (!transform_manager.Run(&mod)) {
-    std::cerr << "Transformer: " << transform_manager.error() << std::endl;
+
+  auto out = transform_manager.Run(&mod);
+  if (out.diagnostics.contains_errors()) {
+    diag_formatter.format(out.diagnostics, diag_printer.get());
     return 1;
   }
+
+  mod = std::move(out.module);
 
   std::unique_ptr<tint::writer::Writer> writer;
 

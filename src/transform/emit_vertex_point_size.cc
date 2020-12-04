@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/emit_vertex_point_size_transform.h"
+#include "src/transform/emit_vertex_point_size.h"
 
 #include <memory>
 #include <utility>
@@ -34,44 +34,46 @@ const char kPointSizeVar[] = "tint_pointsize";
 
 }  // namespace
 
-EmitVertexPointSizeTransform::EmitVertexPointSizeTransform(ast::Module* mod)
-    : Transformer(mod) {}
+EmitVertexPointSize::EmitVertexPointSize() = default;
+EmitVertexPointSize::~EmitVertexPointSize() = default;
 
-EmitVertexPointSizeTransform::~EmitVertexPointSizeTransform() = default;
+Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
+  Output out;
+  out.module = in->Clone();
+  auto* mod = &out.module;
 
-bool EmitVertexPointSizeTransform::Run() {
-  if (!mod_->HasStage(ast::PipelineStage::kVertex)) {
+  if (!mod->HasStage(ast::PipelineStage::kVertex)) {
     // If the module doesn't have any vertex stages, then there's nothing to do.
-    return true;
+    return out;
   }
 
-  auto* f32 = mod_->create<ast::type::F32>();
+  auto* f32 = mod->create<ast::type::F32>();
 
   // Declare the pointsize builtin output variable.
   auto* pointsize_var =
-      mod_->create<ast::DecoratedVariable>(mod_->create<ast::Variable>(
+      mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
           kPointSizeVar, ast::StorageClass::kOutput, f32));
   pointsize_var->set_decorations({
-      mod_->create<ast::BuiltinDecoration>(ast::Builtin::kPointSize, Source{}),
+      mod->create<ast::BuiltinDecoration>(ast::Builtin::kPointSize, Source{}),
   });
-  mod_->AddGlobalVariable(pointsize_var);
+  mod->AddGlobalVariable(pointsize_var);
 
   // Build the AST expression & statement for assigning pointsize one.
-  auto* one = mod_->create<ast::ScalarConstructorExpression>(
-      mod_->create<ast::FloatLiteral>(f32, 1.0f));
+  auto* one = mod->create<ast::ScalarConstructorExpression>(
+      mod->create<ast::FloatLiteral>(f32, 1.0f));
   auto* pointsize_ident =
-      mod_->create<ast::IdentifierExpression>(Source{}, kPointSizeVar);
+      mod->create<ast::IdentifierExpression>(Source{}, kPointSizeVar);
   auto* pointsize_assign =
-      mod_->create<ast::AssignmentStatement>(pointsize_ident, one);
+      mod->create<ast::AssignmentStatement>(pointsize_ident, one);
 
   // Add the pointsize assignment statement to the front of all vertex stages.
-  for (auto* func : mod_->functions()) {
+  for (auto* func : mod->functions()) {
     if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
       func->body()->insert(0, pointsize_assign);
     }
   }
 
-  return true;
+  return out;
 }
 
 }  // namespace transform

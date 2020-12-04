@@ -20,8 +20,13 @@
 #include <utility>
 #include <vector>
 
-#include "src/context.h"
-#include "src/transform/transformer.h"
+#include "src/diagnostic/diagnostic.h"
+#include "src/transform/transform.h"
+
+// A define used by Dawn to atomically switch to the new tint::transform API
+// when the API breaking change lands.
+// TODO(bclayton) - Remove once migration is complete
+#define DAWN_USE_NEW_TINT_TRANSFORM_API 1
 
 namespace tint {
 namespace transform {
@@ -29,40 +34,25 @@ namespace transform {
 /// Manager for the provided passes. The passes will be execute in the
 /// appended order. If any pass fails the manager will return immediately and
 /// the error can be retrieved with the error() method.
-class Manager {
+class Manager : public Transform {
  public:
   /// Constructor
   Manager();
-  /// Constructor
-  /// DEPRECATED
-  /// @param context the tint context
-  /// @param module the module to transform
-  Manager(Context* context, ast::Module* module);
-  ~Manager();
+  ~Manager() override;
 
   /// Add pass to the manager
   /// @param transform the transform to append
-  void append(std::unique_ptr<Transformer> transform) {
+  void append(std::unique_ptr<Transform> transform) {
     transforms_.push_back(std::move(transform));
   }
 
-  /// Runs the transforms
-  /// @param module the module to run the transforms on
-  /// @returns true on success; false otherwise
-  bool Run(ast::Module* module);
-  /// Runs the transforms
-  /// DEPRECATED
-  /// @returns true on success; false otherwise
-  bool Run();
-
-  /// @returns the error, or blank if none set
-  std::string error() const { return error_; }
+  /// Runs the transforms on `module`, returning the transformation result.
+  /// @param module the source module to transform
+  /// @returns the transformed module and diagnostics
+  Output Run(ast::Module* module) override;
 
  private:
-  std::vector<std::unique_ptr<Transformer>> transforms_;
-  ast::Module* module_ = nullptr;
-
-  std::string error_;
+  std::vector<std::unique_ptr<Transform>> transforms_;
 };
 
 }  // namespace transform
