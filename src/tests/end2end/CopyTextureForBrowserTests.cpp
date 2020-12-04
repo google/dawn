@@ -252,6 +252,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyFlipY) {
     // OpenGL tests fails because 'WriteTexture' is unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 901;
     constexpr uint32_t kHeight = 1001;
@@ -273,6 +274,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyFlipYInSlimTexture) {
     // OpenGL tests fails because 'WriteTexture' is unimplemented.
     // Related bug : crbug.com/dawn/483
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 1;
     constexpr uint32_t kHeight = 1001;

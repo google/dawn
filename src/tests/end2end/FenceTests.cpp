@@ -260,4 +260,9 @@ TEST_P(FenceTests, ClientValidationErrorInErrorScope) {
     WaitForCompletedValue(fence, 4);
 }
 
-DAWN_INSTANTIATE_TEST(FenceTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(FenceTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());

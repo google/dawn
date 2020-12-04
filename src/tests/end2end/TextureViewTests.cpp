@@ -182,6 +182,8 @@ class TextureViewSamplingTest : public DawnTest {
                            uint32_t textureMipLevels,
                            uint32_t textureViewBaseLayer,
                            uint32_t textureViewBaseMipLevel) {
+        // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+        DAWN_SKIP_TEST_IF(IsOpenGLES());
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
@@ -216,6 +218,8 @@ class TextureViewSamplingTest : public DawnTest {
                                 uint32_t textureMipLevels,
                                 uint32_t textureViewBaseLayer,
                                 uint32_t textureViewBaseMipLevel) {
+        // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+        DAWN_SKIP_TEST_IF(IsOpenGLES());
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
@@ -302,6 +306,9 @@ class TextureViewSamplingTest : public DawnTest {
                             uint32_t textureViewBaseLayer,
                             uint32_t textureViewLayerCount,
                             bool isCubeMapArray) {
+        // TODO(crbug.com/dawn/600): In OpenGL ES, cube map textures cannot be treated as arrays
+        // of 2D textures. Find a workaround.
+        DAWN_SKIP_TEST_IF(IsOpenGLES());
         constexpr uint32_t kMipLevels = 1u;
         initTexture(textureArrayLayers, kMipLevels);
 
@@ -641,12 +648,14 @@ DAWN_INSTANTIATE_TEST(TextureViewSamplingTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 DAWN_INSTANTIATE_TEST(TextureViewRenderingTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class TextureViewTest : public DawnTest {};
@@ -667,4 +676,5 @@ DAWN_INSTANTIATE_TEST(TextureViewTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

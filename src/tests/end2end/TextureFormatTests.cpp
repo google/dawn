@@ -460,6 +460,8 @@ TEST_P(TextureFormatTest, RGBA8Unorm) {
 
 // Test the BGRA8Unorm format
 TEST_P(TextureFormatTest, BGRA8Unorm) {
+    // TODO(crbug.com/dawn/596): BGRA is unsupported on OpenGL ES; add workaround or validation
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {maxValue, 1, 0, maxValue};
     std::vector<float> uncompressedData = {0.0f, 1.0f / maxValue, 1.0f, 1.0f};
@@ -645,6 +647,7 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
     // TODO(cwallez@chromium.org): This format doesn't exist in OpenGL, emulate it using
     // RGBA8UnormSrgb and swizzling / shader twiddling
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {0, 1, maxValue, 64, 35, 68, 152, 168};
@@ -795,4 +798,5 @@ DAWN_INSTANTIATE_TEST(TextureFormatTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

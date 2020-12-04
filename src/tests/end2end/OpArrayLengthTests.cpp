@@ -91,6 +91,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
     // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES());
 
     // Create a buffer to hold the result sizes and create a bindgroup for it.
     wgpu::BufferDescriptor bufferDesc;
@@ -149,6 +150,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
     // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
     // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
@@ -206,6 +208,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
     // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
     // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
@@ -266,4 +269,5 @@ DAWN_INSTANTIATE_TEST(OpArrayLengthTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

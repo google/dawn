@@ -303,4 +303,5 @@ DAWN_INSTANTIATE_TEST(PrimitiveTopologyTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

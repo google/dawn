@@ -38,6 +38,7 @@ DAWN_INSTANTIATE_TEST(QueueTests,
                       MetalBackend(),
                       NullBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class QueueWriteBufferTests : public DawnTest {};
@@ -179,6 +180,7 @@ TEST_P(QueueWriteBufferTests, UnalignedDynamicUploader) {
     // that WriteTexture implementation uses a DynamicUploader which might be false in the
     // case of a future OpenGL implementation.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     utils::UnalignDynamicUploader(device);
 
@@ -197,6 +199,7 @@ DAWN_INSTANTIATE_TEST(QueueWriteBufferTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 // For MinimumDataSpec bytesPerRow and rowsPerImage, compute a default from the copy extent.

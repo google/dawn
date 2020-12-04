@@ -159,4 +159,5 @@ DAWN_INSTANTIATE_TEST(SubresourceRenderAttachmentTest,
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

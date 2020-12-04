@@ -63,4 +63,5 @@ DAWN_INSTANTIATE_TEST(PipelineLayoutTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

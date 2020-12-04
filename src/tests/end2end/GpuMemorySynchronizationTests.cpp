@@ -235,6 +235,7 @@ DAWN_INSTANTIATE_TEST(GpuMemorySyncTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class StorageToUniformSyncTests : public DawnTest {
@@ -422,6 +423,7 @@ DAWN_INSTANTIATE_TEST(StorageToUniformSyncTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 constexpr int kRTSize = 8;
@@ -696,4 +698,5 @@ DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

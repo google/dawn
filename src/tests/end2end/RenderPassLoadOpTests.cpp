@@ -290,4 +290,5 @@ DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
