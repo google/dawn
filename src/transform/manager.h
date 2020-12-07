@@ -23,11 +23,6 @@
 #include "src/diagnostic/diagnostic.h"
 #include "src/transform/transform.h"
 
-// A define used by Dawn to atomically switch to the new tint::transform API
-// when the API breaking change lands.
-// TODO(bclayton) - Remove once migration is complete
-#define DAWN_USE_NEW_TINT_TRANSFORM_API 1
-
 namespace tint {
 namespace transform {
 
