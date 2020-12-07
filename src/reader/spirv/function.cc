@@ -55,6 +55,7 @@
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/texture_type.h"
@@ -3748,9 +3749,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     // When sampling from a depth texture, the Lod operand must be an unsigned
     // integer.
     if (texture_type->Is<ast::type::DepthTexture>()) {
-      // Convert it to an unsigned integer type.
+      // Convert it to a signed integer type.
       lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
-          ast_module_.create<ast::type::U32>(),
+          ast_module_.create<ast::type::I32>(),
           ast::ExpressionList{lod_operand});
     }
     params.push_back(lod_operand);
@@ -3902,9 +3903,9 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     ast::Expression* array_index =
         ast_module_.create<ast::MemberAccessorExpression>(raw_coords.expr,
                                                           Swizzle(num_axes));
-    // Convert it to an unsigned integer type.
+    // Convert it to a signed integer type.
     result.push_back(ast_module_.create<ast::TypeConstructorExpression>(
-        ast_module_.create<ast::type::U32>(),
+        ast_module_.create<ast::type::I32>(),
         ast::ExpressionList{array_index}));
   } else {
     if (num_coords_supplied == num_coords_required) {

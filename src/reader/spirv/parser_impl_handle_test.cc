@@ -1387,7 +1387,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -1466,7 +1466,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -1544,7 +1544,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -1626,7 +1626,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -1789,7 +1789,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -1868,7 +1868,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -1952,7 +1952,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -2035,7 +2035,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -2117,7 +2117,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -2203,7 +2203,7 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{xy}
               }
               TypeConstructor[not set]{
-                __u32
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
                   Identifier[not set]{z}
@@ -2289,7 +2289,7 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_10}
               Identifier[not set]{vf12}
               TypeConstructor[not set]{
-                __u32
+                __i32
                 Identifier[not set]{f1}
               }
             )
@@ -3122,7 +3122,7 @@ INSTANTIATE_TEST_SUITE_P(Good_1DArray,
 }
 )",
                                   R"(TypeConstructor[not set]{
-  __u32
+  __i32
   MemberAccessor[not set]{
     Identifier[not set]{vf12}
     Identifier[not set]{y}
@@ -3140,7 +3140,7 @@ INSTANTIATE_TEST_SUITE_P(Good_1DArray,
 }
 )",
                                   R"(TypeConstructor[not set]{
-  __u32
+  __i32
   MemberAccessor[not set]{
     Identifier[not set]{vf123}
     Identifier[not set]{y}
@@ -3158,7 +3158,7 @@ INSTANTIATE_TEST_SUITE_P(Good_1DArray,
 }
 )",
                                   R"(TypeConstructor[not set]{
-  __u32
+  __i32
   MemberAccessor[not set]{
     Identifier[not set]{vf1234}
     Identifier[not set]{y}
@@ -3207,7 +3207,7 @@ INSTANTIATE_TEST_SUITE_P(Good_2DArray,
 }
 )",
                                   R"(TypeConstructor[not set]{
-  __u32
+  __i32
   MemberAccessor[not set]{
     Identifier[not set]{vf123}
     Identifier[not set]{z}
@@ -3225,7 +3225,7 @@ INSTANTIATE_TEST_SUITE_P(Good_2DArray,
 }
 )",
                                   R"(TypeConstructor[not set]{
-  __u32
+  __i32
   MemberAccessor[not set]{
     Identifier[not set]{vf1234}
     Identifier[not set]{z}
@@ -3289,7 +3289,7 @@ INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
 }
 )",
                                R"(TypeConstructor[not set]{
-  __u32
+  __i32
   MemberAccessor[not set]{
     Identifier[not set]{vf1234}
     Identifier[not set]{w}
