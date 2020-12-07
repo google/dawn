@@ -38,9 +38,6 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
   ReturnStatement(ReturnStatement&&);
   ~ReturnStatement() override;
 
-  /// Sets the value
-  /// @param value the value
-  void set_value(Expression* value) { value_ = value; }
   /// @returns the value
   Expression* value() const { return value_; }
   /// @returns true if the return has a value
