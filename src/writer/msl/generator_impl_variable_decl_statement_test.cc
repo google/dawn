@@ -69,7 +69,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
   ast::type::F32 f32;
-  ast::type::Array ary(&f32, 5);
+  ast::type::Array ary(&f32, 5, ast::ArrayDecorationList{});
 
   auto* var =
       create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &ary);

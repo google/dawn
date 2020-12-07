@@ -169,20 +169,20 @@ TEST_F(AliasTest, MinBufferBindingSizeU32) {
 
 TEST_F(AliasTest, MinBufferBindingSizeArray) {
   U32 u32;
-  Array array(&u32, 4);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 4,
+              ArrayDecorationList{
+                  create<StrideDecoration>(4, Source{}),
+              });
   Alias alias{"alias", &array};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AliasTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
-  Array array(&u32);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 0,
+              ArrayDecorationList{
+                  create<StrideDecoration>(4, Source{}),
+              });
   Alias alias{"alias", &array};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
@@ -218,20 +218,20 @@ TEST_F(AliasTest, BaseAlignmentU32) {
 
 TEST_F(AliasTest, BaseAlignmentArray) {
   U32 u32;
-  Array array(&u32, 4);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 4,
+              ArrayDecorationList{
+                  create<StrideDecoration>(4, Source{}),
+              });
   Alias alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AliasTest, BaseAlignmentRuntimeArray) {
   U32 u32;
-  Array array(&u32);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 0,
+              ArrayDecorationList{
+                  create<StrideDecoration>(4, Source{}),
+              });
   Alias alias{"alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }

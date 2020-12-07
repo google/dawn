@@ -146,7 +146,7 @@ class TypesBuilder {
   /// @param n the array size. 0 represents unbounded
   /// @return the tint AST type for a array of size `n` of type `T`
   type::Array* array(type::Type* subtype, uint32_t n) const {
-    return mod_->create<type::Array>(subtype, n);
+    return mod_->create<type::Array>(subtype, n, ArrayDecorationList{});
   }
 
   /// @return the tint AST type for an array of size `N` of type `T`

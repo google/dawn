@@ -99,12 +99,8 @@ TEST_F(StructTest, MinBufferBindingSize) {
 
 TEST_F(StructTest, MinBufferBindingSizeArray) {
   U32 u32;
-  Array arr(&u32, 4);
-  {
-    ArrayDecorationList decos;
-    decos.push_back(create<StrideDecoration>(4, Source{}));
-    arr.set_decorations(decos);
-  }
+  Array arr(&u32, 4,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
 
   StructMemberList members;
   {
@@ -134,12 +130,8 @@ TEST_F(StructTest, MinBufferBindingSizeArray) {
 
 TEST_F(StructTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
-  Array arr(&u32);
-  {
-    ArrayDecorationList decos;
-    decos.push_back(create<StrideDecoration>(4, Source{}));
-    arr.set_decorations(decos);
-  }
+  Array arr(&u32, 0,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
 
   StructMemberList members;
   {
@@ -248,12 +240,8 @@ TEST_F(StructTest, BaseAlignment) {
 
 TEST_F(StructTest, BaseAlignmentArray) {
   U32 u32;
-  Array arr(&u32, 4);
-  {
-    ArrayDecorationList decos;
-    decos.push_back(create<StrideDecoration>(4, Source{}));
-    arr.set_decorations(decos);
-  }
+  Array arr(&u32, 4,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
 
   StructMemberList members;
   {
@@ -281,12 +269,8 @@ TEST_F(StructTest, BaseAlignmentArray) {
 
 TEST_F(StructTest, BaseAlignmentRuntimeArray) {
   U32 u32;
-  Array arr(&u32);
-  {
-    ArrayDecorationList decos;
-    decos.push_back(create<StrideDecoration>(4, Source{}));
-    arr.set_decorations(decos);
-  }
+  Array arr(&u32, 0,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
 
   StructMemberList members;
   {

@@ -174,7 +174,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
   ast::type::F32 f32;
   ast::type::Vector vec(&f32, 3);
-  ast::type::Array ary(&vec, 3);
+  ast::type::Array ary(&vec, 3, ast::ArrayDecorationList{});
 
   ast::ExpressionList ary_values;
 

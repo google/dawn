@@ -39,7 +39,7 @@ using ArrayTest = TestHelper;
 
 TEST_F(ArrayTest, CreateSizedArray) {
   U32 u32;
-  Array arr{&u32, 3};
+  Array arr{&u32, 3, ArrayDecorationList{}};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 3u);
   EXPECT_TRUE(arr.Is<Array>());
@@ -48,7 +48,7 @@ TEST_F(ArrayTest, CreateSizedArray) {
 
 TEST_F(ArrayTest, CreateRuntimeArray) {
   U32 u32;
-  Array arr{&u32};
+  Array arr{&u32, 0, ArrayDecorationList{}};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 0u);
   EXPECT_TRUE(arr.Is<Array>());
@@ -58,7 +58,7 @@ TEST_F(ArrayTest, CreateRuntimeArray) {
 TEST_F(ArrayTest, Is) {
   I32 i32;
 
-  Array arr{&i32, 3};
+  Array arr{&i32, 3, ArrayDecorationList{}};
   Type* ty = &arr;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -77,70 +77,55 @@ TEST_F(ArrayTest, Is) {
 
 TEST_F(ArrayTest, TypeName) {
   I32 i32;
-  Array arr{&i32};
+  Array arr{&i32, 0, ArrayDecorationList{}};
   EXPECT_EQ(arr.type_name(), "__array__i32");
 }
 
 TEST_F(ArrayTest, TypeName_RuntimeArray) {
   I32 i32;
-  Array arr{&i32, 3};
+  Array arr{&i32, 3, ArrayDecorationList{}};
   EXPECT_EQ(arr.type_name(), "__array__i32_3");
 }
 
 TEST_F(ArrayTest, TypeName_WithStride) {
   I32 i32;
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(16, Source{}));
-
-  Array arr{&i32, 3};
-  arr.set_decorations(decos);
+  Array arr{&i32, 3,
+            ArrayDecorationList{create<StrideDecoration>(16, Source{})}};
   EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 
 TEST_F(ArrayTest, MinBufferBindingSizeNoStride) {
   U32 u32;
-  Array arr(&u32, 4);
+  Array arr(&u32, 4, ArrayDecorationList{});
   EXPECT_EQ(0u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(ArrayTest, MinBufferBindingSizeArray) {
   U32 u32;
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-
-  Array arr(&u32, 4);
-  arr.set_decorations(decos);
+  Array arr(&u32, 4,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   EXPECT_EQ(16u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(ArrayTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-
-  Array arr(&u32);
-  arr.set_decorations(decos);
+  Array arr(&u32, 0,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   EXPECT_EQ(4u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(ArrayTest, BaseAlignmentArray) {
   U32 u32;
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-
-  Array arr(&u32, 4);
-  arr.set_decorations(decos);
+  Array arr(&u32, 4,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
 TEST_F(ArrayTest, BaseAlignmentRuntimeArray) {
   U32 u32;
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-
-  Array arr(&u32);
-  arr.set_decorations(decos);
+  Array arr(&u32, 0,
+            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
 }

@@ -1011,7 +1011,7 @@ kernel void main_tint_0() {
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ast::type::F32 f32;
-  ast::type::Array ary(&f32, 5);
+  ast::type::Array ary(&f32, 5, ast::ArrayDecorationList{});
 
   ast::VariableList params;
   params.push_back(

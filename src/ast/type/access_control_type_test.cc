@@ -106,20 +106,16 @@ TEST_F(AccessControlTest, MinBufferBindingSizeU32) {
 
 TEST_F(AccessControlTest, MinBufferBindingSizeArray) {
   U32 u32;
-  Array array(&u32, 4);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 4,
+              ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AccessControlTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
-  Array array(&u32);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 0,
+              ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(4u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
@@ -153,20 +149,16 @@ TEST_F(AccessControlTest, BaseAlignmentU32) {
 
 TEST_F(AccessControlTest, BaseAlignmentArray) {
   U32 u32;
-  Array array(&u32, 4);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 4,
+              ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AccessControlTest, BaseAlignmentRuntimeArray) {
   U32 u32;
-  Array array(&u32);
-  ArrayDecorationList decos;
-  decos.push_back(create<StrideDecoration>(4, Source{}));
-  array.set_decorations(decos);
+  Array array(&u32, 0,
+              ArrayDecorationList{create<StrideDecoration>(4, Source{})});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }

@@ -1099,9 +1099,7 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_array(
       size = val.value;
     }
 
-    auto ty = std::make_unique<ast::type::Array>(subtype.value, size);
-    ty->set_decorations(std::move(decos));
-    return module_.unique_type(std::move(ty));
+    return create<ast::type::Array>(subtype.value, size, std::move(decos));
   });
 }
 

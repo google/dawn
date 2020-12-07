@@ -181,7 +181,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   ast::type::I32 i32;
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
-  ast::type::Array ary4(&vec3, 4);
+  ast::type::Array ary4(&vec3, 4, ast::ArrayDecorationList{});
 
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
@@ -228,7 +228,7 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
   ast::type::I32 i32;
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
-  ast::type::Array ary4(&vec3, 4);
+  ast::type::Array ary4(&vec3, 4, ast::ArrayDecorationList{});
 
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
@@ -784,13 +784,13 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
       ast::StructMemberList{create<ast::StructMember>("bar", &c_type, decos)});
   ast::type::Struct b_type("B", s);
 
-  ast::type::Array b_ary_type(&b_type, 3);
+  ast::type::Array b_ary_type(&b_type, 3, ast::ArrayDecorationList{});
 
   s = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>("foo", &b_ary_type, decos)});
   ast::type::Struct a_type("A", s);
 
-  ast::type::Array a_ary_type(&a_type, 2);
+  ast::type::Array a_ary_type(&a_type, 2, ast::ArrayDecorationList{});
 
   ast::Variable var(Source{}, "index", ast::StorageClass::kFunction,
                     &a_ary_type);
@@ -858,7 +858,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   ast::type::F32 f32;
   ast::type::U32 u32;
   ast::type::Vector vec(&f32, 2);
-  ast::type::Array arr(&vec, 3);
+  ast::type::Array arr(&vec, 3, ast::ArrayDecorationList{});
 
   ast::ExpressionList ary_params;
   ary_params.push_back(create<ast::TypeConstructorExpression>(

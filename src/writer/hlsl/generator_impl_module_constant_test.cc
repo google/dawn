@@ -35,7 +35,7 @@ using HlslGeneratorImplTest_ModuleConstant = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   ast::type::F32 f32;
-  ast::type::Array ary(&f32, 3);
+  ast::type::Array ary(&f32, 3, ast::ArrayDecorationList{});
 
   ast::ExpressionList exprs;
   exprs.push_back(create<ast::ScalarConstructorExpression>(

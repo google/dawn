@@ -477,8 +477,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> asint(data.Load((2 * 4));
   ast::type::F32 f32;
   ast::type::I32 i32;
-  ast::type::Array ary(&i32, 5);
-  ary.set_decorations({create<ast::StrideDecoration>(4, Source{})});
+  ast::type::Array ary(&i32, 5,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(4, Source{}),
+                       });
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -521,8 +523,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> asint(data.Load((4 * ((2 + 4) - 3)));
   ast::type::F32 f32;
   ast::type::I32 i32;
-  ast::type::Array ary(&i32, 5);
-  ary.set_decorations({create<ast::StrideDecoration>(4, Source{})});
+  ast::type::Array ary(&i32, 5,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(4, Source{}),
+                       });
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -623,8 +627,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::F32 f32;
   ast::type::I32 i32;
-  ast::type::Array ary(&i32, 5);
-  ary.set_decorations({create<ast::StrideDecoration>(4, Source{})});
+  ast::type::Array ary(&i32, 5,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(4, Source{}),
+                       });
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
@@ -848,8 +854,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct data("Data", data_str);
 
-  ast::type::Array ary(&data, 4);
-  ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
+  ast::type::Array ary(&data, 4,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(32, Source{}),
+                       });
 
   auto* pre_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
@@ -919,8 +927,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct data("Data", data_str);
 
-  ast::type::Array ary(&data, 4);
-  ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
+  ast::type::Array ary(
+      &data, 4,
+      ast::ArrayDecorationList{create<ast::StrideDecoration>(32, Source{})});
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
@@ -989,8 +998,10 @@ TEST_F(
 
   ast::type::Struct data("Data", data_str);
 
-  ast::type::Array ary(&data, 4);
-  ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
+  ast::type::Array ary(&data, 4,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(32, Source{}),
+                       });
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
@@ -1058,8 +1069,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct data("Data", data_str);
 
-  ast::type::Array ary(&data, 4);
-  ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
+  ast::type::Array ary(&data, 4,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(32, Source{}),
+                       });
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
@@ -1128,8 +1141,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct data("Data", data_str);
 
-  ast::type::Array ary(&data, 4);
-  ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
+  ast::type::Array ary(&data, 4,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(32, Source{}),
+                       });
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
@@ -1209,8 +1224,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct data("Data", data_str);
 
-  ast::type::Array ary(&data, 4);
-  ary.set_decorations({create<ast::StrideDecoration>(32, Source{})});
+  ast::type::Array ary(&data, 4,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(32, Source{}),
+                       });
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(

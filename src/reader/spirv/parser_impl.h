@@ -492,12 +492,12 @@ class ParserImpl : Reader {
   ast::type::Type* ConvertType(uint32_t type_id,
                                const spvtools::opt::analysis::Pointer* ptr_ty);
 
-  /// Applies SPIR-V decorations to the given array or runtime-array type.
-  /// @param spv_type the SPIR-V aray or runtime-array type.
-  /// @param ast_type non-null; the AST type to apply decorations to
+  /// Parses the array or runtime-array decorations.
+  /// @param spv_type the SPIR-V array or runtime-array type.
+  /// @param decorations the populated decoration list
   /// @returns true on success.
-  bool ApplyArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
-                             ast::type::Array* ast_type);
+  bool ParseArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
+                             ast::ArrayDecorationList* decorations);
 
   /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.

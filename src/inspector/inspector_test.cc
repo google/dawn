@@ -675,13 +675,13 @@ class InspectorHelper {
   ast::type::U32* u32_type() { return &u32_type_; }
   ast::type::Array* u32_array_type(uint32_t count) {
     if (array_type_memo_.find(count) == array_type_memo_.end()) {
-      array_type_memo_[count] =
-          std::make_unique<ast::type::Array>(u32_type(), count);
-      ast::ArrayDecorationList decos;
-      decos.push_back(create<ast::StrideDecoration>(4, Source{}));
-      array_type_memo_[count]->set_decorations(decos);
+      array_type_memo_[count] = create<ast::type::Array>(
+          u32_type(), count,
+          ast::ArrayDecorationList{
+              create<ast::StrideDecoration>(4, Source{}),
+          });
     }
-    return array_type_memo_[count].get();
+    return array_type_memo_[count];
   }
   ast::type::Vector* vec_type(ast::type::Type* type, uint32_t count) {
     if (vector_type_memo_.find(std::tie(type, count)) ==
@@ -718,7 +718,7 @@ class InspectorHelper {
   ast::type::Void void_type_;
   ast::type::Sampler sampler_type_;
   ast::type::Sampler comparison_sampler_type_;
-  std::map<uint32_t, std::unique_ptr<ast::type::Array>> array_type_memo_;
+  std::map<uint32_t, ast::type::Array*> array_type_memo_;
   std::map<std::tuple<ast::type::Type*, uint32_t>,
            std::unique_ptr<ast::type::Vector>>
       vector_type_memo_;

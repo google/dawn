@@ -52,7 +52,7 @@ uint64_t Matrix::MinBufferBindingSize(MemoryLayout mem_layout) const {
 
 uint64_t Matrix::BaseAlignment(MemoryLayout mem_layout) const {
   Vector vec(subtype_, rows_);
-  Array arr(&vec, columns_);
+  Array arr(&vec, columns_, ArrayDecorationList{});
   return arr.BaseAlignment(mem_layout);
 }
 

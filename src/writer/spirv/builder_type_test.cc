@@ -81,7 +81,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   ast::type::I32 i32;
-  ast::type::Array ary(&i32);
+  ast::type::Array ary(&i32, 0, ast::ArrayDecorationList{});
 
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -94,7 +94,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   ast::type::I32 i32;
-  ast::type::Array ary(&i32);
+  ast::type::Array ary(&i32, 0, ast::ArrayDecorationList{});
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
@@ -107,7 +107,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 
 TEST_F(BuilderTest_Type, GenerateArray) {
   ast::type::I32 i32;
-  ast::type::Array ary(&i32, 4);
+  ast::type::Array ary(&i32, 4, ast::ArrayDecorationList{});
 
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -123,11 +123,10 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
   ast::type::I32 i32;
 
-  ast::ArrayDecorationList decos;
-  decos.push_back(create<ast::StrideDecoration>(16u, Source{}));
-
-  ast::type::Array ary(&i32, 4);
-  ary.set_decorations(decos);
+  ast::type::Array ary(&i32, 4,
+                       ast::ArrayDecorationList{
+                           create<ast::StrideDecoration>(16u, Source{}),
+                       });
 
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -145,7 +144,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
   ast::type::I32 i32;
-  ast::type::Array ary(&i32, 4);
+  ast::type::Array ary(&i32, 4, ast::ArrayDecorationList{});
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
@@ -471,14 +470,17 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   ast::type::F32 f32;
 
   ast::type::Matrix glsl_mat2x2(&f32, 2, 2);
-  ast::type::Array arr_mat2x2(&glsl_mat2x2, 1);  // Singly nested array
+  ast::type::Array arr_mat2x2(
+      &glsl_mat2x2, 1, ast::ArrayDecorationList{});  // Singly nested array
 
   ast::type::Matrix glsl_mat2x3(&f32, 3, 2);  // 2 columns, 3 rows
-  ast::type::Array arr_mat2x3(&glsl_mat2x3, 1);
-  ast::type::Array arr_arr_mat2x2(&arr_mat2x3, 1);  // Doubly nested array
+  ast::type::Array arr_mat2x3(&glsl_mat2x3, 1, ast::ArrayDecorationList{});
+  ast::type::Array arr_arr_mat2x2(
+      &arr_mat2x3, 1, ast::ArrayDecorationList{});  // Doubly nested array
 
   ast::type::Matrix glsl_mat4x4(&f32, 4, 4);
-  ast::type::Array rtarr_mat4x4(&glsl_mat4x4);  // Runtime array
+  ast::type::Array rtarr_mat4x4(&glsl_mat4x4, 0,
+                                ast::ArrayDecorationList{});  // Runtime array
 
   ast::StructMemberDecorationList a_decos;
   a_decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));

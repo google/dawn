@@ -428,7 +428,7 @@ TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   ast::type::I32 i32;
   ast::type::F32 f32;
-  ast::type::Array ary(&f32, 3);
+  ast::type::Array ary(&f32, 3, ast::ArrayDecorationList{});
 
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
@@ -452,7 +452,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   ast::type::I32 i32;
   ast::type::F32 f32;
-  ast::type::Array ary(&f32, 3);
+  ast::type::Array ary(&f32, 3, ast::ArrayDecorationList{});
   ast::type::Alias aary("myarrty", &ary);
 
   auto* idx = create<ast::ScalarConstructorExpression>(
@@ -477,7 +477,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
   ast::type::I32 i32;
   ast::type::F32 f32;
-  ast::type::Array ary(&f32, 3);
+  ast::type::Array ary(&f32, 3, ast::ArrayDecorationList{});
 
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));

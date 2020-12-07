@@ -64,7 +64,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&a, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[4]");
@@ -72,8 +72,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
-  ast::type::Array c(&a, 5);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
+  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&c, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[5][4]");
@@ -82,9 +82,9 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
-  ast::type::Array c(&a, 5);
-  ast::type::Array d(&c);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
+  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
+  ast::type::Array d(&c, 0, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&c, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[5][4][1]");
@@ -92,9 +92,9 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
-  ast::type::Array c(&a, 5);
-  ast::type::Array d(&c, 6);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
+  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
+  ast::type::Array d(&c, 6, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&d, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[6][5][4]");
@@ -102,7 +102,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&a, "bool")) << gen.error();
   EXPECT_EQ(gen.result(), "bool bool_tint_0[4]");
@@ -110,7 +110,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&a, "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool[4]");
@@ -118,7 +118,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b);
+  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&a, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[1]");
@@ -126,7 +126,7 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray_NameCollision) {
   ast::type::Bool b;
-  ast::type::Array a(&b);
+  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&a, "discard_fragment")) << gen.error();
   EXPECT_EQ(gen.result(), "bool discard_fragment_tint_0[1]");

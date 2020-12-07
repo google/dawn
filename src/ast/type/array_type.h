@@ -30,13 +30,12 @@ namespace type {
 /// An array type. If size is zero then it is a runtime array.
 class Array : public Castable<Array, Type> {
  public:
-  /// Constructor for runtime array
-  /// @param subtype the type of the array elements
-  explicit Array(Type* subtype);
   /// Constructor
   /// @param subtype the type of the array elements
-  /// @param size the number of elements in the array
-  Array(Type* subtype, uint32_t size);
+  /// @param size the number of elements in the array. `0` represents a
+  /// runtime-sized array.
+  /// @param decorations the array decorations
+  Array(Type* subtype, uint32_t size, ArrayDecorationList decorations);
   /// Move constructor
   Array(Array&&);
   ~Array() override;
@@ -55,9 +54,6 @@ class Array : public Castable<Array, Type> {
   ///          0 for non-host shareable types.
   uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
 
-  /// Sets the array decorations
-  /// @param decos the decorations to set
-  void set_decorations(ArrayDecorationList decos) { decos_ = std::move(decos); }
   /// @returns the array decorations
   const ArrayDecorationList& decorations() const { return decos_; }
 

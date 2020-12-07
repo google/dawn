@@ -57,7 +57,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
   EXPECT_EQ(gen.result(), "array<bool, 4>");
@@ -105,11 +105,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
   ast::type::Bool b;
-  ast::ArrayDecorationList decos;
-  decos.push_back(create<ast::StrideDecoration>(16u, Source{}));
-
-  ast::type::Array a(&b, 4);
-  a.set_decorations(decos);
+  ast::type::Array a(&b, 4,
+                     ast::ArrayDecorationList{
+                         create<ast::StrideDecoration>(16u, Source{}),
+                     });
 
   ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
   EXPECT_EQ(gen.result(), "[[stride(16)]] array<bool, 4>");
@@ -117,12 +116,11 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
   ast::type::Bool b;
-  ast::ArrayDecorationList decos;
-  decos.push_back(create<ast::StrideDecoration>(16u, Source{}));
-  decos.push_back(create<ast::StrideDecoration>(32u, Source{}));
-
-  ast::type::Array a(&b, 4);
-  a.set_decorations(decos);
+  ast::type::Array a(&b, 4,
+                     ast::ArrayDecorationList{
+                         create<ast::StrideDecoration>(16u, Source{}),
+                         create<ast::StrideDecoration>(32u, Source{}),
+                     });
 
   ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
   EXPECT_EQ(gen.result(), "[[stride(16)]] [[stride(32)]] array<bool, 4>");
@@ -130,7 +128,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b);
+  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(&a)) << gen.error();
   EXPECT_EQ(gen.result(), "array<bool>");

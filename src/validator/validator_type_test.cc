@@ -43,7 +43,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   // };
 
   ast::type::F32 f32;
-  ast::type::Array arr(&f32);
+  ast::type::Array arr(&f32, 0, ast::ArrayDecorationList{});
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
@@ -70,7 +70,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   // };
 
   ast::type::F32 f32;
-  ast::type::Array arr(&f32);
+  ast::type::Array arr(&f32, 0, ast::ArrayDecorationList{});
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
@@ -100,7 +100,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   // };
 
   ast::type::F32 f32;
-  ast::type::Array arr(&f32);
+  ast::type::Array arr(&f32, 0, ast::ArrayDecorationList{});
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
@@ -132,7 +132,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   //}
 
   ast::type::F32 u32;
-  ast::type::Array array(&u32);
+  ast::type::Array array(&u32, 0, ast::ArrayDecorationList{});
   ast::type::Alias alias{"RTArr", &array};
 
   ast::StructMemberList members;
@@ -166,7 +166,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   //}
 
   ast::type::F32 u32;
-  ast::type::Array array(&u32);
+  ast::type::Array array(&u32, 0, ast::ArrayDecorationList{});
   ast::type::Alias alias{"RTArr", &array};
 
   ast::StructMemberList members;
@@ -191,7 +191,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   /// [[stage(vertex)]]
   // fn func -> void { var a : array<i32>; }
   ast::type::I32 i32;
-  ast::type::Array array(&i32);
+  ast::type::Array array(&i32, 0, ast::ArrayDecorationList{});
 
   auto* var =
       create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &array);

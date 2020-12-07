@@ -28,9 +28,8 @@ namespace tint {
 namespace ast {
 namespace type {
 
-Array::Array(Type* subtype) : subtype_(subtype) {}
-
-Array::Array(Type* subtype, uint32_t size) : subtype_(subtype), size_(size) {}
+Array::Array(Type* subtype, uint32_t size, ArrayDecorationList decorations)
+    : subtype_(subtype), size_(size), decos_(decorations) {}
 
 Array::Array(Array&&) = default;
 
@@ -98,9 +97,8 @@ std::string Array::type_name() const {
 }
 
 Array* Array::Clone(CloneContext* ctx) const {
-  auto cloned = std::make_unique<Array>(ctx->Clone(subtype_), size_);
-  cloned->set_decorations(ctx->Clone(decorations()));
-  return ctx->mod->unique_type(std::move(cloned));
+  return ctx->mod->create<Array>(ctx->Clone(subtype_), size_,
+                                 ctx->Clone(decorations()));
 }
 
 }  // namespace type

@@ -579,7 +579,7 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
   ast::type::F32 f32;
   AddVertexInputVariable(0, "var_a", &f32);
 
-  ast::type::Array vec4_f32{&f32, 4u};
+  ast::type::Array vec4_f32{&f32, 4u, ast::ArrayDecorationList{}};
   AddVertexInputVariable(1, "var_b", &vec4_f32);
 
   InitTransform(
@@ -759,13 +759,13 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
   InitBasicModule();
 
   ast::type::F32 f32;
-  ast::type::Array vec2_f32{&f32, 2u};
+  ast::type::Array vec2_f32{&f32, 2u, ast::ArrayDecorationList{}};
   AddVertexInputVariable(0, "var_a", &vec2_f32);
 
-  ast::type::Array vec3_f32{&f32, 3u};
+  ast::type::Array vec3_f32{&f32, 3u, ast::ArrayDecorationList{}};
   AddVertexInputVariable(1, "var_b", &vec3_f32);
 
-  ast::type::Array vec4_f32{&f32, 4u};
+  ast::type::Array vec4_f32{&f32, 4u, ast::ArrayDecorationList{}};
   AddVertexInputVariable(2, "var_c", &vec4_f32);
 
   InitTransform(

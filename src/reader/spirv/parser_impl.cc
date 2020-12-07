@@ -710,11 +710,11 @@ ast::type::Type* ParserImpl::ConvertType(
   if (ast_elem_ty == nullptr) {
     return nullptr;
   }
-  auto ast_type = std::make_unique<ast::type::Array>(ast_elem_ty);
-  if (!ApplyArrayDecorations(rtarr_ty, ast_type.get())) {
+  ast::ArrayDecorationList decorations;
+  if (!ParseArrayDecorations(rtarr_ty, &decorations)) {
     return nullptr;
   }
-  return ast_module_.unique_type(std::move(ast_type));
+  return create<ast::type::Array>(ast_elem_ty, 0, std::move(decorations));
 }
 
 ast::type::Type* ParserImpl::ConvertType(
@@ -751,20 +751,22 @@ ast::type::Type* ParserImpl::ConvertType(
            << num_elem;
     return nullptr;
   }
-  auto ast_type = std::make_unique<ast::type::Array>(
-      ast_elem_ty, static_cast<uint32_t>(num_elem));
-  if (!ApplyArrayDecorations(arr_ty, ast_type.get())) {
+  ast::ArrayDecorationList decorations;
+  if (!ParseArrayDecorations(arr_ty, &decorations)) {
     return nullptr;
   }
+
   if (remap_buffer_block_type_.count(elem_type_id)) {
     remap_buffer_block_type_.insert(type_mgr_->GetId(arr_ty));
   }
-  return ast_module_.unique_type(std::move(ast_type));
+  return create<ast::type::Array>(ast_elem_ty, static_cast<uint32_t>(num_elem),
+                                  std::move(decorations));
 }
 
-bool ParserImpl::ApplyArrayDecorations(
+bool ParserImpl::ParseArrayDecorations(
     const spvtools::opt::analysis::Type* spv_type,
-    ast::type::Array* ast_type) {
+    ast::ArrayDecorationList* decorations) {
+  bool has_array_stride = false;
   const auto type_id = type_mgr_->GetId(spv_type);
   for (auto& decoration : this->GetDecorationsFor(type_id)) {
     if (decoration.size() == 2 && decoration[0] == SpvDecorationArrayStride) {
@@ -773,13 +775,12 @@ bool ParserImpl::ApplyArrayDecorations(
         return Fail() << "invalid array type ID " << type_id
                       << ": ArrayStride can't be 0";
       }
-      if (ast_type->has_array_stride()) {
+      if (has_array_stride) {
         return Fail() << "invalid array type ID " << type_id
                       << ": multiple ArrayStride decorations";
       }
-      ast::ArrayDecorationList decos;
-      decos.push_back(create<ast::StrideDecoration>(stride, Source{}));
-      ast_type->set_decorations(std::move(decos));
+      has_array_stride = true;
+      decorations->push_back(create<ast::StrideDecoration>(stride, Source{}));
     } else {
       return Fail() << "invalid array type ID " << type_id
                     << ": unknown decoration "

@@ -61,7 +61,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias_NameCollision) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &a, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[4]");
@@ -69,8 +69,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
-  ast::type::Array c(&a, 5);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
+  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &c, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4]");
@@ -80,9 +80,9 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 TEST_F(HlslGeneratorImplTest_Type,
        DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
-  ast::type::Array c(&a, 5);
-  ast::type::Array d(&c);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
+  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
+  ast::type::Array d(&c, 0, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &c, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4][1]");
@@ -90,9 +90,9 @@ TEST_F(HlslGeneratorImplTest_Type,
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
-  ast::type::Array c(&a, 5);
-  ast::type::Array d(&c, 6);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
+  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
+  ast::type::Array d(&c, 6, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &d, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[6][5][4]");
@@ -100,7 +100,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_NameCollision) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &a, "bool")) << gen.error();
   EXPECT_EQ(result(), "bool bool_tint_0[4]");
@@ -108,7 +108,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_NameCollision) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
   ast::type::Bool b;
-  ast::type::Array a(&b, 4);
+  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &a, "")) << gen.error();
   EXPECT_EQ(result(), "bool[4]");
@@ -116,7 +116,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
   ast::type::Bool b;
-  ast::type::Array a(&b);
+  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &a, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[]");
@@ -125,7 +125,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
 TEST_F(HlslGeneratorImplTest_Type,
        DISABLED_EmitType_RuntimeArray_NameCollision) {
   ast::type::Bool b;
-  ast::type::Array a(&b);
+  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
 
   ASSERT_TRUE(gen.EmitType(out, &a, "double")) << gen.error();
   EXPECT_EQ(result(), "bool double_tint_0[]");

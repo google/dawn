@@ -123,7 +123,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_alias) {
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_array) {
   ast::type::F32 f32;
-  ast::type::Array ary(&f32, 4);
+  ast::type::Array ary(&f32, 4, ast::ArrayDecorationList{});
   EXPECT_EQ(4u * 4u, gen.calculate_alignment_size(&ary));
 }
 

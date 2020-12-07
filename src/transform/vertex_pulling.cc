@@ -239,12 +239,11 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
 void VertexPulling::State::AddVertexStorageBuffers() {
   // TODO(idanr): Make this readonly https://github.com/gpuweb/gpuweb/issues/935
   // The array inside the struct definition
-  auto internal_array = std::make_unique<ast::type::Array>(GetU32Type());
-  ast::ArrayDecorationList ary_decos;
-  ary_decos.push_back(mod->create<ast::StrideDecoration>(4u, Source{}));
-  internal_array->set_decorations(std::move(ary_decos));
-
-  auto* internal_array_type = mod->unique_type(std::move(internal_array));
+  auto* internal_array_type = mod->create<ast::type::Array>(
+      GetU32Type(), 0,
+      ast::ArrayDecorationList{
+          mod->create<ast::StrideDecoration>(4u, Source{}),
+      });
 
   // Creating the struct type
   ast::StructMemberList members;
