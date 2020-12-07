@@ -1647,14 +1647,11 @@ Maybe<ast::IfStatement*> ParserImpl::if_stmt() {
   auto el = else_stmt();
   if (el.errored)
     return Failure::kErrored;
-
-  auto* stmt = create<ast::IfStatement>(source, condition.value, body.value);
-  if (el.matched) {
+  if (el.matched)
     elseif.value.push_back(el.value);
-  }
-  stmt->set_else_statements(elseif.value);
 
-  return stmt;
+  return create<ast::IfStatement>(source, condition.value, body.value,
+                                  elseif.value);
 }
 
 // elseif_stmt
@@ -1945,8 +1942,9 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
     auto* break_body = create<ast::BlockStatement>(not_condition->source());
     break_body->append(break_stmt);
     // if (!condition) { break; }
-    auto* break_if_not_condition = create<ast::IfStatement>(
-        not_condition->source(), not_condition, break_body);
+    auto* break_if_not_condition =
+        create<ast::IfStatement>(not_condition->source(), not_condition,
+                                 break_body, ast::ElseStatementList{});
     body->insert(0, break_if_not_condition);
   }
 

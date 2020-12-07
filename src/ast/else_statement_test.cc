@@ -97,7 +97,8 @@ TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
   auto* body = create<BlockStatement>();
-  body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
+  body->append(create<IfStatement>(Source{}, nullptr, create<BlockStatement>(),
+                                   ElseStatementList{}));
 
   ElseStatement e(body);
   EXPECT_FALSE(e.IsValid());

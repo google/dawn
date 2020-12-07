@@ -30,16 +30,14 @@ namespace ast {
 class IfStatement : public Castable<IfStatement, Statement> {
  public:
   /// Constructor
-  /// @param condition the if condition
-  /// @param body the if body
-  IfStatement(Expression* condition, BlockStatement* body);
-  /// Constructor
   /// @param source the source information
   /// @param condition the if condition
   /// @param body the if body
+  /// @param else_stmts the else statements
   IfStatement(const Source& source,
               Expression* condition,
-              BlockStatement* body);
+              BlockStatement* body,
+              ElseStatementList else_stmts);
   /// Move constructor
   IfStatement(IfStatement&&);
   ~IfStatement() override;
@@ -51,11 +49,6 @@ class IfStatement : public Castable<IfStatement, Statement> {
   /// @returns the if body
   BlockStatement* body() { return body_; }
 
-  /// Sets the else statements
-  /// @param else_statements the else statements to set
-  void set_else_statements(ElseStatementList else_statements) {
-    else_statements_ = std::move(else_statements);
-  }
   /// @returns the else statements
   const ElseStatementList& else_statements() const { return else_statements_; }
   /// @returns the else statements

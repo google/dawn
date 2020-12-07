@@ -23,13 +23,14 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::IfStatement);
 namespace tint {
 namespace ast {
 
-IfStatement::IfStatement(Expression* condition, BlockStatement* body)
-    : Base(), condition_(condition), body_(body) {}
-
 IfStatement::IfStatement(const Source& source,
                          Expression* condition,
-                         BlockStatement* body)
-    : Base(source), condition_(condition), body_(body) {}
+                         BlockStatement* body,
+                         ElseStatementList else_stmts)
+    : Base(source),
+      condition_(condition),
+      body_(body),
+      else_statements_(std::move(else_stmts)) {}
 
 IfStatement::IfStatement(IfStatement&&) = default;
 
@@ -37,8 +38,8 @@ IfStatement::~IfStatement() = default;
 
 IfStatement* IfStatement::Clone(CloneContext* ctx) const {
   auto* cloned = ctx->mod->create<IfStatement>(
-      ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_));
-  cloned->else_statements_ = ctx->Clone(else_statements_);
+      ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_),
+      ctx->Clone(else_statements_));
   return cloned;
 }
 

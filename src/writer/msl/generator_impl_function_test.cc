@@ -911,12 +911,13 @@ TEST_F(MslGeneratorImplTest,
   list->append(create<ast::ReturnStatement>());
 
   body->append(create<ast::IfStatement>(
+      Source{},
       create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 1)),
                                     create<ast::ScalarConstructorExpression>(
                                         create<ast::SintLiteral>(&i32, 1))),
-      list));
+      list, ast::ElseStatementList{}));
 
   body->append(create<ast::ReturnStatement>());
 

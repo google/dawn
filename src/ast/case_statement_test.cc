@@ -124,7 +124,8 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   b.push_back(create<SintLiteral>(&i32, 2));
 
   auto* body = create<BlockStatement>();
-  body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
+  body->append(create<IfStatement>(Source{}, nullptr, create<BlockStatement>(),
+                                   ElseStatementList{}));
 
   CaseStatement c({b}, body);
   EXPECT_FALSE(c.IsValid());

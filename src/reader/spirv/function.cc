@@ -572,7 +572,8 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
 
   auto* cond = create<ast::IdentifierExpression>(guard_name);
   auto* body = create<ast::BlockStatement>();
-  AddStatement(create<ast::IfStatement>(cond, body));
+  AddStatement(
+      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
   PushNewStatementBlock(top.construct_, end_id, body, nullptr, nullptr);
 }
 
@@ -582,7 +583,8 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
 
   auto* cond = MakeTrue();
   auto* body = create<ast::BlockStatement>();
-  AddStatement(create<ast::IfStatement>(cond, body));
+  AddStatement(
+      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
   PushNewStatementBlock(top.construct_, end_id, body, nullptr, nullptr);
 }
 
@@ -2028,10 +2030,41 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
       block_info.basic_block->terminator()->GetSingleWordInOperand(0);
   auto* cond = MakeExpression(condition_id).expr;
   auto* body = create<ast::BlockStatement>();
-  auto* const if_stmt = AddStatement(create<ast::IfStatement>(cond, body))
-                            ->As<ast::IfStatement>();
 
   // Generate the code for the condition.
+  // Use the IfBuilder to create the if-statement. The IfBuilder is constructed
+  // as a std::shared_ptr and is captured by the then and else clause
+  // CompletionAction lambdas, and so will only be destructed when the last
+  // block is completed. The IfBuilder destructor constructs the IfStatement,
+  // inserting it at the current insertion point in the current
+  // ast::BlockStatement.
+  struct IfBuilder {
+    IfBuilder(ast::Module* mod,
+              StatementBlock& statement_block,
+              tint::ast::Expression* cond,
+              ast::BlockStatement* body)
+        : mod_(mod),
+          dst_block_(statement_block.statements_),
+          dst_block_insertion_point_(statement_block.statements_->size()),
+          cond_(cond),
+          body_(body) {}
+
+    ~IfBuilder() {
+      dst_block_->insert(
+          dst_block_insertion_point_,
+          mod_->create<ast::IfStatement>(Source{}, cond_, body_, else_stmts_));
+    }
+
+    ast::Module* mod_;
+    ast::BlockStatement* dst_block_;
+    size_t dst_block_insertion_point_;
+    tint::ast::Expression* cond_;
+    ast::BlockStatement* body_;
+    ast::ElseStatementList else_stmts_;
+  };
+
+  auto if_builder = std::make_shared<IfBuilder>(
+      &ast_module_, statements_stack_.back(), cond, body);
 
   // Compute the block IDs that should end the then-clause and the else-clause.
 
@@ -2069,20 +2102,18 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 
   // Push statement blocks for the then-clause and the else-clause.
   // But make sure we do it in the right order.
-
-  auto push_else = [this, if_stmt, else_end, construct]() {
+  auto push_else = [this, if_builder, else_end, construct]() {
     // Push the else clause onto the stack first.
     auto* else_body = create<ast::BlockStatement>();
     PushNewStatementBlock(
-        construct, else_end, else_body, nullptr, [this, if_stmt, else_body]() {
+        construct, else_end, else_body, nullptr,
+        [this, if_builder, else_body]() {
           // Only set the else-clause if there are statements to fill it.
           if (!else_body->empty()) {
             // The "else" consists of the statement list from the top of
-            // statments stack, without an elseif condition.
-            ast::ElseStatementList else_stmts;
-            else_stmts.emplace_back(
+            // statements stack, without an elseif condition.
+            if_builder->else_stmts_.emplace_back(
                 create<ast::ElseStatement>(nullptr, else_body));
-            if_stmt->set_else_statements(else_stmts);
           }
         });
   };
@@ -2121,7 +2152,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     }
 
     // Push the then clause onto the stack.
-    PushNewStatementBlock(construct, then_end, body, nullptr, nullptr);
+    PushNewStatementBlock(construct, then_end, body, nullptr, [if_builder] {});
   }
 
   return success();
@@ -2439,18 +2470,17 @@ ast::Statement* FunctionEmitter::MakeSimpleIf(ast::Expression* condition,
   if ((then_stmt == nullptr) && (else_stmt == nullptr)) {
     return nullptr;
   }
-  auto* if_block = create<ast::BlockStatement>();
-  auto* if_stmt = create<ast::IfStatement>(condition, if_block);
-  if (then_stmt != nullptr) {
-    if_block->append(then_stmt);
-  }
+  ast::ElseStatementList else_stmts;
   if (else_stmt != nullptr) {
     auto* stmts = create<ast::BlockStatement>();
     stmts->append(else_stmt);
-
-    ast::ElseStatementList else_stmts;
     else_stmts.emplace_back(create<ast::ElseStatement>(nullptr, stmts));
-    if_stmt->set_else_statements(else_stmts);
+  }
+  auto* if_block = create<ast::BlockStatement>();
+  auto* if_stmt =
+      create<ast::IfStatement>(Source{}, condition, if_block, else_stmts);
+  if (then_stmt != nullptr) {
+    if_block->append(then_stmt);
   }
   return if_stmt;
 }

@@ -118,7 +118,8 @@ TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
 TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
+  body->append(create<IfStatement>(Source{}, nullptr, create<BlockStatement>(),
+                                   ElseStatementList{}));
 
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
@@ -145,7 +146,8 @@ TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
 
   auto* continuing = create<BlockStatement>();
   continuing->append(create<DiscardStatement>());
-  continuing->append(create<IfStatement>(nullptr, create<BlockStatement>()));
+  continuing->append(create<IfStatement>(
+      Source{}, nullptr, create<BlockStatement>(), ElseStatementList{}));
 
   LoopStatement l(body, continuing);
   EXPECT_FALSE(l.IsValid());

@@ -388,21 +388,21 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
                                     create<ast::IdentifierExpression>("c")),
       body);
 
-  ast::ElseStatementList else_stmts;
-  else_stmts.push_back(else_if_stmt);
-  else_stmts.push_back(else_stmt);
-
   body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 1))));
 
   ast::IfStatement expr(
+      Source{},
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                     create<ast::IdentifierExpression>("a"),
                                     create<ast::IdentifierExpression>("b")),
-      body);
-  expr.set_else_statements(else_stmts);
+      body,
+      {
+          else_if_stmt,
+          else_stmt,
+      });
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;

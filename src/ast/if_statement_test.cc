@@ -27,28 +27,18 @@ using IfStatementTest = TestHelper;
 TEST_F(IfStatementTest, Creation) {
   auto* cond = create<IdentifierExpression>("cond");
   auto* body = create<BlockStatement>();
-  auto* discard = create<DiscardStatement>();
-  body->append(discard);
-
-  IfStatement stmt(cond, body);
-  EXPECT_EQ(stmt.condition(), cond);
-  ASSERT_EQ(stmt.body()->size(), 1u);
-  EXPECT_EQ(stmt.body()->get(0), discard);
-}
-
-TEST_F(IfStatementTest, Creation_WithSource) {
-  auto* cond = create<IdentifierExpression>("cond");
-  auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(Source{Source::Location{20, 2}}, cond, body);
+  IfStatement stmt(Source{Source::Location{20, 2}}, cond, body,
+                   ElseStatementList{});
   auto src = stmt.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IfStatementTest, IsIf) {
-  IfStatement stmt(nullptr, create<BlockStatement>());
+  IfStatement stmt(Source{}, nullptr, create<BlockStatement>(),
+                   ElseStatementList{});
   EXPECT_TRUE(stmt.Is<IfStatement>());
 }
 
@@ -57,7 +47,7 @@ TEST_F(IfStatementTest, IsValid) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(cond, body);
+  IfStatement stmt(Source{}, cond, body, ElseStatementList{});
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -66,13 +56,13 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("Ident"), create<BlockStatement>()));
-  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
-
-  IfStatement stmt(cond, body);
-  stmt.set_else_statements(else_stmts);
+  IfStatement stmt(
+      Source{}, cond, body,
+      {
+          create<ElseStatement>(create<IdentifierExpression>("Ident"),
+                                create<BlockStatement>()),
+          create<ElseStatement>(create<BlockStatement>()),
+      });
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -80,7 +70,7 @@ TEST_F(IfStatementTest, IsValid_MissingCondition) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(nullptr, body);
+  IfStatement stmt(Source{}, nullptr, body, ElseStatementList{});
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -89,7 +79,7 @@ TEST_F(IfStatementTest, IsValid_InvalidCondition) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(cond, body);
+  IfStatement stmt(Source{}, cond, body, ElseStatementList{});
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -99,7 +89,7 @@ TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
   body->append(create<DiscardStatement>());
   body->append(nullptr);
 
-  IfStatement stmt(cond, body);
+  IfStatement stmt(Source{}, cond, body, ElseStatementList{});
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -107,9 +97,10 @@ TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
   auto* cond = create<IdentifierExpression>("cond");
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
-  body->append(create<IfStatement>(nullptr, create<BlockStatement>()));
+  body->append(create<IfStatement>(Source{}, nullptr, create<BlockStatement>(),
+                                   ast::ElseStatementList{}));
 
-  IfStatement stmt(cond, body);
+  IfStatement stmt(Source{}, cond, body, ElseStatementList{});
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -118,14 +109,14 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("Ident"), create<BlockStatement>()));
-  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
-  else_stmts.push_back(nullptr);
-
-  IfStatement stmt(cond, body);
-  stmt.set_else_statements(else_stmts);
+  IfStatement stmt(
+      Source{}, cond, body,
+      {
+          create<ElseStatement>(create<IdentifierExpression>("Ident"),
+                                create<BlockStatement>()),
+          create<ElseStatement>(create<BlockStatement>()),
+          nullptr,
+      });
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -134,12 +125,11 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(create<IdentifierExpression>(""),
-                                             create<BlockStatement>()));
-
-  IfStatement stmt(cond, body);
-  stmt.set_else_statements(else_stmts);
+  IfStatement stmt(Source{}, cond, body,
+                   {
+                       create<ElseStatement>(create<IdentifierExpression>(""),
+                                             create<BlockStatement>()),
+                   });
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -148,12 +138,11 @@ TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
-  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
-
-  IfStatement stmt(cond, body);
-  stmt.set_else_statements(else_stmts);
+  IfStatement stmt(Source{}, cond, body,
+                   {
+                       create<ElseStatement>(create<BlockStatement>()),
+                       create<ElseStatement>(create<BlockStatement>()),
+                   });
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -162,13 +151,13 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(create<BlockStatement>()));
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("ident"), create<BlockStatement>()));
-
-  IfStatement stmt(cond, body);
-  stmt.set_else_statements(else_stmts);
+  IfStatement stmt(
+      Source{}, cond, body,
+      {
+          create<ElseStatement>(create<BlockStatement>()),
+          create<ElseStatement>(create<IdentifierExpression>("ident"),
+                                create<BlockStatement>()),
+      });
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -177,7 +166,7 @@ TEST_F(IfStatementTest, ToStr) {
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
-  IfStatement stmt(cond, body);
+  IfStatement stmt(Source{}, cond, body, ElseStatementList{});
 
   std::ostringstream out;
   stmt.to_str(out, 2);
@@ -204,13 +193,12 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   else_body->append(create<DiscardStatement>());
   else_body->append(create<DiscardStatement>());
 
-  ElseStatementList else_stmts;
-  else_stmts.push_back(create<ElseStatement>(
-      create<IdentifierExpression>("ident"), else_if_body));
-  else_stmts.push_back(create<ElseStatement>(else_body));
-
-  IfStatement stmt(cond, body);
-  stmt.set_else_statements(else_stmts);
+  IfStatement stmt(Source{}, cond, body,
+                   {
+                       create<ElseStatement>(
+                           create<IdentifierExpression>("ident"), else_if_body),
+                       create<ElseStatement>(else_body),
+                   });
 
   std::ostringstream out;
   stmt.to_str(out, 2);

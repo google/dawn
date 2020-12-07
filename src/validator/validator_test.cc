@@ -353,7 +353,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
       create<ast::FloatLiteral>(&f32, 3.14f));
 
   auto* outer_body = create<ast::BlockStatement>();
-  outer_body->append(create<ast::IfStatement>(cond, body));
+  outer_body->append(
+      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
   outer_body->append(create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs));
 
@@ -388,7 +389,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
 
   auto* outer_body = create<ast::BlockStatement>();
   outer_body->append(create<ast::VariableDeclStatement>(var));
-  outer_body->append(create<ast::IfStatement>(cond, body));
+  outer_body->append(
+      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
@@ -554,7 +556,8 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
       create<ast::FloatLiteral>(&f32, 3.14)));
 
   auto* outer_body = create<ast::BlockStatement>();
-  outer_body->append(create<ast::IfStatement>(cond, body));
+  outer_body->append(
+      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
   outer_body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var_a_float));
 
@@ -588,7 +591,8 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
 
   auto* outer_body = create<ast::BlockStatement>();
   outer_body->append(create<ast::VariableDeclStatement>(var_a_float));
-  outer_body->append(create<ast::IfStatement>(cond, body));
+  outer_body->append(
+      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(outer_body));

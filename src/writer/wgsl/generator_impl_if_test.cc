@@ -32,7 +32,7 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  ast::IfStatement i(cond, body);
+  ast::IfStatement i(Source{}, cond, body, ast::ElseStatementList{});
 
   gen.increment_indent();
 
@@ -48,15 +48,12 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
 
-  ast::ElseStatementList elses;
-  elses.push_back(create<ast::ElseStatement>(else_cond, else_body));
-
   auto* cond = create<ast::IdentifierExpression>("cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  ast::IfStatement i(cond, body);
-  i.set_else_statements(elses);
+  ast::IfStatement i(Source{}, cond, body,
+                     {create<ast::ElseStatement>(else_cond, else_body)});
 
   gen.increment_indent();
 
@@ -73,15 +70,12 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
 
-  ast::ElseStatementList elses;
-  elses.push_back(create<ast::ElseStatement>(else_body));
-
   auto* cond = create<ast::IdentifierExpression>("cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  ast::IfStatement i(cond, body);
-  i.set_else_statements(elses);
+  ast::IfStatement i(Source{}, cond, body,
+                     {create<ast::ElseStatement>(else_body)});
 
   gen.increment_indent();
 
@@ -103,16 +97,15 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   auto* else_body_2 = create<ast::BlockStatement>();
   else_body_2->append(create<ast::DiscardStatement>());
 
-  ast::ElseStatementList elses;
-  elses.push_back(create<ast::ElseStatement>(else_cond, else_body));
-  elses.push_back(create<ast::ElseStatement>(else_body_2));
-
   auto* cond = create<ast::IdentifierExpression>("cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  ast::IfStatement i(cond, body);
-  i.set_else_statements(elses);
+  ast::IfStatement i(Source{}, cond, body,
+                     {
+                         create<ast::ElseStatement>(else_cond, else_body),
+                         create<ast::ElseStatement>(else_body_2),
+                     });
 
   gen.increment_indent();
 

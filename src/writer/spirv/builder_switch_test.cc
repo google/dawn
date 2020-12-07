@@ -447,9 +447,10 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
-      create<ast::IfStatement>(create<ast::ScalarConstructorExpression>(
+      create<ast::IfStatement>(Source{},
+                               create<ast::ScalarConstructorExpression>(
                                    create<ast::BoolLiteral>(&bool_type, true)),
-                               if_body));
+                               if_body, ast::ElseStatementList{}));
 
   case_1_body->append(
       create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),

@@ -225,9 +225,6 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
                                      create<ast::SintLiteral>(&i32, 3)),
                                  else_body);
 
-  ast::ElseStatementList else_stmts;
-  else_stmts.push_back(else_stmt);
-
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   auto* rhs = create<ast::ScalarConstructorExpression>(
@@ -236,10 +233,10 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(lhs, rhs));
 
-  ast::IfStatement stmt(create<ast::ScalarConstructorExpression>(
+  ast::IfStatement stmt(Source{},
+                        create<ast::ScalarConstructorExpression>(
                             create<ast::SintLiteral>(&i32, 3)),
-                        body);
-  stmt.set_else_statements(else_stmts);
+                        body, ast::ElseStatementList{else_stmt});
 
   EXPECT_TRUE(td()->DetermineResultType(&stmt));
   ASSERT_NE(stmt.condition()->result_type(), nullptr);
