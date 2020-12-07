@@ -342,6 +342,82 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450Length:
       return "length";
     default:
+    // TODO(dneto). The following are not implemented.
+    // They are grouped semantically, as in GLSL.std.450.h.
+    case GLSLstd450Round:
+    case GLSLstd450RoundEven:
+    case GLSLstd450Trunc:
+    case GLSLstd450FAbs:
+    case GLSLstd450SAbs:
+    case GLSLstd450FSign:
+    case GLSLstd450SSign:
+    case GLSLstd450Floor:
+    case GLSLstd450Ceil:
+    case GLSLstd450Fract:
+
+    case GLSLstd450Radians:
+    case GLSLstd450Degrees:
+    case GLSLstd450Tan:
+    case GLSLstd450Asin:
+    case GLSLstd450Acos:
+    case GLSLstd450Atan:
+    case GLSLstd450Sinh:
+    case GLSLstd450Cosh:
+    case GLSLstd450Tanh:
+    case GLSLstd450Asinh:
+    case GLSLstd450Acosh:
+    case GLSLstd450Atanh:
+
+    case GLSLstd450Pow:
+    case GLSLstd450Exp:
+    case GLSLstd450Log:
+    case GLSLstd450Exp2:
+    case GLSLstd450Log2:
+    case GLSLstd450Sqrt:
+    case GLSLstd450InverseSqrt:
+
+    case GLSLstd450Determinant:
+    case GLSLstd450MatrixInverse:
+
+    case GLSLstd450Modf:
+    case GLSLstd450ModfStruct:
+    case GLSLstd450FMin:
+    case GLSLstd450UMin:
+    case GLSLstd450SMin:
+    case GLSLstd450FMax:
+    case GLSLstd450UMax:
+    case GLSLstd450SMax:
+    case GLSLstd450FMix:
+    case GLSLstd450IMix:
+    case GLSLstd450Step:
+    case GLSLstd450SmoothStep:
+
+    case GLSLstd450Fma:
+    case GLSLstd450Frexp:
+    case GLSLstd450FrexpStruct:
+    case GLSLstd450Ldexp:
+
+    case GLSLstd450PackSnorm4x8:
+    case GLSLstd450PackUnorm4x8:
+    case GLSLstd450PackSnorm2x16:
+    case GLSLstd450PackUnorm2x16:
+    case GLSLstd450PackHalf2x16:
+    case GLSLstd450PackDouble2x32:
+    case GLSLstd450UnpackSnorm2x16:
+    case GLSLstd450UnpackUnorm2x16:
+    case GLSLstd450UnpackHalf2x16:
+    case GLSLstd450UnpackSnorm4x8:
+    case GLSLstd450UnpackUnorm4x8:
+    case GLSLstd450UnpackDouble2x32:
+
+    case GLSLstd450Cross:
+    case GLSLstd450FaceForward:
+    case GLSLstd450Reflect:
+    case GLSLstd450Refract:
+
+    case GLSLstd450FindILsb:
+    case GLSLstd450FindSMsb:
+    case GLSLstd450FindUMsb:
       break;
   }
   return "";
