@@ -106,44 +106,46 @@ namespace dawn_native { namespace opengl {
                              ColorAttachmentIndex attachment,
                              const ColorStateDescriptor* descriptor) {
             GLuint colorBuffer = static_cast<GLuint>(static_cast<uint8_t>(attachment));
-            if (gl.IsAtLeastGL(3, 0) || gl.IsAtLeastGLES(3, 2)) {
-                if (BlendEnabled(descriptor)) {
-                    gl.Enablei(GL_BLEND, colorBuffer);
-                    gl.BlendEquationSeparatei(colorBuffer,
-                                              GLBlendMode(descriptor->colorBlend.operation),
-                                              GLBlendMode(descriptor->alphaBlend.operation));
-                    gl.BlendFuncSeparatei(colorBuffer,
-                                          GLBlendFactor(descriptor->colorBlend.srcFactor, false),
-                                          GLBlendFactor(descriptor->colorBlend.dstFactor, false),
-                                          GLBlendFactor(descriptor->alphaBlend.srcFactor, true),
-                                          GLBlendFactor(descriptor->alphaBlend.dstFactor, true));
-                } else {
-                    gl.Disablei(GL_BLEND, colorBuffer);
-                }
-                gl.ColorMaski(colorBuffer, descriptor->writeMask & wgpu::ColorWriteMask::Red,
-                              descriptor->writeMask & wgpu::ColorWriteMask::Green,
-                              descriptor->writeMask & wgpu::ColorWriteMask::Blue,
-                              descriptor->writeMask & wgpu::ColorWriteMask::Alpha);
+            if (BlendEnabled(descriptor)) {
+                gl.Enablei(GL_BLEND, colorBuffer);
+                gl.BlendEquationSeparatei(colorBuffer,
+                                          GLBlendMode(descriptor->colorBlend.operation),
+                                          GLBlendMode(descriptor->alphaBlend.operation));
+                gl.BlendFuncSeparatei(colorBuffer,
+                                      GLBlendFactor(descriptor->colorBlend.srcFactor, false),
+                                      GLBlendFactor(descriptor->colorBlend.dstFactor, false),
+                                      GLBlendFactor(descriptor->alphaBlend.srcFactor, true),
+                                      GLBlendFactor(descriptor->alphaBlend.dstFactor, true));
             } else {
-                // TODO(crbug.com/dawn/582): Add validation to prevent this as it is not supported
-                // on GLES < 3.2.
-                DAWN_ASSERT(colorBuffer == 0);
-                if (BlendEnabled(descriptor)) {
-                    gl.Enable(GL_BLEND);
-                    gl.BlendEquationSeparate(GLBlendMode(descriptor->colorBlend.operation),
-                                             GLBlendMode(descriptor->alphaBlend.operation));
-                    gl.BlendFuncSeparate(GLBlendFactor(descriptor->colorBlend.srcFactor, false),
-                                         GLBlendFactor(descriptor->colorBlend.dstFactor, false),
-                                         GLBlendFactor(descriptor->alphaBlend.srcFactor, true),
-                                         GLBlendFactor(descriptor->alphaBlend.dstFactor, true));
-                } else {
-                    gl.Disable(GL_BLEND);
-                }
-                gl.ColorMask(descriptor->writeMask & wgpu::ColorWriteMask::Red,
-                             descriptor->writeMask & wgpu::ColorWriteMask::Green,
-                             descriptor->writeMask & wgpu::ColorWriteMask::Blue,
-                             descriptor->writeMask & wgpu::ColorWriteMask::Alpha);
+                gl.Disablei(GL_BLEND, colorBuffer);
             }
+            gl.ColorMaski(colorBuffer, descriptor->writeMask & wgpu::ColorWriteMask::Red,
+                          descriptor->writeMask & wgpu::ColorWriteMask::Green,
+                          descriptor->writeMask & wgpu::ColorWriteMask::Blue,
+                          descriptor->writeMask & wgpu::ColorWriteMask::Alpha);
+        }
+
+        void ApplyColorState(const OpenGLFunctions& gl, const ColorStateDescriptor* descriptor) {
+            if (BlendEnabled(descriptor)) {
+                gl.Enable(GL_BLEND);
+                gl.BlendEquationSeparate(GLBlendMode(descriptor->colorBlend.operation),
+                                         GLBlendMode(descriptor->alphaBlend.operation));
+                gl.BlendFuncSeparate(GLBlendFactor(descriptor->colorBlend.srcFactor, false),
+                                     GLBlendFactor(descriptor->colorBlend.dstFactor, false),
+                                     GLBlendFactor(descriptor->alphaBlend.srcFactor, true),
+                                     GLBlendFactor(descriptor->alphaBlend.dstFactor, true));
+            } else {
+                gl.Disable(GL_BLEND);
+            }
+            gl.ColorMask(descriptor->writeMask & wgpu::ColorWriteMask::Red,
+                         descriptor->writeMask & wgpu::ColorWriteMask::Green,
+                         descriptor->writeMask & wgpu::ColorWriteMask::Blue,
+                         descriptor->writeMask & wgpu::ColorWriteMask::Alpha);
+        }
+
+        bool Equal(const BlendDescriptor& lhs, const BlendDescriptor& rhs) {
+            return lhs.operation == rhs.operation && lhs.srcFactor == rhs.srcFactor &&
+                   lhs.dstFactor == rhs.dstFactor;
         }
 
         GLuint OpenGLStencilOperation(wgpu::StencilOperation stencilOperation) {
@@ -298,8 +300,25 @@ namespace dawn_native { namespace opengl {
             gl.Disable(GL_POLYGON_OFFSET_FILL);
         }
 
-        for (ColorAttachmentIndex attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
-            ApplyColorState(gl, attachmentSlot, GetColorStateDescriptor(attachmentSlot));
+        if (!GetDevice()->IsToggleEnabled(Toggle::DisableIndexedDrawBuffers)) {
+            for (ColorAttachmentIndex attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
+                ApplyColorState(gl, attachmentSlot, GetColorStateDescriptor(attachmentSlot));
+            }
+        } else {
+            const ColorStateDescriptor* prevDescriptor = nullptr;
+            for (ColorAttachmentIndex attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
+                const ColorStateDescriptor* descriptor = GetColorStateDescriptor(attachmentSlot);
+                if (!prevDescriptor) {
+                    ApplyColorState(gl, descriptor);
+                    prevDescriptor = descriptor;
+                } else if (!Equal(descriptor->alphaBlend, prevDescriptor->alphaBlend) ||
+                           !Equal(descriptor->colorBlend, prevDescriptor->colorBlend) ||
+                           descriptor->writeMask != prevDescriptor->writeMask) {
+                    // TODO(crbug.com/dawn/582): Add validation to prevent this as it is not
+                    // supported on GLES < 3.2.
+                    ASSERT(false);
+                }
+            }
         }
     }
 

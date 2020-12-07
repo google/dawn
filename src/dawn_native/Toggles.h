@@ -39,6 +39,7 @@ namespace dawn_native {
         MetalUseSharedModeForCounterSampleBuffer,
         DisableBaseVertex,
         DisableBaseInstance,
+        DisableIndexedDrawBuffers,
         UseD3D12SmallShaderVisibleHeapForTesting,
         UseDXC,
         DisableRobustness,

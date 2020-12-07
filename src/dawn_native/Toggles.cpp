@@ -120,6 +120,11 @@ namespace dawn_native {
               "Disables the use of non-zero base instance which is unsupported on some "
               "platforms.",
               "https://crbug.com/dawn/343"}},
+            {Toggle::DisableIndexedDrawBuffers,
+             {"disable_indexed_draw_buffers",
+              "Disables the use of indexed draw buffer state which is unsupported on some "
+              "platforms.",
+              "https://crbug.com/dawn/582"}},
             {Toggle::UseD3D12SmallShaderVisibleHeapForTesting,
              {"use_d3d12_small_shader_visible_heap",
               "Enable use of a small D3D12 shader visible heap, instead of using a large one by "

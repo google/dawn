@@ -65,6 +65,9 @@ namespace dawn_native { namespace opengl {
 
         bool supportsBaseInstance = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(4, 2);
 
+        // TODO(crbug.com/dawn/582): Use OES_draw_buffers_indexed where available.
+        bool supportsIndexedDrawBuffers = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 0);
+
         // TODO(crbug.com/dawn/343): We can support the extension variants, but need to load the EXT
         // procs without the extension suffix.
         // We'll also need emulation of shader builtins gl_BaseVertex and gl_BaseInstance.
@@ -82,6 +85,7 @@ namespace dawn_native { namespace opengl {
         // TODO(crbug.com/dawn/343): Investigate emulation.
         SetToggle(Toggle::DisableBaseVertex, !supportsBaseVertex);
         SetToggle(Toggle::DisableBaseInstance, !supportsBaseInstance);
+        SetToggle(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
     }
 
     const GLFormat& Device::GetGLFormat(const Format& format) {
