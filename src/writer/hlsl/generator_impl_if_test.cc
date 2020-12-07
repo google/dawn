@@ -29,7 +29,7 @@ using HlslGeneratorImplTest_If = TestHelper;
 TEST_F(HlslGeneratorImplTest_If, Emit_If) {
   auto* cond = create<ast::IdentifierExpression>("cond");
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::IfStatement i(Source{}, cond, body, ast::ElseStatementList{});
   gen.increment_indent();
@@ -44,11 +44,11 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
   auto* else_cond = create<ast::IdentifierExpression>("else_cond");
   auto* else_body = create<ast::BlockStatement>();
-  else_body->append(create<ast::ReturnStatement>());
+  else_body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* cond = create<ast::IdentifierExpression>("cond");
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::IfStatement i(Source{}, cond, body,
                      {create<ast::ElseStatement>(else_cond, else_body)});
@@ -68,11 +68,11 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
   auto* else_body = create<ast::BlockStatement>();
-  else_body->append(create<ast::ReturnStatement>());
+  else_body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* cond = create<ast::IdentifierExpression>("cond");
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::IfStatement i(Source{}, cond, body,
                      {create<ast::ElseStatement>(else_body)});
@@ -92,14 +92,14 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
   auto* else_cond = create<ast::IdentifierExpression>("else_cond");
 
   auto* else_body = create<ast::BlockStatement>();
-  else_body->append(create<ast::ReturnStatement>());
+  else_body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* else_body_2 = create<ast::BlockStatement>();
-  else_body_2->append(create<ast::ReturnStatement>());
+  else_body_2->append(create<ast::ReturnStatement>(Source{}));
 
   auto* cond = create<ast::IdentifierExpression>("cond");
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::IfStatement i(Source{}, cond, body,
                      {

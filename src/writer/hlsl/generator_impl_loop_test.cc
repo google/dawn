@@ -52,7 +52,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   body->append(create<ast::DiscardStatement>());
 
   auto* continuing = create<ast::BlockStatement>();
-  continuing->append(create<ast::ReturnStatement>());
+  continuing->append(create<ast::ReturnStatement>(Source{}));
 
   ast::LoopStatement l(body, continuing);
   gen.increment_indent();
@@ -79,7 +79,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   body->append(create<ast::DiscardStatement>());
 
   auto* continuing = create<ast::BlockStatement>();
-  continuing->append(create<ast::ReturnStatement>());
+  continuing->append(create<ast::ReturnStatement>(Source{}));
 
   auto* inner = create<ast::LoopStatement>(body, continuing);
 

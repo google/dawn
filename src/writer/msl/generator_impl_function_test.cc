@@ -60,7 +60,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
   ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func =
       create<ast::Function>(Source{}, "my_func", ast::VariableList{},
                             &void_type, body, ast::FunctionDecorationList{});
@@ -82,7 +82,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func =
       create<ast::Function>(Source{}, "main", ast::VariableList{}, &void_type,
                             body, ast::FunctionDecorationList{});
@@ -113,7 +113,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(Source{}, "my_func", params, &void_type,
                                      body, ast::FunctionDecorationList{});
 
@@ -153,7 +153,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("foo")));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -213,7 +213,7 @@ TEST_F(MslGeneratorImplTest,
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -267,7 +267,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -333,7 +333,7 @@ TEST_F(MslGeneratorImplTest,
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -404,7 +404,7 @@ TEST_F(MslGeneratorImplTest,
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -469,8 +469,8 @@ TEST_F(
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("val"),
       create<ast::IdentifierExpression>("param")));
-  body->append(
-      create<ast::ReturnStatement>(create<ast::IdentifierExpression>("foo")));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::IdentifierExpression>("foo")));
   auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
                                          body, ast::FunctionDecorationList{});
 
@@ -485,7 +485,7 @@ TEST_F(
       create<ast::IdentifierExpression>("bar"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   expr)));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func_1 = create<ast::Function>(
       Source{}, "ep_1", params, &void_type, body,
       ast::FunctionDecorationList{
@@ -546,8 +546,8 @@ TEST_F(MslGeneratorImplTest,
                                          ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::IdentifierExpression>("param")));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::IdentifierExpression>("param")));
   auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
                                          body, ast::FunctionDecorationList{});
 
@@ -562,7 +562,7 @@ TEST_F(MslGeneratorImplTest,
       create<ast::IdentifierExpression>("depth"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   expr)));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func_1 = create<ast::Function>(
       Source{}, "ep_1", params, &void_type, body,
@@ -627,8 +627,8 @@ TEST_F(
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
-  body->append(
-      create<ast::ReturnStatement>(create<ast::IdentifierExpression>("param")));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::IdentifierExpression>("param")));
   auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
                                          body, ast::FunctionDecorationList{});
 
@@ -643,7 +643,7 @@ TEST_F(
       create<ast::IdentifierExpression>("depth"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   expr)));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func_1 = create<ast::Function>(
       Source{}, "ep_1", params, &void_type, body,
       ast::FunctionDecorationList{
@@ -697,10 +697,10 @@ TEST_F(MslGeneratorImplTest,
                                          ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("x"))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::MemberAccessorExpression>(
+                    create<ast::IdentifierExpression>("coord"),
+                    create<ast::IdentifierExpression>("x"))));
   auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
                                          body, ast::FunctionDecorationList{});
 
@@ -717,7 +717,7 @@ TEST_F(MslGeneratorImplTest,
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -781,10 +781,10 @@ TEST_F(MslGeneratorImplTest,
                                          ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("b"))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::MemberAccessorExpression>(
+                    create<ast::IdentifierExpression>("coord"),
+                    create<ast::IdentifierExpression>("b"))));
   auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
                                          body, ast::FunctionDecorationList{});
 
@@ -801,7 +801,7 @@ TEST_F(MslGeneratorImplTest,
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -871,10 +871,10 @@ TEST_F(MslGeneratorImplTest,
                                          ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("b"))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::MemberAccessorExpression>(
+                    create<ast::IdentifierExpression>("coord"),
+                    create<ast::IdentifierExpression>("b"))));
   auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
                                          body, ast::FunctionDecorationList{});
 
@@ -891,7 +891,7 @@ TEST_F(MslGeneratorImplTest,
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
       Source{}, "frag_main", params, &void_type, body,
@@ -946,7 +946,7 @@ TEST_F(MslGeneratorImplTest,
           create<ast::FloatLiteral>(&f32, 1.0f))));
 
   auto* list = create<ast::BlockStatement>();
-  list->append(create<ast::ReturnStatement>());
+  list->append(create<ast::ReturnStatement>(Source{}));
 
   body->append(create<ast::IfStatement>(
       Source{},
@@ -957,7 +957,7 @@ TEST_F(MslGeneratorImplTest,
                                         create<ast::SintLiteral>(&i32, 1))),
       list, ast::ElseStatementList{}));
 
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func_1 = create<ast::Function>(
       Source{}, "ep_1", params, &void_type, body,
@@ -1020,7 +1020,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(Source{}, "my_func", params, &void_type,
                                      body, ast::FunctionDecorationList{});
 
@@ -1095,7 +1095,7 @@ TEST_F(MslGeneratorImplTest,
 
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func =
         create<ast::Function>(Source{}, "a", params, &void_type, body,
@@ -1117,7 +1117,7 @@ TEST_F(MslGeneratorImplTest,
 
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func =
         create<ast::Function>(Source{}, "b", params, &void_type, body,

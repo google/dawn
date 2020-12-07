@@ -549,7 +549,7 @@ TEST_F(BuilderTest, If_WithReturn) {
       create<ast::BoolLiteral>(&bool_type, true));
 
   auto* if_body = create<ast::BlockStatement>();
-  if_body->append(create<ast::ReturnStatement>());
+  if_body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::IfStatement expr(Source{}, cond, if_body, ast::ElseStatementList{});
 
@@ -581,7 +581,7 @@ TEST_F(BuilderTest, If_WithReturnValue) {
       create<ast::BoolLiteral>(&bool_type, false));
 
   auto* if_body = create<ast::BlockStatement>();
-  if_body->append(create<ast::ReturnStatement>(cond2));
+  if_body->append(create<ast::ReturnStatement>(Source{}, cond2));
 
   ast::IfStatement expr(Source{}, cond, if_body, ast::ElseStatementList{});
 

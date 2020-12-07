@@ -28,7 +28,7 @@ using ReturnStatementTest = TestHelper;
 TEST_F(ReturnStatementTest, Creation) {
   auto* expr = create<IdentifierExpression>("expr");
 
-  ReturnStatement r(expr);
+  ReturnStatement r(Source{}, expr);
   EXPECT_EQ(r.value(), expr);
 }
 
@@ -40,41 +40,41 @@ TEST_F(ReturnStatementTest, Creation_WithSource) {
 }
 
 TEST_F(ReturnStatementTest, IsReturn) {
-  ReturnStatement r;
+  ReturnStatement r(Source{});
   EXPECT_TRUE(r.Is<ReturnStatement>());
 }
 
 TEST_F(ReturnStatementTest, HasValue_WithoutValue) {
-  ReturnStatement r;
+  ReturnStatement r(Source{});
   EXPECT_FALSE(r.has_value());
 }
 
 TEST_F(ReturnStatementTest, HasValue_WithValue) {
   auto* expr = create<IdentifierExpression>("expr");
-  ReturnStatement r(expr);
+  ReturnStatement r(Source{}, expr);
   EXPECT_TRUE(r.has_value());
 }
 
 TEST_F(ReturnStatementTest, IsValid_WithoutValue) {
-  ReturnStatement r;
+  ReturnStatement r(Source{});
   EXPECT_TRUE(r.IsValid());
 }
 
 TEST_F(ReturnStatementTest, IsValid_WithValue) {
   auto* expr = create<IdentifierExpression>("expr");
-  ReturnStatement r(expr);
+  ReturnStatement r(Source{}, expr);
   EXPECT_TRUE(r.IsValid());
 }
 
 TEST_F(ReturnStatementTest, IsValid_InvalidValue) {
   auto* expr = create<IdentifierExpression>("");
-  ReturnStatement r(expr);
+  ReturnStatement r(Source{}, expr);
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(ReturnStatementTest, ToStr_WithValue) {
   auto* expr = create<IdentifierExpression>("expr");
-  ReturnStatement r(expr);
+  ReturnStatement r(Source{}, expr);
   std::ostringstream out;
   r.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Return{
@@ -86,7 +86,7 @@ TEST_F(ReturnStatementTest, ToStr_WithValue) {
 }
 
 TEST_F(ReturnStatementTest, ToStr_WithoutValue) {
-  ReturnStatement r;
+  ReturnStatement r(Source{});
   std::ostringstream out;
   r.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Return{}

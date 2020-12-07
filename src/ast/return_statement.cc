@@ -22,11 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ReturnStatement);
 namespace tint {
 namespace ast {
 
-ReturnStatement::ReturnStatement() : Base() {}
-
 ReturnStatement::ReturnStatement(const Source& source) : Base(source) {}
-
-ReturnStatement::ReturnStatement(Expression* value) : Base(), value_(value) {}
 
 ReturnStatement::ReturnStatement(const Source& source, Expression* value)
     : Base(source), value_(value) {}

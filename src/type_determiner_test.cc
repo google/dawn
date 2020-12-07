@@ -291,7 +291,7 @@ TEST_F(TypeDeterminerTest, Stmt_Return) {
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
-  ast::ReturnStatement ret(cond);
+  ast::ReturnStatement ret(Source{}, cond);
 
   EXPECT_TRUE(td()->DetermineResultType(&ret));
   ASSERT_NE(cond->result_type(), nullptr);
@@ -300,7 +300,7 @@ TEST_F(TypeDeterminerTest, Stmt_Return) {
 
 TEST_F(TypeDeterminerTest, Stmt_Return_WithoutValue) {
   ast::type::I32 i32;
-  ast::ReturnStatement ret;
+  ast::ReturnStatement ret(Source{});
   EXPECT_TRUE(td()->DetermineResultType(&ret));
 }
 
@@ -370,14 +370,14 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
   ast::VariableList params0;
   auto* main_body = create<ast::BlockStatement>();
   main_body->append(create<ast::CallStatement>(call_expr));
-  main_body->append(create<ast::ReturnStatement>());
+  main_body->append(create<ast::ReturnStatement>(Source{}));
   auto* func_main =
       create<ast::Function>(Source{}, "main", params0, &f32, main_body,
                             ast::FunctionDecorationList{});
   mod->AddFunction(func_main);
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(Source{}, "func", params0, &f32, body,
                                      ast::FunctionDecorationList{});
   mod->AddFunction(func);

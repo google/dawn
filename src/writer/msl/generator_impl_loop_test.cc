@@ -55,7 +55,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
   body->append(create<ast::DiscardStatement>());
 
   auto* continuing = create<ast::BlockStatement>();
-  continuing->append(create<ast::ReturnStatement>());
+  continuing->append(create<ast::ReturnStatement>(Source{}));
 
   ast::LoopStatement l(body, continuing);
 
@@ -83,7 +83,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   body->append(create<ast::DiscardStatement>());
 
   auto* continuing = create<ast::BlockStatement>();
-  continuing->append(create<ast::ReturnStatement>());
+  continuing->append(create<ast::ReturnStatement>(Source{}));
 
   auto* inner = create<ast::LoopStatement>(body, continuing);
 

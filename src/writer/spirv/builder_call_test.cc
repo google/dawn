@@ -49,9 +49,10 @@ TEST_F(BuilderTest, Expression_Call) {
       create<ast::Variable>(Source{}, "b", ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
-      create<ast::IdentifierExpression>("b"))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::BinaryExpression>(
+                    ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
+                    create<ast::IdentifierExpression>("b"))));
   ast::Function a_func(Source{}, "a_func", func_params, &f32, body,
                        ast::FunctionDecorationList{});
 
@@ -113,9 +114,10 @@ TEST_F(BuilderTest, Statement_Call) {
       create<ast::Variable>(Source{}, "b", ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
-      create<ast::IdentifierExpression>("b"))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::BinaryExpression>(
+                    ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
+                    create<ast::IdentifierExpression>("b"))));
 
   ast::Function a_func(Source{}, "a_func", func_params, &void_type, body,
                        ast::FunctionDecorationList{});

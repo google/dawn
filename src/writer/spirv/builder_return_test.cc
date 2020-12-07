@@ -35,7 +35,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Return) {
-  ast::ReturnStatement ret;
+  ast::ReturnStatement ret(Source{});
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
@@ -59,7 +59,7 @@ TEST_F(BuilderTest, Return_WithValue) {
 
   auto* val = create<ast::TypeConstructorExpression>(&vec, vals);
 
-  ast::ReturnStatement ret(val);
+  ast::ReturnStatement ret(Source{}, val);
 
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
 
@@ -83,7 +83,8 @@ TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
 
   ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &f32);
 
-  ast::ReturnStatement ret(create<ast::IdentifierExpression>("param"));
+  ast::ReturnStatement ret(Source{},
+                           create<ast::IdentifierExpression>("param"));
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();

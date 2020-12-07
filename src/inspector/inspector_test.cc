@@ -82,7 +82,7 @@ class InspectorHelper {
       std::string name,
       ast::FunctionDecorationList decorations = {}) {
     auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, name, ast::VariableList(),
                                  void_type(), body, decorations);
   }
@@ -101,7 +101,7 @@ class InspectorHelper {
     auto* call_expr =
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, caller, ast::VariableList(),
                                  void_type(), body, decorations);
   }
@@ -141,7 +141,7 @@ class InspectorHelper {
           create<ast::IdentifierExpression>(out),
           create<ast::IdentifierExpression>(in)));
     }
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, name, ast::VariableList(),
                                  void_type(), body, decorations);
   }
@@ -171,7 +171,7 @@ class InspectorHelper {
     auto* call_expr =
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, caller, ast::VariableList(),
                                  void_type(), body, decorations);
   }
@@ -416,7 +416,7 @@ class InspectorHelper {
               create<ast::IdentifierExpression>(member_name))));
     }
 
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, func_name, ast::VariableList(),
                                  void_type(), body,
                                  ast::FunctionDecorationList{});
@@ -540,7 +540,7 @@ class InspectorHelper {
 
     body->append(create<ast::AssignmentStatement>(
         create<ast::IdentifierExpression>("sampler_result"), call_expr));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
 
     return create<ast::Function>(Source{}, func_name, ast::VariableList(),
                                  void_type(), body, decorations);
@@ -582,7 +582,7 @@ class InspectorHelper {
 
     body->append(create<ast::AssignmentStatement>(
         create<ast::IdentifierExpression>("sampler_result"), call_expr));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
 
     return create<ast::Function>(Source{}, func_name, ast::VariableList(),
                                  void_type(), body, decorations);
@@ -624,7 +624,7 @@ class InspectorHelper {
 
     body->append(create<ast::AssignmentStatement>(
         create<ast::IdentifierExpression>("sampler_result"), call_expr));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
 
     return create<ast::Function>(Source{}, func_name, ast::VariableList(),
                                  void_type(), body, decorations);
@@ -1455,7 +1455,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   AddFuncCall(body, "ub_bar_func");
   AddFuncCall(body, "ub_baz_func");
 
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
       Source{}, "ep_func", ast::VariableList(), void_type(), body,
       ast::FunctionDecorationList{
@@ -1601,7 +1601,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   AddFuncCall(body, "sb_bar_func");
   AddFuncCall(body, "sb_baz_func");
 
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
       Source{}, "ep_func", ast::VariableList(), void_type(), body,
       ast::FunctionDecorationList{
@@ -1774,7 +1774,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   AddFuncCall(body, "sb_bar_func");
   AddFuncCall(body, "sb_baz_func");
 
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
       Source{}, "ep_func", ast::VariableList(), void_type(), body,
       ast::FunctionDecorationList{

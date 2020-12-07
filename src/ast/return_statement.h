@@ -28,13 +28,8 @@ namespace ast {
 class ReturnStatement : public Castable<ReturnStatement, Statement> {
  public:
   /// Constructor
-  ReturnStatement();
-  /// Constructor
   /// @param source the source information
   explicit ReturnStatement(const Source& source);
-  /// Constructor
-  /// @param value the return value
-  explicit ReturnStatement(Expression* value);
   /// Constructor
   /// @param source the return statement source
   /// @param value the return value

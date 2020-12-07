@@ -67,7 +67,7 @@ TEST_F(BuilderTest, Function_Terminator_Return) {
   ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::Function func(Source{}, "a_func", {}, &void_type, body,
                      ast::FunctionDecorationList{});
@@ -92,8 +92,8 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
   td.RegisterVariableForTesting(var_a);
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::IdentifierExpression>("a")));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::IdentifierExpression>("a")));
   ASSERT_TRUE(td.DetermineResultType(body)) << td.error();
 
   ast::Function func(Source{}, "a_func", {}, &void_type, body,
@@ -153,8 +153,8 @@ TEST_F(BuilderTest, Function_WithParams) {
   params.push_back(var_b);
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::IdentifierExpression>("a")));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::IdentifierExpression>("a")));
   ast::Function func(Source{}, "a_func", params, &f32, body,
                      ast::FunctionDecorationList{});
 
@@ -182,7 +182,7 @@ TEST_F(BuilderTest, Function_WithBody) {
   ast::type::Void void_type;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::Function func(Source{}, "a_func", {}, &void_type, body,
                      ast::FunctionDecorationList{});
@@ -282,7 +282,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func =
         create<ast::Function>(Source{}, "a", params, &void_type, body,
@@ -304,7 +304,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));
-    body->append(create<ast::ReturnStatement>());
+    body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func =
         create<ast::Function>(Source{}, "b", params, &void_type, body,

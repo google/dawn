@@ -378,15 +378,15 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   ast::type::I32 i32;
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 3))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::ScalarConstructorExpression>(
+                    create<ast::SintLiteral>(&i32, 3))));
   auto* else_stmt = create<ast::ElseStatement>(body);
 
   body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::ScalarConstructorExpression>(
+                    create<ast::SintLiteral>(&i32, 2))));
   auto* else_if_stmt = create<ast::ElseStatement>(
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                     create<ast::IdentifierExpression>("b"),
@@ -394,9 +394,9 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
       body);
 
   body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::ReturnStatement>(create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1))));
+  body->append(create<ast::ReturnStatement>(
+      Source{}, create<ast::ScalarConstructorExpression>(
+                    create<ast::SintLiteral>(&i32, 1))));
 
   ast::IfStatement expr(
       Source{},
@@ -436,9 +436,11 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
   auto* b = create<ast::IdentifierExpression>("b");
   auto* c = create<ast::IdentifierExpression>("c");
 
-  ast::ReturnStatement expr(create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b), c));
+  ast::ReturnStatement expr(
+      Source{},
+      create<ast::BinaryExpression>(
+          ast::BinaryOp::kLogicalOr,
+          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b), c));
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;

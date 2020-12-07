@@ -2374,11 +2374,11 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
   const auto& terminator = *(block_info.basic_block->terminator());
   switch (terminator.opcode()) {
     case SpvOpReturn:
-      AddStatement(create<ast::ReturnStatement>());
+      AddStatement(create<ast::ReturnStatement>(Source{}));
       return true;
     case SpvOpReturnValue: {
       auto value = MakeExpression(terminator.GetSingleWordInOperand(0));
-      AddStatement(create<ast::ReturnStatement>(value.expr));
+      AddStatement(create<ast::ReturnStatement>(Source{}, value.expr));
     }
       return true;
     case SpvOpKill:
@@ -2392,11 +2392,11 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       {
         const auto* result_type = type_mgr_->GetType(function_.type_id());
         if (result_type->AsVoid() != nullptr) {
-          AddStatement(create<ast::ReturnStatement>());
+          AddStatement(create<ast::ReturnStatement>(Source{}));
         } else {
           auto* ast_type = parser_impl_.ConvertType(function_.type_id());
           AddStatement(create<ast::ReturnStatement>(
-              parser_impl_.MakeNullValue(ast_type)));
+              Source{}, parser_impl_.MakeNullValue(ast_type)));
         }
       }
       return true;

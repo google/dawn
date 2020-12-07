@@ -29,7 +29,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Return) {
-  ast::ReturnStatement r;
+  ast::ReturnStatement r(Source{});
 
   gen.increment_indent();
 
@@ -39,7 +39,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Return) {
 
 TEST_F(WgslGeneratorImplTest, Emit_ReturnWithValue) {
   auto* expr = create<ast::IdentifierExpression>("expr");
-  ast::ReturnStatement r(expr);
+  ast::ReturnStatement r(Source{}, expr);
 
   gen.increment_indent();
 

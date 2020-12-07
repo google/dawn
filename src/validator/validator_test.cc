@@ -326,7 +326,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs));
-  body->append(create<ast::ReturnStatement>());
+  body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(
       Source{}, "my_func", params, &void_type, body,
       ast::FunctionDecorationList{
@@ -634,7 +634,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   auto* body0 = create<ast::BlockStatement>();
   body0->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var0));
-  body0->append(create<ast::ReturnStatement>());
+  body0->append(create<ast::ReturnStatement>(Source{}));
   auto* func0 = create<ast::Function>(Source{}, "func0", params0, &void_type,
                                       body0, ast::FunctionDecorationList{});
 
@@ -642,7 +642,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   auto* body1 = create<ast::BlockStatement>();
   body1->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{13, 34}}, var1));
-  body1->append(create<ast::ReturnStatement>());
+  body1->append(create<ast::ReturnStatement>(Source{}));
   auto* func1 = create<ast::Function>(
       Source{}, "func1", params1, &void_type, body1,
       ast::FunctionDecorationList{
