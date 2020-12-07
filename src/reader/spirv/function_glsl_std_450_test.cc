@@ -467,12 +467,21 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Floating_FloatingFloating,
-                         ::testing::Values(GlslStd450Case{"Atan2", "atan2"}));
+                         ::testing::ValuesIn(std::vector<GlslStd450Case>{
+                             {"Atan2", "atan2"},
+                             {"NMax", "max"},
+                             {"NMin", "min"},
+                             {"FMax", "max"},  // WGSL max promises more for NaN
+                             {"FMin", "min"}   // WGSL min promises more for NaN
+                         }));
 
 INSTANTIATE_TEST_SUITE_P(
     Samples,
     SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating,
-    ::testing::Values(GlslStd450Case{"FClamp", "clamp"}));
+    ::testing::ValuesIn(std::vector<GlslStd450Case>{
+        {"NClamp", "clamp"},
+        {"FClamp", "clamp"}  // WGSL FClamp promises more for NaN
+    }));
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   const auto assembly = Preamble() + R"(

@@ -337,10 +337,18 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "normalize";
     case GLSLstd450UClamp:
     case GLSLstd450SClamp:
-    case GLSLstd450FClamp:
+    case GLSLstd450NClamp:
+    case GLSLstd450FClamp:  // FClamp is less prescriptive about NaN operands
       return "clamp";
     case GLSLstd450Length:
       return "length";
+    case GLSLstd450NMin:
+    case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
+      return "min";
+    case GLSLstd450NMax:
+    case GLSLstd450FMax:  // FMax is less prescriptive about NaN operands
+      return "max";
+
     default:
     // TODO(dneto). The following are not implemented.
     // They are grouped semantically, as in GLSL.std.450.h.
@@ -381,10 +389,8 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 
     case GLSLstd450Modf:
     case GLSLstd450ModfStruct:
-    case GLSLstd450FMin:
     case GLSLstd450UMin:
     case GLSLstd450SMin:
-    case GLSLstd450FMax:
     case GLSLstd450UMax:
     case GLSLstd450SMax:
     case GLSLstd450FMix:
@@ -418,6 +424,10 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450FindILsb:
     case GLSLstd450FindSMsb:
     case GLSLstd450FindUMsb:
+
+    case GLSLstd450InterpolateAtCentroid:
+    case GLSLstd450InterpolateAtSample:
+    case GLSLstd450InterpolateAtOffset:
       break;
   }
   return "";
