@@ -70,7 +70,7 @@ class VertexPullingHelper {
                               std::string name,
                               ast::type::Type* type) {
     auto* var = create<ast::DecoratedVariable>(
-        create<ast::Variable>(name, ast::StorageClass::kInput, type));
+        create<ast::Variable>(Source{}, name, ast::StorageClass::kInput, type));
 
     ast::VariableDecorationList decorations;
     decorations.push_back(create<ast::LocationDecoration>(location, Source{}));
@@ -419,7 +419,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
   {
     auto* vertex_index_var =
         create<ast::DecoratedVariable>(create<ast::Variable>(
-            "custom_vertex_index", ast::StorageClass::kInput, &i32));
+            Source{}, "custom_vertex_index", ast::StorageClass::kInput, &i32));
 
     ast::VariableDecorationList decorations;
     decorations.push_back(
@@ -430,9 +430,9 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
   }
 
   {
-    auto* instance_index_var =
-        create<ast::DecoratedVariable>(create<ast::Variable>(
-            "custom_instance_index", ast::StorageClass::kInput, &i32));
+    auto* instance_index_var = create<ast::DecoratedVariable>(
+        create<ast::Variable>(Source{}, "custom_instance_index",
+                              ast::StorageClass::kInput, &i32));
 
     ast::VariableDecorationList decorations;
     decorations.push_back(

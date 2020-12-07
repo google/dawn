@@ -27,9 +27,6 @@ namespace ast {
 
 Variable::Variable() = default;
 
-Variable::Variable(const std::string& name, StorageClass sc, type::Type* type)
-    : Base(), name_(name), storage_class_(sc), type_(type) {}
-
 Variable::Variable(const Source& source,
                    const std::string& name,
                    StorageClass sc,
@@ -41,9 +38,8 @@ Variable::Variable(Variable&&) = default;
 Variable::~Variable() = default;
 
 Variable* Variable::Clone(CloneContext* ctx) const {
-  auto* cloned =
-      ctx->mod->create<Variable>(name(), storage_class(), ctx->Clone(type()));
-  cloned->set_source(ctx->Clone(source()));
+  auto* cloned = ctx->mod->create<Variable>(
+      ctx->Clone(source()), name(), storage_class(), ctx->Clone(type()));
   cloned->set_constructor(ctx->Clone(constructor()));
   cloned->set_is_const(is_const());
   return cloned;

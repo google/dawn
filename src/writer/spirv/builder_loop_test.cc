@@ -65,7 +65,8 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   // loop {
   //   v = 2;
   // }
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -111,7 +112,8 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   //   }
   // }
 
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
 
   auto* body = create<ast::BlockStatement>();
   body->append(

@@ -114,10 +114,10 @@ class InspectorHelper {
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      auto* in_var =
-          create<ast::Variable>(in, ast::StorageClass::kInput, u32_type());
-      auto* out_var =
-          create<ast::Variable>(out, ast::StorageClass::kOutput, u32_type());
+      auto* in_var = create<ast::Variable>(
+          Source{}, in, ast::StorageClass::kInput, u32_type());
+      auto* out_var = create<ast::Variable>(
+          Source{}, out, ast::StorageClass::kOutput, u32_type());
       mod()->AddGlobalVariable(in_var);
       mod()->AddGlobalVariable(out_var);
     }
@@ -188,7 +188,7 @@ class InspectorHelper {
                      ast::type::Type* type,
                      T* val) {
     auto* dvar = create<ast::DecoratedVariable>(
-        create<ast::Variable>(name, ast::StorageClass::kNone, type));
+        create<ast::Variable>(Source{}, name, ast::StorageClass::kNone, type));
     dvar->set_is_const(true);
     ast::VariableDecorationList decos;
     decos.push_back(create<ast::ConstantIdDecoration>(id, Source{}));
@@ -349,7 +349,7 @@ class InspectorHelper {
                   uint32_t set,
                   uint32_t binding) {
     auto* var = create<ast::DecoratedVariable>(
-        create<ast::Variable>(name, storage_class, type));
+        create<ast::Variable>(Source{}, name, storage_class, type));
     ast::VariableDecorationList decorations;
 
     decorations.push_back(create<ast::BindingDecoration>(binding, Source{}));
@@ -399,8 +399,9 @@ class InspectorHelper {
       ast::type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
-      body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
-          "local" + member_name, ast::StorageClass::kNone, member_type)));
+      body->append(create<ast::VariableDeclStatement>(
+          create<ast::Variable>(Source{}, "local" + member_name,
+                                ast::StorageClass::kNone, member_type)));
     }
 
     for (auto member : members) {
@@ -494,16 +495,16 @@ class InspectorHelper {
   }
 
   void AddGlobalVariable(const std::string& name, ast::type::Type* type) {
-    mod()->AddGlobalVariable(
-        create<ast::Variable>(name, ast::StorageClass::kUniformConstant, type));
+    mod()->AddGlobalVariable(create<ast::Variable>(
+        Source{}, name, ast::StorageClass::kUniformConstant, type));
   }
 
   /// Adds a depth texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, ast::type::Type* type) {
-    mod()->AddGlobalVariable(
-        create<ast::Variable>(name, ast::StorageClass::kUniformConstant, type));
+    mod()->AddGlobalVariable(create<ast::Variable>(
+        Source{}, name, ast::StorageClass::kUniformConstant, type));
   }
 
   /// Generates a function that references a specific sampler variable
@@ -525,8 +526,9 @@ class InspectorHelper {
 
     auto* body = create<ast::BlockStatement>();
 
-    auto* call_result = create<ast::Variable>(
-        "sampler_result", ast::StorageClass::kFunction, vec_type(base_type, 4));
+    auto* call_result = create<ast::Variable>(Source{}, "sampler_result",
+                                              ast::StorageClass::kFunction,
+                                              vec_type(base_type, 4));
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
@@ -565,8 +567,9 @@ class InspectorHelper {
 
     auto* body = create<ast::BlockStatement>();
 
-    auto* call_result = create<ast::Variable>(
-        "sampler_result", ast::StorageClass::kFunction, vec_type(base_type, 4));
+    auto* call_result = create<ast::Variable>(Source{}, "sampler_result",
+                                              ast::StorageClass::kFunction,
+                                              vec_type(base_type, 4));
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
@@ -608,7 +611,7 @@ class InspectorHelper {
     auto* body = create<ast::BlockStatement>();
 
     auto* call_result = create<ast::Variable>(
-        "sampler_result", ast::StorageClass::kFunction, base_type);
+        Source{}, "sampler_result", ast::StorageClass::kFunction, base_type);
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;

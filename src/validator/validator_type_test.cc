@@ -193,7 +193,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   ast::type::I32 i32;
   ast::type::Array array(&i32);
 
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &array);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &array);
   ast::VariableList params;
   ast::type::Void void_type;
   auto* body = create<ast::BlockStatement>();

@@ -121,7 +121,7 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
 
   ast::type::I32 i32;
 
-  ast::Variable var("param", ast::StorageClass::kFunction, &i32);
+  ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &i32);
 
   auto* lhs = create<ast::IdentifierExpression>("param");
   auto* rhs = create<ast::IdentifierExpression>("param");
@@ -633,7 +633,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
   ast::type::F32 f32;
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* var = create<ast::Variable>(Source{}, "mat",
+                                    ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
@@ -665,7 +666,8 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
   ast::type::F32 f32;
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* var = create<ast::Variable>(Source{}, "mat",
+                                    ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
   auto* rhs = create<ast::IdentifierExpression>("mat");
@@ -698,7 +700,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* var = create<ast::Variable>(Source{}, "mat",
+                                    ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
 
   ast::ExpressionList vals;
@@ -739,7 +742,8 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* var = create<ast::Variable>(Source{}, "mat",
+                                    ast::StorageClass::kFunction, &mat3);
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -781,7 +785,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>("mat", ast::StorageClass::kFunction, &mat3);
+  auto* var = create<ast::Variable>(Source{}, "mat",
+                                    ast::StorageClass::kFunction, &mat3);
   auto* lhs = create<ast::IdentifierExpression>("mat");
   auto* rhs = create<ast::IdentifierExpression>("mat");
 
@@ -856,12 +861,12 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
   ast::type::Bool bool_type;
 
-  auto* a_var =
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
+  auto* a_var = create<ast::Variable>(Source{}, "a",
+                                      ast::StorageClass::kFunction, &bool_type);
   a_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true)));
-  auto* b_var =
-      create<ast::Variable>("b", ast::StorageClass::kFunction, &bool_type);
+  auto* b_var = create<ast::Variable>(Source{}, "b",
+                                      ast::StorageClass::kFunction, &bool_type);
   b_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false)));
 
@@ -1042,12 +1047,12 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
   ast::type::Bool bool_type;
 
-  auto* a_var =
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &bool_type);
+  auto* a_var = create<ast::Variable>(Source{}, "a",
+                                      ast::StorageClass::kFunction, &bool_type);
   a_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true)));
-  auto* b_var =
-      create<ast::Variable>("b", ast::StorageClass::kFunction, &bool_type);
+  auto* b_var = create<ast::Variable>(Source{}, "b",
+                                      ast::StorageClass::kFunction, &bool_type);
   b_var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false)));
 

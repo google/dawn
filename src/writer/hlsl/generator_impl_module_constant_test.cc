@@ -45,7 +45,8 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   exprs.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* var = create<ast::Variable>("pos", ast::StorageClass::kNone, &ary);
+  auto* var =
+      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &ary);
   var->set_is_const(true);
   var->set_constructor(create<ast::TypeConstructorExpression>(&ary, exprs));
 
@@ -60,7 +61,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
 
   auto* var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
+      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &f32));
   var->set_decorations(decos);
   var->set_is_const(true);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
@@ -82,7 +83,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
 
   auto* var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("pos", ast::StorageClass::kNone, &f32));
+      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &f32));
   var->set_decorations(decos);
   var->set_is_const(true);
 

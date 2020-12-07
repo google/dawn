@@ -33,7 +33,7 @@ TEST_F(ScopeStackTest, Global) {
 
 TEST_F(ScopeStackTest, Global_SetWithPointer) {
   ast::type::F32 f32;
-  ast::Variable v("test", ast::StorageClass::kNone, &f32);
+  ast::Variable v(Source{}, "test", ast::StorageClass::kNone, &f32);
   v.set_name("my_var");
 
   ScopeStack<ast::Variable*> s;

@@ -159,7 +159,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   vertex_index_name = kDefaultVertexIndexName;
 
   auto* var = mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-      vertex_index_name, ast::StorageClass::kInput, GetI32Type()));
+      Source{}, vertex_index_name, ast::StorageClass::kInput, GetI32Type()));
 
   ast::VariableDecorationList decorations;
   decorations.push_back(
@@ -203,7 +203,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   instance_index_name = kDefaultInstanceIndexName;
 
   auto* var = mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-      instance_index_name, ast::StorageClass::kInput, GetI32Type()));
+      Source{}, instance_index_name, ast::StorageClass::kInput, GetI32Type()));
 
   ast::VariableDecorationList decorations;
   decorations.push_back(mod->create<ast::BuiltinDecoration>(
@@ -226,8 +226,8 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
           // This is where the replacement happens. Expressions use identifier
           // strings instead of pointers, so we don't need to update any other
           // place in the AST.
-          v = mod->create<ast::Variable>(v->name(), ast::StorageClass::kPrivate,
-                                         v->type());
+          v = mod->create<ast::Variable>(
+              Source{}, v->name(), ast::StorageClass::kPrivate, v->type());
           location_to_var[location] = v;
           break;
         }
@@ -265,7 +265,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
     // The decorated variable with struct type
     auto* var = mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-        GetVertexBufferName(i), ast::StorageClass::kStorageBuffer,
+        Source{}, GetVertexBufferName(i), ast::StorageClass::kStorageBuffer,
         struct_type));
 
     // Add decorations
@@ -289,9 +289,9 @@ void VertexPulling::State::AddVertexPullingPreamble(
   auto* block = mod->create<ast::BlockStatement>();
 
   // Declare the |kPullingPosVarName| variable in the shader
-  auto* pos_declaration =
-      mod->create<ast::VariableDeclStatement>(mod->create<ast::Variable>(
-          kPullingPosVarName, ast::StorageClass::kFunction, GetI32Type()));
+  auto* pos_declaration = mod->create<ast::VariableDeclStatement>(
+      mod->create<ast::Variable>(Source{}, kPullingPosVarName,
+                                 ast::StorageClass::kFunction, GetI32Type()));
 
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression

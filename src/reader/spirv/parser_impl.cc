@@ -1171,7 +1171,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     type = ast_module_.create<ast::type::AccessControl>(access, type);
   }
 
-  auto* ast_var = create<ast::Variable>(namer_.Name(id), sc, type);
+  auto* ast_var = create<ast::Variable>(Source{}, namer_.Name(id), sc, type);
 
   ast::VariableDecorationList ast_decorations;
   for (auto& deco : GetDecorationsFor(id)) {

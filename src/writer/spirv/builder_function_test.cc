@@ -87,7 +87,8 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
   ast::type::Void void_type;
   ast::type::F32 f32;
 
-  auto* var_a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
+  auto* var_a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &f32);
   td.RegisterVariableForTesting(var_a);
 
   auto* body = create<ast::BlockStatement>();
@@ -142,10 +143,12 @@ TEST_F(BuilderTest, Function_WithParams) {
   ast::type::I32 i32;
 
   ast::VariableList params;
-  auto* var_a = create<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
+  auto* var_a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction, &f32);
   var_a->set_is_const(true);
   params.push_back(var_a);
-  auto* var_b = create<ast::Variable>("b", ast::StorageClass::kFunction, &i32);
+  auto* var_b =
+      create<ast::Variable>(Source{}, "b", ast::StorageClass::kFunction, &i32);
   var_b->set_is_const(true);
   params.push_back(var_b);
 
@@ -256,8 +259,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
-  auto* data_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));
+  auto* data_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "data", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -271,7 +274,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>(Source{}, "v",
+                                      ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));
@@ -292,7 +296,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>(Source{}, "v",
+                                      ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));

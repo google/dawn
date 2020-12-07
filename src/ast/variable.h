@@ -79,11 +79,6 @@ namespace ast {
 class Variable : public Castable<Variable, Node> {
  public:
   /// Create a variable
-  /// @param name the variables name
-  /// @param sc the variable storage class
-  /// @param type the value type
-  Variable(const std::string& name, StorageClass sc, type::Type* type);
-  /// Create a variable
   /// @param source the variable source
   /// @param name the variables name
   /// @param sc the variable storage class

@@ -43,7 +43,8 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   //   default: {}
   // }
   ast::type::F32 f32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&f32, 3.14f)));
 
@@ -71,7 +72,8 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   //   case 1: {}
   // }
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -102,7 +104,8 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   //   default: {}
   // }
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -145,7 +148,8 @@ TEST_F(ValidateControlBlockTest,
   // }
   ast::type::U32 u32;
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -181,7 +185,8 @@ TEST_F(ValidateControlBlockTest,
   // }
   ast::type::U32 u32;
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &u32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &u32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 2)));
 
@@ -216,7 +221,8 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   //   default: {}
   // }
   ast::type::U32 u32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &u32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &u32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 3)));
 
@@ -257,7 +263,8 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   //   default: {}
   // }
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -298,7 +305,8 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   //   default: { fallthrough; }
   // }
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -328,7 +336,8 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   //   case 5: {}
   // }
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -361,7 +370,8 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   ast::type::U32 u32;
   ast::type::Alias my_int{"MyInt", &u32};
 
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &my_int);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &my_int);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&u32, 2)));
 

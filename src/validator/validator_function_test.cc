@@ -39,7 +39,8 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { var a:i32 = 2; }
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -80,7 +81,8 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
@@ -237,7 +239,8 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   // fn func() -> i32 {var a: i32 = func(); return 2; }
   ast::type::I32 i32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &i32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}},
@@ -288,7 +291,8 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   ast::type::I32 i32;
   ast::type::Void void_type;
   ast::VariableList params;
-  params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &i32));
+  params.push_back(
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32));
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
   auto* func = create<ast::Function>(

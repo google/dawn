@@ -81,7 +81,7 @@ TEST_F(BuilderTest, Return_WithValue) {
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
   ast::type::F32 f32;
 
-  ast::Variable var("param", ast::StorageClass::kFunction, &f32);
+  ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &f32);
 
   ast::ReturnStatement ret(create<ast::IdentifierExpression>("param"));
 

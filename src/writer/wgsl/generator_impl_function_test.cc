@@ -68,8 +68,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   ast::type::F32 f32;
   ast::type::I32 i32;
   ast::VariableList params;
-  params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &f32));
-  params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
+  params.push_back(
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32));
+  params.push_back(
+      create<ast::Variable>(Source{}, "b", ast::StorageClass::kNone, &i32));
 
   ast::type::Void void_type;
   ast::Function func(Source{}, "my_func", params, &void_type, body,
@@ -189,8 +191,8 @@ TEST_F(WgslGeneratorImplTest,
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
-  auto* data_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));
+  auto* data_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "data", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -204,7 +206,8 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>(Source{}, "v",
+                                      ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));
@@ -225,7 +228,8 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>(Source{}, "v",
+                                      ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));

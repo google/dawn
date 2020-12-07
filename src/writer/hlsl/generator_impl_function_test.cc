@@ -98,8 +98,10 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
   ast::type::I32 i32;
 
   ast::VariableList params;
-  params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &f32));
-  params.push_back(create<ast::Variable>("b", ast::StorageClass::kNone, &i32));
+  params.push_back(
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32));
+  params.push_back(
+      create<ast::Variable>(Source{}, "b", ast::StorageClass::kNone, &i32));
 
   ast::type::Void void_type;
 
@@ -125,11 +127,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::F32 f32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
   foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &f32));
   bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
@@ -177,14 +179,14 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::F32 f32;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kInput, &vec4));
 
   coord_var->set_decorations(
       {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{})});
 
-  auto* depth_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
+  auto* depth_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "depth", ast::StorageClass::kOutput, &f32));
   depth_var->set_decorations(
       {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
 
@@ -235,8 +237,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::F32 f32;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kUniform, &vec4));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -247,7 +249,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod.AddGlobalVariable(coord_var);
 
   ast::VariableList params;
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("coord"),
       create<ast::IdentifierExpression>("x")));
@@ -291,8 +294,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::type::Struct s("Uniforms", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("uniforms", ast::StorageClass::kUniform, &s));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "uniforms", ast::StorageClass::kUniform, &s));
 
   mod.AddConstructedType(&s);
 
@@ -305,7 +308,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod.AddGlobalVariable(coord_var);
 
   ast::VariableList params;
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::MemberAccessorExpression>(
       create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("uniforms"),
@@ -359,8 +363,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -371,7 +375,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod.AddGlobalVariable(coord_var);
 
   ast::VariableList params;
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("coord"),
       create<ast::IdentifierExpression>("b")));
@@ -419,8 +424,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -431,7 +436,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod.AddGlobalVariable(coord_var);
 
   ast::VariableList params;
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("coord"),
       create<ast::IdentifierExpression>("b")));
@@ -479,8 +485,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -529,15 +535,15 @@ TEST_F(
   ast::type::F32 f32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
   foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &f32));
   bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   auto* val_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("val", ast::StorageClass::kOutput, &f32));
+      create<ast::Variable>(Source{}, "val", ast::StorageClass::kOutput, &f32));
   val_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
@@ -549,8 +555,8 @@ TEST_F(
   mod.AddGlobalVariable(val_var);
 
   ast::VariableList params;
-  params.push_back(
-      create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
+  params.push_back(create<ast::Variable>(Source{}, "param",
+                                         ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -616,8 +622,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::F32 f32;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* depth_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
+  auto* depth_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "depth", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(
@@ -629,8 +635,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod.AddGlobalVariable(depth_var);
 
   ast::VariableList params;
-  params.push_back(
-      create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
+  params.push_back(create<ast::Variable>(Source{}, "param",
+                                         ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -684,13 +690,13 @@ TEST_F(
   ast::type::F32 f32;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kInput, &vec4));
   coord_var->set_decorations(
       {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{})});
 
-  auto* depth_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
+  auto* depth_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "depth", ast::StorageClass::kOutput, &f32));
   depth_var->set_decorations(
       {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
 
@@ -701,8 +707,8 @@ TEST_F(
   mod.AddGlobalVariable(depth_var);
 
   ast::VariableList params;
-  params.push_back(
-      create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
+  params.push_back(create<ast::Variable>(Source{}, "param",
+                                         ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -765,8 +771,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::F32 f32;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kUniform, &vec4));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kUniform, &vec4));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -778,8 +784,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod.AddGlobalVariable(coord_var);
 
   ast::VariableList params;
-  params.push_back(
-      create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
+  params.push_back(create<ast::Variable>(Source{}, "param",
+                                         ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -795,7 +801,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::CallExpression>(
       create<ast::IdentifierExpression>("sub_func"), expr));
 
@@ -834,8 +841,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::F32 f32;
   ast::type::Vector vec4(&f32, 4);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &vec4);
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kStorageBuffer, &ac));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -847,8 +854,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod.AddGlobalVariable(coord_var);
 
   ast::VariableList params;
-  params.push_back(
-      create<ast::Variable>("param", ast::StorageClass::kFunction, &f32));
+  params.push_back(create<ast::Variable>(Source{}, "param",
+                                         ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -864,7 +871,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::CallExpression>(
       create<ast::IdentifierExpression>("sub_func"), expr));
 
@@ -902,7 +910,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::I32 i32;
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kOutput, &f32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &f32));
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(decos);
@@ -1032,7 +1040,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
   ast::type::Array ary(&f32, 5);
 
   ast::VariableList params;
-  params.push_back(create<ast::Variable>("a", ast::StorageClass::kNone, &ary));
+  params.push_back(
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &ary));
 
   ast::type::Void void_type;
 
@@ -1086,8 +1095,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
-  auto* data_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("data", ast::StorageClass::kStorageBuffer, &ac));
+  auto* data_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "data", ast::StorageClass::kStorageBuffer, &ac));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::BindingDecoration>(0, Source{}));
@@ -1100,7 +1109,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>(Source{}, "v",
+                                      ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));
@@ -1120,7 +1130,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>("v", ast::StorageClass::kFunction, &f32);
+    auto* var = create<ast::Variable>(Source{}, "v",
+                                      ast::StorageClass::kFunction, &f32);
     var->set_constructor(create<ast::MemberAccessorExpression>(
         create<ast::IdentifierExpression>("data"),
         create<ast::IdentifierExpression>("d")));

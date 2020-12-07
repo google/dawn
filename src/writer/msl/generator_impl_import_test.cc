@@ -267,7 +267,8 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
   ast::type::F32 f32;
   ast::type::Matrix mat(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>("var", ast::StorageClass::kFunction, &mat);
+  auto* var = create<ast::Variable>(Source{}, "var",
+                                    ast::StorageClass::kFunction, &mat);
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("var"));

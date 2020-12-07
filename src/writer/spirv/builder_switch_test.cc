@@ -76,8 +76,10 @@ TEST_F(BuilderTest, Switch_WithCase) {
   //     v = 2;
   // }
 
-  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+  auto* a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -155,8 +157,10 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   //     v = 1;
   //  }
 
-  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+  auto* a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
 
   auto* default_body = create<ast::BlockStatement>();
   default_body->append(
@@ -219,8 +223,10 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //      v = 3;
   //  }
 
-  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+  auto* a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -313,8 +319,10 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //      v = 3;
   //  }
 
-  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+  auto* a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -403,8 +411,10 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   //      fallthrough;
   //  }
 
-  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+  auto* a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -449,8 +459,10 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //     v = 1;
   //  }
 
-  auto* v = create<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
-  auto* a = create<ast::Variable>("a", ast::StorageClass::kPrivate, &i32);
+  auto* v =
+      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+  auto* a =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
 
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::BreakStatement>());

@@ -67,7 +67,7 @@ TEST_F(ModuleTest, IsValid_Empty) {
 
 TEST_F(ModuleTest, IsValid_GlobalVariable) {
   type::F32 f32;
-  auto* var = create<Variable>("var", StorageClass::kInput, &f32);
+  auto* var = create<Variable>(Source{}, "var", StorageClass::kInput, &f32);
 
   Module m;
   m.AddGlobalVariable(var);
@@ -81,7 +81,7 @@ TEST_F(ModuleTest, IsValid_Null_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
-  auto* var = create<Variable>("var", StorageClass::kInput, nullptr);
+  auto* var = create<Variable>(Source{}, "var", StorageClass::kInput, nullptr);
 
   Module m;
   m.AddGlobalVariable(var);

@@ -44,9 +44,9 @@ TEST_F(BuilderTest, Expression_Call) {
 
   ast::VariableList func_params;
   func_params.push_back(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction, &f32));
   func_params.push_back(
-      create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{}, "b", ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
@@ -108,9 +108,9 @@ TEST_F(BuilderTest, Statement_Call) {
 
   ast::VariableList func_params;
   func_params.push_back(
-      create<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction, &f32));
   func_params.push_back(
-      create<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{}, "b", ast::StorageClass::kFunction, &f32));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(

@@ -53,7 +53,7 @@ TEST_F(BuilderTest, ArrayAccessor) {
   // vec3<f32> ary;
   // ary[1]  -> ptr<f32>
 
-  ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
+  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3);
 
   auto* ary = create<ast::IdentifierExpression>("ary");
   auto* idx_expr = create<ast::ScalarConstructorExpression>(
@@ -94,8 +94,8 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   // idx : i32;
   // ary[idx]  -> ptr<f32>
 
-  ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
-  ast::Variable idx("idx", ast::StorageClass::kFunction, &i32);
+  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3);
+  ast::Variable idx(Source{}, "idx", ast::StorageClass::kFunction, &i32);
 
   auto* ary = create<ast::IdentifierExpression>("ary");
   auto* idx_expr = create<ast::IdentifierExpression>("idx");
@@ -139,7 +139,7 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   // vec3<f32> ary;
   // ary[1 + 2]  -> ptr<f32>
 
-  ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
+  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3);
 
   auto* ary = create<ast::IdentifierExpression>("ary");
 
@@ -186,7 +186,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
 
-  ast::Variable var("ary", ast::StorageClass::kFunction, &ary4);
+  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &ary4);
 
   ast::ArrayAccessorExpression expr(
       create<ast::ArrayAccessorExpression>(
@@ -233,7 +233,7 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
 
-  ast::Variable var("ary", ast::StorageClass::kFunction, &ary4);
+  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &ary4);
 
   ast::MemberAccessorExpression expr(
       create<ast::ArrayAccessorExpression>(
@@ -289,7 +289,7 @@ TEST_F(BuilderTest, MemberAccessor) {
   auto* s = create<ast::Struct>(members);
   ast::type::Struct s_type("my_struct", s);
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type);
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
                                      create<ast::IdentifierExpression>("b"));
@@ -343,7 +343,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 
   ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type);
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -403,7 +403,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
 
   ast::type::Struct s_type("Outer", create<ast::Struct>(outer_members));
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type);
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -462,7 +462,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type);
 
   auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::MemberAccessorExpression>(
@@ -528,8 +528,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 
   ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
-  ast::Variable store("store", ast::StorageClass::kFunction, &f32);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type);
+  ast::Variable store(Source{}, "store", ast::StorageClass::kFunction, &f32);
 
   auto* lhs = create<ast::IdentifierExpression>("store");
 
@@ -578,7 +578,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 
   // ident.y
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3);
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
                                      create<ast::IdentifierExpression>("y"));
@@ -613,7 +613,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 
   // ident.yx
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3);
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
                                      create<ast::IdentifierExpression>("yx"));
@@ -647,7 +647,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 
   // ident.yxz.xz
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3);
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -685,7 +685,7 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 
   // ident.yxz.x
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3);
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -723,7 +723,7 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 
   // index.yxz[1]
 
-  ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
+  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3);
 
   ast::ArrayAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -792,7 +792,8 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   ast::type::Array a_ary_type(&a_type, 2);
 
-  ast::Variable var("index", ast::StorageClass::kFunction, &a_ary_type);
+  ast::Variable var(Source{}, "index", ast::StorageClass::kFunction,
+                    &a_ary_type);
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -884,7 +885,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
                     create<ast::FloatLiteral>(&f32, -0.5)),
             }));
 
-  ast::Variable var("pos", ast::StorageClass::kPrivate, &arr);
+  ast::Variable var(Source{}, "pos", ast::StorageClass::kPrivate, &arr);
   var.set_is_const(true);
   var.set_constructor(create<ast::TypeConstructorExpression>(&arr, ary_params));
 
@@ -940,7 +941,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   vec_params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 0.5)));
 
-  ast::Variable var("pos", ast::StorageClass::kPrivate, &vec);
+  ast::Variable var(Source{}, "pos", ast::StorageClass::kPrivate, &vec);
   var.set_is_const(true);
   var.set_constructor(
       create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)));

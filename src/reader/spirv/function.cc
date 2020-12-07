@@ -2094,8 +2094,9 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   const std::string guard_name = block_info.flow_guard_name;
   if (!guard_name.empty()) {
     // Declare the guard variable just before the "if", initialized to true.
-    auto* guard_var = create<ast::Variable>(
-        guard_name, ast::StorageClass::kFunction, parser_impl_.Bool());
+    auto* guard_var = create<ast::Variable>(Source{}, guard_name,
+                                            ast::StorageClass::kFunction,
+                                            parser_impl_.Bool());
     guard_var->set_constructor(MakeTrue());
     auto* guard_decl = create<ast::VariableDeclStatement>(guard_var);
     AddStatement(guard_decl);
@@ -2637,9 +2638,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     assert(def_inst);
     const auto phi_var_name = GetDefInfo(id)->phi_var;
     assert(!phi_var_name.empty());
-    auto* var =
-        create<ast::Variable>(phi_var_name, ast::StorageClass::kFunction,
-                              parser_impl_.ConvertType(def_inst->type_id()));
+    auto* var = create<ast::Variable>(
+        Source{}, phi_var_name, ast::StorageClass::kFunction,
+        parser_impl_.ConvertType(def_inst->type_id()));
     AddStatement(create<ast::VariableDeclStatement>(var));
   }
 

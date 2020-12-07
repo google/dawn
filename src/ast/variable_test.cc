@@ -27,7 +27,7 @@ using VariableTest = TestHelper;
 
 TEST_F(VariableTest, Creation) {
   type::I32 t;
-  Variable v("my_var", StorageClass::kFunction, &t);
+  Variable v(Source{}, "my_var", StorageClass::kFunction, &t);
 
   EXPECT_EQ(v.name(), "my_var");
   EXPECT_EQ(v.storage_class(), StorageClass::kFunction);
@@ -68,43 +68,43 @@ TEST_F(VariableTest, CreationEmpty) {
 
 TEST_F(VariableTest, IsValid) {
   type::I32 t;
-  Variable v{"my_var", StorageClass::kNone, &t};
+  Variable v{Source{}, "my_var", StorageClass::kNone, &t};
   EXPECT_TRUE(v.IsValid());
 }
 
 TEST_F(VariableTest, IsValid_WithConstructor) {
   type::I32 t;
-  Variable v{"my_var", StorageClass::kNone, &t};
+  Variable v{Source{}, "my_var", StorageClass::kNone, &t};
   v.set_constructor(create<IdentifierExpression>("ident"));
   EXPECT_TRUE(v.IsValid());
 }
 
 TEST_F(VariableTest, IsValid_MissinName) {
   type::I32 t;
-  Variable v{"", StorageClass::kNone, &t};
+  Variable v{Source{}, "", StorageClass::kNone, &t};
   EXPECT_FALSE(v.IsValid());
 }
 
 TEST_F(VariableTest, IsValid_MissingType) {
-  Variable v{"x", StorageClass::kNone, nullptr};
+  Variable v{Source{}, "x", StorageClass::kNone, nullptr};
   EXPECT_FALSE(v.IsValid());
 }
 
 TEST_F(VariableTest, IsValid_MissingBoth) {
-  Variable v("", StorageClass::kNone, nullptr);
+  Variable v{Source{}, "", StorageClass::kNone, nullptr};
   EXPECT_FALSE(v.IsValid());
 }
 
 TEST_F(VariableTest, IsValid_InvalidConstructor) {
   type::I32 t;
-  Variable v{"my_var", StorageClass::kNone, &t};
+  Variable v{Source{}, "my_var", StorageClass::kNone, &t};
   v.set_constructor(create<IdentifierExpression>(""));
   EXPECT_FALSE(v.IsValid());
 }
 
 TEST_F(VariableTest, to_str) {
   type::F32 t;
-  Variable v{"my_var", StorageClass::kFunction, &t};
+  Variable v{Source{}, "my_var", StorageClass::kFunction, &t};
   std::ostringstream out;
   v.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Variable{

@@ -102,11 +102,12 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
 
-  auto* v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
-  auto* v_out =
-      create<ast::Variable>("my_out", ast::StorageClass::kOutput, &f32);
-  auto* v_wg =
-      create<ast::Variable>("my_wg", ast::StorageClass::kWorkgroup, &f32);
+  auto* v_in =
+      create<ast::Variable>(Source{}, "my_in", ast::StorageClass::kInput, &f32);
+  auto* v_out = create<ast::Variable>(Source{}, "my_out",
+                                      ast::StorageClass::kOutput, &f32);
+  auto* v_wg = create<ast::Variable>(Source{}, "my_wg",
+                                     ast::StorageClass::kWorkgroup, &f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
@@ -161,11 +162,12 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
       create<ast::IdentifierExpression>("my_in")));
   func.set_body(body);
 
-  auto* v_in = create<ast::Variable>("my_in", ast::StorageClass::kInput, &f32);
-  auto* v_out =
-      create<ast::Variable>("my_out", ast::StorageClass::kOutput, &f32);
-  auto* v_wg =
-      create<ast::Variable>("my_wg", ast::StorageClass::kWorkgroup, &f32);
+  auto* v_in =
+      create<ast::Variable>(Source{}, "my_in", ast::StorageClass::kInput, &f32);
+  auto* v_out = create<ast::Variable>(Source{}, "my_out",
+                                      ast::StorageClass::kOutput, &f32);
+  auto* v_wg = create<ast::Variable>(Source{}, "my_wg",
+                                     ast::StorageClass::kWorkgroup, &f32);
 
   td.RegisterVariableForTesting(v_in);
   td.RegisterVariableForTesting(v_out);

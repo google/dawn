@@ -34,7 +34,8 @@ using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
   ast::type::F32 f32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
 
   ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
@@ -45,7 +46,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   ast::type::F32 f32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
   var->set_is_const(true);
 
   ast::VariableDeclStatement stmt(var);
@@ -59,7 +61,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
   ast::type::F32 f32;
   ast::type::Array ary(&f32, 5);
 
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &ary);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &ary);
 
   ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
@@ -71,7 +74,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Function) {
   ast::type::F32 f32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction, &f32);
 
   ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
@@ -82,7 +86,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
   ast::type::F32 f32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &f32);
 
   ast::VariableDeclStatement stmt(var);
   gen.increment_indent();
@@ -96,7 +101,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   auto* ident = create<ast::IdentifierExpression>("initializer");
 
   ast::type::F32 f32;
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &f32);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
   var->set_constructor(ident);
 
   ast::VariableDeclStatement stmt(var);
@@ -113,7 +119,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   ast::ExpressionList values;
   auto* zero_vec = create<ast::TypeConstructorExpression>(&vec, values);
 
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &vec);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &vec);
   var->set_constructor(zero_vec);
 
   ast::VariableDeclStatement stmt(var);
@@ -130,7 +137,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   ast::ExpressionList values;
   auto* zero_mat = create<ast::TypeConstructorExpression>(&mat, values);
 
-  auto* var = create<ast::Variable>("a", ast::StorageClass::kNone, &mat);
+  auto* var =
+      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &mat);
   var->set_constructor(zero_mat);
 
   ast::VariableDeclStatement stmt(var);

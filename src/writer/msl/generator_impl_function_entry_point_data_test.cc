@@ -52,11 +52,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
   foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kInput, &i32));
   bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
@@ -106,11 +106,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kOutput, &f32));
   foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &i32));
   bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
@@ -160,11 +160,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
   foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kInput, &i32));
   bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
@@ -213,11 +213,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kOutput, &f32));
   foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &i32));
   bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
 
   td.RegisterVariableForTesting(foo_var);
@@ -264,14 +264,14 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kInput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(decos);
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kInput, &i32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kInput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(decos);
 
@@ -314,14 +314,14 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   ast::type::I32 i32;
 
   auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("foo", ast::StorageClass::kOutput, &f32));
+      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kOutput, &f32));
 
   ast::VariableDecorationList decos;
   decos.push_back(create<ast::LocationDecoration>(0, Source{}));
   foo_var->set_decorations(decos);
 
   auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("bar", ast::StorageClass::kOutput, &i32));
+      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &i32));
   decos.push_back(create<ast::LocationDecoration>(1, Source{}));
   bar_var->set_decorations(decos);
 
@@ -369,13 +369,13 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   ast::type::Void void_type;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* coord_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("coord", ast::StorageClass::kInput, &vec4));
+  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "coord", ast::StorageClass::kInput, &vec4));
   coord_var->set_decorations(
       {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{})});
 
-  auto* depth_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>("depth", ast::StorageClass::kOutput, &f32));
+  auto* depth_var = create<ast::DecoratedVariable>(create<ast::Variable>(
+      Source{}, "depth", ast::StorageClass::kOutput, &f32));
   depth_var->set_decorations(
       {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
 

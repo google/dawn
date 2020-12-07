@@ -149,14 +149,15 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
 
   ast::type::F32 f32;
 
-  auto* var = create<ast::Variable>("lhs", ast::StorageClass::kFunction, &f32);
+  auto* var = create<ast::Variable>(Source{}, "lhs",
+                                    ast::StorageClass::kFunction, &f32);
   var->set_constructor(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.4)));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::VariableDeclStatement>(
-      create<ast::Variable>("other", ast::StorageClass::kFunction, &f32)));
+  body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
+      Source{}, "other", ast::StorageClass::kFunction, &f32)));
 
   auto* lhs = create<ast::IdentifierExpression>("lhs");
   auto* rhs = create<ast::IdentifierExpression>("rhs");
