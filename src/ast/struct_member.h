@@ -56,11 +56,7 @@ class StructMember : public Castable<StructMember, Node> {
   const std::string& name() const { return name_; }
   /// @returns the type
   type::Type* type() const { return type_; }
-  /// Sets the decorations
-  /// @param decorations the decorations
-  void set_decorations(StructMemberDecorationList decorations) {
-    decorations_ = std::move(decorations);
-  }
+
   /// @returns the decorations
   const StructMemberDecorationList& decorations() const { return decorations_; }
 

@@ -52,11 +52,6 @@ class Struct : public Castable<Struct, Node> {
 
   ~Struct() override;
 
-  /// Sets the struct decoration
-  /// @param decos the list of decorations to set
-  void set_decorations(StructDecorationList decos) {
-    decorations_ = std::move(decos);
-  }
   /// @returns the struct decorations
   const StructDecorationList& decorations() const { return decorations_; }
 
