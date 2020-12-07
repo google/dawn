@@ -50,10 +50,12 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Generate) {
   ast::type::Void void_type;
 
-  auto* func = create<ast::Function>("my_func", ast::VariableList{}, &void_type,
-                                     create<ast::BlockStatement>());
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "my_func", ast::VariableList{}, &void_type,
+      create<ast::BlockStatement>(),
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+      });
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.Generate()) << gen.error();

@@ -186,6 +186,21 @@ struct BlockCounters {
 
 }  // namespace
 
+ParserImpl::FunctionHeader::FunctionHeader() = default;
+
+ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
+
+ParserImpl::FunctionHeader::FunctionHeader(Source src,
+                                           std::string n,
+                                           ast::VariableList p,
+                                           ast::type::Type* ret_ty)
+    : source(src), name(n), params(p), return_type(ret_ty) {}
+
+ParserImpl::FunctionHeader::~FunctionHeader() = default;
+
+ParserImpl::FunctionHeader& ParserImpl::FunctionHeader::operator=(
+    const FunctionHeader& rhs) = default;
+
 ParserImpl::ParserImpl(Source::File const* file)
     : lexer_(std::make_unique<Lexer>(file)) {}
 
@@ -1238,8 +1253,8 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
 // function_decl
 //   : function_header body_stmt
 Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
-  auto f = function_header();
-  if (f.errored) {
+  auto header = function_header();
+  if (header.errored) {
     if (sync_to(Token::Type::kBraceLeft, /* consume: */ false)) {
       // There were errors in the function header, but the parser has managed to
       // resynchronize with the opening brace. As there's no outer
@@ -1251,7 +1266,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
     }
     return Failure::kErrored;
   }
-  if (!f.matched)
+  if (!header.matched)
     return Failure::kNoMatch;
 
   bool errored = false;
@@ -1260,8 +1275,6 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
   if (func_decos.errored)
     errored = true;
 
-  f->set_decorations(std::move(func_decos.value));
-
   auto body = expect_body_stmt();
   if (body.errored)
     errored = true;
@@ -1269,8 +1282,9 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
   if (errored)
     return Failure::kErrored;
 
-  f->set_body(body.value);
-  return f.value;
+  return create<ast::Function>(header->source, header->name, header->params,
+                               header->return_type, body.value,
+                               func_decos.value);
 }
 
 // function_type_decl
@@ -1285,7 +1299,7 @@ Maybe<ast::type::Type*> ParserImpl::function_type_decl() {
 
 // function_header
 //   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT ARROW function_type_decl
-Maybe<ast::Function*> ParserImpl::function_header() {
+Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   Source source;
   if (!match(Token::Type::kFn, &source))
     return Failure::kNoMatch;
@@ -1320,8 +1334,8 @@ Maybe<ast::Function*> ParserImpl::function_header() {
   if (errored)
     return Failure::kErrored;
 
-  return create<ast::Function>(source, name.value, std::move(params.value),
-                               type.value, create<ast::BlockStatement>());
+  return FunctionHeader{source, name.value, std::move(params.value),
+                        type.value};
 }
 
 // param_list

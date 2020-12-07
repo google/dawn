@@ -229,6 +229,39 @@ class ParserImpl {
     Source source;
   };
 
+  /// FunctionHeader contains the parsed information for a function header.
+  struct FunctionHeader {
+    /// Constructor
+    FunctionHeader();
+    /// Copy constructor
+    /// @param other the FunctionHeader to copy
+    FunctionHeader(const FunctionHeader& other);
+    /// Constructor
+    /// @param src parsed header source
+    /// @param n function name
+    /// @param p function parameters
+    /// @param ret_ty function return type
+    FunctionHeader(Source src,
+                   std::string n,
+                   ast::VariableList p,
+                   ast::type::Type* ret_ty);
+    /// Destructor
+    ~FunctionHeader();
+    /// Assignment operator
+    /// @param other the FunctionHeader to copy
+    /// @returns this FunctionHeader
+    FunctionHeader& operator=(const FunctionHeader& other);
+
+    /// Parsed header source
+    Source source;
+    /// Function name
+    std::string name;
+    /// Function parameters
+    ast::VariableList params;
+    /// Function return type
+    ast::type::Type* return_type;
+  };
+
   /// Creates a new parser using the given file
   /// @param file the input source file to parse
   explicit ParserImpl(Source::File const* file);
@@ -398,8 +431,8 @@ class ParserImpl {
   /// @returns the parsed type or nullptr otherwise
   Maybe<ast::type::Type*> function_type_decl();
   /// Parses a `function_header` grammar element
-  /// @returns the parsed function nullptr otherwise
-  Maybe<ast::Function*> function_header();
+  /// @returns the parsed function header
+  Maybe<FunctionHeader> function_header();
   /// Parses a `param_list` grammar element, erroring on parse failure.
   /// @returns the parsed variables
   Expect<ast::VariableList> expect_param_list();

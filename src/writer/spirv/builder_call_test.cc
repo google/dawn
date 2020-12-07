@@ -52,9 +52,12 @@ TEST_F(BuilderTest, Expression_Call) {
   body->append(create<ast::ReturnStatement>(create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));
-  ast::Function a_func("a_func", func_params, &f32, body);
+  ast::Function a_func(Source{}, "a_func", func_params, &f32, body,
+                       ast::FunctionDecorationList{});
 
-  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "main", {}, &void_type,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(
@@ -114,9 +117,12 @@ TEST_F(BuilderTest, Statement_Call) {
       ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
       create<ast::IdentifierExpression>("b"))));
 
-  ast::Function a_func("a_func", func_params, &void_type, body);
+  ast::Function a_func(Source{}, "a_func", func_params, &void_type, body,
+                       ast::FunctionDecorationList{});
 
-  ast::Function func("main", {}, &void_type, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "main", {}, &void_type,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(

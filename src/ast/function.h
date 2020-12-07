@@ -51,25 +51,18 @@ class Function : public Castable<Function, Node> {
   };
 
   /// Create a function
-  /// @param name the function name
-  /// @param params the function parameters
-  /// @param return_type the return type
-  /// @param body the function body
-  Function(const std::string& name,
-           VariableList params,
-           type::Type* return_type,
-           BlockStatement* body);
-  /// Create a function
   /// @param source the variable source
   /// @param name the function name
   /// @param params the function parameters
   /// @param return_type the return type
   /// @param body the function body
+  /// @param decorations the function decorations
   Function(const Source& source,
            const std::string& name,
            VariableList params,
            type::Type* return_type,
-           BlockStatement* body);
+           BlockStatement* body,
+           FunctionDecorationList decorations);
   /// Move constructor
   Function(Function&&);
 
@@ -80,17 +73,6 @@ class Function : public Castable<Function, Node> {
   /// @returns the function params
   const VariableList& params() const { return params_; }
 
-  /// Sets the function decorations
-  /// @param decos the decorations to set. This will overwrite any existing
-  /// decorations
-  void set_decorations(FunctionDecorationList decos) {
-    decorations_ = std::move(decos);
-  }
-  /// Adds a decoration to the function
-  /// @param deco the decoration to set
-  void add_decoration(FunctionDecoration* deco) {
-    decorations_.push_back(deco);
-  }
   /// @returns the decorations attached to this function
   const FunctionDecorationList& decorations() const { return decorations_; }
 

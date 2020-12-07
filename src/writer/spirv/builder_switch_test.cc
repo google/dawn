@@ -107,7 +107,9 @@ TEST_F(BuilderTest, Switch_WithCase) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "a_func", {}, &i32,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -171,7 +173,9 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "a_func", {}, &i32,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -254,7 +258,9 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "a_func", {}, &i32,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -346,7 +352,9 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "a_func", {}, &i32,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -417,7 +425,9 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "a_func", {}, &i32,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -469,7 +479,9 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func("a_func", {}, &i32, create<ast::BlockStatement>());
+  ast::Function func(Source{}, "a_func", {}, &i32,
+                     create<ast::BlockStatement>(),
+                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();

@@ -59,18 +59,22 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
               tint::ast::StorageClass::kFunction, ty.f32)));
 
       mod->AddFunction(
-          create<ast::Function>("non_entry_a", ast::VariableList{}, ty.void_,
-                                create<ast::BlockStatement>(Source{})));
+          create<ast::Function>(Source{}, "non_entry_a", ast::VariableList{},
+                                ty.void_, create<ast::BlockStatement>(Source{}),
+                                ast::FunctionDecorationList{}));
 
-      auto* entry =
-          create<ast::Function>("entry", ast::VariableList{}, ty.void_, block);
-      entry->set_decorations({create<ast::StageDecoration>(
-          ast::PipelineStage::kVertex, Source{})});
+      auto* entry = create<ast::Function>(
+          Source{}, "entry", ast::VariableList{}, ty.void_, block,
+          ast::FunctionDecorationList{
+              create<ast::StageDecoration>(ast::PipelineStage::kVertex,
+                                           Source{}),
+          });
       mod->AddFunction(entry);
 
       mod->AddFunction(
-          create<ast::Function>("non_entry_b", ast::VariableList{}, ty.void_,
-                                create<ast::BlockStatement>(Source{})));
+          create<ast::Function>(Source{}, "non_entry_b", ast::VariableList{},
+                                ty.void_, create<ast::BlockStatement>(Source{}),
+                                ast::FunctionDecorationList{}));
     }
   };
 
@@ -120,19 +124,22 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
   struct Builder : ModuleBuilder {
     void Build() override {
       mod->AddFunction(
-          create<ast::Function>("non_entry_a", ast::VariableList{}, ty.void_,
-                                create<ast::BlockStatement>(Source{})));
-
-      auto* entry =
-          create<ast::Function>("entry", ast::VariableList{}, ty.void_,
-                                create<ast::BlockStatement>(Source{}));
-      entry->set_decorations({create<ast::StageDecoration>(
-          ast::PipelineStage::kVertex, Source{})});
-      mod->AddFunction(entry);
+          create<ast::Function>(Source{}, "non_entry_a", ast::VariableList{},
+                                ty.void_, create<ast::BlockStatement>(Source{}),
+                                ast::FunctionDecorationList{}));
 
       mod->AddFunction(
-          create<ast::Function>("non_entry_b", ast::VariableList{}, ty.void_,
-                                create<ast::BlockStatement>(Source{})));
+          create<ast::Function>(Source{}, "entry", ast::VariableList{},
+                                ty.void_, create<ast::BlockStatement>(Source{}),
+                                ast::FunctionDecorationList{
+                                    create<ast::StageDecoration>(
+                                        ast::PipelineStage::kVertex, Source{}),
+                                }));
+
+      mod->AddFunction(
+          create<ast::Function>(Source{}, "non_entry_b", ast::VariableList{},
+                                ty.void_, create<ast::BlockStatement>(Source{}),
+                                ast::FunctionDecorationList{}));
     }
   };
 
@@ -174,18 +181,22 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
 TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
   struct Builder : ModuleBuilder {
     void Build() override {
-      auto* fragment_entry =
-          create<ast::Function>("fragment_entry", ast::VariableList{}, ty.void_,
-                                create<ast::BlockStatement>(Source{}));
-      fragment_entry->set_decorations({create<ast::StageDecoration>(
-          ast::PipelineStage::kFragment, Source{})});
+      auto* fragment_entry = create<ast::Function>(
+          Source{}, "fragment_entry", ast::VariableList{}, ty.void_,
+          create<ast::BlockStatement>(Source{}),
+          ast::FunctionDecorationList{
+              create<ast::StageDecoration>(ast::PipelineStage::kFragment,
+                                           Source{}),
+          });
       mod->AddFunction(fragment_entry);
 
       auto* compute_entry =
-          create<ast::Function>("compute_entry", ast::VariableList{}, ty.void_,
-                                create<ast::BlockStatement>(Source{}));
-      compute_entry->set_decorations({create<ast::StageDecoration>(
-          ast::PipelineStage::kCompute, Source{})});
+          create<ast::Function>(Source{}, "compute_entry", ast::VariableList{},
+                                ty.void_, create<ast::BlockStatement>(Source{}),
+                                ast::FunctionDecorationList{
+                                    create<ast::StageDecoration>(
+                                        ast::PipelineStage::kCompute, Source{}),
+                                });
       mod->AddFunction(compute_entry);
     }
   };

@@ -199,9 +199,11 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var));
-  auto* func = create<ast::Function>("func", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "func", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+      });
   mod()->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();

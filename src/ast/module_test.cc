@@ -49,7 +49,8 @@ TEST_F(ModuleTest, LookupFunction) {
   Module m;
 
   auto* func =
-      create<Function>("main", VariableList{}, &f32, create<BlockStatement>());
+      create<Function>(Source{}, "main", VariableList{}, &f32,
+                       create<BlockStatement>(), ast::FunctionDecorationList{});
   m.AddFunction(func);
   EXPECT_EQ(func, m.FindFunctionByName("main"));
 }
@@ -125,7 +126,8 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
 TEST_F(ModuleTest, IsValid_Function) {
   type::F32 f32;
   auto* func =
-      create<Function>("main", VariableList(), &f32, create<BlockStatement>());
+      create<Function>(Source{}, "main", VariableList(), &f32,
+                       create<BlockStatement>(), ast::FunctionDecorationList{});
 
   Module m;
   m.AddFunction(func);
@@ -140,7 +142,8 @@ TEST_F(ModuleTest, IsValid_Null_Function) {
 
 TEST_F(ModuleTest, IsValid_Invalid_Function) {
   VariableList p;
-  auto* func = create<Function>("", p, nullptr, nullptr);
+  auto* func = create<Function>(Source{}, "", p, nullptr, nullptr,
+                                ast::FunctionDecorationList{});
 
   Module m;
   m.AddFunction(func);

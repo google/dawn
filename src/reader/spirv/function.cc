@@ -694,14 +694,13 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
   if (failed()) {
     return false;
   }
-
-  auto* ast_fn = create<ast::Function>(name, std::move(ast_params), ret_ty,
-                                       create<ast::BlockStatement>());
-
+  ast::FunctionDecorationList decos;
   if (ep_info_ != nullptr) {
-    ast_fn->add_decoration(
-        create<ast::StageDecoration>(ep_info_->stage, Source{}));
+    decos.emplace_back(create<ast::StageDecoration>(ep_info_->stage, Source{}));
   }
+  auto* ast_fn =
+      create<ast::Function>(Source{}, name, std::move(ast_params), ret_ty,
+                            create<ast::BlockStatement>(), std::move(decos));
 
   ast_module_.AddFunction(ast_fn);
 

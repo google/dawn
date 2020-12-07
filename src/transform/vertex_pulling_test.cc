@@ -46,11 +46,11 @@ class VertexPullingHelper {
 
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
-    auto* func = create<ast::Function>("main", ast::VariableList{},
-                                       mod_->create<ast::type::Void>(),
-                                       create<ast::BlockStatement>());
-    func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+    auto* func = create<ast::Function>(
+        Source{}, "main", ast::VariableList{}, mod_->create<ast::type::Void>(),
+        create<ast::BlockStatement>(),
+        ast::FunctionDecorationList{create<ast::StageDecoration>(
+            ast::PipelineStage::kVertex, Source{})});
     mod()->AddFunction(func);
   }
 
@@ -128,11 +128,12 @@ TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
 }
 
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
-  auto* func = create<ast::Function>("main", ast::VariableList{},
-                                     mod()->create<ast::type::Void>(),
-                                     create<ast::BlockStatement>());
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "main", ast::VariableList{}, mod()->create<ast::type::Void>(),
+      create<ast::BlockStatement>(),
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
   mod()->AddFunction(func);
 
   InitTransform({});

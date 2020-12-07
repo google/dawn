@@ -59,7 +59,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
   auto* func =
-      create<ast::Function>("my_func", ast::VariableList{}, &void_type, body);
+      create<ast::Function>(Source{}, "my_func", ast::VariableList{},
+                            &void_type, body, ast::FunctionDecorationList{});
 
   mod.AddFunction(func);
   gen.increment_indent();
@@ -77,8 +78,9 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("GeometryShader", ast::VariableList{},
-                                     &void_type, body);
+  auto* func =
+      create<ast::Function>(Source{}, "GeometryShader", ast::VariableList{},
+                            &void_type, body, ast::FunctionDecorationList{});
 
   mod.AddFunction(func);
   gen.increment_indent();
@@ -103,7 +105,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("my_func", params, &void_type, body);
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &void_type,
+                                     body, ast::FunctionDecorationList{});
 
   mod.AddFunction(func);
   gen.increment_indent();
@@ -141,9 +144,11 @@ TEST_F(HlslGeneratorImplTest_Function,
       create<ast::IdentifierExpression>("bar"),
       create<ast::IdentifierExpression>("foo")));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -197,9 +202,11 @@ TEST_F(HlslGeneratorImplTest_Function,
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -248,9 +255,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -306,9 +315,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -368,9 +379,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -426,9 +439,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -487,9 +502,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* body = create<ast::BlockStatement>();
   body->append(assign);
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -544,7 +561,8 @@ TEST_F(
       create<ast::IdentifierExpression>("param")));
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("foo")));
-  auto* sub_func = create<ast::Function>("sub_func", params, &f32, body);
+  auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
+                                         body, ast::FunctionDecorationList{});
 
   mod.AddFunction(sub_func);
 
@@ -558,9 +576,11 @@ TEST_F(
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   expr)));
   body->append(create<ast::ReturnStatement>());
-  auto* func_1 = create<ast::Function>("ep_1", params, &void_type, body);
-  func_1->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func_1 = create<ast::Function>(
+      Source{}, "ep_1", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func_1);
 
@@ -615,7 +635,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* body = create<ast::BlockStatement>();
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("param")));
-  auto* sub_func = create<ast::Function>("sub_func", params, &f32, body);
+  auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
+                                         body, ast::FunctionDecorationList{});
 
   mod.AddFunction(sub_func);
 
@@ -629,9 +650,11 @@ TEST_F(HlslGeneratorImplTest_Function,
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   expr)));
   body->append(create<ast::ReturnStatement>());
-  auto* func_1 = create<ast::Function>("ep_1", params, &void_type, body);
-  func_1->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func_1 = create<ast::Function>(
+      Source{}, "ep_1", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func_1);
 
@@ -689,7 +712,8 @@ TEST_F(
           create<ast::IdentifierExpression>("x"))));
   body->append(
       create<ast::ReturnStatement>(create<ast::IdentifierExpression>("param")));
-  auto* sub_func = create<ast::Function>("sub_func", params, &f32, body);
+  auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
+                                         body, ast::FunctionDecorationList{});
 
   mod.AddFunction(sub_func);
 
@@ -703,9 +727,11 @@ TEST_F(
       create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
                                   expr)));
   body->append(create<ast::ReturnStatement>());
-  auto* func_1 = create<ast::Function>("ep_1", params, &void_type, body);
-  func_1->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func_1 = create<ast::Function>(
+      Source{}, "ep_1", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func_1);
 
@@ -760,7 +786,8 @@ TEST_F(HlslGeneratorImplTest_Function,
       create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
-  auto* sub_func = create<ast::Function>("sub_func", params, &f32, body);
+  auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
+                                         body, ast::FunctionDecorationList{});
 
   mod.AddFunction(sub_func);
 
@@ -775,9 +802,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -826,7 +855,8 @@ TEST_F(HlslGeneratorImplTest_Function,
       create<ast::ReturnStatement>(create<ast::MemberAccessorExpression>(
           create<ast::IdentifierExpression>("coord"),
           create<ast::IdentifierExpression>("x"))));
-  auto* sub_func = create<ast::Function>("sub_func", params, &f32, body);
+  auto* sub_func = create<ast::Function>(Source{}, "sub_func", params, &f32,
+                                         body, ast::FunctionDecorationList{});
 
   mod.AddFunction(sub_func);
 
@@ -841,9 +871,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("frag_main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "frag_main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -898,9 +930,11 @@ TEST_F(HlslGeneratorImplTest_Function,
       list, ast::ElseStatementList{}));
 
   body->append(create<ast::ReturnStatement>());
-  auto* func_1 = create<ast::Function>("ep_1", params, &void_type, body);
-  func_1->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func_1 = create<ast::Function>(
+      Source{}, "ep_1", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func_1);
 
@@ -926,10 +960,12 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
   ast::type::Void void_type;
 
-  auto* func = create<ast::Function>("GeometryShader", ast::VariableList{},
-                                     &void_type, create<ast::BlockStatement>());
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "GeometryShader", ast::VariableList{}, &void_type,
+      create<ast::BlockStatement>(),
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -947,9 +983,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -970,10 +1008,12 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("main", params, &void_type, body);
-  func->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
-  func->add_decoration(create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}));
+  auto* func = create<ast::Function>(
+      Source{}, "main", params, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+          create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
+      });
 
   mod.AddFunction(func);
 
@@ -998,7 +1038,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("my_func", params, &void_type, body);
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &void_type,
+                                     body, ast::FunctionDecorationList{});
 
   mod.AddFunction(func);
   gen.increment_indent();
@@ -1067,9 +1108,12 @@ TEST_F(HlslGeneratorImplTest_Function,
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>());
-    auto* func = create<ast::Function>("a", params, &void_type, body);
-    func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
+    auto* func =
+        create<ast::Function>(Source{}, "a", params, &void_type, body,
+                              ast::FunctionDecorationList{
+                                  create<ast::StageDecoration>(
+                                      ast::PipelineStage::kCompute, Source{}),
+                              });
 
     mod.AddFunction(func);
   }
@@ -1084,9 +1128,12 @@ TEST_F(HlslGeneratorImplTest_Function,
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>());
-    auto* func = create<ast::Function>("b", params, &void_type, body);
-    func->add_decoration(
-        create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}));
+    auto* func =
+        create<ast::Function>(Source{}, "b", params, &void_type, body,
+                              ast::FunctionDecorationList{
+                                  create<ast::StageDecoration>(
+                                      ast::PipelineStage::kCompute, Source{}),
+                              });
 
     mod.AddFunction(func);
   }

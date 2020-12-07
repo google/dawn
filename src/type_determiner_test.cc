@@ -340,8 +340,9 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   ast::type::F32 f32;
 
   ast::VariableList params;
-  auto* func = create<ast::Function>("my_func", params, &f32,
-                                     create<ast::BlockStatement>());
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32,
+                                     create<ast::BlockStatement>(),
+                                     ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -370,12 +371,15 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
   auto* main_body = create<ast::BlockStatement>();
   main_body->append(create<ast::CallStatement>(call_expr));
   main_body->append(create<ast::ReturnStatement>());
-  auto* func_main = create<ast::Function>("main", params0, &f32, main_body);
+  auto* func_main =
+      create<ast::Function>(Source{}, "main", params0, &f32, main_body,
+                            ast::FunctionDecorationList{});
   mod->AddFunction(func_main);
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>());
-  auto* func = create<ast::Function>("func", params0, &f32, body);
+  auto* func = create<ast::Function>(Source{}, "func", params0, &f32, body,
+                                     ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   EXPECT_FALSE(td()->Determine()) << td()->error();
@@ -583,8 +587,9 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   ast::type::F32 f32;
 
   ast::VariableList params;
-  auto* func = create<ast::Function>("my_func", params, &f32,
-                                     create<ast::BlockStatement>());
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32,
+                                     create<ast::BlockStatement>(),
+                                     ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -602,8 +607,9 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   ast::type::F32 f32;
 
   ast::VariableList params;
-  auto* func = create<ast::Function>("my_func", params, &f32,
-                                     create<ast::BlockStatement>());
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32,
+                                     create<ast::BlockStatement>(),
+                                     ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -732,7 +738,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   body->append(create<ast::AssignmentStatement>(
       my_var, create<ast::IdentifierExpression>("my_var")));
 
-  ast::Function f("my_func", {}, &f32, body);
+  ast::Function f(Source{}, "my_func", {}, &f32, body,
+                  ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
@@ -752,7 +759,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   body->append(create<ast::AssignmentStatement>(
       my_var, create<ast::IdentifierExpression>("my_var")));
 
-  ast::Function f("my_func", {}, &f32, body);
+  ast::Function f(Source{}, "my_func", {}, &f32, body,
+                  ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
@@ -777,7 +785,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   body->append(create<ast::AssignmentStatement>(
       my_var, create<ast::IdentifierExpression>("my_var")));
 
-  ast::Function f("my_func", {}, &f32, body);
+  ast::Function f(Source{}, "my_func", {}, &f32, body,
+                  ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
@@ -793,8 +802,9 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   ast::type::F32 f32;
 
   ast::VariableList params;
-  auto* func = create<ast::Function>("my_func", params, &f32,
-                                     create<ast::BlockStatement>());
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32,
+                                     create<ast::BlockStatement>(),
+                                     ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -845,7 +855,8 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("priv_var"),
       create<ast::IdentifierExpression>("priv_var")));
-  auto* func = create<ast::Function>("my_func", params, &f32, body);
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32, body,
+                                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -895,7 +906,8 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
       create<ast::IdentifierExpression>("priv_var"),
       create<ast::IdentifierExpression>("priv_var")));
   ast::VariableList params;
-  auto* func = create<ast::Function>("my_func", params, &f32, body);
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32, body,
+                                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -904,7 +916,8 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
       create<ast::IdentifierExpression>("out_var"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("my_func"),
                                   ast::ExpressionList{})));
-  auto* func2 = create<ast::Function>("func", params, &f32, body);
+  auto* func2 = create<ast::Function>(Source{}, "func", params, &f32, body,
+                                      ast::FunctionDecorationList{});
 
   mod->AddFunction(func2);
 
@@ -934,7 +947,8 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
           create<ast::FloatLiteral>(&f32, 1.f))));
 
   ast::VariableList params;
-  auto* func = create<ast::Function>("my_func", params, &f32, body);
+  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32, body,
+                                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -2154,7 +2168,8 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(stmt);
-  auto* func = create<ast::Function>("func", ast::VariableList{}, &i32, body);
+  auto* func = create<ast::Function>(Source{}, "func", ast::VariableList{},
+                                     &i32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -2171,7 +2186,8 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(stmt);
-  auto* func = create<ast::Function>("func", ast::VariableList{}, &i32, body);
+  auto* func = create<ast::Function>(Source{}, "func", ast::VariableList{},
+                                     &i32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -2187,7 +2203,8 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(stmt);
-  auto* func = create<ast::Function>("func", ast::VariableList{}, &i32, body);
+  auto* func = create<ast::Function>(Source{}, "func", ast::VariableList{},
+                                     &i32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -4338,21 +4355,24 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
-  auto* func_b = create<ast::Function>("b", params, &f32, body);
+  auto* func_b = create<ast::Function>(Source{}, "b", params, &f32, body,
+                                       ast::FunctionDecorationList{});
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("second"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("b"),
                                   ast::ExpressionList{})));
-  auto* func_c = create<ast::Function>("c", params, &f32, body);
+  auto* func_c = create<ast::Function>(Source{}, "c", params, &f32, body,
+                                       ast::FunctionDecorationList{});
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("first"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("c"),
                                   ast::ExpressionList{})));
-  auto* func_a = create<ast::Function>("a", params, &f32, body);
+  auto* func_a = create<ast::Function>(Source{}, "a", params, &f32, body,
+                                       ast::FunctionDecorationList{});
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -4363,18 +4383,22 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
       create<ast::IdentifierExpression>("call_b"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("b"),
                                   ast::ExpressionList{})));
-  auto* ep_1 = create<ast::Function>("ep_1", params, &f32, body);
-  ep_1->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  auto* ep_1 = create<ast::Function>(
+      Source{}, "ep_1", params, &f32, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+      });
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("call_c"),
       create<ast::CallExpression>(create<ast::IdentifierExpression>("c"),
                                   ast::ExpressionList{})));
-  auto* ep_2 = create<ast::Function>("ep_2", params, &f32, body);
-  ep_2->add_decoration(
-      create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}));
+  auto* ep_2 = create<ast::Function>(
+      Source{}, "ep_2", params, &f32, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+      });
 
   mod->AddFunction(func_b);
   mod->AddFunction(func_c);
