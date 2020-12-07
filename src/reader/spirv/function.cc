@@ -335,6 +335,8 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "distance";
     case GLSLstd450Normalize:
       return "normalize";
+    case GLSLstd450UClamp:
+    case GLSLstd450SClamp:
     case GLSLstd450FClamp:
       return "clamp";
     case GLSLstd450Length:

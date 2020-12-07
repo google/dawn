@@ -42,8 +42,10 @@ std::string Preamble() {
   %float = OpTypeFloat 32
 
   %uint_10 = OpConstant %uint 10
+  %uint_15 = OpConstant %uint 15
   %uint_20 = OpConstant %uint 20
   %int_30 = OpConstant %int 30
+  %int_35 = OpConstant %int 35
   %int_40 = OpConstant %int 40
   %float_50 = OpConstant %float 50
   %float_60 = OpConstant %float 60
@@ -55,8 +57,10 @@ std::string Preamble() {
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
+  %v2uint_15_15 = OpConstantComposite %v2uint %uint_15 %uint_15
   %v2int_30_40 = OpConstantComposite %v2int %int_30 %int_40
   %v2int_40_30 = OpConstantComposite %v2int %int_40 %int_30
+  %v2int_35_35 = OpConstantComposite %v2int %int_35 %int_35
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
   %v2float_70_70 = OpConstantComposite %v2float %float_70 %float_70
@@ -75,6 +79,10 @@ inline std::ostream& operator<<(std::ostream& out, GlslStd450Case c) {
 // Nomenclature:
 // Float = scalar float
 // Floating = scalar float or vector-of-float
+// Int = scalar signed int
+// Inting = scalar int or vector-of-int
+// Uint = scalar unsigned int
+// Uinting = scalar unsigned or vector-of-unsigned
 
 using SpvParserTest_GlslStd450_Float_Floating =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
@@ -85,6 +93,11 @@ using SpvParserTest_GlslStd450_Floating_Floating =
 using SpvParserTest_GlslStd450_Floating_FloatingFloating =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+
+using SpvParserTest_GlslStd450_Inting_IntingIntingInting =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Uinting_UintingUintingUinting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 
 TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
@@ -466,6 +479,172 @@ INSTANTIATE_TEST_SUITE_P(
     Samples,
     SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating,
     ::testing::Values(GlslStd450Case{"FClamp", "clamp"}));
+
+TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpExtInst %int %glsl )" +
+                        GetParam().opcode + R"( %int_30 %int_35 %int_40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          ScalarConstructor[not set]{30}
+          ScalarConstructor[not set]{35}
+          ScalarConstructor[not set]{40}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpExtInst %v2int %glsl )" +
+                        GetParam().opcode +
+                        R"( %v2int_30_40 %v2int_40_30 %v2int_35_35
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__i32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{40}
+            ScalarConstructor[not set]{30}
+          }
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{35}
+            ScalarConstructor[not set]{35}
+          }
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Inting_IntingIntingInting,
+                         ::testing::Values(GlslStd450Case{"SClamp", "clamp"}));
+
+TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpExtInst %uint %glsl )" +
+                        GetParam().opcode + R"( %uint_10 %uint_15 %uint_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{15}
+          ScalarConstructor[not set]{20}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpExtInst %v2uint %glsl )" +
+                        GetParam().opcode +
+                        R"( %v2uint_10_20 %v2uint_20_10 %v2uint_15_15
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{20}
+          }
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10}
+          }
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{15}
+            ScalarConstructor[not set]{15}
+          }
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Uinting_UintingUintingUinting,
+                         ::testing::Values(GlslStd450Case{"UClamp", "clamp"}));
 
 }  // namespace
 }  // namespace spirv
