@@ -35,7 +35,8 @@ namespace dawn_native { namespace metal {
     class ShaderModule final : public ShaderModuleBase {
       public:
         static ResultOrError<ShaderModule*> Create(Device* device,
-                                                   const ShaderModuleDescriptor* descriptor);
+                                                   const ShaderModuleDescriptor* descriptor,
+                                                   ShaderModuleParseResult* parseResult);
 
         struct MetalFunctionData {
             NSPRef<id<MTLFunction>> function;
@@ -51,7 +52,11 @@ namespace dawn_native { namespace metal {
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
-        MaybeError Initialize();
+        MaybeError Initialize(ShaderModuleParseResult* parseResult);
+
+#ifdef DAWN_ENABLE_WGSL
+        std::unique_ptr<tint::ast::Module> mTintModule;
+#endif
     };
 
 }}  // namespace dawn_native::metal

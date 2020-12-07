@@ -174,14 +174,23 @@ namespace dawn_native { namespace d3d12 {
 
     // static
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
-                                                      const ShaderModuleDescriptor* descriptor) {
+                                                      const ShaderModuleDescriptor* descriptor,
+                                                      ShaderModuleParseResult* parseResult) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-        DAWN_TRY(module->InitializeBase());
+        DAWN_TRY(module->Initialize(parseResult));
         return module.Detach();
     }
 
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
         : ShaderModuleBase(device, descriptor) {
+    }
+
+    MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+        DAWN_TRY(InitializeBase(parseResult));
+#ifdef DAWN_ENABLE_WGSL
+        mTintModule = std::move(parseResult->tintModule);
+#endif
+        return {};
     }
 
     ResultOrError<std::string> ShaderModule::TranslateToHLSLWithTint(
@@ -195,41 +204,11 @@ namespace dawn_native { namespace d3d12 {
         std::ostringstream errorStream;
         errorStream << "Tint HLSL failure:" << std::endl;
 
-        // TODO: Remove redundant SPIRV step between WGSL and HLSL.
-        tint::reader::spirv::Parser parser(GetSpirv());
-
-        if (!parser.Parse()) {
-            errorStream << "Parser: " << parser.error() << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-
-        tint::ast::Module module = parser.module();
-        if (!module.IsValid()) {
-            errorStream << "Invalid module generated..." << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-
-        tint::TypeDeterminer typeDeterminer(&module);
-        if (!typeDeterminer.Determine()) {
-            errorStream << "Type Determination: " << typeDeterminer.error();
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-
-        tint::Validator validator;
-        if (!validator.Validate(&module)) {
-            errorStream << "Validation: " << validator.error() << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-
         tint::transform::Manager transformManager;
         transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
-        auto result = transformManager.Run(&module);
-        if (result.diagnostics.contains_errors()) {
-            errorStream << "Bound Array Accessors Transform: "
-                        << tint::diag::Formatter{}.format(result.diagnostics);
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-        module = std::move(result.module);
+
+        tint::ast::Module module;
+        DAWN_TRY_ASSIGN(module, RunTransforms(&transformManager, mTintModule.get()));
 
         ASSERT(remappedEntryPointName != nullptr);
         tint::inspector::Inspector inspector(module);

@@ -173,13 +173,12 @@ namespace dawn_native {
         }
 
 #ifdef DAWN_ENABLE_WGSL
-        MaybeError ValidateWGSL(const char* source) {
+        ResultOrError<tint::ast::Module> ParseWGSL(const char* wgsl) {
             std::ostringstream errorStream;
-            errorStream << "Tint WGSL failure:" << std::endl;
+            errorStream << "Tint WGSL reader failure:" << std::endl;
 
-            tint::Source::File file("", source);
+            tint::Source::File file("", wgsl);
             tint::reader::wgsl::Parser parser(&file);
-
             if (!parser.Parse()) {
                 errorStream << "Parser: " << parser.error() << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -191,14 +190,46 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            tint::TypeDeterminer type_determiner(&module);
-            if (!type_determiner.Determine()) {
-                errorStream << "Type Determination: " << type_determiner.error();
+            tint::TypeDeterminer typeDeterminer(&module);
+            if (!typeDeterminer.Determine()) {
+                errorStream << "Type Determination: " << typeDeterminer.error();
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
+            return std::move(module);
+        }
+
+        ResultOrError<tint::ast::Module> ParseSPIRV(const std::vector<uint32_t>& spirv) {
+            std::ostringstream errorStream;
+            errorStream << "Tint SPIRV reader failure:" << std::endl;
+
+            tint::reader::spirv::Parser parser(spirv);
+            if (!parser.Parse()) {
+                errorStream << "Parser: " << parser.error() << std::endl;
+                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+            }
+
+            tint::ast::Module module = parser.module();
+            if (!module.IsValid()) {
+                errorStream << "Invalid module generated..." << std::endl;
+                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+            }
+
+            tint::TypeDeterminer typeDeterminer(&module);
+            if (!typeDeterminer.Determine()) {
+                errorStream << "Type Determination: " << typeDeterminer.error();
+                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+            }
+
+            return std::move(module);
+        }
+
+        MaybeError ValidateModule(tint::ast::Module* module) {
+            std::ostringstream errorStream;
+            errorStream << "Tint module validation" << std::endl;
+
             tint::Validator validator;
-            if (!validator.Validate(&module)) {
+            if (!validator.Validate(module)) {
                 errorStream << "Validation: " << validator.error() << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
@@ -206,111 +237,9 @@ namespace dawn_native {
             return {};
         }
 
-        ResultOrError<std::vector<uint32_t>> ConvertWGSLToSPIRV(const char* source) {
+        ResultOrError<std::vector<uint32_t>> ModuleToSPIRV(tint::ast::Module module) {
             std::ostringstream errorStream;
-            errorStream << "Tint WGSL->SPIR-V failure:" << std::endl;
-
-            tint::Source::File file("", source);
-            tint::reader::wgsl::Parser parser(&file);
-
-            // TODO: This is a duplicate parse with ValidateWGSL, need to store
-            // state between calls to avoid this.
-            if (!parser.Parse()) {
-                errorStream << "Parser: " << parser.error() << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::ast::Module module = parser.module();
-            if (!module.IsValid()) {
-                errorStream << "Invalid module generated..." << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::TypeDeterminer type_determiner(&module);
-            if (!type_determiner.Determine()) {
-                errorStream << "Type Determination: " << type_determiner.error();
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::writer::spirv::Generator generator(std::move(module));
-            if (!generator.Generate()) {
-                errorStream << "Generator: " << generator.error() << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            std::vector<uint32_t> spirv = generator.result();
-
-            DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
-
-            return std::move(spirv);
-        }
-
-        ResultOrError<std::vector<uint32_t>> ConvertWGSLToSPIRVWithPulling(
-            const char* source,
-            const VertexStateDescriptor& vertexState,
-            const std::string& entryPoint,
-            uint32_t pullingBufferBindingSet) {
-            std::ostringstream errorStream;
-            errorStream << "Tint WGSL->SPIR-V failure:" << std::endl;
-
-            tint::Source::File file("", source);
-            tint::reader::wgsl::Parser parser(&file);
-
-            // TODO: This is a duplicate parse with ValidateWGSL, need to store
-            // state between calls to avoid this.
-            if (!parser.Parse()) {
-                errorStream << "Parser: " << parser.error() << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::ast::Module module = parser.module();
-            if (!module.IsValid()) {
-                errorStream << "Invalid module generated..." << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::transform::Manager transformManager;
-            {
-                auto transform = std::make_unique<tint::transform::VertexPulling>();
-                tint::transform::VertexStateDescriptor state;
-
-                for (uint32_t i = 0; i < vertexState.vertexBufferCount; ++i) {
-                    auto& vertexBuffer = vertexState.vertexBuffers[i];
-                    tint::transform::VertexBufferLayoutDescriptor layout;
-                    layout.array_stride = vertexBuffer.arrayStride;
-                    layout.step_mode = ToTintInputStepMode(vertexBuffer.stepMode);
-
-                    for (uint32_t j = 0; j < vertexBuffer.attributeCount; ++j) {
-                        auto& attribute = vertexBuffer.attributes[j];
-                        tint::transform::VertexAttributeDescriptor attr;
-                        attr.format = ToTintVertexFormat(attribute.format);
-                        attr.offset = attribute.offset;
-                        attr.shader_location = attribute.shaderLocation;
-
-                        layout.attributes.push_back(std::move(attr));
-                    }
-
-                    state.push_back(std::move(layout));
-                }
-                transform->SetVertexState(std::move(state));
-                transform->SetEntryPoint(entryPoint);
-                transform->SetPullingBufferBindingSet(pullingBufferBindingSet);
-                transformManager.append(std::move(transform));
-            }
-
-            auto result = transformManager.Run(&module);
-            if (result.diagnostics.contains_errors()) {
-                errorStream << "Vertex pulling transform: "
-                            << tint::diag::Formatter{}.format(result.diagnostics);
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-            module = std::move(result.module);
-
-            tint::TypeDeterminer type_determiner(&module);
-            if (!type_determiner.Determine()) {
-                errorStream << "Type Determination: " << type_determiner.error();
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
+            errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
             tint::writer::spirv::Generator generator(std::move(module));
             if (!generator.Generate()) {
@@ -745,37 +674,15 @@ namespace dawn_native {
         // completed using PopulateMetadataUsingSPIRVCross. In the future, once
         // this function is complete, ReflectShaderUsingSPIRVCross and
         // PopulateMetadataUsingSPIRVCross will be removed.
-        ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(DeviceBase* device,
-                                                                      std::vector<uint32_t> spirv) {
+        ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
+            DeviceBase* device,
+            const tint::ast::Module& module) {
 #ifdef DAWN_ENABLE_WGSL
+            ASSERT(module.IsValid());
+
             EntryPointMetadataTable result;
             std::ostringstream errorStream;
             errorStream << "Tint Reflection failure:" << std::endl;
-
-            tint::reader::spirv::Parser parser(spirv);
-
-            if (!parser.Parse()) {
-                errorStream << "Parser: " << parser.error() << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::ast::Module module = parser.module();
-            if (!module.IsValid()) {
-                errorStream << "Invalid module generated..." << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::TypeDeterminer typeDeterminer(&module);
-            if (!typeDeterminer.Determine()) {
-                errorStream << "Type Determination: " << typeDeterminer.error();
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::Validator validator;
-            if (!validator.Validate(&module)) {
-                errorStream << "Validation: " << validator.error() << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
 
             tint::inspector::Inspector inspector(module);
             auto entryPoints = inspector.GetEntryPoints();
@@ -862,8 +769,17 @@ namespace dawn_native {
 
     }  // anonymous namespace
 
-    MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
-                                              const ShaderModuleDescriptor* descriptor) {
+    ShaderModuleParseResult::ShaderModuleParseResult() = default;
+    ShaderModuleParseResult::~ShaderModuleParseResult() = default;
+
+    ShaderModuleParseResult::ShaderModuleParseResult(ShaderModuleParseResult&& rhs) = default;
+
+    ShaderModuleParseResult& ShaderModuleParseResult::operator=(ShaderModuleParseResult&& rhs) =
+        default;
+
+    ResultOrError<ShaderModuleParseResult> ValidateShaderModuleDescriptor(
+        DeviceBase* device,
+        const ShaderModuleDescriptor* descriptor) {
         const ChainedStruct* chainedDescriptor = descriptor->nextInChain;
         if (chainedDescriptor == nullptr) {
             return DAWN_VALIDATION_ERROR("Shader module descriptor missing chained descriptor");
@@ -874,11 +790,29 @@ namespace dawn_native {
                 "Shader module descriptor chained nextInChain must be nullptr");
         }
 
+        ShaderModuleParseResult parseResult = {};
         switch (chainedDescriptor->sType) {
             case wgpu::SType::ShaderModuleSPIRVDescriptor: {
                 const auto* spirvDesc =
                     static_cast<const ShaderModuleSPIRVDescriptor*>(chainedDescriptor);
-                DAWN_TRY(ValidateSpirv(spirvDesc->code, spirvDesc->codeSize));
+                std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
+                if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
+#ifdef DAWN_ENABLE_WGSL
+                    tint::ast::Module module;
+                    DAWN_TRY_ASSIGN(module, ParseSPIRV(spirv));
+                    if (device->IsValidationEnabled()) {
+                        DAWN_TRY(ValidateModule(&module));
+                    }
+                    parseResult.tintModule = std::make_unique<tint::ast::Module>(std::move(module));
+#else
+                    return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
+#endif  // DAWN_ENABLE_WGSL
+                } else {
+                    if (device->IsValidationEnabled()) {
+                        DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
+                    }
+                    parseResult.spirv = std::move(spirv);
+                }
                 break;
             }
 
@@ -886,17 +820,35 @@ namespace dawn_native {
 #ifdef DAWN_ENABLE_WGSL
                 const auto* wgslDesc =
                     static_cast<const ShaderModuleWGSLDescriptor*>(chainedDescriptor);
-                DAWN_TRY(ValidateWGSL(wgslDesc->source));
+
+                if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
+                    tint::ast::Module module;
+                    DAWN_TRY_ASSIGN(module, ParseWGSL(wgslDesc->source));
+                    if (device->IsValidationEnabled()) {
+                        DAWN_TRY(ValidateModule(&module));
+                    }
+                    parseResult.tintModule = std::make_unique<tint::ast::Module>(std::move(module));
+                } else {
+                    tint::ast::Module module;
+                    DAWN_TRY_ASSIGN(module, ParseWGSL(wgslDesc->source));
+                    if (device->IsValidationEnabled()) {
+                        DAWN_TRY(ValidateModule(&module));
+                    }
+                    std::vector<uint32_t> spirv;
+                    DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(std::move(module)));
+                    DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
+                    parseResult.spirv = std::move(spirv);
+                }
                 break;
 #else
-                return DAWN_VALIDATION_ERROR("WGSL not supported (yet)");
+                return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
 #endif  // DAWN_ENABLE_WGSL
             }
             default:
                 return DAWN_VALIDATION_ERROR("Unsupported sType");
         }
 
-        return {};
+        return std::move(parseResult);
     }
 
     RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
@@ -909,6 +861,23 @@ namespace dawn_native {
 
         return bufferSizes;
     }
+
+#ifdef DAWN_ENABLE_WGSL
+    ResultOrError<tint::ast::Module> RunTransforms(tint::transform::Manager* manager,
+                                                   tint::ast::Module* module) {
+        tint::transform::Transform::Output output = manager->Run(module);
+        if (output.diagnostics.contains_errors()) {
+            std::string err =
+                "Tint transform failure: " + tint::diag::Formatter{}.format(output.diagnostics);
+            return DAWN_VALIDATION_ERROR(err.c_str());
+        }
+
+        if (!output.module.IsValid()) {
+            return DAWN_VALIDATION_ERROR("Tint transform did not produce valid module.");
+        }
+        return std::move(output.module);
+    }
+#endif
 
     MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                        const EntryPointMetadata& entryPoint,
@@ -994,49 +963,136 @@ namespace dawn_native {
     }
 
     const std::vector<uint32_t>& ShaderModuleBase::GetSpirv() const {
+        ASSERT(!GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator));
         return mSpirv;
     }
 
 #ifdef DAWN_ENABLE_WGSL
     ResultOrError<std::vector<uint32_t>> ShaderModuleBase::GeneratePullingSpirv(
+        const std::vector<uint32_t>& spirv,
         const VertexStateDescriptor& vertexState,
         const std::string& entryPoint,
         uint32_t pullingBufferBindingSet) const {
-        std::vector<uint32_t> spirv;
-        DAWN_TRY_ASSIGN(spirv, ConvertWGSLToSPIRVWithPulling(mWgsl.c_str(), vertexState, entryPoint,
-                                                             pullingBufferBindingSet));
+        tint::ast::Module module;
+        DAWN_TRY_ASSIGN(module, ParseSPIRV(spirv));
+
+        return GeneratePullingSpirv(&module, vertexState, entryPoint, pullingBufferBindingSet);
+    }
+
+    ResultOrError<std::vector<uint32_t>> ShaderModuleBase::GeneratePullingSpirv(
+        tint::ast::Module* moduleIn,
+        const VertexStateDescriptor& vertexState,
+        const std::string& entryPoint,
+        uint32_t pullingBufferBindingSet) const {
+        std::ostringstream errorStream;
+        errorStream << "Tint vertex pulling failure:" << std::endl;
+
+        tint::transform::Manager transformManager;
+        {
+            auto transform = std::make_unique<tint::transform::VertexPulling>();
+            tint::transform::VertexStateDescriptor state;
+            for (uint32_t i = 0; i < vertexState.vertexBufferCount; ++i) {
+                const auto& vertexBuffer = vertexState.vertexBuffers[i];
+                tint::transform::VertexBufferLayoutDescriptor layout;
+                layout.array_stride = vertexBuffer.arrayStride;
+                layout.step_mode = ToTintInputStepMode(vertexBuffer.stepMode);
+
+                for (uint32_t j = 0; j < vertexBuffer.attributeCount; ++j) {
+                    const auto& attribute = vertexBuffer.attributes[j];
+                    tint::transform::VertexAttributeDescriptor attr;
+                    attr.format = ToTintVertexFormat(attribute.format);
+                    attr.offset = attribute.offset;
+                    attr.shader_location = attribute.shaderLocation;
+
+                    layout.attributes.push_back(std::move(attr));
+                }
+
+                state.push_back(std::move(layout));
+            }
+            transform->SetVertexState(std::move(state));
+            transform->SetEntryPoint(entryPoint);
+            transform->SetPullingBufferBindingSet(pullingBufferBindingSet);
+            transformManager.append(std::move(transform));
+        }
+        if (GetDevice()->IsRobustnessEnabled()) {
+            // TODO(enga): Run the Tint BoundArrayAccessors transform instead of the SPIRV Tools
+            // one, but it appears to crash after running VertexPulling.
+            // transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
+        }
+
+        tint::ast::Module module;
+        DAWN_TRY_ASSIGN(module, RunTransforms(&transformManager, moduleIn));
+
+        tint::writer::spirv::Generator generator(std::move(module));
+        if (!generator.Generate()) {
+            errorStream << "Generator: " << generator.error() << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        std::vector<uint32_t> spirv = generator.result();
         if (GetDevice()->IsRobustnessEnabled()) {
             DAWN_TRY_ASSIGN(spirv, RunRobustBufferAccessPass(spirv));
         }
-
+        DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
         return std::move(spirv);
     }
 #endif
 
-    MaybeError ShaderModuleBase::InitializeBase() {
-        std::vector<uint32_t> spirv;
-        if (mType == Type::Wgsl) {
+    MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult) {
 #ifdef DAWN_ENABLE_WGSL
-            DAWN_TRY_ASSIGN(spirv, ConvertWGSLToSPIRV(mWgsl.c_str()));
+        tint::ast::Module* module = parseResult->tintModule.get();
+#endif
+        mSpirv = std::move(parseResult->spirv);
+
+        // If not using Tint to generate backend code, run the robust buffer access pass now since
+        // all backends will use this SPIR-V. If Tint is used, the robustness pass should be run
+        // per-backend.
+        if (!GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator) &&
+            GetDevice()->IsRobustnessEnabled()) {
+            DAWN_TRY_ASSIGN(mSpirv, RunRobustBufferAccessPass(mSpirv));
+        }
+
+        // We still need the spirv for reflection. Remove this when we use the Tint inspector
+        // completely.
+        std::vector<uint32_t>* spirvPtr = &mSpirv;
+        std::vector<uint32_t> localSpirv;
+        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
+#ifdef DAWN_ENABLE_WGSL
+            ASSERT(module != nullptr);
+            tint::ast::Module clonedModule = module->Clone();
+            tint::TypeDeterminer typeDeterminer(&clonedModule);
+            if (!typeDeterminer.Determine()) {
+                return DAWN_VALIDATION_ERROR(typeDeterminer.error().c_str());
+            }
+            DAWN_TRY_ASSIGN(localSpirv, ModuleToSPIRV(std::move(clonedModule)));
+            DAWN_TRY(ValidateSpirv(localSpirv.data(), localSpirv.size()));
+            spirvPtr = &localSpirv;
+#else
+            UNREACHABLE();
+#endif
+        }
+
+        if (GetDevice()->IsToggleEnabled(Toggle::UseTintInspector)) {
+#ifdef DAWN_ENABLE_WGSL
+            tint::ast::Module localModule;
+
+            tint::ast::Module* modulePtr = module;
+            if (!GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
+                // We have mSpirv, but no Tint module
+                DAWN_TRY_ASSIGN(localModule, ParseSPIRV(mSpirv));
+                DAWN_TRY(ValidateModule(&localModule));
+                modulePtr = &localModule;
+            }
+
+            EntryPointMetadataTable table;
+            DAWN_TRY_ASSIGN(table, ReflectShaderUsingTint(GetDevice(), *modulePtr));
+            DAWN_TRY(PopulateMetadataUsingSPIRVCross(GetDevice(), *spirvPtr, &table));
+            mEntryPoints = std::move(table);
 #else
             return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
-#endif  // DAWN_ENABLE_WGSL
+#endif
         } else {
-            spirv = mOriginalSpirv;
-        }
-
-        if (GetDevice()->IsRobustnessEnabled()) {
-            DAWN_TRY_ASSIGN(spirv, RunRobustBufferAccessPass(spirv));
-        }
-
-        mSpirv = std::move(spirv);
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintInspector)) {
-            EntryPointMetadataTable table;
-            DAWN_TRY_ASSIGN(table, ReflectShaderUsingTint(GetDevice(), mSpirv));
-            DAWN_TRY(PopulateMetadataUsingSPIRVCross(GetDevice(), mSpirv, &table));
-            mEntryPoints = std::move(table);
-        } else {
-            DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mSpirv));
+            DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), *spirvPtr));
         }
 
         return {};

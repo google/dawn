@@ -143,7 +143,7 @@ namespace dawn_native {
               "http://crbug.com/1138528"}},
             {Toggle::UseTintGenerator,
              {"use_tint_generator", "Use Tint instead of SPRIV-cross to generate shaders.",
-              "https://crbug.com/dawn/548"}},
+              "https://crbug.com/dawn/571"}},
             {Toggle::UseTintInspector,
              {"use_tint_inspector", "Use Tint instead of SPRIV-cross for shader reflection.",
               "https://crbug.com/dawn/578"}},

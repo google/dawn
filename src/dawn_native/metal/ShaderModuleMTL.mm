@@ -22,15 +22,24 @@
 
 #include <spirv_msl.hpp>
 
+#ifdef DAWN_ENABLE_WGSL
+// Tint include must be after spirv_msl.hpp, because spirv-cross has its own
+// version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
+// is at 3 while spirv-headers is at 4.
+#    undef SPV_REVISION
+#    include <tint/tint.h>
+#endif  // DAWN_ENABLE_WGSL
+
 #include <sstream>
 
 namespace dawn_native { namespace metal {
 
     // static
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
-                                                      const ShaderModuleDescriptor* descriptor) {
+                                                      const ShaderModuleDescriptor* descriptor,
+                                                      ShaderModuleParseResult* parseResult) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-        DAWN_TRY(module->Initialize());
+        DAWN_TRY(module->Initialize(parseResult));
         return module.Detach();
     }
 
@@ -38,8 +47,12 @@ namespace dawn_native { namespace metal {
         : ShaderModuleBase(device, descriptor) {
     }
 
-    MaybeError ShaderModule::Initialize() {
-        return InitializeBase();
+    MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+        DAWN_TRY(InitializeBase(parseResult));
+#ifdef DAWN_ENABLE_WGSL
+        mTintModule = std::move(parseResult->tintModule);
+#endif
+        return {};
     }
 
     MaybeError ShaderModule::CreateFunction(const char* entryPointName,
@@ -59,9 +72,17 @@ namespace dawn_native { namespace metal {
         std::vector<uint32_t> pullingSpirv;
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             stage == SingleShaderStage::Vertex) {
-            DAWN_TRY_ASSIGN(pullingSpirv,
-                            GeneratePullingSpirv(*renderPipeline->GetVertexStateDescriptor(),
-                                                 entryPointName, kPullingBufferBindingSet));
+            if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
+                DAWN_TRY_ASSIGN(pullingSpirv,
+                                GeneratePullingSpirv(mTintModule.get(),
+                                                     *renderPipeline->GetVertexStateDescriptor(),
+                                                     entryPointName, kPullingBufferBindingSet));
+            } else {
+                DAWN_TRY_ASSIGN(
+                    pullingSpirv,
+                    GeneratePullingSpirv(GetSpirv(), *renderPipeline->GetVertexStateDescriptor(),
+                                         entryPointName, kPullingBufferBindingSet));
+            }
             spirv = &pullingSpirv;
         }
 #endif

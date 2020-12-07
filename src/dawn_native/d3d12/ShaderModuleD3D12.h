@@ -36,7 +36,8 @@ namespace dawn_native { namespace d3d12 {
     class ShaderModule final : public ShaderModuleBase {
       public:
         static ResultOrError<ShaderModule*> Create(Device* device,
-                                                   const ShaderModuleDescriptor* descriptor);
+                                                   const ShaderModuleDescriptor* descriptor,
+                                                   ShaderModuleParseResult* parseResult);
 
         ResultOrError<CompiledShader> Compile(const char* entryPointName,
                                               SingleShaderStage stage,
@@ -46,6 +47,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
+        MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
         ResultOrError<std::string> TranslateToHLSLWithTint(
             const char* entryPointName,
@@ -61,6 +63,10 @@ namespace dawn_native { namespace d3d12 {
                                          SingleShaderStage stage,
                                          const std::string& hlslSource,
                                          uint32_t compileFlags) const;
+
+#ifdef DAWN_ENABLE_WGSL
+        std::unique_ptr<tint::ast::Module> mTintModule;
+#endif
     };
 
 }}  // namespace dawn_native::d3d12

@@ -40,6 +40,7 @@ namespace dawn_native {
     class PersistentCache;
     class StagingBufferBase;
     struct InternalPipelineStore;
+    struct ShaderModuleParseResult;
 
     class DeviceBase {
       public:
@@ -129,7 +130,8 @@ namespace dawn_native {
         void UncacheSampler(SamplerBase* obj);
 
         ResultOrError<ShaderModuleBase*> GetOrCreateShaderModule(
-            const ShaderModuleDescriptor* descriptor);
+            const ShaderModuleDescriptor* descriptor,
+            ShaderModuleParseResult* parseResult);
         void UncacheShaderModule(ShaderModuleBase* obj);
 
         Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentStateBlueprint* blueprint);
@@ -275,7 +277,8 @@ namespace dawn_native {
         virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) = 0;
         virtual ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
-            const ShaderModuleDescriptor* descriptor) = 0;
+            const ShaderModuleDescriptor* descriptor,
+            ShaderModuleParseResult* parseResult) = 0;
         virtual ResultOrError<SwapChainBase*> CreateSwapChainImpl(
             const SwapChainDescriptor* descriptor) = 0;
         // Note that previousSwapChain may be nullptr, or come from a different backend.
