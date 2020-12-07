@@ -29,7 +29,6 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 

@@ -23,9 +23,6 @@ namespace spirv {
 Parser::Parser(const std::vector<uint32_t>& spv_binary)
     : Reader(), impl_(std::make_unique<ParserImpl>(spv_binary)) {}
 
-Parser::Parser(Context*, const std::vector<uint32_t>& spv_binary)
-    : Parser(spv_binary) {}
-
 Parser::~Parser() = default;
 
 bool Parser::Parse() {

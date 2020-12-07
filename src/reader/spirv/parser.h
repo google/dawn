@@ -19,7 +19,6 @@
 #include <memory>
 #include <vector>
 
-#include "src/context.h"
 #include "src/reader/reader.h"
 
 namespace tint {
@@ -34,11 +33,6 @@ class Parser : public Reader {
   /// Creates a new parser
   /// @param input the input data to parse
   explicit Parser(const std::vector<uint32_t>& input);
-  /// Creates a new parser
-  /// DEPRECATED
-  /// @param ctx the non-null context object
-  /// @param input the input data to parse
-  Parser(Context* ctx, const std::vector<uint32_t>& input);
   /// Destructor
   ~Parser() override;
 

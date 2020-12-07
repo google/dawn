@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/case_statement.h"
+#include <unordered_set>
 
 #include "gtest/gtest.h"
+#include "src/ast/case_statement.h"
 #include "src/reader/wgsl/parser.h"
 #include "src/writer/wgsl/generator.h"
 
@@ -107,8 +108,7 @@ fn main() -> void {
 )");
 
   // Parse the wgsl, create the src module
-  Context ctx;
-  reader::wgsl::Parser parser(&ctx, &file);
+  reader::wgsl::Parser parser(&file);
   ASSERT_TRUE(parser.Parse()) << parser.error();
   auto src = parser.module();
 

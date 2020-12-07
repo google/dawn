@@ -28,7 +28,6 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/i32_type.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"

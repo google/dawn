@@ -60,9 +60,6 @@ namespace tint {
 
 TypeDeterminer::TypeDeterminer(ast::Module* mod) : mod_(mod) {}
 
-TypeDeterminer::TypeDeterminer(Context*, ast::Module* mod)
-    : TypeDeterminer(mod) {}
-
 TypeDeterminer::~TypeDeterminer() = default;
 
 void TypeDeterminer::set_error(const Source& src, const std::string& msg) {

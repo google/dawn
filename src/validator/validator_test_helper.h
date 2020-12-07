@@ -52,7 +52,6 @@ class ValidatorTestHelper {
 
  private:
   std::unique_ptr<ValidatorImpl> v_;
-  Context ctx_;
   ast::Module mod_;
   std::unique_ptr<TypeDeterminer> td_;
   ast::type::Void void_type_;

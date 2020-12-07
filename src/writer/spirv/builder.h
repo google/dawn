@@ -51,7 +51,6 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/context.h"
 #include "src/scope_stack.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
@@ -85,11 +84,6 @@ class Builder {
   /// Constructor
   /// @param mod the module to generate from
   explicit Builder(ast::Module* mod);
-  /// Constructor
-  /// DEPRECATED
-  /// @param ctx the context, must be non-null
-  /// @param mod the module to generate from
-  Builder(Context* ctx, ast::Module* mod);
   ~Builder();
 
   /// Generates the SPIR-V instructions for the given module

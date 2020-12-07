@@ -19,7 +19,6 @@
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
 

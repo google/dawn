@@ -58,7 +58,7 @@ class VertexPullingHelper {
   void InitTransform(VertexStateDescriptor vertex_state) {
     EXPECT_TRUE(mod_->IsValid());
 
-    TypeDeterminer td(&ctx_, mod_.get());
+    TypeDeterminer td(mod_.get());
     EXPECT_TRUE(td.Determine());
 
     transform_->SetVertexState(vertex_state);
@@ -80,6 +80,7 @@ class VertexPullingHelper {
   }
 
   ast::Module* mod() { return mod_.get(); }
+
   Manager* manager() { return manager_.get(); }
   VertexPulling* transform() { return transform_; }
 
@@ -93,7 +94,6 @@ class VertexPullingHelper {
   }
 
  private:
-  Context ctx_;
   std::unique_ptr<ast::Module> mod_;
   std::unique_ptr<Manager> manager_;
   VertexPulling* transform_;

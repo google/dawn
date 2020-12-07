@@ -21,7 +21,6 @@
 
 #include "src/ast/module.h"
 #include "src/ast/type/storage_texture_type.h"
-#include "src/context.h"
 #include "src/scope_stack.h"
 
 namespace tint {
@@ -46,11 +45,6 @@ class TypeDeterminer {
   /// Constructor
   /// @param mod the module to update with typing information
   explicit TypeDeterminer(ast::Module* mod);
-  /// Constructor
-  /// DEPRECATED
-  /// @param ctx the tint context, must be non-null
-  /// @param mod the module to update with typing information
-  TypeDeterminer(Context* ctx, ast::Module* mod);
   ~TypeDeterminer();
 
   /// @returns error messages from the type determiner

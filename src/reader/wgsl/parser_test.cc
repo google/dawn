@@ -15,7 +15,6 @@
 #include "src/reader/wgsl/parser.h"
 
 #include "gtest/gtest.h"
-#include "src/context.h"
 
 namespace tint {
 namespace reader {
@@ -25,14 +24,12 @@ namespace {
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Empty) {
-  Context ctx;
   Source::File file("test.wgsl", "");
-  Parser p(&ctx, &file);
+  Parser p(&file);
   ASSERT_TRUE(p.Parse()) << p.error();
 }
 
 TEST_F(ParserTest, Parses) {
-  Context ctx;
   Source::File file("test.wgsl", R"(
 [[location(0)]] var<out> gl_FragColor : vec4<f32>;
 
@@ -41,7 +38,7 @@ fn main() -> void {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1);
 }
 )");
-  Parser p(&ctx, &file);
+  Parser p(&file);
   ASSERT_TRUE(p.Parse()) << p.error();
 
   auto m = p.module();
@@ -50,12 +47,11 @@ fn main() -> void {
 }
 
 TEST_F(ParserTest, HandlesError) {
-  Context ctx;
   Source::File file("test.wgsl", R"(
 fn main() ->  {  # missing return type
   return;
 })");
-  Parser p(&ctx, &file);
+  Parser p(&file);
 
   ASSERT_FALSE(p.Parse());
   ASSERT_TRUE(p.has_error());

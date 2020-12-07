@@ -279,8 +279,6 @@ Builder::AccessorInfo::~AccessorInfo() {}
 
 Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
 
-Builder::Builder(Context*, ast::Module* mod) : Builder(mod) {}
-
 Builder::~Builder() = default;
 
 bool Builder::Build() {

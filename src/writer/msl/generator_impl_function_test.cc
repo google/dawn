@@ -45,7 +45,6 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"

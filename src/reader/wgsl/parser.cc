@@ -25,8 +25,6 @@ namespace wgsl {
 Parser::Parser(Source::File const* file)
     : Reader(), impl_(std::make_unique<ParserImpl>(file)) {}
 
-Parser::Parser(Context*, Source::File const* file) : Parser(file) {}
-
 Parser::~Parser() = default;
 
 bool Parser::Parse() {

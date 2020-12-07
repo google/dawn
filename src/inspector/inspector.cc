@@ -45,9 +45,6 @@ namespace inspector {
 
 Inspector::Inspector(const ast::Module& module) : module_(module) {}
 
-Inspector::Inspector(Context*, const ast::Module& module)
-    : Inspector(std::move(module)) {}
-
 Inspector::~Inspector() = default;
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {

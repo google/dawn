@@ -92,12 +92,11 @@ TEST_F(StorageTextureTest, TypeName) {
 }
 
 TEST_F(StorageTextureTest, F32) {
-  Context ctx;
   Module mod;
   Type* s = mod.create<StorageTexture>(TextureDimension::k2dArray,
                                        ast::AccessControl::kReadOnly,
                                        ImageFormat::kRgba32Float);
-  TypeDeterminer td(&ctx, &mod);
+  TypeDeterminer td(&mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<Texture>());
@@ -106,12 +105,11 @@ TEST_F(StorageTextureTest, F32) {
 }
 
 TEST_F(StorageTextureTest, U32) {
-  Context ctx;
   Module mod;
   Type* s = mod.create<StorageTexture>(TextureDimension::k2dArray,
                                        ast::AccessControl::kReadOnly,
                                        ImageFormat::kRg32Uint);
-  TypeDeterminer td(&ctx, &mod);
+  TypeDeterminer td(&mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<Texture>());
@@ -120,12 +118,11 @@ TEST_F(StorageTextureTest, U32) {
 }
 
 TEST_F(StorageTextureTest, I32) {
-  Context ctx;
   Module mod;
   Type* s = mod.create<StorageTexture>(TextureDimension::k2dArray,
                                        ast::AccessControl::kReadOnly,
                                        ImageFormat::kRgba32Sint);
-  TypeDeterminer td(&ctx, &mod);
+  TypeDeterminer td(&mod);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(s->Is<Texture>());

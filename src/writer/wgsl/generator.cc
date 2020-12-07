@@ -23,9 +23,6 @@ namespace wgsl {
 Generator::Generator(ast::Module module)
     : Text(std::move(module)), impl_(std::make_unique<GeneratorImpl>()) {}
 
-Generator::Generator(Context*, ast::Module module)
-    : Generator(std::move(module)) {}
-
 Generator::~Generator() = default;
 
 void Generator::Reset() {

@@ -27,7 +27,6 @@
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 

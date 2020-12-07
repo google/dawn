@@ -30,7 +30,6 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"

@@ -26,7 +26,6 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"

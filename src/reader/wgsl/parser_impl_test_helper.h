@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/context.h"
 #include "src/reader/wgsl/parser_impl.h"
 
 namespace tint {

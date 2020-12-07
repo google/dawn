@@ -21,7 +21,6 @@
 #include "src/ast/expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
-#include "src/context.h"
 #include "src/scope_stack.h"
 #include "src/transform/transform.h"
 

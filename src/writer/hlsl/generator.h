@@ -32,11 +32,6 @@ class Generator : public Text {
   /// Constructor
   /// @param module the module to convert
   explicit Generator(ast::Module module);
-  /// Constructor
-  /// DEPRECATED
-  /// @param ctx the context, must be non-null
-  /// @param module the module to convert
-  Generator(Context* ctx, ast::Module module);
   ~Generator() override;
 
   /// Resets the generator

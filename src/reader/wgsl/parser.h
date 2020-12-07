@@ -18,7 +18,6 @@
 #include <memory>
 #include <string>
 
-#include "src/context.h"
 #include "src/reader/reader.h"
 #include "src/source.h"
 
@@ -34,11 +33,6 @@ class Parser : public Reader {
   /// Creates a new parser from the given file.
   /// @param file the input source file to parse
   explicit Parser(Source::File const* file);
-  /// Creates a new parser from the given file.
-  /// DEPRECATED
-  /// @param ctx the non-null context object
-  /// @param file the input source file to parse
-  Parser(Context* ctx, Source::File const* file);
   ~Parser() override;
 
   /// Run the parser

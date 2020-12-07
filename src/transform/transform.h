@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "src/ast/module.h"
-#include "src/context.h"
 #include "src/diagnostic/diagnostic.h"
 
 namespace tint {

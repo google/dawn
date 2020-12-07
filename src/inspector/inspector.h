@@ -23,7 +23,6 @@
 
 #include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
-#include "src/context.h"
 #include "src/inspector/entry_point.h"
 #include "src/inspector/scalar.h"
 
@@ -74,11 +73,6 @@ class Inspector {
   /// Constructor
   /// @param module Shader module to extract information from.
   explicit Inspector(const ast::Module& module);
-  /// Constructor
-  /// DEPRECATED
-  /// @param ctx the context, must be non-null
-  /// @param module Shader module to extract information from.
-  Inspector(Context* ctx, const ast::Module& module);
   ~Inspector();
 
   /// @returns error messages from the Inspector

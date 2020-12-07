@@ -19,7 +19,6 @@
 
 #include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
-#include "src/context.h"
 
 namespace tint {
 namespace writer {

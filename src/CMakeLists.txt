@@ -213,8 +213,6 @@ set(TINT_LIB_SRCS
   ast/workgroup_decoration.h
   castable.cc
   castable.h
-  context.cc
-  context.h
   diagnostic/diagnostic.cc
   diagnostic/diagnostic.h
   diagnostic/formatter.cc
