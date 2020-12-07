@@ -60,9 +60,6 @@ class Struct : public Castable<Struct, Node> {
   /// @returns the struct decorations
   const StructDecorationList& decorations() const { return decorations_; }
 
-  /// Sets the struct members
-  /// @param members the members to set
-  void set_members(StructMemberList members) { members_ = std::move(members); }
   /// @returns the members
   const StructMemberList& members() const { return members_; }
 

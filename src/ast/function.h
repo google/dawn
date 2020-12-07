@@ -165,9 +165,6 @@ class Function : public Castable<Function, Node> {
   /// @returns true if `name` is an ancestor entry point of this function
   bool HasAncestorEntryPoint(const std::string& name) const;
 
-  /// Sets the return type of the function
-  /// @param type the return type
-  void set_return_type(type::Type* type) { return_type_ = type; }
   /// @returns the function return type.
   type::Type* return_type() const { return return_type_; }
   /// @returns a pointer to the last statement of the function or nullptr if

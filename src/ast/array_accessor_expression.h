@@ -46,9 +46,6 @@ class ArrayAccessorExpression
   /// @returns the array
   Expression* array() const { return array_; }
 
-  /// Sets the index expression
-  /// @param idx_expr the index expression
-  void set_idx_expr(Expression* idx_expr) { idx_expr_ = idx_expr; }
   /// @returns the index expression
   Expression* idx_expr() const { return idx_expr_; }
 

@@ -31,9 +31,6 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   SintLiteral(type::Type* type, int32_t value);
   ~SintLiteral() override;
 
-  /// Updates the literals value
-  /// @param val the value to set
-  void set_value(int32_t val) { value_ = val; }
   /// @returns the int literal value
   int32_t value() const { return value_; }
 

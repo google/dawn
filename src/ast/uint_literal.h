@@ -31,9 +31,6 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   UintLiteral(type::Type* type, uint32_t value);
   ~UintLiteral() override;
 
-  /// Updates the literals value
-  /// @param val the value to set
-  void set_value(uint32_t val) { value_ = val; }
   /// @returns the uint literal value
   uint32_t value() const { return value_; }
 
