@@ -33,6 +33,28 @@ std::string Preamble() {
   return R"(
   OpCapability Shader
   %glsl = OpExtInstImport "GLSL.std.450"
+  OpMemoryModel Logical GLSL450
+  OpEntryPoint GLCompute %100 "main"
+  OpExecutionMode %100 LocalSize 1 1 1
+
+  OpName %u1 "u1"
+  OpName %u2 "u2"
+  OpName %u3 "u3"
+  OpName %i1 "i1"
+  OpName %i2 "i2"
+  OpName %i3 "i3"
+  OpName %f1 "f1"
+  OpName %f2 "f2"
+  OpName %f3 "f3"
+  OpName %v2u1 "v2u1"
+  OpName %v2u2 "v2u2"
+  OpName %v2u3 "v2u3"
+  OpName %v2i1 "v2i1"
+  OpName %v2i2 "v2i2"
+  OpName %v2i3 "v2i3"
+  OpName %v2f1 "v2f1"
+  OpName %v2f2 "v2f2"
+  OpName %v2f3 "v2f3"
 
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
@@ -64,6 +86,34 @@ std::string Preamble() {
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
   %v2float_70_70 = OpConstantComposite %v2float %float_70 %float_70
+
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  %u1 = OpCopyObject %uint %uint_10
+  %u2 = OpCopyObject %uint %uint_15
+  %u3 = OpCopyObject %uint %uint_20
+
+  %i1 = OpCopyObject %int %int_30
+  %i2 = OpCopyObject %int %int_35
+  %i3 = OpCopyObject %int %int_40
+
+  %f1 = OpCopyObject %float %float_50
+  %f2 = OpCopyObject %float %float_60
+  %f3 = OpCopyObject %float %float_70
+
+  %v2u1 = OpCopyObject %v2uint %v2uint_10_20
+  %v2u2 = OpCopyObject %v2uint %v2uint_20_10
+  %v2u3 = OpCopyObject %v2uint %v2uint_15_15
+
+  %v2i1 = OpCopyObject %v2int %v2int_30_40
+  %v2i2 = OpCopyObject %v2int %v2int_40_30
+  %v2i3 = OpCopyObject %v2int %v2int_35_35
+
+  %v2f1 = OpCopyObject %v2float %v2float_50_60
+  %v2f2 = OpCopyObject %v2float %v2float_60_50
+  %v2f3 = OpCopyObject %v2float %v2float_70_70
+
 )";
 }
 
@@ -102,10 +152,8 @@ using SpvParserTest_GlslStd450_Uinting_UintingUintingUinting =
 
 TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %float_50
+                        GetParam().opcode + R"( %f1
      OpReturn
      OpFunctionEnd
   )";
@@ -123,7 +171,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          ScalarConstructor[not set]{50.000000}
+          Identifier[not set]{f1}
         )
       }
     }
@@ -133,10 +181,8 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
 
 TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %v2float_50_60
+                        GetParam().opcode + R"( %v2f1
      OpReturn
      OpFunctionEnd
   )";
@@ -154,11 +200,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{50.000000}
-            ScalarConstructor[not set]{60.000000}
-          }
+          Identifier[not set]{v2f1}
         )
       }
     }
@@ -168,10 +210,8 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
 
 TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %float_50 %float_60
+                        GetParam().opcode + R"( %f1 %f2
      OpReturn
      OpFunctionEnd
   )";
@@ -189,8 +229,8 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          ScalarConstructor[not set]{50.000000}
-          ScalarConstructor[not set]{60.000000}
+          Identifier[not set]{f1}
+          Identifier[not set]{f2}
         )
       }
     }
@@ -200,10 +240,8 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
 
 TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %v2float_50_60 %v2float_60_50
+                        GetParam().opcode + R"( %v2f1 %v2f2
      OpReturn
      OpFunctionEnd
   )";
@@ -221,16 +259,8 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{50.000000}
-            ScalarConstructor[not set]{60.000000}
-          }
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{60.000000}
-            ScalarConstructor[not set]{50.000000}
-          }
+          Identifier[not set]{v2f1}
+          Identifier[not set]{v2f2}
         )
       }
     }
@@ -240,10 +270,8 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
 
 TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %float_50
+                        GetParam().opcode + R"( %f1
      OpReturn
      OpFunctionEnd
   )";
@@ -261,7 +289,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          ScalarConstructor[not set]{50.000000}
+          Identifier[not set]{f1}
         )
       }
     }
@@ -271,10 +299,8 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
 
 TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %v2float %glsl )" +
-                        GetParam().opcode + R"( %v2float_50_60
+                        GetParam().opcode + R"( %v2f1
      OpReturn
      OpFunctionEnd
   )";
@@ -292,11 +318,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{50.000000}
-            ScalarConstructor[not set]{60.000000}
-          }
+          Identifier[not set]{v2f1}
         )
       }
     }
@@ -306,10 +328,8 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %float_50 %float_60
+                        GetParam().opcode + R"( %f1 %f2
      OpReturn
      OpFunctionEnd
   )";
@@ -327,8 +347,8 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          ScalarConstructor[not set]{50.000000}
-          ScalarConstructor[not set]{60.000000}
+          Identifier[not set]{f1}
+          Identifier[not set]{f2}
         )
       }
     }
@@ -338,10 +358,8 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %v2float %glsl )" +
-                        GetParam().opcode + R"( %v2float_50_60 %v2float_60_50
+                        GetParam().opcode + R"( %v2f1 %v2f2
      OpReturn
      OpFunctionEnd
   )";
@@ -359,16 +377,8 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{50.000000}
-            ScalarConstructor[not set]{60.000000}
-          }
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{60.000000}
-            ScalarConstructor[not set]{50.000000}
-          }
+          Identifier[not set]{v2f1}
+          Identifier[not set]{v2f2}
         )
       }
     }
@@ -378,10 +388,8 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %float_50 %float_60 %float_70
+                        GetParam().opcode + R"( %f1 %f2 %f3
      OpReturn
      OpFunctionEnd
   )";
@@ -399,9 +407,9 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          ScalarConstructor[not set]{50.000000}
-          ScalarConstructor[not set]{60.000000}
-          ScalarConstructor[not set]{70.000000}
+          Identifier[not set]{f1}
+          Identifier[not set]{f2}
+          Identifier[not set]{f3}
         )
       }
     }
@@ -411,11 +419,9 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %v2float %glsl )" +
                         GetParam().opcode +
-                        R"( %v2float_50_60 %v2float_60_50 %v2float_70_70
+                        R"( %v2f1 %v2f2 %v2f3
      OpReturn
      OpFunctionEnd
   )";
@@ -433,21 +439,9 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{50.000000}
-            ScalarConstructor[not set]{60.000000}
-          }
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{60.000000}
-            ScalarConstructor[not set]{50.000000}
-          }
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{70.000000}
-            ScalarConstructor[not set]{70.000000}
-          }
+          Identifier[not set]{v2f1}
+          Identifier[not set]{v2f2}
+          Identifier[not set]{v2f3}
         )
       }
     }
@@ -482,10 +476,9 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %int %glsl )" +
-                        GetParam().opcode + R"( %int_30 %int_35 %int_40
+                        GetParam().opcode +
+                        R"( %i1 %i2 %i3
      OpReturn
      OpFunctionEnd
   )";
@@ -503,9 +496,9 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          ScalarConstructor[not set]{30}
-          ScalarConstructor[not set]{35}
-          ScalarConstructor[not set]{40}
+          Identifier[not set]{i1}
+          Identifier[not set]{i2}
+          Identifier[not set]{i3}
         )
       }
     }
@@ -515,11 +508,9 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %v2int %glsl )" +
                         GetParam().opcode +
-                        R"( %v2int_30_40 %v2int_40_30 %v2int_35_35
+                        R"( %v2i1 %v2i2 %v2i3
      OpReturn
      OpFunctionEnd
   )";
@@ -537,21 +528,9 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          TypeConstructor[not set]{
-            __vec_2__i32
-            ScalarConstructor[not set]{30}
-            ScalarConstructor[not set]{40}
-          }
-          TypeConstructor[not set]{
-            __vec_2__i32
-            ScalarConstructor[not set]{40}
-            ScalarConstructor[not set]{30}
-          }
-          TypeConstructor[not set]{
-            __vec_2__i32
-            ScalarConstructor[not set]{35}
-            ScalarConstructor[not set]{35}
-          }
+          Identifier[not set]{v2i1}
+          Identifier[not set]{v2i2}
+          Identifier[not set]{v2i3}
         )
       }
     }
@@ -565,10 +544,8 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %uint %glsl )" +
-                        GetParam().opcode + R"( %uint_10 %uint_15 %uint_20
+                        GetParam().opcode + R"( %u1 %u2 %u3
      OpReturn
      OpFunctionEnd
   )";
@@ -586,9 +563,9 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          ScalarConstructor[not set]{10}
-          ScalarConstructor[not set]{15}
-          ScalarConstructor[not set]{20}
+          Identifier[not set]{u1}
+          Identifier[not set]{u2}
+          Identifier[not set]{u3}
         )
       }
     }
@@ -598,11 +575,9 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
   const auto assembly = Preamble() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
      %1 = OpExtInst %v2uint %glsl )" +
                         GetParam().opcode +
-                        R"( %v2uint_10_20 %v2uint_20_10 %v2uint_15_15
+                        R"( %v2u1 %v2u2 %v2u3
      OpReturn
      OpFunctionEnd
   )";
@@ -620,21 +595,9 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
         Identifier[not set]{)" + GetParam().wgsl_func +
                                                  R"(}
         (
-          TypeConstructor[not set]{
-            __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
-          }
-          TypeConstructor[not set]{
-            __vec_2__u32
-            ScalarConstructor[not set]{20}
-            ScalarConstructor[not set]{10}
-          }
-          TypeConstructor[not set]{
-            __vec_2__u32
-            ScalarConstructor[not set]{15}
-            ScalarConstructor[not set]{15}
-          }
+          Identifier[not set]{v2u1}
+          Identifier[not set]{v2u2}
+          Identifier[not set]{v2u3}
         )
       }
     }
