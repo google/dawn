@@ -153,9 +153,6 @@ class Function : public Castable<Function, Node> {
   // function is empty
   const Statement* get_last_statement() const;
 
-  /// Sets the body of the function
-  /// @param body the function body
-  void set_body(BlockStatement* body) { body_ = body; }
   /// @returns the function body
   const BlockStatement* body() const { return body_; }
   /// @returns the function body

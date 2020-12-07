@@ -143,12 +143,6 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   ast::type::F32 f32;
   ast::type::Void void_type;
 
-  ast::Function func(
-      Source{}, "main", {}, &void_type, create<ast::BlockStatement>(),
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
-      });
-
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("my_out"),
@@ -160,7 +154,12 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("my_out"),
       create<ast::IdentifierExpression>("my_in")));
-  func.set_body(body);
+
+  ast::Function func(
+      Source{}, "main", {}, &void_type, body,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+      });
 
   auto* v_in =
       create<ast::Variable>(Source{}, "my_in", ast::StorageClass::kInput, &f32);

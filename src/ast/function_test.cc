@@ -185,12 +185,11 @@ TEST_F(FunctionTest, IsValid) {
   params.push_back(
       create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
 
-  auto* block = create<BlockStatement>();
-  block->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
-  Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
+  Function f(Source{}, "func", params, &void_type, body,
              FunctionDecorationList{});
-  f.set_body(block);
   EXPECT_TRUE(f.IsValid());
 }
 
@@ -253,13 +252,13 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   params.push_back(
       create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
 
-  auto* block = create<BlockStatement>();
-  block->append(create<DiscardStatement>());
-  block->append(nullptr);
+  auto* body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
+  body->append(nullptr);
 
-  Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
+  Function f(Source{}, "func", params, &void_type, body,
              FunctionDecorationList{});
-  f.set_body(block);
+
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -271,13 +270,12 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   params.push_back(
       create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
 
-  auto* block = create<BlockStatement>();
-  block->append(create<DiscardStatement>());
-  block->append(nullptr);
+  auto* body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
+  body->append(nullptr);
 
-  Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
+  Function f(Source{}, "func", params, &void_type, body,
              FunctionDecorationList{});
-  f.set_body(block);
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -285,12 +283,10 @@ TEST_F(FunctionTest, ToStr) {
   type::Void void_type;
   type::I32 i32;
 
-  auto* block = create<BlockStatement>();
-  block->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
-  Function f(Source{}, "func", {}, &void_type, create<BlockStatement>(),
-             FunctionDecorationList{});
-  f.set_body(block);
+  Function f(Source{}, "func", {}, &void_type, body, FunctionDecorationList{});
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -306,11 +302,11 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
   type::Void void_type;
   type::I32 i32;
 
-  auto* block = create<BlockStatement>();
-  block->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
   Function f(
-      Source{}, "func", {}, &void_type, block,
+      Source{}, "func", {}, &void_type, body,
       FunctionDecorationList{create<WorkgroupDecoration>(2, 4, 6, Source{})});
 
   std::ostringstream out;
@@ -332,12 +328,11 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   params.push_back(
       create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
 
-  auto* block = create<BlockStatement>();
-  block->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>();
+  body->append(create<DiscardStatement>());
 
-  Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
+  Function f(Source{}, "func", params, &void_type, body,
              FunctionDecorationList{});
-  f.set_body(block);
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -386,9 +381,8 @@ TEST_F(FunctionTest, GetLastStatement) {
   auto* body = create<BlockStatement>();
   auto* stmt = create<DiscardStatement>();
   body->append(stmt);
-  Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
+  Function f(Source{}, "func", params, &void_type, body,
              FunctionDecorationList{});
-  f.set_body(body);
 
   EXPECT_EQ(f.get_last_statement(), stmt);
 }
@@ -398,9 +392,8 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
 
   VariableList params;
   auto* body = create<BlockStatement>();
-  Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
+  Function f(Source{}, "func", params, &void_type, body,
              FunctionDecorationList{});
-  f.set_body(body);
 
   EXPECT_EQ(f.get_last_statement(), nullptr);
 }

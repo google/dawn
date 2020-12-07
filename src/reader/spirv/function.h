@@ -328,12 +328,6 @@ class FunctionEmitter {
   /// @returns the parser implementation
   ParserImpl* parser() { return &parser_impl_; }
 
-  /// Emits the declaration, which comprises the name, parameters, and
-  /// return type. The function AST node is appended to the module
-  /// AST node.
-  /// @returns true if emission has not yet failed.
-  bool EmitFunctionDeclaration();
-
   /// Emits the function body, populating the bottom entry of the statements
   /// stack.
   /// @returns false if emission failed.
@@ -700,6 +694,31 @@ class FunctionEmitter {
       const spvtools::opt::Instruction& image_access);
 
  private:
+  /// FunctionDeclaration contains the parsed information for a function header.
+  struct FunctionDeclaration {
+    /// Constructor
+    FunctionDeclaration();
+    /// Destructor
+    ~FunctionDeclaration();
+
+    /// Parsed header source
+    Source source;
+    /// Function name
+    std::string name;
+    /// Function parameters
+    ast::VariableList params;
+    /// Function return type
+    ast::type::Type* return_type;
+    /// Function decorations
+    ast::FunctionDecorationList decorations;
+  };
+
+  /// Parse the function declaration, which comprises the name, parameters, and
+  /// return type, populating `decl`.
+  /// @param decl the FunctionDeclaration to populate
+  /// @returns true if emission has not yet failed.
+  bool ParseFunctionDeclaration(FunctionDeclaration* decl);
+
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
   ast::type::Type* GetVariableStoreType(

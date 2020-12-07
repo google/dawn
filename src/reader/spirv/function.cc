@@ -702,7 +702,8 @@ bool FunctionEmitter::Emit() {
     return true;
   }
 
-  if (!EmitFunctionDeclaration()) {
+  FunctionDeclaration decl;
+  if (!ParseFunctionDeclaration(&decl)) {
     return false;
   }
 
@@ -716,8 +717,12 @@ bool FunctionEmitter::Emit() {
                      "element but has "
                   << statements_stack_.size();
   }
+
   auto* body = statements_stack_[0].statements_;
-  parser_impl_.get_module().functions().back()->set_body(body);
+  ast_module_.AddFunction(create<ast::Function>(
+      decl.source, decl.name, std::move(decl.params), decl.return_type, body,
+      std::move(decl.decorations)));
+
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();
   PushNewStatementBlock(constructs_[0].get(), 0, nullptr, nullptr, nullptr);
@@ -725,7 +730,7 @@ bool FunctionEmitter::Emit() {
   return success();
 }
 
-bool FunctionEmitter::EmitFunctionDeclaration() {
+bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
   if (failed()) {
     return false;
   }
@@ -774,11 +779,11 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
   if (ep_info_ != nullptr) {
     decos.emplace_back(create<ast::StageDecoration>(ep_info_->stage, Source{}));
   }
-  auto* ast_fn =
-      create<ast::Function>(Source{}, name, std::move(ast_params), ret_ty,
-                            create<ast::BlockStatement>(), std::move(decos));
 
-  ast_module_.AddFunction(ast_fn);
+  decl->name = name;
+  decl->params = std::move(ast_params);
+  decl->return_type = ret_ty;
+  decl->decorations = std::move(decos);
 
   return success();
 }
@@ -4113,6 +4118,9 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
   // We must do a bitcast conversion.
   return ast_module_.create<ast::BitcastExpression>(dest_type, texel_prefix);
 }
+
+FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
+FunctionEmitter::FunctionDeclaration::~FunctionDeclaration() = default;
 
 }  // namespace spirv
 }  // namespace reader
