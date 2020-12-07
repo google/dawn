@@ -50,6 +50,22 @@ namespace dawn_native { namespace metal {
                                   const RenderPipeline* renderPipeline = nullptr);
 
       private:
+        ResultOrError<std::string> TranslateToMSLWithTint(const char* entryPointName,
+                                                          SingleShaderStage stage,
+                                                          const PipelineLayout* layout,
+                                                          uint32_t sampleMask,
+                                                          const RenderPipeline* renderPipeline,
+                                                          std::string* remappedEntryPointName,
+                                                          bool* needsStorageBufferLength);
+        ResultOrError<std::string> TranslateToMSLWithSPIRVCross(
+            const char* entryPointName,
+            SingleShaderStage stage,
+            const PipelineLayout* layout,
+            uint32_t sampleMask,
+            const RenderPipeline* renderPipeline,
+            std::string* remappedEntryPointName,
+            bool* needsStorageBufferLength);
+
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
