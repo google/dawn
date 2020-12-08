@@ -95,7 +95,6 @@ class FirstIndexOffset : public Transform {
   /// @param field_name name of field in firstVertex/Instance buffer
   /// @param buffer_var variable of firstVertex/Instance buffer
   /// @param func function to modify
-  /// @returns true if it was able to add constant to function
   void AddFirstIndexOffset(const std::string& original_name,
                            const std::string& field_name,
                            ast::Variable* buffer_var,
