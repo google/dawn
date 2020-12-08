@@ -71,14 +71,14 @@ expected_texture_overload_spirv expected_texture_overload(
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
 %15 = OpConstant %4 1
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 2
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%16 = OpConvertUToF %4 %18
+%16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %14 %15 %16
 %8 = OpImageSampleImplicitLod %9 %13 %19
 )"};
@@ -148,14 +148,14 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20
 )"};
@@ -174,21 +174,20 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
-%22 = OpTypeInt 32 1
-%21 = OpTypeVector %22 2
-%23 = OpConstant %22 4
-%24 = OpConstant %22 5
-%25 = OpConstantComposite %21 %23 %24
+%21 = OpTypeVector %18 2
+%22 = OpConstant %18 4
+%23 = OpConstant %18 5
+%24 = OpConstantComposite %21 %22 %23
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleImplicitLod %9 %13 %20 Offset %25
+%8 = OpImageSampleImplicitLod %9 %13 %20 Offset %24
 )"};
     case ValidTextureOverload::kSample3dF32:
       return {
@@ -283,14 +282,14 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20
 )"};
@@ -357,14 +356,14 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 3
 )",
           R"(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%16 = OpConvertUToF %4 %18
+%16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleImplicitLod %4 %12 %19
 )"};
@@ -382,21 +381,20 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 3
-%21 = OpTypeInt 32 1
-%20 = OpTypeVector %21 2
-%22 = OpConstant %21 4
-%23 = OpConstant %21 5
-%24 = OpConstantComposite %20 %22 %23
+%20 = OpTypeVector %17 2
+%21 = OpConstant %17 4
+%22 = OpConstant %17 5
+%23 = OpConstantComposite %20 %21 %22
 )",
           R"(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%16 = OpConvertUToF %4 %18
+%16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleImplicitLod %4 %12 %19 Offset %24
+%8 = OpImageSampleImplicitLod %4 %12 %19 Offset %23
 )"};
     case ValidTextureOverload::kSampleDepthCubeF32:
       return {
@@ -436,14 +434,14 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 )",
           R"(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %13 %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %4 %12 %20
 )"};
@@ -515,7 +513,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 %21 = OpConstant %4 3
 )",
@@ -523,7 +521,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20 Bias %21
 )"};
@@ -542,22 +540,21 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
 %21 = OpConstant %4 4
-%23 = OpTypeInt 32 1
-%22 = OpTypeVector %23 2
-%24 = OpConstant %23 5
-%25 = OpConstant %23 6
-%26 = OpConstantComposite %22 %24 %25
+%22 = OpTypeVector %18 2
+%23 = OpConstant %18 5
+%24 = OpConstant %18 6
+%25 = OpConstantComposite %22 %23 %24
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleImplicitLod %9 %13 %20 Bias|Offset %21 %26
+%8 = OpImageSampleImplicitLod %9 %13 %20 Bias|Offset %21 %25
 )"};
     case ValidTextureOverload::kSampleBias3dF32:
       return {
@@ -655,7 +652,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
 %21 = OpConstant %4 4
 )",
@@ -663,7 +660,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20 Bias %21
 )"};
@@ -735,7 +732,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
 %21 = OpConstant %4 4
 )",
@@ -743,7 +740,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Lod %21
 )"};
@@ -762,22 +759,21 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
 %21 = OpConstant %4 4
-%23 = OpTypeInt 32 1
-%22 = OpTypeVector %23 2
-%24 = OpConstant %23 5
-%25 = OpConstant %23 6
-%26 = OpConstantComposite %22 %24 %25
+%22 = OpTypeVector %18 2
+%23 = OpConstant %18 5
+%24 = OpConstant %18 6
+%25 = OpConstantComposite %22 %23 %24
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleExplicitLod %9 %13 %20 Lod|Offset %21 %26
+%8 = OpImageSampleExplicitLod %9 %13 %20 Lod|Offset %21 %25
 )"};
     case ValidTextureOverload::kSampleLevel3dF32:
       return {
@@ -875,7 +871,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 %21 = OpConstant %4 5
 )",
@@ -883,7 +879,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Lod %21
 )"};
@@ -902,7 +898,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstantComposite %13 %14 %15
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 3
 )",
           R"(
@@ -926,19 +922,18 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstantComposite %13 %14 %15
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 3
-%20 = OpTypeInt 32 1
-%19 = OpTypeVector %20 2
-%21 = OpConstant %20 4
-%22 = OpConstant %20 5
-%23 = OpConstantComposite %19 %21 %22
+%19 = OpTypeVector %17 2
+%20 = OpConstant %17 4
+%21 = OpConstant %17 5
+%22 = OpConstantComposite %19 %20 %21
 )",
           R"(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleExplicitLod %4 %12 %16 Lod|Offset %18 %23
+%8 = OpImageSampleExplicitLod %4 %12 %16 Lod|Offset %18 %22
 )"};
     case ValidTextureOverload::kSampleLevelDepth2dArrayF32:
       return {
@@ -954,7 +949,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 3
 %20 = OpConstant %17 4
 )",
@@ -962,7 +957,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%16 = OpConvertUToF %4 %18
+%16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleExplicitLod %4 %12 %19 Lod %20
 )"};
@@ -980,22 +975,21 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 3
 %20 = OpConstant %17 4
-%22 = OpTypeInt 32 1
-%21 = OpTypeVector %22 2
-%23 = OpConstant %22 5
-%24 = OpConstant %22 6
-%25 = OpConstantComposite %21 %23 %24
+%21 = OpTypeVector %17 2
+%22 = OpConstant %17 5
+%23 = OpConstant %17 6
+%24 = OpConstantComposite %21 %22 %23
 )",
           R"(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%16 = OpConvertUToF %4 %18
+%16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleExplicitLod %4 %12 %19 Lod|Offset %20 %25
+%8 = OpImageSampleExplicitLod %4 %12 %19 Lod|Offset %20 %24
 )"};
     case ValidTextureOverload::kSampleLevelDepthCubeF32:
       return {
@@ -1013,7 +1007,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
 %17 = OpConstantComposite %13 %14 %15 %16
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 )",
           R"(
@@ -1037,7 +1031,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 %21 = OpConstant %18 5
 )",
@@ -1045,7 +1039,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %13 %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %4 %12 %20 Lod %21
 )"};
@@ -1127,7 +1121,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
 %21 = OpTypeVector %4 2
 %22 = OpConstant %4 4
@@ -1141,7 +1135,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Grad %24 %27
 )"};
@@ -1160,7 +1154,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpTypeVector %4 3
 %15 = OpConstant %4 1
 %16 = OpConstant %4 2
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
 %21 = OpTypeVector %4 2
 %22 = OpConstant %4 4
@@ -1169,19 +1163,18 @@ expected_texture_overload_spirv expected_texture_overload(
 %25 = OpConstant %4 6
 %26 = OpConstant %4 7
 %27 = OpConstantComposite %21 %25 %26
-%29 = OpTypeInt 32 1
-%28 = OpTypeVector %29 2
-%30 = OpConstant %29 8
-%31 = OpConstant %29 9
-%32 = OpConstantComposite %28 %30 %31
+%28 = OpTypeVector %18 2
+%29 = OpConstant %18 8
+%30 = OpConstant %18 9
+%31 = OpConstantComposite %28 %29 %30
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleExplicitLod %9 %13 %20 Grad|Offset %24 %27 %32
+%8 = OpImageSampleExplicitLod %9 %13 %20 Grad|Offset %24 %27 %31
 )"};
     case ValidTextureOverload::kSampleGrad3dF32:
       return {
@@ -1300,7 +1293,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 %21 = OpTypeVector %4 3
 %22 = OpConstant %4 5
@@ -1316,7 +1309,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Grad %25 %29
 )"};
@@ -1387,7 +1380,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 4
 %20 = OpConstant %4 3
 %21 = OpConstant %4 0
@@ -1396,7 +1389,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%16 = OpConvertUToF %4 %18
+%16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleDrefExplicitLod %4 %12 %19 %20 Lod %21
 )"};
@@ -1414,23 +1407,22 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
-%17 = OpTypeInt 32 0
+%17 = OpTypeInt 32 1
 %18 = OpConstant %17 4
 %20 = OpConstant %4 3
 %21 = OpConstant %4 0
-%23 = OpTypeInt 32 1
-%22 = OpTypeVector %23 2
-%24 = OpConstant %23 5
-%25 = OpConstant %23 6
-%26 = OpConstantComposite %22 %24 %25
+%22 = OpTypeVector %17 2
+%23 = OpConstant %17 5
+%24 = OpConstant %17 6
+%25 = OpConstantComposite %22 %23 %24
 )",
           R"(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%16 = OpConvertUToF %4 %18
+%16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleDrefExplicitLod %4 %12 %19 %20 Lod|Offset %21 %26
+%8 = OpImageSampleDrefExplicitLod %4 %12 %19 %20 Lod|Offset %21 %25
 )"};
     case ValidTextureOverload::kSampleGradDepthCubeF32:
       return {
@@ -1472,7 +1464,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstant %4 3
-%18 = OpTypeInt 32 0
+%18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
 %21 = OpConstant %4 5
 %22 = OpConstant %4 0
@@ -1481,7 +1473,7 @@ expected_texture_overload_spirv expected_texture_overload(
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%17 = OpConvertUToF %4 %19
+%17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %13 %14 %15 %16 %17
 %8 = OpImageSampleDrefExplicitLod %4 %12 %20 %21 Lod %22
 )"};
