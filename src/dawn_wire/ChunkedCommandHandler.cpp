@@ -15,8 +15,7 @@
 #include "dawn_wire/ChunkedCommandHandler.h"
 
 #include <algorithm>
-
-#include <string.h>
+#include <cstring>
 
 namespace dawn_wire {
 
