@@ -17,6 +17,8 @@
 
 #include "dawn_native/ObjectBase.h"
 
+#include <cstddef>
+
 namespace dawn_native {
 
     // Some objects are cached so that instead of creating new duplicate objects,

@@ -670,6 +670,7 @@ namespace dawn_native {
             return {std::move(metadata)};
         }
 
+#ifdef DAWN_ENABLE_WGSL
         // Currently only partially populated the reflection data, needs to be
         // completed using PopulateMetadataUsingSPIRVCross. In the future, once
         // this function is complete, ReflectShaderUsingSPIRVCross and
@@ -677,7 +678,6 @@ namespace dawn_native {
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
             DeviceBase* device,
             const tint::ast::Module& module) {
-#ifdef DAWN_ENABLE_WGSL
             ASSERT(module.IsValid());
 
             EntryPointMetadataTable result;
@@ -699,10 +699,8 @@ namespace dawn_native {
                 result[entryPoint.name] = std::move(metadata);
             }
             return std::move(result);
-#else
-            return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
-#endif  // DAWN_ENABLE_WGSL
         }
+#endif  // DAWN_ENABLE_WGSL
 
         // Uses SPIRV-Cross, which is planned for removal, but until
         // ReflectShaderUsingTint is completed, will be kept as a
@@ -727,6 +725,7 @@ namespace dawn_native {
             return std::move(result);
         }
 
+#ifdef DAWN_ENABLE_WGSL
         // Temporary utility method that allows for polyfilling like behaviour,
         // specifically data missing from the Tint implementation is filled in
         // using the SPIRV-Cross implementation. Once the Tint implementation is
@@ -766,6 +765,7 @@ namespace dawn_native {
             }
             return {};
         }
+#endif  // DAWN_ENABLE_WGSL
 
     }  // anonymous namespace
 
