@@ -41,7 +41,7 @@ bool PackCoordAndArrayIndex(
     ast::Expression* array_idx,
     std::function<bool(ast::TypeConstructorExpression*)> callback) {
   uint32_t packed_size;
-  ast::type::Type* packed_el_ty;  // Currenly must be f32.
+  ast::type::Type* packed_el_ty;  // Currently must be f32.
   if (auto* vec = coords->result_type()->As<ast::type::Vector>()) {
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
