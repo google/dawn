@@ -48,16 +48,33 @@ namespace dawn_native {
     // Aspect::None.
     Aspect TryConvertAspect(const Format& format, wgpu::TextureAspect aspect);
 
+    // Helper struct to make it clear that what the parameters of a range mean.
+    template <typename T>
+    struct FirstAndCountRange {
+        T first;
+        T count;
+    };
+
     struct SubresourceRange {
-        uint32_t baseMipLevel;
-        uint32_t levelCount;
+        SubresourceRange(Aspect aspects,
+                         FirstAndCountRange<uint32_t> arrayLayerParam,
+                         FirstAndCountRange<uint32_t> mipLevelParams);
+        SubresourceRange();
+
+        Aspect aspects;
         uint32_t baseArrayLayer;
         uint32_t layerCount;
-        Aspect aspects;
+        uint32_t baseMipLevel;
+        uint32_t levelCount;
 
         static SubresourceRange SingleMipAndLayer(uint32_t baseMipLevel,
                                                   uint32_t baseArrayLayer,
                                                   Aspect aspects);
+        static SubresourceRange MakeSingle(Aspect aspect,
+                                           uint32_t baseArrayLayer,
+                                           uint32_t baseMipLevel);
+
+        static SubresourceRange MakeFull(Aspect aspects, uint32_t layerCount, uint32_t levelCount);
     };
 
     // Helper function to use aspects as linear indices in arrays.

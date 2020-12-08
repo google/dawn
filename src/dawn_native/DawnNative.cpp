@@ -180,18 +180,18 @@ namespace dawn_native {
         return deviceBase->GetDeprecationWarningCountForTesting();
     }
 
-    bool IsTextureSubresourceInitialized(WGPUTexture texture,
+    bool IsTextureSubresourceInitialized(WGPUTexture cTexture,
                                          uint32_t baseMipLevel,
                                          uint32_t levelCount,
                                          uint32_t baseArrayLayer,
                                          uint32_t layerCount,
-                                         WGPUTextureAspect aspect) {
-        dawn_native::TextureBase* textureBase =
-            reinterpret_cast<dawn_native::TextureBase*>(texture);
-        SubresourceRange range = {
-            baseMipLevel, levelCount, baseArrayLayer, layerCount,
-            ConvertAspect(textureBase->GetFormat(), static_cast<wgpu::TextureAspect>(aspect))};
-        return textureBase->IsSubresourceContentInitialized(range);
+                                         WGPUTextureAspect cAspect) {
+        dawn_native::TextureBase* texture = reinterpret_cast<dawn_native::TextureBase*>(cTexture);
+
+        Aspect aspect =
+            ConvertAspect(texture->GetFormat(), static_cast<wgpu::TextureAspect>(cAspect));
+        SubresourceRange range(aspect, {baseArrayLayer, layerCount}, {baseMipLevel, levelCount});
+        return texture->IsSubresourceContentInitialized(range);
     }
 
     std::vector<const char*> GetProcMapNamesForTestingInternal();

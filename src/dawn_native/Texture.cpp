@@ -421,7 +421,7 @@ namespace dawn_native {
     }
     SubresourceRange TextureBase::GetAllSubresources() const {
         ASSERT(!IsError());
-        return {0, mMipLevelCount, 0, GetArrayLayers(), mFormat.aspects};
+        return {mFormat.aspects, {0, GetArrayLayers()}, {0, mMipLevelCount}};
     }
     uint32_t TextureBase::GetSampleCount() const {
         ASSERT(!IsError());
@@ -577,8 +577,9 @@ namespace dawn_native {
           mTexture(texture),
           mFormat(GetDevice()->GetValidInternalFormat(descriptor->format)),
           mDimension(descriptor->dimension),
-          mRange({descriptor->baseMipLevel, descriptor->mipLevelCount, descriptor->baseArrayLayer,
-                  descriptor->arrayLayerCount, ConvertAspect(mFormat, descriptor->aspect)}) {
+          mRange({ConvertAspect(mFormat, descriptor->aspect),
+                  {descriptor->baseArrayLayer, descriptor->arrayLayerCount},
+                  {descriptor->baseMipLevel, descriptor->mipLevelCount}}) {
     }
 
     TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
