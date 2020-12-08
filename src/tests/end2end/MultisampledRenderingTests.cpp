@@ -315,6 +315,10 @@ TEST_P(MultisampledRenderingTest, ResolveFromSingleLayerArrayInto2DTexture) {
 
 // Test multisampled rendering with depth test works correctly.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTest) {
+    // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
+                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
+
     constexpr bool kTestDepth = true;
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
@@ -670,6 +674,10 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMas
     // TODO(dawn:491): Find out why this test doesn't work on Windows Intel Vulkan.
     DAWN_SKIP_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
 
+    // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
+                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
+
     constexpr bool kTestDepth = true;
     // The second sample is included in the first render pass and it's covered by the triangle.
     constexpr uint32_t kSampleMaskGreen = kSecondSampleMaskBit;
@@ -730,6 +738,9 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMas
 // Test using one multisampled color attachment with resolve target can render correctly
 // with non-default sample mask and shader-output mask.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOutputMask) {
+    // TODO(crbug.com/tint/372): Support sample mask builtin.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr bool kTestDepth = false;
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
@@ -773,6 +784,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
 // Test doing MSAA resolve into multiple resolve targets works correctly with a non-default
 // shader-output mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOutputMask) {
+    // TODO(crbug.com/tint/372): Support sample mask builtin.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
     wgpu::Texture resolveTexture2 = CreateTextureForRenderAttachment(kColorFormat, 1);
@@ -925,6 +939,10 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCo
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
     DAWN_SKIP_TEST_IF(IsSwiftshader());
+
+    // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
+                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
 
     constexpr bool kTestDepth = true;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;

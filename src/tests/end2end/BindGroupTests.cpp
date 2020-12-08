@@ -157,6 +157,10 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
 // It contains a transformation matrix for the VS and the fragment color for the FS.
 // These must result in different register offsets in the native APIs.
 TEST_P(BindGroupTests, ReusedUBO) {
+    // TODO(crbug.com/dawn/571): Fix failures using Tint.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
+                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule =
@@ -229,6 +233,10 @@ TEST_P(BindGroupTests, ReusedUBO) {
 // shader. In D3D12 for example, these different types of bindings end up in different namespaces,
 // but the register offsets used must match between the shader module and descriptor range.
 TEST_P(BindGroupTests, UBOSamplerAndTexture) {
+    // TODO(crbug.com/dawn/571): Fix failures using Tint.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
+                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule =
@@ -327,6 +335,12 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 }
 
 TEST_P(BindGroupTests, MultipleBindLayouts) {
+    // TODO(crbug.com/tint/403):
+    // error: line 74: Expected Result Type to be a scalar type
+    // %44 = OpVectorExtractDynamic %v2float %30 %uint_0_0
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
+                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule =
@@ -1095,6 +1109,11 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.
 TEST_P(BindGroupTests, ReallyLargeBindGroup) {
+    // TODO(crbug.com/tint/399)
+    // Tint SPIRV reader failure:
+    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     std::string interface = "#version 450\n";
     std::string body;

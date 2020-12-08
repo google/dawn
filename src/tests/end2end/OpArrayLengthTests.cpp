@@ -23,6 +23,9 @@ class OpArrayLengthTest : public DawnTest {
     void SetUp() {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/tint/252): Implement arrayLength.
+        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
         // Create buffers of various size to check the length() implementation
         wgpu::BufferDescriptor bufferDesc;
         bufferDesc.size = 4;

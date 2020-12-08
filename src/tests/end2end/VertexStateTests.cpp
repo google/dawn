@@ -524,6 +524,9 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
 
 // Test that overlapping vertex attributes are permitted and load data correctly
 TEST_P(VertexStateTest, OverlappingVertexAttributes) {
+    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     utils::ComboVertexStateDescriptor vertexState =
@@ -617,6 +620,9 @@ class OptionalVertexStateTest : public DawnTest {};
 
 // Test that vertex input is not required in render pipeline descriptor.
 TEST_P(OptionalVertexStateTest, Basic) {
+    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     wgpu::ShaderModule vsModule =

@@ -135,6 +135,9 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
 
 // Verify the basic use of CreateReadyRenderPipeline() works on all backends.
 TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
+    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
     const char* vertexShader = R"(
@@ -211,6 +214,9 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
 // callback.
 TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
     DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
+
+    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
 
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
 
@@ -289,6 +295,9 @@ TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyComputeP
 // Verify there is no error when the device is released before the callback of
 // CreateReadyRenderPipeline() is called.
 TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyRenderPipeline) {
+    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     const char* vertexShader = R"(
         #version 450
         void main() {

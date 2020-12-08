@@ -22,6 +22,9 @@ class ViewportTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
         mQuadVS =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(#version 450
             const vec2 pos[6] = vec2[6](vec2(-1.0f,  1.0f),

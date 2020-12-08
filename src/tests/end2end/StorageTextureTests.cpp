@@ -711,6 +711,9 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
 
 // Test that read-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
+    // TODO(crbug.com/tint/401): SPIR-V reader parses readonly storage textures as read/write.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -748,6 +751,9 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
 
 // Test that read-only storage textures are supported in vertex shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
+    // TODO(crbug.com/tint/401): SPIR-V reader parses readonly storage textures as read/write.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -791,6 +797,9 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
 
 // Test that read-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
+    // TODO(crbug.com/tint/401): SPIR-V reader parses readonly storage textures as read/write.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -826,6 +835,9 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
 
 // Test that write-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
+    // TODO(https://github.com/gpuweb/gpuweb/issues/1107): texture size queries unspecified
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES());
 
@@ -856,6 +868,9 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 // Test that reading from one read-only storage texture then writing into another write-only storage
 // texture in one dispatch are supported in compute shader.
 TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInComputeShader) {
+    // TODO(https://github.com/gpuweb/gpuweb/issues/1107): texture size queries unspecified
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
@@ -890,6 +905,9 @@ TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInCompu
 
 // Test that write-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
+    // TODO(https://github.com/gpuweb/gpuweb/issues/1107): texture size queries unspecified
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
@@ -919,6 +937,9 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 
 // Verify 2D array read-only storage texture works correctly.
 TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
+    // TODO(crbug.com/tint/401): SPIR-V reader parses readonly storage textures as read/write.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr uint32_t kArrayLayerCount = 3u;
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -951,6 +972,9 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
 
 // Verify 2D array write-only storage texture works correctly.
 TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
+    // TODO(https://github.com/gpuweb/gpuweb/issues/1107): texture size queries unspecified
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     constexpr uint32_t kArrayLayerCount = 3u;
@@ -973,6 +997,11 @@ TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
 // Test that multiple dispatches to increment values by ping-ponging between a read-only storage
 // texture and a write-only storage texture are synchronized in one pass.
 TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
+    // TODO(crbug.com/tint/399)
+    // Tint SPIRV reader failure:
+    // Type Determination: v-0006: identifier must be declared before use: textureStore
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -1050,6 +1079,11 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
 // Test that multiple dispatches to increment values by ping-ponging between a sampled texture and
 // a write-only storage texture are synchronized in one pass.
 TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
+    // TODO(crbug.com/tint/399)
+    // Tint SPIRV reader failure:
+    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // TODO(crbug.com/dawn/581): this test requires glClearTexSubImage(), unsupported on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -1177,6 +1211,9 @@ class StorageTextureZeroInitTests : public StorageTextureTests {
 // Verify that the texture is correctly cleared to 0 before its first usage as a read-only storage
 // texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPass) {
+    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     wgpu::Texture readonlyStorageTexture =
         CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
 
@@ -1203,6 +1240,11 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPa
 // Verify that the texture is correctly cleared to 0 before its first usage as a read-only storage
 // texture in a compute pass.
 TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputePass) {
+    // TODO(crbug.com/tint/399)
+    // Tint SPIRV reader failure:
+    // Type Determination: v-0006: identifier must be declared before use: textureStore
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     wgpu::Texture readonlyStorageTexture =
         CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
 
@@ -1230,6 +1272,9 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
 // storage texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderPass) {
+    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // Prepare the write-only storage texture.
     constexpr uint32_t kTexelSizeR32Uint = 4u;
     wgpu::Texture writeonlyStorageTexture = CreateTexture(
@@ -1243,6 +1288,11 @@ TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderP
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
 // texture in a compute pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInComputePass) {
+    // TODO(crbug.com/tint/399)
+    // Tint SPIRV reader failure:
+    // Type Determination: v-0006: identifier must be declared before use: textureStore
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // Prepare the write-only storage texture.
     constexpr uint32_t kTexelSizeR32Uint = 4u;
     wgpu::Texture writeonlyStorageTexture = CreateTexture(

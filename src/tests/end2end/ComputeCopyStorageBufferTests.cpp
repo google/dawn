@@ -118,6 +118,9 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
+    // TODO(crbug.com/tint/400)
+    // Tint transform failure: error: invalid 0 size for array or vector
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
     BasicTest(R"(
         #version 450
         #define kInstances 4

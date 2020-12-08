@@ -456,6 +456,19 @@ std::vector<AdapterTestParam> DawnTestEnvironment::GetAvailableAdapterTestParams
             if (params[i].backendType == adapterProperties.backendType &&
                 adapterProperties.selected) {
                 testParams.push_back(AdapterTestParam(params[i], adapterProperties));
+
+                // HACK: This is a hack to get Tint generator enabled on all tests
+                // without adding a new test suite in Chromium's infra config but skipping
+                // that suite on all unsupported platforms. Once we have basic functionality and
+                // test skips on all backends, we can remove this and use a test suite with
+                // use_tint_generator in the command line args instead.
+                if (params[i].backendType == wgpu::BackendType::Vulkan ||
+                    params[i].backendType == wgpu::BackendType::OpenGL ||
+                    params[i].backendType == wgpu::BackendType::OpenGLES) {
+                    BackendTestConfig configWithTint = params[i];
+                    configWithTint.forceEnabledWorkarounds.push_back("use_tint_generator");
+                    testParams.push_back(AdapterTestParam(configWithTint, adapterProperties));
+                }
             }
         }
     }
