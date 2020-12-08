@@ -53,13 +53,6 @@ namespace dawn_native {
             }
         };
 
-        template <>
-        struct RecordImpl<std::string> {
-            static constexpr void Call(ObjectContentHasher* recorder, const std::string& str) {
-                recorder->RecordIterable<std::string>(str);
-            }
-        };
-
         template <typename T>
         struct RecordImpl<std::vector<T>> {
             static constexpr void Call(ObjectContentHasher* recorder, const std::vector<T>& vec) {
@@ -68,7 +61,7 @@ namespace dawn_native {
         };
 
         template <typename IteratorT>
-        void RecordIterable(const IteratorT& iterable) {
+        constexpr void RecordIterable(const IteratorT& iterable) {
             for (auto it = iterable.begin(); it != iterable.end(); ++it) {
                 Record(*it);
             }
@@ -76,6 +69,14 @@ namespace dawn_native {
 
         size_t mContentHash = 0;
     };
+
+    template <>
+    struct ObjectContentHasher::RecordImpl<std::string> {
+        static constexpr void Call(ObjectContentHasher* recorder, const std::string& str) {
+            recorder->RecordIterable<std::string>(str);
+        }
+    };
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_OBJECT_CONTENT_HASHER_H_
