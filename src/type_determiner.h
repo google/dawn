@@ -112,7 +112,7 @@ class TypeDeterminer {
 
  private:
   void set_error(const Source& src, const std::string& msg);
-  void set_referenced_from_function_if_needed(ast::Variable* var);
+  void set_referenced_from_function_if_needed(ast::Variable* var, bool local);
   void set_entry_points(const std::string& fn_name, const std::string& ep_name);
 
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);

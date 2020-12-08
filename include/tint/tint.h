@@ -26,6 +26,7 @@
 #include "src/reader/reader.h"
 #include "src/transform/bound_array_accessors.h"
 #include "src/transform/emit_vertex_point_size.h"
+#include "src/transform/first_index_offset.h"
 #include "src/transform/manager.h"
 #include "src/transform/vertex_pulling.h"
 #include "src/type_determiner.h"

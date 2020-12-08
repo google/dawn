@@ -75,6 +75,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                Available transforms:
                                 bound_array_accessors
                                 emit_vertex_point_size
+                                first_index_offset
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
   --dawn-validation         -- SPIRV outputs are validated with the same flags
@@ -519,6 +520,9 @@ int main(int argc, const char** argv) {
     } else if (name == "emit_vertex_point_size") {
       transform_manager.append(
           std::make_unique<tint::transform::EmitVertexPointSize>());
+    } else if (name == "first_index_offset") {
+      transform_manager.append(
+          std::make_unique<tint::transform::FirstIndexOffset>(0, 0));
     } else {
       std::cerr << "Unknown transform name: " << name << std::endl;
       return 1;

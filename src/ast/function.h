@@ -90,11 +90,19 @@ class Function : public Castable<Function, Node> {
   /// is not already included.
   /// @param var the module variable to add
   void add_referenced_module_variable(Variable* var);
+  /// Adds the given variable to the list of locally referenced module variables
+  /// if it is not already included.
+  /// @param var the module variable to add
+  void add_local_referenced_module_variable(Variable* var);
   /// Note: If this function calls other functions, the return will also include
   /// all of the referenced variables from the callees.
   /// @returns the referenced module variables
   const std::vector<Variable*>& referenced_module_variables() const {
     return referenced_module_vars_;
+  }
+  /// @returns the locally referenced module variables
+  const std::vector<Variable*>& local_referenced_module_variables() const {
+    return local_referenced_module_vars_;
   }
   /// Retrieves any referenced location variables
   /// @returns the <variable, decoration> pair.
@@ -134,6 +142,11 @@ class Function : public Castable<Function, Node> {
   /// @returns the referenced sampled textures
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_multisampled_texture_variables() const;
+
+  /// Retrieves any locally referenced builtin variables
+  /// @returns the <variable, decoration> pairs.
+  const std::vector<std::pair<Variable*, BuiltinDecoration*>>
+  local_referenced_builtin_variables() const;
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor
@@ -189,6 +202,7 @@ class Function : public Castable<Function, Node> {
   type::Type* return_type_ = nullptr;
   BlockStatement* body_ = nullptr;
   std::vector<Variable*> referenced_module_vars_;
+  std::vector<Variable*> local_referenced_module_vars_;
   std::vector<std::string> ancestor_entry_points_;
   FunctionDecorationList decorations_;
 };

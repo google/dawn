@@ -74,6 +74,15 @@ void Function::add_referenced_module_variable(Variable* var) {
   referenced_module_vars_.push_back(var);
 }
 
+void Function::add_local_referenced_module_variable(Variable* var) {
+  for (const auto* v : local_referenced_module_vars_) {
+    if (v->name() == var->name()) {
+      return;
+    }
+  }
+  local_referenced_module_vars_.push_back(var);
+}
+
 const std::vector<std::pair<Variable*, LocationDecoration*>>
 Function::referenced_location_variables() const {
   std::vector<std::pair<Variable*, LocationDecoration*>> ret;
@@ -184,6 +193,23 @@ Function::referenced_sampled_texture_variables() const {
 const std::vector<std::pair<Variable*, Function::BindingInfo>>
 Function::referenced_multisampled_texture_variables() const {
   return ReferencedSampledTextureVariablesImpl(true);
+}
+
+const std::vector<std::pair<Variable*, BuiltinDecoration*>>
+Function::local_referenced_builtin_variables() const {
+  std::vector<std::pair<Variable*, BuiltinDecoration*>> ret;
+
+  for (auto* var : local_referenced_module_variables()) {
+    if (auto* decorated = var->As<DecoratedVariable>()) {
+      for (auto* deco : decorated->decorations()) {
+        if (auto* builtin = deco->As<BuiltinDecoration>()) {
+          ret.push_back({var, builtin});
+          break;
+        }
+      }
+    }
+  }
+  return ret;
 }
 
 void Function::add_ancestor_entry_point(const std::string& ep) {

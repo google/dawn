@@ -71,8 +71,8 @@ void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
   error_ += msg;
 }
 
-void TypeDeterminer::set_referenced_from_function_if_needed(
-    ast::Variable* var) {
+void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
+                                                            bool local) {
   if (current_function_ == nullptr) {
     return;
   }
@@ -82,6 +82,9 @@ void TypeDeterminer::set_referenced_from_function_if_needed(
   }
 
   current_function_->add_referenced_module_variable(var);
+  if (local) {
+    current_function_->add_local_referenced_module_variable(var);
+  }
 }
 
 bool TypeDeterminer::Determine() {
@@ -394,7 +397,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
 
         // We inherit any referenced variables from the callee.
         for (auto* var : callee_func->referenced_module_variables()) {
-          set_referenced_from_function_if_needed(var);
+          set_referenced_from_function_if_needed(var, false);
         }
       }
 
@@ -849,7 +852,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
           mod_->create<ast::type::Pointer>(var->type(), var->storage_class()));
     }
 
-    set_referenced_from_function_if_needed(var);
+    set_referenced_from_function_if_needed(var, true);
     return true;
   }
 

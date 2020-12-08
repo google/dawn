@@ -236,6 +236,8 @@ set(TINT_LIB_SRCS
   transform/emit_vertex_point_size.h
   transform/bound_array_accessors.cc
   transform/bound_array_accessors.h
+  transform/first_index_offset.cc
+  transform/first_index_offset.h
   transform/manager.cc
   transform/manager.h
   transform/transform.cc
@@ -431,6 +433,7 @@ set(TINT_TEST_SRCS
   scope_stack_test.cc
   transform/emit_vertex_point_size_test.cc
   transform/bound_array_accessors_test.cc
+  transform/first_index_offset_test.cc
   transform/vertex_pulling_test.cc
   type_determiner_test.cc
   validator/validator_control_block_test.cc
