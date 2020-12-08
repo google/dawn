@@ -55,6 +55,8 @@ std::string Preamble() {
   OpName %v2f1 "v2f1"
   OpName %v2f2 "v2f2"
   OpName %v2f3 "v2f3"
+  OpName %v3f1 "v3f1"
+  OpName %v3f2 "v3f2"
 
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
@@ -76,6 +78,7 @@ std::string Preamble() {
   %v2uint = OpTypeVector %uint 2
   %v2int = OpTypeVector %int 2
   %v2float = OpTypeVector %float 2
+  %v3float = OpTypeVector %float 3
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
@@ -86,6 +89,9 @@ std::string Preamble() {
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
   %v2float_70_70 = OpConstantComposite %v2float %float_70 %float_70
+
+  %v3float_50_60_70 = OpConstantComposite %v3float %float_50 %float_60 %float_70
+  %v3float_60_70_50 = OpConstantComposite %v3float %float_60 %float_70 %float_50
 
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
@@ -114,6 +120,9 @@ std::string Preamble() {
   %v2f2 = OpCopyObject %v2float %v2float_60_50
   %v2f3 = OpCopyObject %v2float %v2float_70_70
 
+  %v3f1 = OpCopyObject %v3float %v3float_50_60_70
+  %v3f2 = OpCopyObject %v3float %v3float_60_70_50
+
 )";
 }
 
@@ -129,6 +138,7 @@ inline std::ostream& operator<<(std::ostream& out, GlslStd450Case c) {
 // Nomenclature:
 // Float = scalar float
 // Floating = scalar float or vector-of-float
+// Float3 = 3-element vector of float
 // Int = scalar signed int
 // Inting = scalar int or vector-of-int
 // Uint = scalar unsigned int
@@ -143,6 +153,8 @@ using SpvParserTest_GlslStd450_Floating_Floating =
 using SpvParserTest_GlslStd450_Floating_FloatingFloating =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Float3_Float3Float3 =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 
 using SpvParserTest_GlslStd450_Inting_IntingIntingInting =
@@ -276,7 +288,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
@@ -334,7 +346,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
@@ -364,7 +376,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
@@ -449,6 +461,37 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
       << ToString(fe.ast_body());
 }
 
+TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v3float %glsl )" +
+                        GetParam().opcode +
+                        R"( %v3f1 %v3f2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_3__f32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{v3f1}
+          Identifier[not set]{v3f2}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Float_Floating,
                          ::testing::Values(GlslStd450Case{"Length", "length"}));
@@ -460,10 +503,31 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Floating_Floating,
-                         ::testing::Values(GlslStd450Case{"Sin", "sin"},
-                                           GlslStd450Case{"Cos", "cos"},
-                                           GlslStd450Case{"Normalize",
-                                                          "normalize"}));
+                         ::testing::ValuesIn(std::vector<GlslStd450Case>{
+                             {"Acos", "acos"},
+                             {"Asin", "asin"},
+                             {"Atan", "atan"},
+                             {"Ceil", "ceil"},
+                             {"Cos", "cos"},
+                             {"Cosh", "cosh"},
+                             {"Exp", "exp"},
+                             {"Exp2", "exp2"},
+                             {"FAbs", "abs"},
+                             {"FSign", "sign"},
+                             {"Floor", "floor"},
+                             {"Fract", "fract"},
+                             {"InverseSqrt", "inverseSqrt"},
+                             {"Log", "log"},
+                             {"Log2", "log2"},
+                             {"Normalize", "normalize"},
+                             {"Round", "round"},
+                             {"Sin", "sin"},
+                             {"Sinh", "sinh"},
+                             {"Sqrt", "sqrt"},
+                             {"Tan", "tan"},
+                             {"Tanh", "tanh"},
+                             {"Trunc", "trunc"},
+                         }));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Floating_FloatingFloating,
@@ -472,16 +536,26 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                              {"NMax", "max"},
                              {"NMin", "min"},
                              {"FMax", "max"},  // WGSL max promises more for NaN
-                             {"FMin", "min"}   // WGSL min promises more for NaN
+                             {"FMin", "min"},  // WGSL min promises more for NaN
+                             {"Pow", "pow"},
+                             {"Reflect", "reflect"},
+                             {"Step", "step"},
                          }));
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Float3_Float3Float3,
+                         ::testing::Values(GlslStd450Case{"Cross", "cross"}));
 
 INSTANTIATE_TEST_SUITE_P(
     Samples,
     SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating,
     ::testing::ValuesIn(std::vector<GlslStd450Case>{
         {"NClamp", "clamp"},
-        {"FClamp", "clamp"}  // WGSL FClamp promises more for NaN
-    }));
+        {"FClamp", "clamp"},  // WGSL FClamp promises more for NaN
+        {"FaceForward", "faceForward"},
+        {"Fma", "fma"},
+        {"FMix", "mix"},
+        {"SmoothStep", "smoothStep"}}));
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   const auto assembly = Preamble() + R"(

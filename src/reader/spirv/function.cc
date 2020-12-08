@@ -325,64 +325,98 @@ ast::BinaryOp NegatedFloatCompare(SpvOp opcode) {
 // @returns the WGSL standard function name, or an empty string.
 std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
   switch (ext_opcode) {
+    case GLSLstd450FAbs:
+      return "abs";
+    case GLSLstd450Acos:
+      return "acos";
+    case GLSLstd450Asin:
+      return "asin";
+    case GLSLstd450Atan:
+      return "atan";
     case GLSLstd450Atan2:
       return "atan2";
-    case GLSLstd450Cos:
-      return "cos";
-    case GLSLstd450Sin:
-      return "sin";
-    case GLSLstd450Distance:
-      return "distance";
-    case GLSLstd450Normalize:
-      return "normalize";
+    case GLSLstd450Ceil:
+      return "ceil";
     case GLSLstd450UClamp:
     case GLSLstd450SClamp:
     case GLSLstd450NClamp:
     case GLSLstd450FClamp:  // FClamp is less prescriptive about NaN operands
       return "clamp";
+    case GLSLstd450Cos:
+      return "cos";
+    case GLSLstd450Cosh:
+      return "cosh";
+    case GLSLstd450Cross:
+      return "cross";
+    case GLSLstd450Distance:
+      return "distance";
+    case GLSLstd450Exp:
+      return "exp";
+    case GLSLstd450Exp2:
+      return "exp2";
+    case GLSLstd450FaceForward:
+      return "faceForward";
+    case GLSLstd450Floor:
+      return "floor";
+    case GLSLstd450Fma:
+      return "fma";
+    case GLSLstd450Fract:
+      return "fract";
+    case GLSLstd450InverseSqrt:
+      return "inverseSqrt";
     case GLSLstd450Length:
       return "length";
-    case GLSLstd450NMin:
-    case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
-      return "min";
+    case GLSLstd450Log:
+      return "log";
+    case GLSLstd450Log2:
+      return "log2";
     case GLSLstd450NMax:
     case GLSLstd450FMax:  // FMax is less prescriptive about NaN operands
       return "max";
+    case GLSLstd450NMin:
+    case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
+      return "min";
+    case GLSLstd450FMix:
+      return "mix";
+    case GLSLstd450Normalize:
+      return "normalize";
+    case GLSLstd450Pow:
+      return "pow";
+    case GLSLstd450FSign:
+      return "sign";
+    case GLSLstd450Reflect:
+      return "reflect";
+    case GLSLstd450Round:
+      return "round";
+    case GLSLstd450Sin:
+      return "sin";
+    case GLSLstd450Sinh:
+      return "sinh";
+    case GLSLstd450SmoothStep:
+      return "smoothStep";
+    case GLSLstd450Sqrt:
+      return "sqrt";
+    case GLSLstd450Step:
+      return "step";
+    case GLSLstd450Tan:
+      return "tan";
+    case GLSLstd450Tanh:
+      return "tanh";
+    case GLSLstd450Trunc:
+      return "trunc";
 
     default:
     // TODO(dneto). The following are not implemented.
     // They are grouped semantically, as in GLSL.std.450.h.
-    case GLSLstd450Round:
     case GLSLstd450RoundEven:
-    case GLSLstd450Trunc:
-    case GLSLstd450FAbs:
     case GLSLstd450SAbs:
-    case GLSLstd450FSign:
     case GLSLstd450SSign:
-    case GLSLstd450Floor:
-    case GLSLstd450Ceil:
-    case GLSLstd450Fract:
 
     case GLSLstd450Radians:
     case GLSLstd450Degrees:
-    case GLSLstd450Tan:
-    case GLSLstd450Asin:
-    case GLSLstd450Acos:
-    case GLSLstd450Atan:
-    case GLSLstd450Sinh:
-    case GLSLstd450Cosh:
-    case GLSLstd450Tanh:
     case GLSLstd450Asinh:
     case GLSLstd450Acosh:
     case GLSLstd450Atanh:
-
-    case GLSLstd450Pow:
-    case GLSLstd450Exp:
-    case GLSLstd450Log:
-    case GLSLstd450Exp2:
-    case GLSLstd450Log2:
-    case GLSLstd450Sqrt:
-    case GLSLstd450InverseSqrt:
 
     case GLSLstd450Determinant:
     case GLSLstd450MatrixInverse:
@@ -393,12 +427,8 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450SMin:
     case GLSLstd450UMax:
     case GLSLstd450SMax:
-    case GLSLstd450FMix:
     case GLSLstd450IMix:
-    case GLSLstd450Step:
-    case GLSLstd450SmoothStep:
 
-    case GLSLstd450Fma:
     case GLSLstd450Frexp:
     case GLSLstd450FrexpStruct:
     case GLSLstd450Ldexp:
@@ -416,9 +446,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450UnpackUnorm4x8:
     case GLSLstd450UnpackDouble2x32:
 
-    case GLSLstd450Cross:
-    case GLSLstd450FaceForward:
-    case GLSLstd450Reflect:
     case GLSLstd450Refract:
 
     case GLSLstd450FindILsb:
