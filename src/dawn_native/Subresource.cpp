@@ -26,12 +26,12 @@ namespace dawn_native {
     }
 
     Aspect ConvertAspect(const Format& format, wgpu::TextureAspect aspect) {
-        Aspect aspectMask = TryConvertAspect(format, aspect);
+        Aspect aspectMask = SelectFormatAspects(format, aspect);
         ASSERT(aspectMask != Aspect::None);
         return aspectMask;
     }
 
-    Aspect TryConvertAspect(const Format& format, wgpu::TextureAspect aspect) {
+    Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect) {
         switch (aspect) {
             case wgpu::TextureAspect::All:
                 return format.aspects;

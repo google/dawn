@@ -577,7 +577,7 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("mipLevel out of range");
         }
 
-        if (TryConvertAspect(texture->GetFormat(), textureCopy.aspect) == Aspect::None) {
+        if (SelectFormatAspects(texture->GetFormat(), textureCopy.aspect) == Aspect::None) {
             return DAWN_VALIDATION_ERROR("Texture does not have selected aspect for texture copy.");
         }
 

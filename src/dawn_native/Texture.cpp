@@ -266,7 +266,7 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
         DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
-        if (TryConvertAspect(texture->GetFormat(), descriptor->aspect) == Aspect::None) {
+        if (SelectFormatAspects(texture->GetFormat(), descriptor->aspect) == Aspect::None) {
             return DAWN_VALIDATION_ERROR("Texture does not have selected aspect for texture view.");
         }
 

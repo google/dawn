@@ -44,9 +44,10 @@ namespace dawn_native {
     // does not exist in the format.
     Aspect ConvertAspect(const Format& format, wgpu::TextureAspect aspect);
 
-    // Try to convert the TextureAspect to an Aspect mask for the format. May return
-    // Aspect::None.
-    Aspect TryConvertAspect(const Format& format, wgpu::TextureAspect aspect);
+    // Returns the Aspects of the Format that are selected by the wgpu::TextureAspect.
+    // Note that this can return Aspect::None if the Format doesn't have any of the
+    // selected aspects.
+    Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect);
 
     // Helper struct to make it clear that what the parameters of a range mean.
     template <typename T>
