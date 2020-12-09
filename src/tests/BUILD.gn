@@ -177,6 +177,7 @@ test("dawn_unittests") {
     "unittests/SerialQueueTests.cpp",
     "unittests/SlabAllocatorTests.cpp",
     "unittests/StackContainerTests.cpp",
+    "unittests/SubresourceStorageTests.cpp",
     "unittests/SystemUtilsTests.cpp",
     "unittests/ToBackendTests.cpp",
     "unittests/TypedIntegerTests.cpp",
