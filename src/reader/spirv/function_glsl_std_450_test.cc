@@ -826,6 +826,66 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Uinting_UintingUintingUinting,
                          ::testing::Values(GlslStd450Case{"UClamp", "clamp"}));
 
+TEST_F(SpvParserTest, RectifyOperandsAndResult_GLSLstd450SClamp) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl SClamp %u1 %i2 %u3
+     %2 = OpExtInst %v2uint %glsl SClamp %v2u1 %v2i2 %v2u3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Bitcast[not set]<__u32>{
+        Call[not set]{
+          Identifier[not set]{clamp}
+          (
+            Bitcast[not set]<__i32>{
+              Identifier[not set]{u1}
+            }
+            Identifier[not set]{i2}
+            Bitcast[not set]<__i32>{
+              Identifier[not set]{u3}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_2
+    none
+    __vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Call[not set]{
+          Identifier[not set]{clamp}
+          (
+            Bitcast[not set]<__vec_2__i32>{
+              Identifier[not set]{v2u1}
+            }
+            Identifier[not set]{v2i2}
+            Bitcast[not set]<__vec_2__i32>{
+              Identifier[not set]{v2u3}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

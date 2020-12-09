@@ -235,6 +235,12 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool RegisterExtendedInstructionImports();
 
+  // Returns true when the given instruction is an extended instruction
+  // for GLSL.std.450.
+  // @param inst a SPIR-V instruction
+  // @returns true if its an SpvOpExtInst for GLSL.std.450
+  bool IsGlslExtendedInstruction(const spvtools::opt::Instruction& inst) const;
+
   /// Registers user names for SPIR-V objects, from OpName, and OpMemberName.
   /// Also synthesizes struct field names.  Ensures uniqueness for names for
   /// SPIR-V IDs, and uniqueness of names of fields within any single struct.
@@ -301,25 +307,27 @@ class ParserImpl : Reader {
   ast::Expression* MakeNullValue(ast::type::Type* type);
 
   /// Converts a given expression to the signedness demanded for an operand
-  /// of the given SPIR-V opcode, if required.  If the operation assumes
+  /// of the given SPIR-V instruction, if required.  If the instruction assumes
   /// signed integer operands, and `expr` is unsigned, then return an
   /// as-cast expression converting it to signed. Otherwise, return
   /// `expr` itself.  Similarly, convert as required from unsigned
   /// to signed. Assumes all SPIR-V types have been mapped to AST types.
-  /// @param op the SPIR-V opcode
+  /// @param inst the SPIR-V instruction
   /// @param expr an expression
   /// @returns expr, or a cast of expr
-  TypedExpression RectifyOperandSignedness(SpvOp op, TypedExpression&& expr);
+  TypedExpression RectifyOperandSignedness(
+      const spvtools::opt::Instruction& inst,
+      TypedExpression&& expr);
 
-  /// Returns the "forced" result type for the given SPIR-V opcode.
+  /// Returns the "forced" result type for the given SPIR-V instruction.
   /// If the WGSL result type for an operation has a more strict rule than
   /// requried by SPIR-V, then we say the result type is "forced".  This occurs
   /// for signed integer division (OpSDiv), for example, where the result type
   /// in WGSL must match the operand types.
-  /// @param op the SPIR-V opcode
+  /// @param inst the SPIR-V instruction
   /// @param first_operand_type the AST type for the first operand.
   /// @returns the forced AST result type, or nullptr if no forcing is required.
-  ast::type::Type* ForcedResultType(SpvOp op,
+  ast::type::Type* ForcedResultType(const spvtools::opt::Instruction& inst,
                                     ast::type::Type* first_operand_type);
 
   /// Returns a signed integer scalar or vector type matching the shape (scalar,
@@ -343,12 +351,13 @@ class ParserImpl : Reader {
   /// from the expression's result type. Otherwise, returns the given expression
   /// unchanged.
   /// @param expr the expression to pass through or to wrap
-  /// @param op the SPIR-V opcode
+  /// @param inst the SPIR-V instruction
   /// @param first_operand_type the AST type for the first operand.
   /// @returns the forced AST result type, or nullptr if no forcing is required.
-  TypedExpression RectifyForcedResultType(TypedExpression expr,
-                                          SpvOp op,
-                                          ast::type::Type* first_operand_type);
+  TypedExpression RectifyForcedResultType(
+      TypedExpression expr,
+      const spvtools::opt::Instruction& inst,
+      ast::type::Type* first_operand_type);
 
   /// @returns the registered boolean type.
   ast::type::Type* Bool() const { return bool_type_; }

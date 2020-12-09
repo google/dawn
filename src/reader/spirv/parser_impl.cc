@@ -159,6 +159,23 @@ bool AssumesSignedOperands(SpvOp opcode) {
   return false;
 }
 
+// Returns true if the GLSL extended instruction expects operands to be signed.
+// @param extended_opcode GLSL.std.450 opcode
+// @returns true if all operands must be signed integral type
+bool AssumesSignedOperands(GLSLstd450 extended_opcode) {
+  switch (extended_opcode) {
+    case GLSLstd450SAbs:
+    case GLSLstd450SSign:
+    case GLSLstd450SMin:
+    case GLSLstd450SMax:
+    case GLSLstd450SClamp:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
 // Returns true if the opcode operates as if its operands are unsigned integral.
 bool AssumesUnsignedOperands(SpvOp opcode) {
   switch (opcode) {
@@ -176,6 +193,22 @@ bool AssumesUnsignedOperands(SpvOp opcode) {
   return false;
 }
 
+// Returns true if the GLSL extended instruction expects operands to be
+// unsigned.
+// @param extended_opcode GLSL.std.450 opcode
+// @returns true if all operands must be unsigned integral type
+bool AssumesUnsignedOperands(GLSLstd450 extended_opcode) {
+  switch (extended_opcode) {
+    case GLSLstd450UMin:
+    case GLSLstd450UMax:
+    case GLSLstd450UClamp:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
 // Returns true if the operation is binary, and the WGSL operation requires
 // the signedness of the result to match the signedness of the first operand.
 bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
@@ -183,6 +216,29 @@ bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
     case SpvOpSDiv:
     case SpvOpSMod:
     case SpvOpSRem:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
+// Returns true if the extended instruction requires the signedness of the
+// result to match the signedness of the first operand to the operation.
+// @param extended_opcode GLSL.std.450 opcode
+// @returns true if the result type must match the first operand type.
+bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
+  switch (extended_opcode) {
+    case GLSLstd450SAbs:
+    case GLSLstd450SSign:
+    case GLSLstd450SMin:
+    case GLSLstd450SMax:
+    case GLSLstd450SClamp:
+    case GLSLstd450UMin:
+    case GLSLstd450UMax:
+    case GLSLstd450UClamp:
+      // TODO(dneto): FindSMsb?
+      // TODO(dneto): FindUMsb?
       return true;
     default:
       break;
@@ -559,6 +615,12 @@ bool ParserImpl::RegisterExtendedInstructionImports() {
     }
   }
   return true;
+}
+
+bool ParserImpl::IsGlslExtendedInstruction(
+    const spvtools::opt::Instruction& inst) const {
+  return (inst.opcode() == SpvOpExtInst) &&
+         (glsl_std_450_imports_.count(inst.GetSingleWordInOperand(0)) > 0);
 }
 
 bool ParserImpl::RegisterUserAndStructMemberNames() {
@@ -1389,10 +1451,21 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
   return nullptr;
 }
 
-TypedExpression ParserImpl::RectifyOperandSignedness(SpvOp op,
-                                                     TypedExpression&& expr) {
-  const bool requires_signed = AssumesSignedOperands(op);
-  const bool requires_unsigned = AssumesUnsignedOperands(op);
+TypedExpression ParserImpl::RectifyOperandSignedness(
+    const spvtools::opt::Instruction& inst,
+    TypedExpression&& expr) {
+  bool requires_signed = false;
+  bool requires_unsigned = false;
+  if (IsGlslExtendedInstruction(inst)) {
+    const auto extended_opcode =
+        static_cast<GLSLstd450>(inst.GetSingleWordInOperand(1));
+    requires_signed = AssumesSignedOperands(extended_opcode);
+    requires_unsigned = AssumesUnsignedOperands(extended_opcode);
+  } else {
+    const auto opcode = inst.opcode();
+    requires_signed = AssumesSignedOperands(opcode);
+    requires_unsigned = AssumesUnsignedOperands(opcode);
+  }
   if (!requires_signed && !requires_unsigned) {
     // No conversion is required, assuming our tables are complete.
     return std::move(expr);
@@ -1425,13 +1498,25 @@ TypedExpression ParserImpl::RectifyOperandSignedness(SpvOp op,
 }
 
 ast::type::Type* ParserImpl::ForcedResultType(
-    SpvOp op,
+    const spvtools::opt::Instruction& inst,
     ast::type::Type* first_operand_type) {
-  const bool binary_match_first_operand =
-      AssumesResultSignednessMatchesBinaryFirstOperand(op);
-  const bool unary_match_operand = (op == SpvOpSNegate) || (op == SpvOpNot);
-  if (binary_match_first_operand || unary_match_operand) {
+  const auto opcode = inst.opcode();
+  if ((opcode == SpvOpSNegate) || (opcode == SpvOpNot)) {
+    // The unary operation cases that force the result type to match the
+    // first operand type.
     return first_operand_type;
+  }
+  if (AssumesResultSignednessMatchesBinaryFirstOperand(opcode)) {
+    // The binary operation cases that force the result type to match
+    // the first operand type.
+    return first_operand_type;
+  }
+  if (IsGlslExtendedInstruction(inst)) {
+    const auto extended_opcode =
+        static_cast<GLSLstd450>(inst.GetSingleWordInOperand(1));
+    if (AssumesResultSignednessMatchesFirstOperand(extended_opcode)) {
+      return first_operand_type;
+    }
   }
   return nullptr;
 }
@@ -1474,9 +1559,9 @@ ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
 
 TypedExpression ParserImpl::RectifyForcedResultType(
     TypedExpression expr,
-    SpvOp op,
+    const spvtools::opt::Instruction& inst,
     ast::type::Type* first_operand_type) {
-  auto* forced_result_ty = ForcedResultType(op, first_operand_type);
+  auto* forced_result_ty = ForcedResultType(inst, first_operand_type);
   if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
     return expr;
   }

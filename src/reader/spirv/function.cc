@@ -2862,7 +2862,7 @@ TypedExpression FunctionEmitter::MakeOperand(
     const spvtools::opt::Instruction& inst,
     uint32_t operand_index) {
   auto expr = this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
-  return parser_impl_.RectifyOperandSignedness(inst.opcode(), std::move(expr));
+  return parser_impl_.RectifyOperandSignedness(inst, std::move(expr));
 }
 
 TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
@@ -2883,7 +2883,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     auto* binary_expr =
         create<ast::BinaryExpression>(binary_op, arg0.expr, arg1.expr);
     TypedExpression result{ast_type, binary_expr};
-    return parser_impl_.RectifyForcedResultType(result, opcode, arg0.type);
+    return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
   }
 
   auto unary_op = ast::UnaryOp::kNegation;
@@ -2891,7 +2891,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     auto arg0 = MakeOperand(inst, 0);
     auto* unary_expr = create<ast::UnaryOpExpression>(unary_op, arg0.expr);
     TypedExpression result{ast_type, unary_expr};
-    return parser_impl_.RectifyForcedResultType(result, opcode, arg0.type);
+    return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
   }
 
   const char* unary_builtin_name = GetUnaryBuiltInFunctionName(opcode);
@@ -3002,13 +3002,20 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
 
   auto* func = create<ast::IdentifierExpression>(name);
   ast::ExpressionList operands;
+  ast::type::Type* first_operand_type = nullptr;
   // All parameters to GLSL.std.450 extended instructions are IDs.
   for (uint32_t iarg = 2; iarg < inst.NumInOperands(); ++iarg) {
-    operands.emplace_back(MakeOperand(inst, iarg).expr);
+    TypedExpression operand = MakeOperand(inst, iarg);
+    if (first_operand_type == nullptr) {
+      first_operand_type = operand.type;
+    }
+    operands.emplace_back(operand.expr);
   }
   auto* ast_type = parser_impl_.ConvertType(inst.type_id());
   auto* call = create<ast::CallExpression>(func, std::move(operands));
-  return {ast_type, call};
+  TypedExpression call_expr{ast_type, call};
+  return parser_impl_.RectifyForcedResultType(call_expr, inst,
+                                              first_operand_type);
 }
 
 ast::IdentifierExpression* FunctionEmitter::Swizzle(uint32_t i) {
