@@ -154,6 +154,10 @@ using SpvParserTest_GlslStd450_Floating_FloatingFloating =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Floating_FloatingInting =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Floating_FloatingUinting =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Float3_Float3Float3 =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 
@@ -461,6 +465,128 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
       << ToString(fe.ast_body());
 }
 
+TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl )" +
+                        GetParam().opcode + R"( %f1 %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __f32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{f1}
+          Identifier[not set]{u1}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl )" +
+                        GetParam().opcode +
+                        R"( %v2f1 %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{v2f1}
+          Identifier[not set]{v2u1}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl )" +
+                        GetParam().opcode + R"( %f1 %i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __f32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{f1}
+          Identifier[not set]{i1}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl )" +
+                        GetParam().opcode +
+                        R"( %v2f1 %v2i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{v2f1}
+          Identifier[not set]{v2i1}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
   const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v3float %glsl )" +
@@ -541,6 +667,14 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                              {"Reflect", "reflect"},
                              {"Step", "step"},
                          }));
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Floating_FloatingUinting,
+                         ::testing::Values(GlslStd450Case{"Ldexp", "ldexp"}));
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Floating_FloatingInting,
+                         ::testing::Values(GlslStd450Case{"Ldexp", "ldexp"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Float3_Float3Float3,

@@ -364,6 +364,8 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "fract";
     case GLSLstd450InverseSqrt:
       return "inverseSqrt";
+    case GLSLstd450Ldexp:
+      return "ldexp";
     case GLSLstd450Length:
       return "length";
     case GLSLstd450Log:
@@ -431,7 +433,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 
     case GLSLstd450Frexp:
     case GLSLstd450FrexpStruct:
-    case GLSLstd450Ldexp:
 
     case GLSLstd450PackSnorm4x8:
     case GLSLstd450PackUnorm4x8:
