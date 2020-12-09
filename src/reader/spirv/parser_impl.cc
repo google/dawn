@@ -1683,7 +1683,8 @@ ParserImpl::GetMemoryObjectDeclarationForHandle(uint32_t id,
   }
 }
 
-const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleVar(
+const spvtools::opt::Instruction*
+ParserImpl::GetSpirvTypeForHandleMemoryObjectDeclaration(
     const spvtools::opt::Instruction& var) {
   if (!success()) {
     return nullptr;
@@ -1700,14 +1701,16 @@ const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleVar(
 
   // Get the SPIR-V handle type.
   const auto* ptr_type = def_use_mgr_->GetDef(var.type_id());
-  if (!ptr_type) {
-    Fail() << "Invalid type for variable " << var.PrettyPrint();
+  if (!ptr_type || (ptr_type->opcode() != SpvOpTypePointer)) {
+    Fail() << "Invalid type for variable or function parameter "
+           << var.PrettyPrint();
     return nullptr;
   }
   const auto* raw_handle_type =
       def_use_mgr_->GetDef(ptr_type->GetSingleWordInOperand(1));
   if (!raw_handle_type) {
-    Fail() << "Invalid pointer type for variable " << var.PrettyPrint();
+    Fail() << "Invalid pointer type for variable or function parameter "
+           << var.PrettyPrint();
     return nullptr;
   }
   switch (raw_handle_type->opcode()) {
@@ -1719,11 +1722,12 @@ const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleVar(
     case SpvOpTypeRuntimeArray:
       Fail()
           << "arrays of textures or samplers are not supported in WGSL; can't "
-             "translate variable "
+             "translate variable or function parameter: "
           << var.PrettyPrint();
       return nullptr;
     default:
-      Fail() << "invalid type for image or sampler variable: "
+      Fail() << "invalid type for image or sampler variable or function "
+                "parameter: "
              << var.PrettyPrint();
       return nullptr;
   }
@@ -1738,7 +1742,7 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
   }
 
   const spvtools::opt::Instruction* raw_handle_type =
-      GetSpirvTypeForHandleVar(var);
+      GetSpirvTypeForHandleMemoryObjectDeclaration(var);
   if (!raw_handle_type) {
     return nullptr;
   }

@@ -1229,6 +1229,14 @@ TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
      OpName %vf12 "vf12"
      OpName %vf123 "vf123"
      OpName %vf1234 "vf1234"
+     OpName %u1 "u1"
+     OpName %vu12 "vu12"
+     OpName %vu123 "vu123"
+     OpName %vu1234 "vu1234"
+     OpName %i1 "i1"
+     OpName %vi12 "vi12"
+     OpName %vi123 "vi123"
+     OpName %vi1234 "vi1234"
      OpName %coords1 "coords1"
      OpName %coords12 "coords12"
      OpName %coords123 "coords123"
@@ -1260,6 +1268,16 @@ TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
      %vf12 = OpCopyObject %v2float %the_vf12
      %vf123 = OpCopyObject %v3float %the_vf123
      %vf1234 = OpCopyObject %v4float %the_vf1234
+
+     %i1 = OpCopyObject %int %int_1
+     %vi12 = OpCopyObject %v2int %the_vi12
+     %vi123 = OpCopyObject %v3int %the_vi123
+     %vi1234 = OpCopyObject %v4int %the_vi1234
+
+     %u1 = OpCopyObject %uint %uint_1
+     %vu12 = OpCopyObject %v2uint %the_vu12
+     %vu123 = OpCopyObject %v3uint %the_vu123
+     %vu1234 = OpCopyObject %v4uint %the_vu1234
 
      %coords1 = OpCopyObject %float %float_1
      %coords12 = OpCopyObject %v2float %vf12
@@ -2889,7 +2907,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // OpImageFetch with no extra params
-        {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageFetch %v4float %im %vu12",
+        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vu12",
          R"(DecoratedVariable{
     Decorations{
       SetDecoration{2}
@@ -2916,7 +2934,7 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
         // OpImageFetch with ConstOffset
-        {"%float 2D 0 0 0 1 Rgba32f",
+        {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vu12 ConstOffset %offsets2d",
          R"(DecoratedVariable{
     Decorations{
@@ -2940,6 +2958,502 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{vu12}
               Identifier[not set]{offsets2d}
             )
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ConvertResultSignedness,
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Valid SPIR-V only has:
+        //      float scalar sampled type vs. floating result
+        //      integral scalar sampled type vs. integral result
+        // Any of the sampling, reading, or fetching use the same codepath.
+
+        // We'll test with:
+        //     OpImageFetch
+        //     OpImageRead
+        //     OpImageSampleImplicitLod - representative of sampling
+
+        //
+        // OpImageRead
+        //
+
+        // OpImageFetch requires no conversion, float -> v4float
+        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageFetch requires no conversion, uint -> v4uint
+        {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__u32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__u32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageFetch requires conversion, uint -> v4int
+        {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__u32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          Bitcast[not set]<__vec_4__i32>{
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vu12}
+              )
+            }
+          }
+        }
+      }
+    })"},
+        // OpImageFetch requires no conversion, int -> v4int
+        {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__i32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageFetch requires conversion, int -> v4uint
+        {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__i32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__u32
+        {
+          Bitcast[not set]<__vec_4__u32>{
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vu12}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        //
+        // OpImageRead
+        //
+
+        // OpImageRead requires no conversion, float -> v4float
+        {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageRead %v4float %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_read_only_2d_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageRead requires no conversion, uint -> v4uint
+        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4uint %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_read_only_2d_rgba32uint
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__u32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageRead requires conversion, uint -> v4int
+        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4int %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_read_only_2d_rgba32uint
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          Bitcast[not set]<__vec_4__i32>{
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vu12}
+              )
+            }
+          }
+        }
+      }
+    })"},
+        // OpImageRead requires no conversion, int -> v4int
+        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4int %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_read_only_2d_rgba32sint
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageRead requires conversion, int -> v4uint
+        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4uint %im %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __storage_texture_read_only_2d_rgba32sint
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__u32
+        {
+          Bitcast[not set]<__vec_4__u32>{
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vu12}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        //
+        // Sampling operations, using OpImageSampleImplicitLod as an example.
+        //
+
+        // OpImageSampleImplicitLod requires no conversion, float -> v4float
+        {"%float 2D 0 0 0 1 Unknown",
+         "%99 = OpImageSampleImplicitLod %v4float %sampled_image %vu12",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageSampleImplicitLod requires no conversion, uint -> v4uint
+        {"%uint 2D 0 0 0 1 Unknown",
+         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vu12",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__u32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__u32
+        {
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageSampleImplicitLod requires conversion, uint -> v4int
+        {"%uint 2D 0 0 0 1 Unknown",
+         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vu12",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__u32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          Bitcast[not set]<__vec_4__i32>{
+            Call[not set]{
+              Identifier[not set]{textureSample}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
+                Identifier[not set]{vu12}
+              )
+            }
+          }
+        }
+      }
+    })"},
+        // OpImageSampleImplicitLod requires no conversion, int -> v4int
+        {"%int 2D 0 0 0 1 Unknown",
+         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vu12",
+         R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__i32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{vu12}
+            )
+          }
+        }
+      }
+    })"},
+        // OpImageSampleImplicitLod requires conversion, int -> v4uint
+        {"%int 2D 0 0 0 1 Unknown",
+         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vu12",
+         R"(DecoratedVariable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__i32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__u32
+        {
+          Bitcast[not set]<__vec_4__u32>{
+            Call[not set]{
+              Identifier[not set]{textureSample}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
+                Identifier[not set]{vu12}
+              )
+            }
           }
         }
       }
@@ -3297,27 +3811,28 @@ INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
 }
 )"}}}));
 
-INSTANTIATE_TEST_SUITE_P(BadInstructions,
-                         SpvParserTest_ImageCoordsTest,
-                         ::testing::ValuesIn(std::vector<ImageCoordsCase>{
-                             {"%float 1D 0 0 0 1 Unknown",
-                              "OpNop",
-                              "internal error: not an image access "
-                              "instruction: OpNop",
-                              {}},
-                             {"%float 1D 0 0 0 1 Unknown",
-                              "%50 = OpCopyObject %float %float_1",
-                              "internal error: couldn't find image for "
-                              "%50 = OpCopyObject %9 %36",
-                              {}},
-                             {"%float 1D 0 0 0 1 Unknown",
-                              "OpStore %float_var %float_1",
-                              "invalid type for image or sampler "
-                              "variable: %1 = OpVariable %2 Function",
-                              {}},
-                             // An example with a missing coordinate
-                             // won't assemble, so we skip it.
-                         }));
+INSTANTIATE_TEST_SUITE_P(
+    BadInstructions,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 1D 0 0 0 1 Unknown",
+         "OpNop",
+         "internal error: not an image access "
+         "instruction: OpNop",
+         {}},
+        {"%float 1D 0 0 0 1 Unknown",
+         "%50 = OpCopyObject %float %float_1",
+         "internal error: couldn't find image for "
+         "%50 = OpCopyObject %9 %36",
+         {}},
+        {"%float 1D 0 0 0 1 Unknown",
+         "OpStore %float_var %float_1",
+         "invalid type for image or sampler "
+         "variable or function parameter: %1 = OpVariable %2 Function",
+         {}},
+        // An example with a missing coordinate
+        // won't assemble, so we skip it.
+    }));
 
 INSTANTIATE_TEST_SUITE_P(
     Bad_Coordinate,

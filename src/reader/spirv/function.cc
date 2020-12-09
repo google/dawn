@@ -3940,9 +3940,32 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
 
   if (inst.type_id() != 0) {
     // It returns a value.
+    ast::Expression* value = call_expr;
+
+    // If necessary, convert the result to the signedness of the instruction
+    // result type. Compare the SPIR-V image's sampled component type with the
+    // component of the result type of the SPIR-V instruction.
     auto* result_type = parser_impl_.ConvertType(inst.type_id());
-    // TODO(dneto): Convert result signedness if needed. crbug.com/tint/382
-    EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
+    auto* result_component_type = result_type;
+    if (auto* result_vector_type = result_type->As<ast::type::Vector>()) {
+      result_component_type = result_vector_type->type();
+    }
+    auto* spirv_image_type =
+        parser_impl_.GetSpirvTypeForHandleMemoryObjectDeclaration(*image);
+    if (!spirv_image_type || (spirv_image_type->opcode() != SpvOpTypeImage)) {
+      return Fail() << "invalid image type for image memory object declaration "
+                    << image->PrettyPrint();
+    }
+    auto* expected_component_type =
+        parser_impl_.ConvertType(spirv_image_type->GetSingleWordInOperand(0));
+    if (expected_component_type != result_component_type) {
+      // This occurs if one is signed integer and the other is unsigned integer,
+      // or vice versa. Perform a bitcast.
+      value =
+          ast_module_.create<ast::BitcastExpression>(result_type, call_expr);
+    }
+
+    EmitConstDefOrWriteToHoistedVar(inst, {result_type, value});
   } else {
     // It's an image write. No value is returned, so make a statement out
     // of the call.
