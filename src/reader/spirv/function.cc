@@ -408,7 +408,7 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "trunc";
 
     default:
-    // TODO(dneto). The following are not implemented.
+    // TODO(dneto) - The following are not implemented.
     // They are grouped semantically, as in GLSL.std.450.h.
     case GLSLstd450RoundEven:
     case GLSLstd450SAbs:

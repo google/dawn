@@ -57,8 +57,8 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
-#include "src/writer/pack_coord_arrayidx.h"
 
 namespace tint {
 namespace writer {
@@ -729,8 +729,13 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto& pidx = signature->params.idx;
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
-  if (!EmitExpression(pre, out, params[pidx.texture]))
+  auto* texture = params[pidx.texture];
+  auto* texture_type = texture->result_type()->UnwrapPtrIfNeeded();
+
+  if (!EmitExpression(pre, out, texture))
     return false;
+
+  bool pack_mip_in_coords = false;
 
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureSample:
@@ -748,35 +753,61 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     case ast::Intrinsic::kTextureSampleCompare:
       out << ".SampleCmp(";
       break;
+    case ast::Intrinsic::kTextureLoad:
+      out << ".Load(";
+      if (!texture_type->Is<ast::type::StorageTexture>()) {
+        pack_mip_in_coords = true;
+      }
+      break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
                ident->name() + "'";
-      break;
+      return false;
   }
 
-  if (!EmitExpression(pre, out, params[pidx.sampler]))
-    return false;
+  if (pidx.sampler != kNotUsed) {
+    if (!EmitExpression(pre, out, params[pidx.sampler]))
+      return false;
+    out << ", ";
+  }
 
-  out << ", ";
+  auto* param_coords = params[pidx.coords];
+
+  auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
+    auto* i32 = module_->create<ast::type::I32>();
+    ast::SintLiteral zero_lit(i32, 0);
+    ast::ScalarConstructorExpression zero(&zero_lit);
+    zero.set_result_type(i32);
+    return AppendVector(vector, &zero,
+                        [&](ast::TypeConstructorExpression* packed) {
+                          return EmitExpression(pre, out, packed);
+                        });
+  };
 
   if (pidx.array_index != kNotUsed) {
     // Array index needs to be appended to the coordinates.
-    auto* param_coords = params[pidx.coords];
     auto* param_array_index = params[pidx.array_index];
-    if (!PackCoordAndArrayIndex(param_coords, param_array_index,
-                                [&](ast::TypeConstructorExpression* packed) {
-                                  return EmitExpression(pre, out, packed);
-                                })) {
+    if (!AppendVector(param_coords, param_array_index,
+                      [&](ast::TypeConstructorExpression* packed) {
+                        if (pack_mip_in_coords) {
+                          return emit_vector_appended_with_i32_zero(packed);
+                        } else {
+                          return EmitExpression(pre, out, packed);
+                        }
+                      })) {
       return false;
     }
-
+  } else if (pack_mip_in_coords) {
+    // Mip level needs to be appended to the coordinates, but is always zero.
+    if (!emit_vector_appended_with_i32_zero(param_coords))
+      return false;
   } else {
-    if (!EmitExpression(pre, out, params[pidx.coords]))
+    if (!EmitExpression(pre, out, param_coords))
       return false;
   }
 
   for (auto idx : {pidx.depth_ref, pidx.bias, pidx.level, pidx.ddx, pidx.ddy,
-                   pidx.offset}) {
+                   pidx.sample_index, pidx.offset}) {
     if (idx != kNotUsed) {
       out << ", ";
       if (!EmitExpression(pre, out, params[idx]))

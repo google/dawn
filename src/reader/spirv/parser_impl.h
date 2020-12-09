@@ -235,10 +235,10 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool RegisterExtendedInstructionImports();
 
-  // Returns true when the given instruction is an extended instruction
-  // for GLSL.std.450.
-  // @param inst a SPIR-V instruction
-  // @returns true if its an SpvOpExtInst for GLSL.std.450
+  /// Returns true when the given instruction is an extended instruction
+  /// for GLSL.std.450.
+  /// @param inst a SPIR-V instruction
+  /// @returns true if its an SpvOpExtInst for GLSL.std.450
   bool IsGlslExtendedInstruction(const spvtools::opt::Instruction& inst) const;
 
   /// Registers user names for SPIR-V objects, from OpName, and OpMemberName.

@@ -18,6 +18,7 @@
 #include "src/ast/builder.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/type/depth_texture_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
@@ -135,9 +136,102 @@ std::string expected_texture_overload(
       return R"(texture_tint_0.SampleCmp(sampler_tint_0, float3(1.0f, 2.0f, 3.0f), 4.0f))";
     case ValidTextureOverload::kSampleGradDepthCubeArrayF32:
       return R"(texture_tint_0.SampleCmp(sampler_tint_0, float4(1.0f, 2.0f, 3.0f, float(4)), 5.0f))";
+    case ValidTextureOverload::kLoad1dF32:
+      return R"(texture_tint_0.Load(int2(1, 0)))";
+    case ValidTextureOverload::kLoad1dU32:
+      return R"(texture_tint_0.Load(int2(1, 0)))";
+    case ValidTextureOverload::kLoad1dI32:
+      return R"(texture_tint_0.Load(int2(1, 0)))";
+    case ValidTextureOverload::kLoad1dArrayF32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0)))";
+    case ValidTextureOverload::kLoad1dArrayU32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0)))";
+    case ValidTextureOverload::kLoad1dArrayI32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0)))";
+    case ValidTextureOverload::kLoad2dF32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0)))";
+    case ValidTextureOverload::kLoad2dU32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0)))";
+    case ValidTextureOverload::kLoad2dI32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0)))";
+    case ValidTextureOverload::kLoad2dLevelF32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0), 3))";
+    case ValidTextureOverload::kLoad2dLevelU32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0), 3))";
+    case ValidTextureOverload::kLoad2dLevelI32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0), 3))";
+    case ValidTextureOverload::kLoad2dArrayF32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0)))";
+    case ValidTextureOverload::kLoad2dArrayU32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0)))";
+    case ValidTextureOverload::kLoad2dArrayI32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0)))";
+    case ValidTextureOverload::kLoad2dArrayLevelF32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoad2dArrayLevelU32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoad2dArrayLevelI32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoad3dF32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0)))";
+    case ValidTextureOverload::kLoad3dU32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0)))";
+    case ValidTextureOverload::kLoad3dI32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0)))";
+    case ValidTextureOverload::kLoad3dLevelF32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoad3dLevelU32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoad3dLevelI32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoadMultisampled2dF32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0), 3))";
+    case ValidTextureOverload::kLoadMultisampled2dU32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0), 3))";
+    case ValidTextureOverload::kLoadMultisampled2dI32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0), 3))";
+    case ValidTextureOverload::kLoadMultisampled2dArrayF32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoadMultisampled2dArrayU32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoadMultisampled2dArrayI32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoadDepth2dF32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0)))";
+    case ValidTextureOverload::kLoadDepth2dLevelF32:
+      return R"(texture_tint_0.Load(int3(1, 2, 0), 3))";
+    case ValidTextureOverload::kLoadDepth2dArrayF32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0)))";
+    case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
+      return R"(texture_tint_0.Load(int4(1, 2, 3, 0), 4))";
+    case ValidTextureOverload::kLoadStorageRO1dRgba32float:
+      return R"(texture_tint_0.Load(1))";
+    case ValidTextureOverload::kLoadStorageRO1dArrayRgba32float:
+      return R"(texture_tint_0.Load(int2(1, 2)))";
+    case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
+    case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
+    case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba8sint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba16uint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba16sint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba16float:
+    case ValidTextureOverload::kLoadStorageRO2dR32uint:
+    case ValidTextureOverload::kLoadStorageRO2dR32sint:
+    case ValidTextureOverload::kLoadStorageRO2dR32float:
+    case ValidTextureOverload::kLoadStorageRO2dRg32uint:
+    case ValidTextureOverload::kLoadStorageRO2dRg32sint:
+    case ValidTextureOverload::kLoadStorageRO2dRg32float:
+    case ValidTextureOverload::kLoadStorageRO2dRgba32uint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba32sint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba32float:
+      return R"(texture_tint_0.Load(int2(1, 2)))";
+    case ValidTextureOverload::kLoadStorageRO2dArrayRgba32float:
+      return R"(texture_tint_0.Load(int3(1, 2, 3)))";
+    case ValidTextureOverload::kLoadStorageRO3dRgba32float:
+      return R"(texture_tint_0.Load(int3(1, 2, 3)))";
   }
   return "<unmatched texture overload>";
-}  // LINT - Ignore the length of this function
+}  // NOLINT - Ignore the length of this function
 
 class HlslGeneratorIntrinsicTextureTest
     : public ast::BuilderWithModule,
@@ -165,38 +259,13 @@ class HlslGeneratorIntrinsicTextureTest
 TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   auto param = GetParam();
 
-  ast::type::Type* datatype = nullptr;
-  switch (param.texture_data_type) {
-    case ast::intrinsic::test::TextureDataType::kF32:
-      datatype = ty.f32;
-      break;
-    case ast::intrinsic::test::TextureDataType::kU32:
-      datatype = ty.u32;
-      break;
-    case ast::intrinsic::test::TextureDataType::kI32:
-      datatype = ty.i32;
-      break;
-  }
-
-  ast::type::Sampler sampler_type{param.sampler_kind};
-  switch (param.texture_kind) {
-    case ast::intrinsic::test::TextureKind::kRegular:
-      Var("texture", ast::StorageClass::kNone,
-          mod->create<ast::type::SampledTexture>(param.texture_dimension,
-                                                 datatype));
-      break;
-
-    case ast::intrinsic::test::TextureKind::kDepth:
-      Var("texture", ast::StorageClass::kNone,
-          mod->create<ast::type::DepthTexture>(param.texture_dimension));
-      break;
-  }
-
-  Var("sampler", ast::StorageClass::kNone, &sampler_type);
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
 
   ast::CallExpression call{Expr(param.function), param.args(this)};
 
-  EXPECT_TRUE(td.DetermineResultType(&call)) << td.error();
+  ASSERT_TRUE(td.Determine()) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
 

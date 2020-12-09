@@ -54,6 +54,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/sampler_type.h"
@@ -4510,6 +4511,7 @@ std::string to_str(const std::string& function,
   maybe_add_param(sig->params.idx.level, "level");
   maybe_add_param(sig->params.idx.offset, "offset");
   maybe_add_param(sig->params.idx.sampler, "sampler");
+  maybe_add_param(sig->params.idx.sample_index, "sample_index");
   maybe_add_param(sig->params.idx.texture, "texture");
   std::sort(
       params.begin(), params.end(),
@@ -4534,126 +4536,202 @@ const char* expected_texture_overload(
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
     case ValidTextureOverload::kSample1dF32:
-      return "textureSample(texture, sampler, coords)";
+      return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSample1dArrayF32:
-      return "textureSample(texture, sampler, coords, array_index)";
+      return R"(textureSample(texture, sampler, coords, array_index))";
     case ValidTextureOverload::kSample2dF32:
-      return "textureSample(texture, sampler, coords)";
+      return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSample2dOffsetF32:
-      return "textureSample(texture, sampler, coords, offset)";
+      return R"(textureSample(texture, sampler, coords, offset))";
     case ValidTextureOverload::kSample2dArrayF32:
-      return "textureSample(texture, sampler, coords, array_index)";
+      return R"(textureSample(texture, sampler, coords, array_index))";
     case ValidTextureOverload::kSample2dArrayOffsetF32:
-      return "textureSample(texture, sampler, coords, array_index, offset)";
+      return R"(textureSample(texture, sampler, coords, array_index, offset))";
     case ValidTextureOverload::kSample3dF32:
-      return "textureSample(texture, sampler, coords)";
+      return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSample3dOffsetF32:
-      return "textureSample(texture, sampler, coords, offset)";
+      return R"(textureSample(texture, sampler, coords, offset))";
     case ValidTextureOverload::kSampleCubeF32:
-      return "textureSample(texture, sampler, coords)";
+      return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSampleCubeArrayF32:
-      return "textureSample(texture, sampler, coords, array_index)";
+      return R"(textureSample(texture, sampler, coords, array_index))";
     case ValidTextureOverload::kSampleDepth2dF32:
-      return "textureSample(texture, sampler, coords)";
+      return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSampleDepth2dOffsetF32:
-      return "textureSample(texture, sampler, coords, offset)";
+      return R"(textureSample(texture, sampler, coords, offset))";
     case ValidTextureOverload::kSampleDepth2dArrayF32:
-      return "textureSample(texture, sampler, coords, array_index)";
+      return R"(textureSample(texture, sampler, coords, array_index))";
     case ValidTextureOverload::kSampleDepth2dArrayOffsetF32:
-      return "textureSample(texture, sampler, coords, array_index, offset)";
+      return R"(textureSample(texture, sampler, coords, array_index, offset))";
     case ValidTextureOverload::kSampleDepthCubeF32:
-      return "textureSample(texture, sampler, coords)";
+      return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSampleDepthCubeArrayF32:
-      return "textureSample(texture, sampler, coords, array_index)";
+      return R"(textureSample(texture, sampler, coords, array_index))";
     case ValidTextureOverload::kSampleBias2dF32:
-      return "textureSampleBias(texture, sampler, coords, bias)";
+      return R"(textureSampleBias(texture, sampler, coords, bias))";
     case ValidTextureOverload::kSampleBias2dOffsetF32:
-      return "textureSampleBias(texture, sampler, coords, bias, offset)";
+      return R"(textureSampleBias(texture, sampler, coords, bias, offset))";
     case ValidTextureOverload::kSampleBias2dArrayF32:
-      return "textureSampleBias(texture, sampler, coords, array_index, "
-             "bias)";
+      return R"(textureSampleBias(texture, sampler, coords, array_index, bias))";
     case ValidTextureOverload::kSampleBias2dArrayOffsetF32:
-      return "textureSampleBias(texture, sampler, coords, array_index, "
-             "bias, offset)";
+      return R"(textureSampleBias(texture, sampler, coords, array_index, bias, offset))";
     case ValidTextureOverload::kSampleBias3dF32:
-      return "textureSampleBias(texture, sampler, coords, bias)";
+      return R"(textureSampleBias(texture, sampler, coords, bias))";
     case ValidTextureOverload::kSampleBias3dOffsetF32:
-      return "textureSampleBias(texture, sampler, coords, bias, offset)";
+      return R"(textureSampleBias(texture, sampler, coords, bias, offset))";
     case ValidTextureOverload::kSampleBiasCubeF32:
-      return "textureSampleBias(texture, sampler, coords, bias)";
+      return R"(textureSampleBias(texture, sampler, coords, bias))";
     case ValidTextureOverload::kSampleBiasCubeArrayF32:
-      return "textureSampleBias(texture, sampler, coords, array_index, "
-             "bias)";
+      return R"(textureSampleBias(texture, sampler, coords, array_index, bias))";
     case ValidTextureOverload::kSampleLevel2dF32:
-      return "textureSampleLevel(texture, sampler, coords, level)";
+      return R"(textureSampleLevel(texture, sampler, coords, level))";
     case ValidTextureOverload::kSampleLevel2dOffsetF32:
-      return "textureSampleLevel(texture, sampler, coords, level, offset)";
+      return R"(textureSampleLevel(texture, sampler, coords, level, offset))";
     case ValidTextureOverload::kSampleLevel2dArrayF32:
-      return "textureSampleLevel(texture, sampler, coords, array_index, "
-             "level)";
+      return R"(textureSampleLevel(texture, sampler, coords, array_index, level))";
     case ValidTextureOverload::kSampleLevel2dArrayOffsetF32:
-      return "textureSampleLevel(texture, sampler, coords, array_index, "
-             "level, offset)";
+      return R"(textureSampleLevel(texture, sampler, coords, array_index, level, offset))";
     case ValidTextureOverload::kSampleLevel3dF32:
-      return "textureSampleLevel(texture, sampler, coords, level)";
+      return R"(textureSampleLevel(texture, sampler, coords, level))";
     case ValidTextureOverload::kSampleLevel3dOffsetF32:
-      return "textureSampleLevel(texture, sampler, coords, level, offset)";
+      return R"(textureSampleLevel(texture, sampler, coords, level, offset))";
     case ValidTextureOverload::kSampleLevelCubeF32:
-      return "textureSampleLevel(texture, sampler, coords, level)";
+      return R"(textureSampleLevel(texture, sampler, coords, level))";
     case ValidTextureOverload::kSampleLevelCubeArrayF32:
-      return "textureSampleLevel(texture, sampler, coords, array_index, "
-             "level)";
+      return R"(textureSampleLevel(texture, sampler, coords, array_index, level))";
     case ValidTextureOverload::kSampleLevelDepth2dF32:
-      return "textureSampleLevel(texture, sampler, coords, level)";
+      return R"(textureSampleLevel(texture, sampler, coords, level))";
     case ValidTextureOverload::kSampleLevelDepth2dOffsetF32:
-      return "textureSampleLevel(texture, sampler, coords, level, offset)";
+      return R"(textureSampleLevel(texture, sampler, coords, level, offset))";
     case ValidTextureOverload::kSampleLevelDepth2dArrayF32:
-      return "textureSampleLevel(texture, sampler, coords, array_index, level)";
+      return R"(textureSampleLevel(texture, sampler, coords, array_index, level))";
     case ValidTextureOverload::kSampleLevelDepth2dArrayOffsetF32:
-      return "textureSampleLevel(texture, sampler, coords, array_index, level, "
-             "offset)";
+      return R"(textureSampleLevel(texture, sampler, coords, array_index, level, offset))";
     case ValidTextureOverload::kSampleLevelDepthCubeF32:
-      return "textureSampleLevel(texture, sampler, coords, level)";
+      return R"(textureSampleLevel(texture, sampler, coords, level))";
     case ValidTextureOverload::kSampleLevelDepthCubeArrayF32:
-      return "textureSampleLevel(texture, sampler, coords, array_index, "
-             "level)";
+      return R"(textureSampleLevel(texture, sampler, coords, array_index, level))";
     case ValidTextureOverload::kSampleGrad2dF32:
-      return "textureSampleGrad(texture, sampler, coords, ddx, ddy)";
+      return R"(textureSampleGrad(texture, sampler, coords, ddx, ddy))";
     case ValidTextureOverload::kSampleGrad2dOffsetF32:
-      return "textureSampleGrad(texture, sampler, coords, ddx, ddy, "
-             "offset)";
+      return R"(textureSampleGrad(texture, sampler, coords, ddx, ddy, offset))";
     case ValidTextureOverload::kSampleGrad2dArrayF32:
-      return "textureSampleGrad(texture, sampler, coords, array_index, ddx, "
-             "ddy)";
+      return R"(textureSampleGrad(texture, sampler, coords, array_index, ddx, ddy))";
     case ValidTextureOverload::kSampleGrad2dArrayOffsetF32:
-      return "textureSampleGrad(texture, sampler, coords, array_index, ddx, "
-             "ddy, offset)";
+      return R"(textureSampleGrad(texture, sampler, coords, array_index, ddx, ddy, offset))";
     case ValidTextureOverload::kSampleGrad3dF32:
-      return "textureSampleGrad(texture, sampler, coords, ddx, ddy)";
+      return R"(textureSampleGrad(texture, sampler, coords, ddx, ddy))";
     case ValidTextureOverload::kSampleGrad3dOffsetF32:
-      return "textureSampleGrad(texture, sampler, coords, ddx, ddy, "
-             "offset)";
+      return R"(textureSampleGrad(texture, sampler, coords, ddx, ddy, offset))";
     case ValidTextureOverload::kSampleGradCubeF32:
-      return "textureSampleGrad(texture, sampler, coords, ddx, ddy)";
+      return R"(textureSampleGrad(texture, sampler, coords, ddx, ddy))";
     case ValidTextureOverload::kSampleGradCubeArrayF32:
-      return "textureSampleGrad(texture, sampler, coords, array_index, ddx, "
-             "ddy)";
+      return R"(textureSampleGrad(texture, sampler, coords, array_index, ddx, ddy))";
     case ValidTextureOverload::kSampleGradDepth2dF32:
-      return "textureSampleCompare(texture, sampler, coords, depth_ref)";
+      return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
     case ValidTextureOverload::kSampleGradDepth2dOffsetF32:
-      return "textureSampleCompare(texture, sampler, coords, depth_ref, "
-             "offset)";
+      return R"(textureSampleCompare(texture, sampler, coords, depth_ref, offset))";
     case ValidTextureOverload::kSampleGradDepth2dArrayF32:
-      return "textureSampleCompare(texture, sampler, coords, array_index, "
-             "depth_ref)";
+      return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
     case ValidTextureOverload::kSampleGradDepth2dArrayOffsetF32:
-      return "textureSampleCompare(texture, sampler, coords, array_index, "
-             "depth_ref, offset)";
+      return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref, offset))";
     case ValidTextureOverload::kSampleGradDepthCubeF32:
-      return "textureSampleCompare(texture, sampler, coords, depth_ref)";
+      return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
     case ValidTextureOverload::kSampleGradDepthCubeArrayF32:
-      return "textureSampleCompare(texture, sampler, coords, array_index, "
-             "depth_ref)";
+      return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
+    case ValidTextureOverload::kLoad1dF32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad1dU32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad1dI32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad1dArrayF32:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoad1dArrayU32:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoad1dArrayI32:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoad2dF32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad2dU32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad2dI32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad2dLevelF32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoad2dLevelU32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoad2dLevelI32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoad2dArrayF32:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoad2dArrayU32:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoad2dArrayI32:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoad2dArrayLevelF32:
+      return R"(textureLoad(texture, coords, array_index, level))";
+    case ValidTextureOverload::kLoad2dArrayLevelU32:
+      return R"(textureLoad(texture, coords, array_index, level))";
+    case ValidTextureOverload::kLoad2dArrayLevelI32:
+      return R"(textureLoad(texture, coords, array_index, level))";
+    case ValidTextureOverload::kLoad3dF32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad3dU32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad3dI32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad3dLevelF32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoad3dLevelU32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoad3dLevelI32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoadMultisampled2dF32:
+      return R"(textureLoad(texture, coords, sample_index))";
+    case ValidTextureOverload::kLoadMultisampled2dU32:
+      return R"(textureLoad(texture, coords, sample_index))";
+    case ValidTextureOverload::kLoadMultisampled2dI32:
+      return R"(textureLoad(texture, coords, sample_index))";
+    case ValidTextureOverload::kLoadMultisampled2dArrayF32:
+      return R"(textureLoad(texture, coords, array_index, sample_index))";
+    case ValidTextureOverload::kLoadMultisampled2dArrayU32:
+      return R"(textureLoad(texture, coords, array_index, sample_index))";
+    case ValidTextureOverload::kLoadMultisampled2dArrayI32:
+      return R"(textureLoad(texture, coords, array_index, sample_index))";
+    case ValidTextureOverload::kLoadDepth2dF32:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoadDepth2dLevelF32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoadDepth2dArrayF32:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
+      return R"(textureLoad(texture, coords, array_index, level))";
+    case ValidTextureOverload::kLoadStorageRO1dRgba32float:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoadStorageRO1dArrayRgba32float:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
+    case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
+    case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba8sint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba16uint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba16sint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba16float:
+    case ValidTextureOverload::kLoadStorageRO2dR32uint:
+    case ValidTextureOverload::kLoadStorageRO2dR32sint:
+    case ValidTextureOverload::kLoadStorageRO2dR32float:
+    case ValidTextureOverload::kLoadStorageRO2dRg32uint:
+    case ValidTextureOverload::kLoadStorageRO2dRg32sint:
+    case ValidTextureOverload::kLoadStorageRO2dRg32float:
+    case ValidTextureOverload::kLoadStorageRO2dRgba32uint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba32sint:
+    case ValidTextureOverload::kLoadStorageRO2dRgba32float:
+      return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoadStorageRO2dArrayRgba32float:
+      return R"(textureLoad(texture, coords, array_index))";
+    case ValidTextureOverload::kLoadStorageRO3dRgba32float:
+      return R"(textureLoad(texture, coords))";
   }
   return "<unmatched texture overload>";
 }
@@ -4661,56 +4739,37 @@ const char* expected_texture_overload(
 TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
   auto param = GetParam();
 
-  ast::type::Type* datatype = nullptr;
-  switch (param.texture_data_type) {
-    case ast::intrinsic::test::TextureDataType::kF32:
-      datatype = ty.f32;
-      break;
-    case ast::intrinsic::test::TextureDataType::kU32:
-      datatype = ty.u32;
-      break;
-    case ast::intrinsic::test::TextureDataType::kI32:
-      datatype = ty.i32;
-      break;
-  }
-
-  ast::type::Sampler sampler_type{param.sampler_kind};
-  switch (param.texture_kind) {
-    case ast::intrinsic::test::TextureKind::kRegular:
-      Var("texture", ast::StorageClass::kNone,
-          mod->create<ast::type::SampledTexture>(param.texture_dimension,
-                                                 datatype));
-      break;
-
-    case ast::intrinsic::test::TextureKind::kDepth:
-      Var("texture", ast::StorageClass::kNone,
-          mod->create<ast::type::DepthTexture>(param.texture_dimension));
-      break;
-  }
-
-  Var("sampler", ast::StorageClass::kNone, &sampler_type);
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
 
   auto* ident = Expr(param.function);
   ast::CallExpression call{ident, param.args(this)};
 
-  EXPECT_TRUE(td()->DetermineResultType(&call)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(td()->DetermineResultType(&call)) << td()->error();
 
   switch (param.texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
+    case ast::intrinsic::test::TextureKind::kMultisampled:
+    case ast::intrinsic::test::TextureKind::kStorage: {
+      auto* datatype = param.resultVectorComponentType(this);
       ASSERT_TRUE(call.result_type()->Is<ast::type::Vector>());
       EXPECT_EQ(call.result_type()->As<ast::type::Vector>()->type(), datatype);
       break;
-
-    case ast::intrinsic::test::TextureKind::kDepth:
+    }
+    case ast::intrinsic::test::TextureKind::kDepth: {
       EXPECT_EQ(call.result_type(), ty.f32);
       break;
+    }
   }
 
   auto* sig = static_cast<const ast::intrinsic::TextureSignature*>(
       ident->intrinsic_signature());
+  ASSERT_NE(sig, nullptr);
 
+  auto got = to_str(param.function, sig);
   auto* expected = expected_texture_overload(param.overload);
-  EXPECT_EQ(to_str(param.function, sig), expected);
+  EXPECT_EQ(got, expected);
 }
 
 }  // namespace

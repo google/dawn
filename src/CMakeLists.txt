@@ -252,10 +252,10 @@ set(TINT_LIB_SRCS
   validator/validator_impl.h
   validator/validator_test_helper.cc
   validator/validator_test_helper.h
+  writer/append_vector.cc
+  writer/append_vector.h
   writer/float_to_string.cc
   writer/float_to_string.h
-  writer/pack_coord_arrayidx.cc
-  writer/pack_coord_arrayidx.h
   writer/text.cc
   writer/text.h
   writer/text_generator.cc

@@ -20,6 +20,7 @@
 
 #include "src/ast/builder.h"
 #include "src/ast/type/sampler_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/texture_type.h"
 
 namespace tint {
@@ -27,37 +28,13 @@ namespace ast {
 namespace intrinsic {
 namespace test {
 
-enum class TextureKind { kRegular, kDepth };
-
-inline std::ostream& operator<<(std::ostream& out, const TextureKind& kind) {
-  switch (kind) {
-    case TextureKind::kRegular:
-      out << "regular";
-      break;
-    case TextureKind::kDepth:
-      out << "depth";
-      break;
-  }
-  return out;
-}
-
+enum class TextureKind { kRegular, kDepth, kMultisampled, kStorage };
 enum class TextureDataType { kF32, kU32, kI32 };
 
-inline std::ostream& operator<<(std::ostream& out, const TextureDataType& ty) {
-  switch (ty) {
-    case TextureDataType::kF32:
-      out << "f32";
-      break;
-    case TextureDataType::kU32:
-      out << "u32";
-      break;
-    case TextureDataType::kI32:
-      out << "i32";
-      break;
-  }
-  return out;
-}
+std::ostream& operator<<(std::ostream& out, const TextureKind& kind);
+std::ostream& operator<<(std::ostream& out, const TextureDataType& ty);
 
+/// Non-exhaustive list of valid texture overloads
 enum class ValidTextureOverload {
   kSample1dF32,
   kSample1dArrayF32,
@@ -111,17 +88,86 @@ enum class ValidTextureOverload {
   kSampleGradDepth2dArrayOffsetF32,
   kSampleGradDepthCubeF32,
   kSampleGradDepthCubeArrayF32,
+  kLoad1dF32,
+  kLoad1dU32,
+  kLoad1dI32,
+  kLoad1dArrayF32,
+  kLoad1dArrayU32,
+  kLoad1dArrayI32,
+  kLoad2dF32,
+  kLoad2dU32,
+  kLoad2dI32,
+  kLoad2dLevelF32,
+  kLoad2dLevelU32,
+  kLoad2dLevelI32,
+  kLoad2dArrayF32,
+  kLoad2dArrayU32,
+  kLoad2dArrayI32,
+  kLoad2dArrayLevelF32,
+  kLoad2dArrayLevelU32,
+  kLoad2dArrayLevelI32,
+  kLoad3dF32,
+  kLoad3dU32,
+  kLoad3dI32,
+  kLoad3dLevelF32,
+  kLoad3dLevelU32,
+  kLoad3dLevelI32,
+  kLoadMultisampled2dF32,
+  kLoadMultisampled2dU32,
+  kLoadMultisampled2dI32,
+  kLoadMultisampled2dArrayF32,
+  kLoadMultisampled2dArrayU32,
+  kLoadMultisampled2dArrayI32,
+  kLoadDepth2dF32,
+  kLoadDepth2dLevelF32,
+  kLoadDepth2dArrayF32,
+  kLoadDepth2dArrayLevelF32,
+  kLoadStorageRO1dRgba32float,       // Not permutated for all texel formats
+  kLoadStorageRO1dArrayRgba32float,  // Not permutated for all texel formats
+  kLoadStorageRO2dRgba8unorm,
+  kLoadStorageRO2dRgba8snorm,
+  kLoadStorageRO2dRgba8uint,
+  kLoadStorageRO2dRgba8sint,
+  kLoadStorageRO2dRgba16uint,
+  kLoadStorageRO2dRgba16sint,
+  kLoadStorageRO2dRgba16float,
+  kLoadStorageRO2dR32uint,
+  kLoadStorageRO2dR32sint,
+  kLoadStorageRO2dR32float,
+  kLoadStorageRO2dRg32uint,
+  kLoadStorageRO2dRg32sint,
+  kLoadStorageRO2dRg32float,
+  kLoadStorageRO2dRgba32uint,
+  kLoadStorageRO2dRgba32sint,
+  kLoadStorageRO2dRgba32float,
+  kLoadStorageRO2dArrayRgba32float,  // Not permutated for all texel formats
+  kLoadStorageRO3dRgba32float,       // Not permutated for all texel formats
 };
 
 /// Describes a texture intrinsic overload
 struct TextureOverloadCase {
-  /// Constructor
-  TextureOverloadCase();
-  /// Constructor
+  /// Constructor for textureSample...() functions
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       TextureKind,
                       type::SamplerKind,
+                      type::TextureDimension,
+                      TextureDataType,
+                      const char*,
+                      std::function<ExpressionList(Builder*)>);
+  /// Constructor for textureLoad() functions with non-storage textures
+  TextureOverloadCase(ValidTextureOverload,
+                      const char*,
+                      TextureKind,
+                      type::TextureDimension,
+                      TextureDataType,
+                      const char*,
+                      std::function<ExpressionList(Builder*)>);
+  /// Constructor for textureLoad() with storage textures
+  TextureOverloadCase(ValidTextureOverload,
+                      const char*,
+                      AccessControl,
+                      type::ImageFormat,
                       type::TextureDimension,
                       TextureDataType,
                       const char*,
@@ -131,37 +177,46 @@ struct TextureOverloadCase {
   /// Destructor
   ~TextureOverloadCase();
 
-  /// @return a vector containing a large number of valid texture overloads
+  /// @return a vector containing a large number (non-exhaustive) of valid
+  /// texture overloads.
   static std::vector<TextureOverloadCase> ValidCases();
 
+  /// @param builder the AST builder used for the test
+  /// @returns the vector component type of the texture function return value
+  ast::type::Type* resultVectorComponentType(ast::Builder* builder) const;
+  /// @param builder the AST builder used for the test
+  /// @returns a Variable holding the test texture
+  ast::Variable* buildTextureVariable(ast::Builder* builder) const;
+  /// @param builder the AST builder used for the test
+  /// @returns a Variable holding the test sampler
+  ast::Variable* buildSamplerVariable(ast::Builder* builder) const;
+
   /// The enumerator for this overload
-  ValidTextureOverload overload;
+  ValidTextureOverload const overload;
   /// A human readable description of the overload
-  const char* description;
+  const char* const description;
   /// The texture kind for the texture parameter
-  TextureKind texture_kind;
+  TextureKind const texture_kind;
   /// The sampler kind for the sampler parameter
-  type::SamplerKind sampler_kind;
+  /// Used only when texture_kind is not kStorage
+  type::SamplerKind const sampler_kind = type::SamplerKind::kSampler;
+  /// The access control for the storage texture
+  /// Used only when texture_kind is kStorage
+  AccessControl const access_control = AccessControl::kReadWrite;
+  /// The image format for the storage texture
+  /// Used only when texture_kind is kStorage
+  type::ImageFormat const image_format = type::ImageFormat::kNone;
   /// The dimensions of the texture parameter
-  type::TextureDimension texture_dimension;
+  type::TextureDimension const texture_dimension;
   /// The data type of the texture parameter
-  TextureDataType texture_data_type;
+  TextureDataType const texture_data_type;
   /// Name of the function. e.g. `textureSample`, `textureSampleGrad`, etc
-  const char* function;
+  const char* const function;
   /// A function that builds the AST arguments for the overload
-  std::function<ExpressionList(Builder*)> args;
+  std::function<ExpressionList(Builder*)> const args;
 };
 
-inline std::ostream& operator<<(std::ostream& out,
-                                const TextureOverloadCase& data) {
-  out << "TextureOverloadCase" << static_cast<int>(data.overload) << "\n";
-  out << data.description << "\n";
-  out << "texture_kind:      " << data.texture_kind << "\n";
-  out << "sampler_kind:      " << data.sampler_kind << "\n";
-  out << "texture_dimension: " << data.texture_dimension << "\n";
-  out << "texture_data_type: " << data.texture_data_type << "\n";
-  return out;
-}
+std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data);
 
 }  // namespace test
 }  // namespace intrinsic

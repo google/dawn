@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_WRITER_PACK_COORD_ARRAYIDX_H_
-#define SRC_WRITER_PACK_COORD_ARRAYIDX_H_
+#ifndef SRC_WRITER_APPEND_VECTOR_H_
+#define SRC_WRITER_APPEND_VECTOR_H_
 
 #include <functional>
 
@@ -28,25 +28,26 @@ class TypeConstructorExpression;
 
 namespace writer {
 
-/// A helper function use to generate texture intrinsic function calls for
-/// backends that expect the texture coordinate and array index to be packed
-/// together into a single 'coordinate' parameter.
-/// PackCoordAndArrayIndex() calls the `callback` function with a vector
-/// expression containing the elements of `coords` followed by the single
-/// element of `array_idx` cast to the `coords` element type.
+/// A helper function used to append a vector with an additional scalar.
+/// AppendVector is used to generate texture intrinsic function calls for
+/// backends that expect the texture coordinates to be packed with an additional
+/// mip-level or array-index parameter.
+/// AppendVector() calls the `callback` function with a vector
+/// expression containing the elements of `vector` followed by the single
+/// element of `scalar` cast to the `vector` element type.
 /// All types must have been assigned to the expressions and their child nodes
 /// before calling.
-/// @param coords the texture coordinates. May be a scalar, `vec2` or `vec3`.
-/// @param array_idx the texture array index. Must be a scalar.
+/// @param vector the vector to be appended. May be a scalar, `vec2` or `vec3`.
+/// @param scalar the scalar to append to the vector. Must be a scalar.
 /// @param callback the function called with the packed result. Note that the
 /// pointer argument is only valid for the duration of the call.
 /// @returns the value returned by `callback` to indicate success
-bool PackCoordAndArrayIndex(
-    ast::Expression* coords,
-    ast::Expression* array_idx,
+bool AppendVector(
+    ast::Expression* vector,
+    ast::Expression* scalar,
     std::function<bool(ast::TypeConstructorExpression*)> callback);
 
 }  // namespace writer
 }  // namespace tint
 
-#endif  // SRC_WRITER_PACK_COORD_ARRAYIDX_H_
+#endif  // SRC_WRITER_APPEND_VECTOR_H_

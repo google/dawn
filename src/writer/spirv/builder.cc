@@ -13,6 +13,7 @@
 
 #include "src/writer/spirv/builder.h"
 
+#include <algorithm>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -72,7 +73,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/writer/pack_coord_arrayidx.h"
+#include "src/writer/append_vector.h"
 
 namespace tint {
 namespace writer {
@@ -1946,25 +1947,50 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   spirv_params.emplace_back(std::move(result_id));    // result id
 
   // Extra image operands, appended to spirv_params.
-  uint32_t spirv_operand_mask = 0;
-  OperandList spirv_operands;
-  spirv_operands.reserve(4);  // Enough to fit most parameter lists
+  struct ImageOperand {
+    SpvImageOperandsMask mask;
+    tint::writer::spirv::Operand operand;
+  };
+  std::vector<ImageOperand> image_operands;
+  image_operands.reserve(4);  // Enough to fit most parameter lists
+
+  auto append_coords_to_spirv_params = [&] {
+    if (pidx.array_index != kNotUsed) {
+      // Array index needs to be appended to the coordinates.
+      auto* param_coords = call->params()[pidx.coords];
+      auto* param_array_index = call->params()[pidx.array_index];
+
+      if (!AppendVector(param_coords, param_array_index,
+                        [&](ast::TypeConstructorExpression* packed) {
+                          auto param =
+                              GenerateTypeConstructorExpression(packed, false);
+                          if (param == 0) {
+                            return false;
+                          }
+                          spirv_params.emplace_back(Operand::Int(param));
+                          return true;
+                        })) {
+        return;
+      }
+    } else {
+      spirv_params.emplace_back(gen_param(pidx.coords));  // coordinates
+    }
+  };
 
   if (ident->intrinsic() == ast::Intrinsic::kTextureLoad) {
     op = texture_type->Is<ast::type::StorageTexture>() ? spv::Op::OpImageRead
                                                        : spv::Op::OpImageFetch;
     spirv_params.emplace_back(gen_param(pidx.texture));
-    spirv_params.emplace_back(gen_param(pidx.coords));
+    append_coords_to_spirv_params();
 
-    // TODO(dsinclair): Remove the LOD param from textureLoad on storage
-    // textures when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
     if (pidx.level != kNotUsed) {
-      if (texture_type->Is<ast::type::MultisampledTexture>()) {
-        spirv_operand_mask |= SpvImageOperandsSampleMask;
-      } else {
-        spirv_operand_mask |= SpvImageOperandsLodMask;
-      }
-      spirv_operands.emplace_back(gen_param(pidx.level));
+      image_operands.emplace_back(
+          ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
+    }
+
+    if (pidx.sample_index != kNotUsed) {
+      image_operands.emplace_back(ImageOperand{SpvImageOperandsSampleMask,
+                                               gen_param(pidx.sample_index)});
     }
   } else {
     assert(pidx.sampler != kNotUsed);
@@ -1976,27 +2002,7 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
 
     // Populate the spirv_params with the common parameters
     spirv_params.emplace_back(Operand::Int(sampled_image));  // sampled image
-
-    if (pidx.array_index != kNotUsed) {
-      // Array index needs to be appended to the coordinates.
-      auto* param_coords = call->params()[pidx.coords];
-      auto* param_array_index = call->params()[pidx.array_index];
-
-      if (!PackCoordAndArrayIndex(
-              param_coords, param_array_index,
-              [&](ast::TypeConstructorExpression* packed) {
-                auto param = GenerateTypeConstructorExpression(packed, false);
-                if (param == 0) {
-                  return false;
-                }
-                spirv_params.emplace_back(Operand::Int(param));
-                return true;
-              })) {
-        return;
-      }
-    } else {
-      spirv_params.emplace_back(gen_param(pidx.coords));  // coordinates
-    }
+    append_coords_to_spirv_params();
 
     switch (ident->intrinsic()) {
       case ast::Intrinsic::kTextureSample: {
@@ -2006,24 +2012,25 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       case ast::Intrinsic::kTextureSampleBias: {
         op = spv::Op::OpImageSampleImplicitLod;
         assert(pidx.bias != kNotUsed);
-        spirv_operand_mask |= SpvImageOperandsBiasMask;
-        spirv_operands.emplace_back(gen_param(pidx.bias));
+        image_operands.emplace_back(
+            ImageOperand{SpvImageOperandsBiasMask, gen_param(pidx.bias)});
         break;
       }
       case ast::Intrinsic::kTextureSampleLevel: {
         op = spv::Op::OpImageSampleExplicitLod;
         assert(pidx.level != kNotUsed);
-        spirv_operand_mask |= SpvImageOperandsLodMask;
-        spirv_operands.emplace_back(gen_param(pidx.level));
+        image_operands.emplace_back(
+            ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
         break;
       }
       case ast::Intrinsic::kTextureSampleGrad: {
         op = spv::Op::OpImageSampleExplicitLod;
         assert(pidx.ddx != kNotUsed);
         assert(pidx.ddy != kNotUsed);
-        spirv_operand_mask |= SpvImageOperandsGradMask;
-        spirv_operands.emplace_back(gen_param(pidx.ddx));
-        spirv_operands.emplace_back(gen_param(pidx.ddy));
+        image_operands.emplace_back(
+            ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddx)});
+        image_operands.emplace_back(
+            ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddy)});
         break;
       }
       case ast::Intrinsic::kTextureSampleCompare: {
@@ -2031,11 +2038,11 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
         assert(pidx.depth_ref != kNotUsed);
         spirv_params.emplace_back(gen_param(pidx.depth_ref));
 
-        spirv_operand_mask |= SpvImageOperandsLodMask;
         ast::type::F32 f32;
         ast::FloatLiteral float_0(&f32, 0.0);
-        spirv_operands.emplace_back(
-            Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0)));
+        image_operands.emplace_back(ImageOperand{
+            SpvImageOperandsLodMask,
+            Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0))});
         break;
       }
       default:
@@ -2044,16 +2051,21 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   }
 
   if (pidx.offset != kNotUsed) {
-    spirv_operand_mask |= SpvImageOperandsOffsetMask;
-    spirv_operands.emplace_back(gen_param(pidx.offset));
+    image_operands.emplace_back(
+        ImageOperand{SpvImageOperandsOffsetMask, gen_param(pidx.offset)});
   }
 
-  if (spirv_operand_mask != 0) {
-    // Note: Order of operands is based on SpvImageXXXOperands value -
-    // smaller-numbered SpvImageXXXOperands bits appear first.
-    spirv_params.emplace_back(Operand::Int(spirv_operand_mask));
-    spirv_params.insert(std::end(spirv_params), std::begin(spirv_operands),
-                        std::end(spirv_operands));
+  if (!image_operands.empty()) {
+    std::sort(image_operands.begin(), image_operands.end(),
+              [](auto& a, auto& b) { return a.mask < b.mask; });
+    uint32_t mask = 0;
+    for (auto& image_operand : image_operands) {
+      mask |= image_operand.mask;
+    }
+    spirv_params.emplace_back(Operand::Int(mask));
+    for (auto& image_operand : image_operands) {
+      spirv_params.emplace_back(image_operand.operand);
+    }
   }
 
   if (op == spv::Op::OpNop) {
@@ -2143,8 +2155,8 @@ bool Builder::GenerateConditionalBlock(
   auto true_block = result_op();
   auto true_block_id = true_block.to_i();
 
-  // if there are no more else statements we branch on false to the merge block
-  // otherwise we branch to the false block
+  // if there are no more else statements we branch on false to the merge
+  // block otherwise we branch to the false block
   auto false_block_id =
       cur_else_idx < else_stmts.size() ? next_id() : merge_block_id;
 
@@ -2644,12 +2656,12 @@ bool Builder::GenerateStructType(ast::type::Struct* struct_type,
     }
 
     // We're attaching the access control to the members of the struct instead
-    // of to the variable. The reason we do this is that WGSL models the access
-    // as part of the type. If we attach to the variable, it's no longer part
-    // of the type in the SPIR-V backend, but part of the variable. This differs
-    // from the modeling and other backends. Attaching to the struct members
-    // means the access control stays part of the type where it logically makes
-    // the most sense.
+    // of to the variable. The reason we do this is that WGSL models the
+    // access as part of the type. If we attach to the variable, it's no
+    // longer part of the type in the SPIR-V backend, but part of the
+    // variable. This differs from the modeling and other backends. Attaching
+    // to the struct members means the access control stays part of the type
+    // where it logically makes the most sense.
     if (access_control == ast::AccessControl::kReadOnly) {
       push_annot(spv::Op::OpMemberDecorate,
                  {Operand::Int(struct_id), Operand::Int(i),

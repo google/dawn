@@ -139,6 +139,8 @@ struct TextureSignature : public Signature {
       size_t offset = kNotUsed;
       /// `sampler` parameter index.
       size_t sampler = kNotUsed;
+      /// `sample_index` parameter index.
+      size_t sample_index = kNotUsed;
       /// `texture` parameter index.
       size_t texture = kNotUsed;
     };

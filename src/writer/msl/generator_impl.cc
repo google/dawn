@@ -663,6 +663,8 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
   if (!EmitExpression(params[pidx.texture]))
     return false;
 
+  bool lod_param_is_named = true;
+
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureSample:
     case ast::Intrinsic::kTextureSampleBias:
@@ -673,37 +675,59 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
     case ast::Intrinsic::kTextureSampleCompare:
       out_ << ".sample_compare(";
       break;
+    case ast::Intrinsic::kTextureLoad:
+      out_ << ".read(";
+      lod_param_is_named = false;
+      break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
                ident->name() + "'";
-      break;
+      return false;
   }
 
-  if (!EmitExpression(params[pidx.sampler])) {
-    return false;
-  }
-
-  for (auto idx : {pidx.coords, pidx.array_index, pidx.depth_ref}) {
-    if (idx != kNotUsed) {
+  bool first_arg = true;
+  auto maybe_write_comma = [&] {
+    if (!first_arg) {
       out_ << ", ";
+    }
+    first_arg = false;
+  };
+
+  if (pidx.sampler != kNotUsed) {
+    if (!EmitExpression(params[pidx.sampler])) {
+      return false;
+    }
+    first_arg = false;
+  }
+
+  for (auto idx :
+       {pidx.coords, pidx.array_index, pidx.depth_ref, pidx.sample_index}) {
+    if (idx != kNotUsed) {
+      maybe_write_comma();
       if (!EmitExpression(params[idx]))
         return false;
     }
   }
 
   if (pidx.bias != kNotUsed) {
-    out_ << ", bias(";
+    maybe_write_comma();
+    out_ << "bias(";
     if (!EmitExpression(params[pidx.bias])) {
       return false;
     }
     out_ << ")";
   }
   if (pidx.level != kNotUsed) {
-    out_ << ", level(";
+    maybe_write_comma();
+    if (lod_param_is_named) {
+      out_ << "level(";
+    }
     if (!EmitExpression(params[pidx.level])) {
       return false;
     }
-    out_ << ")";
+    if (lod_param_is_named) {
+      out_ << ")";
+    }
   }
   if (pidx.ddx != kNotUsed) {
     auto dim = params[pidx.texture]
@@ -714,14 +738,17 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
     switch (dim) {
       case ast::type::TextureDimension::k2d:
       case ast::type::TextureDimension::k2dArray:
-        out_ << ", gradient2d(";
+        maybe_write_comma();
+        out_ << "gradient2d(";
         break;
       case ast::type::TextureDimension::k3d:
-        out_ << ", gradient3d(";
+        maybe_write_comma();
+        out_ << "gradient3d(";
         break;
       case ast::type::TextureDimension::kCube:
       case ast::type::TextureDimension::kCubeArray:
-        out_ << ", gradientcube(";
+        maybe_write_comma();
+        out_ << "gradientcube(";
         break;
       default: {
         std::stringstream err;
@@ -741,7 +768,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
   }
 
   if (pidx.offset != kNotUsed) {
-    out_ << ", ";
+    maybe_write_comma();
     if (!EmitExpression(params[pidx.offset])) {
       return false;
     }

@@ -555,6 +555,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                                       ->As<ast::type::Texture>();
 
     bool is_array = false;
+    bool is_multisampled = texture->Is<ast::type::MultisampledTexture>();
     switch (texture->dim()) {
       case ast::type::TextureDimension::k1dArray:
       case ast::type::TextureDimension::k2dArray:
@@ -571,13 +572,13 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (is_array) {
           param.idx.array_index = param.count++;
         }
-
-        // TODO(dsinclair): Remove the LOD param from textureLoad on storage
-        // textures when https://github.com/gpuweb/gpuweb/pull/1032 gets merged.
         if (expr->params().size() > param.count) {
-          param.idx.level = param.count++;
+          if (is_multisampled) {
+            param.idx.sample_index = param.count++;
+          } else {
+            param.idx.level = param.count++;
+          }
         }
-
         break;
       case ast::Intrinsic::kTextureSample:
         param.idx.texture = param.count++;
@@ -659,21 +660,21 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     if (texture->Is<ast::type::DepthTexture>()) {
       expr->func()->set_result_type(mod_->create<ast::type::F32>());
-      return true;
-    }
-
-    ast::type::Type* type = nullptr;
-    if (auto* storage = texture->As<ast::type::StorageTexture>()) {
-      type = storage->type();
-    } else if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
-      type = sampled->type();
-    } else if (auto* msampled = texture->As<ast::type::MultisampledTexture>()) {
-      type = msampled->type();
     } else {
-      set_error(expr->source(), "unknown texture type for texture sampling");
-      return false;
+      ast::type::Type* type = nullptr;
+      if (auto* storage = texture->As<ast::type::StorageTexture>()) {
+        type = storage->type();
+      } else if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
+        type = sampled->type();
+      } else if (auto* msampled =
+                     texture->As<ast::type::MultisampledTexture>()) {
+        type = msampled->type();
+      } else {
+        set_error(expr->source(), "unknown texture type for texture sampling");
+        return false;
+      }
+      expr->func()->set_result_type(mod_->create<ast::type::Vector>(type, 4));
     }
-    expr->func()->set_result_type(mod_->create<ast::type::Vector>(type, 4));
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kDot) {
