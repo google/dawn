@@ -69,7 +69,7 @@ option(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_META
 option(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
 option(DAWN_ENABLE_OPENGL "Enable compilation of the OpenGL backend" ${ENABLE_OPENGL})
 option(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" ${ENABLE_VULKAN})
-option(DAWN_ENABLE_WGSL "Enable WGSL support" OFF)
+option(DAWN_ENABLE_WGSL "Enable WGSL support" ON)
 option(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
 option(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
 
