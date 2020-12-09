@@ -24,17 +24,21 @@ Manager::~Manager() = default;
 
 Transform::Output Manager::Run(ast::Module* module) {
   Output out;
-  for (auto& transform : transforms_) {
-    auto res = transform->Run(module);
-    out.module = std::move(res.module);
-    out.diagnostics.add(std::move(res.diagnostics));
-    if (out.diagnostics.contains_errors()) {
-      return out;
+  if (!transforms_.empty()) {
+    for (auto& transform : transforms_) {
+      auto res = transform->Run(module);
+      out.module = std::move(res.module);
+      out.diagnostics.add(std::move(res.diagnostics));
+      if (out.diagnostics.contains_errors()) {
+        return out;
+      }
+      module = &out.module;
     }
-    module = &out.module;
+  } else {
+    out.module = module->Clone();
   }
 
-  TypeDeterminer td(module);
+  TypeDeterminer td(&out.module);
   if (!td.Determine()) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;
