@@ -381,7 +381,7 @@ if (${TINT_BUILD_FUZZERS})
   target_link_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
 endif()
 
-if(${TEST_BUILD_TESTS})
+if(${TINT_BUILD_TESTS})
   set(TINT_TEST_SRCS
     ast/array_accessor_expression_test.cc
     ast/assignment_statement_test.cc
