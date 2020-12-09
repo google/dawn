@@ -355,99 +355,19 @@ if(${TINT_BUILD_HLSL_WRITER})
   )
 endif()
 
-set(TINT_TEST_SRCS
-  ast/array_accessor_expression_test.cc
-  ast/assignment_statement_test.cc
-  ast/binding_decoration_test.cc
-  ast/bitcast_expression_test.cc
-  ast/block_statement_test.cc
-  ast/bool_literal_test.cc
-  ast/break_statement_test.cc
-  ast/builtin_decoration_test.cc
-  ast/call_expression_test.cc
-  ast/call_statement_test.cc
-  ast/case_statement_test.cc
-  ast/clone_context_test.cc
-  ast/constant_id_decoration_test.cc
-  ast/continue_statement_test.cc
-  ast/discard_statement_test.cc
-  ast/decoration_test.cc
-  ast/decorated_variable_test.cc
-  ast/else_statement_test.cc
-  ast/expression_test.cc
-  ast/fallthrough_statement_test.cc
-  ast/float_literal_test.cc
-  ast/function_test.cc
-  ast/identifier_expression_test.cc
-  ast/if_statement_test.cc
-  ast/intrinsic_texture_helper_test.cc
-  ast/intrinsic_texture_helper_test.h
-  ast/int_literal_test.cc
-  ast/location_decoration_test.cc
-  ast/loop_statement_test.cc
-  ast/member_accessor_expression_test.cc
-  ast/module_test.cc
-  ast/module_clone_test.cc
-  ast/null_literal_test.cc
-  ast/binary_expression_test.cc
-  ast/return_statement_test.cc
-  ast/scalar_constructor_expression_test.cc
-  ast/set_decoration_test.cc
-  ast/sint_literal_test.cc
-  ast/stage_decoration_test.cc
-  ast/stride_decoration_test.cc
-  ast/struct_member_test.cc
-  ast/struct_member_offset_decoration_test.cc
-  ast/struct_test.cc
-  ast/switch_statement_test.cc
-  ast/test_helper.h
-  ast/type/access_control_type_test.cc
-  ast/type/alias_type_test.cc
-  ast/type/array_type_test.cc
-  ast/type/bool_type_test.cc
-  ast/type/depth_texture_type_test.cc
-  ast/type/f32_type_test.cc
-  ast/type/i32_type_test.cc
-  ast/type/matrix_type_test.cc
-  ast/type/multisampled_texture_type_test.cc
-  ast/type/pointer_type_test.cc
-  ast/type/sampled_texture_type_test.cc
-  ast/type/sampler_type_test.cc
-  ast/type/storage_texture_type_test.cc
-  ast/type/struct_type_test.cc
-  ast/type/u32_type_test.cc
-  ast/type/vector_type_test.cc
-  ast/traits_test.cc
-  ast/type_constructor_expression_test.cc
-  ast/type_manager_test.cc
-  ast/uint_literal_test.cc
-  ast/unary_op_expression_test.cc
-  ast/variable_decl_statement_test.cc
-  ast/variable_test.cc
-  ast/workgroup_decoration_test.cc
-  castable_test.cc
-  diagnostic/formatter_test.cc
-  diagnostic/printer_test.cc
-  inspector/inspector_test.cc
-  namer_test.cc
-  scope_stack_test.cc
-  transform/emit_vertex_point_size_test.cc
-  transform/bound_array_accessors_test.cc
-  transform/first_index_offset_test.cc
-  transform/vertex_pulling_test.cc
-  type_determiner_test.cc
-  validator/validator_control_block_test.cc
-  validator/validator_function_test.cc
-  validator/validator_test.cc
-  validator/validator_type_test.cc
-  writer/float_to_string_test.cc
-)
-
 ## Tint library
 add_library(libtint ${TINT_LIB_SRCS})
 tint_default_compile_options(libtint)
 if (${COMPILER_IS_LIKE_GNU})
   target_compile_options(libtint PRIVATE -fvisibility=hidden)
+endif()
+set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
+
+if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+  tint_spvtools_compile_options(libtint)
+  if (${TINT_BUILD_FUZZERS})
+    tint_spvtools_compile_options(libtint-fuzz)
+  endif()
 endif()
 
 if (${TINT_BUILD_FUZZERS})
@@ -461,283 +381,364 @@ if (${TINT_BUILD_FUZZERS})
   target_link_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
 endif()
 
-set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
+if(${TEST_BUILD_TESTS})
+  set(TINT_TEST_SRCS
+    ast/array_accessor_expression_test.cc
+    ast/assignment_statement_test.cc
+    ast/binding_decoration_test.cc
+    ast/bitcast_expression_test.cc
+    ast/block_statement_test.cc
+    ast/bool_literal_test.cc
+    ast/break_statement_test.cc
+    ast/builtin_decoration_test.cc
+    ast/call_expression_test.cc
+    ast/call_statement_test.cc
+    ast/case_statement_test.cc
+    ast/clone_context_test.cc
+    ast/constant_id_decoration_test.cc
+    ast/continue_statement_test.cc
+    ast/discard_statement_test.cc
+    ast/decoration_test.cc
+    ast/decorated_variable_test.cc
+    ast/else_statement_test.cc
+    ast/expression_test.cc
+    ast/fallthrough_statement_test.cc
+    ast/float_literal_test.cc
+    ast/function_test.cc
+    ast/identifier_expression_test.cc
+    ast/if_statement_test.cc
+    ast/intrinsic_texture_helper_test.cc
+    ast/intrinsic_texture_helper_test.h
+    ast/int_literal_test.cc
+    ast/location_decoration_test.cc
+    ast/loop_statement_test.cc
+    ast/member_accessor_expression_test.cc
+    ast/module_test.cc
+    ast/module_clone_test.cc
+    ast/null_literal_test.cc
+    ast/binary_expression_test.cc
+    ast/return_statement_test.cc
+    ast/scalar_constructor_expression_test.cc
+    ast/set_decoration_test.cc
+    ast/sint_literal_test.cc
+    ast/stage_decoration_test.cc
+    ast/stride_decoration_test.cc
+    ast/struct_member_test.cc
+    ast/struct_member_offset_decoration_test.cc
+    ast/struct_test.cc
+    ast/switch_statement_test.cc
+    ast/test_helper.h
+    ast/type/access_control_type_test.cc
+    ast/type/alias_type_test.cc
+    ast/type/array_type_test.cc
+    ast/type/bool_type_test.cc
+    ast/type/depth_texture_type_test.cc
+    ast/type/f32_type_test.cc
+    ast/type/i32_type_test.cc
+    ast/type/matrix_type_test.cc
+    ast/type/multisampled_texture_type_test.cc
+    ast/type/pointer_type_test.cc
+    ast/type/sampled_texture_type_test.cc
+    ast/type/sampler_type_test.cc
+    ast/type/storage_texture_type_test.cc
+    ast/type/struct_type_test.cc
+    ast/type/u32_type_test.cc
+    ast/type/vector_type_test.cc
+    ast/traits_test.cc
+    ast/type_constructor_expression_test.cc
+    ast/type_manager_test.cc
+    ast/uint_literal_test.cc
+    ast/unary_op_expression_test.cc
+    ast/variable_decl_statement_test.cc
+    ast/variable_test.cc
+    ast/workgroup_decoration_test.cc
+    castable_test.cc
+    diagnostic/formatter_test.cc
+    diagnostic/printer_test.cc
+    inspector/inspector_test.cc
+    namer_test.cc
+    scope_stack_test.cc
+    transform/emit_vertex_point_size_test.cc
+    transform/bound_array_accessors_test.cc
+    transform/first_index_offset_test.cc
+    transform/vertex_pulling_test.cc
+    type_determiner_test.cc
+    validator/validator_control_block_test.cc
+    validator/validator_function_test.cc
+    validator/validator_test.cc
+    validator/validator_type_test.cc
+    writer/float_to_string_test.cc
+  )
 
-if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
-  tint_spvtools_compile_options(libtint)
-  if (${TINT_BUILD_FUZZERS})
-    tint_spvtools_compile_options(libtint-fuzz)
+  if(${TINT_BUILD_SPV_READER})
+    list(APPEND TINT_TEST_SRCS
+      reader/spirv/enum_converter_test.cc
+      reader/spirv/fail_stream_test.cc
+      reader/spirv/function_arithmetic_test.cc
+      reader/spirv/function_bit_test.cc
+      reader/spirv/function_cfg_test.cc
+      reader/spirv/function_call_test.cc
+      reader/spirv/function_composite_test.cc
+      reader/spirv/function_conversion_test.cc
+      reader/spirv/function_decl_test.cc
+      reader/spirv/function_glsl_std_450_test.cc
+      reader/spirv/function_logical_test.cc
+      reader/spirv/function_memory_test.cc
+      reader/spirv/function_misc_test.cc
+      reader/spirv/function_var_test.cc
+      reader/spirv/namer_test.cc
+      reader/spirv/parser_impl_convert_member_decoration_test.cc
+      reader/spirv/parser_impl_convert_type_test.cc
+      reader/spirv/parser_impl_function_decl_test.cc
+      reader/spirv/parser_impl_get_decorations_test.cc
+      reader/spirv/parser_impl_handle_test.cc
+      reader/spirv/parser_impl_import_test.cc
+      reader/spirv/parser_impl_module_var_test.cc
+      reader/spirv/parser_impl_named_types_test.cc
+      reader/spirv/parser_impl_test.cc
+      reader/spirv/parser_impl_user_name_test.cc
+      reader/spirv/parser_test.cc
+      reader/spirv/spirv_tools_helpers_test.cc
+      reader/spirv/spirv_tools_helpers_test.h
+      reader/spirv/usage_test.cc
+    )
   endif()
+
+  if(${TINT_BUILD_WGSL_READER})
+    list(APPEND TINT_TEST_SRCS
+      reader/wgsl/lexer_test.cc
+      reader/wgsl/parser_test.cc
+      reader/wgsl/parser_impl_additive_expression_test.cc
+      reader/wgsl/parser_impl_and_expression_test.cc
+      reader/wgsl/parser_impl_argument_expression_list_test.cc
+      reader/wgsl/parser_impl_assignment_stmt_test.cc
+      reader/wgsl/parser_impl_body_stmt_test.cc
+      reader/wgsl/parser_impl_break_stmt_test.cc
+      reader/wgsl/parser_impl_call_stmt_test.cc
+      reader/wgsl/parser_impl_case_body_test.cc
+      reader/wgsl/parser_impl_const_expr_test.cc
+      reader/wgsl/parser_impl_const_literal_test.cc
+      reader/wgsl/parser_impl_continue_stmt_test.cc
+      reader/wgsl/parser_impl_continuing_stmt_test.cc
+      reader/wgsl/parser_impl_depth_texture_type_test.cc
+      reader/wgsl/parser_impl_else_stmt_test.cc
+      reader/wgsl/parser_impl_elseif_stmt_test.cc
+      reader/wgsl/parser_impl_equality_expression_test.cc
+      reader/wgsl/parser_impl_error_msg_test.cc
+      reader/wgsl/parser_impl_error_resync_test.cc
+      reader/wgsl/parser_impl_exclusive_or_expression_test.cc
+      reader/wgsl/parser_impl_for_stmt_test.cc
+      reader/wgsl/parser_impl_function_decl_test.cc
+      reader/wgsl/parser_impl_function_decoration_list_test.cc
+      reader/wgsl/parser_impl_function_decoration_test.cc
+      reader/wgsl/parser_impl_function_header_test.cc
+      reader/wgsl/parser_impl_function_type_decl_test.cc
+      reader/wgsl/parser_impl_global_constant_decl_test.cc
+      reader/wgsl/parser_impl_global_decl_test.cc
+      reader/wgsl/parser_impl_global_variable_decl_test.cc
+      reader/wgsl/parser_impl_if_stmt_test.cc
+      reader/wgsl/parser_impl_image_storage_type_test.cc
+      reader/wgsl/parser_impl_inclusive_or_expression_test.cc
+      reader/wgsl/parser_impl_logical_and_expression_test.cc
+      reader/wgsl/parser_impl_logical_or_expression_test.cc
+      reader/wgsl/parser_impl_loop_stmt_test.cc
+      reader/wgsl/parser_impl_multiplicative_expression_test.cc
+      reader/wgsl/parser_impl_param_list_test.cc
+      reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
+      reader/wgsl/parser_impl_pipeline_stage_test.cc
+      reader/wgsl/parser_impl_postfix_expression_test.cc
+      reader/wgsl/parser_impl_primary_expression_test.cc
+      reader/wgsl/parser_impl_relational_expression_test.cc
+      reader/wgsl/parser_impl_sampled_texture_type_test.cc
+      reader/wgsl/parser_impl_sampler_type_test.cc
+      reader/wgsl/parser_impl_shift_expression_test.cc
+      reader/wgsl/parser_impl_statement_test.cc
+      reader/wgsl/parser_impl_statements_test.cc
+      reader/wgsl/parser_impl_storage_class_test.cc
+      reader/wgsl/parser_impl_storage_texture_type_test.cc
+      reader/wgsl/parser_impl_struct_body_decl_test.cc
+      reader/wgsl/parser_impl_struct_decl_test.cc
+      reader/wgsl/parser_impl_struct_decoration_decl_test.cc
+      reader/wgsl/parser_impl_struct_decoration_test.cc
+      reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc
+      reader/wgsl/parser_impl_struct_member_decoration_test.cc
+      reader/wgsl/parser_impl_struct_member_test.cc
+      reader/wgsl/parser_impl_switch_body_test.cc
+      reader/wgsl/parser_impl_switch_stmt_test.cc
+      reader/wgsl/parser_impl_test.cc
+      reader/wgsl/parser_impl_test_helper.cc
+      reader/wgsl/parser_impl_test_helper.h
+      reader/wgsl/parser_impl_texture_sampler_types_test.cc
+      reader/wgsl/parser_impl_type_alias_test.cc
+      reader/wgsl/parser_impl_type_decl_test.cc
+      reader/wgsl/parser_impl_unary_expression_test.cc
+      reader/wgsl/parser_impl_variable_decl_test.cc
+      reader/wgsl/parser_impl_variable_decoration_list_test.cc
+      reader/wgsl/parser_impl_variable_decoration_test.cc
+      reader/wgsl/parser_impl_variable_ident_decl_test.cc
+      reader/wgsl/parser_impl_variable_stmt_test.cc
+      reader/wgsl/parser_impl_variable_storage_decoration_test.cc
+      reader/wgsl/token_test.cc
+    )
+  endif()
+
+  if(${TINT_BUILD_SPV_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      writer/spirv/binary_writer_test.cc
+      writer/spirv/builder_accessor_expression_test.cc
+      writer/spirv/builder_assign_test.cc
+      writer/spirv/builder_binary_expression_test.cc
+      writer/spirv/builder_bitcast_expression_test.cc
+      writer/spirv/builder_block_test.cc
+      writer/spirv/builder_call_test.cc
+      writer/spirv/builder_constructor_expression_test.cc
+      writer/spirv/builder_discard_test.cc
+      writer/spirv/builder_format_conversion_test.cc
+      writer/spirv/builder_function_decoration_test.cc
+      writer/spirv/builder_function_test.cc
+      writer/spirv/builder_function_variable_test.cc
+      writer/spirv/builder_global_variable_test.cc
+      writer/spirv/builder_ident_expression_test.cc
+      writer/spirv/builder_if_test.cc
+      writer/spirv/builder_intrinsic_test.cc
+      writer/spirv/builder_intrinsic_texture_test.cc
+      writer/spirv/builder_literal_test.cc
+      writer/spirv/builder_loop_test.cc
+      writer/spirv/builder_return_test.cc
+      writer/spirv/builder_switch_test.cc
+      writer/spirv/builder_test.cc
+      writer/spirv/builder_type_test.cc
+      writer/spirv/builder_unary_op_expression_test.cc
+      writer/spirv/instruction_test.cc
+      writer/spirv/operand_test.cc
+      writer/spirv/spv_dump.cc
+      writer/spirv/spv_dump.h
+      writer/spirv/test_helper.h
+    )
+  endif()
+
+  if(${TINT_BUILD_WGSL_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      writer/wgsl/generator_impl_test.cc
+      writer/wgsl/generator_impl_alias_type_test.cc
+      writer/wgsl/generator_impl_array_accessor_test.cc
+      writer/wgsl/generator_impl_assign_test.cc
+      writer/wgsl/generator_impl_binary_test.cc
+      writer/wgsl/generator_impl_bitcast_test.cc
+      writer/wgsl/generator_impl_block_test.cc
+      writer/wgsl/generator_impl_break_test.cc
+      writer/wgsl/generator_impl_call_test.cc
+      writer/wgsl/generator_impl_case_test.cc
+      writer/wgsl/generator_impl_cast_test.cc
+      writer/wgsl/generator_impl_constructor_test.cc
+      writer/wgsl/generator_impl_continue_test.cc
+      writer/wgsl/generator_impl_discard_test.cc
+      writer/wgsl/generator_impl_fallthrough_test.cc
+      writer/wgsl/generator_impl_function_test.cc
+      writer/wgsl/generator_impl_identifier_test.cc
+      writer/wgsl/generator_impl_if_test.cc
+      writer/wgsl/generator_impl_loop_test.cc
+      writer/wgsl/generator_impl_member_accessor_test.cc
+      writer/wgsl/generator_impl_return_test.cc
+      writer/wgsl/generator_impl_switch_test.cc
+      writer/wgsl/generator_impl_type_test.cc
+      writer/wgsl/generator_impl_unary_op_test.cc
+      writer/wgsl/generator_impl_variable_decl_statement_test.cc
+      writer/wgsl/generator_impl_variable_test.cc
+      writer/wgsl/test_helper.h
+    )
+  endif()
+
+  if(${TINT_BUILD_MSL_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      writer/msl/generator_impl_alias_type_test.cc
+      writer/msl/generator_impl_array_accessor_test.cc
+      writer/msl/generator_impl_assign_test.cc
+      writer/msl/generator_impl_binary_test.cc
+      writer/msl/generator_impl_bitcast_test.cc
+      writer/msl/generator_impl_block_test.cc
+      writer/msl/generator_impl_break_test.cc
+      writer/msl/generator_impl_call_test.cc
+      writer/msl/generator_impl_case_test.cc
+      writer/msl/generator_impl_cast_test.cc
+      writer/msl/generator_impl_constructor_test.cc
+      writer/msl/generator_impl_continue_test.cc
+      writer/msl/generator_impl_discard_test.cc
+      writer/msl/generator_impl_function_entry_point_data_test.cc
+      writer/msl/generator_impl_function_test.cc
+      writer/msl/generator_impl_identifier_test.cc
+      writer/msl/generator_impl_if_test.cc
+      writer/msl/generator_impl_import_test.cc
+      writer/msl/generator_impl_intrinsic_test.cc
+      writer/msl/generator_impl_intrinsic_texture_test.cc
+      writer/msl/generator_impl_loop_test.cc
+      writer/msl/generator_impl_member_accessor_test.cc
+      writer/msl/generator_impl_module_constant_test.cc
+      writer/msl/generator_impl_return_test.cc
+      writer/msl/generator_impl_switch_test.cc
+      writer/msl/generator_impl_test.cc
+      writer/msl/generator_impl_type_test.cc
+      writer/msl/generator_impl_unary_op_test.cc
+      writer/msl/generator_impl_variable_decl_statement_test.cc
+      writer/msl/namer_test.cc
+      writer/msl/test_helper.h
+    )
+  endif()
+
+  if (${TINT_BUILD_HLSL_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      writer/hlsl/generator_impl_alias_type_test.cc
+      writer/hlsl/generator_impl_array_accessor_test.cc
+      writer/hlsl/generator_impl_assign_test.cc
+      writer/hlsl/generator_impl_binary_test.cc
+      writer/hlsl/generator_impl_bitcast_test.cc
+      writer/hlsl/generator_impl_block_test.cc
+      writer/hlsl/generator_impl_break_test.cc
+      writer/hlsl/generator_impl_call_test.cc
+      writer/hlsl/generator_impl_case_test.cc
+      writer/hlsl/generator_impl_cast_test.cc
+      writer/hlsl/generator_impl_constructor_test.cc
+      writer/hlsl/generator_impl_continue_test.cc
+      writer/hlsl/generator_impl_discard_test.cc
+      writer/hlsl/generator_impl_function_entry_point_data_test.cc
+      writer/hlsl/generator_impl_function_test.cc
+      writer/hlsl/generator_impl_identifier_test.cc
+      writer/hlsl/generator_impl_if_test.cc
+      writer/hlsl/generator_impl_intrinsic_test.cc
+      writer/hlsl/generator_impl_intrinsic_texture_test.cc
+      writer/hlsl/generator_impl_import_test.cc
+      writer/hlsl/generator_impl_loop_test.cc
+      writer/hlsl/generator_impl_member_accessor_test.cc
+      writer/hlsl/generator_impl_module_constant_test.cc
+      writer/hlsl/generator_impl_return_test.cc
+      writer/hlsl/generator_impl_switch_test.cc
+      writer/hlsl/generator_impl_test.cc
+      writer/hlsl/generator_impl_type_test.cc
+      writer/hlsl/generator_impl_unary_op_test.cc
+      writer/hlsl/generator_impl_variable_decl_statement_test.cc
+      writer/hlsl/namer_test.cc
+      writer/hlsl/test_helper.h
+    )
+  endif()
+
+  add_executable(tint_unittests ${TINT_TEST_SRCS})
+
+  if(NOT MSVC)
+    target_compile_options(tint_unittests PRIVATE
+      -Wno-global-constructors
+      -Wno-weak-vtables
+    )
+  endif()
+
+  ## Test executable
+  target_include_directories(
+      tint_unittests PRIVATE ${gmock_SOURCE_DIR}/include)
+  target_link_libraries(tint_unittests libtint gmock_main)
+  tint_default_compile_options(tint_unittests)
+
+  if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+    tint_spvtools_compile_options(tint_unittests)
+  endif()
+
+  add_test(NAME tint_unittests COMMAND tint_unittests)
 endif()
-
-if(${TINT_BUILD_SPV_READER})
-  list(APPEND TINT_TEST_SRCS
-    reader/spirv/enum_converter_test.cc
-    reader/spirv/fail_stream_test.cc
-    reader/spirv/function_arithmetic_test.cc
-    reader/spirv/function_bit_test.cc
-    reader/spirv/function_cfg_test.cc
-    reader/spirv/function_call_test.cc
-    reader/spirv/function_composite_test.cc
-    reader/spirv/function_conversion_test.cc
-    reader/spirv/function_decl_test.cc
-    reader/spirv/function_glsl_std_450_test.cc
-    reader/spirv/function_logical_test.cc
-    reader/spirv/function_memory_test.cc
-    reader/spirv/function_misc_test.cc
-    reader/spirv/function_var_test.cc
-    reader/spirv/namer_test.cc
-    reader/spirv/parser_impl_convert_member_decoration_test.cc
-    reader/spirv/parser_impl_convert_type_test.cc
-    reader/spirv/parser_impl_function_decl_test.cc
-    reader/spirv/parser_impl_get_decorations_test.cc
-    reader/spirv/parser_impl_handle_test.cc
-    reader/spirv/parser_impl_import_test.cc
-    reader/spirv/parser_impl_module_var_test.cc
-    reader/spirv/parser_impl_named_types_test.cc
-    reader/spirv/parser_impl_test.cc
-    reader/spirv/parser_impl_user_name_test.cc
-    reader/spirv/parser_test.cc
-    reader/spirv/spirv_tools_helpers_test.cc
-    reader/spirv/spirv_tools_helpers_test.h
-    reader/spirv/usage_test.cc
-  )
-endif()
-
-if(${TINT_BUILD_WGSL_READER})
-  list(APPEND TINT_TEST_SRCS
-    reader/wgsl/lexer_test.cc
-    reader/wgsl/parser_test.cc
-    reader/wgsl/parser_impl_additive_expression_test.cc
-    reader/wgsl/parser_impl_and_expression_test.cc
-    reader/wgsl/parser_impl_argument_expression_list_test.cc
-    reader/wgsl/parser_impl_assignment_stmt_test.cc
-    reader/wgsl/parser_impl_body_stmt_test.cc
-    reader/wgsl/parser_impl_break_stmt_test.cc
-    reader/wgsl/parser_impl_call_stmt_test.cc
-    reader/wgsl/parser_impl_case_body_test.cc
-    reader/wgsl/parser_impl_const_expr_test.cc
-    reader/wgsl/parser_impl_const_literal_test.cc
-    reader/wgsl/parser_impl_continue_stmt_test.cc
-    reader/wgsl/parser_impl_continuing_stmt_test.cc
-    reader/wgsl/parser_impl_depth_texture_type_test.cc
-    reader/wgsl/parser_impl_else_stmt_test.cc
-    reader/wgsl/parser_impl_elseif_stmt_test.cc
-    reader/wgsl/parser_impl_equality_expression_test.cc
-    reader/wgsl/parser_impl_error_msg_test.cc
-    reader/wgsl/parser_impl_error_resync_test.cc
-    reader/wgsl/parser_impl_exclusive_or_expression_test.cc
-    reader/wgsl/parser_impl_for_stmt_test.cc
-    reader/wgsl/parser_impl_function_decl_test.cc
-    reader/wgsl/parser_impl_function_decoration_list_test.cc
-    reader/wgsl/parser_impl_function_decoration_test.cc
-    reader/wgsl/parser_impl_function_header_test.cc
-    reader/wgsl/parser_impl_function_type_decl_test.cc
-    reader/wgsl/parser_impl_global_constant_decl_test.cc
-    reader/wgsl/parser_impl_global_decl_test.cc
-    reader/wgsl/parser_impl_global_variable_decl_test.cc
-    reader/wgsl/parser_impl_if_stmt_test.cc
-    reader/wgsl/parser_impl_image_storage_type_test.cc
-    reader/wgsl/parser_impl_inclusive_or_expression_test.cc
-    reader/wgsl/parser_impl_logical_and_expression_test.cc
-    reader/wgsl/parser_impl_logical_or_expression_test.cc
-    reader/wgsl/parser_impl_loop_stmt_test.cc
-    reader/wgsl/parser_impl_multiplicative_expression_test.cc
-    reader/wgsl/parser_impl_param_list_test.cc
-    reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
-    reader/wgsl/parser_impl_pipeline_stage_test.cc
-    reader/wgsl/parser_impl_postfix_expression_test.cc
-    reader/wgsl/parser_impl_primary_expression_test.cc
-    reader/wgsl/parser_impl_relational_expression_test.cc
-    reader/wgsl/parser_impl_sampled_texture_type_test.cc
-    reader/wgsl/parser_impl_sampler_type_test.cc
-    reader/wgsl/parser_impl_shift_expression_test.cc
-    reader/wgsl/parser_impl_statement_test.cc
-    reader/wgsl/parser_impl_statements_test.cc
-    reader/wgsl/parser_impl_storage_class_test.cc
-    reader/wgsl/parser_impl_storage_texture_type_test.cc
-    reader/wgsl/parser_impl_struct_body_decl_test.cc
-    reader/wgsl/parser_impl_struct_decl_test.cc
-    reader/wgsl/parser_impl_struct_decoration_decl_test.cc
-    reader/wgsl/parser_impl_struct_decoration_test.cc
-    reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc
-    reader/wgsl/parser_impl_struct_member_decoration_test.cc
-    reader/wgsl/parser_impl_struct_member_test.cc
-    reader/wgsl/parser_impl_switch_body_test.cc
-    reader/wgsl/parser_impl_switch_stmt_test.cc
-    reader/wgsl/parser_impl_test.cc
-    reader/wgsl/parser_impl_test_helper.cc
-    reader/wgsl/parser_impl_test_helper.h
-    reader/wgsl/parser_impl_texture_sampler_types_test.cc
-    reader/wgsl/parser_impl_type_alias_test.cc
-    reader/wgsl/parser_impl_type_decl_test.cc
-    reader/wgsl/parser_impl_unary_expression_test.cc
-    reader/wgsl/parser_impl_variable_decl_test.cc
-    reader/wgsl/parser_impl_variable_decoration_list_test.cc
-    reader/wgsl/parser_impl_variable_decoration_test.cc
-    reader/wgsl/parser_impl_variable_ident_decl_test.cc
-    reader/wgsl/parser_impl_variable_stmt_test.cc
-    reader/wgsl/parser_impl_variable_storage_decoration_test.cc
-    reader/wgsl/token_test.cc
-  )
-endif()
-
-if(${TINT_BUILD_SPV_WRITER})
-  list(APPEND TINT_TEST_SRCS
-    writer/spirv/binary_writer_test.cc
-    writer/spirv/builder_accessor_expression_test.cc
-    writer/spirv/builder_assign_test.cc
-    writer/spirv/builder_binary_expression_test.cc
-    writer/spirv/builder_bitcast_expression_test.cc
-    writer/spirv/builder_block_test.cc
-    writer/spirv/builder_call_test.cc
-    writer/spirv/builder_constructor_expression_test.cc
-    writer/spirv/builder_discard_test.cc
-    writer/spirv/builder_format_conversion_test.cc
-    writer/spirv/builder_function_decoration_test.cc
-    writer/spirv/builder_function_test.cc
-    writer/spirv/builder_function_variable_test.cc
-    writer/spirv/builder_global_variable_test.cc
-    writer/spirv/builder_ident_expression_test.cc
-    writer/spirv/builder_if_test.cc
-    writer/spirv/builder_intrinsic_test.cc
-    writer/spirv/builder_intrinsic_texture_test.cc
-    writer/spirv/builder_literal_test.cc
-    writer/spirv/builder_loop_test.cc
-    writer/spirv/builder_return_test.cc
-    writer/spirv/builder_switch_test.cc
-    writer/spirv/builder_test.cc
-    writer/spirv/builder_type_test.cc
-    writer/spirv/builder_unary_op_expression_test.cc
-    writer/spirv/instruction_test.cc
-    writer/spirv/operand_test.cc
-    writer/spirv/spv_dump.cc
-    writer/spirv/spv_dump.h
-    writer/spirv/test_helper.h
-  )
-endif()
-
-if(${TINT_BUILD_WGSL_WRITER})
-  list(APPEND TINT_TEST_SRCS
-    writer/wgsl/generator_impl_test.cc
-    writer/wgsl/generator_impl_alias_type_test.cc
-    writer/wgsl/generator_impl_array_accessor_test.cc
-    writer/wgsl/generator_impl_assign_test.cc
-    writer/wgsl/generator_impl_binary_test.cc
-    writer/wgsl/generator_impl_bitcast_test.cc
-    writer/wgsl/generator_impl_block_test.cc
-    writer/wgsl/generator_impl_break_test.cc
-    writer/wgsl/generator_impl_call_test.cc
-    writer/wgsl/generator_impl_case_test.cc
-    writer/wgsl/generator_impl_cast_test.cc
-    writer/wgsl/generator_impl_constructor_test.cc
-    writer/wgsl/generator_impl_continue_test.cc
-    writer/wgsl/generator_impl_discard_test.cc
-    writer/wgsl/generator_impl_fallthrough_test.cc
-    writer/wgsl/generator_impl_function_test.cc
-    writer/wgsl/generator_impl_identifier_test.cc
-    writer/wgsl/generator_impl_if_test.cc
-    writer/wgsl/generator_impl_loop_test.cc
-    writer/wgsl/generator_impl_member_accessor_test.cc
-    writer/wgsl/generator_impl_return_test.cc
-    writer/wgsl/generator_impl_switch_test.cc
-    writer/wgsl/generator_impl_type_test.cc
-    writer/wgsl/generator_impl_unary_op_test.cc
-    writer/wgsl/generator_impl_variable_decl_statement_test.cc
-    writer/wgsl/generator_impl_variable_test.cc
-    writer/wgsl/test_helper.h
-  )
-endif()
-
-if(${TINT_BUILD_MSL_WRITER})
-  list(APPEND TINT_TEST_SRCS
-    writer/msl/generator_impl_alias_type_test.cc
-    writer/msl/generator_impl_array_accessor_test.cc
-    writer/msl/generator_impl_assign_test.cc
-    writer/msl/generator_impl_binary_test.cc
-    writer/msl/generator_impl_bitcast_test.cc
-    writer/msl/generator_impl_block_test.cc
-    writer/msl/generator_impl_break_test.cc
-    writer/msl/generator_impl_call_test.cc
-    writer/msl/generator_impl_case_test.cc
-    writer/msl/generator_impl_cast_test.cc
-    writer/msl/generator_impl_constructor_test.cc
-    writer/msl/generator_impl_continue_test.cc
-    writer/msl/generator_impl_discard_test.cc
-    writer/msl/generator_impl_function_entry_point_data_test.cc
-    writer/msl/generator_impl_function_test.cc
-    writer/msl/generator_impl_identifier_test.cc
-    writer/msl/generator_impl_if_test.cc
-    writer/msl/generator_impl_import_test.cc
-    writer/msl/generator_impl_intrinsic_test.cc
-    writer/msl/generator_impl_intrinsic_texture_test.cc
-    writer/msl/generator_impl_loop_test.cc
-    writer/msl/generator_impl_member_accessor_test.cc
-    writer/msl/generator_impl_module_constant_test.cc
-    writer/msl/generator_impl_return_test.cc
-    writer/msl/generator_impl_switch_test.cc
-    writer/msl/generator_impl_test.cc
-    writer/msl/generator_impl_type_test.cc
-    writer/msl/generator_impl_unary_op_test.cc
-    writer/msl/generator_impl_variable_decl_statement_test.cc
-    writer/msl/namer_test.cc
-    writer/msl/test_helper.h
-  )
-endif()
-
-if (${TINT_BUILD_HLSL_WRITER})
-  list(APPEND TINT_TEST_SRCS
-    writer/hlsl/generator_impl_alias_type_test.cc
-    writer/hlsl/generator_impl_array_accessor_test.cc
-    writer/hlsl/generator_impl_assign_test.cc
-    writer/hlsl/generator_impl_binary_test.cc
-    writer/hlsl/generator_impl_bitcast_test.cc
-    writer/hlsl/generator_impl_block_test.cc
-    writer/hlsl/generator_impl_break_test.cc
-    writer/hlsl/generator_impl_call_test.cc
-    writer/hlsl/generator_impl_case_test.cc
-    writer/hlsl/generator_impl_cast_test.cc
-    writer/hlsl/generator_impl_constructor_test.cc
-    writer/hlsl/generator_impl_continue_test.cc
-    writer/hlsl/generator_impl_discard_test.cc
-    writer/hlsl/generator_impl_function_entry_point_data_test.cc
-    writer/hlsl/generator_impl_function_test.cc
-    writer/hlsl/generator_impl_identifier_test.cc
-    writer/hlsl/generator_impl_if_test.cc
-    writer/hlsl/generator_impl_intrinsic_test.cc
-    writer/hlsl/generator_impl_intrinsic_texture_test.cc
-    writer/hlsl/generator_impl_import_test.cc
-    writer/hlsl/generator_impl_loop_test.cc
-    writer/hlsl/generator_impl_member_accessor_test.cc
-    writer/hlsl/generator_impl_module_constant_test.cc
-    writer/hlsl/generator_impl_return_test.cc
-    writer/hlsl/generator_impl_switch_test.cc
-    writer/hlsl/generator_impl_test.cc
-    writer/hlsl/generator_impl_type_test.cc
-    writer/hlsl/generator_impl_unary_op_test.cc
-    writer/hlsl/generator_impl_variable_decl_statement_test.cc
-    writer/hlsl/namer_test.cc
-    writer/hlsl/test_helper.h
-  )
-endif()
-
-add_executable(tint_unittests ${TINT_TEST_SRCS})
-
-if(NOT MSVC)
-  target_compile_options(tint_unittests PRIVATE
-    -Wno-global-constructors
-    -Wno-weak-vtables
-  )
-endif()
-
-## Test executable
-target_include_directories(
-    tint_unittests PRIVATE ${gmock_SOURCE_DIR}/include)
-target_link_libraries(tint_unittests libtint gmock_main)
-tint_default_compile_options(tint_unittests)
-
-if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
-  tint_spvtools_compile_options(tint_unittests)
-endif()
-
-add_test(NAME tint_unittests COMMAND tint_unittests)
