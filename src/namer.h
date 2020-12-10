@@ -19,52 +19,73 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "src/ast/module.h"
+
 namespace tint {
 
 /// Base class for the namers.
 class Namer {
  public:
   /// Constructor
-  Namer();
+  /// @param mod the module this namer works with
+  explicit Namer(ast::Module* mod);
+  /// Destructor
   virtual ~Namer();
 
-  /// Returns a sanitized version of `name`
-  /// @param name the name to sanitize
-  /// @returns the sanitized version of `name`
-  virtual std::string NameFor(const std::string& name) = 0;
+  /// Returns the name for `sym`
+  /// @param sym the symbol to retrieve the name for
+  /// @returns the sanitized version of `name` or "" if not found
+  virtual std::string NameFor(const Symbol& sym) = 0;
 
-  /// Returns if the given name has been mapped already
-  /// @param name the name to check
-  /// @returns true if the name has been mapped
-  bool IsMapped(const std::string& name);
+  /// Generates a unique name for `prefix`
+  /// @param prefix the prefix name
+  /// @returns the unique name string
+  std::string GenerateName(const std::string& prefix);
 
  protected:
-  /// Map of original name to new name.
-  std::unordered_map<std::string, std::string> name_map_;
+  /// Checks if `name` has been used
+  /// @param name the name to check
+  /// @returns true if `name` has already been used
+  bool IsUsed(const std::string& name);
+
+  /// The module storing the symbol table
+  ast::Module* module_ = nullptr;
+
+ private:
+  // The list of names taken by the remapper
+  std::unordered_set<std::string> used_;
 };
 
-/// A namer class which hashes the name
-class HashingNamer : public Namer {
+/// A namer class which mangles the name
+class MangleNamer : public Namer {
  public:
-  HashingNamer();
-  ~HashingNamer() override;
+  /// Constructor
+  /// @param mod the module to retrieve names from
+  explicit MangleNamer(ast::Module* mod);
+  /// Destructor
+  ~MangleNamer() override;
 
-  /// Returns a sanitized version of `name`
-  /// @param name the name to sanitize
-  /// @returns the sanitized version of `name`
-  std::string NameFor(const std::string& name) override;
+  /// Returns a mangled name for `sym`
+  /// @param sym the symbol to name
+  /// @returns the name for `sym` or "" if not found
+  std::string NameFor(const Symbol& sym) override;
 };
 
-/// A namer which just returns the provided string
-class NoopNamer : public Namer {
+/// A namer which returns the user provided name. This is unsafe in general as
+/// it passes user provided data through to the backend compiler. It is useful
+/// for development and debugging.
+class UnsafeNamer : public Namer {
  public:
-  NoopNamer();
-  ~NoopNamer() override;
+  /// Constructor
+  /// @param mod the module to retrieve names from
+  explicit UnsafeNamer(ast::Module* mod);
+  /// Destructor
+  ~UnsafeNamer() override;
 
   /// Returns `name`
-  /// @param name the name
-  /// @returns `name`
-  std::string NameFor(const std::string& name) override;
+  /// @param sym the symbol
+  /// @returns `name` or "" if not found
+  std::string NameFor(const Symbol& sym) override;
 };
 
 }  // namespace tint

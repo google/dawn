@@ -169,6 +169,11 @@ class Module {
   /// previously generated symbol will be returned.
   Symbol RegisterSymbol(const std::string& name);
 
+  /// Returns the `name` for `sym`
+  /// @param sym the symbol to retrieve the name for
+  /// @returns the use provided `name` for the symbol or "" if not found
+  std::string SymbolToName(const Symbol sym) const;
+
  private:
   Module(const Module&) = delete;
 

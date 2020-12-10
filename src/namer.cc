@@ -18,46 +18,44 @@
 #include <iomanip>
 #include <sstream>
 
+#include "src/symbol.h"
+
 namespace tint {
 
-Namer::Namer() = default;
+Namer::Namer(ast::Module* mod) : module_(mod) {}
 
 Namer::~Namer() = default;
 
-bool Namer::IsMapped(const std::string& name) {
-  auto it = name_map_.find(name);
-  return it != name_map_.end();
+bool Namer::IsUsed(const std::string& name) {
+  auto it = used_.find(name);
+  return it != used_.end();
 }
 
-HashingNamer::HashingNamer() = default;
-
-HashingNamer::~HashingNamer() = default;
-
-std::string HashingNamer::NameFor(const std::string& name) {
-  auto it = name_map_.find(name);
-  if (it != name_map_.end()) {
-    return it->second;
+std::string Namer::GenerateName(const std::string& prefix) {
+  std::string name = prefix;
+  uint32_t i = 0;
+  while (IsUsed(name)) {
+    name = prefix + "_" + std::to_string(i);
+    ++i;
   }
-
-  std::stringstream ret_name;
-  ret_name << "tint_";
-
-  ret_name << std::hex << std::setfill('0') << std::setw(2);
-  for (size_t i = 0; i < name.size(); ++i) {
-    ret_name << static_cast<uint32_t>(name[i]);
-  }
-
-  name_map_[name] = ret_name.str();
-  return ret_name.str();
-}
-
-NoopNamer::NoopNamer() = default;
-
-NoopNamer::~NoopNamer() = default;
-
-std::string NoopNamer::NameFor(const std::string& name) {
-  name_map_[name] = name;
+  used_.insert(name);
   return name;
+}
+
+MangleNamer::MangleNamer(ast::Module* mod) : Namer(mod) {}
+
+MangleNamer::~MangleNamer() = default;
+
+std::string MangleNamer::NameFor(const Symbol& sym) {
+  return sym.to_str();
+}
+
+UnsafeNamer::UnsafeNamer(ast::Module* mod) : Namer(mod) {}
+
+UnsafeNamer::~UnsafeNamer() = default;
+
+std::string UnsafeNamer::NameFor(const Symbol& sym) {
+  return module_->SymbolToName(sym);
 }
 
 }  // namespace tint

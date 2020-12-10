@@ -15,50 +15,49 @@
 #include "src/namer.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/module.h"
 
 namespace tint {
 namespace {
 
-using Namer_HashingNamer_Test = testing::Test;
+using NamerTest = testing::Test;
 
-TEST_F(Namer_HashingNamer_Test, ReturnsName) {
-  HashingNamer n;
-  EXPECT_EQ("tint_6d795f6e616d65", n.NameFor("my_name"));
+TEST_F(NamerTest, GenerateName) {
+  ast::Module m;
+  MangleNamer n(&m);
+  EXPECT_EQ("name", n.GenerateName("name"));
+  EXPECT_EQ("name_0", n.GenerateName("name"));
+  EXPECT_EQ("name_1", n.GenerateName("name"));
 }
 
-TEST_F(Namer_HashingNamer_Test, ReturnsSameValueForSameName) {
-  HashingNamer n;
-  EXPECT_EQ("tint_6e616d6531", n.NameFor("name1"));
-  EXPECT_EQ("tint_6e616d6532", n.NameFor("name2"));
-  EXPECT_EQ("tint_6e616d6531", n.NameFor("name1"));
+using MangleNamerTest = testing::Test;
+
+TEST_F(MangleNamerTest, ReturnsName) {
+  ast::Module m;
+  auto s = m.RegisterSymbol("my_sym");
+
+  MangleNamer n(&m);
+  EXPECT_EQ("tint_symbol_1", n.NameFor(s));
 }
 
-TEST_F(Namer_HashingNamer_Test, IsMapped) {
-  HashingNamer n;
-  EXPECT_FALSE(n.IsMapped("my_name"));
-  EXPECT_EQ("tint_6d795f6e616d65", n.NameFor("my_name"));
-  EXPECT_TRUE(n.IsMapped("my_name"));
+TEST_F(MangleNamerTest, ReturnsSameValueForSameName) {
+  ast::Module m;
+  auto s1 = m.RegisterSymbol("my_sym");
+  auto s2 = m.RegisterSymbol("my_sym2");
+
+  MangleNamer n(&m);
+  EXPECT_EQ("tint_symbol_1", n.NameFor(s1));
+  EXPECT_EQ("tint_symbol_2", n.NameFor(s2));
+  EXPECT_EQ("tint_symbol_1", n.NameFor(s1));
 }
 
-using Namer_NoopNamer_Test = testing::Test;
+using UnsafeNamerTest = testing::Test;
+TEST_F(UnsafeNamerTest, ReturnsName) {
+  ast::Module m;
+  auto s = m.RegisterSymbol("my_sym");
 
-TEST_F(Namer_NoopNamer_Test, ReturnsName) {
-  NoopNamer n;
-  EXPECT_EQ("my_name", n.NameFor("my_name"));
-}
-
-TEST_F(Namer_NoopNamer_Test, ReturnsSameValueForSameName) {
-  NoopNamer n;
-  EXPECT_EQ("name1", n.NameFor("name1"));
-  EXPECT_EQ("name2", n.NameFor("name2"));
-  EXPECT_EQ("name1", n.NameFor("name1"));
-}
-
-TEST_F(Namer_NoopNamer_Test, IsMapped) {
-  NoopNamer n;
-  EXPECT_FALSE(n.IsMapped("my_name"));
-  EXPECT_EQ("my_name", n.NameFor("my_name"));
-  EXPECT_TRUE(n.IsMapped("my_name"));
+  UnsafeNamer n(&m);
+  EXPECT_EQ("my_sym", n.NameFor(s));
 }
 
 }  // namespace

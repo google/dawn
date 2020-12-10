@@ -81,6 +81,10 @@ Symbol Module::RegisterSymbol(const std::string& name) {
   return symbol_table_.Register(name);
 }
 
+std::string Module::SymbolToName(const Symbol sym) const {
+  return symbol_table_.NameFor(sym);
+}
+
 bool Module::IsValid() const {
   for (auto* var : global_variables_) {
     if (var == nullptr || !var->IsValid()) {
