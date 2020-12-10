@@ -326,6 +326,7 @@ ast::BinaryOp NegatedFloatCompare(SpvOp opcode) {
 std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
   switch (ext_opcode) {
     case GLSLstd450FAbs:
+    case GLSLstd450SAbs:
       return "abs";
     case GLSLstd450Acos:
       return "acos";
@@ -374,9 +375,13 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "log2";
     case GLSLstd450NMax:
     case GLSLstd450FMax:  // FMax is less prescriptive about NaN operands
+    case GLSLstd450UMax:
+    case GLSLstd450SMax:
       return "max";
     case GLSLstd450NMin:
     case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
+    case GLSLstd450UMin:
+    case GLSLstd450SMin:
       return "min";
     case GLSLstd450FMix:
       return "mix";
@@ -411,7 +416,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     // TODO(dneto) - The following are not implemented.
     // They are grouped semantically, as in GLSL.std.450.h.
     case GLSLstd450RoundEven:
-    case GLSLstd450SAbs:
     case GLSLstd450SSign:
 
     case GLSLstd450Radians:
@@ -425,10 +429,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 
     case GLSLstd450Modf:
     case GLSLstd450ModfStruct:
-    case GLSLstd450UMin:
-    case GLSLstd450SMin:
-    case GLSLstd450UMax:
-    case GLSLstd450SMax:
     case GLSLstd450IMix:
 
     case GLSLstd450Frexp:

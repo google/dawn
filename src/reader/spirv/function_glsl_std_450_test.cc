@@ -161,7 +161,13 @@ using SpvParserTest_GlslStd450_Floating_FloatingUinting =
 using SpvParserTest_GlslStd450_Float3_Float3Float3 =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 
+using SpvParserTest_GlslStd450_Inting_Inting =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Inting_IntingInting =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Inting_IntingIntingInting =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Uinting_UintingUinting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Uinting_UintingUintingUinting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
@@ -691,6 +697,128 @@ INSTANTIATE_TEST_SUITE_P(
         {"FMix", "mix"},
         {"SmoothStep", "smoothStep"}}));
 
+TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %int %glsl )" +
+                        GetParam().opcode +
+                        R"( %i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{i1}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2int %glsl )" +
+                        GetParam().opcode +
+                        R"( %v2i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__i32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{v2i1}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %int %glsl )" +
+                        GetParam().opcode +
+                        R"( %i1 %i2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{i1}
+          Identifier[not set]{i2}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2int %glsl )" +
+                        GetParam().opcode +
+                        R"( %v2i1 %v2i2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__i32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{v2i1}
+          Identifier[not set]{v2i2}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   const auto assembly = Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
@@ -756,8 +884,78 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Inting_Inting,
+                         ::testing::Values(GlslStd450Case{"SAbs", "abs"}));
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Inting_IntingInting,
+                         ::testing::Values(GlslStd450Case{"SMax", "max"},
+                                           GlslStd450Case{"SMin", "min"}));
+
+INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_IntingIntingInting,
                          ::testing::Values(GlslStd450Case{"SClamp", "clamp"}));
+
+TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl )" +
+                        GetParam().opcode + R"( %u1 %u2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{u1}
+          Identifier[not set]{u2}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2uint %glsl )" +
+                        GetParam().opcode +
+                        R"( %v2u1 %v2u2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Call[not set]{
+        Identifier[not set]{)" + GetParam().wgsl_func +
+                                                 R"(}
+        (
+          Identifier[not set]{v2u1}
+          Identifier[not set]{v2u2}
+        )
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
   const auto assembly = Preamble() + R"(
@@ -823,10 +1021,186 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Uinting_UintingUinting,
+                         ::testing::Values(GlslStd450Case{"UMax", "max"},
+                                           GlslStd450Case{"UMin", "min"}));
+
+INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Uinting_UintingUintingUinting,
                          ::testing::Values(GlslStd450Case{"UClamp", "clamp"}));
 
-TEST_F(SpvParserTest, RectifyOperandsAndResult_GLSLstd450SClamp) {
+// Check that we convert signedness of operands and result type.
+// This is needed for each of the integer-based extended instructions.
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl SAbs %u1
+     %2 = OpExtInst %v2uint %glsl SAbs %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Bitcast[not set]<__u32>{
+        Call[not set]{
+          Identifier[not set]{abs}
+          (
+            Bitcast[not set]<__i32>{
+              Identifier[not set]{u1}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_2
+    none
+    __vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Call[not set]{
+          Identifier[not set]{abs}
+          (
+            Bitcast[not set]<__vec_2__i32>{
+              Identifier[not set]{v2u1}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl SMax %u1 %u2
+     %2 = OpExtInst %v2uint %glsl SMax %v2u1 %v2u2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Bitcast[not set]<__u32>{
+        Call[not set]{
+          Identifier[not set]{max}
+          (
+            Bitcast[not set]<__i32>{
+              Identifier[not set]{u1}
+            }
+            Bitcast[not set]<__i32>{
+              Identifier[not set]{u2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_2
+    none
+    __vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Call[not set]{
+          Identifier[not set]{max}
+          (
+            Bitcast[not set]<__vec_2__i32>{
+              Identifier[not set]{v2u1}
+            }
+            Bitcast[not set]<__vec_2__i32>{
+              Identifier[not set]{v2u2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl SMin %u1 %u2
+     %2 = OpExtInst %v2uint %glsl SMin %v2u1 %v2u2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Bitcast[not set]<__u32>{
+        Call[not set]{
+          Identifier[not set]{min}
+          (
+            Bitcast[not set]<__i32>{
+              Identifier[not set]{u1}
+            }
+            Bitcast[not set]<__i32>{
+              Identifier[not set]{u2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_2
+    none
+    __vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Call[not set]{
+          Identifier[not set]{min}
+          (
+            Bitcast[not set]<__vec_2__i32>{
+              Identifier[not set]{v2u1}
+            }
+            Bitcast[not set]<__vec_2__i32>{
+              Identifier[not set]{v2u2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
   const auto assembly = Preamble() + R"(
      %1 = OpExtInst %uint %glsl SClamp %u1 %i2 %u3
      %2 = OpExtInst %v2uint %glsl SClamp %v2u1 %v2i2 %v2u3
@@ -877,6 +1251,182 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_GLSLstd450SClamp) {
             Identifier[not set]{v2i2}
             Bitcast[not set]<__vec_2__i32>{
               Identifier[not set]{v2u3}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %int %glsl UMax %i1 %i2
+     %2 = OpExtInst %v2int %glsl UMax %v2i1 %v2i2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Bitcast[not set]<__i32>{
+        Call[not set]{
+          Identifier[not set]{max}
+          (
+            Bitcast[not set]<__u32>{
+              Identifier[not set]{i1}
+            }
+            Bitcast[not set]<__u32>{
+              Identifier[not set]{i2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_2
+    none
+    __vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Call[not set]{
+          Identifier[not set]{max}
+          (
+            Bitcast[not set]<__vec_2__u32>{
+              Identifier[not set]{v2i1}
+            }
+            Bitcast[not set]<__vec_2__u32>{
+              Identifier[not set]{v2i2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %int %glsl UMin %i1 %i2
+     %2 = OpExtInst %v2int %glsl UMin %v2i1 %v2i2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Bitcast[not set]<__i32>{
+        Call[not set]{
+          Identifier[not set]{min}
+          (
+            Bitcast[not set]<__u32>{
+              Identifier[not set]{i1}
+            }
+            Bitcast[not set]<__u32>{
+              Identifier[not set]{i2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_2
+    none
+    __vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Call[not set]{
+          Identifier[not set]{min}
+          (
+            Bitcast[not set]<__vec_2__u32>{
+              Identifier[not set]{v2i1}
+            }
+            Bitcast[not set]<__vec_2__u32>{
+              Identifier[not set]{v2i2}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %int %glsl UClamp %i1 %u2 %i3
+     %2 = OpExtInst %v2int %glsl UClamp %v2i1 %v2u2 %v2i3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Bitcast[not set]<__i32>{
+        Call[not set]{
+          Identifier[not set]{clamp}
+          (
+            Bitcast[not set]<__u32>{
+              Identifier[not set]{i1}
+            }
+            Identifier[not set]{u2}
+            Bitcast[not set]<__u32>{
+              Identifier[not set]{i3}
+            }
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_2
+    none
+    __vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Call[not set]{
+          Identifier[not set]{clamp}
+          (
+            Bitcast[not set]<__vec_2__u32>{
+              Identifier[not set]{v2i1}
+            }
+            Identifier[not set]{v2u2}
+            Bitcast[not set]<__vec_2__u32>{
+              Identifier[not set]{v2i3}
             }
           )
         }
