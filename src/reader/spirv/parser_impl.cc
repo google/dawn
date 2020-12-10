@@ -209,10 +209,14 @@ bool AssumesUnsignedOperands(GLSLstd450 extended_opcode) {
   return false;
 }
 
-// Returns true if the operation is binary, and the WGSL operation requires
+// Returns true if the corresponding WGSL operation requires
 // the signedness of the result to match the signedness of the first operand.
-bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
+bool AssumesResultSignednessMatchesFirstOperand(SpvOp opcode) {
   switch (opcode) {
+    case SpvOpNot:
+    case SpvOpSNegate:
+    case SpvOpBitCount:
+    case SpvOpBitReverse:
     case SpvOpSDiv:
     case SpvOpSMod:
     case SpvOpSRem:
@@ -1501,14 +1505,7 @@ ast::type::Type* ParserImpl::ForcedResultType(
     const spvtools::opt::Instruction& inst,
     ast::type::Type* first_operand_type) {
   const auto opcode = inst.opcode();
-  if ((opcode == SpvOpSNegate) || (opcode == SpvOpNot)) {
-    // The unary operation cases that force the result type to match the
-    // first operand type.
-    return first_operand_type;
-  }
-  if (AssumesResultSignednessMatchesBinaryFirstOperand(opcode)) {
-    // The binary operation cases that force the result type to match
-    // the first operand type.
+  if (AssumesResultSignednessMatchesFirstOperand(opcode)) {
     return first_operand_type;
   }
   if (IsGlslExtendedInstruction(inst)) {

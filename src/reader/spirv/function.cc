@@ -465,6 +465,10 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 // given instruction, or ast::Intrinsic::kNone
 ast::Intrinsic GetIntrinsic(SpvOp opcode) {
   switch (opcode) {
+    case SpvOpBitCount:
+      return ast::Intrinsic::kCountOneBits;
+    case SpvOpBitReverse:
+      return ast::Intrinsic::kReverseBits;
     case SpvOpDot:
       return ast::Intrinsic::kDot;
     case SpvOpOuterProduct:
@@ -3726,8 +3730,13 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
   ident->set_intrinsic(intrinsic);
 
   ast::ExpressionList params;
+  ast::type::Type* first_operand_type = nullptr;
   for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
-    params.emplace_back(MakeOperand(inst, iarg).expr);
+    TypedExpression operand = MakeOperand(inst, iarg);
+    if (first_operand_type == nullptr) {
+      first_operand_type = operand.type;
+    }
+    params.emplace_back(operand.expr);
   }
   auto* call_expr = create<ast::CallExpression>(ident, std::move(params));
   auto* result_type = parser_impl_.ConvertType(inst.type_id());
@@ -3736,7 +3745,8 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
            << inst.PrettyPrint();
     return {};
   }
-  return {result_type, call_expr};
+  TypedExpression call{result_type, call_expr};
+  return parser_impl_.RectifyForcedResultType(call, inst, first_operand_type);
 }
 
 TypedExpression FunctionEmitter::MakeSimpleSelect(

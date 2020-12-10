@@ -627,11 +627,499 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
       << ToString(fe.ast_body());
 }
 
+std::string BitTestPreamble() {
+  return R"(
+  OpCapability Shader
+  %glsl = OpExtInstImport "GLSL.std.450"
+  OpMemoryModel Logical GLSL450
+  OpEntryPoint GLCompute %100 "main"
+  OpExecutionMode %100 LocalSize 1 1 1
+
+  OpName %u1 "u1"
+  OpName %i1 "i1"
+  OpName %v2u1 "v2u1"
+  OpName %v2i1 "v2i1"
+
+)" + CommonTypes() +
+         R"(
+
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  %u1 = OpCopyObject %uint %uint_10
+  %i1 = OpCopyObject %int %int_30
+  %v2u1 = OpCopyObject %v2uint %v2uint_10_20
+  %v2i1 = OpCopyObject %v2int %v2int_30_40
+)";
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_Uint_Uint) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %uint %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Call[not set]{
+        Identifier[not set]{countOneBits}
+        (
+          Identifier[not set]{u1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_Uint_Int) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %uint %i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Bitcast[not set]<__u32>{
+        Call[not set]{
+          Identifier[not set]{countOneBits}
+          (
+            Identifier[not set]{i1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_Int_Uint) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %int %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Bitcast[not set]<__i32>{
+        Call[not set]{
+          Identifier[not set]{countOneBits}
+          (
+            Identifier[not set]{u1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_Int_Int) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %int %i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Call[not set]{
+        Identifier[not set]{countOneBits}
+        (
+          Identifier[not set]{i1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_UintVector_UintVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %v2uint %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Call[not set]{
+        Identifier[not set]{countOneBits}
+        (
+          Identifier[not set]{v2u1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_UintVector_IntVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %v2uint %v2i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Call[not set]{
+          Identifier[not set]{countOneBits}
+          (
+            Identifier[not set]{v2i1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_IntVector_UintVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %v2int %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Call[not set]{
+          Identifier[not set]{countOneBits}
+          (
+            Identifier[not set]{v2u1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitCount_IntVector_IntVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitCount %v2int %v2i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__i32
+    {
+      Call[not set]{
+        Identifier[not set]{countOneBits}
+        (
+          Identifier[not set]{v2i1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_Uint_Uint) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %uint %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Call[not set]{
+        Identifier[not set]{reverseBits}
+        (
+          Identifier[not set]{u1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_Uint_Int) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %uint %i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Bitcast[not set]<__u32>{
+        Call[not set]{
+          Identifier[not set]{reverseBits}
+          (
+            Identifier[not set]{i1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_Int_Uint) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %int %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Bitcast[not set]<__i32>{
+        Call[not set]{
+          Identifier[not set]{reverseBits}
+          (
+            Identifier[not set]{u1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_Int_Int) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %int %i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __i32
+    {
+      Call[not set]{
+        Identifier[not set]{reverseBits}
+        (
+          Identifier[not set]{i1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_UintVector_UintVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %v2uint %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Call[not set]{
+        Identifier[not set]{reverseBits}
+        (
+          Identifier[not set]{v2u1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_UintVector_IntVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %v2uint %v2i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Call[not set]{
+          Identifier[not set]{reverseBits}
+          (
+            Identifier[not set]{v2i1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_IntVector_UintVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %v2int %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Call[not set]{
+          Identifier[not set]{reverseBits}
+          (
+            Identifier[not set]{v2u1}
+          )
+        }
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvUnaryBitTest, BitReverse_IntVector_IntVector) {
+  const auto assembly = BitTestPreamble() + R"(
+     %1 = OpBitReverse %v2int %v2i1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__i32
+    {
+      Call[not set]{
+        Identifier[not set]{reverseBits}
+        (
+          Identifier[not set]{v2i1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
 // TODO(dneto): OpBitFieldInsert
 // TODO(dneto): OpBitFieldSExtract
 // TODO(dneto): OpBitFieldUExtract
-// TODO(dneto): OpBitReverse
-// TODO(dneto): OpBitCount
 
 }  // namespace
 }  // namespace spirv
