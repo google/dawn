@@ -363,13 +363,6 @@ if (${COMPILER_IS_LIKE_GNU})
 endif()
 set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
 
-if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
-  tint_spvtools_compile_options(libtint)
-  if (${TINT_BUILD_FUZZERS})
-    tint_spvtools_compile_options(libtint-fuzz)
-  endif()
-endif()
-
 if (${TINT_BUILD_FUZZERS})
   # Tint library with fuzzer instrumentation
   add_library(libtint-fuzz ${TINT_LIB_SRCS})
@@ -379,6 +372,13 @@ if (${TINT_BUILD_FUZZERS})
   endif()
   target_compile_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
   target_link_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
+endif()
+
+if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+  tint_spvtools_compile_options(libtint)
+  if (${TINT_BUILD_FUZZERS})
+    tint_spvtools_compile_options(libtint-fuzz)
+  endif()
 endif()
 
 if(${TINT_BUILD_TESTS})
