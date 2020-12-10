@@ -1943,8 +1943,10 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   // Populate the spirv_params with common parameters
   OperandList spirv_params;
   spirv_params.reserve(8);  // Enough to fit most parameter lists
-  spirv_params.emplace_back(std::move(result_type));  // result type
-  spirv_params.emplace_back(std::move(result_id));    // result id
+  if (ident->intrinsic() != ast::Intrinsic::kTextureStore) {
+    spirv_params.emplace_back(std::move(result_type));
+    spirv_params.emplace_back(std::move(result_id));
+  }
 
   // Extra image operands, appended to spirv_params.
   struct ImageOperand {
@@ -1977,24 +1979,9 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
   };
 
-  if (ident->intrinsic() == ast::Intrinsic::kTextureLoad) {
-    op = texture_type->Is<ast::type::StorageTexture>() ? spv::Op::OpImageRead
-                                                       : spv::Op::OpImageFetch;
-    spirv_params.emplace_back(gen_param(pidx.texture));
-    append_coords_to_spirv_params();
-
-    if (pidx.level != kNotUsed) {
-      image_operands.emplace_back(
-          ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
-    }
-
-    if (pidx.sample_index != kNotUsed) {
-      image_operands.emplace_back(ImageOperand{SpvImageOperandsSampleMask,
-                                               gen_param(pidx.sample_index)});
-    }
-  } else {
+  auto append_image_and_coords_to_spirv_params = [&] {
     assert(pidx.sampler != kNotUsed);
-
+    assert(pidx.texture != kNotUsed);
     auto sampler_param = gen_param(pidx.sampler);
     auto texture_param = gen_param(pidx.texture);
     auto sampled_image =
@@ -2003,51 +1990,82 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     // Populate the spirv_params with the common parameters
     spirv_params.emplace_back(Operand::Int(sampled_image));  // sampled image
     append_coords_to_spirv_params();
+  };
 
-    switch (ident->intrinsic()) {
-      case ast::Intrinsic::kTextureSample: {
-        op = spv::Op::OpImageSampleImplicitLod;
-        break;
-      }
-      case ast::Intrinsic::kTextureSampleBias: {
-        op = spv::Op::OpImageSampleImplicitLod;
-        assert(pidx.bias != kNotUsed);
-        image_operands.emplace_back(
-            ImageOperand{SpvImageOperandsBiasMask, gen_param(pidx.bias)});
-        break;
-      }
-      case ast::Intrinsic::kTextureSampleLevel: {
-        op = spv::Op::OpImageSampleExplicitLod;
-        assert(pidx.level != kNotUsed);
+  switch (ident->intrinsic()) {
+    case ast::Intrinsic::kTextureLoad: {
+      op = texture_type->Is<ast::type::StorageTexture>()
+               ? spv::Op::OpImageRead
+               : spv::Op::OpImageFetch;
+      spirv_params.emplace_back(gen_param(pidx.texture));
+      append_coords_to_spirv_params();
+
+      if (pidx.level != kNotUsed) {
         image_operands.emplace_back(
             ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
-        break;
       }
-      case ast::Intrinsic::kTextureSampleGrad: {
-        op = spv::Op::OpImageSampleExplicitLod;
-        assert(pidx.ddx != kNotUsed);
-        assert(pidx.ddy != kNotUsed);
-        image_operands.emplace_back(
-            ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddx)});
-        image_operands.emplace_back(
-            ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddy)});
-        break;
-      }
-      case ast::Intrinsic::kTextureSampleCompare: {
-        op = spv::Op::OpImageSampleDrefExplicitLod;
-        assert(pidx.depth_ref != kNotUsed);
-        spirv_params.emplace_back(gen_param(pidx.depth_ref));
 
-        ast::type::F32 f32;
-        ast::FloatLiteral float_0(&f32, 0.0);
-        image_operands.emplace_back(ImageOperand{
-            SpvImageOperandsLodMask,
-            Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0))});
-        break;
+      if (pidx.sample_index != kNotUsed) {
+        image_operands.emplace_back(ImageOperand{SpvImageOperandsSampleMask,
+                                                 gen_param(pidx.sample_index)});
       }
-      default:
-        break;  // unreachable
+
+      break;
     }
+    case ast::Intrinsic::kTextureStore: {
+      op = spv::Op::OpImageWrite;
+      spirv_params.emplace_back(gen_param(pidx.texture));
+      append_coords_to_spirv_params();
+      spirv_params.emplace_back(gen_param(pidx.value));
+      break;
+    }
+    case ast::Intrinsic::kTextureSample: {
+      op = spv::Op::OpImageSampleImplicitLod;
+      append_image_and_coords_to_spirv_params();
+      break;
+    }
+    case ast::Intrinsic::kTextureSampleBias: {
+      op = spv::Op::OpImageSampleImplicitLod;
+      append_image_and_coords_to_spirv_params();
+      assert(pidx.bias != kNotUsed);
+      image_operands.emplace_back(
+          ImageOperand{SpvImageOperandsBiasMask, gen_param(pidx.bias)});
+      break;
+    }
+    case ast::Intrinsic::kTextureSampleLevel: {
+      op = spv::Op::OpImageSampleExplicitLod;
+      append_image_and_coords_to_spirv_params();
+      assert(pidx.level != kNotUsed);
+      image_operands.emplace_back(
+          ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
+      break;
+    }
+    case ast::Intrinsic::kTextureSampleGrad: {
+      op = spv::Op::OpImageSampleExplicitLod;
+      append_image_and_coords_to_spirv_params();
+      assert(pidx.ddx != kNotUsed);
+      assert(pidx.ddy != kNotUsed);
+      image_operands.emplace_back(
+          ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddx)});
+      image_operands.emplace_back(
+          ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddy)});
+      break;
+    }
+    case ast::Intrinsic::kTextureSampleCompare: {
+      op = spv::Op::OpImageSampleDrefExplicitLod;
+      append_image_and_coords_to_spirv_params();
+      assert(pidx.depth_ref != kNotUsed);
+      spirv_params.emplace_back(gen_param(pidx.depth_ref));
+
+      ast::type::F32 f32;
+      ast::FloatLiteral float_0(&f32, 0.0);
+      image_operands.emplace_back(ImageOperand{
+          SpvImageOperandsLodMask,
+          Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0))});
+      break;
+    }
+    default:
+      break;  // unreachable
   }
 
   if (pidx.offset != kNotUsed) {

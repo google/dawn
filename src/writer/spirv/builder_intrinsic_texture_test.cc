@@ -2564,7 +2564,137 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %16
 )"};
+    case ValidTextureOverload::kStoreWO1dRgba32float:
+      return {R"(
+%4 = OpTypeVoid
+%3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%11 = OpConstant %10 1
+%13 = OpTypeFloat 32
+%12 = OpTypeVector %13 4
+%14 = OpConstant %13 2
+%15 = OpConstant %13 3
+%16 = OpConstant %13 4
+%17 = OpConstant %13 5
+%18 = OpConstantComposite %12 %14 %15 %16 %17
+)",
+              R"(
+%9 = OpLoad %3 %1
+OpImageWrite %9 %11 %18
+)"};
+    case ValidTextureOverload::kStoreWO1dArrayRgba32float:
+      return {R"(
+%4 = OpTypeVoid
+%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%11 = OpTypeInt 32 1
+%10 = OpTypeVector %11 2
+%12 = OpConstant %11 1
+%13 = OpConstant %11 2
+%14 = OpConstantComposite %10 %12 %13
+%16 = OpTypeFloat 32
+%15 = OpTypeVector %16 4
+%17 = OpConstant %16 3
+%18 = OpConstant %16 4
+%19 = OpConstant %16 5
+%20 = OpConstant %16 6
+%21 = OpConstantComposite %15 %17 %18 %19 %20
+)",
+              R"(
+%9 = OpLoad %3 %1
+OpImageWrite %9 %14 %21
+)"};
+    case ValidTextureOverload::kStoreWO2dRgba32float:
+      return {R"(
+%4 = OpTypeVoid
+%3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%11 = OpTypeInt 32 1
+%10 = OpTypeVector %11 2
+%12 = OpConstant %11 1
+%13 = OpConstant %11 2
+%14 = OpConstantComposite %10 %12 %13
+%16 = OpTypeFloat 32
+%15 = OpTypeVector %16 4
+%17 = OpConstant %16 3
+%18 = OpConstant %16 4
+%19 = OpConstant %16 5
+%20 = OpConstant %16 6
+%21 = OpConstantComposite %15 %17 %18 %19 %20
+)",
+              R"(
+%9 = OpLoad %3 %1
+OpImageWrite %9 %14 %21
+)"};
+    case ValidTextureOverload::kStoreWO2dArrayRgba32float:
+      return {R"(
+%4 = OpTypeVoid
+%3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%11 = OpTypeInt 32 1
+%10 = OpTypeVector %11 3
+%12 = OpConstant %11 1
+%13 = OpConstant %11 2
+%14 = OpConstant %11 3
+%15 = OpConstantComposite %10 %12 %13 %14
+%17 = OpTypeFloat 32
+%16 = OpTypeVector %17 4
+%18 = OpConstant %17 4
+%19 = OpConstant %17 5
+%20 = OpConstant %17 6
+%21 = OpConstant %17 7
+%22 = OpConstantComposite %16 %18 %19 %20 %21
+)",
+              R"(
+%9 = OpLoad %3 %1
+OpImageWrite %9 %15 %22
+)"};
+    case ValidTextureOverload::kStoreWO3dRgba32float:
+      return {R"(
+%4 = OpTypeVoid
+%3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%11 = OpTypeInt 32 1
+%10 = OpTypeVector %11 3
+%12 = OpConstant %11 1
+%13 = OpConstant %11 2
+%14 = OpConstant %11 3
+%15 = OpConstantComposite %10 %12 %13 %14
+%17 = OpTypeFloat 32
+%16 = OpTypeVector %17 4
+%18 = OpConstant %17 4
+%19 = OpConstant %17 5
+%20 = OpConstant %17 6
+%21 = OpConstant %17 7
+%22 = OpConstantComposite %16 %18 %19 %20 %21
+)",
+              R"(
+%9 = OpLoad %3 %1
+OpImageWrite %9 %15 %22
+)"};
   }
+
   return {"<unmatched texture overload>", "<unmatched texture overload>"};
 }  // NOLINT - Ignore the length of this function
 

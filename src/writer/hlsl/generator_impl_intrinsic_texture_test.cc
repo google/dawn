@@ -229,6 +229,16 @@ std::string expected_texture_overload(
       return R"(texture_tint_0.Load(int3(1, 2, 3)))";
     case ValidTextureOverload::kLoadStorageRO3dRgba32float:
       return R"(texture_tint_0.Load(int3(1, 2, 3)))";
+    case ValidTextureOverload::kStoreWO1dRgba32float:
+      return R"(texture_tint_0[1] = float4(2.0f, 3.0f, 4.0f, 5.0f))";
+    case ValidTextureOverload::kStoreWO1dArrayRgba32float:
+      return R"(texture_tint_0[int2(1, 2)] = float4(3.0f, 4.0f, 5.0f, 6.0f))";
+    case ValidTextureOverload::kStoreWO2dRgba32float:
+      return R"(texture_tint_0[int2(1, 2)] = float4(3.0f, 4.0f, 5.0f, 6.0f))";
+    case ValidTextureOverload::kStoreWO2dArrayRgba32float:
+      return R"(texture_tint_0[int3(1, 2, 3)] = float4(4.0f, 5.0f, 6.0f, 7.0f))";
+    case ValidTextureOverload::kStoreWO3dRgba32float:
+      return R"(texture_tint_0[int3(1, 2, 3)] = float4(4.0f, 5.0f, 6.0f, 7.0f))";
   }
   return "<unmatched texture overload>";
 }  // NOLINT - Ignore the length of this function

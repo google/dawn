@@ -91,6 +91,7 @@ enum class Intrinsic {
   kTextureSampleCompare,
   kTextureSampleGrad,
   kTextureSampleLevel,
+  kTextureStore,
   kTrunc
 };
 
@@ -143,6 +144,8 @@ struct TextureSignature : public Signature {
       size_t sample_index = kNotUsed;
       /// `texture` parameter index.
       size_t texture = kNotUsed;
+      /// `value` parameter index.
+      size_t value = kNotUsed;
     };
     /// The indices of all possible parameters.
     Index idx;

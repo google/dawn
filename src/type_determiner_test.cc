@@ -4513,6 +4513,7 @@ std::string to_str(const std::string& function,
   maybe_add_param(sig->params.idx.sampler, "sampler");
   maybe_add_param(sig->params.idx.sample_index, "sample_index");
   maybe_add_param(sig->params.idx.texture, "texture");
+  maybe_add_param(sig->params.idx.value, "value");
   std::sort(
       params.begin(), params.end(),
       [](const Parameter& a, const Parameter& b) { return a.idx < b.idx; });
@@ -4732,6 +4733,16 @@ const char* expected_texture_overload(
       return R"(textureLoad(texture, coords, array_index))";
     case ValidTextureOverload::kLoadStorageRO3dRgba32float:
       return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kStoreWO1dRgba32float:
+      return R"(textureStore(texture, coords, value))";
+    case ValidTextureOverload::kStoreWO1dArrayRgba32float:
+      return R"(textureStore(texture, coords, array_index, value))";
+    case ValidTextureOverload::kStoreWO2dRgba32float:
+      return R"(textureStore(texture, coords, value))";
+    case ValidTextureOverload::kStoreWO2dArrayRgba32float:
+      return R"(textureStore(texture, coords, array_index, value))";
+    case ValidTextureOverload::kStoreWO3dRgba32float:
+      return R"(textureStore(texture, coords, value))";
   }
   return "<unmatched texture overload>";
 }
@@ -4748,18 +4759,23 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_TRUE(td()->DetermineResultType(&call)) << td()->error();
 
-  switch (param.texture_kind) {
-    case ast::intrinsic::test::TextureKind::kRegular:
-    case ast::intrinsic::test::TextureKind::kMultisampled:
-    case ast::intrinsic::test::TextureKind::kStorage: {
-      auto* datatype = param.resultVectorComponentType(this);
-      ASSERT_TRUE(call.result_type()->Is<ast::type::Vector>());
-      EXPECT_EQ(call.result_type()->As<ast::type::Vector>()->type(), datatype);
-      break;
-    }
-    case ast::intrinsic::test::TextureKind::kDepth: {
-      EXPECT_EQ(call.result_type(), ty.f32);
-      break;
+  if (std::string(param.function) == "textureStore") {
+    EXPECT_EQ(call.result_type(), ty.void_);
+  } else {
+    switch (param.texture_kind) {
+      case ast::intrinsic::test::TextureKind::kRegular:
+      case ast::intrinsic::test::TextureKind::kMultisampled:
+      case ast::intrinsic::test::TextureKind::kStorage: {
+        auto* datatype = param.resultVectorComponentType(this);
+        ASSERT_TRUE(call.result_type()->Is<ast::type::Vector>());
+        EXPECT_EQ(call.result_type()->As<ast::type::Vector>()->type(),
+                  datatype);
+        break;
+      }
+      case ast::intrinsic::test::TextureKind::kDepth: {
+        EXPECT_EQ(call.result_type(), ty.f32);
+        break;
+      }
     }
   }
 

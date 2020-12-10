@@ -142,6 +142,11 @@ enum class ValidTextureOverload {
   kLoadStorageRO2dRgba32float,
   kLoadStorageRO2dArrayRgba32float,  // Not permutated for all texel formats
   kLoadStorageRO3dRgba32float,       // Not permutated for all texel formats
+  kStoreWO1dRgba32float,             // Not permutated for all texel formats
+  kStoreWO1dArrayRgba32float,        // Not permutated for all texel formats
+  kStoreWO2dRgba32float,             // Not permutated for all texel formats
+  kStoreWO2dArrayRgba32float,        // Not permutated for all texel formats
+  kStoreWO3dRgba32float,             // Not permutated for all texel formats
 };
 
 /// Describes a texture intrinsic overload

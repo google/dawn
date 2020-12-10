@@ -52,6 +52,7 @@
 #include "src/ast/type/texture_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -640,6 +641,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           param.idx.offset = param.count++;
         }
         break;
+      case ast::Intrinsic::kTextureStore:
+        param.idx.texture = param.count++;
+        param.idx.coords = param.count++;
+        if (is_array) {
+          param.idx.array_index = param.count++;
+        }
+        param.idx.value = param.count++;
+        break;
       default:
         set_error(expr->source(),
                   "Internal compiler error: Unreachable intrinsic " +
@@ -658,23 +667,32 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     ident->set_intrinsic_signature(
         std::make_unique<ast::intrinsic::TextureSignature>(param));
 
-    if (texture->Is<ast::type::DepthTexture>()) {
-      expr->func()->set_result_type(mod_->create<ast::type::F32>());
+    // Set the function return type
+    ast::type::Type* return_type = nullptr;
+    if (ident->intrinsic() == ast::Intrinsic::kTextureStore) {
+      return_type = mod_->create<ast::type::Void>();
     } else {
-      ast::type::Type* type = nullptr;
-      if (auto* storage = texture->As<ast::type::StorageTexture>()) {
-        type = storage->type();
-      } else if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
-        type = sampled->type();
-      } else if (auto* msampled =
-                     texture->As<ast::type::MultisampledTexture>()) {
-        type = msampled->type();
+      if (texture->Is<ast::type::DepthTexture>()) {
+        return_type = mod_->create<ast::type::F32>();
       } else {
-        set_error(expr->source(), "unknown texture type for texture sampling");
-        return false;
+        ast::type::Type* type = nullptr;
+        if (auto* storage = texture->As<ast::type::StorageTexture>()) {
+          type = storage->type();
+        } else if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
+          type = sampled->type();
+        } else if (auto* msampled =
+                       texture->As<ast::type::MultisampledTexture>()) {
+          type = msampled->type();
+        } else {
+          set_error(expr->source(),
+                    "unknown texture type for texture sampling");
+          return false;
+        }
+        return_type = mod_->create<ast::type::Vector>(type, 4);
       }
-      expr->func()->set_result_type(mod_->create<ast::type::Vector>(type, 4));
     }
+    expr->func()->set_result_type(return_type);
+
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kDot) {
@@ -996,6 +1014,8 @@ bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
     ident->set_intrinsic(ast::Intrinsic::kTanh);
   } else if (ident->name() == "textureLoad") {
     ident->set_intrinsic(ast::Intrinsic::kTextureLoad);
+  } else if (ident->name() == "textureStore") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureStore);
   } else if (ident->name() == "textureSample") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSample);
   } else if (ident->name() == "textureSampleBias") {

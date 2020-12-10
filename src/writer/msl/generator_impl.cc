@@ -679,6 +679,9 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
       out_ << ".read(";
       lod_param_is_named = false;
       break;
+    case ast::Intrinsic::kTextureStore:
+      out_ << ".write(";
+      break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
                ident->name() + "'";
@@ -693,15 +696,8 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
     first_arg = false;
   };
 
-  if (pidx.sampler != kNotUsed) {
-    if (!EmitExpression(params[pidx.sampler])) {
-      return false;
-    }
-    first_arg = false;
-  }
-
-  for (auto idx :
-       {pidx.coords, pidx.array_index, pidx.depth_ref, pidx.sample_index}) {
+  for (auto idx : {pidx.value, pidx.sampler, pidx.coords, pidx.array_index,
+                   pidx.depth_ref, pidx.sample_index}) {
     if (idx != kNotUsed) {
       maybe_write_comma();
       if (!EmitExpression(params[idx]))

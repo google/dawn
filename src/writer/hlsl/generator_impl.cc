@@ -719,8 +719,6 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
                                     std::ostream& out,
                                     ast::CallExpression* expr) {
-  make_indent(out);
-
   auto* ident = expr->func()->As<ast::IdentifierExpression>();
 
   auto params = expr->params();
@@ -758,6 +756,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       if (!texture_type->Is<ast::type::StorageTexture>()) {
         pack_mip_in_coords = true;
       }
+      break;
+    case ast::Intrinsic::kTextureStore:
+      out << "[";
       break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
@@ -815,7 +816,13 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     }
   }
 
-  out << ")";
+  if (ident->intrinsic() == ast::Intrinsic::kTextureStore) {
+    out << "] = ";
+    if (!EmitExpression(pre, out, params[pidx.value]))
+      return false;
+  } else {
+    out << ")";
+  }
 
   return true;
 }

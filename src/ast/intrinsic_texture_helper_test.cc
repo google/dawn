@@ -1976,6 +1976,90 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                                b->vec3<i32>(1, 2, 3));  // coords
           },
       },
+      {
+          ValidTextureOverload::kStoreWO1dRgba32float,
+          "textureStore(t      : texture_storage_wo_1d<F>,\n"
+          "             coords : i32,\n"
+          "             value  : vec4<T>) -> void",
+          ast::AccessControl::kWriteOnly,
+          ast::type::ImageFormat::kRgba32Float,
+          type::TextureDimension::k1d,
+          TextureDataType::kF32,
+          "textureStore",
+          [](Builder* b) {
+            return b->ExprList("texture",                          // t
+                               1,                                  // coords
+                               b->vec4<f32>(2.f, 3.f, 4.f, 5.f));  // value
+          },
+      },
+      {
+          ValidTextureOverload::kStoreWO1dArrayRgba32float,
+          "textureStore(t           : texture_storage_wo_1d_array<F>,\n"
+          "             coords      : i32,\n"
+          "             array_index : i32,\n"
+          "             value       : vec4<T>) -> void",
+          ast::AccessControl::kWriteOnly,
+          ast::type::ImageFormat::kRgba32Float,
+          type::TextureDimension::k1dArray,
+          TextureDataType::kF32,
+          "textureStore",
+          [](Builder* b) {
+            return b->ExprList("texture",  // t
+                               1,          // coords
+                               2,          // array_index
+                               b->vec4<f32>(3.f, 4.f, 5.f, 6.f));  // value
+          },
+      },
+      {
+          ValidTextureOverload::kStoreWO2dRgba32float,
+          "textureStore(t      : texture_storage_wo_2d<F>,\n"
+          "             coords : vec2<i32>,\n"
+          "             value  : vec4<T>) -> void",
+          ast::AccessControl::kWriteOnly,
+          ast::type::ImageFormat::kRgba32Float,
+          type::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureStore",
+          [](Builder* b) {
+            return b->ExprList("texture",                          // t
+                               b->vec2<i32>(1, 2),                 // coords
+                               b->vec4<f32>(3.f, 4.f, 5.f, 6.f));  // value
+          },
+      },
+      {
+          ValidTextureOverload::kStoreWO2dArrayRgba32float,
+          "textureStore(t           : texture_storage_wo_2d_array<F>,\n"
+          "             coords      : vec2<i32>,\n"
+          "             array_index : i32,\n"
+          "             value       : vec4<T>) -> void",
+          ast::AccessControl::kWriteOnly,
+          ast::type::ImageFormat::kRgba32Float,
+          type::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureStore",
+          [](Builder* b) {
+            return b->ExprList("texture",           // t
+                               b->vec2<i32>(1, 2),  // coords
+                               3,                   // array_index
+                               b->vec4<f32>(4.f, 5.f, 6.f, 7.f));  // value
+          },
+      },
+      {
+          ValidTextureOverload::kStoreWO3dRgba32float,
+          "textureStore(t      : texture_storage_wo_3d<F>,\n"
+          "             coords : vec3<i32>,\n"
+          "             value  : vec4<T>) -> void",
+          ast::AccessControl::kWriteOnly,
+          ast::type::ImageFormat::kRgba32Float,
+          type::TextureDimension::k3d,
+          TextureDataType::kF32,
+          "textureStore",
+          [](Builder* b) {
+            return b->ExprList("texture",                          // t
+                               b->vec3<i32>(1, 2, 3),              // coords
+                               b->vec4<f32>(4.f, 5.f, 6.f, 7.f));  // value
+          },
+      },
   };
 }
 
