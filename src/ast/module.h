@@ -56,6 +56,10 @@ class Module {
   Module Clone();
 
   /// Clone this module into `ctx->mod` using the provided CloneContext
+  /// The module will be cloned in this order:
+  /// * Constructed types
+  /// * Global variables
+  /// * Functions
   /// @param ctx the clone context
   void Clone(CloneContext* ctx);
 

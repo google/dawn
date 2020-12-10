@@ -76,6 +76,8 @@ TEST_F(FirstIndexOffsetTest, Error_AlreadyTransformed) {
   struct Builder : public ModuleBuilder {
     void Build() override {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
+      AddFunction("test")->body()->append(create<ast::ReturnStatement>(
+          Source{}, create<ast::IdentifierExpression>("vert_idx")));
     }
   };
 
@@ -106,15 +108,16 @@ TEST_F(FirstIndexOffsetTest, EmptyModule) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  EXPECT_EQ("Module{\n}\n", result.module.to_str());
+  auto got = result.module.to_str();
+  auto* expected = "Module{\n}\n";
+  EXPECT_EQ(got, expected);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
   struct Builder : public ModuleBuilder {
     void Build() override {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      ast::Function* func = AddFunction("test");
-      func->body()->append(create<ast::ReturnStatement>(
+      AddFunction("test")->body()->append(create<ast::ReturnStatement>(
           Source{}, create<ast::IdentifierExpression>("vert_idx")));
     }
   };
@@ -131,7 +134,9 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  EXPECT_EQ(R"(Module{
+  auto got = result.module.to_str();
+  auto* expected =
+      R"(Module{
   TintFirstIndexOffsetData Struct{
     [[block]]
     StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
@@ -180,14 +185,16 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
     }
   }
 }
-)",
-            result.module.to_str());
+)";
+  EXPECT_EQ(got, expected);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
   struct Builder : public ModuleBuilder {
     void Build() override {
       AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
+      AddFunction("test")->body()->append(create<ast::ReturnStatement>(
+          Source{}, create<ast::IdentifierExpression>("inst_idx")));
     }
   };
 
@@ -202,7 +209,9 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
 
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
-  EXPECT_EQ(R"(Module{
+
+  auto got = result.module.to_str();
+  auto* expected = R"(Module{
   TintFirstIndexOffsetData Struct{
     [[block]]
     StructMember{[[ offset 0 ]] tint_first_instance_index: __u32}
@@ -224,9 +233,35 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
+  Function test -> __u32
+  ()
+  {
+    VariableDeclStatement{
+      VariableConst{
+        inst_idx
+        none
+        __u32
+        {
+          Binary[__u32]{
+            Identifier[__ptr_in__u32]{tint_first_index_offset_inst_idx}
+            add
+            MemberAccessor[__ptr_uniform__u32]{
+              Identifier[__ptr_uniform__struct_TintFirstIndexOffsetData]{tint_first_index_data}
+              Identifier[not set]{tint_first_instance_index}
+            }
+          }
+        }
+      }
+    }
+    Return{
+      {
+        Identifier[__u32]{inst_idx}
+      }
+    }
+  }
 }
-)",
-            result.module.to_str());
+)";
+  EXPECT_EQ(got, expected);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
@@ -234,6 +269,8 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     void Build() override {
       AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
+      AddFunction("test")->body()->append(
+          create<ast::ReturnStatement>(Source{}, Expr(1u)));
     }
   };
 
@@ -251,7 +288,9 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
 
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
-  EXPECT_EQ(R"(Module{
+
+  auto got = result.module.to_str();
+  auto* expected = R"(Module{
   TintFirstIndexOffsetData Struct{
     [[block]]
     StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
@@ -282,9 +321,18 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
+  Function test -> __u32
+  ()
+  {
+    Return{
+      {
+        ScalarConstructor[__u32]{1}
+      }
+    }
+  }
 }
-)",
-            result.module.to_str());
+)";
+  EXPECT_EQ(got, expected);
 
   EXPECT_TRUE(transform_ptr->HasVertexIndex());
   EXPECT_EQ(transform_ptr->GetFirstVertexOffset(), 0u);
@@ -321,7 +369,9 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
 
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
-  EXPECT_EQ(R"(Module{
+
+  auto got = result.module.to_str();
+  auto* expected = R"(Module{
   TintFirstIndexOffsetData Struct{
     [[block]]
     StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
@@ -383,8 +433,8 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
     }
   }
 }
-)",
-            result.module.to_str());
+)";
+  EXPECT_EQ(got, expected);
 }
 
 }  // namespace

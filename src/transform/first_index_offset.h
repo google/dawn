@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/ast/module.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/transform/transform.h"
 
 namespace tint {
@@ -94,12 +95,12 @@ class FirstIndexOffset : public Transform {
   /// @param original_name the name of the original builtin used in function
   /// @param field_name name of field in firstVertex/Instance buffer
   /// @param buffer_var variable of firstVertex/Instance buffer
-  /// @param func function to modify
-  void AddFirstIndexOffset(const std::string& original_name,
-                           const std::string& field_name,
-                           ast::Variable* buffer_var,
-                           ast::Function* func,
-                           ast::Module* module);
+  /// @param module the target module to contain the new ast nodes
+  ast::VariableDeclStatement* CreateFirstIndexOffset(
+      const std::string& original_name,
+      const std::string& field_name,
+      ast::Variable* buffer_var,
+      ast::Module* module);
 
   uint32_t binding_;
   uint32_t set_;
