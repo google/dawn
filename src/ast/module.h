@@ -26,6 +26,7 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type_manager.h"
 #include "src/ast/variable.h"
+#include "src/symbol_table.h"
 
 namespace tint {
 namespace ast {
@@ -158,9 +159,16 @@ class Module {
   /// @returns all the declared nodes in the module
   const std::vector<std::unique_ptr<ast::Node>>& nodes() { return ast_nodes_; }
 
+  /// Registers `name` as a symbol
+  /// @param name the name to register
+  /// @returns the symbol for the `name`. If `name` is already registered the
+  /// previously generated symbol will be returned.
+  Symbol RegisterSymbol(const std::string& name);
+
  private:
   Module(const Module&) = delete;
 
+  SymbolTable symbol_table_;
   VariableList global_variables_;
   // The constructed types are owned by the type manager
   std::vector<type::Type*> constructed_types_;

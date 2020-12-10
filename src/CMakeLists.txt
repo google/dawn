@@ -232,6 +232,10 @@ set(TINT_LIB_SRCS
   scope_stack.h
   source.cc
   source.h
+  symbol.cc
+  symbol.h
+  symbol_table.cc
+  symbol_table.h
   transform/emit_vertex_point_size.cc
   transform/emit_vertex_point_size.h
   transform/bound_array_accessors.cc
@@ -458,6 +462,8 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     namer_test.cc
     scope_stack_test.cc
+    symbol_table_test.cc
+    symbol_test.cc
     transform/emit_vertex_point_size_test.cc
     transform/bound_array_accessors_test.cc
     transform/first_index_offset_test.cc

@@ -25,6 +25,7 @@ namespace ast {
 Module::Module() = default;
 
 Module::Module(Module&&) = default;
+
 Module& Module::operator=(Module&& rhs) = default;
 
 Module::~Module() = default;
@@ -74,6 +75,10 @@ bool Module::HasStage(ast::PipelineStage stage) const {
     }
   }
   return false;
+}
+
+Symbol Module::RegisterSymbol(const std::string& name) {
+  return symbol_table_.Register(name);
 }
 
 bool Module::IsValid() const {
