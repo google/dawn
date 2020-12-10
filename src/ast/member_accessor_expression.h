@@ -16,7 +16,6 @@
 #define SRC_AST_MEMBER_ACCESSOR_EXPRESSION_H_
 
 #include <memory>
-#include <string>
 #include <utility>
 
 #include "src/ast/expression.h"

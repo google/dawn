@@ -15,9 +15,6 @@
 #ifndef SRC_AST_TYPE_DECORATION_H_
 #define SRC_AST_TYPE_DECORATION_H_
 
-#include <memory>
-#include <ostream>
-#include <string>
 #include <vector>
 
 #include "src/ast/decoration.h"

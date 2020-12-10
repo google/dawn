@@ -15,8 +15,6 @@
 #ifndef SRC_AST_INT_LITERAL_H_
 #define SRC_AST_INT_LITERAL_H_
 
-#include <string>
-
 #include "src/ast/literal.h"
 
 namespace tint {

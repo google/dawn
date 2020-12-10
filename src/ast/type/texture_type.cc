@@ -15,6 +15,7 @@
 #include "src/ast/type/texture_type.h"
 
 #include <cassert>
+#include <ostream>
 
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"

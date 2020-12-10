@@ -15,9 +15,6 @@
 #ifndef SRC_AST_TYPE_TEXTURE_TYPE_H_
 #define SRC_AST_TYPE_TEXTURE_TYPE_H_
 
-#include <ostream>
-#include <string>
-
 #include "src/ast/type/type.h"
 
 namespace tint {

@@ -17,8 +17,6 @@
 
 #include <stddef.h>
 
-#include <string>
-
 #include "src/ast/array_decoration.h"
 
 namespace tint {

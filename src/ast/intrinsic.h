@@ -16,7 +16,6 @@
 #define SRC_AST_INTRINSIC_H_
 
 #include <ostream>
-#include <string>
 
 namespace tint {
 namespace ast {
