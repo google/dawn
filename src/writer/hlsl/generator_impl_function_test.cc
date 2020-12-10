@@ -268,7 +268,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer : register(b0) {
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
   float4 coord;
 };
 
@@ -819,7 +819,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer : register(b0) {
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
   float4 coord;
 };
 

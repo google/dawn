@@ -1334,7 +1334,9 @@ bool GeneratorImpl::EmitEntryPointData(
       // is not a block.
       // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
       //           https://github.com/gpuweb/gpuweb/issues/1008
-      out << "cbuffer : register(b" << binding->value() << ") {" << std::endl;
+      auto name = "cbuffer_" + var->name();
+      out << "cbuffer " << name << " : register(b" << binding->value() << ") {"
+          << std::endl;
 
       increment_indent();
       make_indent(out);
