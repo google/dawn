@@ -3459,23 +3459,6 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"}}));
 
-INSTANTIATE_TEST_SUITE_P(
-    // The SPIR-V result type could be integral but of different signedness
-    // than the sampled texel type.  In these cases the result should be
-    // converted to match the signedness of the SPIR-V result type.  This
-    // affects any instruction that yields texel values.
-    DISABLED_ImageAccess_ConvertResultSignedness,
-    SpvParserTest_ImageAccessTest,
-    ::testing::ValuesIn(std::vector<ImageAccessCase>
-                        // OpImageRead
-                        // OpImageFetch
-                        // OpImageGather
-                        // OpImageSampleExplicitLod
-                        // OpImageSampleImplicitLod
-                        // In WGSL, depth-reference sampling only yields
-                        // floating point results in WGSL.
-                        {}));
-
 struct ImageCoordsCase {
   // SPIR-V image type, excluding result ID and opcode
   std::string spirv_image_type_details;
