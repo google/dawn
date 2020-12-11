@@ -36,6 +36,7 @@
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/ast/storage_class.h"
+#include "src/ast/type/i32_type.h"
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/entry_point_info.h"
 #include "src/reader/spirv/fail_stream.h"
@@ -693,6 +694,13 @@ class FunctionEmitter {
   ast::ExpressionList MakeCoordinateOperandsForImageAccess(
       const spvtools::opt::Instruction& image_access);
 
+  /// Returns the given value as an I32.  If it's already an I32 then this
+  /// return the given value.  Otherwise, wrap the value in a TypeConstructor
+  /// expression.
+  /// @param value the value to pass through or convert
+  /// @reutrns the value as an I32 value.
+  TypedExpression ToI32(TypedExpression value);
+
  private:
   /// FunctionDeclaration contains the parsed information for a function header.
   struct FunctionDeclaration {
@@ -892,6 +900,7 @@ class FunctionEmitter {
   FailStream& fail_stream_;
   Namer& namer_;
   const spvtools::opt::Function& function_;
+  ast::type::I32* const i32_;  // The unique I32 type object.
 
   // A stack of statement lists. Each list is contained in a construct in
   // the next deeper element of stack. The 0th entry represents the statements

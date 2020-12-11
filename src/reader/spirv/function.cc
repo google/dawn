@@ -640,6 +640,7 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       fail_stream_(pi->fail_stream()),
       namer_(pi->namer()),
       function_(function),
+      i32_(ast_module_.create<ast::type::I32>()),
       ep_info_(ep_info) {
   PushNewStatementBlock(nullptr, 0, nullptr, nullptr, nullptr);
 }
@@ -3041,17 +3042,17 @@ ast::IdentifierExpression* FunctionEmitter::Swizzle(uint32_t i) {
     return nullptr;
   }
   const char* names[] = {"x", "y", "z", "w"};
-  return ast_module_.create<ast::IdentifierExpression>(names[i & 3]);
+  return create<ast::IdentifierExpression>(names[i & 3]);
 }
 
 ast::IdentifierExpression* FunctionEmitter::PrefixSwizzle(uint32_t n) {
   switch (n) {
     case 1:
-      return ast_module_.create<ast::IdentifierExpression>("x");
+      return create<ast::IdentifierExpression>("x");
     case 2:
-      return ast_module_.create<ast::IdentifierExpression>("xy");
+      return create<ast::IdentifierExpression>("xy");
     case 3:
-      return ast_module_.create<ast::IdentifierExpression>("xyz");
+      return create<ast::IdentifierExpression>("xyz");
     default:
       break;
   }
@@ -3930,9 +3931,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     // integer.
     if (texture_type->Is<ast::type::DepthTexture>()) {
       // Convert it to a signed integer type.
-      lod_operand = ast_module_.create<ast::TypeConstructorExpression>(
-          ast_module_.create<ast::type::I32>(),
-          ast::ExpressionList{lod_operand});
+      lod_operand = create<ast::TypeConstructorExpression>(
+          create<ast::type::I32>(), ast::ExpressionList{lod_operand});
     }
     params.push_back(lod_operand);
     image_operands_mask ^= SpvImageOperandsLodMask;
@@ -3955,13 +3955,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsSampleMask)) {
-    TypedExpression sample = MakeOperand(inst, arg_index);
-    if (!sample.type->Is<ast::type::I32>()) {
-      sample.expr = ast_module_.create<ast::TypeConstructorExpression>(
-          ast_module_.create<ast::type::I32>(),
-          ast::ExpressionList{sample.expr});
-    }
-    params.push_back(sample.expr);
+    params.push_back(ToI32(MakeOperand(inst, arg_index)).expr);
     image_operands_mask ^= SpvImageOperandsSampleMask;
     arg_index++;
   }
@@ -3996,8 +3990,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     if (expected_component_type != result_component_type) {
       // This occurs if one is signed integer and the other is unsigned integer,
       // or vice versa. Perform a bitcast.
-      value =
-          ast_module_.create<ast::BitcastExpression>(result_type, call_expr);
+      value = create<ast::BitcastExpression>(result_type, call_expr);
     }
 
     EmitConstDefOrWriteToHoistedVar(inst, {result_type, value});
@@ -4112,17 +4105,15 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     // The source must be a vector, because it has enough components and has an
     // array component. Use a vector swizzle to get the first `num_axes`
     // components.
-    result.push_back(ast_module_.create<ast::MemberAccessorExpression>(
+    result.push_back(create<ast::MemberAccessorExpression>(
         raw_coords.expr, PrefixSwizzle(num_axes)));
 
     // Now get the array index.
-    ast::Expression* array_index =
-        ast_module_.create<ast::MemberAccessorExpression>(raw_coords.expr,
-                                                          Swizzle(num_axes));
+    ast::Expression* array_index = create<ast::MemberAccessorExpression>(
+        raw_coords.expr, Swizzle(num_axes));
     // Convert it to a signed integer type.
-    result.push_back(ast_module_.create<ast::TypeConstructorExpression>(
-        ast_module_.create<ast::type::I32>(),
-        ast::ExpressionList{array_index}));
+    result.push_back(create<ast::TypeConstructorExpression>(
+        create<ast::type::I32>(), ast::ExpressionList{array_index}));
   } else {
     if (num_coords_supplied == num_coords_required) {
       // Pass the value through.
@@ -4130,7 +4121,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     } else {
       // There are more coordinates supplied than needed. So the source type is
       // a vector. Use a vector swizzle to get the first `num_axes` components.
-      result.push_back(ast_module_.create<ast::MemberAccessorExpression>(
+      result.push_back(create<ast::MemberAccessorExpression>(
           raw_coords.expr, PrefixSwizzle(num_axes)));
     }
   }
@@ -4176,7 +4167,7 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
   // higher-numbered components.
   auto* texel_prefix = (src_count == dest_count)
                            ? texel.expr
-                           : ast_module_.create<ast::MemberAccessorExpression>(
+                           : create<ast::MemberAccessorExpression>(
                                  texel.expr, PrefixSwizzle(dest_count));
 
   if (!(dest_type->is_float_scalar_or_vector() ||
@@ -4219,7 +4210,15 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     return texel_prefix;
   }
   // We must do a bitcast conversion.
-  return ast_module_.create<ast::BitcastExpression>(dest_type, texel_prefix);
+  return create<ast::BitcastExpression>(dest_type, texel_prefix);
+}
+
+TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
+  if (!value.type || value.type == i32_) {
+    return value;
+  }
+  return {i32_, create<ast::TypeConstructorExpression>(
+                    i32_, ast::ExpressionList{value.expr})};
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
