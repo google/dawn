@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/module.h"
+#include "src/demangler.h"
 
 namespace tint {
 namespace ast {
@@ -40,8 +41,17 @@ class TestHelperBase : public BASE {
     return mod.create<T>(std::forward<ARGS>(args)...);
   }
 
+  /// Demangles the given string
+  /// @param s the string to demangle
+  /// @returns the demangled string
+  std::string demangle(const std::string& s) {
+    return demanger.Demangle(mod, s);
+  }
+
   /// The module
   Module mod;
+  /// A demangler
+  Demangler demanger;
 };
 using TestHelper = TestHelperBase<testing::Test>;
 

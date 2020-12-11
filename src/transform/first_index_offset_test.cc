@@ -33,6 +33,7 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
+#include "src/demangler.h"
 #include "src/diagnostic/formatter.h"
 #include "src/source.h"
 #include "src/transform/manager.h"
@@ -154,7 +155,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function tint_symbol_1 -> __u32
+  Function test -> __u32
   ()
   {
     VariableDeclStatement{
@@ -182,7 +183,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
   }
 }
 )";
-  EXPECT_EQ(got, expected);
+  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
@@ -229,7 +230,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function tint_symbol_1 -> __u32
+  Function test -> __u32
   ()
   {
     VariableDeclStatement{
@@ -257,7 +258,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
   }
 }
 )";
-  EXPECT_EQ(got, expected);
+  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
@@ -317,7 +318,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function tint_symbol_1 -> __u32
+  Function test -> __u32
   ()
   {
     Return{
@@ -328,7 +329,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
   }
 }
 )";
-  EXPECT_EQ(got, expected);
+  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
 
   EXPECT_TRUE(transform_ptr->HasVertexIndex());
   EXPECT_EQ(transform_ptr->GetFirstVertexOffset(), 0u);
@@ -389,7 +390,7 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function tint_symbol_1 -> __u32
+  Function func1 -> __u32
   ()
   {
     VariableDeclStatement{
@@ -415,7 +416,7 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
       }
     }
   }
-  Function tint_symbol_2 -> __u32
+  Function func2 -> __u32
   ()
   {
     Return{
@@ -430,7 +431,7 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
   }
 }
 )";
-  EXPECT_EQ(got, expected);
+  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
 }
 
 }  // namespace

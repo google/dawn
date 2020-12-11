@@ -35,8 +35,7 @@ TEST_F(FunctionTest, Creation) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -57,8 +56,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -76,8 +74,7 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   Variable v(Source{}, "var", StorageClass::kInput, &i32, false, nullptr,
              ast::VariableDecorationList{});
@@ -102,8 +99,7 @@ TEST_F(FunctionTest, GetReferenceLocations) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   auto* loc1 = create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32,
                                 false, nullptr,
@@ -150,8 +146,7 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   auto* loc1 = create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32,
                                 false, nullptr,
@@ -197,9 +192,8 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
 TEST_F(FunctionTest, AddDuplicateEntryPoints) {
   type::Void void_type;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
-  auto main_sym = m.RegisterSymbol("main");
+  auto func_sym = mod.RegisterSymbol("func");
+  auto main_sym = mod.RegisterSymbol("main");
 
   Function f(Source{}, func_sym, "func", VariableList{}, &void_type,
              create<BlockStatement>(), FunctionDecorationList{});
@@ -217,8 +211,7 @@ TEST_F(FunctionTest, IsValid) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -237,8 +230,7 @@ TEST_F(FunctionTest, IsValid_InvalidName) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("");
+  auto func_sym = mod.RegisterSymbol("");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -256,8 +248,7 @@ TEST_F(FunctionTest, IsValid_InvalidName) {
 TEST_F(FunctionTest, IsValid_MissingReturnType) {
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -273,8 +264,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -290,8 +280,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
 TEST_F(FunctionTest, IsValid_InvalidParam) {
   type::Void void_type;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone,
@@ -307,8 +296,7 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -329,8 +317,7 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -350,8 +337,7 @@ TEST_F(FunctionTest, ToStr) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
@@ -361,7 +347,7 @@ TEST_F(FunctionTest, ToStr) {
 
   std::ostringstream out;
   f.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Function tint_symbol_1 -> __void
+  EXPECT_EQ(demangle(out.str()), R"(  Function func -> __void
   ()
   {
     Discard{}
@@ -373,8 +359,7 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
@@ -385,7 +370,7 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
 
   std::ostringstream out;
   f.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Function tint_symbol_1 -> __void
+  EXPECT_EQ(demangle(out.str()), R"(  Function func -> __void
   WorkgroupDecoration{2 4 6}
   ()
   {
@@ -398,8 +383,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   type::Void void_type;
   type::I32 i32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
@@ -414,7 +398,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
 
   std::ostringstream out;
   f.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Function tint_symbol_1 -> __void
+  EXPECT_EQ(demangle(out.str()), R"(  Function func -> __void
   (
     Variable{
       var
@@ -431,8 +415,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
 TEST_F(FunctionTest, TypeName) {
   type::Void void_type;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   Function f(Source{}, func_sym, "func", {}, &void_type,
              create<BlockStatement>(), FunctionDecorationList{});
@@ -444,8 +427,7 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   type::I32 i32;
   type::F32 f32;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   params.push_back(create<Variable>(Source{}, "var1", StorageClass::kNone, &i32,
@@ -463,8 +445,7 @@ TEST_F(FunctionTest, TypeName_WithParams) {
 TEST_F(FunctionTest, GetLastStatement) {
   type::Void void_type;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   auto* body = create<BlockStatement>();
@@ -479,8 +460,7 @@ TEST_F(FunctionTest, GetLastStatement) {
 TEST_F(FunctionTest, GetLastStatement_nullptr) {
   type::Void void_type;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
   auto* body = create<BlockStatement>();
@@ -493,8 +473,7 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
 TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
   type::Void void_type;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   Function f(Source{}, func_sym, "func", {}, &void_type,
              create<BlockStatement>(), FunctionDecorationList{});
@@ -510,8 +489,7 @@ TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
 TEST_F(FunctionTest, WorkgroupSize) {
   type::Void void_type;
 
-  Module m;
-  auto func_sym = m.RegisterSymbol("func");
+  auto func_sym = mod.RegisterSymbol("func");
 
   Function f(Source{}, func_sym, "func", {}, &void_type,
              create<BlockStatement>(),

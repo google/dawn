@@ -211,6 +211,8 @@ set(TINT_LIB_SRCS
   ast/workgroup_decoration.h
   castable.cc
   castable.h
+  demangler.cc
+  demangler.h;
   diagnostic/diagnostic.cc
   diagnostic/diagnostic.h
   diagnostic/formatter.cc
@@ -454,6 +456,7 @@ if(${TINT_BUILD_TESTS})
     ast/variable_test.cc
     ast/workgroup_decoration_test.cc
     castable_test.cc
+    demangler_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
     inspector/inspector_test.cc
