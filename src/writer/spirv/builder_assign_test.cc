@@ -44,7 +44,8 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Assign_Var) {
   ast::type::F32 f32;
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::IdentifierExpression>("var");
   auto* val = create<ast::ScalarConstructorExpression>(
@@ -78,7 +79,8 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
   ast::type::F32 f32;
   ast::type::Vector vec(&f32, 3);
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec, false,
+                  nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::IdentifierExpression>("var");
   ast::ExpressionList vals;
@@ -128,7 +130,8 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
                      create<ast::FloatLiteral>(&f32, 3.0f)),
              });
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
+                  nullptr, ast::VariableDecorationList{});
 
   ast::AssignmentStatement assign(create<ast::IdentifierExpression>("var"),
                                   init);
@@ -176,7 +179,8 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 
   auto* init = create<ast::TypeConstructorExpression>(&vec3, vals);
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
+                  nullptr, ast::VariableDecorationList{});
 
   ast::AssignmentStatement assign(create<ast::IdentifierExpression>("var"),
                                   init);
@@ -223,7 +227,8 @@ TEST_F(BuilderTest, Assign_StructMember) {
   auto* s = create<ast::Struct>(members);
   ast::type::Struct s_type("my_struct", s);
 
-  ast::Variable v(Source{}, "ident", ast::StorageClass::kFunction, &s_type);
+  ast::Variable v(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
+                  false, nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("ident"),
@@ -265,7 +270,8 @@ TEST_F(BuilderTest, Assign_Vector) {
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
+                  nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::IdentifierExpression>("var");
 
@@ -312,7 +318,8 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
 
   // var.y = 1
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
+                  nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("var"),
@@ -357,7 +364,8 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
 
   // var[1] = 1
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
+                  nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::ArrayAccessorExpression>(
       create<ast::IdentifierExpression>("var"),

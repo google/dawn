@@ -26,7 +26,8 @@ using VariableDeclStatementTest = TestHelper;
 
 TEST_F(VariableDeclStatementTest, Creation) {
   type::F32 f32;
-  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32);
+  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
+                               nullptr, ast::VariableDecorationList{});
 
   VariableDeclStatement stmt(var);
   EXPECT_EQ(stmt.variable(), var);
@@ -34,7 +35,8 @@ TEST_F(VariableDeclStatementTest, Creation) {
 
 TEST_F(VariableDeclStatementTest, Creation_WithSource) {
   type::F32 f32;
-  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32);
+  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
+                               nullptr, ast::VariableDecorationList{});
 
   VariableDeclStatement stmt(Source{Source::Location{20, 2}}, var);
   auto src = stmt.source();
@@ -44,7 +46,8 @@ TEST_F(VariableDeclStatementTest, Creation_WithSource) {
 
 TEST_F(VariableDeclStatementTest, IsVariableDecl) {
   type::F32 f32;
-  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32);
+  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
+                               nullptr, ast::VariableDecorationList{});
 
   VariableDeclStatement s(var);
   EXPECT_TRUE(s.Is<VariableDeclStatement>());
@@ -52,14 +55,16 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
 
 TEST_F(VariableDeclStatementTest, IsValid) {
   type::F32 f32;
-  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32);
+  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
+                               nullptr, ast::VariableDecorationList{});
   VariableDeclStatement stmt(var);
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
   type::F32 f32;
-  auto* var = create<Variable>(Source{}, "", StorageClass::kNone, &f32);
+  auto* var = create<Variable>(Source{}, "", StorageClass::kNone, &f32, false,
+                               nullptr, ast::VariableDecorationList{});
   VariableDeclStatement stmt(var);
   EXPECT_FALSE(stmt.IsValid());
 }
@@ -71,7 +76,8 @@ TEST_F(VariableDeclStatementTest, IsValid_NullVariable) {
 
 TEST_F(VariableDeclStatementTest, ToStr) {
   type::F32 f32;
-  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32);
+  auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
+                               nullptr, ast::VariableDecorationList{});
 
   VariableDeclStatement stmt(Source{Source::Location{20, 2}}, var);
   std::ostringstream out;

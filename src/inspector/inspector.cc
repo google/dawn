@@ -20,7 +20,6 @@
 
 #include "src/ast/bool_literal.h"
 #include "src/ast/constructor_expression.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
 #include "src/ast/null_literal.h"
@@ -39,6 +38,7 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/variable.h"
 
 namespace tint {
 namespace inspector {
@@ -91,12 +91,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
   for (auto* var : module_.global_variables()) {
-    auto* decorated = var->As<ast::DecoratedVariable>();
-    if (decorated == nullptr) {
-      continue;
-    }
-
-    if (!decorated->HasConstantIdDecoration()) {
+    if (!var->HasConstantIdDecoration()) {
       continue;
     }
 
@@ -104,7 +99,7 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
     // WGSL, so the validator should catch it. Thus here the inspector just
     // assumes all definitians of the constant id are the same, so only needs
     // to find the first reference to constant id.
-    uint32_t constant_id = decorated->constant_id();
+    uint32_t constant_id = var->constant_id();
     if (result.find(constant_id) != result.end()) {
       continue;
     }

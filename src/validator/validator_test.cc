@@ -115,10 +115,15 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   // var a :i32 = 2;
   // a = 2
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   auto* lhs = create<ast::IdentifierExpression>("a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
@@ -140,10 +145,16 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
+
   auto* lhs = create<ast::IdentifierExpression>("a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.3f));
@@ -167,10 +178,15 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   //  a = 2
   // }
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   auto* lhs = create<ast::IdentifierExpression>("a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
@@ -196,10 +212,15 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
   auto* lhs = create<ast::IdentifierExpression>("a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.3f));
@@ -223,10 +244,14 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
   ast::type::F32 f32;
-  auto* global_var =
-      create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
-                            ast::StorageClass::kInput, &f32);
-  mod()->AddGlobalVariable(global_var);
+  mod()->AddGlobalVariable(
+      create<ast::Variable>(Source{Source::Location{12, 34}},  // source
+                            "global_var",                      // name
+                            ast::StorageClass::kInput,         // storage_class
+                            &f32,                              // type
+                            false,                             // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{}));   // decorations
   EXPECT_TRUE(v()->ValidateGlobalVariables(mod()->global_variables()))
       << v()->error();
 }
@@ -234,24 +259,31 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   // var gloabl_var: f32;
   ast::type::F32 f32;
-  auto* global_var =
-      create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
-                            ast::StorageClass::kNone, &f32);
-  mod()->AddGlobalVariable(global_var);
+  mod()->AddGlobalVariable(
+      create<ast::Variable>(Source{Source::Location{12, 34}},  // source
+                            "global_var",                      // name
+                            ast::StorageClass::kNone,          // storage_class
+                            &f32,                              // type
+                            false,                             // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{}));   // decorations
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(v()->error(),
             "12:34 v-0022: global variables must have a storage class");
 }
+
 TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> gloabl_var: f32;
   ast::type::F32 f32;
-  auto* global_var =
-      create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
-                            ast::StorageClass::kInput, &f32);
-  global_var->set_is_const(true);
-
-  mod()->AddGlobalVariable(global_var);
+  mod()->AddGlobalVariable(
+      create<ast::Variable>(Source{Source::Location{12, 34}},  // source
+                            "global_var",                      // name
+                            ast::StorageClass::kInput,         // storage_class
+                            &f32,                              // type
+                            true,                              // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{}));   // decorations
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod()));
   EXPECT_EQ(
@@ -262,12 +294,14 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
 TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
   // const gloabl_var: f32;
   ast::type::F32 f32;
-  auto* global_var =
-      create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
-                            ast::StorageClass::kNone, &f32);
-  global_var->set_is_const(true);
-
-  mod()->AddGlobalVariable(global_var);
+  mod()->AddGlobalVariable(
+      create<ast::Variable>(Source{Source::Location{12, 34}},  // source
+                            "global_var",                      // name
+                            ast::StorageClass::kNone,          // storage_class
+                            &f32,                              // type
+                            true,                              // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{}));   // decorations
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_FALSE(v()->Validate(mod())) << v()->error();
 }
@@ -278,11 +312,15 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   //   not_global_var = 3.14f;
   // }
   ast::type::F32 f32;
-  auto* global_var = create<ast::Variable>(Source{}, "global_var",
-                                           ast::StorageClass::kPrivate, &f32);
-  global_var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.1)));
-  mod()->AddGlobalVariable(global_var);
+  mod()->AddGlobalVariable(create<ast::Variable>(
+      Source{},                     // source
+      "global_var",                 // name
+      ast::StorageClass::kPrivate,  // storage_class
+      &f32,                         // type
+      false,                        // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.1)),  // constructor
+      ast::VariableDecorationList{}));            // decorations
 
   auto* lhs = create<ast::IdentifierExpression>(
       Source{Source::Location{12, 34}}, "not_global_var");
@@ -311,11 +349,15 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   ast::type::F32 f32;
   ast::type::Void void_type;
 
-  auto* global_var = create<ast::Variable>(Source{}, "global_var",
-                                           ast::StorageClass::kPrivate, &f32);
-  global_var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.1)));
-  mod()->AddGlobalVariable(global_var);
+  mod()->AddGlobalVariable(create<ast::Variable>(
+      Source{},                     // source
+      "global_var",                 // name
+      ast::StorageClass::kPrivate,  // storage_class
+      &f32,                         // type
+      false,                        // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.1)),  // constructor
+      ast::VariableDecorationList{}));            // decorations
 
   auto* lhs = create<ast::IdentifierExpression>("global_var");
   auto* rhs = create<ast::ScalarConstructorExpression>(
@@ -344,10 +386,15 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   //   a = 3.14;
   // }
   ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.0)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
@@ -379,10 +426,15 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   //   if (true) { a = 3.14; }
   // }
   ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.0)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
   auto* lhs =
       create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
@@ -411,17 +463,26 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   // var global_var1 : i32 = 0;
   ast::type::F32 f32;
   ast::type::I32 i32;
-  auto* var0 = create<ast::Variable>(Source{}, "global_var0",
-                                     ast::StorageClass::kPrivate, &f32);
-  var0->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 0.1)));
+  auto* var0 = create<ast::Variable>(
+      Source{},                     // source
+      "global_var0",                // name
+      ast::StorageClass::kPrivate,  // storage_class
+      &f32,                         // type
+      false,                        // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 0.1)),  // constructor
+      ast::VariableDecorationList{});             // decorations
   mod()->AddGlobalVariable(var0);
 
-  auto* var1 =
-      create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var1",
-                            ast::StorageClass::kPrivate, &f32);
-  var1->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 0)));
+  auto* var1 = create<ast::Variable>(
+      Source{Source::Location{12, 34}},  // source
+      "global_var1",                     // name
+      ast::StorageClass::kPrivate,       // storage_class
+      &f32,                              // type
+      false,                             // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 0)),  // constructor
+      ast::VariableDecorationList{});          // decorations
   mod()->AddGlobalVariable(var1);
 
   EXPECT_TRUE(v()->ValidateGlobalVariables(mod()->global_variables()))
@@ -433,17 +494,26 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
   // var global_var : i32 = 0;
   ast::type::F32 f32;
   ast::type::I32 i32;
-  auto* var0 = create<ast::Variable>(Source{}, "global_var",
-                                     ast::StorageClass::kPrivate, &f32);
-  var0->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 0.1)));
+  auto* var0 = create<ast::Variable>(
+      Source{},                     // source
+      "global_var",                 // name
+      ast::StorageClass::kPrivate,  // storage_class
+      &f32,                         // type
+      false,                        // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 0.1)),  // constructor
+      ast::VariableDecorationList{});             // decorations
   mod()->AddGlobalVariable(var0);
 
-  auto* var1 =
-      create<ast::Variable>(Source{Source::Location{12, 34}}, "global_var",
-                            ast::StorageClass::kPrivate, &f32);
-  var1->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 0)));
+  auto* var1 = create<ast::Variable>(
+      Source{Source::Location{12, 34}},  // source
+      "global_var",                      // name
+      ast::StorageClass::kPrivate,       // storage_class
+      &f32,                              // type
+      false,                             // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 0)),  // constructor
+      ast::VariableDecorationList{});          // decorations
   mod()->AddGlobalVariable(var1);
 
   EXPECT_FALSE(v()->ValidateGlobalVariables(mod()->global_variables()));
@@ -457,11 +527,15 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   //  a = 2
   // }
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-  var->set_is_const(true);
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      true,                      // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   auto* lhs = create<ast::IdentifierExpression>("a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
@@ -489,16 +563,26 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
 
   ast::type::Void void_type;
   ast::type::F32 f32;
-  auto* global_var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &f32);
-  global_var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.1)));
+  auto* global_var = create<ast::Variable>(
+      Source{},                     // source
+      "a",                          // name
+      ast::StorageClass::kPrivate,  // storage_class
+      &f32,                         // type
+      false,                        // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.1)),  // constructor
+      ast::VariableDecorationList{});             // decorations
   mod()->AddGlobalVariable(global_var);
 
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.0)),  // constructor
+      ast::VariableDecorationList{});             // decorations
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
@@ -522,15 +606,25 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   ast::type::Void void_type;
   ast::type::I32 i32;
   ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
-  auto* var_a_float =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var_a_float->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 0.1)));
+  auto* var_a_float = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 0.1)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -554,10 +648,15 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   // var a : f32 = 3.14;
   // }
   ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.0)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
@@ -565,10 +664,15 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
 
-  auto* var_a_float =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var_a_float->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.14)));
+  auto* var_a_float = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 3.14)),  // constructor
+      ast::VariableDecorationList{});              // decorations
 
   auto* outer_body = create<ast::BlockStatement>();
   outer_body->append(
@@ -588,15 +692,25 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   // if (true) { var a : f32 = 2.0; }
   // }
   ast::type::F32 f32;
-  auto* var_a_float =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var_a_float->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.14)));
+  auto* var_a_float = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 3.14)),  // constructor
+      ast::VariableDecorationList{});              // decorations
 
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.0)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
@@ -620,15 +734,25 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   // func1 { var a : f32 = 3.0; return; }
   ast::type::F32 f32;
   ast::type::Void void_type;
-  auto* var0 =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var0->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0)));
+  auto* var0 = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.0)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
-  auto* var1 = create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone,
-                                     &void_type);
-  var1->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0)));
+  auto* var1 = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &void_type,                // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 1.0)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
   ast::VariableList params0;
   auto* body0 = create<ast::BlockStatement>();
@@ -663,7 +787,13 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   // }
   ast::type::I32 i32;
   auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   td()->RegisterVariableForTesting(var);
   auto* lhs = create<ast::IdentifierExpression>("a");

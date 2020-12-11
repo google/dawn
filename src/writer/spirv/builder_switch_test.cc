@@ -77,9 +77,21 @@ TEST_F(BuilderTest, Switch_WithCase) {
   // }
 
   auto* v =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* a =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -158,9 +170,21 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   //  }
 
   auto* v =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* a =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* default_body = create<ast::BlockStatement>();
   default_body->append(
@@ -224,9 +248,21 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //  }
 
   auto* v =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* a =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -320,9 +356,21 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //  }
 
   auto* v =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* a =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -412,9 +460,21 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   //  }
 
   auto* v =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* a =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* case_1_body = create<ast::BlockStatement>();
   case_1_body->append(
@@ -460,9 +520,21 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //  }
 
   auto* v =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* a =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::BreakStatement>());

@@ -32,7 +32,16 @@ Builder::~Builder() = default;
 Variable* Builder::Var(const std::string& name,
                        StorageClass storage,
                        type::Type* type) {
-  auto* var = create<Variable>(Source{}, name, storage, type);
+  return Var(name, storage, type, nullptr, {});
+}
+
+Variable* Builder::Var(const std::string& name,
+                       StorageClass storage,
+                       type::Type* type,
+                       Expression* constructor,
+                       VariableDecorationList decorations) {
+  auto* var = create<Variable>(Source{}, name, storage, type, false,
+                               constructor, decorations);
   OnVariableBuilt(var);
   return var;
 }
@@ -40,8 +49,16 @@ Variable* Builder::Var(const std::string& name,
 Variable* Builder::Const(const std::string& name,
                          StorageClass storage,
                          type::Type* type) {
-  auto* var = create<Variable>(Source{}, name, storage, type);
-  var->set_is_const(true);
+  return Const(name, storage, type, nullptr, {});
+}
+
+Variable* Builder::Const(const std::string& name,
+                         StorageClass storage,
+                         type::Type* type,
+                         Expression* constructor,
+                         VariableDecorationList decorations) {
+  auto* var = create<Variable>(Source{}, name, storage, type, true, constructor,
+                               decorations);
   OnVariableBuilt(var);
   return var;
 }

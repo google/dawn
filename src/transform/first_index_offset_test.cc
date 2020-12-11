@@ -25,7 +25,6 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
@@ -52,12 +51,9 @@ struct ModuleBuilder : public ast::BuilderWithModule {
 
  protected:
   void AddBuiltinInput(const std::string& name, ast::Builtin builtin) {
-    auto* var = Var(name, ast::StorageClass::kInput, ty.u32);
-    auto* dec_var = create<ast::DecoratedVariable>(var);
-    ast::VariableDecorationList decs;
-    decs.push_back(create<ast::BuiltinDecoration>(builtin, Source{}));
-    dec_var->set_decorations(std::move(decs));
-    mod->AddGlobalVariable(dec_var);
+    mod->AddGlobalVariable(
+        Var(name, ast::StorageClass::kInput, ty.u32, nullptr,
+            {create<ast::BuiltinDecoration>(builtin, Source{})}));
   }
 
   ast::Function* AddFunction(const std::string& name,
@@ -141,7 +137,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
     [[block]]
     StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -149,7 +145,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
     in
     __u32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{1}
       SetDecoration{2}
@@ -216,7 +212,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
     [[block]]
     StructMember{[[ offset 0 ]] tint_first_instance_index: __u32}
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{instance_idx}
     }
@@ -224,7 +220,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
     in
     __u32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{1}
       SetDecoration{7}
@@ -296,7 +292,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
     StructMember{[[ offset 4 ]] tint_first_instance_index: __u32}
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{instance_idx}
     }
@@ -304,7 +300,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     in
     __u32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -312,7 +308,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     in
     __u32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{1}
       SetDecoration{7}
@@ -376,7 +372,7 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
     [[block]]
     StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -384,7 +380,7 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
     in
     __u32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{2}
       SetDecoration{2}

@@ -262,6 +262,18 @@ class ParserImpl {
     ast::type::Type* return_type;
   };
 
+  /// VarDeclInfo contains the parsed information for variable declaration.
+  struct VarDeclInfo {
+    /// Variable declaration source
+    Source source;
+    /// Variable name
+    std::string name;
+    /// Variable storage class
+    ast::StorageClass storage_class;
+    /// Variable type
+    ast::type::Type* type;
+  };
+
   /// Creates a new parser using the given file
   /// @param file the input source file to parse
   explicit ParserImpl(Source::File const* file);
@@ -356,8 +368,8 @@ class ParserImpl {
   /// @returns the const object or nullptr
   Maybe<ast::Variable*> global_constant_decl();
   /// Parses a `variable_decl` grammar element
-  /// @returns the parsed variable or nullptr otherwise
-  Maybe<ast::Variable*> variable_decl();
+  /// @returns the parsed variable declaration info
+  Maybe<VarDeclInfo> variable_decl();
   /// Parses a `variable_ident_decl` grammar element, erroring on parse
   /// failure.
   /// @param use a description of what was being parsed if an error was raised.

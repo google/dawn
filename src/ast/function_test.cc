@@ -15,7 +15,6 @@
 #include "src/ast/function.h"
 
 #include "src/ast/builtin_decoration.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
@@ -37,8 +36,9 @@ TEST_F(FunctionTest, Creation) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
   auto* var = params[0];
 
   Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
@@ -54,8 +54,9 @@ TEST_F(FunctionTest, Creation_WithSource) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   Function f(Source{Source::Location{20, 2}}, "func", params, &void_type,
              create<BlockStatement>(), FunctionDecorationList{});
@@ -68,7 +69,8 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   type::Void void_type;
   type::I32 i32;
 
-  Variable v(Source{}, "var", StorageClass::kInput, &i32);
+  Variable v(Source{}, "var", StorageClass::kInput, &i32, false, nullptr,
+             ast::VariableDecorationList{});
   Function f(Source{}, "func", VariableList{}, &void_type,
              create<BlockStatement>(), FunctionDecorationList{});
 
@@ -79,7 +81,8 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   f.add_referenced_module_variable(&v);
   ASSERT_EQ(f.referenced_module_variables().size(), 1u);
 
-  Variable v2(Source{}, "var2", StorageClass::kOutput, &i32);
+  Variable v2(Source{}, "var2", StorageClass::kOutput, &i32, false, nullptr,
+              ast::VariableDecorationList{});
   f.add_referenced_module_variable(&v2);
   ASSERT_EQ(f.referenced_module_variables().size(), 2u);
   EXPECT_EQ(f.referenced_module_variables()[1], &v2);
@@ -89,38 +92,44 @@ TEST_F(FunctionTest, GetReferenceLocations) {
   type::Void void_type;
   type::I32 i32;
 
-  DecoratedVariable loc1(
-      create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32));
-  loc1.set_decorations({create<LocationDecoration>(0, Source{})});
+  auto* loc1 = create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32,
+                                false, nullptr,
+                                ast::VariableDecorationList{
+                                    create<LocationDecoration>(0, Source{}),
+                                });
 
-  DecoratedVariable loc2(
-      create<Variable>(Source{}, "loc2", StorageClass::kInput, &i32));
-  loc2.set_decorations({create<LocationDecoration>(1, Source{})});
+  auto* loc2 = create<Variable>(Source{}, "loc2", StorageClass::kInput, &i32,
+                                false, nullptr,
+                                ast::VariableDecorationList{
+                                    create<LocationDecoration>(1, Source{}),
+                                });
 
-  DecoratedVariable builtin1(
-      create<Variable>(Source{}, "builtin1", StorageClass::kInput, &i32));
-  builtin1.set_decorations(
-      {create<BuiltinDecoration>(Builtin::kPosition, Source{})});
+  auto* builtin1 = create<Variable>(
+      Source{}, "builtin1", StorageClass::kInput, &i32, false, nullptr,
+      ast::VariableDecorationList{
+          create<BuiltinDecoration>(Builtin::kPosition, Source{}),
+      });
 
-  DecoratedVariable builtin2(
-      create<Variable>(Source{}, "builtin2", StorageClass::kInput, &i32));
-  builtin2.set_decorations(
-      {create<BuiltinDecoration>(Builtin::kFragDepth, Source{})});
+  auto* builtin2 = create<Variable>(
+      Source{}, "builtin2", StorageClass::kInput, &i32, false, nullptr,
+      ast::VariableDecorationList{
+          create<BuiltinDecoration>(Builtin::kFragDepth, Source{}),
+      });
 
   Function f(Source{}, "func", VariableList{}, &void_type,
              create<BlockStatement>(), FunctionDecorationList{});
 
-  f.add_referenced_module_variable(&loc1);
-  f.add_referenced_module_variable(&builtin1);
-  f.add_referenced_module_variable(&loc2);
-  f.add_referenced_module_variable(&builtin2);
+  f.add_referenced_module_variable(loc1);
+  f.add_referenced_module_variable(builtin1);
+  f.add_referenced_module_variable(loc2);
+  f.add_referenced_module_variable(builtin2);
   ASSERT_EQ(f.referenced_module_variables().size(), 4u);
 
   auto ref_locs = f.referenced_location_variables();
   ASSERT_EQ(ref_locs.size(), 2u);
-  EXPECT_EQ(ref_locs[0].first, &loc1);
+  EXPECT_EQ(ref_locs[0].first, loc1);
   EXPECT_EQ(ref_locs[0].second->value(), 0u);
-  EXPECT_EQ(ref_locs[1].first, &loc2);
+  EXPECT_EQ(ref_locs[1].first, loc2);
   EXPECT_EQ(ref_locs[1].second->value(), 1u);
 }
 
@@ -128,38 +137,44 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
   type::Void void_type;
   type::I32 i32;
 
-  DecoratedVariable loc1(
-      create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32));
-  loc1.set_decorations({create<LocationDecoration>(0, Source{})});
+  auto* loc1 = create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32,
+                                false, nullptr,
+                                ast::VariableDecorationList{
+                                    create<LocationDecoration>(0, Source{}),
+                                });
 
-  DecoratedVariable loc2(
-      create<Variable>(Source{}, "loc2", StorageClass::kInput, &i32));
-  loc2.set_decorations({create<LocationDecoration>(1, Source{})});
+  auto* loc2 = create<Variable>(Source{}, "loc2", StorageClass::kInput, &i32,
+                                false, nullptr,
+                                ast::VariableDecorationList{
+                                    create<LocationDecoration>(1, Source{}),
+                                });
 
-  DecoratedVariable builtin1(
-      create<Variable>(Source{}, "builtin1", StorageClass::kInput, &i32));
-  builtin1.set_decorations(
-      {create<BuiltinDecoration>(Builtin::kPosition, Source{})});
+  auto* builtin1 = create<Variable>(
+      Source{}, "builtin1", StorageClass::kInput, &i32, false, nullptr,
+      ast::VariableDecorationList{
+          create<BuiltinDecoration>(Builtin::kPosition, Source{}),
+      });
 
-  DecoratedVariable builtin2(
-      create<Variable>(Source{}, "builtin2", StorageClass::kInput, &i32));
-  builtin2.set_decorations(
-      {create<BuiltinDecoration>(Builtin::kFragDepth, Source{})});
+  auto* builtin2 = create<Variable>(
+      Source{}, "builtin2", StorageClass::kInput, &i32, false, nullptr,
+      ast::VariableDecorationList{
+          create<BuiltinDecoration>(Builtin::kFragDepth, Source{}),
+      });
 
   Function f(Source{}, "func", VariableList{}, &void_type,
              create<BlockStatement>(), FunctionDecorationList{});
 
-  f.add_referenced_module_variable(&loc1);
-  f.add_referenced_module_variable(&builtin1);
-  f.add_referenced_module_variable(&loc2);
-  f.add_referenced_module_variable(&builtin2);
+  f.add_referenced_module_variable(loc1);
+  f.add_referenced_module_variable(builtin1);
+  f.add_referenced_module_variable(loc2);
+  f.add_referenced_module_variable(builtin2);
   ASSERT_EQ(f.referenced_module_variables().size(), 4u);
 
   auto ref_locs = f.referenced_builtin_variables();
   ASSERT_EQ(ref_locs.size(), 2u);
-  EXPECT_EQ(ref_locs[0].first, &builtin1);
+  EXPECT_EQ(ref_locs[0].first, builtin1);
   EXPECT_EQ(ref_locs[0].second->value(), Builtin::kPosition);
-  EXPECT_EQ(ref_locs[1].first, &builtin2);
+  EXPECT_EQ(ref_locs[1].first, builtin2);
   EXPECT_EQ(ref_locs[1].second->value(), Builtin::kFragDepth);
 }
 
@@ -182,8 +197,9 @@ TEST_F(FunctionTest, IsValid) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
@@ -198,8 +214,9 @@ TEST_F(FunctionTest, IsValid_EmptyName) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   Function f(Source{}, "", params, &void_type, create<BlockStatement>(),
              FunctionDecorationList{});
@@ -210,8 +227,9 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   Function f(Source{}, "func", params, nullptr, create<BlockStatement>(),
              FunctionDecorationList{});
@@ -223,8 +241,9 @@ TEST_F(FunctionTest, IsValid_NullParam) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
   params.push_back(nullptr);
 
   Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
@@ -236,8 +255,9 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
   type::Void void_type;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, nullptr));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone,
+                                    nullptr, false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
              FunctionDecorationList{});
@@ -249,8 +269,9 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
@@ -267,8 +288,9 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
@@ -325,8 +347,9 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   type::I32 i32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var", StorageClass::kNone, &i32));
+  params.push_back(create<Variable>(Source{}, "var", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
@@ -364,10 +387,12 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   type::F32 f32;
 
   VariableList params;
-  params.push_back(
-      create<Variable>(Source{}, "var1", StorageClass::kNone, &i32));
-  params.push_back(
-      create<Variable>(Source{}, "var2", StorageClass::kNone, &f32));
+  params.push_back(create<Variable>(Source{}, "var1", StorageClass::kNone, &i32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
+  params.push_back(create<Variable>(Source{}, "var2", StorageClass::kNone, &f32,
+                                    false, nullptr,
+                                    ast::VariableDecorationList{}));
 
   Function f(Source{}, "func", params, &void_type, create<BlockStatement>(),
              FunctionDecorationList{});

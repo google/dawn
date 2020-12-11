@@ -27,7 +27,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/decorated_variable.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
@@ -56,6 +56,7 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
@@ -1035,12 +1036,9 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
 }
 
 bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
-  if (auto* decorated = var->As<ast::DecoratedVariable>()) {
-    if (decorated->HasLocationDecoration() ||
-        decorated->HasBuiltinDecoration()) {
-      return var->storage_class() == ast::StorageClass::kInput ||
-             var->storage_class() == ast::StorageClass::kOutput;
-    }
+  if (var->HasLocationDecoration() || var->HasBuiltinDecoration()) {
+    return var->storage_class() == ast::StorageClass::kInput ||
+           var->storage_class() == ast::StorageClass::kOutput;
   }
   return false;
 }
@@ -2237,7 +2235,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   make_indent(out);
 
   // TODO(dsinclair): Handle variable decorations
-  if (var->Is<ast::DecoratedVariable>()) {
+  if (!var->decorations().empty()) {
     error_ = "Variable decorations are not handled yet";
     return false;
   }
@@ -2271,10 +2269,11 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
                                              const ast::Variable* var) {
   make_indent(out);
 
-  auto* decorated = var->As<ast::DecoratedVariable>();
-  if (decorated != nullptr && !decorated->HasConstantIdDecoration()) {
-    error_ = "Decorated const values not valid";
-    return false;
+  for (auto* d : var->decorations()) {
+    if (!d->Is<ast::ConstantIdDecoration>()) {
+      error_ = "Decorated const values not valid";
+      return false;
+    }
   }
   if (!var->is_const()) {
     error_ = "Expected a const value";
@@ -2290,8 +2289,8 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     out << pre.str();
   }
 
-  if (decorated != nullptr && decorated->HasConstantIdDecoration()) {
-    auto const_id = decorated->constant_id();
+  if (var->HasConstantIdDecoration()) {
+    auto const_id = var->constant_id();
 
     out << "#ifndef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
 

@@ -103,11 +103,29 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
       });
 
   auto* v_in =
-      create<ast::Variable>(Source{}, "my_in", ast::StorageClass::kInput, &f32);
-  auto* v_out = create<ast::Variable>(Source{}, "my_out",
-                                      ast::StorageClass::kOutput, &f32);
-  auto* v_wg = create<ast::Variable>(Source{}, "my_wg",
-                                     ast::StorageClass::kWorkgroup, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "my_in",                         // name
+                            ast::StorageClass::kInput,       // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* v_out =
+      create<ast::Variable>(Source{},                        // source
+                            "my_out",                        // name
+                            ast::StorageClass::kOutput,      // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* v_wg =
+      create<ast::Variable>(Source{},                        // source
+                            "my_wg",                         // name
+                            ast::StorageClass::kWorkgroup,   // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
@@ -162,11 +180,29 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
       });
 
   auto* v_in =
-      create<ast::Variable>(Source{}, "my_in", ast::StorageClass::kInput, &f32);
-  auto* v_out = create<ast::Variable>(Source{}, "my_out",
-                                      ast::StorageClass::kOutput, &f32);
-  auto* v_wg = create<ast::Variable>(Source{}, "my_wg",
-                                     ast::StorageClass::kWorkgroup, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "my_in",                         // name
+                            ast::StorageClass::kInput,       // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* v_out =
+      create<ast::Variable>(Source{},                        // source
+                            "my_out",                        // name
+                            ast::StorageClass::kOutput,      // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* v_wg =
+      create<ast::Variable>(Source{},                        // source
+                            "my_wg",                         // name
+                            ast::StorageClass::kWorkgroup,   // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   td.RegisterVariableForTesting(v_in);
   td.RegisterVariableForTesting(v_out);

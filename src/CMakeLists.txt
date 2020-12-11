@@ -80,8 +80,6 @@ set(TINT_LIB_SRCS
   ast/constructor_expression.h
   ast/continue_statement.cc
   ast/continue_statement.h
-  ast/decorated_variable.cc
-  ast/decorated_variable.h
   ast/decoration.cc
   ast/decoration.h
   ast/discard_statement.cc
@@ -403,7 +401,6 @@ if(${TINT_BUILD_TESTS})
     ast/continue_statement_test.cc
     ast/discard_statement_test.cc
     ast/decoration_test.cc
-    ast/decorated_variable_test.cc
     ast/else_statement_test.cc
     ast/expression_test.cc
     ast/fallthrough_statement_test.cc

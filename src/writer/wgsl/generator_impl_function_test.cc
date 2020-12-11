@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/member_accessor_expression.h"
@@ -69,9 +68,21 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   ast::type::I32 i32;
   ast::VariableList params;
   params.push_back(
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32));
+      create<ast::Variable>(Source{},                         // source
+                            "a",                              // name
+                            ast::StorageClass::kNone,         // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
   params.push_back(
-      create<ast::Variable>(Source{}, "b", ast::StorageClass::kNone, &i32));
+      create<ast::Variable>(Source{},                         // source
+                            "b",                              // name
+                            ast::StorageClass::kNone,         // storage_class
+                            &i32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
 
   ast::type::Void void_type;
   ast::Function func(Source{}, "my_func", params, &void_type, body,
@@ -191,13 +202,18 @@ TEST_F(WgslGeneratorImplTest,
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
-  auto* data_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &ac));
-
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::BindingDecoration>(0, Source{}));
-  decos.push_back(create<ast::SetDecoration>(0, Source{}));
-  data_var->set_decorations(decos);
+  auto* data_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &ac,                                // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::BindingDecoration>(0, Source{}),
+                                create<ast::SetDecoration>(0, Source{}),
+                            });
 
   mod.AddConstructedType(&s);
 
@@ -206,11 +222,16 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>(Source{}, "v",
-                                      ast::StorageClass::kFunction, &f32);
-    var->set_constructor(create<ast::MemberAccessorExpression>(
-        create<ast::IdentifierExpression>("data"),
-        create<ast::IdentifierExpression>("d")));
+    auto* var = create<ast::Variable>(
+        Source{},                      // source
+        "v",                           // name
+        ast::StorageClass::kFunction,  // storage_class
+        &f32,                          // type
+        false,                         // is_const
+        create<ast::MemberAccessorExpression>(
+            create<ast::IdentifierExpression>("data"),
+            create<ast::IdentifierExpression>("d")),  // constructor
+        ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));
@@ -228,11 +249,16 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     ast::VariableList params;
-    auto* var = create<ast::Variable>(Source{}, "v",
-                                      ast::StorageClass::kFunction, &f32);
-    var->set_constructor(create<ast::MemberAccessorExpression>(
-        create<ast::IdentifierExpression>("data"),
-        create<ast::IdentifierExpression>("d")));
+    auto* var = create<ast::Variable>(
+        Source{},                      // source
+        "v",                           // name
+        ast::StorageClass::kFunction,  // storage_class
+        &f32,                          // type
+        false,                         // is_const
+        create<ast::MemberAccessorExpression>(
+            create<ast::IdentifierExpression>("data"),
+            create<ast::IdentifierExpression>("d")),  // constructor
+        ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::VariableDeclStatement>(var));

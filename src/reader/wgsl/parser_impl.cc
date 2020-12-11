@@ -28,7 +28,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
@@ -67,6 +66,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/lexer.h"
@@ -419,25 +419,25 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
   if (!decl.matched)
     return Failure::kNoMatch;
 
-  auto* var = decl.value;
-
   auto var_decos = cast_decorations<ast::VariableDecoration>(decos);
   if (var_decos.errored)
     return Failure::kErrored;
 
-  if (var_decos.value.size() > 0) {
-    auto* dv = create<ast::DecoratedVariable>(var);
-    dv->set_decorations(var_decos.value);
-    var = dv;
-  }
-
+  ast::Expression* constructor = nullptr;
   if (match(Token::Type::kEqual)) {
     auto expr = expect_const_expr();
     if (expr.errored)
       return Failure::kErrored;
-    var->set_constructor(expr.value);
+    constructor = expr.value;
   }
-  return var;
+
+  return create<ast::Variable>(decl->source,                 // source
+                               decl->name,                   // name
+                               decl->storage_class,          // storage_class
+                               decl->type,                   // type
+                               false,                        // is_const
+                               constructor,                  // constructor
+                               std::move(var_decos.value));  // decorations
 }
 
 // global_constant_decl
@@ -452,10 +452,6 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  auto* var = create<ast::Variable>(decl->source, decl->name,
-                                    ast::StorageClass::kNone, decl->type);
-  var->set_is_const(true);
-
   if (!expect(use, Token::Type::kEqual))
     return Failure::kErrored;
 
@@ -463,14 +459,18 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
   if (init.errored)
     return Failure::kErrored;
 
-  var->set_constructor(init.value);
-
-  return var;
+  return create<ast::Variable>(decl->source,                    // source
+                               decl->name,                      // name
+                               ast::StorageClass::kNone,        // storage_class
+                               decl->type,                      // type
+                               true,                            // is_const
+                               init.value,                      // constructor
+                               ast::VariableDecorationList{});  // decorations
 }
 
 // variable_decl
 //   : VAR variable_storage_decoration? variable_ident_decl
-Maybe<ast::Variable*> ParserImpl::variable_decl() {
+Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
   if (!match(Token::Type::kVar))
     return Failure::kNoMatch;
 
@@ -482,9 +482,9 @@ Maybe<ast::Variable*> ParserImpl::variable_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  return create<ast::Variable>(decl->source, decl->name,
-                               sc.matched ? sc.value : ast::StorageClass::kNone,
-                               decl->type);
+  return VarDeclInfo{decl->source, decl->name,
+                     sc.matched ? sc.value : ast::StorageClass::kNone,
+                     decl->type};
 }
 
 // texture_sampler_types
@@ -1349,13 +1349,18 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
 
   ast::VariableList ret;
   for (;;) {
-    auto* var = create<ast::Variable>(decl->source, decl->name,
-                                      ast::StorageClass::kNone, decl->type);
+    auto* var =
+        create<ast::Variable>(decl->source,                    // source
+                              decl->name,                      // name
+                              ast::StorageClass::kNone,        // storage_class
+                              decl->type,                      // type
+                              true,                            // is_const
+                              nullptr,                         // constructor
+                              ast::VariableDecorationList{});  // decorations
     // Formal parameters are treated like a const declaration where the
     // initializer value is provided by the call's argument.  The key point is
     // that it's not updatable after intially set.  This is unlike C or GLSL
     // which treat formal parameters like local variables that can be updated.
-    var->set_is_const(true);
     ret.push_back(var);
 
     if (!match(Token::Type::kComma))
@@ -1610,31 +1615,45 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
     if (!constructor.matched)
       return add_error(peek(), "missing constructor for const declaration");
 
-    auto* var = create<ast::Variable>(decl->source, decl->name,
-                                      ast::StorageClass::kNone, decl->type);
-    var->set_is_const(true);
-    var->set_constructor(constructor.value);
+    auto* var =
+        create<ast::Variable>(decl->source,                    // source
+                              decl->name,                      // name
+                              ast::StorageClass::kNone,        // storage_class
+                              decl->type,                      // type
+                              true,                            // is_const
+                              constructor.value,               // constructor
+                              ast::VariableDecorationList{});  // decorations
 
     return create<ast::VariableDeclStatement>(decl->source, var);
   }
 
-  auto var = variable_decl();
-  if (var.errored)
+  auto decl = variable_decl();
+  if (decl.errored)
     return Failure::kErrored;
-  if (!var.matched)
+  if (!decl.matched)
     return Failure::kNoMatch;
 
+  ast::Expression* constructor = nullptr;
   if (match(Token::Type::kEqual)) {
-    auto constructor = logical_or_expression();
-    if (constructor.errored)
+    auto constructor_expr = logical_or_expression();
+    if (constructor_expr.errored)
       return Failure::kErrored;
-    if (!constructor.matched)
+    if (!constructor_expr.matched)
       return add_error(peek(), "missing constructor for variable declaration");
 
-    var->set_constructor(constructor.value);
+    constructor = constructor_expr.value;
   }
 
-  return create<ast::VariableDeclStatement>(var->source(), var.value);
+  auto* var =
+      create<ast::Variable>(decl->source,                    // source
+                            decl->name,                      // name
+                            decl->storage_class,             // storage_class
+                            decl->type,                      // type
+                            false,                           // is_const
+                            constructor,                     // constructor
+                            ast::VariableDecorationList{});  // decorations
+
+  return create<ast::VariableDeclStatement>(var->source(), var);
 }
 
 // if_stmt

@@ -18,10 +18,10 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"
@@ -35,7 +35,8 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
   ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32);
+  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
+                  ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var a : f32;
@@ -44,7 +45,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
   ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kInput, &f32);
+  ast::Variable v(Source{}, "a", ast::StorageClass::kInput, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var<in> a : f32;
@@ -54,15 +56,12 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
   ast::type::F32 f32;
 
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::LocationDecoration>(2, Source{}));
+  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
+                  ast::VariableDecorationList{
+                      create<ast::LocationDecoration>(2, Source{}),
+                  });
 
-  ast::DecoratedVariable dv;
-  dv.set_name("a");
-  dv.set_type(&f32);
-  dv.set_decorations(decos);
-
-  ASSERT_TRUE(gen.EmitVariable(&dv)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[location(2)]] var a : f32;
 )");
 }
@@ -70,20 +69,17 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ast::type::F32 f32;
 
-  ast::VariableDecorationList decos;
-  decos.push_back(
-      create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
-  decos.push_back(create<ast::BindingDecoration>(0, Source{}));
-  decos.push_back(create<ast::SetDecoration>(1, Source{}));
-  decos.push_back(create<ast::LocationDecoration>(2, Source{}));
-  decos.push_back(create<ast::ConstantIdDecoration>(42, Source{}));
+  ast::Variable v(
+      Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
+      ast::VariableDecorationList{
+          create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}),
+          create<ast::BindingDecoration>(0, Source{}),
+          create<ast::SetDecoration>(1, Source{}),
+          create<ast::LocationDecoration>(2, Source{}),
+          create<ast::ConstantIdDecoration>(42, Source{}),
+      });
 
-  ast::DecoratedVariable dv;
-  dv.set_name("a");
-  dv.set_type(&f32);
-  dv.set_decorations(decos);
-
-  ASSERT_TRUE(gen.EmitVariable(&dv)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
   EXPECT_EQ(
       gen.result(),
       R"([[builtin(position), binding(0), set(1), location(2), constant_id(42)]] var a : f32;
@@ -94,8 +90,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   auto* ident = create<ast::IdentifierExpression>("initializer");
 
   ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32);
-  v.set_constructor(ident);
+  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, ident,
+                  ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var a : f32 = initializer;
@@ -106,9 +102,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   auto* ident = create<ast::IdentifierExpression>("initializer");
 
   ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32);
-  v.set_constructor(ident);
-  v.set_is_const(true);
+  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, true, ident,
+                  ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(const a : f32 = initializer;

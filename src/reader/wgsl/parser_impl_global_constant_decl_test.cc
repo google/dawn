@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"

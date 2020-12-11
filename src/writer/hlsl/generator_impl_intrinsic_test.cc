@@ -76,9 +76,21 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* a =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &vec2);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec2,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* b =
-      create<ast::Variable>(Source{}, "b", ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "b",                             // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("a"));
@@ -115,8 +127,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
 
   ast::CallExpression call(create<ast::IdentifierExpression>("dot"), params);
 
-  ast::Variable v1(Source{}, "param1", ast::StorageClass::kFunction, &vec);
-  ast::Variable v2(Source{}, "param2", ast::StorageClass::kFunction, &vec);
+  ast::Variable v1(Source{}, "param1", ast::StorageClass::kFunction, &vec,
+                   false, nullptr, ast::VariableDecorationList{});
+  ast::Variable v2(Source{}, "param2", ast::StorageClass::kFunction, &vec,
+                   false, nullptr, ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&v1);
   td.RegisterVariableForTesting(&v2);

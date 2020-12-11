@@ -268,8 +268,14 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   ast::type::F32 f32;
   ast::type::Matrix mat(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "var",
-                                    ast::StorageClass::kFunction, &mat);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "var",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>("var"));

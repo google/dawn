@@ -83,7 +83,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
       << diag::Formatter().format(result.diagnostics);
 
   auto* expected = R"(Module{
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{pointsize}
     }
@@ -148,7 +148,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
       << diag::Formatter().format(result.diagnostics);
 
   auto* expected = R"(Module{
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{pointsize}
     }

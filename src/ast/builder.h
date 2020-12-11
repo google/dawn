@@ -428,7 +428,8 @@ class Builder {
   /// @param name the variable name
   /// @param storage the variable storage class
   /// @param type the variable type
-  /// @returns a `Variable` with the given name, storage and type
+  /// @returns a `Variable` with the given name, storage and type. The variable
+  /// will be built with a nullptr constructor and no decorations.
   Variable* Var(const std::string& name,
                 StorageClass storage,
                 type::Type* type);
@@ -436,10 +437,35 @@ class Builder {
   /// @param name the variable name
   /// @param storage the variable storage class
   /// @param type the variable type
-  /// @returns a constant `Variable` with the given name, storage and type
+  /// @param constructor constructor expression
+  /// @param decorations variable decorations
+  /// @returns a `Variable` with the given name, storage and type
+  Variable* Var(const std::string& name,
+                StorageClass storage,
+                type::Type* type,
+                Expression* constructor,
+                VariableDecorationList decorations);
+
+  /// @param name the variable name
+  /// @param storage the variable storage class
+  /// @param type the variable type
+  /// @returns a constant `Variable` with the given name, storage and type. The
+  /// variable will be built with a nullptr constructor and no decorations.
   Variable* Const(const std::string& name,
                   StorageClass storage,
                   type::Type* type);
+
+  /// @param name the variable name
+  /// @param storage the variable storage class
+  /// @param type the variable type
+  /// @param constructor optional constructor expression
+  /// @param decorations optional variable decorations
+  /// @returns a constant `Variable` with the given name, storage and type
+  Variable* Const(const std::string& name,
+                  StorageClass storage,
+                  type::Type* type,
+                  Expression* constructor,
+                  VariableDecorationList decorations);
 
   /// @param func the function name
   /// @param args the function call arguments

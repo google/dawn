@@ -53,9 +53,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(init);
-  v.set_is_const(true);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, true, init,
+                  ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&v);
 
@@ -77,7 +76,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
   ast::type::F32 f32;
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&v);
 
@@ -112,9 +112,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(init);
-  v.set_is_const(true);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, true, init,
+                  ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v);
 
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
@@ -134,7 +133,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
   ast::type::F32 f32;
-  ast::Variable v(Source{}, "var", ast::StorageClass::kNone, &f32);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kNone, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&v);
 
@@ -160,7 +160,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 TEST_F(BuilderTest, IdentifierExpression_Load) {
   ast::type::I32 i32;
 
-  ast::Variable var(Source{}, "var", ast::StorageClass::kPrivate, &i32);
+  ast::Variable var(Source{}, "var", ast::StorageClass::kPrivate, &i32, false,
+                    nullptr, ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&var);
 
@@ -190,10 +191,10 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
   ast::type::I32 i32;
 
-  ast::Variable var(Source{}, "var", ast::StorageClass::kNone, &i32);
-  var.set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
-  var.set_is_const(true);
+  ast::Variable var(Source{}, "var", ast::StorageClass::kNone, &i32, true,
+                    create<ast::ScalarConstructorExpression>(
+                        create<ast::SintLiteral>(&i32, 2)),
+                    ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&var);
 

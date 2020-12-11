@@ -390,10 +390,15 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "my_var",                  // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
   auto* init = var->constructor();
 
   ast::VariableDeclStatement decl(var);
@@ -405,10 +410,15 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "my_var",                  // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
   auto* init = var->constructor();
 
   mod->AddGlobalVariable(var);
@@ -433,8 +443,14 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
-  auto* var = create<ast::Variable>(Source{}, "my_var",
-                                    ast::StorageClass::kFunction, &ary);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &ary,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -458,8 +474,14 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
 
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
-  auto* var = create<ast::Variable>(Source{}, "my_var",
-                                    ast::StorageClass::kFunction, &aary);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &aary,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -482,9 +504,14 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
 
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
-  auto* var = create<ast::Variable>(Source{}, "my_var",
-                                    ast::StorageClass::kFunction, &ary);
-  var->set_is_const(true);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &ary,                            // type
+                            true,                            // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -506,7 +533,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &mat);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -533,7 +566,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   auto* idx2 = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &mat);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -560,7 +599,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &vec);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -581,7 +626,8 @@ TEST_F(TypeDeterminerTest, Expr_Bitcast) {
   ast::BitcastExpression bitcast(&f32,
                                  create<ast::IdentifierExpression>("name"));
 
-  ast::Variable v(Source{}, "name", ast::StorageClass::kPrivate, &f32);
+  ast::Variable v(Source{}, "name", ast::StorageClass::kPrivate, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
   td()->RegisterVariableForTesting(&v);
 
   EXPECT_TRUE(td()->DetermineResultType(&bitcast));
@@ -659,7 +705,8 @@ TEST_F(TypeDeterminerTest, Expr_Cast) {
   params.push_back(create<ast::IdentifierExpression>("name"));
   ast::TypeConstructorExpression cast(&f32, params);
 
-  ast::Variable v(Source{}, "name", ast::StorageClass::kPrivate, &f32);
+  ast::Variable v(Source{}, "name", ast::StorageClass::kPrivate, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
   td()->RegisterVariableForTesting(&v);
 
   EXPECT_TRUE(td()->DetermineResultType(&cast));
@@ -701,7 +748,13 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   ast::type::F32 f32;
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -719,10 +772,14 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
   ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &f32);
-  var->set_is_const(true);
-  mod->AddGlobalVariable(var);
+  mod->AddGlobalVariable(
+      create<ast::Variable>(Source{},                         // source
+                            "my_var",                         // name
+                            ast::StorageClass::kNone,         // storage_class
+                            &f32,                             // type
+                            true,                             // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
 
   // Register the global
   EXPECT_TRUE(td()->Determine());
@@ -739,8 +796,13 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   auto* my_var = create<ast::IdentifierExpression>("my_var");
 
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &f32);
-  var->set_is_const(true);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            true,                            // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
@@ -762,8 +824,14 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   auto* my_var = create<ast::IdentifierExpression>("my_var");
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
-      Source{}, "my_var", ast::StorageClass::kNone, &f32)));
+  body->append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>(Source{},                          // source
+                            "my_var",                          // name
+                            ast::StorageClass::kNone,          // storage_class
+                            &f32,                              // type
+                            false,                             // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{})));  // decorations
 
   body->append(create<ast::AssignmentStatement>(
       my_var, create<ast::IdentifierExpression>("my_var")));
@@ -788,8 +856,14 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   auto* my_var = create<ast::IdentifierExpression>("my_var");
 
   auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
-      Source{}, "my_var", ast::StorageClass::kNone, &ptr)));
+  body->append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>(Source{},                          // source
+                            "my_var",                          // name
+                            ast::StorageClass::kNone,          // storage_class
+                            &ptr,                              // type
+                            false,                             // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{})));  // decorations
 
   body->append(create<ast::AssignmentStatement>(
       my_var, create<ast::IdentifierExpression>("my_var")));
@@ -833,16 +907,46 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   ast::type::F32 f32;
 
-  auto* in_var = create<ast::Variable>(Source{}, "in_var",
-                                       ast::StorageClass::kInput, &f32);
-  auto* out_var = create<ast::Variable>(Source{}, "out_var",
-                                        ast::StorageClass::kOutput, &f32);
-  auto* sb_var = create<ast::Variable>(Source{}, "sb_var",
-                                       ast::StorageClass::kStorageBuffer, &f32);
-  auto* wg_var = create<ast::Variable>(Source{}, "wg_var",
-                                       ast::StorageClass::kWorkgroup, &f32);
-  auto* priv_var = create<ast::Variable>(Source{}, "priv_var",
-                                         ast::StorageClass::kPrivate, &f32);
+  auto* in_var =
+      create<ast::Variable>(Source{},                        // source
+                            "in_var",                        // name
+                            ast::StorageClass::kInput,       // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* out_var =
+      create<ast::Variable>(Source{},                        // source
+                            "out_var",                       // name
+                            ast::StorageClass::kOutput,      // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* sb_var =
+      create<ast::Variable>(Source{},                           // source
+                            "sb_var",                           // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &f32,                               // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
+  auto* wg_var =
+      create<ast::Variable>(Source{},                        // source
+                            "wg_var",                        // name
+                            ast::StorageClass::kWorkgroup,   // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* priv_var =
+      create<ast::Variable>(Source{},                        // source
+                            "priv_var",                      // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   mod->AddGlobalVariable(in_var);
   mod->AddGlobalVariable(out_var);
@@ -884,16 +988,46 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   ast::type::F32 f32;
 
-  auto* in_var = create<ast::Variable>(Source{}, "in_var",
-                                       ast::StorageClass::kInput, &f32);
-  auto* out_var = create<ast::Variable>(Source{}, "out_var",
-                                        ast::StorageClass::kOutput, &f32);
-  auto* sb_var = create<ast::Variable>(Source{}, "sb_var",
-                                       ast::StorageClass::kStorageBuffer, &f32);
-  auto* wg_var = create<ast::Variable>(Source{}, "wg_var",
-                                       ast::StorageClass::kWorkgroup, &f32);
-  auto* priv_var = create<ast::Variable>(Source{}, "priv_var",
-                                         ast::StorageClass::kPrivate, &f32);
+  auto* in_var =
+      create<ast::Variable>(Source{},                        // source
+                            "in_var",                        // name
+                            ast::StorageClass::kInput,       // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* out_var =
+      create<ast::Variable>(Source{},                        // source
+                            "out_var",                       // name
+                            ast::StorageClass::kOutput,      // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* sb_var =
+      create<ast::Variable>(Source{},                           // source
+                            "sb_var",                           // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &f32,                               // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
+  auto* wg_var =
+      create<ast::Variable>(Source{},                        // source
+                            "wg_var",                        // name
+                            ast::StorageClass::kWorkgroup,   // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* priv_var =
+      create<ast::Variable>(Source{},                        // source
+                            "priv_var",                      // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   mod->AddGlobalVariable(in_var);
   mod->AddGlobalVariable(out_var);
@@ -945,8 +1079,14 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
 TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   ast::type::F32 f32;
 
-  auto* var = create<ast::Variable>(Source{}, "in_var",
-                                    ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "in_var",                        // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
@@ -961,7 +1101,8 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
 
   mod->AddFunction(func);
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kFunction, &f32);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kFunction, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
   td()->RegisterVariableForTesting(&v);
 
   // Register the function
@@ -983,8 +1124,14 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
 
   ast::type::Struct st("S", strct);
 
-  auto* var = create<ast::Variable>(Source{}, "my_struct",
-                                    ast::StorageClass::kNone, &st);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_struct",                     // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &st,                             // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   mod->AddGlobalVariable(var);
 
@@ -1017,8 +1164,14 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   auto st = std::make_unique<ast::type::Struct>("alias", strct);
   ast::type::Alias alias("alias", st.get());
 
-  auto* var = create<ast::Variable>(Source{}, "my_struct",
-                                    ast::StorageClass::kNone, &alias);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_struct",                     // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &alias,                          // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   mod->AddGlobalVariable(var);
 
@@ -1041,8 +1194,14 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "my_vec",
-                                    ast::StorageClass::kNone, &vec3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_vec",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1064,8 +1223,14 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "my_vec",
-                                    ast::StorageClass::kNone, &vec3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_vec",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1130,7 +1295,13 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   ast::type::Struct stA("A", strctA);
 
   auto* var =
-      create<ast::Variable>(Source{}, "c", ast::StorageClass::kNone, &stA);
+      create<ast::Variable>(Source{},                        // source
+                            "c",                             // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &stA,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1165,7 +1336,13 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   ast::type::I32 i32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "val", ast::StorageClass::kNone, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "val",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1186,7 +1363,13 @@ TEST_P(Expr_Binary_BitwiseTest, Vector) {
   ast::type::Vector vec3(&i32, 3);
 
   auto* var =
-      create<ast::Variable>(Source{}, "val", ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "val",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1222,8 +1405,14 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
 
   ast::type::Bool bool_type;
 
-  auto* var = create<ast::Variable>(Source{}, "val", ast::StorageClass::kNone,
-                                    &bool_type);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "val",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &bool_type,                      // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1244,7 +1433,13 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
   ast::type::Vector vec3(&bool_type, 3);
 
   auto* var =
-      create<ast::Variable>(Source{}, "val", ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "val",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1274,7 +1469,13 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
   ast::type::I32 i32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "val", ast::StorageClass::kNone, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "val",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1295,7 +1496,13 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
   ast::type::Vector vec3(&i32, 3);
 
   auto* var =
-      create<ast::Variable>(Source{}, "val", ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "val",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1326,7 +1533,13 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
   ast::type::I32 i32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "val", ast::StorageClass::kNone, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "val",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1346,9 +1559,21 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* scalar =
-      create<ast::Variable>(Source{}, "scalar", ast::StorageClass::kNone, &f32);
-  auto* vector = create<ast::Variable>(Source{}, "vector",
-                                       ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "scalar",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* vector =
+      create<ast::Variable>(Source{},                        // source
+                            "vector",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(scalar);
   mod->AddGlobalVariable(vector);
 
@@ -1374,9 +1599,21 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* scalar =
-      create<ast::Variable>(Source{}, "scalar", ast::StorageClass::kNone, &f32);
-  auto* vector = create<ast::Variable>(Source{}, "vector",
-                                       ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "scalar",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* vector =
+      create<ast::Variable>(Source{},                        // source
+                            "vector",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(scalar);
   mod->AddGlobalVariable(vector);
 
@@ -1401,8 +1638,14 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
 
-  auto* vector = create<ast::Variable>(Source{}, "vector",
-                                       ast::StorageClass::kNone, &vec3);
+  auto* vector =
+      create<ast::Variable>(Source{},                        // source
+                            "vector",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(vector);
 
   // Register the global
@@ -1427,9 +1670,21 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
   ast::type::Matrix mat3x2(&f32, 3, 2);
 
   auto* scalar =
-      create<ast::Variable>(Source{}, "scalar", ast::StorageClass::kNone, &f32);
-  auto* matrix = create<ast::Variable>(Source{}, "matrix",
-                                       ast::StorageClass::kNone, &mat3x2);
+      create<ast::Variable>(Source{},                        // source
+                            "scalar",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* matrix =
+      create<ast::Variable>(Source{},                        // source
+                            "matrix",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat3x2,                         // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(scalar);
   mod->AddGlobalVariable(matrix);
 
@@ -1455,9 +1710,21 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
   ast::type::Matrix mat3x2(&f32, 3, 2);
 
   auto* scalar =
-      create<ast::Variable>(Source{}, "scalar", ast::StorageClass::kNone, &f32);
-  auto* matrix = create<ast::Variable>(Source{}, "matrix",
-                                       ast::StorageClass::kNone, &mat3x2);
+      create<ast::Variable>(Source{},                        // source
+                            "scalar",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* matrix =
+      create<ast::Variable>(Source{},                        // source
+                            "matrix",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat3x2,                         // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(scalar);
   mod->AddGlobalVariable(matrix);
 
@@ -1483,10 +1750,22 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
   ast::type::Vector vec3(&f32, 2);
   ast::type::Matrix mat3x2(&f32, 3, 2);
 
-  auto* vector = create<ast::Variable>(Source{}, "vector",
-                                       ast::StorageClass::kNone, &vec3);
-  auto* matrix = create<ast::Variable>(Source{}, "matrix",
-                                       ast::StorageClass::kNone, &mat3x2);
+  auto* vector =
+      create<ast::Variable>(Source{},                        // source
+                            "vector",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* matrix =
+      create<ast::Variable>(Source{},                        // source
+                            "matrix",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat3x2,                         // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(vector);
   mod->AddGlobalVariable(matrix);
 
@@ -1512,10 +1791,22 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Matrix mat3x2(&f32, 3, 2);
 
-  auto* vector = create<ast::Variable>(Source{}, "vector",
-                                       ast::StorageClass::kNone, &vec3);
-  auto* matrix = create<ast::Variable>(Source{}, "matrix",
-                                       ast::StorageClass::kNone, &mat3x2);
+  auto* vector =
+      create<ast::Variable>(Source{},                        // source
+                            "vector",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* matrix =
+      create<ast::Variable>(Source{},                        // source
+                            "matrix",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat3x2,                         // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(vector);
   mod->AddGlobalVariable(matrix);
 
@@ -1541,10 +1832,22 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   ast::type::Matrix mat4x3(&f32, 4, 3);
   ast::type::Matrix mat3x4(&f32, 3, 4);
 
-  auto* matrix1 = create<ast::Variable>(Source{}, "mat4x3",
-                                        ast::StorageClass::kNone, &mat4x3);
-  auto* matrix2 = create<ast::Variable>(Source{}, "mat3x4",
-                                        ast::StorageClass::kNone, &mat3x4);
+  auto* matrix1 =
+      create<ast::Variable>(Source{},                        // source
+                            "mat4x3",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat4x3,                         // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* matrix2 =
+      create<ast::Variable>(Source{},                        // source
+                            "mat3x4",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &mat3x4,                         // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(matrix1);
   mod->AddGlobalVariable(matrix2);
 
@@ -1572,7 +1875,13 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
   ast::type::F32 f32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "ident", ast::StorageClass::kNone, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "ident",                         // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1596,7 +1905,13 @@ TEST_P(IntrinsicDerivativeTest, Vector) {
   ast::type::Vector vec4(&f32, 4);
 
   auto* var =
-      create<ast::Variable>(Source{}, "ident", ast::StorageClass::kNone, &vec4);
+      create<ast::Variable>(Source{},                        // source
+                            "ident",                         // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec4,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -1640,10 +1955,22 @@ TEST_P(IntrinsicDerivativeTest, ToomManyParams) {
   ast::type::F32 f32;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* var1 = create<ast::Variable>(Source{}, "ident1",
-                                     ast::StorageClass::kNone, &vec4);
-  auto* var2 = create<ast::Variable>(Source{}, "ident2",
-                                     ast::StorageClass::kNone, &vec4);
+  auto* var1 =
+      create<ast::Variable>(Source{},                        // source
+                            "ident1",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec4,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* var2 =
+      create<ast::Variable>(Source{},                        // source
+                            "ident2",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec4,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var1);
   mod->AddGlobalVariable(var2);
 
@@ -1678,8 +2005,14 @@ TEST_P(Intrinsic, Test) {
   ast::type::Bool bool_type;
   ast::type::Vector vec3(&bool_type, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "my_var",
-                                    ast::StorageClass::kNone, &vec3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -1706,8 +2039,14 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "my_var",
-                                    ast::StorageClass::kNone, &vec3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -1735,7 +2074,13 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
   ast::type::F32 f32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -1757,7 +2102,13 @@ TEST_P(Intrinsic_FloatMethod, MissingParam) {
   ast::type::F32 f32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -1776,7 +2127,13 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
   ast::type::F32 f32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "my_var", ast::StorageClass::kNone, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -1846,7 +2203,13 @@ class Intrinsic_TextureOperation
                       ast::type::Type* type,
                       ast::ExpressionList* call_params) {
     auto* var =
-        create<ast::Variable>(Source{}, name, ast::StorageClass::kNone, type);
+        create<ast::Variable>(Source{},                        // source
+                              name,                            // name
+                              ast::StorageClass::kNone,        // storage_class
+                              type,                            // type
+                              false,                           // is_const
+                              nullptr,                         // constructor
+                              ast::VariableDecorationList{});  // decorations
     mod->AddGlobalVariable(var);
     call_params->push_back(create<ast::IdentifierExpression>(name));
   }
@@ -1998,8 +2361,14 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   ast::type::F32 f32;
   ast::type::Vector vec3(&f32, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "my_var",
-                                    ast::StorageClass::kNone, &vec3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -2022,10 +2391,22 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Vector bool_vec3(&bool_type, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "my_var",
-                                    ast::StorageClass::kNone, &vec3);
-  auto* bool_var = create<ast::Variable>(Source{}, "bool_var",
-                                         ast::StorageClass::kNone, &bool_vec3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "my_var",                        // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* bool_var =
+      create<ast::Variable>(Source{},                        // source
+                            "bool_var",                      // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &bool_vec3,                      // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
   mod->AddGlobalVariable(bool_var);
 
@@ -2054,7 +2435,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_TooFewParams) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* var =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -2075,7 +2462,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_TooManyParams) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* var =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
@@ -2100,9 +2493,21 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
   ast::type::Vector vec2(&f32, 2);
 
   auto* var1 =
-      create<ast::Variable>(Source{}, "v3", ast::StorageClass::kNone, &vec3);
+      create<ast::Variable>(Source{},                        // source
+                            "v3",                            // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* var2 =
-      create<ast::Variable>(Source{}, "v2", ast::StorageClass::kNone, &vec2);
+      create<ast::Variable>(Source{},                        // source
+                            "v2",                            // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec2,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var1);
   mod->AddGlobalVariable(var2);
 
@@ -2132,7 +2537,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooFewParams) {
   ast::type::Vector vec2(&f32, 2);
 
   auto* var2 =
-      create<ast::Variable>(Source{}, "v2", ast::StorageClass::kNone, &vec2);
+      create<ast::Variable>(Source{},                        // source
+                            "v2",                            // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec2,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
@@ -2153,7 +2564,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooManyParams) {
   ast::type::Vector vec2(&f32, 2);
 
   auto* var2 =
-      create<ast::Variable>(Source{}, "v2", ast::StorageClass::kNone, &vec2);
+      create<ast::Variable>(Source{},                        // source
+                            "v2",                            // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec2,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
@@ -2179,7 +2596,13 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   ast::type::Vector vec4(&f32, 4);
 
   auto* var =
-      create<ast::Variable>(Source{}, "ident", ast::StorageClass::kNone, &vec4);
+      create<ast::Variable>(Source{},                        // source
+                            "ident",                         // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &vec4,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -2202,7 +2625,13 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
   ast::type::I32 i32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "var", ast::StorageClass::kNone, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "var",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   auto* body = create<ast::BlockStatement>();
@@ -2220,8 +2649,13 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
   ast::type::I32 i32;
 
   auto* var =
-      create<ast::Variable>(Source{}, "var", ast::StorageClass::kNone, &i32);
-  var->set_is_const(true);
+      create<ast::Variable>(Source{},                        // source
+                            "var",                           // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &i32,                            // type
+                            true,                            // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   auto* body = create<ast::BlockStatement>();
@@ -2238,8 +2672,14 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
 TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
   ast::type::I32 i32;
 
-  auto* var = create<ast::Variable>(Source{}, "var",
-                                    ast::StorageClass::kWorkgroup, &i32);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "var",                           // name
+                            ast::StorageClass::kWorkgroup,   // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   auto* body = create<ast::BlockStatement>();
@@ -4296,8 +4736,14 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
   ast::type::F32 f32;
   ast::type::Matrix mat(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "var",
-                                    ast::StorageClass::kFunction, &mat);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "var",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -4322,8 +4768,14 @@ TEST_P(ImportData_Matrix_OneParam_Test, Error_Float) {
 
   ast::type::F32 f32;
 
-  auto* var = create<ast::Variable>(Source{}, "var",
-                                    ast::StorageClass::kFunction, &f32);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "var",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -4359,8 +4811,14 @@ TEST_P(ImportData_Matrix_OneParam_Test, TooManyParams) {
   ast::type::F32 f32;
   ast::type::Matrix mat(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "var",
-                                    ast::StorageClass::kFunction, &mat);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "var",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   mod->AddGlobalVariable(var);
 
   // Register the global
@@ -4450,16 +4908,46 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   mod->AddFunction(ep_1);
   mod->AddFunction(ep_2);
 
-  mod->AddGlobalVariable(create<ast::Variable>(
-      Source{}, "first", ast::StorageClass::kPrivate, &f32));
-  mod->AddGlobalVariable(create<ast::Variable>(
-      Source{}, "second", ast::StorageClass::kPrivate, &f32));
-  mod->AddGlobalVariable(create<ast::Variable>(
-      Source{}, "call_a", ast::StorageClass::kPrivate, &f32));
-  mod->AddGlobalVariable(create<ast::Variable>(
-      Source{}, "call_b", ast::StorageClass::kPrivate, &f32));
-  mod->AddGlobalVariable(create<ast::Variable>(
-      Source{}, "call_c", ast::StorageClass::kPrivate, &f32));
+  mod->AddGlobalVariable(
+      create<ast::Variable>(Source{},                         // source
+                            "first",                          // name
+                            ast::StorageClass::kPrivate,      // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
+  mod->AddGlobalVariable(
+      create<ast::Variable>(Source{},                         // source
+                            "second",                         // name
+                            ast::StorageClass::kPrivate,      // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
+  mod->AddGlobalVariable(
+      create<ast::Variable>(Source{},                         // source
+                            "call_a",                         // name
+                            ast::StorageClass::kPrivate,      // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
+  mod->AddGlobalVariable(
+      create<ast::Variable>(Source{},                         // source
+                            "call_b",                         // name
+                            ast::StorageClass::kPrivate,      // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
+  mod->AddGlobalVariable(
+      create<ast::Variable>(Source{},                         // source
+                            "call_c",                         // name
+                            ast::StorageClass::kPrivate,      // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
 
   // Register the functions and calculate the callers
   ASSERT_TRUE(td()->Determine()) << td()->error();

@@ -32,7 +32,6 @@
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
@@ -70,6 +69,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/writer/float_to_string.h"
@@ -582,10 +582,8 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
 bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   make_indent();
 
-  if (auto* decorated = var->As<ast::DecoratedVariable>()) {
-    if (!EmitVariableDecorations(decorated)) {
-      return false;
-    }
+  if (!var->decorations().empty() && !EmitVariableDecorations(var)) {
+    return false;
   }
 
   if (var->is_const()) {
@@ -614,7 +612,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   return true;
 }
 
-bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
+bool GeneratorImpl::EmitVariableDecorations(ast::Variable* var) {
   out_ << "[[";
   bool first = true;
   for (auto* deco : var->decorations()) {

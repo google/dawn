@@ -41,16 +41,28 @@ TEST_F(BuilderTest, Block) {
   // serves to prove the block code is pushing new scopes as needed.
   ast::BlockStatement outer;
 
-  outer.append(create<ast::VariableDeclStatement>(create<ast::Variable>(
-      Source{}, "var", ast::StorageClass::kFunction, &f32)));
+  outer.append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>(Source{},                          // source
+                            "var",                             // name
+                            ast::StorageClass::kFunction,      // storage_class
+                            &f32,                              // type
+                            false,                             // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{})));  // decorations
   outer.append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 1.0f))));
 
   auto* inner = create<ast::BlockStatement>();
-  inner->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
-      Source{}, "var", ast::StorageClass::kFunction, &f32)));
+  inner->append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>(Source{},                          // source
+                            "var",                             // name
+                            ast::StorageClass::kFunction,      // storage_class
+                            &f32,                              // type
+                            false,                             // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{})));  // decorations
   inner->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>("var"),
       create<ast::ScalarConstructorExpression>(

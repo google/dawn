@@ -291,10 +291,16 @@ class ParserImpl : Reader {
   /// @param id the SPIR-V result ID
   /// @param sc the storage class, which cannot be ast::StorageClass::kNone
   /// @param type the type
+  /// @param is_const if true, the variable is const
+  /// @param constructor the variable constructor
+  /// @param decorations the variable decorations
   /// @returns a new Variable node, or null in the error case
   ast::Variable* MakeVariable(uint32_t id,
                               ast::StorageClass sc,
-                              ast::type::Type* type);
+                              ast::type::Type* type,
+                              bool is_const,
+                              ast::Expression* constructor,
+                              ast::VariableDecorationList decorations);
 
   /// Creates an AST expression node for a SPIR-V constant.
   /// @param id the SPIR-V ID of the constant

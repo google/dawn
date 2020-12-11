@@ -33,7 +33,13 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32 f32;
   auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kNone,        // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   ast::VariableDeclStatement stmt(var);
 
@@ -49,7 +55,13 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   // https://github.com/gpuweb/gpuweb/issues/654
   ast::type::F32 f32;
   auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   ast::VariableDeclStatement stmt(var);
 
@@ -62,7 +74,13 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   ast::type::F32 f32;
   auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kPrivate, &f32);
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   ast::VariableDeclStatement stmt(var);
 

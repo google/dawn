@@ -16,7 +16,6 @@
 #include <vector>
 
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -45,10 +44,14 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   exprs.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* var =
-      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &ary);
-  var->set_is_const(true);
-  var->set_constructor(create<ast::TypeConstructorExpression>(&ary, exprs));
+  auto* var = create<ast::Variable>(
+      Source{},                                             // source
+      "pos",                                                // name
+      ast::StorageClass::kNone,                             // storage_class
+      &ary,                                                 // type
+      true,                                                 // is_const
+      create<ast::TypeConstructorExpression>(&ary, exprs),  // constructor
+      ast::VariableDecorationList{});                       // decorations
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), "static const float pos[3] = {1.0f, 2.0f, 3.0f};\n");
@@ -57,15 +60,18 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   ast::type::F32 f32;
 
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
-
-  auto* var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &f32));
-  var->set_decorations(decos);
-  var->set_is_const(true);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "pos",                     // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      true,                      // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 3.0f)),  // constructor
+      ast::VariableDecorationList{
+          // decorations
+          create<ast::ConstantIdDecoration>(23, Source{}),
+      });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
@@ -79,13 +85,17 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   ast::type::F32 f32;
 
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
-
-  auto* var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &f32));
-  var->set_decorations(decos);
-  var->set_is_const(true);
+  auto* var =
+      create<ast::Variable>(Source{},                  // source
+                            "pos",                     // name
+                            ast::StorageClass::kNone,  // storage_class
+                            &f32,                      // type
+                            true,                      // is_const
+                            nullptr,                   // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::ConstantIdDecoration>(23, Source{}),
+                            });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23

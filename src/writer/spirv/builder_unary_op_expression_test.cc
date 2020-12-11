@@ -98,7 +98,8 @@ TEST_F(BuilderTest, UnaryOp_LoadRequired) {
   ast::type::F32 f32;
   ast::type::Vector vec(&f32, 3);
 
-  ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &vec);
+  ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &vec,
+                    false, nullptr, ast::VariableDecorationList{});
 
   ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
                               create<ast::IdentifierExpression>("param"));

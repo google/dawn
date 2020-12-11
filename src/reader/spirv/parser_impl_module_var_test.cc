@@ -199,7 +199,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinVertexIndex) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -249,7 +249,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_MapsToModuleScopeVec4Var) {
   EXPECT_EQ(position_info.per_vertex_var_id, 1u);
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{position}
     }
@@ -1146,7 +1146,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_LocationDecoration_Valid) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       LocationDecoration{3}
     }
@@ -1198,7 +1198,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_DescriptorSetDecoration_Valid) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{3}
     }
@@ -1252,7 +1252,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BindingDecoration_Valid) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{3}
     }
@@ -1501,7 +1501,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_True) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariableConst{
+  VariableConst{
     Decorations{
       ConstantIdDecoration{12}
     }
@@ -1526,7 +1526,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_False) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariableConst{
+  VariableConst{
     Decorations{
       ConstantIdDecoration{12}
     }
@@ -1551,7 +1551,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_U32) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariableConst{
+  VariableConst{
     Decorations{
       ConstantIdDecoration{12}
     }
@@ -1576,7 +1576,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_I32) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariableConst{
+  VariableConst{
     Decorations{
       ConstantIdDecoration{12}
     }
@@ -1601,7 +1601,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  DecoratedVariableConst{
+  VariableConst{
     Decorations{
       ConstantIdDecoration{12}
     }

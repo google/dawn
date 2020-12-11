@@ -27,7 +27,6 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/clone_context.h"
 #include "src/ast/constructor_expression.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/fallthrough_statement.h"
@@ -62,18 +61,17 @@ constexpr char kFirstVertexName[] = "tint_first_vertex_index";
 constexpr char kFirstInstanceName[] = "tint_first_instance_index";
 constexpr char kIndexOffsetPrefix[] = "tint_first_index_offset_";
 
-ast::DecoratedVariable* clone_variable_with_new_name(ast::CloneContext* ctx,
-                                                     ast::DecoratedVariable* in,
-                                                     std::string new_name) {
-  auto* var = ctx->mod->create<ast::Variable>(ctx->Clone(in->source()),
-                                              new_name, in->storage_class(),
-                                              ctx->Clone(in->type()));
-  var->set_is_const(in->is_const());
-  var->set_constructor(ctx->Clone(in->constructor()));
-
-  auto* out = ctx->mod->create<ast::DecoratedVariable>(var);
-  out->set_decorations(ctx->Clone(in->decorations()));
-  return out;
+ast::Variable* clone_variable_with_new_name(ast::CloneContext* ctx,
+                                            ast::Variable* in,
+                                            std::string new_name) {
+  return ctx->mod->create<ast::Variable>(
+      ctx->Clone(in->source()),        // source
+      new_name,                        // name
+      in->storage_class(),             // storage_class
+      ctx->Clone(in->type()),          // type
+      in->is_const(),                  // is_const
+      ctx->Clone(in->constructor()),   // constructor
+      ctx->Clone(in->decorations()));  // decorations
 }
 
 }  // namespace
@@ -86,7 +84,7 @@ FirstIndexOffset::~FirstIndexOffset() = default;
 Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // First do a quick check to see if the transform has already been applied.
   for (ast::Variable* var : in->global_variables()) {
-    if (auto* dec_var = var->As<ast::DecoratedVariable>()) {
+    if (auto* dec_var = var->As<ast::Variable>()) {
       if (dec_var->name() == kBufferName) {
         diag::Diagnostic err;
         err.message = "First index offset transform has already been applied.";
@@ -129,7 +127,7 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // a CreateFirstIndexOffset() statement to each function that uses one of
   // these builtins.
   ast::CloneContext ctx(&out.module);
-  ctx.ReplaceAll([&](ast::DecoratedVariable* var) -> ast::DecoratedVariable* {
+  ctx.ReplaceAll([&](ast::Variable* var) -> ast::Variable* {
     for (ast::VariableDecoration* dec : var->decorations()) {
       if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
         ast::Builtin blt_type = blt_dec->value();
@@ -229,13 +227,17 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
       kStructName,
       mod->create<ast::Struct>(std::move(decos), std::move(members)));
 
-  auto* idx_var =
-      mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-          Source{}, kBufferName, ast::StorageClass::kUniform, struct_type));
-  idx_var->set_decorations({
-      mod->create<ast::BindingDecoration>(binding_, Source{}),
-      mod->create<ast::SetDecoration>(set_, Source{}),
-  });
+  auto* idx_var = mod->create<ast::Variable>(
+      Source{},                     // source
+      kBufferName,                  // name
+      ast::StorageClass::kUniform,  // storage_class
+      struct_type,                  // type
+      false,                        // is_const
+      nullptr,                      // constructor
+      ast::VariableDecorationList{
+          mod->create<ast::BindingDecoration>(binding_, Source{}),
+          mod->create<ast::SetDecoration>(set_, Source{}),
+      });  // decorations
 
   mod->AddGlobalVariable(idx_var);
 
@@ -250,16 +252,20 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
     ast::Variable* buffer_var,
     ast::Module* mod) {
   auto* buffer = mod->create<ast::IdentifierExpression>(buffer_var->name());
-  auto* var = mod->create<ast::Variable>(Source{}, original_name,
-                                         ast::StorageClass::kNone,
-                                         mod->create<ast::type::U32>());
-
-  var->set_is_const(true);
-  var->set_constructor(mod->create<ast::BinaryExpression>(
+  auto* constructor = mod->create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd,
-      mod->create<ast::IdentifierExpression>(kIndexOffsetPrefix + var->name()),
+      mod->create<ast::IdentifierExpression>(kIndexOffsetPrefix +
+                                             original_name),
       mod->create<ast::MemberAccessorExpression>(
-          buffer, mod->create<ast::IdentifierExpression>(field_name))));
+          buffer, mod->create<ast::IdentifierExpression>(field_name)));
+  auto* var =
+      mod->create<ast::Variable>(Source{},                  // source
+                                 original_name,             // name
+                                 ast::StorageClass::kNone,  // storage_class
+                                 mod->create<ast::type::U32>(),   // type
+                                 true,                            // is_const
+                                 constructor,                     // constructor
+                                 ast::VariableDecorationList{});  // decorations
   return mod->create<ast::VariableDeclStatement>(var);
 }
 

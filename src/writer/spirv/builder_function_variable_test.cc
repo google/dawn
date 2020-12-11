@@ -19,7 +19,6 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -47,7 +46,8 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
   ast::type::F32 f32;
-  ast::Variable v(Source{}, "var", ast::StorageClass::kNone, &f32);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kNone, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
@@ -80,8 +80,8 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(init);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
+                  init, ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&v);
 
@@ -126,8 +126,8 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kFunction, &vec);
-  v.set_constructor(init);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kFunction, &vec, false,
+                  init, ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&v);
   b.push_function(Function{});
@@ -164,12 +164,13 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
 
   ASSERT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "v", ast::StorageClass::kFunction, &f32);
-  v.set_constructor(init);
+  ast::Variable v(Source{}, "v", ast::StorageClass::kFunction, &f32, false,
+                  init, ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v);
 
-  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32);
-  v2.set_constructor(create<ast::IdentifierExpression>("v"));
+  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32, false,
+                   create<ast::IdentifierExpression>("v"),
+                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v2);
 
   ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();
@@ -209,13 +210,13 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "v", ast::StorageClass::kFunction, &f32);
-  v.set_constructor(init);
+  ast::Variable v(Source{}, "v", ast::StorageClass::kFunction, &f32, false,
+                  init, ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v);
 
-  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32);
-  v2.set_is_const(true);
-  v2.set_constructor(create<ast::IdentifierExpression>("v"));
+  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32, true,
+                   create<ast::IdentifierExpression>("v"),
+                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v2);
 
   ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();
@@ -257,9 +258,8 @@ TEST_F(BuilderTest, FunctionVar_Const) {
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(init);
-  v.set_is_const(true);
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, true, init,
+                  ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&v);
 

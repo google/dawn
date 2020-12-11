@@ -34,7 +34,6 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/constructor_expression.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
@@ -72,6 +71,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/append_vector.h"
 
@@ -739,8 +739,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     //    one
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
-    auto* decorated = var->As<ast::DecoratedVariable>();
-    if (decorated != nullptr && decorated->HasConstantIdDecoration()) {
+    if (var->HasConstantIdDecoration()) {
       if (type->Is<ast::type::F32>()) {
         ast::FloatLiteral l(type, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
@@ -775,33 +774,31 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   push_type(spv::Op::OpVariable, std::move(ops));
 
-  if (auto* decorated = var->As<ast::DecoratedVariable>()) {
-    for (auto* deco : decorated->decorations()) {
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        push_annot(spv::Op::OpDecorate,
-                   {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
-                    Operand::Int(ConvertBuiltin(builtin->value()))});
-      } else if (auto* location = deco->As<ast::LocationDecoration>()) {
-        push_annot(spv::Op::OpDecorate,
-                   {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
-                    Operand::Int(location->value())});
-      } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
-        push_annot(spv::Op::OpDecorate,
-                   {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
-                    Operand::Int(binding->value())});
-      } else if (auto* set = deco->As<ast::SetDecoration>()) {
-        push_annot(
-            spv::Op::OpDecorate,
-            {Operand::Int(var_id), Operand::Int(SpvDecorationDescriptorSet),
-             Operand::Int(set->value())});
-      } else if (deco->Is<ast::ConstantIdDecoration>()) {
-        // Spec constants are handled elsewhere
-      } else {
-        error_ = "unknown decoration";
-        return false;
-      }
+  for (auto* deco : var->decorations()) {
+    if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
+                  Operand::Int(ConvertBuiltin(builtin->value()))});
+    } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
+                  Operand::Int(location->value())});
+    } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
+                  Operand::Int(binding->value())});
+    } else if (auto* set = deco->As<ast::SetDecoration>()) {
+      push_annot(spv::Op::OpDecorate, {Operand::Int(var_id),
+                                       Operand::Int(SpvDecorationDescriptorSet),
+                                       Operand::Int(set->value())});
+    } else if (deco->Is<ast::ConstantIdDecoration>()) {
+      // Spec constants are handled elsewhere
+    } else {
+      error_ = "unknown decoration";
+      return false;
     }
   }
+
   scope_stack_.set_global(var->name(), var_id);
   spirv_id_to_variable_[var_id] = var;
   return true;
@@ -1455,8 +1452,7 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
 
   auto name = lit->name();
   bool is_spec_constant = false;
-  if (var && var->Is<ast::DecoratedVariable>() &&
-      var->As<ast::DecoratedVariable>()->HasConstantIdDecoration()) {
+  if (var && var->HasConstantIdDecoration()) {
     name = "__spec" + name;
     is_spec_constant = true;
   }
@@ -1470,10 +1466,9 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
   auto result_id = result.to_i();
 
   if (is_spec_constant) {
-    push_annot(
-        spv::Op::OpDecorate,
-        {Operand::Int(result_id), Operand::Int(SpvDecorationSpecId),
-         Operand::Int(var->As<ast::DecoratedVariable>()->constant_id())});
+    push_annot(spv::Op::OpDecorate,
+               {Operand::Int(result_id), Operand::Int(SpvDecorationSpecId),
+                Operand::Int(var->constant_id())});
   }
 
   if (auto* l = lit->As<ast::BoolLiteral>()) {

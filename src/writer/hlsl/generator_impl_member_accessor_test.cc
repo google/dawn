@@ -17,7 +17,6 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
@@ -35,6 +34,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/variable.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 
@@ -57,8 +57,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
   ast::type::Struct s("Str", strct);
 
-  auto* str_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "str", ast::StorageClass::kPrivate, &s));
+  auto* str_var =
+      create<ast::Variable>(Source{},                        // source
+                            "str",                           // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &s,                              // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* str = create<ast::IdentifierExpression>("str");
   auto* mem = create<ast::IdentifierExpression>("mem");
@@ -100,8 +106,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("b"));
@@ -143,8 +155,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
@@ -190,10 +208,22 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::type::Struct s("Data", str);
 
   auto* b_var =
-      create<ast::Variable>(Source{}, "b", ast::StorageClass::kPrivate, &mat);
+      create<ast::Variable>(Source{},                        // source
+                            "b",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &mat,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
-  auto* coord_var = create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s);
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("data"),
@@ -249,8 +279,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::IdentifierExpression>("data"),
@@ -304,8 +340,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
@@ -354,8 +396,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
@@ -396,8 +444,14 @@ TEST_F(
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("data"),
                                      create<ast::IdentifierExpression>("a"));
@@ -442,8 +496,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::ArrayAccessorExpression expr(
       create<ast::ArrayAccessorExpression>(
@@ -491,8 +551,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::ArrayAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -537,8 +603,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   ast::ArrayAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
@@ -593,8 +665,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -641,8 +719,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -693,8 +777,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -744,8 +834,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -790,8 +886,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct s("Data", str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &s));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &s,                                 // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -868,8 +970,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct pre_struct("Pre", pre_str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &pre_struct));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &pre_struct,                        // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -939,8 +1047,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct pre_struct("Pre", pre_str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &pre_struct));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &pre_struct,                        // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -1011,8 +1125,14 @@ TEST_F(
 
   ast::type::Struct pre_struct("Pre", pre_str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &pre_struct));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &pre_struct,                        // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -1082,8 +1202,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct pre_struct("Pre", pre_str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &pre_struct));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &pre_struct,                        // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -1154,8 +1280,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct pre_struct("Pre", pre_str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &pre_struct));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &pre_struct,                        // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -1237,8 +1369,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ast::type::Struct pre_struct("Pre", pre_str);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "data", ast::StorageClass::kStorageBuffer, &pre_struct));
+  auto* coord_var =
+      create<ast::Variable>(Source{},                           // source
+                            "data",                             // name
+                            ast::StorageClass::kStorageBuffer,  // storage_class
+                            &pre_struct,                        // type
+                            false,                              // is_const
+                            nullptr,                            // constructor
+                            ast::VariableDecorationList{});     // decorations
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);

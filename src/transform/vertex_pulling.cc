@@ -20,7 +20,6 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/stride_decoration.h"
@@ -37,6 +36,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -143,13 +143,11 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
       continue;
     }
 
-    if (auto* decorated = v->As<ast::DecoratedVariable>()) {
-      for (auto* d : decorated->decorations()) {
-        if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
-          if (builtin->value() == ast::Builtin::kVertexIdx) {
-            vertex_index_name = v->name();
-            return;
-          }
+    for (auto* d : v->decorations()) {
+      if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
+        if (builtin->value() == ast::Builtin::kVertexIdx) {
+          vertex_index_name = v->name();
+          return;
         }
       }
     }
@@ -158,14 +156,19 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   // We didn't find a vertex index builtin, so create one
   vertex_index_name = kDefaultVertexIndexName;
 
-  auto* var = mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-      Source{}, vertex_index_name, ast::StorageClass::kInput, GetI32Type()));
+  auto* var =
+      mod->create<ast::Variable>(Source{},                   // source
+                                 vertex_index_name,          // name
+                                 ast::StorageClass::kInput,  // storage_class
+                                 GetI32Type(),               // type
+                                 false,                      // is_const
+                                 nullptr,                    // constructor
+                                 ast::VariableDecorationList{
+                                     // decorations
+                                     mod->create<ast::BuiltinDecoration>(
+                                         ast::Builtin::kVertexIdx, Source{}),
+                                 });
 
-  ast::VariableDecorationList decorations;
-  decorations.push_back(
-      mod->create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx, Source{}));
-
-  var->set_decorations(std::move(decorations));
   mod->AddGlobalVariable(var);
 }
 
@@ -187,13 +190,11 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
       continue;
     }
 
-    if (auto* decorated = v->As<ast::DecoratedVariable>()) {
-      for (auto* d : decorated->decorations()) {
-        if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
-          if (builtin->value() == ast::Builtin::kInstanceIdx) {
-            instance_index_name = v->name();
-            return;
-          }
+    for (auto* d : v->decorations()) {
+      if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
+        if (builtin->value() == ast::Builtin::kInstanceIdx) {
+          instance_index_name = v->name();
+          return;
         }
       }
     }
@@ -202,14 +203,18 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   // We didn't find an instance index builtin, so create one
   instance_index_name = kDefaultInstanceIndexName;
 
-  auto* var = mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-      Source{}, instance_index_name, ast::StorageClass::kInput, GetI32Type()));
-
-  ast::VariableDecorationList decorations;
-  decorations.push_back(mod->create<ast::BuiltinDecoration>(
-      ast::Builtin::kInstanceIdx, Source{}));
-
-  var->set_decorations(std::move(decorations));
+  auto* var =
+      mod->create<ast::Variable>(Source{},                   // source
+                                 instance_index_name,        // name
+                                 ast::StorageClass::kInput,  // storage_class
+                                 GetI32Type(),               // type
+                                 false,                      // is_const
+                                 nullptr,                    // constructor
+                                 ast::VariableDecorationList{
+                                     // decorations
+                                     mod->create<ast::BuiltinDecoration>(
+                                         ast::Builtin::kInstanceIdx, Source{}),
+                                 });
   mod->AddGlobalVariable(var);
 }
 
@@ -219,18 +224,22 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
       continue;
     }
 
-    if (auto* decorated = v->As<ast::DecoratedVariable>()) {
-      for (auto* d : decorated->decorations()) {
-        if (auto* l = d->As<ast::LocationDecoration>()) {
-          uint32_t location = l->value();
-          // This is where the replacement happens. Expressions use identifier
-          // strings instead of pointers, so we don't need to update any other
-          // place in the AST.
-          v = mod->create<ast::Variable>(
-              Source{}, v->name(), ast::StorageClass::kPrivate, v->type());
-          location_to_var[location] = v;
-          break;
-        }
+    for (auto* d : v->decorations()) {
+      if (auto* l = d->As<ast::LocationDecoration>()) {
+        uint32_t location = l->value();
+        // This is where the replacement happens. Expressions use identifier
+        // strings instead of pointers, so we don't need to update any other
+        // place in the AST.
+        v = mod->create<ast::Variable>(
+            Source{},                        // source
+            v->name(),                       // name
+            ast::StorageClass::kPrivate,     // storage_class
+            v->type(),                       // type
+            false,                           // is_const
+            nullptr,                         // constructor
+            ast::VariableDecorationList{});  // decorations
+        location_to_var[location] = v;
+        break;
       }
     }
   }
@@ -263,17 +272,18 @@ void VertexPulling::State::AddVertexStorageBuffers() {
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
     // The decorated variable with struct type
-    auto* var = mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-        Source{}, GetVertexBufferName(i), ast::StorageClass::kStorageBuffer,
-        struct_type));
-
-    // Add decorations
-    ast::VariableDecorationList decorations;
-    decorations.push_back(mod->create<ast::BindingDecoration>(i, Source{}));
-    decorations.push_back(
-        mod->create<ast::SetDecoration>(cfg.pulling_set, Source{}));
-    var->set_decorations(std::move(decorations));
-
+    auto* var = mod->create<ast::Variable>(
+        Source{},                           // source
+        GetVertexBufferName(i),             // name
+        ast::StorageClass::kStorageBuffer,  // storage_class
+        struct_type,                        // type
+        false,                              // is_const
+        nullptr,                            // constructor
+        ast::VariableDecorationList{
+            // decorations
+            mod->create<ast::BindingDecoration>(i, Source{}),
+            mod->create<ast::SetDecoration>(cfg.pulling_set, Source{}),
+        });
     mod->AddGlobalVariable(var);
   }
   mod->AddConstructedType(struct_type);
@@ -288,9 +298,15 @@ void VertexPulling::State::AddVertexPullingPreamble(
   auto* block = mod->create<ast::BlockStatement>();
 
   // Declare the |kPullingPosVarName| variable in the shader
-  auto* pos_declaration = mod->create<ast::VariableDeclStatement>(
-      mod->create<ast::Variable>(Source{}, kPullingPosVarName,
-                                 ast::StorageClass::kFunction, GetI32Type()));
+  auto* pos_declaration =
+      mod->create<ast::VariableDeclStatement>(mod->create<ast::Variable>(
+          Source{},                         // source
+          kPullingPosVarName,               // name
+          ast::StorageClass::kFunction,     // storage_class
+          GetI32Type(),                     // type
+          false,                            // is_const
+          nullptr,                          // constructor
+          ast::VariableDecorationList{}));  // decorations
 
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression

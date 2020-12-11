@@ -1141,7 +1141,7 @@ INSTANTIATE_TEST_SUITE_P(Samplers,
          %10 = OpVariable %ptr UniformConstant
 )",
                                                           R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1159,7 +1159,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
          %10 = OpVariable %ptr_f_texture_1d UniformConstant
 )",
                                                           R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1175,7 +1175,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
          %10 = OpVariable %ptr_f_storage_1d UniformConstant
 )",
                                                           R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1191,7 +1191,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
          %10 = OpVariable %ptr_f_storage_1d UniformConstant
 )",
                                                           R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1343,7 +1343,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords12",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1352,7 +1352,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1376,7 +1376,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords123",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1385,7 +1385,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1420,7 +1420,7 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords12 ConstOffset %offsets2d",
             R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1429,7 +1429,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1455,7 +1455,7 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords123 ConstOffset %offsets2d",
             R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1464,7 +1464,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1499,7 +1499,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords12 Bias %float_7",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1508,7 +1508,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1533,7 +1533,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords123 Bias %float_7",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1542,7 +1542,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1580,7 +1580,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%v4float %sampled_image %coords12 Bias|ConstOffset "
                         "%float_7 %offsets2d",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1589,7 +1589,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1615,7 +1615,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%v4float %sampled_image %coords123 Bias|ConstOffset "
                         "%float_7 %offsets2d",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1624,7 +1624,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1672,7 +1672,7 @@ INSTANTIATE_TEST_SUITE_P(
      %210 = OpImageSampleDrefImplicitLod %v4float %sampled_dref_image %coords12 %depth
 )",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1681,7 +1681,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1690,7 +1690,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __depth_texture_2d
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{1}
@@ -1745,7 +1745,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleDrefImplicitLod "
                         "%v4float %sampled_image %coords12 %depth",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1754,7 +1754,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_comparison
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1778,7 +1778,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleDrefImplicitLod "
                         "%v4float %sampled_image %coords123 %depth",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1787,7 +1787,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_comparison
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1822,7 +1822,7 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleDrefImplicitLod %v4float "
             "%sampled_image %coords12 %depth ConstOffset %offsets2d",
             R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1831,7 +1831,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_comparison
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1857,7 +1857,7 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleDrefImplicitLod %v4float "
             "%sampled_image %coords123 %depth ConstOffset %offsets2d",
             R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1866,7 +1866,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_comparison
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1907,7 +1907,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords12 Lod %float_null",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1916,7 +1916,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1941,7 +1941,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords123 Lod %float_null",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1950,7 +1950,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -1988,7 +1988,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%v4float %sampled_image %coords12 Lod|ConstOffset "
                         "%float_null %offsets2d",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -1997,7 +1997,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2024,7 +2024,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%v4float %sampled_image %coords123 Lod|ConstOffset "
                         "%float_null %offsets2d",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -2033,7 +2033,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2070,7 +2070,7 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords12 Grad %float_7 %float_null",
             R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -2079,7 +2079,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2106,7 +2106,7 @@ INSTANTIATE_TEST_SUITE_P(
             "%result = OpImageSampleExplicitLod "
             "%v4float %sampled_image %coords123 Grad %float_7 %float_null",
             R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -2115,7 +2115,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2154,7 +2154,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%v4float %sampled_image %coords12 Grad|ConstOffset "
                         "%float_7 %float_null %offsets2d",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -2163,7 +2163,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2192,7 +2192,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "%v4float %sampled_image %coords123 Grad|ConstOffset "
                         "%float_7 %float_null %offsets2d",
                         R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -2201,7 +2201,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2248,7 +2248,7 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleExplicitLod %v4float "
          "%sampled_image %vf12 Lod %f1",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -2257,7 +2257,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2281,7 +2281,7 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleExplicitLod %v4float "
          "%sampled_image %vf12 Lod %f1",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -2290,7 +2290,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2387,7 +2387,7 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageWrite with no extra params
         {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vu12 %vf1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2408,7 +2408,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 2 Rgba32f",
          "OpImageWrite %im %vu12 %vf1234 ConstOffset %offsets2d",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2437,7 +2437,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 1 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %f1",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2457,7 +2457,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 2 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf12",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2480,7 +2480,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 3 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf123",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2503,7 +2503,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 4 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2526,7 +2526,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 2 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf12",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2546,7 +2546,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 3 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf123",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2569,7 +2569,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 4 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2593,7 +2593,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Source 4 component, dest 4 component
         {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vu12 %vf1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2759,7 +2759,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Sampled type is unsigned int, texel is unsigned int
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vu12 %vu1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2779,7 +2779,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Sampled type is unsigned int, texel is signed int
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vu12 %vi1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2801,7 +2801,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Sampled type is signed int, texel is unsigned int
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vu12 %vu1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2823,7 +2823,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Sampled type is signed int, texel is signed int
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vu12 %vi1234",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2847,7 +2847,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // OpImageRead with no extra params
         {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2875,7 +2875,7 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageRead with ConstOffset
         {"%float 2D 0 0 0 2 Rgba32f",
          "%99 = OpImageRead %v4float %im %vu12 ConstOffset %offsets2d",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2908,7 +2908,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // OpImageFetch with no extra params
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2936,7 +2936,7 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageFetch with ConstOffset
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vu12 ConstOffset %offsets2d",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -2983,7 +2983,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageFetch requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3010,7 +3010,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageFetch requires no conversion, uint -> v4uint
         {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3037,7 +3037,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageFetch requires conversion, uint -> v4int
         {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3066,7 +3066,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageFetch requires no conversion, int -> v4int
         {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3093,7 +3093,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageFetch requires conversion, int -> v4uint
         {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3127,7 +3127,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageRead requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageRead %v4float %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3154,7 +3154,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageRead requires no conversion, uint -> v4uint
         {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4uint %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3181,7 +3181,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageRead requires conversion, uint -> v4int
         {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4int %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3210,7 +3210,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageRead requires no conversion, int -> v4int
         {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4int %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3237,7 +3237,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageRead requires conversion, int -> v4uint
         {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4uint %im %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3273,7 +3273,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageSampleImplicitLod %v4float %sampled_image %vu12",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -3282,7 +3282,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3312,7 +3312,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%uint 2D 0 0 0 1 Unknown",
          "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vu12",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -3321,7 +3321,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3351,7 +3351,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%uint 2D 0 0 0 1 Unknown",
          "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vu12",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -3360,7 +3360,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3392,7 +3392,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%int 2D 0 0 0 1 Unknown",
          "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vu12",
          R"(
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{0}
       BindingDecoration{0}
@@ -3401,7 +3401,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampler_sampler
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
@@ -3430,7 +3430,7 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleImplicitLod requires conversion, int -> v4uint
         {"%int 2D 0 0 0 1 Unknown",
          "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vu12",
-         R"(DecoratedVariable{
+         R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}

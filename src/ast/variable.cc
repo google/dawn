@@ -17,7 +17,7 @@
 #include <assert.h>
 
 #include "src/ast/clone_context.h"
-#include "src/ast/decorated_variable.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/module.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::ast::Variable);
@@ -25,24 +25,66 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::Variable);
 namespace tint {
 namespace ast {
 
-Variable::Variable() = default;
-
 Variable::Variable(const Source& source,
                    const std::string& name,
                    StorageClass sc,
-                   type::Type* type)
-    : Base(source), name_(name), storage_class_(sc), type_(type) {}
+                   type::Type* type,
+                   bool is_const,
+                   Expression* constructor,
+                   VariableDecorationList decorations)
+    : Base(source),
+      name_(name),
+      storage_class_(sc),
+      type_(type),
+      is_const_(is_const),
+      constructor_(constructor),
+      decorations_(std::move(decorations)) {}
 
 Variable::Variable(Variable&&) = default;
 
 Variable::~Variable() = default;
 
+bool Variable::HasLocationDecoration() const {
+  for (auto* deco : decorations_) {
+    if (deco->Is<LocationDecoration>()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Variable::HasBuiltinDecoration() const {
+  for (auto* deco : decorations_) {
+    if (deco->Is<BuiltinDecoration>()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Variable::HasConstantIdDecoration() const {
+  for (auto* deco : decorations_) {
+    if (deco->Is<ConstantIdDecoration>()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+uint32_t Variable::constant_id() const {
+  assert(HasConstantIdDecoration());
+  for (auto* deco : decorations_) {
+    if (auto* cid = deco->As<ConstantIdDecoration>()) {
+      return cid->value();
+    }
+  }
+  return 0;
+}
+
 Variable* Variable::Clone(CloneContext* ctx) const {
-  auto* cloned = ctx->mod->create<Variable>(
-      ctx->Clone(source()), name(), storage_class(), ctx->Clone(type()));
-  cloned->set_constructor(ctx->Clone(constructor()));
-  cloned->set_is_const(is_const());
-  return cloned;
+  return ctx->mod->create<Variable>(
+      ctx->Clone(source()), name(), storage_class(), ctx->Clone(type()),
+      is_const_, ctx->Clone(constructor()), ctx->Clone(decorations_));
 }
 
 bool Variable::IsValid() const {
@@ -87,6 +129,17 @@ void Variable::to_str(std::ostream& out, size_t indent) const {
     out << "Const";
   }
   out << "{" << std::endl;
+
+  if (!decorations_.empty()) {
+    make_indent(out, indent + 2);
+    out << "Decorations{" << std::endl;
+    for (auto* deco : decorations_) {
+      deco->to_str(out, indent + 4);
+    }
+    make_indent(out, indent + 2);
+    out << "}" << std::endl;
+  }
+
   info_to_str(out, indent + 2);
   constructor_to_str(out, indent + 2);
   make_indent(out, indent);

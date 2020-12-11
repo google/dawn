@@ -44,9 +44,21 @@ TEST_F(BuilderTest, Expression_Call) {
 
   ast::VariableList func_params;
   func_params.push_back(
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{},                         // source
+                            "a",                              // name
+                            ast::StorageClass::kFunction,     // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
   func_params.push_back(
-      create<ast::Variable>(Source{}, "b", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{},                         // source
+                            "b",                              // name
+                            ast::StorageClass::kFunction,     // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
@@ -109,9 +121,21 @@ TEST_F(BuilderTest, Statement_Call) {
 
   ast::VariableList func_params;
   func_params.push_back(
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{},                         // source
+                            "a",                              // name
+                            ast::StorageClass::kFunction,     // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
   func_params.push_back(
-      create<ast::Variable>(Source{}, "b", ast::StorageClass::kFunction, &f32));
+      create<ast::Variable>(Source{},                         // source
+                            "b",                              // name
+                            ast::StorageClass::kFunction,     // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{}));  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(

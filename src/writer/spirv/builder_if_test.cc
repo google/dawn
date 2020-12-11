@@ -76,7 +76,13 @@ TEST_F(BuilderTest, If_WithStatements) {
   //   v = 2;
   // }
   auto* var =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -124,7 +130,13 @@ TEST_F(BuilderTest, If_WithElse) {
   //   v = 3;
   // }
   auto* var =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -184,7 +196,13 @@ TEST_F(BuilderTest, If_WithElseIf) {
   //   v = 3;
   // }
   auto* var =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -256,7 +274,13 @@ TEST_F(BuilderTest, If_WithMultiple) {
   //   v = 5;
   // }
   auto* var =
-      create<ast::Variable>(Source{}, "v", ast::StorageClass::kPrivate, &i32);
+      create<ast::Variable>(Source{},                        // source
+                            "v",                             // name
+                            ast::StorageClass::kPrivate,     // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(
@@ -609,8 +633,14 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // }
 
   ast::type::Bool bool_type;
-  auto* var = create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction,
-                                    &bool_type);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "a",                             // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &bool_type,                      // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   td.RegisterVariableForTesting(var);
 
   ast::IfStatement expr(Source{}, create<ast::IdentifierExpression>("a"),

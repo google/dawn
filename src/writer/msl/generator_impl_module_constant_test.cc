@@ -17,7 +17,6 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -47,10 +46,14 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   exprs.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.0f)));
 
-  auto* var =
-      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &ary);
-  var->set_is_const(true);
-  var->set_constructor(create<ast::TypeConstructorExpression>(&ary, exprs));
+  auto* var = create<ast::Variable>(
+      Source{},                                             // source
+      "pos",                                                // name
+      ast::StorageClass::kNone,                             // storage_class
+      &ary,                                                 // type
+      true,                                                 // is_const
+      create<ast::TypeConstructorExpression>(&ary, exprs),  // constructor
+      ast::VariableDecorationList{});                       // decorations
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
@@ -59,15 +62,18 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
   ast::type::F32 f32;
 
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::ConstantIdDecoration>(23, Source{}));
-
-  auto* var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "pos", ast::StorageClass::kNone, &f32));
-  var->set_decorations(decos);
-  var->set_is_const(true);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "pos",                     // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      true,                      // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 3.0f)),  // constructor
+      ast::VariableDecorationList{
+          // decorations
+          create<ast::ConstantIdDecoration>(23, Source{}),
+      });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");

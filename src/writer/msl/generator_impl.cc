@@ -29,8 +29,8 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/continue_statement.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
@@ -63,6 +63,7 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/float_to_string.h"
 
@@ -1507,13 +1508,12 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 }
 
 bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
-  auto* decorated = var->As<ast::DecoratedVariable>();
   bool in_or_out_struct_has_location =
-      decorated != nullptr && decorated->HasLocationDecoration() &&
+      var != nullptr && var->HasLocationDecoration() &&
       (var->storage_class() == ast::StorageClass::kInput ||
        var->storage_class() == ast::StorageClass::kOutput);
   bool in_struct_has_builtin =
-      decorated != nullptr && decorated->HasBuiltinDecoration() &&
+      var != nullptr && var->HasBuiltinDecoration() &&
       var->storage_class() == ast::StorageClass::kOutput;
   return in_or_out_struct_has_location || in_struct_has_builtin;
 }
@@ -2013,11 +2013,10 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
   make_indent();
 
   // TODO(dsinclair): Handle variable decorations
-  if (var->Is<ast::DecoratedVariable>()) {
+  if (!var->decorations().empty()) {
     error_ = "Variable decorations are not handled yet";
     return false;
   }
-
   if (var->is_const()) {
     out_ << "const ";
   }
@@ -2051,10 +2050,11 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
 bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   make_indent();
 
-  auto* decorated = var->As<ast::DecoratedVariable>();
-  if (decorated != nullptr && !decorated->HasConstantIdDecoration()) {
-    error_ = "Decorated const values not valid";
-    return false;
+  for (auto* d : var->decorations()) {
+    if (!d->Is<ast::ConstantIdDecoration>()) {
+      error_ = "Decorated const values not valid";
+      return false;
+    }
   }
   if (!var->is_const()) {
     error_ = "Expected a const value";
@@ -2069,8 +2069,8 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     out_ << " " << var->name();
   }
 
-  if (decorated != nullptr && decorated->HasConstantIdDecoration()) {
-    out_ << " [[function_constant(" << decorated->constant_id() << ")]]";
+  if (var->HasConstantIdDecoration()) {
+    out_ << " [[function_constant(" << var->constant_id() << ")]]";
   } else if (var->constructor() != nullptr) {
     out_ << " = ";
     if (!EmitExpression(var->constructor())) {

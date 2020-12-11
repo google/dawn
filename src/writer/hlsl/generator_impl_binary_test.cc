@@ -62,10 +62,22 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 
   auto params = GetParam();
 
-  auto* left_var = create<ast::Variable>(Source{}, "left",
-                                         ast::StorageClass::kFunction, &f32);
-  auto* right_var = create<ast::Variable>(Source{}, "right",
-                                          ast::StorageClass::kFunction, &f32);
+  auto* left_var =
+      create<ast::Variable>(Source{},                        // source
+                            "left",                          // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* right_var =
+      create<ast::Variable>(Source{},                        // source
+                            "right",                         // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &f32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* left = create<ast::IdentifierExpression>("left");
   auto* right = create<ast::IdentifierExpression>("right");
@@ -84,10 +96,22 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 
   auto params = GetParam();
 
-  auto* left_var = create<ast::Variable>(Source{}, "left",
-                                         ast::StorageClass::kFunction, &u32);
-  auto* right_var = create<ast::Variable>(Source{}, "right",
-                                          ast::StorageClass::kFunction, &u32);
+  auto* left_var =
+      create<ast::Variable>(Source{},                        // source
+                            "left",                          // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &u32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* right_var =
+      create<ast::Variable>(Source{},                        // source
+                            "right",                         // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &u32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* left = create<ast::IdentifierExpression>("left");
   auto* right = create<ast::IdentifierExpression>("right");
@@ -106,10 +130,22 @@ TEST_P(HlslBinaryTest, Emit_i32) {
 
   auto params = GetParam();
 
-  auto* left_var = create<ast::Variable>(Source{}, "left",
-                                         ast::StorageClass::kFunction, &i32);
-  auto* right_var = create<ast::Variable>(Source{}, "right",
-                                          ast::StorageClass::kFunction, &i32);
+  auto* left_var =
+      create<ast::Variable>(Source{},                        // source
+                            "left",                          // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
+  auto* right_var =
+      create<ast::Variable>(Source{},                        // source
+                            "right",                         // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &i32,                            // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   auto* left = create<ast::IdentifierExpression>("left");
   auto* right = create<ast::IdentifierExpression>("right");
@@ -199,8 +235,14 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
   ast::type::F32 f32;
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "mat",
-                                    ast::StorageClass::kFunction, &mat3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "mat",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* lhs = create<ast::IdentifierExpression>("mat");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
@@ -218,8 +260,14 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
   ast::type::F32 f32;
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "mat",
-                                    ast::StorageClass::kFunction, &mat3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "mat",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
   auto* rhs = create<ast::IdentifierExpression>("mat");
@@ -238,8 +286,14 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "mat",
-                                    ast::StorageClass::kFunction, &mat3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "mat",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* lhs = create<ast::IdentifierExpression>("mat");
 
   ast::ExpressionList vals;
@@ -265,8 +319,14 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "mat",
-                                    ast::StorageClass::kFunction, &mat3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "mat",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -293,8 +353,14 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
   ast::type::Vector vec3(&f32, 3);
   ast::type::Matrix mat3(&f32, 3, 3);
 
-  auto* var = create<ast::Variable>(Source{}, "mat",
-                                    ast::StorageClass::kFunction, &mat3);
+  auto* var =
+      create<ast::Variable>(Source{},                        // source
+                            "mat",                           // name
+                            ast::StorageClass::kFunction,    // storage_class
+                            &mat3,                           // type
+                            false,                           // is_const
+                            nullptr,                         // constructor
+                            ast::VariableDecorationList{});  // decorations
   auto* lhs = create<ast::IdentifierExpression>("mat");
   auto* rhs = create<ast::IdentifierExpression>("mat");
 
@@ -489,11 +555,17 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   auto* c = create<ast::IdentifierExpression>("c");
   auto* d = create<ast::IdentifierExpression>("d");
 
-  auto* var = create<ast::Variable>(Source{}, "a", ast::StorageClass::kFunction,
-                                    &bool_type);
-  var->set_constructor(create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d));
+  auto* var = create<ast::Variable>(
+      Source{},                      // source
+      "a",                           // name
+      ast::StorageClass::kFunction,  // storage_class
+      &bool_type,                    // type
+      false,                         // is_const
+      create<ast::BinaryExpression>(
+          ast::BinaryOp::kLogicalOr,
+          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c),
+          d),                          // constructor
+      ast::VariableDecorationList{});  // decorations
 
   ast::VariableDeclStatement expr(var);
 

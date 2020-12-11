@@ -803,9 +803,9 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
         auto* ast_type = parser_impl_.ConvertType(param->type_id());
         if (ast_type != nullptr) {
           auto* ast_param = parser_impl_.MakeVariable(
-              param->result_id(), ast::StorageClass::kNone, ast_type);
+              param->result_id(), ast::StorageClass::kNone, ast_type, true,
+              nullptr, ast::VariableDecorationList{});
           // Parameters are treated as const declarations.
-          ast_param->set_is_const(true);
           ast_params.emplace_back(ast_param);
           // The value is accessible by name.
           identifier_values_.insert(param->result_id());
@@ -1864,16 +1864,18 @@ bool FunctionEmitter::EmitFunctionVariables() {
     if (failed()) {
       return false;
     }
-    auto* var = parser_impl_.MakeVariable(
-        inst.result_id(), ast::StorageClass::kFunction, var_store_type);
+    ast::Expression* constructor = nullptr;
     if (inst.NumInOperands() > 1) {
       // SPIR-V initializers are always constants.
       // (OpenCL also allows the ID of an OpVariable, but we don't handle that
       // here.)
-      var->set_constructor(
+      constructor =
           parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1))
-              .expr);
+              .expr;
     }
+    auto* var = parser_impl_.MakeVariable(
+        inst.result_id(), ast::StorageClass::kFunction, var_store_type, false,
+        constructor, ast::VariableDecorationList{});
     auto* var_decl_stmt = create<ast::VariableDeclStatement>(var);
     AddStatementForInstruction(var_decl_stmt, inst);
     // Save this as an already-named value.
@@ -2141,10 +2143,14 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   const std::string guard_name = block_info.flow_guard_name;
   if (!guard_name.empty()) {
     // Declare the guard variable just before the "if", initialized to true.
-    auto* guard_var = create<ast::Variable>(Source{}, guard_name,
-                                            ast::StorageClass::kFunction,
-                                            parser_impl_.Bool());
-    guard_var->set_constructor(MakeTrue());
+    auto* guard_var =
+        create<ast::Variable>(Source{},                        // source
+                              guard_name,                      // name
+                              ast::StorageClass::kFunction,    // storage_class
+                              parser_impl_.Bool(),             // type
+                              false,                           // is_const
+                              MakeTrue(),                      // constructor
+                              ast::VariableDecorationList{});  // decorations
     auto* guard_decl = create<ast::VariableDeclStatement>(guard_var);
     AddStatement(guard_decl);
   }
@@ -2674,8 +2680,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     assert(def_inst);
     auto* ast_type =
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
-    AddStatement(create<ast::VariableDeclStatement>(
-        parser_impl_.MakeVariable(id, ast::StorageClass::kFunction, ast_type)));
+    AddStatement(create<ast::VariableDeclStatement>(parser_impl_.MakeVariable(
+        id, ast::StorageClass::kFunction, ast_type, false, nullptr,
+        ast::VariableDecorationList{})));
     // Save this as an already-named value.
     identifier_values_.insert(id);
   }
@@ -2686,8 +2693,13 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     const auto phi_var_name = GetDefInfo(id)->phi_var;
     assert(!phi_var_name.empty());
     auto* var = create<ast::Variable>(
-        Source{}, phi_var_name, ast::StorageClass::kFunction,
-        parser_impl_.ConvertType(def_inst->type_id()));
+        Source{},                                       // source
+        phi_var_name,                                   // name
+        ast::StorageClass::kFunction,                   // storage_class
+        parser_impl_.ConvertType(def_inst->type_id()),  // type
+        false,                                          // is_const
+        nullptr,                                        // constructor
+        ast::VariableDecorationList{});                 // decorations
     AddStatement(create<ast::VariableDeclStatement>(var));
   }
 
@@ -2734,12 +2746,11 @@ bool FunctionEmitter::EmitConstDefinition(
     return false;
   }
   auto* ast_const = parser_impl_.MakeVariable(
-      inst.result_id(), ast::StorageClass::kNone, ast_expr.type);
+      inst.result_id(), ast::StorageClass::kNone, ast_expr.type, true,
+      ast_expr.expr, ast::VariableDecorationList{});
   if (!ast_const) {
     return false;
   }
-  ast_const->set_constructor(ast_expr.expr);
-  ast_const->set_is_const(true);
   AddStatementForInstruction(create<ast::VariableDeclStatement>(ast_const),
                              inst);
   // Save this as an already-named value.

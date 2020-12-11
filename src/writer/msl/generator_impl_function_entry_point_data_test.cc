@@ -16,7 +16,6 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
@@ -51,13 +50,29 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
-  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
+  auto* foo_var =
+      create<ast::Variable>(Source{},                   // source
+                            "foo",                      // name
+                            ast::StorageClass::kInput,  // storage_class
+                            &f32,                       // type
+                            false,                      // is_const
+                            nullptr,                    // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(0, Source{}),
+                            });
 
-  auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kInput, &i32));
-  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
+  auto* bar_var =
+      create<ast::Variable>(Source{},                   // source
+                            "bar",                      // name
+                            ast::StorageClass::kInput,  // storage_class
+                            &i32,                       // type
+                            false,                      // is_const
+                            nullptr,                    // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(1, Source{}),
+                            });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
@@ -105,13 +120,29 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kOutput, &f32));
-  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
+  auto* foo_var =
+      create<ast::Variable>(Source{},                    // source
+                            "foo",                       // name
+                            ast::StorageClass::kOutput,  // storage_class
+                            &f32,                        // type
+                            false,                       // is_const
+                            nullptr,                     // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(0, Source{}),
+                            });
 
-  auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &i32));
-  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
+  auto* bar_var =
+      create<ast::Variable>(Source{},                    // source
+                            "bar",                       // name
+                            ast::StorageClass::kOutput,  // storage_class
+                            &i32,                        // type
+                            false,                       // is_const
+                            nullptr,                     // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(1, Source{}),
+                            });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
@@ -159,13 +190,29 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
-  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
+  auto* foo_var =
+      create<ast::Variable>(Source{},                   // source
+                            "foo",                      // name
+                            ast::StorageClass::kInput,  // storage_class
+                            &f32,                       // type
+                            false,                      // is_const
+                            nullptr,                    // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(0, Source{}),
+                            });
 
-  auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kInput, &i32));
-  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
+  auto* bar_var =
+      create<ast::Variable>(Source{},                   // source
+                            "bar",                      // name
+                            ast::StorageClass::kInput,  // storage_class
+                            &i32,                       // type
+                            false,                      // is_const
+                            nullptr,                    // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(1, Source{}),
+                            });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
@@ -212,13 +259,29 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kOutput, &f32));
-  foo_var->set_decorations({create<ast::LocationDecoration>(0, Source{})});
+  auto* foo_var =
+      create<ast::Variable>(Source{},                    // source
+                            "foo",                       // name
+                            ast::StorageClass::kOutput,  // storage_class
+                            &f32,                        // type
+                            false,                       // is_const
+                            nullptr,                     // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(0, Source{}),
+                            });
 
-  auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &i32));
-  bar_var->set_decorations({create<ast::LocationDecoration>(1, Source{})});
+  auto* bar_var =
+      create<ast::Variable>(Source{},                    // source
+                            "bar",                       // name
+                            ast::StorageClass::kOutput,  // storage_class
+                            &i32,                        // type
+                            false,                       // is_const
+                            nullptr,                     // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(1, Source{}),
+                            });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
@@ -263,17 +326,29 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kInput, &f32));
+  auto* foo_var =
+      create<ast::Variable>(Source{},                   // source
+                            "foo",                      // name
+                            ast::StorageClass::kInput,  // storage_class
+                            &f32,                       // type
+                            false,                      // is_const
+                            nullptr,                    // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(0, Source{}),
+                            });
 
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(decos);
-
-  auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kInput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(decos);
+  auto* bar_var =
+      create<ast::Variable>(Source{},                   // source
+                            "bar",                      // name
+                            ast::StorageClass::kInput,  // storage_class
+                            &i32,                       // type
+                            false,                      // is_const
+                            nullptr,                    // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(1, Source{}),
+                            });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
@@ -313,17 +388,29 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   ast::type::F32 f32;
   ast::type::I32 i32;
 
-  auto* foo_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "foo", ast::StorageClass::kOutput, &f32));
+  auto* foo_var =
+      create<ast::Variable>(Source{},                    // source
+                            "foo",                       // name
+                            ast::StorageClass::kOutput,  // storage_class
+                            &f32,                        // type
+                            false,                       // is_const
+                            nullptr,                     // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(0, Source{}),
+                            });
 
-  ast::VariableDecorationList decos;
-  decos.push_back(create<ast::LocationDecoration>(0, Source{}));
-  foo_var->set_decorations(decos);
-
-  auto* bar_var = create<ast::DecoratedVariable>(
-      create<ast::Variable>(Source{}, "bar", ast::StorageClass::kOutput, &i32));
-  decos.push_back(create<ast::LocationDecoration>(1, Source{}));
-  bar_var->set_decorations(decos);
+  auto* bar_var =
+      create<ast::Variable>(Source{},                    // source
+                            "bar",                       // name
+                            ast::StorageClass::kOutput,  // storage_class
+                            &i32,                        // type
+                            false,                       // is_const
+                            nullptr,                     // constructor
+                            ast::VariableDecorationList{
+                                // decorations
+                                create<ast::LocationDecoration>(1, Source{}),
+                            });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
@@ -369,15 +456,29 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   ast::type::Void void_type;
   ast::type::Vector vec4(&f32, 4);
 
-  auto* coord_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "coord", ast::StorageClass::kInput, &vec4));
-  coord_var->set_decorations(
-      {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{})});
+  auto* coord_var = create<ast::Variable>(
+      Source{},                   // source
+      "coord",                    // name
+      ast::StorageClass::kInput,  // storage_class
+      &vec4,                      // type
+      false,                      // is_const
+      nullptr,                    // constructor
+      ast::VariableDecorationList{
+          // decorations
+          create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}),
+      });
 
-  auto* depth_var = create<ast::DecoratedVariable>(create<ast::Variable>(
-      Source{}, "depth", ast::StorageClass::kOutput, &f32));
-  depth_var->set_decorations(
-      {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{})});
+  auto* depth_var = create<ast::Variable>(
+      Source{},                    // source
+      "depth",                     // name
+      ast::StorageClass::kOutput,  // storage_class
+      &f32,                        // type
+      false,                       // is_const
+      nullptr,                     // constructor
+      ast::VariableDecorationList{
+          // decorations
+          create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}),
+      });
 
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);

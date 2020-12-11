@@ -144,15 +144,26 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
   ast::type::F32 f32;
 
-  auto* var = create<ast::Variable>(Source{}, "lhs",
-                                    ast::StorageClass::kFunction, &f32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.4)));
+  auto* var = create<ast::Variable>(
+      Source{},                      // source
+      "lhs",                         // name
+      ast::StorageClass::kFunction,  // storage_class
+      &f32,                          // type
+      false,                         // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(&f32, 2.4)),  // constructor
+      ast::VariableDecorationList{});             // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
-  body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
-      Source{}, "other", ast::StorageClass::kFunction, &f32)));
+  body->append(create<ast::VariableDeclStatement>(
+      create<ast::Variable>(Source{},                          // source
+                            "other",                           // name
+                            ast::StorageClass::kFunction,      // storage_class
+                            &f32,                              // type
+                            false,                             // is_const
+                            nullptr,                           // constructor
+                            ast::VariableDecorationList{})));  // decorations
 
   auto* lhs = create<ast::IdentifierExpression>("lhs");
   auto* rhs = create<ast::IdentifierExpression>("rhs");

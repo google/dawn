@@ -1399,9 +1399,8 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto* ptr_var = Var("ptr_var", ast::StorageClass::kPrivate, &ptr);
-  ptr_var->set_constructor(
-      create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")));
+  Var("ptr_var", ast::StorageClass::kPrivate, &ptr,
+      create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")), {});
 
   auto expr = Call("arrayLength", "ptr_var");
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();

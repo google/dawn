@@ -25,6 +25,7 @@
 #include "src/ast/node.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/type/type.h"
+#include "src/ast/variable_decoration.h"
 
 namespace tint {
 namespace ast {
@@ -83,25 +84,24 @@ class Variable : public Castable<Variable, Node> {
   /// @param name the variables name
   /// @param sc the variable storage class
   /// @param type the value type
+  /// @param is_const true if the variable is const
+  /// @param constructor the constructor expression
+  /// @param decorations the variable decorations
   Variable(const Source& source,
            const std::string& name,
            StorageClass sc,
-           type::Type* type);
+           type::Type* type,
+           bool is_const,
+           Expression* constructor,
+           VariableDecorationList decorations);
   /// Move constructor
   Variable(Variable&&);
 
   ~Variable() override;
 
-  /// Sets the variable name
-  /// @param name the name to set
-  void set_name(const std::string& name) { name_ = name; }
   /// @returns the variable name
   const std::string& name() const { return name_; }
 
-  /// Sets the value type if a const or formal parameter, or the
-  /// store type if a var.
-  /// @param type the type
-  void set_type(type::Type* type) { type_ = type; }
   /// @returns the variable's type.
   type::Type* type() const { return type_; }
 
@@ -111,19 +111,27 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the storage class
   StorageClass storage_class() const { return storage_class_; }
 
-  /// Sets the constructor
-  /// @param expr the constructor expression
-  void set_constructor(Expression* expr) { constructor_ = expr; }
   /// @returns the constructor expression or nullptr if none set
   Expression* constructor() const { return constructor_; }
   /// @returns true if the variable has an constructor
   bool has_constructor() const { return constructor_ != nullptr; }
 
-  /// Sets if the variable is constant
-  /// @param val the value to be set
-  void set_is_const(bool val) { is_const_ = val; }
   /// @returns true if this is a constant, false otherwise
   bool is_const() const { return is_const_; }
+
+  /// @returns the decorations attached to this variable
+  const VariableDecorationList& decorations() const { return decorations_; }
+
+  /// @returns true if the decorations include a LocationDecoration
+  bool HasLocationDecoration() const;
+  /// @returns true if the deocrations include a BuiltinDecoration
+  bool HasBuiltinDecoration() const;
+  /// @returns true if the decorations include a ConstantIdDecoration
+  bool HasConstantIdDecoration() const;
+
+  /// @returns the constant_id value for the variable. Assumes that
+  /// HasConstantIdDecoration() has been called first.
+  uint32_t constant_id() const;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -142,10 +150,6 @@ class Variable : public Castable<Variable, Node> {
   void to_str(std::ostream& out, size_t indent) const override;
 
  protected:
-  /// Constructor
-  /// Used by the DecoratedVariable constructor.
-  Variable();
-
   /// Output information for this variable.
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
@@ -158,12 +162,13 @@ class Variable : public Castable<Variable, Node> {
  private:
   Variable(const Variable&) = delete;
 
-  bool is_const_ = false;
   std::string name_;
   StorageClass storage_class_ = StorageClass::kNone;
   // The value type if a const or formal paramter, and the store type if a var
   type::Type* type_ = nullptr;
+  bool is_const_ = false;
   Expression* constructor_ = nullptr;
+  VariableDecorationList decorations_;
 };
 
 /// A list of variables

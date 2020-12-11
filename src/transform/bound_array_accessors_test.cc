@@ -122,8 +122,7 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
       Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
       Const("c", ast::StorageClass::kFunction, ty.u32);
       Const("b", ast::StorageClass::kFunction,
-            ty.pointer<f32>(ast::StorageClass::kFunction))
-          ->set_constructor(Index("a", "c"));
+            ty.pointer<f32>(ast::StorageClass::kFunction), Index("a", "c"), {});
     }
   };
 
@@ -171,8 +170,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
       Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
       Var("b", ast::StorageClass::kFunction, ty.array<f32, 5>());
       Var("i", ast::StorageClass::kFunction, ty.u32);
-      Const("c", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", Index("b", "i")));
+      Const("c", ast::StorageClass::kFunction, ty.f32,
+            Index("a", Index("b", "i")), {});
     }
   };
 
@@ -241,8 +240,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.array(ty.f32, 3));
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", 1u));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index("a", 1u), {});
     }
   };
 
@@ -274,8 +272,8 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
       Var("c", ast::StorageClass::kFunction, ty.u32);
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", Add("c", Sub(2u, 3u))));
+      Var("b", ast::StorageClass::kFunction, ty.f32,
+          Index("a", Add("c", Sub(2u, 3u))), {});
     }
   };
 
@@ -340,8 +338,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", -1));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index("a", -1), {});
     }
   };
 
@@ -371,8 +368,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.array<f32, 3>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", 3u));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index("a", 3u), {});
     }
   };
 
@@ -402,8 +398,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", 1u));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index("a", 1u), {});
     }
   };
 
@@ -435,8 +430,8 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
       Var("c", ast::StorageClass::kFunction, ty.u32);
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", Add("c", Sub(2u, 3u))));
+      Var("b", ast::StorageClass::kFunction, ty.f32,
+          Index("a", Add("c", Sub(2u, 3u))), {});
     }
   };
 
@@ -499,8 +494,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", -1));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index("a", -1), {});
     }
   };
 
@@ -530,8 +524,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.vec3<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index("a", 3u));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index("a", 3u), {});
     }
   };
 
@@ -561,8 +554,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index(Index("a", 2u), 1u));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index(Index("a", 2u), 1u),
+          {});
     }
   };
 
@@ -607,8 +600,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
       Var("c", ast::StorageClass::kFunction, ty.u32);
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index(Index("a", Add("c", Sub(2u, 3u))), 1u));
+      Var("b", ast::StorageClass::kFunction, ty.f32,
+          Index(Index("a", Add("c", Sub(2u, 3u))), 1u), {});
     }
   };
 
@@ -687,8 +680,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
       Var("c", ast::StorageClass::kFunction, ty.u32);
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index(Index("a", 1u), Add("c", Sub(2u, 3u))));
+      Var("b", ast::StorageClass::kFunction, ty.f32,
+          Index(Index("a", 1u), Add("c", Sub(2u, 3u))), {});
     }
   };
 
@@ -765,8 +758,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index(Index("a", -1), 1));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index(Index("a", -1), 1),
+          {});
     }
   };
 
@@ -809,8 +802,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index(Index("a", 2), -1));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index(Index("a", 2), -1),
+          {});
     }
   };
 
@@ -853,8 +846,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index(Index("a", 5u), 1u));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index(Index("a", 5u), 1u),
+          {});
     }
   };
 
@@ -897,8 +890,8 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   struct Builder : ModuleBuilder {
     void Build() override {
       Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
-      Var("b", ast::StorageClass::kFunction, ty.f32)
-          ->set_constructor(Index(Index("a", 2u), 5u));
+      Var("b", ast::StorageClass::kFunction, ty.f32, Index(Index("a", 2u), 5u),
+          {});
     }
   };
 

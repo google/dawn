@@ -17,7 +17,6 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/function.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
@@ -25,6 +24,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/variable.h"
 #include "src/diagnostic/formatter.h"
 #include "src/transform/manager.h"
 #include "src/type_determiner.h"
@@ -69,13 +69,18 @@ class VertexPullingHelper {
   void AddVertexInputVariable(uint32_t location,
                               std::string name,
                               ast::type::Type* type) {
-    auto* var = create<ast::DecoratedVariable>(
-        create<ast::Variable>(Source{}, name, ast::StorageClass::kInput, type));
+    auto* var = create<ast::Variable>(
+        Source{},                   // source
+        name,                       // name
+        ast::StorageClass::kInput,  // storage_class
+        type,                       // type
+        false,                      // is_const
+        nullptr,                    // constructor
+        ast::VariableDecorationList{
+            // decorations
+            create<ast::LocationDecoration>(location, Source{}),
+        });
 
-    ast::VariableDecorationList decorations;
-    decorations.push_back(create<ast::LocationDecoration>(location, Source{}));
-
-    var->set_decorations(decorations);
     mod_->AddGlobalVariable(var);
   }
 
@@ -171,7 +176,7 @@ TEST_F(VertexPullingTest, OneAttribute) {
     private
     __f32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -179,7 +184,7 @@ TEST_F(VertexPullingTest, OneAttribute) {
     in
     __i32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{0}
       SetDecoration{4}
@@ -257,7 +262,7 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
     private
     __f32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{instance_idx}
     }
@@ -265,7 +270,7 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
     in
     __i32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{0}
       SetDecoration{4}
@@ -343,7 +348,7 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
     private
     __f32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -351,7 +356,7 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
     in
     __i32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{0}
       SetDecoration{5}
@@ -416,31 +421,30 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
   AddVertexInputVariable(1, "var_b", &f32);
 
   ast::type::I32 i32;
-  {
-    auto* vertex_index_var =
-        create<ast::DecoratedVariable>(create<ast::Variable>(
-            Source{}, "custom_vertex_index", ast::StorageClass::kInput, &i32));
 
-    ast::VariableDecorationList decorations;
-    decorations.push_back(
-        create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx, Source{}));
+  mod()->AddGlobalVariable(create<ast::Variable>(
+      Source{},                   // source
+      "custom_vertex_index",      // name
+      ast::StorageClass::kInput,  // storage_class
+      &i32,                       // type
+      false,                      // is_const
+      nullptr,                    // constructor
+      ast::VariableDecorationList{
+          // decorations
+          create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx, Source{}),
+      }));
 
-    vertex_index_var->set_decorations(decorations);
-    mod()->AddGlobalVariable(vertex_index_var);
-  }
-
-  {
-    auto* instance_index_var = create<ast::DecoratedVariable>(
-        create<ast::Variable>(Source{}, "custom_instance_index",
-                              ast::StorageClass::kInput, &i32));
-
-    ast::VariableDecorationList decorations;
-    decorations.push_back(
-        create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx, Source{}));
-
-    instance_index_var->set_decorations(decorations);
-    mod()->AddGlobalVariable(instance_index_var);
-  }
+  mod()->AddGlobalVariable(create<ast::Variable>(
+      Source{},                   // source
+      "custom_instance_index",    // name
+      ast::StorageClass::kInput,  // storage_class
+      &i32,                       // type
+      false,                      // is_const
+      nullptr,                    // constructor
+      ast::VariableDecorationList{
+          // decorations
+          create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx, Source{}),
+      }));
 
   InitTransform(
       {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}},
@@ -464,7 +468,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     private
     __f32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -472,7 +476,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     in
     __i32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{instance_idx}
     }
@@ -480,7 +484,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     in
     __i32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{0}
       SetDecoration{4}
@@ -489,7 +493,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     storage_buffer
     __struct_TintVertexData
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{1}
       SetDecoration{4}
@@ -605,7 +609,7 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
     private
     __array__f32_4
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -613,7 +617,7 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
     in
     __i32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{0}
       SetDecoration{4}
@@ -796,7 +800,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     private
     __array__f32_4
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -804,7 +808,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     in
     __i32
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{0}
       SetDecoration{4}
@@ -813,7 +817,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     storage_buffer
     __struct_TintVertexData
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{1}
       SetDecoration{4}
@@ -822,7 +826,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     storage_buffer
     __struct_TintVertexData
   }
-  DecoratedVariable{
+  Variable{
     Decorations{
       BindingDecoration{2}
       SetDecoration{4}

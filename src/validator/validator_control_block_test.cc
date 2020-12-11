@@ -43,10 +43,15 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   //   default: {}
   // }
   ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &f32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&f32, 3.14f)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &f32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&f32, 3.14f)),  // constructor
+      ast::VariableDecorationList{});              // decorations
 
   auto* cond =
       create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
@@ -72,10 +77,15 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   //   case 1: {}
   // }
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   auto* cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList csl;
@@ -104,10 +114,15 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   //   default: {}
   // }
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
   auto* cond = create<ast::IdentifierExpression>("a");
@@ -148,10 +163,15 @@ TEST_F(ValidateControlBlockTest,
   // }
   ast::type::U32 u32;
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
   auto* cond = create<ast::IdentifierExpression>("a");
@@ -185,10 +205,15 @@ TEST_F(ValidateControlBlockTest,
   // }
   ast::type::U32 u32;
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &u32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &u32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
   auto* cond = create<ast::IdentifierExpression>("a");
@@ -221,10 +246,15 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   //   default: {}
   // }
   ast::type::U32 u32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &u32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 3)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &u32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 3)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
   auto* cond = create<ast::IdentifierExpression>("a");
@@ -263,10 +293,15 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   //   default: {}
   // }
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
   auto* cond = create<ast::IdentifierExpression>("a");
@@ -305,10 +340,15 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   //   default: { fallthrough; }
   // }
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   auto* cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList default_csl;
@@ -336,10 +376,15 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   //   case 5: {}
   // }
   ast::type::I32 i32;
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &i32);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &i32,                      // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   auto* cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList default_csl;
@@ -370,10 +415,15 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   ast::type::U32 u32;
   ast::type::Alias my_int{"MyInt", &u32};
 
-  auto* var =
-      create<ast::Variable>(Source{}, "a", ast::StorageClass::kNone, &my_int);
-  var->set_constructor(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&u32, 2)));
+  auto* var = create<ast::Variable>(
+      Source{},                  // source
+      "a",                       // name
+      ast::StorageClass::kNone,  // storage_class
+      &my_int,                   // type
+      false,                     // is_const
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&u32, 2)),  // constructor
+      ast::VariableDecorationList{});          // decorations
 
   auto* cond = create<ast::IdentifierExpression>("a");
   ast::CaseSelectorList default_csl;

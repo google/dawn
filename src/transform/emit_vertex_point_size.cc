@@ -19,12 +19,12 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/block_statement.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type_manager.h"
+#include "src/ast/variable.h"
 
 namespace tint {
 namespace transform {
@@ -51,11 +51,17 @@ Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
 
   // Declare the pointsize builtin output variable.
   auto* pointsize_var =
-      mod->create<ast::DecoratedVariable>(mod->create<ast::Variable>(
-          Source{}, kPointSizeVar, ast::StorageClass::kOutput, f32));
-  pointsize_var->set_decorations({
-      mod->create<ast::BuiltinDecoration>(ast::Builtin::kPointSize, Source{}),
-  });
+      mod->create<ast::Variable>(Source{},                    // source
+                                 kPointSizeVar,               // name
+                                 ast::StorageClass::kOutput,  // storage_class
+                                 f32,                         // type
+                                 false,                       // is_const
+                                 nullptr,                     // constructor
+                                 ast::VariableDecorationList{
+                                     // decorations
+                                     mod->create<ast::BuiltinDecoration>(
+                                         ast::Builtin::kPointSize, Source{}),
+                                 });
   mod->AddGlobalVariable(pointsize_var);
 
   // Build the AST expression & statement for assigning pointsize one.

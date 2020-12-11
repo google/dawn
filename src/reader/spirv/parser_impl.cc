@@ -41,7 +41,6 @@
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -1064,8 +1063,6 @@ bool ParserImpl::EmitScalarSpecConstants() {
         break;
     }
     if (ast_type && ast_expr) {
-      auto* ast_var =
-          MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type);
       ast::VariableDecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
@@ -1074,18 +1071,10 @@ bool ParserImpl::EmitScalarSpecConstants() {
           break;
         }
       }
-      if (spec_id_decos.empty()) {
-        // Register it as a named constant, without specialization id.
-        ast_var->set_is_const(true);
-        ast_var->set_constructor(ast_expr);
-        ast_module_.AddGlobalVariable(ast_var);
-      } else {
-        auto* ast_deco_var = create<ast::DecoratedVariable>(ast_var);
-        ast_deco_var->set_is_const(true);
-        ast_deco_var->set_constructor(ast_expr);
-        ast_deco_var->set_decorations(std::move(spec_id_decos));
-        ast_module_.AddGlobalVariable(ast_deco_var);
-      }
+      auto* ast_var =
+          MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type,
+                       true, ast_expr, std::move(spec_id_decos));
+      ast_module_.AddGlobalVariable(ast_var);
       scalar_spec_constants_.insert(inst.result_id());
     }
   }
@@ -1190,15 +1179,17 @@ bool ParserImpl::EmitModuleScopeVariables() {
     auto* ast_store_type = ast_type->As<ast::type::Pointer>()->type();
     auto ast_storage_class =
         ast_type->As<ast::type::Pointer>()->storage_class();
-    auto* ast_var =
-        MakeVariable(var.result_id(), ast_storage_class, ast_store_type);
+    ast::Expression* ast_constructor = nullptr;
     if (var.NumInOperands() > 1) {
       // SPIR-V initializers are always constants.
       // (OpenCL also allows the ID of an OpVariable, but we don't handle that
       // here.)
-      ast_var->set_constructor(
-          MakeConstantExpression(var.GetSingleWordInOperand(1)).expr);
+      ast_constructor =
+          MakeConstantExpression(var.GetSingleWordInOperand(1)).expr;
     }
+    auto* ast_var =
+        MakeVariable(var.result_id(), ast_storage_class, ast_store_type, false,
+                     ast_constructor, ast::VariableDecorationList{});
     // TODO(dneto): initializers (a.k.a. constructor expression)
     ast_module_.AddGlobalVariable(ast_var);
   }
@@ -1208,23 +1199,26 @@ bool ParserImpl::EmitModuleScopeVariables() {
     // Make sure the variable has a name.
     namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id,
                                 "gl_Position");
-    auto* var = create<ast::DecoratedVariable>(MakeVariable(
+    auto* var = MakeVariable(
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
-        ConvertType(builtin_position_.member_type_id)));
-    ast::VariableDecorationList decos;
-    decos.push_back(
-        create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}));
-    var->set_decorations(std::move(decos));
+        ConvertType(builtin_position_.member_type_id), false, nullptr,
+        ast::VariableDecorationList{
+            create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}),
+        });
 
     ast_module_.AddGlobalVariable(var);
   }
   return success_;
 }
 
-ast::Variable* ParserImpl::MakeVariable(uint32_t id,
-                                        ast::StorageClass sc,
-                                        ast::type::Type* type) {
+ast::Variable* ParserImpl::MakeVariable(
+    uint32_t id,
+    ast::StorageClass sc,
+    ast::type::Type* type,
+    bool is_const,
+    ast::Expression* constructor,
+    ast::VariableDecorationList decorations) {
   if (type == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
@@ -1238,9 +1232,6 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     type = ast_module_.create<ast::type::AccessControl>(access, type);
   }
 
-  auto* ast_var = create<ast::Variable>(Source{}, namer_.Name(id), sc, type);
-
-  ast::VariableDecorationList ast_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
     if (deco.empty()) {
       Fail() << "malformed decoration on ID " << id << ": it is empty";
@@ -1257,7 +1248,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
       if (ast_builtin == ast::Builtin::kNone) {
         return nullptr;
       }
-      ast_decorations.emplace_back(
+      decorations.emplace_back(
           create<ast::BuiltinDecoration>(ast_builtin, Source{}));
     }
     if (deco[0] == SpvDecorationLocation) {
@@ -1266,7 +1257,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                << ": requires one literal operand";
         return nullptr;
       }
-      ast_decorations.emplace_back(
+      decorations.emplace_back(
           create<ast::LocationDecoration>(deco[1], Source{}));
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
@@ -1275,8 +1266,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                << ": has no operand";
         return nullptr;
       }
-      ast_decorations.emplace_back(
-          create<ast::SetDecoration>(deco[1], Source{}));
+      decorations.emplace_back(create<ast::SetDecoration>(deco[1], Source{}));
     }
     if (deco[0] == SpvDecorationBinding) {
       if (deco.size() == 1) {
@@ -1284,16 +1274,18 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                << ": has no operand";
         return nullptr;
       }
-      ast_decorations.emplace_back(
+      decorations.emplace_back(
           create<ast::BindingDecoration>(deco[1], Source{}));
     }
   }
-  if (!ast_decorations.empty()) {
-    auto* decorated_var = create<ast::DecoratedVariable>(ast_var);
-    decorated_var->set_decorations(std::move(ast_decorations));
-    ast_var = std::move(decorated_var);
-  }
-  return ast_var;
+
+  return create<ast::Variable>(Source{},         // source
+                               namer_.Name(id),  // name
+                               sc,               // storage_class
+                               type,             // type
+                               is_const,         // is_const
+                               constructor,      // constructor
+                               decorations);     // decorations
 }
 
 TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {

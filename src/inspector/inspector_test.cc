@@ -22,7 +22,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
@@ -56,6 +55,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
 #include "src/ast/workgroup_decoration.h"
@@ -114,10 +114,22 @@ class InspectorHelper {
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      auto* in_var = create<ast::Variable>(
-          Source{}, in, ast::StorageClass::kInput, u32_type());
-      auto* out_var = create<ast::Variable>(
-          Source{}, out, ast::StorageClass::kOutput, u32_type());
+      auto* in_var =
+          create<ast::Variable>(Source{},                   // source
+                                in,                         // name
+                                ast::StorageClass::kInput,  // storage_class
+                                u32_type(),                 // type
+                                false,                      // is_const
+                                nullptr,                    // constructor
+                                ast::VariableDecorationList{});  // decorations
+      auto* out_var =
+          create<ast::Variable>(Source{},                    // source
+                                out,                         // name
+                                ast::StorageClass::kOutput,  // storage_class
+                                u32_type(),                  // type
+                                false,                       // is_const
+                                nullptr,                     // constructor
+                                ast::VariableDecorationList{});  // decorations
       mod()->AddGlobalVariable(in_var);
       mod()->AddGlobalVariable(out_var);
     }
@@ -187,17 +199,23 @@ class InspectorHelper {
                      uint32_t id,
                      ast::type::Type* type,
                      T* val) {
-    auto* dvar = create<ast::DecoratedVariable>(
-        create<ast::Variable>(Source{}, name, ast::StorageClass::kNone, type));
-    dvar->set_is_const(true);
-    ast::VariableDecorationList decos;
-    decos.push_back(create<ast::ConstantIdDecoration>(id, Source{}));
-    dvar->set_decorations(decos);
+    ast::Expression* constructor = nullptr;
     if (val) {
-      dvar->set_constructor(
-          create<ast::ScalarConstructorExpression>(MakeLiteral(type, val)));
+      constructor =
+          create<ast::ScalarConstructorExpression>(MakeLiteral(type, val));
     }
-    mod()->AddGlobalVariable(dvar);
+    auto* var = create<ast::Variable>(
+        Source{},                  // source
+        name,                      // name
+        ast::StorageClass::kNone,  // storage_class
+        type,                      // type
+        true,                      // is_const
+        constructor,               // constructor
+        ast::VariableDecorationList{
+            // decorations
+            create<ast::ConstantIdDecoration>(id, Source{}),
+        });
+    mod()->AddGlobalVariable(var);
   }
 
   /// @param type AST type of the literal, must resolve to BoolLiteral
@@ -348,13 +366,18 @@ class InspectorHelper {
                   ast::StorageClass storage_class,
                   uint32_t set,
                   uint32_t binding) {
-    auto* var = create<ast::DecoratedVariable>(
-        create<ast::Variable>(Source{}, name, storage_class, type));
-    ast::VariableDecorationList decorations;
-
-    decorations.push_back(create<ast::BindingDecoration>(binding, Source{}));
-    decorations.push_back(create<ast::SetDecoration>(set, Source{}));
-    var->set_decorations(decorations);
+    auto* var = create<ast::Variable>(
+        Source{},       // source
+        name,           // name
+        storage_class,  // storage_class
+        type,           // type
+        false,          // is_const
+        nullptr,        // constructor
+        ast::VariableDecorationList{
+            // decorations
+            create<ast::BindingDecoration>(binding, Source{}),
+            create<ast::SetDecoration>(set, Source{}),
+        });
 
     mod()->AddGlobalVariable(var);
   }
@@ -399,9 +422,14 @@ class InspectorHelper {
       ast::type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
-      body->append(create<ast::VariableDeclStatement>(
-          create<ast::Variable>(Source{}, "local" + member_name,
-                                ast::StorageClass::kNone, member_type)));
+      body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
+          Source{},                          // source
+          "local" + member_name,             // name
+          ast::StorageClass::kNone,          // storage_class
+          member_type,                       // type
+          false,                             // is_const
+          nullptr,                           // constructor
+          ast::VariableDecorationList{})));  // decorations
     }
 
     for (auto member : members) {
@@ -496,7 +524,13 @@ class InspectorHelper {
 
   void AddGlobalVariable(const std::string& name, ast::type::Type* type) {
     mod()->AddGlobalVariable(create<ast::Variable>(
-        Source{}, name, ast::StorageClass::kUniformConstant, type));
+        Source{},                             // source
+        name,                                 // name
+        ast::StorageClass::kUniformConstant,  // storage_class
+        type,                                 // type
+        false,                                // is_const
+        nullptr,                              // constructor
+        ast::VariableDecorationList{}));      // decorations
   }
 
   /// Adds a depth texture variable to the module
@@ -504,7 +538,13 @@ class InspectorHelper {
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, ast::type::Type* type) {
     mod()->AddGlobalVariable(create<ast::Variable>(
-        Source{}, name, ast::StorageClass::kUniformConstant, type));
+        Source{},                             // source
+        name,                                 // name
+        ast::StorageClass::kUniformConstant,  // storage_class
+        type,                                 // type
+        false,                                // is_const
+        nullptr,                              // constructor
+        ast::VariableDecorationList{}));      // decorations
   }
 
   /// Generates a function that references a specific sampler variable
@@ -526,9 +566,14 @@ class InspectorHelper {
 
     auto* body = create<ast::BlockStatement>();
 
-    auto* call_result = create<ast::Variable>(Source{}, "sampler_result",
-                                              ast::StorageClass::kFunction,
-                                              vec_type(base_type, 4));
+    auto* call_result =
+        create<ast::Variable>(Source{},                        // source
+                              "sampler_result",                // name
+                              ast::StorageClass::kFunction,    // storage_class
+                              vec_type(base_type, 4),          // type
+                              false,                           // is_const
+                              nullptr,                         // constructor
+                              ast::VariableDecorationList{});  // decorations
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
@@ -567,9 +612,14 @@ class InspectorHelper {
 
     auto* body = create<ast::BlockStatement>();
 
-    auto* call_result = create<ast::Variable>(Source{}, "sampler_result",
-                                              ast::StorageClass::kFunction,
-                                              vec_type(base_type, 4));
+    auto* call_result =
+        create<ast::Variable>(Source{},                        // source
+                              "sampler_result",                // name
+                              ast::StorageClass::kFunction,    // storage_class
+                              vec_type(base_type, 4),          // type
+                              false,                           // is_const
+                              nullptr,                         // constructor
+                              ast::VariableDecorationList{});  // decorations
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
@@ -610,8 +660,14 @@ class InspectorHelper {
 
     auto* body = create<ast::BlockStatement>();
 
-    auto* call_result = create<ast::Variable>(
-        Source{}, "sampler_result", ast::StorageClass::kFunction, base_type);
+    auto* call_result =
+        create<ast::Variable>(Source{},                        // source
+                              "sampler_result",                // name
+                              ast::StorageClass::kFunction,    // storage_class
+                              base_type,                       // type
+                              false,                           // is_const
+                              nullptr,                         // constructor
+                              ast::VariableDecorationList{});  // decorations
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
