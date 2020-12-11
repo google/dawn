@@ -113,7 +113,7 @@ class TypeDeterminer {
  private:
   void set_error(const Source& src, const std::string& msg);
   void set_referenced_from_function_if_needed(ast::Variable* var, bool local);
-  void set_entry_points(const std::string& fn_name, const std::string& ep_name);
+  void set_entry_points(const std::string& fn_name, Symbol ep_sym);
 
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineBinary(ast::BinaryExpression* expr);

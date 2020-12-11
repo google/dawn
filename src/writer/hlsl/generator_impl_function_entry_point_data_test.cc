@@ -91,7 +91,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar")));
 
   auto* func = create<ast::Function>(
-      Source{}, "vtx_main", params, &f32, body,
+      Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -164,7 +164,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar")));
 
   auto* func = create<ast::Function>(
-      Source{}, "vtx_main", params, &f32, body,
+      Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -237,7 +237,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar")));
 
   auto* func = create<ast::Function>(
-      Source{}, "main", params, &f32, body,
+      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -309,7 +309,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar")));
 
   auto* func = create<ast::Function>(
-      Source{}, "main", params, &f32, body,
+      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });
@@ -378,7 +378,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar")));
 
   auto* func = create<ast::Function>(
-      Source{}, "main", params, &f32, body,
+      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
       });
@@ -442,7 +442,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
       create<ast::IdentifierExpression>("bar")));
 
   auto* func = create<ast::Function>(
-      Source{}, "main", params, &f32, body,
+      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
       });
@@ -512,7 +512,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
           create<ast::IdentifierExpression>("x"))));
 
   auto* func = create<ast::Function>(
-      Source{}, "main", params, &void_type, body,
+      Source{}, mod.RegisterSymbol("main"), "main", params, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });

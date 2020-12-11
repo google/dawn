@@ -156,11 +156,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param func the function to emit
   /// @param emit_duplicate_functions set true if we need to duplicate per entry
   /// point
-  /// @param ep_name the current entry point or blank if none set
+  /// @param ep_sym the current entry point or symbol::kInvalid if not set
   /// @returns true if the function was emitted.
   bool EmitFunctionInternal(ast::Function* func,
                             bool emit_duplicate_functions,
-                            const std::string& ep_name);
+                            Symbol ep_sym);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
   /// @returns true if the identifier was emitted
@@ -282,13 +282,13 @@ class GeneratorImpl : public TextGenerator {
 
   Namer namer_;
   ScopeStack<ast::Variable*> global_variables_;
-  std::string current_ep_name_;
+  Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   const ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
 
-  std::unordered_map<std::string, EntryPointData> ep_name_to_in_data_;
-  std::unordered_map<std::string, EntryPointData> ep_name_to_out_data_;
+  std::unordered_map<uint32_t, EntryPointData> ep_sym_to_in_data_;
+  std::unordered_map<uint32_t, EntryPointData> ep_sym_to_out_data_;
 
   // This maps an input of "<entry_point_name>_<function_name>" to a remapped
   // function name. If there is no entry for a given key then function did

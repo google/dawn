@@ -42,7 +42,8 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
   ast::type::Void void_type;
 
   ast::Function func(
-      Source{}, "main", {}, &void_type, create<ast::BlockStatement>(),
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -67,8 +68,8 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
 
   ast::type::Void void_type;
 
-  ast::Function func(Source{}, "main", {}, &void_type,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
+                     &void_type, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{
                          create<ast::StageDecoration>(params.stage, Source{}),
                      });
@@ -97,7 +98,8 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   ast::type::Void void_type;
 
   ast::Function func(
-      Source{}, "main", {}, &void_type, create<ast::BlockStatement>(),
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -174,7 +176,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
       create<ast::IdentifierExpression>("my_in")));
 
   ast::Function func(
-      Source{}, "main", {}, &void_type, body,
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -244,7 +246,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
   ast::type::Void void_type;
 
   ast::Function func(
-      Source{}, "main", {}, &void_type, create<ast::BlockStatement>(),
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });
@@ -259,7 +262,8 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
   ast::type::Void void_type;
 
   ast::Function func(
-      Source{}, "main", {}, &void_type, create<ast::BlockStatement>(),
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
       });
@@ -274,7 +278,8 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
   ast::type::Void void_type;
 
   ast::Function func(
-      Source{}, "main", {}, &void_type, create<ast::BlockStatement>(),
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
@@ -290,13 +295,15 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
   ast::type::Void void_type;
 
   ast::Function func1(
-      Source{}, "main1", {}, &void_type, create<ast::BlockStatement>(),
+      Source{}, mod->RegisterSymbol("main1"), "main1", {}, &void_type,
+      create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });
 
   ast::Function func2(
-      Source{}, "main2", {}, &void_type, create<ast::BlockStatement>(),
+      Source{}, mod->RegisterSymbol("main2"), "main2", {}, &void_type,
+      create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });

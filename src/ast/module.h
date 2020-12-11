@@ -89,15 +89,14 @@ class Module {
   /// @returns the modules functions
   const FunctionList& functions() const { return functions_; }
   /// Returns the function with the given name
-  /// @param name the name to search for
+  /// @param sym the function symbol to search for
   /// @returns the associated function or nullptr if none exists
-  Function* FindFunctionByName(const std::string& name) const;
+  Function* FindFunctionBySymbol(Symbol sym) const;
   /// Returns the function with the given name
-  /// @param name the name to search for
+  /// @param sym the function symbol to search for
   /// @param stage the pipeline stage
   /// @returns the associated function or nullptr if none exists
-  Function* FindFunctionByNameAndStage(const std::string& name,
-                                       PipelineStage stage) const;
+  Function* FindFunctionBySymbolAndStage(Symbol sym, PipelineStage stage) const;
   /// @param stage the pipeline stage
   /// @returns true if the module contains an entrypoint function with the given
   /// stage
@@ -168,6 +167,11 @@ class Module {
   /// @returns the symbol for the `name`. If `name` is already registered the
   /// previously generated symbol will be returned.
   Symbol RegisterSymbol(const std::string& name);
+
+  /// Returns the symbol for `name`
+  /// @param name the name to lookup
+  /// @returns the symbol for name or symbol::kInvalid
+  Symbol GetSymbol(const std::string& name) const;
 
   /// Returns the `name` for `sym`
   /// @param sym the symbol to retrieve the name for

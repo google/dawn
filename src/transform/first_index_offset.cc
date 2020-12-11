@@ -169,9 +169,9 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
           body->append(ctx.Clone(s));
         }
         return ctx.mod->create<ast::Function>(
-            ctx.Clone(func->source()), func->name(), ctx.Clone(func->params()),
-            ctx.Clone(func->return_type()), ctx.Clone(body),
-            ctx.Clone(func->decorations()));
+            ctx.Clone(func->source()), func->symbol(), func->name(),
+            ctx.Clone(func->params()), ctx.Clone(func->return_type()),
+            ctx.Clone(body), ctx.Clone(func->decorations()));
       });
 
   in->Clone(&ctx);

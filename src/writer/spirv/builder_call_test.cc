@@ -65,11 +65,11 @@ TEST_F(BuilderTest, Expression_Call) {
       Source{}, create<ast::BinaryExpression>(
                     ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
                     create<ast::IdentifierExpression>("b"))));
-  ast::Function a_func(Source{}, "a_func", func_params, &f32, body,
-                       ast::FunctionDecorationList{});
+  ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
+                       func_params, &f32, body, ast::FunctionDecorationList{});
 
-  ast::Function func(Source{}, "main", {}, &void_type,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
+                     &void_type, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;
@@ -143,11 +143,12 @@ TEST_F(BuilderTest, Statement_Call) {
                     ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
                     create<ast::IdentifierExpression>("b"))));
 
-  ast::Function a_func(Source{}, "a_func", func_params, &void_type, body,
+  ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
+                       func_params, &void_type, body,
                        ast::FunctionDecorationList{});
 
-  ast::Function func(Source{}, "main", {}, &void_type,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
+                     &void_type, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;

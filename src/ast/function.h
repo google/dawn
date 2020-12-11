@@ -35,6 +35,7 @@
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/variable.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace ast {
@@ -52,12 +53,14 @@ class Function : public Castable<Function, Node> {
 
   /// Create a function
   /// @param source the variable source
+  /// @param symbol the function symbol
   /// @param name the function name
   /// @param params the function parameters
   /// @param return_type the return type
   /// @param body the function body
   /// @param decorations the function decorations
   Function(const Source& source,
+           Symbol symbol,
            const std::string& name,
            VariableList params,
            type::Type* return_type,
@@ -68,6 +71,8 @@ class Function : public Castable<Function, Node> {
 
   ~Function() override;
 
+  /// @returns the function symbol
+  Symbol symbol() const { return symbol_; }
   /// @returns the function name
   const std::string& name() { return name_; }
   /// @returns the function params
@@ -150,15 +155,15 @@ class Function : public Castable<Function, Node> {
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor
-  void add_ancestor_entry_point(const std::string& ep);
+  void add_ancestor_entry_point(Symbol ep);
   /// @returns the ancestor entry points
-  const std::vector<std::string>& ancestor_entry_points() const {
+  const std::vector<Symbol>& ancestor_entry_points() const {
     return ancestor_entry_points_;
   }
   /// Checks if the given entry point is an ancestor
-  /// @param name the entry point name
-  /// @returns true if `name` is an ancestor entry point of this function
-  bool HasAncestorEntryPoint(const std::string& name) const;
+  /// @param sym the entry point symbol
+  /// @returns true if `sym` is an ancestor entry point of this function
+  bool HasAncestorEntryPoint(Symbol sym) const;
 
   /// @returns the function return type.
   type::Type* return_type() const { return return_type_; }
@@ -197,13 +202,14 @@ class Function : public Castable<Function, Node> {
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   ReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
+  Symbol symbol_;
   std::string name_;
   VariableList params_;
   type::Type* return_type_ = nullptr;
   BlockStatement* body_ = nullptr;
   std::vector<Variable*> referenced_module_vars_;
   std::vector<Variable*> local_referenced_module_vars_;
-  std::vector<std::string> ancestor_entry_points_;
+  std::vector<Symbol> ancestor_entry_points_;
   FunctionDecorationList decorations_;
 };
 

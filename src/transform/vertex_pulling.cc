@@ -84,8 +84,8 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
   }
 
   // Find entry point
-  auto* func = mod->FindFunctionByNameAndStage(cfg.entry_point_name,
-                                               ast::PipelineStage::kVertex);
+  auto* func = mod->FindFunctionBySymbolAndStage(
+      mod->GetSymbol(cfg.entry_point_name), ast::PipelineStage::kVertex);
   if (func == nullptr) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;
@@ -93,9 +93,6 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
     out.diagnostics.add(std::move(err));
     return out;
   }
-
-  // Save the vertex function
-  auto* vertex_func = mod->FindFunctionByName(func->name());
 
   // TODO(idanr): Need to check shader locations in descriptor cover all
   // attributes
@@ -108,7 +105,7 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
   state.FindOrInsertInstanceIndexIfUsed();
   state.ConvertVertexInputVariablesToPrivate();
   state.AddVertexStorageBuffers();
-  state.AddVertexPullingPreamble(vertex_func);
+  state.AddVertexPullingPreamble(func);
 
   return out;
 }

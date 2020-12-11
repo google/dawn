@@ -47,8 +47,8 @@ class VertexPullingHelper {
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
     auto* func = create<ast::Function>(
-        Source{}, "main", ast::VariableList{}, mod_->create<ast::type::Void>(),
-        create<ast::BlockStatement>(),
+        Source{}, mod_->RegisterSymbol("main"), "main", ast::VariableList{},
+        mod_->create<ast::type::Void>(), create<ast::BlockStatement>(),
         ast::FunctionDecorationList{create<ast::StageDecoration>(
             ast::PipelineStage::kVertex, Source{})});
     mod()->AddFunction(func);
@@ -134,8 +134,8 @@ TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
 
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
   auto* func = create<ast::Function>(
-      Source{}, "main", ast::VariableList{}, mod()->create<ast::type::Void>(),
-      create<ast::BlockStatement>(),
+      Source{}, mod()->RegisterSymbol("main"), "main", ast::VariableList{},
+      mod()->create<ast::type::Void>(), create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });
@@ -152,7 +152,8 @@ TEST_F(VertexPullingTest, BasicModule) {
   InitBasicModule();
   InitTransform({});
   auto result = manager()->Run(mod());
-  ASSERT_FALSE(result.diagnostics.contains_errors());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 }
 
 TEST_F(VertexPullingTest, OneAttribute) {
@@ -164,7 +165,8 @@ TEST_F(VertexPullingTest, OneAttribute) {
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
 
   auto result = manager()->Run(mod());
-  ASSERT_FALSE(result.diagnostics.contains_errors());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -193,7 +195,8 @@ TEST_F(VertexPullingTest, OneAttribute) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function main -> __void
+  Function )" + result.module.GetSymbol("main").to_str() +
+                R"( -> __void
   StageDecoration{vertex}
   ()
   {
@@ -250,7 +253,8 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
       {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
 
   auto result = manager()->Run(mod());
-  ASSERT_FALSE(result.diagnostics.contains_errors());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -279,7 +283,8 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function main -> __void
+  Function )" + result.module.GetSymbol("main").to_str() +
+                R"( -> __void
   StageDecoration{vertex}
   ()
   {
@@ -336,7 +341,8 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
   transform()->SetPullingBufferBindingSet(5);
 
   auto result = manager()->Run(mod());
-  ASSERT_FALSE(result.diagnostics.contains_errors());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -365,7 +371,8 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function main -> __void
+  Function )" + result.module.GetSymbol("main").to_str() +
+                R"( -> __void
   StageDecoration{vertex}
   ()
   {
@@ -451,7 +458,8 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
         {4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 1}}}}});
 
   auto result = manager()->Run(mod());
-  ASSERT_FALSE(result.diagnostics.contains_errors());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -502,7 +510,8 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function main -> __void
+  Function )" + result.module.GetSymbol("main").to_str() +
+                R"( -> __void
   StageDecoration{vertex}
   ()
   {
@@ -592,7 +601,8 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
          {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}});
 
   auto result = manager()->Run(mod());
-  ASSERT_FALSE(result.diagnostics.contains_errors());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -626,7 +636,8 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function main -> __void
+  Function )" + result.module.GetSymbol("main").to_str() +
+                R"( -> __void
   StageDecoration{vertex}
   ()
   {
@@ -778,7 +789,8 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
         {16, InputStepMode::kVertex, {{VertexFormat::kVec4F32, 0, 2}}}}});
 
   auto result = manager()->Run(mod());
-  ASSERT_FALSE(result.diagnostics.contains_errors());
+  ASSERT_FALSE(result.diagnostics.contains_errors())
+      << diag::Formatter().format(result.diagnostics);
 
   EXPECT_EQ(R"(Module{
   TintVertexData Struct{
@@ -835,7 +847,8 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function main -> __void
+  Function )" + result.module.GetSymbol("main").to_str() +
+                R"( -> __void
   StageDecoration{vertex}
   ()
   {

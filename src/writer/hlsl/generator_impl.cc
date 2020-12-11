@@ -196,15 +196,15 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
   std::string name = "";
   switch (type) {
     case VarType::kIn: {
-      auto in_it = ep_name_to_in_data_.find(current_ep_name_);
-      if (in_it != ep_name_to_in_data_.end()) {
+      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_.value());
+      if (in_it != ep_sym_to_in_data_.end()) {
         name = in_it->second.var_name;
       }
       break;
     }
     case VarType::kOut: {
-      auto outit = ep_name_to_out_data_.find(current_ep_name_);
-      if (outit != ep_name_to_out_data_.end()) {
+      auto outit = ep_sym_to_out_data_.find(current_ep_sym_.value());
+      if (outit != ep_sym_to_out_data_.end()) {
         name = outit->second.var_name;
       }
       break;
@@ -668,12 +668,14 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   }
 
   auto name = ident->name();
-  auto it = ep_func_name_remapped_.find(current_ep_name_ + "_" + name);
+  auto caller_sym = module_->GetSymbol(name);
+  auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
+                                        caller_sym.to_str());
   if (it != ep_func_name_remapped_.end()) {
     name = it->second;
   }
 
-  auto* func = module_->FindFunctionByName(ident->name());
+  auto* func = module_->FindFunctionBySymbol(module_->GetSymbol(ident->name()));
   if (func == nullptr) {
     error_ = "Unable to find function: " + name;
     return false;
@@ -1189,15 +1191,15 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
                                   has_referenced_var_needing_struct(func);
 
   if (emit_duplicate_functions) {
-    for (const auto& ep_name : func->ancestor_entry_points()) {
-      if (!EmitFunctionInternal(out, func, emit_duplicate_functions, ep_name)) {
+    for (const auto& ep_sym : func->ancestor_entry_points()) {
+      if (!EmitFunctionInternal(out, func, emit_duplicate_functions, ep_sym)) {
         return false;
       }
       out << std::endl;
     }
   } else {
     // Emit as non-duplicated
-    if (!EmitFunctionInternal(out, func, false, "")) {
+    if (!EmitFunctionInternal(out, func, false, Symbol())) {
       return false;
     }
     out << std::endl;
@@ -1209,8 +1211,8 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
 bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
                                          ast::Function* func,
                                          bool emit_duplicate_functions,
-                                         const std::string& ep_name) {
-  auto name = func->name();
+                                         Symbol ep_sym) {
+  auto name = func->symbol().to_str();
 
   if (!EmitType(out, func->return_type(), "")) {
     return false;
@@ -1219,10 +1221,15 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
   out << " ";
 
   if (emit_duplicate_functions) {
-    name = generate_name(name + "_" + ep_name);
-    ep_func_name_remapped_[ep_name + "_" + func->name()] = name;
+    auto func_name = name;
+    auto ep_name = ep_sym.to_str();
+    // TODO(dsinclair): The SymbolToName should go away and just use
+    // to_str() here when the conversion is complete.
+    name = generate_name(func->name() + "_" + module_->SymbolToName(ep_sym));
+    ep_func_name_remapped_[ep_name + "_" + func_name] = name;
   } else {
-    name = namer_.NameFor(name);
+    // TODO(dsinclair): this should be updated to a remapped name
+    name = namer_.NameFor(func->name());
   }
 
   out << name << "(";
@@ -1234,15 +1241,15 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
   //
   // We emit both of them if they're there regardless of if they're both used.
   if (emit_duplicate_functions) {
-    auto in_it = ep_name_to_in_data_.find(ep_name);
-    if (in_it != ep_name_to_in_data_.end()) {
+    auto in_it = ep_sym_to_in_data_.find(ep_sym.value());
+    if (in_it != ep_sym_to_in_data_.end()) {
       out << "in " << in_it->second.struct_name << " "
           << in_it->second.var_name;
       first = false;
     }
 
-    auto outit = ep_name_to_out_data_.find(ep_name);
-    if (outit != ep_name_to_out_data_.end()) {
+    auto outit = ep_sym_to_out_data_.find(ep_sym.value());
+    if (outit != ep_sym_to_out_data_.end()) {
       if (!first) {
         out << ", ";
       }
@@ -1269,13 +1276,13 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
 
   out << ") ";
 
-  current_ep_name_ = ep_name;
+  current_ep_sym_ = ep_sym;
 
   if (!EmitBlockAndNewline(out, func->body())) {
     return false;
   }
 
-  current_ep_name_ = "";
+  current_ep_sym_ = Symbol();
 
   return true;
 }
@@ -1392,7 +1399,7 @@ bool GeneratorImpl::EmitEntryPointData(
     auto in_struct_name =
         generate_name(func->name() + "_" + kInStructNameSuffix);
     auto in_var_name = generate_name(kTintStructInVarPrefix);
-    ep_name_to_in_data_[func->name()] = {in_struct_name, in_var_name};
+    ep_sym_to_in_data_[func->symbol().value()] = {in_struct_name, in_var_name};
 
     make_indent(out);
     out << "struct " << in_struct_name << " {" << std::endl;
@@ -1438,7 +1445,7 @@ bool GeneratorImpl::EmitEntryPointData(
     auto outstruct_name =
         generate_name(func->name() + "_" + kOutStructNameSuffix);
     auto outvar_name = generate_name(kTintStructOutVarPrefix);
-    ep_name_to_out_data_[func->name()] = {outstruct_name, outvar_name};
+    ep_sym_to_out_data_[func->symbol().value()] = {outstruct_name, outvar_name};
 
     make_indent(out);
     out << "struct " << outstruct_name << " {" << std::endl;
@@ -1516,7 +1523,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
                                            ast::Function* func) {
   make_indent(out);
 
-  current_ep_name_ = func->name();
+  current_ep_sym_ = func->symbol();
 
   if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
     uint32_t x = 0;
@@ -1528,17 +1535,18 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     make_indent(out);
   }
 
-  auto outdata = ep_name_to_out_data_.find(current_ep_name_);
-  bool has_outdata = outdata != ep_name_to_out_data_.end();
+  auto outdata = ep_sym_to_out_data_.find(current_ep_sym_.value());
+  bool has_outdata = outdata != ep_sym_to_out_data_.end();
   if (has_outdata) {
     out << outdata->second.struct_name;
   } else {
     out << "void";
   }
-  out << " " << namer_.NameFor(current_ep_name_) << "(";
+  // TODO(dsinclair): This should output the remapped name
+  out << " " << namer_.NameFor(module_->SymbolToName(current_ep_sym_)) << "(";
 
-  auto in_data = ep_name_to_in_data_.find(current_ep_name_);
-  if (in_data != ep_name_to_in_data_.end()) {
+  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_.value());
+  if (in_data != ep_sym_to_in_data_.end()) {
     out << in_data->second.struct_name << " " << in_data->second.var_name;
   }
   out << ") {" << std::endl;
@@ -1563,7 +1571,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   make_indent(out);
   out << "}" << std::endl;
 
-  current_ep_name_ = "";
+  current_ep_sym_ = Symbol();
 
   return true;
 }
@@ -1966,8 +1974,8 @@ bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
 
   if (generating_entry_point_) {
     out << "return";
-    auto outdata = ep_name_to_out_data_.find(current_ep_name_);
-    if (outdata != ep_name_to_out_data_.end()) {
+    auto outdata = ep_sym_to_out_data_.find(current_ep_sym_.value());
+    if (outdata != ep_sym_to_out_data_.end()) {
       out << " " << outdata->second.var_name;
     }
   } else if (stmt->has_value()) {

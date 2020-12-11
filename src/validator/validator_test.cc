@@ -332,7 +332,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   body->append(create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs));
 
-  auto* func = create<ast::Function>(Source{}, "my_func", params, &f32, body,
+  auto* func = create<ast::Function>(Source{}, mod()->RegisterSymbol("my_func"),
+                                     "my_func", params, &f32, body,
                                      ast::FunctionDecorationList{});
   mod()->AddFunction(func);
 
@@ -370,7 +371,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       Source{Source::Location{12, 34}}, lhs, rhs));
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(
-      Source{}, "my_func", params, &void_type, body,
+      Source{}, mod()->RegisterSymbol("my_func"), "my_func", params, &void_type,
+      body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -587,8 +589,9 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var));
-  auto* func = create<ast::Function>(Source{}, "my_func", params, &void_type,
-                                     body, ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(Source{}, mod()->RegisterSymbol("my_func"),
+                                     "my_func", params, &void_type, body,
+                                     ast::FunctionDecorationList{});
 
   mod()->AddFunction(func);
 
@@ -631,8 +634,9 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var_a_float));
-  auto* func = create<ast::Function>(Source{}, "my_func", params, &void_type,
-                                     body, ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(Source{}, mod()->RegisterSymbol("my_func"),
+                                     "my_func", params, &void_type, body,
+                                     ast::FunctionDecorationList{});
 
   mod()->AddFunction(func);
 
@@ -759,8 +763,9 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   body0->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var0));
   body0->append(create<ast::ReturnStatement>(Source{}));
-  auto* func0 = create<ast::Function>(Source{}, "func0", params0, &void_type,
-                                      body0, ast::FunctionDecorationList{});
+  auto* func0 = create<ast::Function>(Source{}, mod()->RegisterSymbol("func0"),
+                                      "func0", params0, &void_type, body0,
+                                      ast::FunctionDecorationList{});
 
   ast::VariableList params1;
   auto* body1 = create<ast::BlockStatement>();
@@ -768,7 +773,8 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
       Source{Source::Location{13, 34}}, var1));
   body1->append(create<ast::ReturnStatement>(Source{}));
   auto* func1 = create<ast::Function>(
-      Source{}, "func1", params1, &void_type, body1,
+      Source{}, mod()->RegisterSymbol("func1"), "func1", params1, &void_type,
+      body1,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });

@@ -53,7 +53,7 @@ TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
   auto p = parser(test::Assemble(CommonTypes()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, Not(HasSubstr("Function{")));
 }
 
@@ -64,7 +64,7 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, Not(HasSubstr("Function{")));
 }
 
@@ -79,9 +79,10 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function main -> __void
+  Function )" + p->get_module().GetSymbol("main").to_str() +
+                                    R"( -> __void
   StageDecoration{vertex}
   ()
   {)"));
@@ -98,9 +99,10 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function main -> __void
+  Function )" + p->get_module().GetSymbol("main").to_str() +
+                                    R"( -> __void
   StageDecoration{fragment}
   ()
   {)"));
@@ -117,9 +119,10 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function main -> __void
+  Function )" + p->get_module().GetSymbol("main").to_str() +
+                                    R"( -> __void
   StageDecoration{compute}
   ()
   {)"));
@@ -138,14 +141,16 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function frag_main -> __void
+  Function )" + p->get_module().GetSymbol("frag_main").to_str() +
+                                    R"( -> __void
   StageDecoration{fragment}
   ()
   {)"));
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function comp_main -> __void
+  Function )" + p->get_module().GetSymbol("comp_main").to_str() +
+                                    R"( -> __void
   StageDecoration{compute}
   ()
   {)"));
@@ -160,9 +165,10 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function main -> __void
+  Function )" + p->get_module().GetSymbol("main").to_str() +
+                                    R"( -> __void
   ()
   {)"));
 }
@@ -193,9 +199,10 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function leaf -> __u32
+  Function )" + p->get_module().GetSymbol("leaf").to_str() +
+                                    R"( -> __u32
   ()
   {
     Return{
@@ -204,7 +211,8 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
       }
     }
   }
-  Function branch -> __u32
+  Function )" + p->get_module().GetSymbol("branch").to_str() +
+                                    R"( -> __u32
   ()
   {
     VariableDeclStatement{
@@ -227,7 +235,8 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
       }
     }
   }
-  Function root -> __void
+  Function )" + p->get_module().GetSymbol("root").to_str() +
+                                    R"( -> __void
   ()
   {
     VariableDeclStatement{
@@ -260,9 +269,10 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function ret_float -> __f32
+  Function )" + p->get_module().GetSymbol("ret_float").to_str() +
+                                    R"( -> __f32
   ()
   {
     Return{
@@ -289,9 +299,10 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function mixed_params -> __void
+  Function )" + p->get_module().GetSymbol("mixed_params").to_str() +
+                                    R"( -> __void
   (
     VariableConst{
       a
@@ -328,9 +339,10 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
+  const auto module_ast = p->get_module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function mixed_params -> __void
+  Function )" + p->get_module().GetSymbol("mixed_params").to_str() +
+                                    R"( -> __void
   (
     VariableConst{
       x_14

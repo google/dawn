@@ -18,9 +18,13 @@ namespace tint {
 
 SymbolTable::SymbolTable() = default;
 
+SymbolTable::SymbolTable(const SymbolTable&) = default;
+
 SymbolTable::SymbolTable(SymbolTable&&) = default;
 
 SymbolTable::~SymbolTable() = default;
+
+SymbolTable& SymbolTable::operator=(const SymbolTable& other) = default;
 
 SymbolTable& SymbolTable::operator=(SymbolTable&&) = default;
 
@@ -39,6 +43,11 @@ Symbol SymbolTable::Register(const std::string& name) {
   symbol_to_name_[sym.value()] = name;
 
   return sym;
+}
+
+Symbol SymbolTable::GetSymbol(const std::string& name) const {
+  auto it = name_to_symbol_.find(name);
+  return it != name_to_symbol_.end() ? it->second : Symbol();
 }
 
 std::string SymbolTable::NameFor(const Symbol symbol) const {

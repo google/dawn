@@ -761,9 +761,10 @@ bool FunctionEmitter::Emit() {
   }
 
   auto* body = statements_stack_[0].statements_;
-  ast_module_.AddFunction(create<ast::Function>(
-      decl.source, decl.name, std::move(decl.params), decl.return_type, body,
-      std::move(decl.decorations)));
+  ast_module_.AddFunction(
+      create<ast::Function>(decl.source, ast_module_.RegisterSymbol(decl.name),
+                            decl.name, std::move(decl.params), decl.return_type,
+                            body, std::move(decl.decorations)));
 
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();

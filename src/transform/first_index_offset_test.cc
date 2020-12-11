@@ -58,9 +58,9 @@ struct ModuleBuilder : public ast::BuilderWithModule {
 
   ast::Function* AddFunction(const std::string& name,
                              ast::VariableList params = {}) {
-    auto* func = create<ast::Function>(Source{}, name, std::move(params),
-                                       ty.u32, create<ast::BlockStatement>(),
-                                       ast::FunctionDecorationList());
+    auto* func = create<ast::Function>(
+        Source{}, mod->RegisterSymbol(name), name, std::move(params), ty.u32,
+        create<ast::BlockStatement>(), ast::FunctionDecorationList());
     mod->AddFunction(func);
     return func;
   }
@@ -154,7 +154,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function test -> __u32
+  Function tint_symbol_1 -> __u32
   ()
   {
     VariableDeclStatement{
@@ -229,7 +229,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function test -> __u32
+  Function tint_symbol_1 -> __u32
   ()
   {
     VariableDeclStatement{
@@ -317,7 +317,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function test -> __u32
+  Function tint_symbol_1 -> __u32
   ()
   {
     Return{
@@ -389,7 +389,7 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
     uniform
     __struct_TintFirstIndexOffsetData
   }
-  Function func1 -> __u32
+  Function tint_symbol_1 -> __u32
   ()
   {
     VariableDeclStatement{
@@ -415,7 +415,7 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
       }
     }
   }
-  Function func2 -> __u32
+  Function tint_symbol_2 -> __u32
   ()
   {
     Return{

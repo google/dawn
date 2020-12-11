@@ -46,8 +46,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::type::Void void_type;
-  ast::Function func(Source{}, "my_func", {}, &void_type, body,
-                     ast::FunctionDecorationList{});
+  ast::Function func(Source{}, mod.RegisterSymbol("my_func"), "my_func", {},
+                     &void_type, body, ast::FunctionDecorationList{});
 
   gen.increment_indent();
 
@@ -85,8 +85,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
                             ast::VariableDecorationList{}));  // decorations
 
   ast::type::Void void_type;
-  ast::Function func(Source{}, "my_func", params, &void_type, body,
-                     ast::FunctionDecorationList{});
+  ast::Function func(Source{}, mod.RegisterSymbol("my_func"), "my_func", params,
+                     &void_type, body, ast::FunctionDecorationList{});
 
   gen.increment_indent();
 
@@ -104,7 +104,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::type::Void void_type;
-  ast::Function func(Source{}, "my_func", {}, &void_type, body,
+  ast::Function func(Source{}, mod.RegisterSymbol("my_func"), "my_func", {},
+                     &void_type, body,
                      ast::FunctionDecorationList{
                          create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
                      });
@@ -127,7 +128,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 
   ast::type::Void void_type;
   ast::Function func(
-      Source{}, "my_func", {}, &void_type, body,
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", {}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });
@@ -150,7 +151,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
 
   ast::type::Void void_type;
   ast::Function func(
-      Source{}, "my_func", {}, &void_type, body,
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", {}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
           create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
@@ -237,12 +238,12 @@ TEST_F(WgslGeneratorImplTest,
     body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
-    auto* func =
-        create<ast::Function>(Source{}, "a", params, &void_type, body,
-                              ast::FunctionDecorationList{
-                                  create<ast::StageDecoration>(
-                                      ast::PipelineStage::kCompute, Source{}),
-                              });
+    auto* func = create<ast::Function>(
+        Source{}, mod.RegisterSymbol("a"), "a", params, &void_type, body,
+        ast::FunctionDecorationList{
+            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
+                                         Source{}),
+        });
 
     mod.AddFunction(func);
   }
@@ -264,12 +265,12 @@ TEST_F(WgslGeneratorImplTest,
     body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
-    auto* func =
-        create<ast::Function>(Source{}, "b", params, &void_type, body,
-                              ast::FunctionDecorationList{
-                                  create<ast::StageDecoration>(
-                                      ast::PipelineStage::kCompute, Source{}),
-                              });
+    auto* func = create<ast::Function>(
+        Source{}, mod.RegisterSymbol("b"), "b", params, &void_type, body,
+        ast::FunctionDecorationList{
+            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
+                                         Source{}),
+        });
 
     mod.AddFunction(func);
   }

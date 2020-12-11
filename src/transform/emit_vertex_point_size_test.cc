@@ -58,23 +58,26 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
           Var("builtin_assignments_should_happen_before_this",
               tint::ast::StorageClass::kFunction, ty.f32)));
 
-      mod->AddFunction(
-          create<ast::Function>(Source{}, "non_entry_a", ast::VariableList{},
-                                ty.void_, create<ast::BlockStatement>(Source{}),
-                                ast::FunctionDecorationList{}));
+      auto a_sym = mod->RegisterSymbol("non_entry_a");
+      mod->AddFunction(create<ast::Function>(
+          Source{}, a_sym, "non_entry_a", ast::VariableList{}, ty.void_,
+          create<ast::BlockStatement>(Source{}),
+          ast::FunctionDecorationList{}));
 
+      auto entry_sym = mod->RegisterSymbol("entry");
       auto* entry = create<ast::Function>(
-          Source{}, "entry", ast::VariableList{}, ty.void_, block,
+          Source{}, entry_sym, "entry", ast::VariableList{}, ty.void_, block,
           ast::FunctionDecorationList{
               create<ast::StageDecoration>(ast::PipelineStage::kVertex,
                                            Source{}),
           });
       mod->AddFunction(entry);
 
-      mod->AddFunction(
-          create<ast::Function>(Source{}, "non_entry_b", ast::VariableList{},
-                                ty.void_, create<ast::BlockStatement>(Source{}),
-                                ast::FunctionDecorationList{}));
+      auto b_sym = mod->RegisterSymbol("non_entry_b");
+      mod->AddFunction(create<ast::Function>(
+          Source{}, b_sym, "non_entry_b", ast::VariableList{}, ty.void_,
+          create<ast::BlockStatement>(Source{}),
+          ast::FunctionDecorationList{}));
     }
   };
 
@@ -82,7 +85,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  auto* expected = R"(Module{
+  auto expected = R"(Module{
   Variable{
     Decorations{
       BuiltinDecoration{pointsize}
@@ -91,11 +94,13 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
     out
     __f32
   }
-  Function non_entry_a -> __void
+  Function )" + result.module.RegisterSymbol("non_entry_a").to_str() +
+                  R"( -> __void
   ()
   {
   }
-  Function entry -> __void
+  Function )" + result.module.RegisterSymbol("entry").to_str() +
+                  R"( -> __void
   StageDecoration{vertex}
   ()
   {
@@ -111,7 +116,8 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
       }
     }
   }
-  Function non_entry_b -> __void
+  Function )" + result.module.RegisterSymbol("non_entry_b").to_str() +
+                  R"( -> __void
   ()
   {
   }
@@ -123,23 +129,26 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
 TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
   struct Builder : ModuleBuilder {
     void Build() override {
-      mod->AddFunction(
-          create<ast::Function>(Source{}, "non_entry_a", ast::VariableList{},
-                                ty.void_, create<ast::BlockStatement>(Source{}),
-                                ast::FunctionDecorationList{}));
+      auto a_sym = mod->RegisterSymbol("non_entry_a");
+      mod->AddFunction(create<ast::Function>(
+          Source{}, a_sym, "non_entry_a", ast::VariableList{}, ty.void_,
+          create<ast::BlockStatement>(Source{}),
+          ast::FunctionDecorationList{}));
 
-      mod->AddFunction(
-          create<ast::Function>(Source{}, "entry", ast::VariableList{},
-                                ty.void_, create<ast::BlockStatement>(Source{}),
-                                ast::FunctionDecorationList{
-                                    create<ast::StageDecoration>(
-                                        ast::PipelineStage::kVertex, Source{}),
-                                }));
+      auto entry_sym = mod->RegisterSymbol("entry");
+      mod->AddFunction(create<ast::Function>(
+          Source{}, entry_sym, "entry", ast::VariableList{}, ty.void_,
+          create<ast::BlockStatement>(Source{}),
+          ast::FunctionDecorationList{
+              create<ast::StageDecoration>(ast::PipelineStage::kVertex,
+                                           Source{}),
+          }));
 
-      mod->AddFunction(
-          create<ast::Function>(Source{}, "non_entry_b", ast::VariableList{},
-                                ty.void_, create<ast::BlockStatement>(Source{}),
-                                ast::FunctionDecorationList{}));
+      auto b_sym = mod->RegisterSymbol("non_entry_b");
+      mod->AddFunction(create<ast::Function>(
+          Source{}, b_sym, "non_entry_b", ast::VariableList{}, ty.void_,
+          create<ast::BlockStatement>(Source{}),
+          ast::FunctionDecorationList{}));
     }
   };
 
@@ -147,7 +156,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  auto* expected = R"(Module{
+  auto expected = R"(Module{
   Variable{
     Decorations{
       BuiltinDecoration{pointsize}
@@ -156,11 +165,13 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
     out
     __f32
   }
-  Function non_entry_a -> __void
+  Function )" + result.module.RegisterSymbol("non_entry_a").to_str() +
+                  R"( -> __void
   ()
   {
   }
-  Function entry -> __void
+  Function )" + result.module.RegisterSymbol("entry").to_str() +
+                  R"( -> __void
   StageDecoration{vertex}
   ()
   {
@@ -169,7 +180,8 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
       ScalarConstructor[__f32]{1.000000}
     }
   }
-  Function non_entry_b -> __void
+  Function )" + result.module.RegisterSymbol("non_entry_b").to_str() +
+                  R"( -> __void
   ()
   {
   }
@@ -181,8 +193,9 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
 TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
   struct Builder : ModuleBuilder {
     void Build() override {
+      auto frag_sym = mod->RegisterSymbol("fragment_entry");
       auto* fragment_entry = create<ast::Function>(
-          Source{}, "fragment_entry", ast::VariableList{}, ty.void_,
+          Source{}, frag_sym, "fragment_entry", ast::VariableList{}, ty.void_,
           create<ast::BlockStatement>(Source{}),
           ast::FunctionDecorationList{
               create<ast::StageDecoration>(ast::PipelineStage::kFragment,
@@ -190,13 +203,14 @@ TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
           });
       mod->AddFunction(fragment_entry);
 
-      auto* compute_entry =
-          create<ast::Function>(Source{}, "compute_entry", ast::VariableList{},
-                                ty.void_, create<ast::BlockStatement>(Source{}),
-                                ast::FunctionDecorationList{
-                                    create<ast::StageDecoration>(
-                                        ast::PipelineStage::kCompute, Source{}),
-                                });
+      auto comp_sym = mod->RegisterSymbol("compute_entry");
+      auto* compute_entry = create<ast::Function>(
+          Source{}, comp_sym, "compute_entry", ast::VariableList{}, ty.void_,
+          create<ast::BlockStatement>(Source{}),
+          ast::FunctionDecorationList{
+              create<ast::StageDecoration>(ast::PipelineStage::kCompute,
+                                           Source{}),
+          });
       mod->AddFunction(compute_entry);
     }
   };
@@ -205,13 +219,15 @@ TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  auto* expected = R"(Module{
-  Function fragment_entry -> __void
+  auto expected = R"(Module{
+  Function )" + result.module.RegisterSymbol("fragment_entry").to_str() +
+                  R"( -> __void
   StageDecoration{fragment}
   ()
   {
   }
-  Function compute_entry -> __void
+  Function )" + result.module.RegisterSymbol("compute_entry").to_str() +
+                  R"( -> __void
   StageDecoration{compute}
   ()
   {

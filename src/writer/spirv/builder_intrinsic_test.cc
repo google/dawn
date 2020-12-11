@@ -471,8 +471,8 @@ TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -505,8 +505,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
   auto expr = Call(param.name, 1.0f);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -533,8 +533,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
   auto expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -587,8 +587,8 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -612,8 +612,8 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
   auto expr = Call("length", vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -639,8 +639,8 @@ TEST_F(IntrinsicBuilderTest, Call_Normalize) {
   auto expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -671,8 +671,8 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -700,8 +700,8 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -737,8 +737,8 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -763,8 +763,8 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -792,8 +792,8 @@ TEST_F(IntrinsicBuilderTest, Call_Cross) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -823,8 +823,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
   auto expr = Call(param.name, 1.0f, 1.0f, 1.0f);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -853,8 +853,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -894,8 +894,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
   auto expr = Call(param.name, 1);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -922,8 +922,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
   auto expr = Call(param.name, vec2<i32>(1, 1));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -957,8 +957,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
   auto expr = Call(param.name, 1u);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -985,8 +985,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
   auto expr = Call(param.name, vec2<u32>(1u, 1u));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1020,8 +1020,8 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
   auto expr = Call(param.name, 1, 1);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1048,8 +1048,8 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
   auto expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1084,8 +1084,8 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
   auto expr = Call(param.name, 1u, 1u);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1112,8 +1112,8 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
   auto expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1148,8 +1148,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
   auto expr = Call(param.name, 1, 1, 1);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1178,8 +1178,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1213,8 +1213,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
   auto expr = Call(param.name, 1u, 1u, 1u);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1243,8 +1243,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1276,8 +1276,8 @@ TEST_F(IntrinsicBuilderTest, Call_Determinant) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1320,8 +1320,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1360,8 +1360,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -1405,8 +1405,8 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   auto expr = Call("arrayLength", "ptr_var");
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, ty.void_,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     ty.void_, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();

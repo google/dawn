@@ -83,8 +83,9 @@ class InspectorHelper {
       ast::FunctionDecorationList decorations = {}) {
     auto* body = create<ast::BlockStatement>();
     body->append(create<ast::ReturnStatement>(Source{}));
-    return create<ast::Function>(Source{}, name, ast::VariableList(),
-                                 void_type(), body, decorations);
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(name), name,
+                                 ast::VariableList(), void_type(), body,
+                                 decorations);
   }
 
   /// Generates a function that calls another
@@ -102,8 +103,9 @@ class InspectorHelper {
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
-    return create<ast::Function>(Source{}, caller, ast::VariableList(),
-                                 void_type(), body, decorations);
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(caller),
+                                 caller, ast::VariableList(), void_type(), body,
+                                 decorations);
   }
 
   /// Add In/Out variables to the global variables
@@ -154,8 +156,9 @@ class InspectorHelper {
           create<ast::IdentifierExpression>(in)));
     }
     body->append(create<ast::ReturnStatement>(Source{}));
-    return create<ast::Function>(Source{}, name, ast::VariableList(),
-                                 void_type(), body, decorations);
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(name), name,
+                                 ast::VariableList(), void_type(), body,
+                                 decorations);
   }
 
   /// Generates a function that references in/out variables and calls another
@@ -184,8 +187,9 @@ class InspectorHelper {
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
-    return create<ast::Function>(Source{}, caller, ast::VariableList(),
-                                 void_type(), body, decorations);
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(caller),
+                                 caller, ast::VariableList(), void_type(), body,
+                                 decorations);
   }
 
   /// Add a Constant ID to the global variables.
@@ -445,9 +449,9 @@ class InspectorHelper {
     }
 
     body->append(create<ast::ReturnStatement>(Source{}));
-    return create<ast::Function>(Source{}, func_name, ast::VariableList(),
-                                 void_type(), body,
-                                 ast::FunctionDecorationList{});
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
+                                 func_name, ast::VariableList(), void_type(),
+                                 body, ast::FunctionDecorationList{});
   }
 
   /// Adds a regular sampler variable to the module
@@ -587,8 +591,9 @@ class InspectorHelper {
         create<ast::IdentifierExpression>("sampler_result"), call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
 
-    return create<ast::Function>(Source{}, func_name, ast::VariableList(),
-                                 void_type(), body, decorations);
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
+                                 func_name, ast::VariableList(), void_type(),
+                                 body, decorations);
   }
 
   /// Generates a function that references a specific sampler variable
@@ -634,8 +639,9 @@ class InspectorHelper {
         create<ast::IdentifierExpression>("sampler_result"), call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
 
-    return create<ast::Function>(Source{}, func_name, ast::VariableList(),
-                                 void_type(), body, decorations);
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
+                                 func_name, ast::VariableList(), void_type(),
+                                 body, decorations);
   }
 
   /// Generates a function that references a specific comparison sampler
@@ -682,8 +688,9 @@ class InspectorHelper {
         create<ast::IdentifierExpression>("sampler_result"), call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
 
-    return create<ast::Function>(Source{}, func_name, ast::VariableList(),
-                                 void_type(), body, decorations);
+    return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
+                                 func_name, ast::VariableList(), void_type(),
+                                 body, decorations);
   }
 
   /// Gets an appropriate type for the data in a given texture type.
@@ -1513,7 +1520,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 
   body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
-      Source{}, "ep_func", ast::VariableList(), void_type(), body,
+      Source{}, mod()->RegisterSymbol("ep_func"), "ep_func",
+      ast::VariableList(), void_type(), body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -1659,7 +1667,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 
   body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
-      Source{}, "ep_func", ast::VariableList(), void_type(), body,
+      Source{}, mod()->RegisterSymbol("ep_func"), "ep_func",
+      ast::VariableList(), void_type(), body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -1832,7 +1841,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
   body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
-      Source{}, "ep_func", ast::VariableList(), void_type(), body,
+      Source{}, mod()->RegisterSymbol("ep_func"), "ep_func",
+      ast::VariableList(), void_type(), body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });

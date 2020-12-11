@@ -267,7 +267,7 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
-  auto* func = module_.FindFunctionByName(name);
+  auto* func = module_.FindFunctionBySymbol(module_.GetSymbol(name));
   if (!func) {
     error_ += name + " was not found!";
     return nullptr;

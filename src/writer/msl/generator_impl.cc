@@ -411,15 +411,15 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
   std::string name = "";
   switch (type) {
     case VarType::kIn: {
-      auto in_it = ep_name_to_in_data_.find(current_ep_name_);
-      if (in_it != ep_name_to_in_data_.end()) {
+      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_.value());
+      if (in_it != ep_sym_to_in_data_.end()) {
         name = in_it->second.var_name;
       }
       break;
     }
     case VarType::kOut: {
-      auto out_it = ep_name_to_out_data_.find(current_ep_name_);
-      if (out_it != ep_name_to_out_data_.end()) {
+      auto out_it = ep_sym_to_out_data_.find(current_ep_sym_.value());
+      if (out_it != ep_sym_to_out_data_.end()) {
         name = out_it->second.var_name;
       }
       break;
@@ -573,12 +573,14 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   }
 
   auto name = ident->name();
-  auto it = ep_func_name_remapped_.find(current_ep_name_ + "_" + name);
+  auto caller_sym = module_->GetSymbol(name);
+  auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
+                                        caller_sym.to_str());
   if (it != ep_func_name_remapped_.end()) {
     name = it->second;
   }
 
-  auto* func = module_->FindFunctionByName(ident->name());
+  auto* func = module_->FindFunctionBySymbol(module_->GetSymbol(ident->name()));
   if (func == nullptr) {
     error_ = "Unable to find function: " + name;
     return false;
@@ -1026,7 +1028,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
     auto in_struct_name =
         generate_name(func->name() + "_" + kInStructNameSuffix);
     auto in_var_name = generate_name(kTintStructInVarPrefix);
-    ep_name_to_in_data_[func->name()] = {in_struct_name, in_var_name};
+    ep_sym_to_in_data_[func->symbol().value()] = {in_struct_name, in_var_name};
 
     make_indent();
     out_ << "struct " << in_struct_name << " {" << std::endl;
@@ -1063,7 +1065,8 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
     auto out_struct_name =
         generate_name(func->name() + "_" + kOutStructNameSuffix);
     auto out_var_name = generate_name(kTintStructOutVarPrefix);
-    ep_name_to_out_data_[func->name()] = {out_struct_name, out_var_name};
+    ep_sym_to_out_data_[func->symbol().value()] = {out_struct_name,
+                                                   out_var_name};
 
     make_indent();
     out_ << "struct " << out_struct_name << " {" << std::endl;
@@ -1205,15 +1208,15 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
                                   has_referenced_var_needing_struct(func);
 
   if (emit_duplicate_functions) {
-    for (const auto& ep_name : func->ancestor_entry_points()) {
-      if (!EmitFunctionInternal(func, emit_duplicate_functions, ep_name)) {
+    for (const auto& ep_sym : func->ancestor_entry_points()) {
+      if (!EmitFunctionInternal(func, emit_duplicate_functions, ep_sym)) {
         return false;
       }
       out_ << std::endl;
     }
   } else {
     // Emit as non-duplicated
-    if (!EmitFunctionInternal(func, false, "")) {
+    if (!EmitFunctionInternal(func, false, Symbol())) {
       return false;
     }
     out_ << std::endl;
@@ -1224,19 +1227,23 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
 bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
                                          bool emit_duplicate_functions,
-                                         const std::string& ep_name) {
-  auto name = func->name();
-
+                                         Symbol ep_sym) {
+  auto name = func->symbol().to_str();
   if (!EmitType(func->return_type(), "")) {
     return false;
   }
 
   out_ << " ";
   if (emit_duplicate_functions) {
-    name = generate_name(name + "_" + ep_name);
-    ep_func_name_remapped_[ep_name + "_" + func->name()] = name;
+    auto func_name = name;
+    auto ep_name = ep_sym.to_str();
+    // TODO(dsinclair): The SymbolToName should go away and just use
+    // to_str() here when the conversion is complete.
+    name = generate_name(func->name() + "_" + module_->SymbolToName(ep_sym));
+    ep_func_name_remapped_[ep_name + "_" + func_name] = name;
   } else {
-    name = namer_.NameFor(name);
+    // TODO(dsinclair): this should be updated to a remapped name
+    name = namer_.NameFor(func->name());
   }
   out_ << name << "(";
 
@@ -1247,15 +1254,15 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   //
   // We emit both of them if they're there regardless of if they're both used.
   if (emit_duplicate_functions) {
-    auto in_it = ep_name_to_in_data_.find(ep_name);
-    if (in_it != ep_name_to_in_data_.end()) {
+    auto in_it = ep_sym_to_in_data_.find(ep_sym.value());
+    if (in_it != ep_sym_to_in_data_.end()) {
       out_ << "thread " << in_it->second.struct_name << "& "
            << in_it->second.var_name;
       first = false;
     }
 
-    auto out_it = ep_name_to_out_data_.find(ep_name);
-    if (out_it != ep_name_to_out_data_.end()) {
+    auto out_it = ep_sym_to_out_data_.find(ep_sym.value());
+    if (out_it != ep_sym_to_out_data_.end()) {
       if (!first) {
         out_ << ", ";
       }
@@ -1337,13 +1344,13 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
   out_ << ") ";
 
-  current_ep_name_ = ep_name;
+  current_ep_sym_ = ep_sym;
 
   if (!EmitBlockAndNewline(func->body())) {
     return false;
   }
 
-  current_ep_name_ = "";
+  current_ep_sym_ = Symbol();
 
   return true;
 }
@@ -1377,25 +1384,25 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
 bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   make_indent();
 
-  current_ep_name_ = func->name();
+  current_ep_sym_ = func->symbol();
 
   EmitStage(func->pipeline_stage());
   out_ << " ";
 
   // This is an entry point, the return type is the entry point output structure
   // if one exists, or void otherwise.
-  auto out_data = ep_name_to_out_data_.find(current_ep_name_);
-  bool has_out_data = out_data != ep_name_to_out_data_.end();
+  auto out_data = ep_sym_to_out_data_.find(current_ep_sym_.value());
+  bool has_out_data = out_data != ep_sym_to_out_data_.end();
   if (has_out_data) {
     out_ << out_data->second.struct_name;
   } else {
     out_ << "void";
   }
-  out_ << " " << namer_.NameFor(current_ep_name_) << "(";
+  out_ << " " << namer_.NameFor(func->name()) << "(";
 
   bool first = true;
-  auto in_data = ep_name_to_in_data_.find(current_ep_name_);
-  if (in_data != ep_name_to_in_data_.end()) {
+  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_.value());
+  if (in_data != ep_sym_to_in_data_.end()) {
     out_ << in_data->second.struct_name << " " << in_data->second.var_name
          << " [[stage_in]]";
     first = false;
@@ -1503,7 +1510,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   make_indent();
   out_ << "}" << std::endl;
 
-  current_ep_name_ = "";
+  current_ep_sym_ = Symbol();
   return true;
 }
 
@@ -1687,8 +1694,8 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   out_ << "return";
 
   if (generating_entry_point_) {
-    auto out_data = ep_name_to_out_data_.find(current_ep_name_);
-    if (out_data != ep_name_to_out_data_.end()) {
+    auto out_data = ep_sym_to_out_data_.find(current_ep_sym_.value());
+    if (out_data != ep_sym_to_out_data_.end()) {
       out_ << " " << out_data->second.var_name;
     }
   } else if (stmt->has_value()) {

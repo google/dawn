@@ -113,7 +113,8 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
 bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
                                        ast::PipelineStage stage,
                                        const std::string& name) {
-  auto* func = module.FindFunctionByNameAndStage(name, stage);
+  auto* func =
+      module.FindFunctionBySymbolAndStage(module.GetSymbol(name), stage);
   if (func == nullptr) {
     error_ = "Unable to find requested entry point: " + name;
     return false;
@@ -153,7 +154,7 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
   }
 
   for (auto* f : module.functions()) {
-    if (!f->HasAncestorEntryPoint(name)) {
+    if (!f->HasAncestorEntryPoint(module.GetSymbol(name))) {
       continue;
     }
 

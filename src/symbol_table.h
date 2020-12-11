@@ -27,11 +27,17 @@ class SymbolTable {
  public:
   /// Constructor
   SymbolTable();
+  /// Copy constructor
+  SymbolTable(const SymbolTable&);
   /// Move Constructor
   SymbolTable(SymbolTable&&);
   /// Destructor
   ~SymbolTable();
 
+  /// Copy assignment
+  /// @param other the symbol table to copy
+  /// @returns the new symbol table
+  SymbolTable& operator=(const SymbolTable& other);
   /// Move assignment
   /// @param other the symbol table to move
   /// @returns the symbol table
@@ -41,6 +47,11 @@ class SymbolTable {
   /// @param name the name to register
   /// @returns the symbol representing the given name
   Symbol Register(const std::string& name);
+
+  /// Returns the symbol for the given `name`
+  /// @param name the name to lookup
+  /// @returns the symbol for the name or symbol::kInvalid if not found.
+  Symbol GetSymbol(const std::string& name) const;
 
   /// Returns the name for the given symbol
   /// @param symbol the symbol to retrieve the name for

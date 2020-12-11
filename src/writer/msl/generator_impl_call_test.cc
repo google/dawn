@@ -37,9 +37,9 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   auto* id = create<ast::IdentifierExpression>("my_func");
   ast::CallExpression call(id, {});
 
-  auto* func = create<ast::Function>(Source{}, "my_func", ast::VariableList{},
-                                     &void_type, create<ast::BlockStatement>(),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -55,9 +55,9 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   params.push_back(create<ast::IdentifierExpression>("param2"));
   ast::CallExpression call(id, params);
 
-  auto* func = create<ast::Function>(Source{}, "my_func", ast::VariableList{},
-                                     &void_type, create<ast::BlockStatement>(),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -73,9 +73,9 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
   params.push_back(create<ast::IdentifierExpression>("param2"));
   ast::CallStatement call(create<ast::CallExpression>(id, params));
 
-  auto* func = create<ast::Function>(Source{}, "my_func", ast::VariableList{},
-                                     &void_type, create<ast::BlockStatement>(),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   gen.increment_indent();

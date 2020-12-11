@@ -613,9 +613,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   ast::type::Void void_type;
 
-  auto* func = create<ast::Function>(Source{}, "foo", ast::VariableList{},
-                                     &void_type, create<ast::BlockStatement>(),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("foo"), "foo", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ast::ExpressionList params;

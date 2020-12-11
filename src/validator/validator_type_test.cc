@@ -206,8 +206,9 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var));
+
   auto* func = create<ast::Function>(
-      Source{}, "func", params, &void_type, body,
+      Source{}, mod()->RegisterSymbol("func"), "func", params, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });

@@ -31,12 +31,14 @@ namespace tint {
 namespace ast {
 
 Function::Function(const Source& source,
+                   Symbol symbol,
                    const std::string& name,
                    VariableList params,
                    type::Type* return_type,
                    BlockStatement* body,
                    FunctionDecorationList decorations)
     : Base(source),
+      symbol_(symbol),
       name_(name),
       params_(std::move(params)),
       return_type_(return_type),
@@ -202,7 +204,7 @@ Function::local_referenced_builtin_variables() const {
   return ret;
 }
 
-void Function::add_ancestor_entry_point(const std::string& ep) {
+void Function::add_ancestor_entry_point(Symbol ep) {
   for (const auto& point : ancestor_entry_points_) {
     if (point == ep) {
       return;
@@ -211,9 +213,9 @@ void Function::add_ancestor_entry_point(const std::string& ep) {
   ancestor_entry_points_.push_back(ep);
 }
 
-bool Function::HasAncestorEntryPoint(const std::string& name) const {
+bool Function::HasAncestorEntryPoint(Symbol symbol) const {
   for (const auto& point : ancestor_entry_points_) {
-    if (point == name) {
+    if (point == symbol) {
       return true;
     }
   }
@@ -226,7 +228,7 @@ const Statement* Function::get_last_statement() const {
 
 Function* Function::Clone(CloneContext* ctx) const {
   return ctx->mod->create<Function>(
-      ctx->Clone(source()), name_, ctx->Clone(params_),
+      ctx->Clone(source()), symbol_, name_, ctx->Clone(params_),
       ctx->Clone(return_type_), ctx->Clone(body_), ctx->Clone(decorations_));
 }
 
@@ -238,7 +240,7 @@ bool Function::IsValid() const {
   if (body_ == nullptr || !body_->IsValid()) {
     return false;
   }
-  if (name_.length() == 0) {
+  if (name_.length() == 0 || !symbol_.IsValid()) {
     return false;
   }
   if (return_type_ == nullptr) {
@@ -249,7 +251,7 @@ bool Function::IsValid() const {
 
 void Function::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Function " << name_ << " -> " << return_type_->type_name()
+  out << "Function " << symbol_.to_str() << " -> " << return_type_->type_name()
       << std::endl;
 
   for (auto* deco : decorations()) {

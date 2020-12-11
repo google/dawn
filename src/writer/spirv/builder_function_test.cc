@@ -47,8 +47,8 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
   ast::type::Void void_type;
-  ast::Function func(Source{}, "a_func", {}, &void_type,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     &void_type, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func));
@@ -68,8 +68,8 @@ TEST_F(BuilderTest, Function_Terminator_Return) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(Source{}));
 
-  ast::Function func(Source{}, "a_func", {}, &void_type, body,
-                     ast::FunctionDecorationList{});
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     &void_type, body, ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
@@ -101,8 +101,8 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
       Source{}, create<ast::IdentifierExpression>("a")));
   ASSERT_TRUE(td.DetermineResultType(body)) << td.error();
 
-  ast::Function func(Source{}, "a_func", {}, &void_type, body,
-                     ast::FunctionDecorationList{});
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     &void_type, body, ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -128,8 +128,8 @@ TEST_F(BuilderTest, Function_Terminator_Discard) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
-  ast::Function func(Source{}, "a_func", {}, &void_type, body,
-                     ast::FunctionDecorationList{});
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     &void_type, body, ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
@@ -168,8 +168,8 @@ TEST_F(BuilderTest, Function_WithParams) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::IdentifierExpression>("a")));
-  ast::Function func(Source{}, "a_func", params, &f32, body,
-                     ast::FunctionDecorationList{});
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", params,
+                     &f32, body, ast::FunctionDecorationList{});
 
   td.RegisterVariableForTesting(func.params()[0]);
   td.RegisterVariableForTesting(func.params()[1]);
@@ -197,8 +197,8 @@ TEST_F(BuilderTest, Function_WithBody) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(Source{}));
 
-  ast::Function func(Source{}, "a_func", {}, &void_type, body,
-                     ast::FunctionDecorationList{});
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     &void_type, body, ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
@@ -213,8 +213,8 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, FunctionType) {
   ast::type::Void void_type;
-  ast::Function func(Source{}, "a_func", {}, &void_type,
-                     create<ast::BlockStatement>(),
+  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                     &void_type, create<ast::BlockStatement>(),
                      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func));
@@ -225,11 +225,11 @@ TEST_F(BuilderTest, FunctionType) {
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
   ast::type::Void void_type;
-  ast::Function func1(Source{}, "a_func", {}, &void_type,
-                      create<ast::BlockStatement>(),
+  ast::Function func1(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
+                      &void_type, create<ast::BlockStatement>(),
                       ast::FunctionDecorationList{});
-  ast::Function func2(Source{}, "b_func", {}, &void_type,
-                      create<ast::BlockStatement>(),
+  ast::Function func2(Source{}, mod->RegisterSymbol("b_func"), "b_func", {},
+                      &void_type, create<ast::BlockStatement>(),
                       ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func1));
@@ -307,12 +307,12 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
-    auto* func =
-        create<ast::Function>(Source{}, "a", params, &void_type, body,
-                              ast::FunctionDecorationList{
-                                  create<ast::StageDecoration>(
-                                      ast::PipelineStage::kCompute, Source{}),
-                              });
+    auto* func = create<ast::Function>(
+        Source{}, mod->RegisterSymbol("a"), "a", params, &void_type, body,
+        ast::FunctionDecorationList{
+            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
+                                         Source{}),
+        });
 
     mod->AddFunction(func);
   }
@@ -334,12 +334,12 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     body->append(create<ast::VariableDeclStatement>(var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
-    auto* func =
-        create<ast::Function>(Source{}, "b", params, &void_type, body,
-                              ast::FunctionDecorationList{
-                                  create<ast::StageDecoration>(
-                                      ast::PipelineStage::kCompute, Source{}),
-                              });
+    auto* func = create<ast::Function>(
+        Source{}, mod->RegisterSymbol("b"), "b", params, &void_type, body,
+        ast::FunctionDecorationList{
+            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
+                                         Source{}),
+        });
 
     mod->AddFunction(func);
   }

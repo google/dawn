@@ -1280,9 +1280,9 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
   if (errored)
     return Failure::kErrored;
 
-  return create<ast::Function>(header->source, header->name, header->params,
-                               header->return_type, body.value,
-                               func_decos.value);
+  return create<ast::Function>(
+      header->source, module_.RegisterSymbol(header->name), header->name,
+      header->params, header->return_type, body.value, func_decos.value);
 }
 
 // function_type_decl

@@ -47,21 +47,23 @@ void Module::Clone(CloneContext* ctx) {
   for (auto* func : functions_) {
     ctx->mod->functions_.emplace_back(ctx->Clone(func));
   }
+
+  ctx->mod->symbol_table_ = symbol_table_;
 }
 
-Function* Module::FindFunctionByName(const std::string& name) const {
+Function* Module::FindFunctionBySymbol(Symbol sym) const {
   for (auto* func : functions_) {
-    if (func->name() == name) {
+    if (func->symbol() == sym) {
       return func;
     }
   }
   return nullptr;
 }
 
-Function* Module::FindFunctionByNameAndStage(const std::string& name,
-                                             PipelineStage stage) const {
+Function* Module::FindFunctionBySymbolAndStage(Symbol sym,
+                                               PipelineStage stage) const {
   for (auto* func : functions_) {
-    if (func->name() == name && func->pipeline_stage() == stage) {
+    if (func->symbol() == sym && func->pipeline_stage() == stage) {
       return func;
     }
   }
@@ -79,6 +81,10 @@ bool Module::HasStage(ast::PipelineStage stage) const {
 
 Symbol Module::RegisterSymbol(const std::string& name) {
   return symbol_table_.Register(name);
+}
+
+Symbol Module::GetSymbol(const std::string& name) const {
+  return symbol_table_.GetSymbol(name);
 }
 
 std::string Module::SymbolToName(const Symbol sym) const {

@@ -46,14 +46,16 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  const auto module_ast_str = p->module().to_str();
+  const auto module_ast_str = p->get_module().to_str();
   EXPECT_THAT(module_ast_str, Eq(R"(Module{
-  Function x_50 -> __void
+  Function )" + p->get_module().GetSymbol("x_50").to_str() +
+                                 R"( -> __void
   ()
   {
     Return{}
   }
-  Function x_100 -> __void
+  Function )" + p->get_module().GetSymbol("x_100").to_str() +
+                                 R"( -> __void
   ()
   {
     Call[not set]{
@@ -214,9 +216,10 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast_str = p->module().to_str();
+  const auto module_ast_str = p->get_module().to_str();
   EXPECT_THAT(module_ast_str, HasSubstr(R"(Module{
-  Function x_50 -> __u32
+  Function )" + p->get_module().GetSymbol("x_50").to_str() +
+                                        R"( -> __u32
   (
     VariableConst{
       x_51
@@ -240,7 +243,8 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
       }
     }
   }
-  Function x_100 -> __void
+  Function )" + p->get_module().GetSymbol("x_100").to_str() +
+                                        R"( -> __void
   ()
   {
     VariableDeclStatement{

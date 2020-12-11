@@ -122,7 +122,7 @@ bool TypeDeterminer::Determine() {
       continue;
     }
     for (const auto& callee : caller_to_callee_[func->name()]) {
-      set_entry_points(callee, func->name());
+      set_entry_points(callee, func->symbol());
     }
   }
 
@@ -130,11 +130,11 @@ bool TypeDeterminer::Determine() {
 }
 
 void TypeDeterminer::set_entry_points(const std::string& fn_name,
-                                      const std::string& ep_name) {
-  name_to_function_[fn_name]->add_ancestor_entry_point(ep_name);
+                                      Symbol ep_sym) {
+  name_to_function_[fn_name]->add_ancestor_entry_point(ep_sym);
 
   for (const auto& callee : caller_to_callee_[fn_name]) {
-    set_entry_points(callee, ep_name);
+    set_entry_points(callee, ep_sym);
   }
 }
 
@@ -389,7 +389,8 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
       if (current_function_) {
         caller_to_callee_[current_function_->name()].push_back(ident->name());
 
-        auto* callee_func = mod_->FindFunctionByName(ident->name());
+        auto* callee_func =
+            mod_->FindFunctionBySymbol(mod_->GetSymbol(ident->name()));
         if (callee_func == nullptr) {
           set_error(expr->source(),
                     "unable to find called function: " + ident->name());

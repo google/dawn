@@ -51,8 +51,8 @@ TEST_F(MslGeneratorImplTest, Generate) {
   ast::type::Void void_type;
 
   auto* func = create<ast::Function>(
-      Source{}, "my_func", ast::VariableList{}, &void_type,
-      create<ast::BlockStatement>(),
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
       });
