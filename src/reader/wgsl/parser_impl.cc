@@ -937,7 +937,8 @@ Maybe<ast::type::Type*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  auto* alias = module_.create<ast::type::Alias>(name.value, type.value);
+  auto* alias = module_.create<ast::type::Alias>(
+      module_.RegisterSymbol(name.value), name.value, type.value);
   register_constructed(name.value, alias);
 
   return alias;

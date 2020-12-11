@@ -138,7 +138,8 @@ std::string Module::to_str() const {
       out << " ";
     }
     if (auto* alias = ty->As<type::Alias>()) {
-      out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
+      out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
+          << std::endl;
       if (auto* str = alias->type()->As<type::Struct>()) {
         str->impl()->to_str(out, indent);
       }

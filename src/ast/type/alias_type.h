@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/ast/type/type.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace ast {
@@ -27,13 +28,17 @@ namespace type {
 class Alias : public Castable<Alias, Type> {
  public:
   /// Constructor
+  /// @param sym the symbol for the alias
   /// @param name the alias name
   /// @param subtype the alias'd type
-  Alias(const std::string& name, Type* subtype);
+  Alias(const Symbol& sym, const std::string& name, Type* subtype);
   /// Move constructor
   Alias(Alias&&);
+  /// Destructor
   ~Alias() override;
 
+  /// @returns the alias symbol
+  Symbol symbol() const { return symbol_; }
   /// @returns the alias name
   const std::string& name() const { return name_; }
   /// @returns the alias type
@@ -58,6 +63,7 @@ class Alias : public Castable<Alias, Type> {
   Alias* Clone(CloneContext* ctx) const override;
 
  private:
+  Symbol symbol_;
   std::string name_;
   Type* subtype_ = nullptr;
 };

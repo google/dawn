@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/demangler.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -799,7 +800,8 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << assembly << p->error();
-  const auto module_str = p->module().to_str();
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_str, HasSubstr(R"(
   RTArr -> __array__u32_stride_4
   S Struct{

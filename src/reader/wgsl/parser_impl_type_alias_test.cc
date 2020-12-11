@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<ast::type::Alias>());
   auto* alias = t->As<ast::type::Alias>();
-  EXPECT_EQ(alias->name(), "a");
+  EXPECT_EQ(p->get_module().SymbolToName(alias->symbol()), "a");
   ASSERT_TRUE(alias->type()->Is<ast::type::Struct>());
 
   auto* s = alias->type()->As<ast::type::Struct>();

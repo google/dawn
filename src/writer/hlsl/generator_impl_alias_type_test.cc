@@ -30,7 +30,7 @@ using HlslGeneratorImplTest_Alias = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
   ast::type::F32 f32;
-  ast::type::Alias alias("a", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float a;
@@ -39,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
   ast::type::F32 f32;
-  ast::type::Alias alias("float", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("float"), "float", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float float_tint_0;
@@ -59,7 +59,7 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   });
 
   ast::type::Struct s("A", str);
-  ast::type::Alias alias("B", &s);
+  ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(struct B {

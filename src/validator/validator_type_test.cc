@@ -133,7 +133,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
 
   ast::type::F32 u32;
   ast::type::Array array(&u32, 0, ast::ArrayDecorationList{});
-  ast::type::Alias alias{"RTArr", &array};
+  ast::type::Alias alias{mod()->RegisterSymbol("RTArr"), "RTArr", &array};
 
   ast::StructMemberList members;
   {
@@ -167,7 +167,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
 
   ast::type::F32 u32;
   ast::type::Array array(&u32, 0, ast::ArrayDecorationList{});
-  ast::type::Alias alias{"RTArr", &array};
+  ast::type::Alias alias{mod()->RegisterSymbol("RTArr"), "RTArr", &array};
 
   ast::StructMemberList members;
   {

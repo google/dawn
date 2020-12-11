@@ -49,7 +49,8 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   auto& mod = p->get_module();
 
   auto* int_type = mod.create<ast::type::I32>();
-  auto* alias_type = mod.create<ast::type::Alias>("A", int_type);
+  auto* alias_type =
+      mod.create<ast::type::Alias>(mod.RegisterSymbol("A"), "A", int_type);
 
   p->register_constructed("A", alias_type);
 
@@ -61,7 +62,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   ASSERT_TRUE(t->Is<ast::type::Alias>());
 
   auto* alias = t->As<ast::type::Alias>();
-  EXPECT_EQ(alias->name(), "A");
+  EXPECT_EQ(p->get_module().SymbolToName(alias->symbol()), "A");
   EXPECT_EQ(alias->type(), int_type);
 }
 

@@ -53,7 +53,7 @@ using BuilderTest_Type = TestHelper;
 
 TEST_F(BuilderTest_Type, GenerateAlias) {
   ast::type::F32 f32;
-  ast::type::Alias alias_type("my_type", &f32);
+  ast::type::Alias alias_type(mod->RegisterSymbol("my_type"), "my_type", &f32);
 
   auto id = b.GenerateTypeIfNeeded(&alias_type);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -67,7 +67,7 @@ TEST_F(BuilderTest_Type, GenerateAlias) {
 TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
   ast::type::I32 i32;
   ast::type::F32 f32;
-  ast::type::Alias alias_type("my_type", &f32);
+  ast::type::Alias alias_type(mod->RegisterSymbol("my_type"), "my_type", &f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();

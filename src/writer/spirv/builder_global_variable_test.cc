@@ -566,7 +566,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   members.push_back(create<ast::StructMember>("a", &i32, decos));
 
   ast::type::Struct A("A", create<ast::Struct>(members));
-  ast::type::Alias B("B", &A);
+  ast::type::Alias B(mod->RegisterSymbol("B"), "B", &A);
   ast::type::AccessControl ac{ast::AccessControl::kReadOnly, &B};
 
   ast::Variable var(Source{}, "b", ast::StorageClass::kStorageBuffer, &ac,
@@ -602,7 +602,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   ast::type::Struct A("A", create<ast::Struct>(members));
   ast::type::AccessControl ac{ast::AccessControl::kReadOnly, &A};
-  ast::type::Alias B("B", &ac);
+  ast::type::Alias B(mod->RegisterSymbol("B"), "B", &ac);
 
   ast::Variable var(Source{}, "b", ast::StorageClass::kStorageBuffer, &B, false,
                     nullptr, ast::VariableDecorationList{});

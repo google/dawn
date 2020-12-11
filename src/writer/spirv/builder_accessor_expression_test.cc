@@ -411,7 +411,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
 
   ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
-  ast::type::Alias alias("Inner", &inner_struct);
+  ast::type::Alias alias(mod->RegisterSymbol("Inner"), "Inner", &inner_struct);
 
   ast::StructMemberList outer_members;
   outer_members.push_back(create<ast::StructMember>("inner", &alias, decos));

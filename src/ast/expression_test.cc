@@ -44,8 +44,8 @@ TEST_F(ExpressionTest, set_result_type) {
 
 TEST_F(ExpressionTest, set_result_type_alias) {
   type::I32 i32;
-  type::Alias a("a", &i32);
-  type::Alias b("b", &a);
+  type::Alias a(mod.RegisterSymbol("a"), "a", &i32);
+  type::Alias b(mod.RegisterSymbol("b"), "b", &a);
 
   Expr e;
   e.set_result_type(&b);

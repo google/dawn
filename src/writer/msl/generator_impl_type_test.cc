@@ -48,7 +48,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitType_Alias) {
   ast::type::F32 f32;
-  ast::type::Alias alias("alias", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("alias"), "alias", &f32);
 
   ASSERT_TRUE(gen.EmitType(&alias, "")) << gen.error();
   EXPECT_EQ(gen.result(), "alias");
@@ -56,7 +56,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
   ast::type::F32 f32;
-  ast::type::Alias alias("bool", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("bool"), "bool", &f32);
 
   ASSERT_TRUE(gen.EmitType(&alias, "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool_tint_0");

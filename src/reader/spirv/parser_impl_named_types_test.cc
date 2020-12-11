@@ -80,7 +80,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(),
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
               HasSubstr("RTArr -> __array__u32_stride_8\n"));
 }
 
@@ -93,7 +93,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
     %arr2 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(),
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
               HasSubstr("RTArr -> __array__u32_stride_8\n  RTArr_1 -> "
                         "__array__u32_stride_8\n"));
 }
@@ -106,7 +106,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(),
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
               HasSubstr("myrtarr -> __array__u32_stride_8\n"));
 }
 
@@ -120,7 +120,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(),
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
               HasSubstr("myarr -> __array__u32_5_stride_8"));
 }
 
@@ -134,7 +134,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(),
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
               HasSubstr("Arr -> __array__u32_5_stride_8\n  Arr_1 -> "
                         "__array__u32_5_stride_8"));
 }

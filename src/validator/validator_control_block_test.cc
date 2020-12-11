@@ -421,7 +421,7 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   // }
 
   ast::type::U32 u32;
-  ast::type::Alias my_int{"MyInt", &u32};
+  ast::type::Alias my_int{mod()->RegisterSymbol("MyInt"), "MyInt", &u32};
 
   auto* var = create<ast::Variable>(
       Source{},                  // source

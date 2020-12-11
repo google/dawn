@@ -32,7 +32,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
   ast::type::F32 f32;
-  ast::type::Alias alias("a", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type a = f32;
@@ -54,7 +54,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("A", str);
-  ast::type::Alias alias("B", &s);
+  ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
@@ -82,7 +82,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
   auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("A", str);
-  ast::type::Alias alias("B", &s);
+  ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type B = A;

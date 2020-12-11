@@ -102,7 +102,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // type Int = i32
   // cast<Int>(2.3f)
 
-  ast::type::Alias alias("Int", ty.i32);
+  ast::type::Alias alias(mod->RegisterSymbol("Int"), "Int", ty.i32);
 
   ast::TypeConstructorExpression cast(&alias, ExprList(2.3f));
 

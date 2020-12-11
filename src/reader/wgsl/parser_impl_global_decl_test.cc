@@ -89,7 +89,9 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
   ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::Alias>());
-  EXPECT_EQ(m.constructed_types()[0]->As<ast::type::Alias>()->name(), "A");
+  EXPECT_EQ(m.SymbolToName(
+                m.constructed_types()[0]->As<ast::type::Alias>()->symbol()),
+            "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -109,7 +111,7 @@ type B = A;)");
 
   ASSERT_TRUE(m.constructed_types()[1]->Is<ast::type::Alias>());
   auto* alias = m.constructed_types()[1]->As<ast::type::Alias>();
-  EXPECT_EQ(alias->name(), "B");
+  EXPECT_EQ(m.SymbolToName(alias->symbol()), "B");
   EXPECT_EQ(alias->type(), str);
 }
 
@@ -134,7 +136,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
   auto& m = p->get_module();
   ASSERT_EQ(m.functions().size(), 1u);
-  EXPECT_EQ(m.functions()[0]->name(), "main");
+  EXPECT_EQ(m.SymbolToName(m.functions()[0]->symbol()), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
@@ -144,7 +146,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
 
   auto& m = p->get_module();
   ASSERT_EQ(m.functions().size(), 1u);
-  EXPECT_EQ(m.functions()[0]->name(), "main");
+  EXPECT_EQ(m.SymbolToName(m.functions()[0]->symbol()), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {

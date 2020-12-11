@@ -1111,8 +1111,8 @@ void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
     return;
   }
   const auto name = namer_.GetName(type_id);
-  auto* ast_alias_type =
-      ast_module_.create<ast::type::Alias>(name, ast_underlying_type);
+  auto* ast_alias_type = ast_module_.create<ast::type::Alias>(
+      ast_module_.RegisterSymbol(name), name, ast_underlying_type);
   // Record this new alias as the AST type for this SPIR-V ID.
   id_to_type_[type_id] = ast_alias_type;
   ast_module_.AddConstructedType(ast_alias_type);

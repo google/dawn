@@ -33,7 +33,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
   ast::type::F32 f32;
-  ast::type::Alias alias("a", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float a;
@@ -42,7 +42,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
   ast::type::F32 f32;
-  ast::type::Alias alias("float", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("float"), "float", &f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float float_tint_0;
@@ -88,7 +88,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   auto* str = create<ast::Struct>(members);
 
   ast::type::Struct s("b", str);
-  ast::type::Alias alias("a", &s);
+  ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef b a;

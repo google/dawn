@@ -118,7 +118,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_alias) {
   ast::type::F32 f32;
-  ast::type::Alias alias("a", &f32);
+  ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &f32);
   EXPECT_EQ(4u, gen.calculate_alignment_size(&alias));
 }
 

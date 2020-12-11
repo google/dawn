@@ -474,7 +474,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   ast::type::I32 i32;
   ast::type::F32 f32;
   ast::type::Array ary(&f32, 3, ast::ArrayDecorationList{});
-  ast::type::Alias aary("myarrty", &ary);
+  ast::type::Alias aary(mod->RegisterSymbol("myarrty"), "myarrty", &ary);
 
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
@@ -1208,7 +1208,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   auto* strct = create<ast::Struct>(members);
 
   auto st = std::make_unique<ast::type::Struct>("alias", strct);
-  ast::type::Alias alias("alias", st.get());
+  ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", st.get());
 
   auto* var =
       create<ast::Variable>(Source{},                        // source
