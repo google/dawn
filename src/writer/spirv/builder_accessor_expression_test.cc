@@ -56,7 +56,8 @@ TEST_F(BuilderTest, ArrayAccessor) {
   ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3, false,
                     nullptr, ast::VariableDecorationList{});
 
-  auto* ary = create<ast::IdentifierExpression>("ary");
+  auto* ary =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ary"), "ary");
   auto* idx_expr = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
 
@@ -100,8 +101,10 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   ast::Variable idx(Source{}, "idx", ast::StorageClass::kFunction, &i32, false,
                     nullptr, ast::VariableDecorationList{});
 
-  auto* ary = create<ast::IdentifierExpression>("ary");
-  auto* idx_expr = create<ast::IdentifierExpression>("idx");
+  auto* ary =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ary"), "ary");
+  auto* idx_expr =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("idx"), "idx");
 
   ast::ArrayAccessorExpression expr(ary, idx_expr);
 
@@ -145,7 +148,8 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3, false,
                     nullptr, ast::VariableDecorationList{});
 
-  auto* ary = create<ast::IdentifierExpression>("ary");
+  auto* ary =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ary"), "ary");
 
   ast::ArrayAccessorExpression expr(
       ary,
@@ -195,7 +199,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 
   ast::ArrayAccessorExpression expr(
       create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("ary"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ary"), "ary"),
           create<ast::ScalarConstructorExpression>(
               create<ast::SintLiteral>(&i32, 3))),
       create<ast::ScalarConstructorExpression>(
@@ -243,10 +247,10 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
 
   ast::MemberAccessorExpression expr(
       create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("ary"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ary"), "ary"),
           create<ast::ScalarConstructorExpression>(
               create<ast::SintLiteral>(&i32, 2))),
-      create<ast::IdentifierExpression>("xy"));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("xy"), "xy"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -298,8 +302,9 @@ TEST_F(BuilderTest, MemberAccessor) {
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
                     false, nullptr, ast::VariableDecorationList{});
 
-  ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
-                                     create<ast::IdentifierExpression>("b"));
+  ast::MemberAccessorExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"), "ident"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -355,9 +360,11 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("ident"),
-          create<ast::IdentifierExpression>("inner")),
-      create<ast::IdentifierExpression>("a"));
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"),
+                                            "ident"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("inner"),
+                                            "inner")),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -416,9 +423,11 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("ident"),
-          create<ast::IdentifierExpression>("inner")),
-      create<ast::IdentifierExpression>("a"));
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"),
+                                            "ident"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("inner"),
+                                            "inner")),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -476,9 +485,11 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   auto* lhs = create<ast::MemberAccessorExpression>(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("ident"),
-          create<ast::IdentifierExpression>("inner")),
-      create<ast::IdentifierExpression>("a"));
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"),
+                                            "ident"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("inner"),
+                                            "inner")),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"));
 
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.f));
@@ -543,13 +554,16 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   ast::Variable store(Source{}, "store", ast::StorageClass::kFunction, &f32,
                       false, nullptr, ast::VariableDecorationList{});
 
-  auto* lhs = create<ast::IdentifierExpression>("store");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("store"), "store");
 
   auto* rhs = create<ast::MemberAccessorExpression>(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("ident"),
-          create<ast::IdentifierExpression>("inner")),
-      create<ast::IdentifierExpression>("a"));
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"),
+                                            "ident"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("inner"),
+                                            "inner")),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"));
 
   ast::AssignmentStatement expr(lhs, rhs);
 
@@ -593,8 +607,9 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3,
                     false, nullptr, ast::VariableDecorationList{});
 
-  ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
-                                     create<ast::IdentifierExpression>("y"));
+  ast::MemberAccessorExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"), "ident"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("y"), "y"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -629,8 +644,9 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3,
                     false, nullptr, ast::VariableDecorationList{});
 
-  ast::MemberAccessorExpression expr(create<ast::IdentifierExpression>("ident"),
-                                     create<ast::IdentifierExpression>("yx"));
+  ast::MemberAccessorExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"), "ident"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("yx"), "yx"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -666,9 +682,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("ident"),
-          create<ast::IdentifierExpression>("yxz")),
-      create<ast::IdentifierExpression>("xz"));
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"),
+                                            "ident"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("yxz"), "yxz")),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("xz"), "xz"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -705,9 +722,10 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 
   ast::MemberAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("ident"),
-          create<ast::IdentifierExpression>("yxz")),
-      create<ast::IdentifierExpression>("x"));
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"),
+                                            "ident"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("yxz"), "yxz")),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("x"), "x"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -744,8 +762,9 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 
   ast::ArrayAccessorExpression expr(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("ident"),
-          create<ast::IdentifierExpression>("yxz")),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"),
+                                            "ident"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("yxz"), "yxz")),
       create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 1)));
 
@@ -818,15 +837,18 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
               create<ast::ArrayAccessorExpression>(
                   create<ast::MemberAccessorExpression>(
                       create<ast::ArrayAccessorExpression>(
-                          create<ast::IdentifierExpression>("index"),
+                          create<ast::IdentifierExpression>(
+                              mod->RegisterSymbol("index"), "index"),
                           create<ast::ScalarConstructorExpression>(
                               create<ast::SintLiteral>(&i32, 0))),
-                      create<ast::IdentifierExpression>("foo")),
+                      create<ast::IdentifierExpression>(
+                          mod->RegisterSymbol("foo"), "foo")),
                   create<ast::ScalarConstructorExpression>(
                       create<ast::SintLiteral>(&i32, 2))),
-              create<ast::IdentifierExpression>("bar")),
-          create<ast::IdentifierExpression>("baz")),
-      create<ast::IdentifierExpression>("yx"));
+              create<ast::IdentifierExpression>(mod->RegisterSymbol("bar"),
+                                                "bar")),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("baz"), "baz")),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("yx"), "yx"));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -906,9 +928,10 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
                     create<ast::TypeConstructorExpression>(&arr, ary_params),
                     ast::VariableDecorationList{});
 
-  ast::ArrayAccessorExpression expr(create<ast::IdentifierExpression>("pos"),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 1)));
+  ast::ArrayAccessorExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("pos"), "pos"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 1)));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();
@@ -963,9 +986,10 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
       create<ast::TypeConstructorExpression>(&vec, std::move(vec_params)),
       ast::VariableDecorationList{});
 
-  ast::ArrayAccessorExpression expr(create<ast::IdentifierExpression>("pos"),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::UintLiteral>(&u32, 1)));
+  ast::ArrayAccessorExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("pos"), "pos"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::UintLiteral>(&u32, 1)));
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();

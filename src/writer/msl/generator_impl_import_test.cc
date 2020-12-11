@@ -57,7 +57,8 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod.RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -100,7 +101,9 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("abs"), params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("abs"), "abs"),
+      params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -120,7 +123,8 @@ TEST_P(MslImportData_DualParamTest, FloatScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.f)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod.RegisterSymbol(param.name), param.name),
                            params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -168,7 +172,8 @@ TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
                     create<ast::FloatLiteral>(&f32, 6.f)),
             }));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod.RegisterSymbol(param.name), param.name),
                            params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -193,7 +198,8 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod.RegisterSymbol(param.name), param.name),
                            params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -219,7 +225,8 @@ TEST_P(MslImportData_TripleParamTest, FloatScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.f)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod.RegisterSymbol(param.name), param.name),
                            params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -250,7 +257,8 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 3)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(param.name),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod.RegisterSymbol(param.name), param.name),
                            params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -277,10 +285,13 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
                             ast::VariableDecorationList{});  // decorations
 
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("var"));
+  params.push_back(
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("var"), "var"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("determinant"),
-                           params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("determinant"),
+                                        "determinant"),
+      params);
 
   mod.AddGlobalVariable(var);
 

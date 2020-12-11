@@ -127,7 +127,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_Private) {
-  auto* ident = create<ast::IdentifierExpression>("initializer");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod.RegisterSymbol("initializer"), "initializer");
 
   ast::type::F32 f32;
   auto* var =

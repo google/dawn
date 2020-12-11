@@ -101,8 +101,9 @@ TEST_F(BuilderTest, UnaryOp_LoadRequired) {
   ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &vec,
                     false, nullptr, ast::VariableDecorationList{});
 
-  ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
-                              create<ast::IdentifierExpression>("param"));
+  ast::UnaryOpExpression expr(
+      ast::UnaryOp::kNegation,
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param"));
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();

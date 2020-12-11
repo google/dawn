@@ -74,7 +74,8 @@ TEST_F(FirstIndexOffsetTest, Error_AlreadyTransformed) {
     void Build() override {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
       AddFunction("test")->body()->append(create<ast::ReturnStatement>(
-          Source{}, create<ast::IdentifierExpression>("vert_idx")));
+          Source{}, create<ast::IdentifierExpression>(
+                        mod->RegisterSymbol("vert_idx"), "vert_idx")));
     }
   };
 
@@ -115,7 +116,8 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
     void Build() override {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
       AddFunction("test")->body()->append(create<ast::ReturnStatement>(
-          Source{}, create<ast::IdentifierExpression>("vert_idx")));
+          Source{}, create<ast::IdentifierExpression>(
+                        mod->RegisterSymbol("vert_idx"), "vert_idx")));
     }
   };
 
@@ -191,7 +193,8 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
     void Build() override {
       AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
       AddFunction("test")->body()->append(create<ast::ReturnStatement>(
-          Source{}, create<ast::IdentifierExpression>("inst_idx")));
+          Source{}, create<ast::IdentifierExpression>(
+                        mod->RegisterSymbol("inst_idx"), "inst_idx")));
     }
   };
 
@@ -344,11 +347,13 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
       ast::Function* func1 = AddFunction("func1");
       func1->body()->append(create<ast::ReturnStatement>(
-          Source{}, create<ast::IdentifierExpression>("vert_idx")));
+          Source{}, create<ast::IdentifierExpression>(
+                        mod->RegisterSymbol("vert_idx"), "vert_idx")));
       ast::Function* func2 = AddFunction("func2");
       func2->body()->append(create<ast::ReturnStatement>(
           Source{}, create<ast::CallExpression>(
-                        create<ast::IdentifierExpression>("func1"),
+                        create<ast::IdentifierExpression>(
+                            mod->RegisterSymbol("func1"), "func1"),
                         ast::ExpressionList{})));
     }
   };

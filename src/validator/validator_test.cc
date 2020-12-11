@@ -66,7 +66,8 @@ TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1));
-  auto* rhs = create<ast::IdentifierExpression>("my_var");
+  auto* rhs = create<ast::IdentifierExpression>(mod()->RegisterSymbol("my_var"),
+                                                "my_var");
   ast::AssignmentStatement assign(Source{Source::Location{12, 34}}, lhs, rhs);
 
   // TODO(sarahM0): Invalidate assignment to scalar.
@@ -79,8 +80,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
   // b = 2;
   ast::type::I32 i32;
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "b");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("b"), "b");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
   auto* assign = create<ast::AssignmentStatement>(
@@ -97,8 +98,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
   // }
   ast::type::I32 i32;
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "b");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("b"), "b");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
@@ -125,7 +126,8 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
@@ -155,7 +157,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.3f));
 
@@ -188,7 +191,8 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
@@ -221,7 +225,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
       create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
-  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.3f));
 
@@ -323,7 +328,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
       ast::VariableDecorationList{}));            // decorations
 
   auto* lhs = create<ast::IdentifierExpression>(
-      Source{Source::Location{12, 34}}, "not_global_var");
+      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("not_global_var"),
+      "not_global_var");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.14f));
 
@@ -360,7 +366,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
           create<ast::FloatLiteral>(&f32, 2.1)),  // constructor
       ast::VariableDecorationList{}));            // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>("global_var");
+  auto* lhs = create<ast::IdentifierExpression>(
+      mod()->RegisterSymbol("global_var"), "global_var");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.14f));
 
@@ -404,8 +411,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.14f));
 
@@ -438,8 +445,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
           create<ast::FloatLiteral>(&f32, 2.0)),  // constructor
       ast::VariableDecorationList{});             // decorations
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 3.14f));
 
@@ -539,7 +546,8 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 
@@ -802,7 +810,8 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
                             ast::VariableDecorationList{});  // decorations
 
   td()->RegisterVariableForTesting(var);
-  auto* lhs = create<ast::IdentifierExpression>("a");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2));
 

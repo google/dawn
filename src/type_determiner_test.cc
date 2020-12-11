@@ -351,7 +351,9 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
 
   ast::ExpressionList call_params;
   auto* expr = create<ast::CallExpression>(
-      create<ast::IdentifierExpression>("my_func"), call_params);
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("my_func"),
+                                        "my_func"),
+      call_params);
 
   ast::CallStatement call(expr);
   EXPECT_TRUE(td()->DetermineResultType(&call));
@@ -364,10 +366,10 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
   // fn func() -> void { return; }
   ast::type::F32 f32;
   ast::ExpressionList call_params;
-  auto* call_expr =
-      create<ast::CallExpression>(create<ast::IdentifierExpression>(
-                                      Source{Source::Location{12, 34}}, "func"),
-                                  call_params);
+  auto* call_expr = create<ast::CallExpression>(
+      create<ast::IdentifierExpression>(Source{Source::Location{12, 34}},
+                                        mod->RegisterSymbol("func"), "func"),
+      call_params);
   ast::VariableList params0;
   auto* main_body = create<ast::BlockStatement>();
   main_body->append(create<ast::CallStatement>(call_expr));
@@ -457,7 +459,8 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>("my_var"),
+  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>(
+                                       mod->RegisterSymbol("my_var"), "my_var"),
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
@@ -488,7 +491,8 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>("my_var"),
+  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>(
+                                       mod->RegisterSymbol("my_var"), "my_var"),
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
@@ -518,7 +522,8 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>("my_var"),
+  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>(
+                                       mod->RegisterSymbol("my_var"), "my_var"),
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
@@ -546,7 +551,8 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>("my_var"),
+  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>(
+                                       mod->RegisterSymbol("my_var"), "my_var"),
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
@@ -581,7 +587,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 
   ast::ArrayAccessorExpression acc(
       create<ast::ArrayAccessorExpression>(
-          create<ast::IdentifierExpression>("my_var"), idx1),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("my_var"),
+                                            "my_var"),
+          idx1),
       idx2);
 
   EXPECT_TRUE(td()->DetermineResultType(&acc));
@@ -612,7 +620,8 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>("my_var"),
+  ast::ArrayAccessorExpression acc(create<ast::IdentifierExpression>(
+                                       mod->RegisterSymbol("my_var"), "my_var"),
                                    idx);
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
@@ -624,8 +633,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
 
 TEST_F(TypeDeterminerTest, Expr_Bitcast) {
   ast::type::F32 f32;
-  ast::BitcastExpression bitcast(&f32,
-                                 create<ast::IdentifierExpression>("name"));
+  ast::BitcastExpression bitcast(
+      &f32,
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("name"), "name"));
 
   ast::Variable v(Source{}, "name", ast::StorageClass::kPrivate, &f32, false,
                   nullptr, ast::VariableDecorationList{});
@@ -649,7 +659,8 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   EXPECT_TRUE(td()->Determine());
 
   ast::ExpressionList call_params;
-  ast::CallExpression call(create<ast::IdentifierExpression>("my_func"),
+  ast::CallExpression call(create<ast::IdentifierExpression>(
+                               mod->RegisterSymbol("my_func"), "my_func"),
                            call_params);
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(call.result_type(), nullptr);
@@ -674,7 +685,8 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
 
   auto* param = call_params.back();
 
-  ast::CallExpression call(create<ast::IdentifierExpression>("my_func"),
+  ast::CallExpression call(create<ast::IdentifierExpression>(
+                               mod->RegisterSymbol("my_func"), "my_func"),
                            call_params);
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(param->result_type(), nullptr);
@@ -691,8 +703,9 @@ TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
   call_params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 2.4)));
 
-  ast::CallExpression call(create<ast::IdentifierExpression>("round"),
-                           call_params);
+  ast::CallExpression call(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("round"), "round"),
+      call_params);
 
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(call.result_type(), nullptr);
@@ -703,7 +716,8 @@ TEST_F(TypeDeterminerTest, Expr_Cast) {
   ast::type::F32 f32;
 
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("name"));
+  params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("name"), "name"));
   ast::TypeConstructorExpression cast(&f32, params);
 
   ast::Variable v(Source{}, "name", ast::StorageClass::kPrivate, &f32, false,
@@ -761,7 +775,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::IdentifierExpression ident("my_var");
+  ast::IdentifierExpression ident(mod->RegisterSymbol("my_var"), "my_var");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
   EXPECT_TRUE(ident.result_type()->Is<ast::type::Pointer>());
@@ -785,7 +799,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::IdentifierExpression ident("my_var");
+  ast::IdentifierExpression ident(mod->RegisterSymbol("my_var"), "my_var");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
   EXPECT_TRUE(ident.result_type()->Is<ast::type::F32>());
@@ -794,7 +808,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   ast::type::F32 f32;
 
-  auto* my_var = create<ast::IdentifierExpression>("my_var");
+  auto* my_var = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var");
 
   auto* var =
       create<ast::Variable>(Source{},                        // source
@@ -808,7 +823,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::AssignmentStatement>(
-      my_var, create<ast::IdentifierExpression>("my_var")));
+      my_var, create<ast::IdentifierExpression>(mod->RegisterSymbol("my_var"),
+                                                "my_var")));
 
   ast::Function f(Source{}, mod->RegisterSymbol("my_func"), "my_func", {}, &f32,
                   body, ast::FunctionDecorationList{});
@@ -822,7 +838,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   ast::type::F32 f32;
 
-  auto* my_var = create<ast::IdentifierExpression>("my_var");
+  auto* my_var = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var");
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
@@ -835,7 +852,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
                             ast::VariableDecorationList{})));  // decorations
 
   body->append(create<ast::AssignmentStatement>(
-      my_var, create<ast::IdentifierExpression>("my_var")));
+      my_var, create<ast::IdentifierExpression>(mod->RegisterSymbol("my_var"),
+                                                "my_var")));
 
   ast::Function f(Source{}, mod->RegisterSymbol("myfunc"), "my_func", {}, &f32,
                   body, ast::FunctionDecorationList{});
@@ -854,7 +872,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   ast::type::F32 f32;
   ast::type::Pointer ptr(&f32, ast::StorageClass::kFunction);
 
-  auto* my_var = create<ast::IdentifierExpression>("my_var");
+  auto* my_var = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var");
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
@@ -867,7 +886,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
                             ast::VariableDecorationList{})));  // decorations
 
   body->append(create<ast::AssignmentStatement>(
-      my_var, create<ast::IdentifierExpression>("my_var")));
+      my_var, create<ast::IdentifierExpression>(mod->RegisterSymbol("my_var"),
+                                                "my_var")));
 
   ast::Function f(Source{}, mod->RegisterSymbol("my_func"), "my_func", {}, &f32,
                   body, ast::FunctionDecorationList{});
@@ -894,14 +914,14 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   // Register the function
   EXPECT_TRUE(td()->Determine());
 
-  ast::IdentifierExpression ident("my_func");
+  ast::IdentifierExpression ident(mod->RegisterSymbol("my_func"), "my_func");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
   EXPECT_TRUE(ident.result_type()->Is<ast::type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
-  ast::IdentifierExpression a("a");
+  ast::IdentifierExpression a(mod->RegisterSymbol("a"), "a");
   EXPECT_FALSE(td()->DetermineResultType(&a));
 }
 
@@ -958,17 +978,25 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("out_var"),
-      create<ast::IdentifierExpression>("in_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("out_var"),
+                                        "out_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("in_var"),
+                                        "in_var")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("wg_var"),
-      create<ast::IdentifierExpression>("wg_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("wg_var"),
+                                        "wg_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("wg_var"),
+                                        "wg_var")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("sb_var"),
-      create<ast::IdentifierExpression>("sb_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("sb_var"),
+                                        "sb_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("sb_var"),
+                                        "sb_var")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("priv_var"),
-      create<ast::IdentifierExpression>("priv_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("priv_var"),
+                                        "priv_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("priv_var"),
+                                        "priv_var")));
   auto* func =
       create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"), "my_func",
                             params, &f32, body, ast::FunctionDecorationList{});
@@ -1039,17 +1067,25 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("out_var"),
-      create<ast::IdentifierExpression>("in_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("out_var"),
+                                        "out_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("in_var"),
+                                        "in_var")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("wg_var"),
-      create<ast::IdentifierExpression>("wg_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("wg_var"),
+                                        "wg_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("wg_var"),
+                                        "wg_var")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("sb_var"),
-      create<ast::IdentifierExpression>("sb_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("sb_var"),
+                                        "sb_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("sb_var"),
+                                        "sb_var")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("priv_var"),
-      create<ast::IdentifierExpression>("priv_var")));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("priv_var"),
+                                        "priv_var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("priv_var"),
+                                        "priv_var")));
   ast::VariableList params;
   auto* func =
       create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"), "my_func",
@@ -1059,9 +1095,12 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("out_var"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("my_func"),
-                                  ast::ExpressionList{})));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("out_var"),
+                                        "out_var"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("my_func"),
+                                            "my_func"),
+          ast::ExpressionList{})));
   auto* func2 =
       create<ast::Function>(Source{}, mod->RegisterSymbol("func"), "func",
                             params, &f32, body, ast::FunctionDecorationList{});
@@ -1095,7 +1134,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 1.f))));
 
@@ -1143,8 +1182,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  auto* ident = create<ast::IdentifierExpression>("my_struct");
-  auto* mem_ident = create<ast::IdentifierExpression>("second_member");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_struct"), "my_struct");
+  auto* mem_ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("second_member"), "second_member");
 
   ast::MemberAccessorExpression mem(ident, mem_ident);
   EXPECT_TRUE(td()->DetermineResultType(&mem));
@@ -1183,8 +1224,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  auto* ident = create<ast::IdentifierExpression>("my_struct");
-  auto* mem_ident = create<ast::IdentifierExpression>("second_member");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_struct"), "my_struct");
+  auto* mem_ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("second_member"), "second_member");
 
   ast::MemberAccessorExpression mem(ident, mem_ident);
   EXPECT_TRUE(td()->DetermineResultType(&mem));
@@ -1212,8 +1255,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  auto* ident = create<ast::IdentifierExpression>("my_vec");
-  auto* swizzle = create<ast::IdentifierExpression>("xy");
+  auto* ident = create<ast::IdentifierExpression>(mod->RegisterSymbol("my_vec"),
+                                                  "my_vec");
+  auto* swizzle =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("xy"), "xy");
 
   ast::MemberAccessorExpression mem(ident, swizzle);
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
@@ -1241,8 +1286,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  auto* ident = create<ast::IdentifierExpression>("my_vec");
-  auto* swizzle = create<ast::IdentifierExpression>("x");
+  auto* ident = create<ast::IdentifierExpression>(mod->RegisterSymbol("my_vec"),
+                                                  "my_vec");
+  auto* swizzle =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("x"), "x");
 
   ast::MemberAccessorExpression mem(ident, swizzle);
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
@@ -1312,12 +1359,16 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  auto* ident = create<ast::IdentifierExpression>("c");
-  auto* mem_ident = create<ast::IdentifierExpression>("mem");
-  auto* foo_ident = create<ast::IdentifierExpression>("foo");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("c"), "c");
+  auto* mem_ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("mem"), "mem");
+  auto* foo_ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("foo"), "foo");
   auto* idx = create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 0));
-  auto* swizzle = create<ast::IdentifierExpression>("yx");
+  auto* swizzle =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("yx"), "yx");
 
   ast::MemberAccessorExpression mem(
       create<ast::MemberAccessorExpression>(
@@ -1353,8 +1404,9 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ast::BinaryExpression expr(op, create<ast::IdentifierExpression>("val"),
-                             create<ast::IdentifierExpression>("val"));
+  ast::BinaryExpression expr(
+      op, create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1380,8 +1432,9 @@ TEST_P(Expr_Binary_BitwiseTest, Vector) {
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ast::BinaryExpression expr(op, create<ast::IdentifierExpression>("val"),
-                             create<ast::IdentifierExpression>("val"));
+  ast::BinaryExpression expr(
+      op, create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1423,8 +1476,9 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ast::BinaryExpression expr(op, create<ast::IdentifierExpression>("val"),
-                             create<ast::IdentifierExpression>("val"));
+  ast::BinaryExpression expr(
+      op, create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1450,8 +1504,9 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ast::BinaryExpression expr(op, create<ast::IdentifierExpression>("val"),
-                             create<ast::IdentifierExpression>("val"));
+  ast::BinaryExpression expr(
+      op, create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1486,8 +1541,9 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ast::BinaryExpression expr(op, create<ast::IdentifierExpression>("val"),
-                             create<ast::IdentifierExpression>("val"));
+  ast::BinaryExpression expr(
+      op, create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1513,8 +1569,9 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ast::BinaryExpression expr(op, create<ast::IdentifierExpression>("val"),
-                             create<ast::IdentifierExpression>("val"));
+  ast::BinaryExpression expr(
+      op, create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1550,9 +1607,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
   // Register the global
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("val"),
-                             create<ast::IdentifierExpression>("val"));
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("val"), "val"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1586,8 +1644,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("vector"),
-                             create<ast::IdentifierExpression>("scalar"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("vector"), "vector"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("scalar"), "scalar"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1626,8 +1686,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("scalar"),
-                             create<ast::IdentifierExpression>("vector"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("scalar"), "scalar"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("vector"), "vector"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1657,8 +1719,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("vector"),
-                             create<ast::IdentifierExpression>("vector"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("vector"), "vector"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("vector"), "vector"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1697,8 +1761,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("matrix"),
-                             create<ast::IdentifierExpression>("scalar"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("matrix"), "matrix"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("scalar"), "scalar"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1737,8 +1803,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("scalar"),
-                             create<ast::IdentifierExpression>("matrix"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("scalar"), "scalar"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("matrix"), "matrix"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1778,8 +1846,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("matrix"),
-                             create<ast::IdentifierExpression>("vector"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("matrix"), "matrix"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("vector"), "vector"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1819,8 +1889,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("vector"),
-                             create<ast::IdentifierExpression>("matrix"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("vector"), "vector"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("matrix"), "matrix"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1860,8 +1932,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply,
-                             create<ast::IdentifierExpression>("mat4x3"),
-                             create<ast::IdentifierExpression>("mat3x4"));
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("mat4x3"), "mat4x3"),
+                             create<ast::IdentifierExpression>(
+                                 mod->RegisterSymbol("mat3x4"), "mat3x4"));
 
   ASSERT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1893,10 +1967,12 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
   EXPECT_TRUE(td()->Determine());
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("ident"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"), "ident"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
   EXPECT_TRUE(td()->DetermineResultType(&expr));
 
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1923,10 +1999,12 @@ TEST_P(IntrinsicDerivativeTest, Vector) {
   EXPECT_TRUE(td()->Determine());
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("ident"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"), "ident"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
   EXPECT_TRUE(td()->DetermineResultType(&expr));
 
   ASSERT_NE(expr.result_type(), nullptr);
@@ -1948,8 +2026,9 @@ TEST_P(IntrinsicDerivativeTest, MissingParam) {
   EXPECT_TRUE(td()->Determine());
 
   ast::ExpressionList call_params;
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
   EXPECT_FALSE(td()->DetermineResultType(&expr));
   EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
 }
@@ -1983,11 +2062,14 @@ TEST_P(IntrinsicDerivativeTest, ToomManyParams) {
   EXPECT_TRUE(td()->Determine());
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("ident1"));
-  call_params.push_back(create<ast::IdentifierExpression>("ident2"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("ident1"), "ident1"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("ident2"), "ident2"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
   EXPECT_FALSE(td()->DetermineResultType(&expr));
   EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
 }
@@ -2021,10 +2103,12 @@ TEST_P(Intrinsic, Test) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2055,10 +2139,12 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2089,10 +2175,12 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2117,8 +2205,9 @@ TEST_P(Intrinsic_FloatMethod, MissingParam) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2142,11 +2231,14 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(name),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2216,7 +2308,8 @@ class Intrinsic_TextureOperation
                               nullptr,                         // constructor
                               ast::VariableDecorationList{});  // decorations
     mod->AddGlobalVariable(var);
-    call_params->push_back(create<ast::IdentifierExpression>(name));
+    call_params->push_back(
+        create<ast::IdentifierExpression>(mod->RegisterSymbol(name), name));
   }
 
   std::unique_ptr<ast::type::Type> subtype(Texture type) {
@@ -2248,8 +2341,10 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   add_call_param("coords", coords_type.get(), &call_params);
   add_call_param("lod", &i32, &call_params);
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("textureLoad"),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("textureLoad"),
+                                        "textureLoad"),
+      call_params);
 
   EXPECT_TRUE(td()->Determine());
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -2326,8 +2421,10 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   add_call_param("coords", coords_type.get(), &call_params);
   add_call_param("lod", &i32, &call_params);
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("textureLoad"),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("textureLoad"),
+                                        "textureLoad"),
+      call_params);
 
   EXPECT_TRUE(td()->Determine());
   EXPECT_TRUE(td()->DetermineResultType(&expr));
@@ -2377,11 +2474,14 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("dot"),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("dot"), "dot"),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2416,11 +2516,15 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   mod->AddGlobalVariable(bool_var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
-  call_params.push_back(create<ast::IdentifierExpression>("my_var"));
-  call_params.push_back(create<ast::IdentifierExpression>("bool_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("my_var"), "my_var"));
+  call_params.push_back(create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("bool_var"), "bool_var"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("select"),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod->RegisterSymbol("select"), "select"),
                            call_params);
 
   // Register the variable
@@ -2450,9 +2554,11 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_TooFewParams) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("v"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("select"),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod->RegisterSymbol("select"), "select"),
                            call_params);
 
   // Register the variable
@@ -2477,12 +2583,17 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_TooManyParams) {
   mod->AddGlobalVariable(var);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("v"));
-  call_params.push_back(create<ast::IdentifierExpression>("v"));
-  call_params.push_back(create<ast::IdentifierExpression>("v"));
-  call_params.push_back(create<ast::IdentifierExpression>("v"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("select"),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod->RegisterSymbol("select"), "select"),
                            call_params);
 
   // Register the variable
@@ -2517,11 +2628,15 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
   mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("v3"));
-  call_params.push_back(create<ast::IdentifierExpression>("v2"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v3"), "v3"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v2"), "v2"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("outerProduct"),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("outerProduct"),
+                                        "outerProduct"),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2552,10 +2667,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooFewParams) {
   mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("v2"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v2"), "v2"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("outerProduct"),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("outerProduct"),
+                                        "outerProduct"),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2579,12 +2697,17 @@ TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooManyParams) {
   mod->AddGlobalVariable(var2);
 
   ast::ExpressionList call_params;
-  call_params.push_back(create<ast::IdentifierExpression>("v2"));
-  call_params.push_back(create<ast::IdentifierExpression>("v2"));
-  call_params.push_back(create<ast::IdentifierExpression>("v2"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v2"), "v2"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v2"), "v2"));
+  call_params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v2"), "v2"));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("outerProduct"),
-                           call_params);
+  ast::CallExpression expr(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("outerProduct"),
+                                        "outerProduct"),
+      call_params);
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
@@ -2613,7 +2736,8 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::UnaryOpExpression der(op, create<ast::IdentifierExpression>("ident"));
+  ast::UnaryOpExpression der(op, create<ast::IdentifierExpression>(
+                                     mod->RegisterSymbol("ident"), "ident"));
   EXPECT_TRUE(td()->DetermineResultType(&der));
   ASSERT_NE(der.result_type(), nullptr);
   ASSERT_TRUE(der.result_type()->Is<ast::type::Vector>());
@@ -2714,7 +2838,7 @@ using IntrinsicDataTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDataTest, Lookup) {
   auto param = GetParam();
 
-  ast::IdentifierExpression ident(param.name);
+  ast::IdentifierExpression ident(mod->RegisterSymbol(param.name), param.name);
   EXPECT_TRUE(td()->SetIntrinsicIfNeeded(&ident));
   EXPECT_EQ(ident.intrinsic(), param.intrinsic);
   EXPECT_TRUE(ident.IsIntrinsic());
@@ -2795,7 +2919,8 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"trunc", ast::Intrinsic::kTrunc}));
 
 TEST_F(TypeDeterminerTest, IntrinsicNotSetIfNotMatched) {
-  ast::IdentifierExpression ident("not_intrinsic");
+  ast::IdentifierExpression ident(mod->RegisterSymbol("not_intrinsic"),
+                                  "not_intrinsic");
   EXPECT_FALSE(td()->SetIntrinsicIfNeeded(&ident));
   EXPECT_EQ(ident.intrinsic(), ast::Intrinsic::kNone);
   EXPECT_FALSE(ident.IsIntrinsic());
@@ -2811,7 +2936,8 @@ TEST_P(ImportData_SingleParamTest, Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -2837,7 +2963,8 @@ TEST_P(ImportData_SingleParamTest, Vector) {
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -2856,7 +2983,8 @@ TEST_P(ImportData_SingleParamTest, Error_Integer) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -2870,7 +2998,8 @@ TEST_P(ImportData_SingleParamTest, Error_NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -2890,7 +3019,8 @@ TEST_P(ImportData_SingleParamTest, Error_MultipleParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -2935,7 +3065,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -2961,7 +3092,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Vector) {
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -2980,7 +3112,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, -11)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3006,7 +3139,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Vector) {
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3025,7 +3159,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3051,7 +3186,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3070,7 +3206,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_Bool) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3084,7 +3221,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3104,7 +3242,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_MultipleParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3126,7 +3265,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
-  auto* ident = create<ast::IdentifierExpression>("length");
+  auto* ident = create<ast::IdentifierExpression>(mod->RegisterSymbol("length"),
+                                                  "length");
 
   ast::CallExpression call(ident, params);
 
@@ -3150,7 +3290,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>("length");
+  auto* ident = create<ast::IdentifierExpression>(mod->RegisterSymbol("length"),
+                                                  "length");
 
   ast::CallExpression call(ident, params);
 
@@ -3166,7 +3307,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>("length");
+  auto* ident = create<ast::IdentifierExpression>(mod->RegisterSymbol("length"),
+                                                  "length");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3178,7 +3320,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
 TEST_F(TypeDeterminerTest, ImportData_Length_Error_NoParams) {
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>("length");
+  auto* ident = create<ast::IdentifierExpression>(mod->RegisterSymbol("length"),
+                                                  "length");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3196,7 +3339,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_MultipleParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>("length");
+  auto* ident = create<ast::IdentifierExpression>(mod->RegisterSymbol("length"),
+                                                  "length");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3216,7 +3360,8 @@ TEST_P(ImportData_TwoParamTest, Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3251,7 +3396,8 @@ TEST_P(ImportData_TwoParamTest, Vector) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3272,7 +3418,8 @@ TEST_P(ImportData_TwoParamTest, Error_Integer) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3286,7 +3433,8 @@ TEST_P(ImportData_TwoParamTest, Error_NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3302,7 +3450,8 @@ TEST_P(ImportData_TwoParamTest, Error_OneParam) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3335,7 +3484,8 @@ TEST_P(ImportData_TwoParamTest, Error_MismatchedParamCount) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec2, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec3, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3362,7 +3512,8 @@ TEST_P(ImportData_TwoParamTest, Error_MismatchedParamType) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3382,7 +3533,8 @@ TEST_P(ImportData_TwoParamTest, Error_TooManyParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3407,7 +3559,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
 
   ast::CallExpression call(ident, params);
 
@@ -3440,7 +3593,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
 
   ast::CallExpression call(ident, params);
 
@@ -3458,7 +3612,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 2)));
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3470,7 +3625,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
 TEST_F(TypeDeterminerTest, ImportData_Distance_Error_NoParams) {
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3484,7 +3640,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_OneParam) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3515,7 +3672,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_MismatchedParamCount) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec2, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec3, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3539,7 +3697,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_MismatchedParamType) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3556,7 +3715,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_TooManyParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>("distance");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("distance"), "distance");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3588,7 +3748,8 @@ TEST_F(TypeDeterminerTest, ImportData_Cross) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>("cross");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("cross"), "cross");
 
   ast::CallExpression call(ident, params);
 
@@ -3607,7 +3768,8 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_Error_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto* ident = create<ast::IdentifierExpression>("cross");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("cross"), "cross");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3639,7 +3801,8 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_Error_IntType) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>("cross");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("cross"), "cross");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3649,7 +3812,8 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_Error_IntType) {
 
 TEST_F(TypeDeterminerTest, ImportData_Cross_Error_MissingParams) {
   ast::ExpressionList params;
-  auto* ident = create<ast::IdentifierExpression>("cross");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("cross"), "cross");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3672,7 +3836,8 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_Error_TooFewParams) {
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
 
-  auto* ident = create<ast::IdentifierExpression>("cross");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("cross"), "cross");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3713,7 +3878,8 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_Error_TooManyParams) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_3));
 
-  auto* ident = create<ast::IdentifierExpression>("cross");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("cross"), "cross");
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3735,7 +3901,8 @@ TEST_P(ImportData_ThreeParamTest, Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3779,7 +3946,8 @@ TEST_P(ImportData_ThreeParamTest, Vector) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_3));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -3802,7 +3970,8 @@ TEST_P(ImportData_ThreeParamTest, Error_Integer) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 3)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3816,7 +3985,8 @@ TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3832,7 +4002,8 @@ TEST_P(ImportData_ThreeParamTest, Error_OneParam) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3850,7 +4021,8 @@ TEST_P(ImportData_ThreeParamTest, Error_TwoParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3892,7 +4064,8 @@ TEST_P(ImportData_ThreeParamTest, Error_MismatchedParamCount) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec3, vals_2));
   params.push_back(create<ast::TypeConstructorExpression>(&vec3, vals_3));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3921,7 +4094,8 @@ TEST_P(ImportData_ThreeParamTest, Error_MismatchedParamType) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3943,7 +4117,8 @@ TEST_P(ImportData_ThreeParamTest, Error_TooManyParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -3975,7 +4150,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4019,7 +4195,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Vector) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_3));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4042,7 +4219,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4086,7 +4264,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_3));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4109,7 +4288,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4153,7 +4333,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_3));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4176,7 +4357,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_Bool) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4190,7 +4372,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4206,7 +4389,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_OneParam) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4224,7 +4408,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_TwoParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4266,7 +4451,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_MismatchedParamCount) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec3, vals_2));
   params.push_back(create<ast::TypeConstructorExpression>(&vec3, vals_3));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4295,7 +4481,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_MismatchedParamType) {
       create<ast::FloatLiteral>(&f32, 1.0f)));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4317,7 +4504,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_TooManyParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4341,7 +4529,8 @@ TEST_P(ImportData_Int_SingleParamTest, Scalar) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4367,7 +4556,8 @@ TEST_P(ImportData_Int_SingleParamTest, Vector) {
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4386,7 +4576,8 @@ TEST_P(ImportData_Int_SingleParamTest, Error_Float) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4400,7 +4591,8 @@ TEST_P(ImportData_Int_SingleParamTest, Error_NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4420,7 +4612,8 @@ TEST_P(ImportData_Int_SingleParamTest, Error_MultipleParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4448,7 +4641,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Signed) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4468,7 +4662,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::UintLiteral>(&u32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4488,7 +4683,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4523,7 +4719,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4559,7 +4756,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4595,7 +4793,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
 
   ast::CallExpression call(ident, params);
 
@@ -4616,7 +4815,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_Bool) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, false)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4630,7 +4830,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4646,7 +4847,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_OneParam) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4679,7 +4881,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_MismatchedParamCount) {
   params.push_back(create<ast::TypeConstructorExpression>(&vec2, vals_1));
   params.push_back(create<ast::TypeConstructorExpression>(&vec3, vals_2));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4706,7 +4909,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_MismatchedParamType) {
       create<ast::SintLiteral>(&i32, 1)));
   params.push_back(create<ast::TypeConstructorExpression>(&vec, vals));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4726,7 +4930,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_TooManyParams) {
   params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::SintLiteral>(&i32, 1)));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4758,9 +4963,11 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("var"));
+  params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"));
 
-  auto* ident = create<ast::IdentifierExpression>("determinant");
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol("determinant"), "determinant");
 
   ast::CallExpression call(ident, params);
 
@@ -4790,9 +4997,11 @@ TEST_P(ImportData_Matrix_OneParam_Test, Error_Float) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("var"));
+  params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4805,7 +5014,8 @@ TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
 
   ast::ExpressionList params;
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4833,10 +5043,13 @@ TEST_P(ImportData_Matrix_OneParam_Test, TooManyParams) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("var"));
-  params.push_back(create<ast::IdentifierExpression>("var"));
+  params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"));
+  params.push_back(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"));
 
-  auto* ident = create<ast::IdentifierExpression>(param.name);
+  auto* ident = create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(param.name), param.name);
   ast::CallExpression call(ident, params);
 
   EXPECT_FALSE(td()->DetermineResultType(&call));
@@ -4871,31 +5084,38 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("second"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("b"),
-                                  ast::ExpressionList{})));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("second"),
+                                        "second"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"),
+          ast::ExpressionList{})));
   auto* func_c =
       create<ast::Function>(Source{}, mod->RegisterSymbol("c"), "c", params,
                             &f32, body, ast::FunctionDecorationList{});
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("first"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("c"),
-                                  ast::ExpressionList{})));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("first"), "first"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("c"), "c"),
+          ast::ExpressionList{})));
   auto* func_a =
       create<ast::Function>(Source{}, mod->RegisterSymbol("a"), "a", params,
                             &f32, body, ast::FunctionDecorationList{});
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("call_a"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("a"),
-                                  ast::ExpressionList{})));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("call_a"),
+                                        "call_a"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"),
+          ast::ExpressionList{})));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("call_b"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("b"),
-                                  ast::ExpressionList{})));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("call_b"),
+                                        "call_b"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"),
+          ast::ExpressionList{})));
   auto* ep_1 = create<ast::Function>(
       Source{}, mod->RegisterSymbol("ep_1"), "ep_1", params, &f32, body,
       ast::FunctionDecorationList{
@@ -4904,9 +5124,11 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("call_c"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("c"),
-                                  ast::ExpressionList{})));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("call_c"),
+                                        "call_c"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("c"), "c"),
+          ast::ExpressionList{})));
   auto* ep_2 = create<ast::Function>(
       Source{}, mod->RegisterSymbol("ep_2"), "ep_2", params, &f32, body,
       ast::FunctionDecorationList{

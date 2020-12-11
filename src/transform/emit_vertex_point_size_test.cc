@@ -21,6 +21,7 @@
 #include "src/ast/builder.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/demangler.h"
 #include "src/diagnostic/formatter.h"
 #include "src/transform/manager.h"
 
@@ -85,7 +86,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  auto expected = R"(Module{
+  auto* expected = R"(Module{
   Variable{
     Decorations{
       BuiltinDecoration{pointsize}
@@ -94,13 +95,11 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
     out
     __f32
   }
-  Function )" + result.module.RegisterSymbol("non_entry_a").to_str() +
-                  R"( -> __void
+  Function non_entry_a -> __void
   ()
   {
   }
-  Function )" + result.module.RegisterSymbol("entry").to_str() +
-                  R"( -> __void
+  Function entry -> __void
   StageDecoration{vertex}
   ()
   {
@@ -116,14 +115,14 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
       }
     }
   }
-  Function )" + result.module.RegisterSymbol("non_entry_b").to_str() +
-                  R"( -> __void
+  Function non_entry_b -> __void
   ()
   {
   }
 }
 )";
-  EXPECT_EQ(expected, result.module.to_str());
+  EXPECT_EQ(expected,
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
@@ -156,7 +155,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  auto expected = R"(Module{
+  auto* expected = R"(Module{
   Variable{
     Decorations{
       BuiltinDecoration{pointsize}
@@ -165,13 +164,11 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
     out
     __f32
   }
-  Function )" + result.module.RegisterSymbol("non_entry_a").to_str() +
-                  R"( -> __void
+  Function non_entry_a -> __void
   ()
   {
   }
-  Function )" + result.module.RegisterSymbol("entry").to_str() +
-                  R"( -> __void
+  Function entry -> __void
   StageDecoration{vertex}
   ()
   {
@@ -180,14 +177,14 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
       ScalarConstructor[__f32]{1.000000}
     }
   }
-  Function )" + result.module.RegisterSymbol("non_entry_b").to_str() +
-                  R"( -> __void
+  Function non_entry_b -> __void
   ()
   {
   }
 }
 )";
-  EXPECT_EQ(expected, result.module.to_str());
+  EXPECT_EQ(expected,
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
@@ -219,22 +216,21 @@ TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
-  auto expected = R"(Module{
-  Function )" + result.module.RegisterSymbol("fragment_entry").to_str() +
-                  R"( -> __void
+  auto* expected = R"(Module{
+  Function fragment_entry -> __void
   StageDecoration{fragment}
   ()
   {
   }
-  Function )" + result.module.RegisterSymbol("compute_entry").to_str() +
-                  R"( -> __void
+  Function compute_entry -> __void
   StageDecoration{compute}
   ()
   {
   }
 }
 )";
-  EXPECT_EQ(expected, result.module.to_str());
+  EXPECT_EQ(expected,
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 }  // namespace

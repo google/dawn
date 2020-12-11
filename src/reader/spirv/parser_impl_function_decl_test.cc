@@ -199,10 +199,10 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->get_module().to_str();
+  const auto module_ast =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function )" + p->get_module().GetSymbol("leaf").to_str() +
-                                    R"( -> __u32
+  Function leaf -> __u32
   ()
   {
     Return{
@@ -211,8 +211,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
       }
     }
   }
-  Function )" + p->get_module().GetSymbol("branch").to_str() +
-                                    R"( -> __u32
+  Function branch -> __u32
   ()
   {
     VariableDeclStatement{
@@ -235,8 +234,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
       }
     }
   }
-  Function )" + p->get_module().GetSymbol("root").to_str() +
-                                    R"( -> __void
+  Function root -> __void
   ()
   {
     VariableDeclStatement{

@@ -26,7 +26,8 @@ namespace {
 using UnaryOpExpressionTest = TestHelper;
 
 TEST_F(UnaryOpExpressionTest, Creation) {
-  auto* ident = create<IdentifierExpression>("ident");
+  auto* ident =
+      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
 
   UnaryOpExpression u(UnaryOp::kNot, ident);
   EXPECT_EQ(u.op(), UnaryOp::kNot);
@@ -34,7 +35,8 @@ TEST_F(UnaryOpExpressionTest, Creation) {
 }
 
 TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
-  auto* ident = create<IdentifierExpression>("ident");
+  auto* ident =
+      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
   UnaryOpExpression u(Source{Source::Location{20, 2}}, UnaryOp::kNot, ident);
   auto src = u.source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -42,13 +44,15 @@ TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
-  auto* ident = create<IdentifierExpression>("ident");
+  auto* ident =
+      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
   UnaryOpExpression u(UnaryOp::kNot, ident);
   EXPECT_TRUE(u.Is<UnaryOpExpression>());
 }
 
 TEST_F(UnaryOpExpressionTest, IsValid) {
-  auto* ident = create<IdentifierExpression>("ident");
+  auto* ident =
+      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
   UnaryOpExpression u(UnaryOp::kNot, ident);
   EXPECT_TRUE(u.IsValid());
 }
@@ -59,17 +63,18 @@ TEST_F(UnaryOpExpressionTest, IsValid_NullExpression) {
 }
 
 TEST_F(UnaryOpExpressionTest, IsValid_InvalidExpression) {
-  auto* ident = create<IdentifierExpression>("");
+  auto* ident = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
   UnaryOpExpression u(UnaryOp::kNot, ident);
   EXPECT_FALSE(u.IsValid());
 }
 
 TEST_F(UnaryOpExpressionTest, ToStr) {
-  auto* ident = create<IdentifierExpression>("ident");
+  auto* ident =
+      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
   UnaryOpExpression u(UnaryOp::kNot, ident);
   std::ostringstream out;
   u.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  UnaryOp[not set]{
+  EXPECT_EQ(demangle(out.str()), R"(  UnaryOp[not set]{
     not
     Identifier[not set]{ident}
   }

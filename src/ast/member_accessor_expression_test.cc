@@ -26,8 +26,10 @@ namespace {
 using MemberAccessorExpressionTest = TestHelper;
 
 TEST_F(MemberAccessorExpressionTest, Creation) {
-  auto* str = create<IdentifierExpression>("structure");
-  auto* mem = create<IdentifierExpression>("member");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol("structure"),
+                                           "structure");
+  auto* mem =
+      create<IdentifierExpression>(mod.RegisterSymbol("member"), "member");
 
   MemberAccessorExpression stmt(str, mem);
   EXPECT_EQ(stmt.structure(), str);
@@ -35,8 +37,10 @@ TEST_F(MemberAccessorExpressionTest, Creation) {
 }
 
 TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
-  auto* str = create<IdentifierExpression>("structure");
-  auto* mem = create<IdentifierExpression>("member");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol("structure"),
+                                           "structure");
+  auto* mem =
+      create<IdentifierExpression>(mod.RegisterSymbol("member"), "member");
 
   MemberAccessorExpression stmt(Source{Source::Location{20, 2}}, str, mem);
   auto src = stmt.source();
@@ -45,59 +49,69 @@ TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
-  auto* str = create<IdentifierExpression>("structure");
-  auto* mem = create<IdentifierExpression>("member");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol("structure"),
+                                           "structure");
+  auto* mem =
+      create<IdentifierExpression>(mod.RegisterSymbol("member"), "member");
 
   MemberAccessorExpression stmt(str, mem);
   EXPECT_TRUE(stmt.Is<MemberAccessorExpression>());
 }
 
 TEST_F(MemberAccessorExpressionTest, IsValid) {
-  auto* str = create<IdentifierExpression>("structure");
-  auto* mem = create<IdentifierExpression>("member");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol("structure"),
+                                           "structure");
+  auto* mem =
+      create<IdentifierExpression>(mod.RegisterSymbol("member"), "member");
 
   MemberAccessorExpression stmt(str, mem);
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(MemberAccessorExpressionTest, IsValid_NullStruct) {
-  auto* mem = create<IdentifierExpression>("member");
+  auto* mem =
+      create<IdentifierExpression>(mod.RegisterSymbol("member"), "member");
 
   MemberAccessorExpression stmt(nullptr, mem);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(MemberAccessorExpressionTest, IsValid_InvalidStruct) {
-  auto* str = create<IdentifierExpression>("");
-  auto* mem = create<IdentifierExpression>("member");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
+  auto* mem =
+      create<IdentifierExpression>(mod.RegisterSymbol("member"), "member");
 
   MemberAccessorExpression stmt(str, mem);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(MemberAccessorExpressionTest, IsValid_NullMember) {
-  auto* str = create<IdentifierExpression>("structure");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol("structure"),
+                                           "structure");
 
   MemberAccessorExpression stmt(str, nullptr);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(MemberAccessorExpressionTest, IsValid_InvalidMember) {
-  auto* str = create<IdentifierExpression>("structure");
-  auto* mem = create<IdentifierExpression>("");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol("structure"),
+                                           "structure");
+  auto* mem = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
 
   MemberAccessorExpression stmt(str, mem);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(MemberAccessorExpressionTest, ToStr) {
-  auto* str = create<IdentifierExpression>("structure");
-  auto* mem = create<IdentifierExpression>("member");
+  auto* str = create<IdentifierExpression>(mod.RegisterSymbol("structure"),
+                                           "structure");
+  auto* mem =
+      create<IdentifierExpression>(mod.RegisterSymbol("member"), "member");
 
   MemberAccessorExpression stmt(str, mem);
   std::ostringstream out;
   stmt.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  MemberAccessor[not set]{
+  EXPECT_EQ(demangle(out.str()), R"(  MemberAccessor[not set]{
     Identifier[not set]{structure}
     Identifier[not set]{member}
   }

@@ -124,8 +124,10 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &i32,
                     false, nullptr, ast::VariableDecorationList{});
 
-  auto* lhs = create<ast::IdentifierExpression>("param");
-  auto* rhs = create<ast::IdentifierExpression>("param");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param");
+  auto* rhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param");
 
   ast::BinaryExpression expr(param.op, lhs, rhs);
 
@@ -642,7 +644,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
                             false,                           // is_const
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>("mat");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
 
@@ -683,7 +686,8 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
                             ast::VariableDecorationList{});  // decorations
   auto* lhs = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f));
-  auto* rhs = create<ast::IdentifierExpression>("mat");
+  auto* rhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
 
   td.RegisterVariableForTesting(var);
 
@@ -721,7 +725,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
                             false,                           // is_const
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>("mat");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -779,7 +784,8 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
       create<ast::FloatLiteral>(&f32, 1.f)));
   auto* lhs = create<ast::TypeConstructorExpression>(&vec3, vals);
 
-  auto* rhs = create<ast::IdentifierExpression>("mat");
+  auto* rhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
 
   td.RegisterVariableForTesting(var);
 
@@ -818,8 +824,10 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
                             false,                           // is_const
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>("mat");
-  auto* rhs = create<ast::IdentifierExpression>("mat");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
+  auto* rhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
 
   td.RegisterVariableForTesting(var);
 
@@ -911,8 +919,8 @@ TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
           create<ast::BoolLiteral>(&bool_type, false)),  // constructor
       ast::VariableDecorationList{});                    // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* rhs = create<ast::IdentifierExpression>("b");
+  auto* lhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a");
+  auto* rhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b");
 
   td.RegisterVariableForTesting(a_var);
   td.RegisterVariableForTesting(b_var);
@@ -1107,8 +1115,8 @@ TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
           create<ast::BoolLiteral>(&bool_type, false)),  // constructor
       ast::VariableDecorationList{});                    // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>("a");
-  auto* rhs = create<ast::IdentifierExpression>("b");
+  auto* lhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a");
+  auto* rhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b");
 
   td.RegisterVariableForTesting(a_var);
   td.RegisterVariableForTesting(b_var);

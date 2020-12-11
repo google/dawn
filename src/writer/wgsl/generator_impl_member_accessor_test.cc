@@ -28,8 +28,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  auto* str = create<ast::IdentifierExpression>("str");
-  auto* mem = create<ast::IdentifierExpression>("mem");
+  auto* str =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("str"), "str");
+  auto* mem =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("mem"), "mem");
 
   ast::MemberAccessorExpression expr(str, mem);
 

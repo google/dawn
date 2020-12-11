@@ -2026,7 +2026,9 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
     return Failure::kErrored;
 
   return create<ast::CallStatement>(create<ast::CallExpression>(
-      source, create<ast::IdentifierExpression>(name), std::move(params)));
+      source,
+      create<ast::IdentifierExpression>(module_.RegisterSymbol(name), name),
+      std::move(params)));
 }
 
 // break_stmt
@@ -2097,7 +2099,8 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
   }
 
   if (match(Token::Type::kIdentifier))
-    return create<ast::IdentifierExpression>(t.source(), t.to_str());
+    return create<ast::IdentifierExpression>(
+        t.source(), module_.RegisterSymbol(t.to_str()), t.to_str());
 
   auto type = type_decl();
   if (type.errored)
@@ -2172,7 +2175,8 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
 
     return postfix_expr(create<ast::MemberAccessorExpression>(
         ident.source, prefix,
-        create<ast::IdentifierExpression>(ident.source, ident.value)));
+        create<ast::IdentifierExpression>(
+            ident.source, module_.RegisterSymbol(ident.value), ident.value)));
   }
 
   return prefix;

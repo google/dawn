@@ -251,13 +251,16 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
     const std::string& field_name,
     ast::Variable* buffer_var,
     ast::Module* mod) {
-  auto* buffer = mod->create<ast::IdentifierExpression>(buffer_var->name());
+  auto* buffer = mod->create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(buffer_var->name()), buffer_var->name());
   auto* constructor = mod->create<ast::BinaryExpression>(
       ast::BinaryOp::kAdd,
-      mod->create<ast::IdentifierExpression>(kIndexOffsetPrefix +
-                                             original_name),
+      mod->create<ast::IdentifierExpression>(
+          mod->RegisterSymbol(kIndexOffsetPrefix + original_name),
+          kIndexOffsetPrefix + original_name),
       mod->create<ast::MemberAccessorExpression>(
-          buffer, mod->create<ast::IdentifierExpression>(field_name)));
+          buffer, mod->create<ast::IdentifierExpression>(
+                      mod->RegisterSymbol(field_name), field_name)));
   auto* var =
       mod->create<ast::Variable>(Source{},                  // source
                                  original_name,             // name

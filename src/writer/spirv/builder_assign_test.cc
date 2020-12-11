@@ -47,7 +47,8 @@ TEST_F(BuilderTest, Assign_Var) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
                   nullptr, ast::VariableDecorationList{});
 
-  auto* ident = create<ast::IdentifierExpression>("var");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
   auto* val = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
 
@@ -82,7 +83,8 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec, false,
                   nullptr, ast::VariableDecorationList{});
 
-  auto* ident = create<ast::IdentifierExpression>("var");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
   ast::ExpressionList vals;
   auto* val = create<ast::TypeConstructorExpression>(&vec, vals);
 
@@ -133,8 +135,9 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
                   nullptr, ast::VariableDecorationList{});
 
-  ast::AssignmentStatement assign(create<ast::IdentifierExpression>("var"),
-                                  init);
+  ast::AssignmentStatement assign(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
+      init);
 
   td.RegisterVariableForTesting(&v);
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
@@ -182,8 +185,9 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
                   nullptr, ast::VariableDecorationList{});
 
-  ast::AssignmentStatement assign(create<ast::IdentifierExpression>("var"),
-                                  init);
+  ast::AssignmentStatement assign(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
+      init);
 
   td.RegisterVariableForTesting(&v);
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
@@ -231,8 +235,8 @@ TEST_F(BuilderTest, Assign_StructMember) {
                   false, nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>("ident"),
-      create<ast::IdentifierExpression>("b"));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"), "ident"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"));
 
   auto* val = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 4.0f));
@@ -273,7 +277,8 @@ TEST_F(BuilderTest, Assign_Vector) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
                   nullptr, ast::VariableDecorationList{});
 
-  auto* ident = create<ast::IdentifierExpression>("var");
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
@@ -322,8 +327,8 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
                   nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>("var"),
-      create<ast::IdentifierExpression>("y"));
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("y"), "y"));
   auto* val = create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f));
 
@@ -368,7 +373,7 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
                   nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>("var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::SintLiteral>(&i32, 1)));
   auto* val = create<ast::ScalarConstructorExpression>(

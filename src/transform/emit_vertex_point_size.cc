@@ -67,8 +67,8 @@ Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
   // Build the AST expression & statement for assigning pointsize one.
   auto* one = mod->create<ast::ScalarConstructorExpression>(
       mod->create<ast::FloatLiteral>(f32, 1.0f));
-  auto* pointsize_ident =
-      mod->create<ast::IdentifierExpression>(Source{}, kPointSizeVar);
+  auto* pointsize_ident = mod->create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol(kPointSizeVar), kPointSizeVar);
   auto* pointsize_assign =
       mod->create<ast::AssignmentStatement>(pointsize_ident, one);
 

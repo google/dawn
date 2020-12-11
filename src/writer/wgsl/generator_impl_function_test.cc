@@ -230,8 +230,10 @@ TEST_F(WgslGeneratorImplTest,
         &f32,                          // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
-            create<ast::IdentifierExpression>("data"),
-            create<ast::IdentifierExpression>("d")),  // constructor
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
+                                              "data"),
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("d"),
+                                              "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();
@@ -257,8 +259,10 @@ TEST_F(WgslGeneratorImplTest,
         &f32,                          // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
-            create<ast::IdentifierExpression>("data"),
-            create<ast::IdentifierExpression>("d")),  // constructor
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
+                                              "data"),
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("d"),
+                                              "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();

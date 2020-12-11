@@ -32,7 +32,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
   ast::type::F32 f32;
 
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("id"));
+  params.push_back(
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("id"), "id"));
 
   ast::TypeConstructorExpression cast(&f32, params);
 

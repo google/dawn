@@ -53,8 +53,8 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
           create<ast::SintLiteral>(&f32, 3.14f)),  // constructor
       ast::VariableDecorationList{});              // decorations
 
-  auto* cond =
-      create<ast::IdentifierExpression>(Source{Source::Location{12, 34}}, "a");
+  auto* cond = create<ast::IdentifierExpression>(
+      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("a"), "a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>();
   ast::CaseStatementList body;
@@ -87,7 +87,8 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   ast::CaseSelectorList csl;
   csl.push_back(create<ast::SintLiteral>(&i32, 1));
   ast::CaseStatementList body;
@@ -125,7 +126,8 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
       ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
 
   ast::CaseSelectorList default_csl_1;
   auto* block_default_1 = create<ast::BlockStatement>();
@@ -174,7 +176,8 @@ TEST_F(ValidateControlBlockTest,
       ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
 
   ast::CaseSelectorList csl;
   csl.push_back(create<ast::UintLiteral>(&u32, 1));
@@ -216,7 +219,8 @@ TEST_F(ValidateControlBlockTest,
       ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
 
   ast::CaseSelectorList csl;
   csl.push_back(create<ast::SintLiteral>(&i32, -1));
@@ -257,7 +261,8 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
       ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
 
   ast::CaseSelectorList csl_1;
   csl_1.push_back(create<ast::UintLiteral>(&u32, 0));
@@ -304,7 +309,8 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
       ast::VariableDecorationList{});          // decorations
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
 
   ast::CaseSelectorList csl_1;
   csl_1.push_back(create<ast::SintLiteral>(&i32, 10));
@@ -350,7 +356,8 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>();
   block_default->append(
@@ -386,7 +393,8 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
           create<ast::SintLiteral>(&i32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>();
   ast::CaseStatementList body;
@@ -425,7 +433,8 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
           create<ast::SintLiteral>(&u32, 2)),  // constructor
       ast::VariableDecorationList{});          // decorations
 
-  auto* cond = create<ast::IdentifierExpression>("a");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>();
   ast::CaseStatementList body;

@@ -321,11 +321,12 @@ void VertexPulling::State::AddVertexPullingPreamble(
       }
       auto* v = it->second;
 
+      auto name = buffer_layout.step_mode == InputStepMode::kVertex
+                      ? vertex_index_name
+                      : instance_index_name;
       // Identifier to index by
       auto* index_identifier = mod->create<ast::IdentifierExpression>(
-          buffer_layout.step_mode == InputStepMode::kVertex
-              ? vertex_index_name
-              : instance_index_name);
+          mod->RegisterSymbol(name), name);
 
       // An expression for the start of the read in the buffer in bytes
       auto* pos_value = mod->create<ast::BinaryExpression>(
@@ -341,7 +342,8 @@ void VertexPulling::State::AddVertexPullingPreamble(
       block->append(set_pos_expr);
 
       block->append(mod->create<ast::AssignmentStatement>(
-          mod->create<ast::IdentifierExpression>(v->name()),
+          mod->create<ast::IdentifierExpression>(mod->RegisterSymbol(v->name()),
+                                                 v->name()),
           AccessByFormat(i, attribute_desc.format)));
     }
   }
@@ -355,7 +357,8 @@ ast::Expression* VertexPulling::State::GenUint(uint32_t value) {
 }
 
 ast::Expression* VertexPulling::State::CreatePullingPositionIdent() {
-  return mod->create<ast::IdentifierExpression>(kPullingPosVarName);
+  return mod->create<ast::IdentifierExpression>(
+      mod->RegisterSymbol(kPullingPosVarName), kPullingPosVarName);
 }
 
 ast::Expression* VertexPulling::State::AccessByFormat(uint32_t buffer,
@@ -392,10 +395,13 @@ ast::Expression* VertexPulling::State::AccessU32(uint32_t buffer,
   // by dividing. Then, that element is going to be read, and if needed,
   // unpacked into an appropriate variable. All reads should end up here as a
   // base case.
+  auto vbuf_name = GetVertexBufferName(buffer);
   return mod->create<ast::ArrayAccessorExpression>(
       mod->create<ast::MemberAccessorExpression>(
-          mod->create<ast::IdentifierExpression>(GetVertexBufferName(buffer)),
-          mod->create<ast::IdentifierExpression>(kStructBufferName)),
+          mod->create<ast::IdentifierExpression>(mod->RegisterSymbol(vbuf_name),
+                                                 vbuf_name),
+          mod->create<ast::IdentifierExpression>(
+              mod->RegisterSymbol(kStructBufferName), kStructBufferName)),
       mod->create<ast::BinaryExpression>(ast::BinaryOp::kDivide, pos,
                                          GenUint(4)));
 }

@@ -24,7 +24,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
-#include "src/ast/variable.h"
+#include "src/demangler.h"
 #include "src/diagnostic/formatter.h"
 #include "src/transform/manager.h"
 #include "src/type_determiner.h"
@@ -195,8 +195,7 @@ TEST_F(VertexPullingTest, OneAttribute) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function )" + result.module.GetSymbol("main").to_str() +
-                R"( -> __void
+  Function main -> __void
   StageDecoration{vertex}
   ()
   {
@@ -240,7 +239,7 @@ TEST_F(VertexPullingTest, OneAttribute) {
   }
 }
 )",
-            result.module.to_str());
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 TEST_F(VertexPullingTest, OneInstancedAttribute) {
@@ -283,8 +282,7 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function )" + result.module.GetSymbol("main").to_str() +
-                R"( -> __void
+  Function main -> __void
   StageDecoration{vertex}
   ()
   {
@@ -328,7 +326,7 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
   }
 }
 )",
-            result.module.to_str());
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
@@ -371,8 +369,7 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function )" + result.module.GetSymbol("main").to_str() +
-                R"( -> __void
+  Function main -> __void
   StageDecoration{vertex}
   ()
   {
@@ -416,7 +413,7 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
   }
 }
 )",
-            result.module.to_str());
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 // We expect the transform to use an existing builtin variables if it finds them
@@ -510,8 +507,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function )" + result.module.GetSymbol("main").to_str() +
-                R"( -> __void
+  Function main -> __void
   StageDecoration{vertex}
   ()
   {
@@ -583,7 +579,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
   }
 }
 )",
-            result.module.to_str());
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
@@ -636,8 +632,7 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function )" + result.module.GetSymbol("main").to_str() +
-                R"( -> __void
+  Function main -> __void
   StageDecoration{vertex}
   ()
   {
@@ -767,7 +762,7 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
   }
 }
 )",
-            result.module.to_str());
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 TEST_F(VertexPullingTest, FloatVectorAttributes) {
@@ -847,8 +842,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     storage_buffer
     __struct_TintVertexData
   }
-  Function )" + result.module.GetSymbol("main").to_str() +
-                R"( -> __void
+  Function main -> __void
   StageDecoration{vertex}
   ()
   {
@@ -1071,7 +1065,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
   }
 }
 )",
-            result.module.to_str());
+            Demangler().Demangle(result.module, result.module.to_str()));
 }
 
 }  // namespace

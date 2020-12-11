@@ -49,7 +49,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Switch) {
   body.push_back(case_stmt);
   body.push_back(def);
 
-  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
   ast::SwitchStatement s(cond, body);
 
   gen.increment_indent();

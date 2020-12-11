@@ -29,7 +29,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
-  auto* id = create<ast::IdentifierExpression>("my_func");
+  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
+                                               "my_func");
   ast::CallExpression call(id, {});
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -37,10 +38,13 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
-  auto* id = create<ast::IdentifierExpression>("my_func");
+  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
+                                               "my_func");
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("param1"));
-  params.push_back(create<ast::IdentifierExpression>("param2"));
+  params.push_back(create<ast::IdentifierExpression>(
+      mod.RegisterSymbol("param1"), "param1"));
+  params.push_back(create<ast::IdentifierExpression>(
+      mod.RegisterSymbol("param2"), "param2"));
   ast::CallExpression call(id, params);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -48,10 +52,13 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
-  auto* id = create<ast::IdentifierExpression>("my_func");
+  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
+                                               "my_func");
   ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>("param1"));
-  params.push_back(create<ast::IdentifierExpression>("param2"));
+  params.push_back(create<ast::IdentifierExpression>(
+      mod.RegisterSymbol("param1"), "param1"));
+  params.push_back(create<ast::IdentifierExpression>(
+      mod.RegisterSymbol("param2"), "param2"));
 
   ast::CallStatement call(create<ast::CallExpression>(id, params));
 

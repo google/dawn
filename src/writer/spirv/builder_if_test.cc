@@ -85,10 +85,10 @@ TEST_F(BuilderTest, If_WithStatements) {
                             ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 2))));
+  body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2))));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
@@ -139,16 +139,16 @@ TEST_F(BuilderTest, If_WithElse) {
                             ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 2))));
+  body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2))));
 
   auto* else_body = create<ast::BlockStatement>();
-  else_body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 3))));
+  else_body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 3))));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
@@ -205,16 +205,16 @@ TEST_F(BuilderTest, If_WithElseIf) {
                             ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 2))));
+  body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2))));
 
   auto* else_body = create<ast::BlockStatement>();
-  else_body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 3))));
+  else_body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 3))));
 
   auto* else_cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
@@ -283,25 +283,25 @@ TEST_F(BuilderTest, If_WithMultiple) {
                             ast::VariableDecorationList{});  // decorations
 
   auto* body = create<ast::BlockStatement>();
-  body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 2))));
+  body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 2))));
   auto* elseif_1_body = create<ast::BlockStatement>();
-  elseif_1_body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 3))));
+  elseif_1_body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 3))));
   auto* elseif_2_body = create<ast::BlockStatement>();
-  elseif_2_body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 4))));
+  elseif_2_body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 4))));
   auto* else_body = create<ast::BlockStatement>();
-  else_body->append(
-      create<ast::AssignmentStatement>(create<ast::IdentifierExpression>("v"),
-                                       create<ast::ScalarConstructorExpression>(
-                                           create<ast::SintLiteral>(&i32, 5))));
+  else_body->append(create<ast::AssignmentStatement>(
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::SintLiteral>(&i32, 5))));
 
   auto* elseif_1_cond = create<ast::ScalarConstructorExpression>(
       create<ast::BoolLiteral>(&bool_type, true));
@@ -643,9 +643,10 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
                             ast::VariableDecorationList{});  // decorations
   td.RegisterVariableForTesting(var);
 
-  ast::IfStatement expr(Source{}, create<ast::IdentifierExpression>("a"),
-                        create<ast::BlockStatement>(),
-                        ast::ElseStatementList{});
+  ast::IfStatement expr(
+      Source{},
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"),
+      create<ast::BlockStatement>(), ast::ElseStatementList{});
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

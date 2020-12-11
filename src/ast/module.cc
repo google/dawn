@@ -38,6 +38,10 @@ Module Module::Clone() {
 }
 
 void Module::Clone(CloneContext* ctx) {
+  // Symbol table must be cloned first so that the resulting module has the
+  // symbols before we start the tree mutations.
+  ctx->mod->symbol_table_ = symbol_table_;
+
   for (auto* ty : constructed_types_) {
     ctx->mod->constructed_types_.emplace_back(ctx->Clone(ty));
   }
@@ -47,8 +51,6 @@ void Module::Clone(CloneContext* ctx) {
   for (auto* func : functions_) {
     ctx->mod->functions_.emplace_back(ctx->Clone(func));
   }
-
-  ctx->mod->symbol_table_ = symbol_table_;
 }
 
 Function* Module::FindFunctionBySymbol(Symbol sym) const {

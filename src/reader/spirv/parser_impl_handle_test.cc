@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/demangler.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -1128,7 +1129,8 @@ TEST_P(SpvParserTest_DeclUnderspecifiedHandle, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto module = p->module().to_str();
+  const auto module =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module, HasSubstr(GetParam().var_decl)) << module;
 }
 
@@ -1300,7 +1302,8 @@ TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto module = p->module().to_str();
+  const auto module =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module, HasSubstr(GetParam().var_decl))
       << "DECLARATIONS ARE BAD " << module;
   EXPECT_THAT(module, HasSubstr(GetParam().texture_builtin))
@@ -2373,7 +2376,8 @@ TEST_P(SpvParserTest_ImageAccessTest, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto module = p->module().to_str();
+  const auto module =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module, HasSubstr(GetParam().var_decl))
       << "DECLARATIONS ARE BAD " << module;
   EXPECT_THAT(module, HasSubstr(GetParam().texture_builtin))
@@ -3670,7 +3674,8 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
       std::vector<std::string> result_strings;
       for (auto* expr : result) {
         ASSERT_NE(expr, nullptr);
-        result_strings.push_back(expr->str());
+        result_strings.push_back(
+            Demangler().Demangle(p->get_module(), expr->str()));
       }
       EXPECT_THAT(result_strings,
                   ::testing::ContainerEq(GetParam().expected_expressions));

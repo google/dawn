@@ -98,7 +98,8 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::IdentifierExpression>("a")));
+      Source{},
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a")));
   ASSERT_TRUE(td.DetermineResultType(body)) << td.error();
 
   ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
@@ -167,7 +168,8 @@ TEST_F(BuilderTest, Function_WithParams) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::IdentifierExpression>("a")));
+      Source{},
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a")));
   ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", params,
                      &f32, body, ast::FunctionDecorationList{});
 
@@ -299,8 +301,10 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
         &f32,                          // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
-            create<ast::IdentifierExpression>("data"),
-            create<ast::IdentifierExpression>("d")),  // constructor
+            create<ast::IdentifierExpression>(mod->RegisterSymbol("data"),
+                                              "data"),
+            create<ast::IdentifierExpression>(mod->RegisterSymbol("d"),
+                                              "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();
@@ -326,8 +330,10 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
         &f32,                          // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
-            create<ast::IdentifierExpression>("data"),
-            create<ast::IdentifierExpression>("d")),  // constructor
+            create<ast::IdentifierExpression>(mod->RegisterSymbol("data"),
+                                              "data"),
+            create<ast::IdentifierExpression>(mod->RegisterSymbol("d"),
+                                              "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();

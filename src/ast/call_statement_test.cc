@@ -25,8 +25,9 @@ namespace {
 using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
-  auto* expr = create<CallExpression>(create<IdentifierExpression>("func"),
-                                      ExpressionList{});
+  auto* expr = create<CallExpression>(
+      create<IdentifierExpression>(mod.RegisterSymbol("func"), "func"),
+      ExpressionList{});
 
   CallStatement c(expr);
   EXPECT_EQ(c.expr(), expr);
@@ -38,8 +39,9 @@ TEST_F(CallStatementTest, IsCall) {
 }
 
 TEST_F(CallStatementTest, IsValid) {
-  CallStatement c(create<CallExpression>(create<IdentifierExpression>("func"),
-                                         ExpressionList{}));
+  CallStatement c(create<CallExpression>(
+      create<IdentifierExpression>(mod.RegisterSymbol("func"), "func"),
+      ExpressionList{}));
   EXPECT_TRUE(c.IsValid());
 }
 
@@ -55,12 +57,13 @@ TEST_F(CallStatementTest, IsValid_InvalidExpr) {
 }
 
 TEST_F(CallStatementTest, ToStr) {
-  CallStatement c(create<CallExpression>(create<IdentifierExpression>("func"),
-                                         ExpressionList{}));
+  CallStatement c(create<CallExpression>(
+      create<IdentifierExpression>(mod.RegisterSymbol("func"), "func"),
+      ExpressionList{}));
 
   std::ostringstream out;
   c.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Call[not set]{
+  EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
     Identifier[not set]{func}
     (
     )

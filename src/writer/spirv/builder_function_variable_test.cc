@@ -168,9 +168,10 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
                   init, ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v);
 
-  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32, false,
-                   create<ast::IdentifierExpression>("v"),
-                   ast::VariableDecorationList{});
+  ast::Variable v2(
+      Source{}, "v2", ast::StorageClass::kFunction, &f32, false,
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v2);
 
   ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();
@@ -214,9 +215,10 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
                   init, ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v);
 
-  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32, true,
-                   create<ast::IdentifierExpression>("v"),
-                   ast::VariableDecorationList{});
+  ast::Variable v2(
+      Source{}, "v2", ast::StorageClass::kFunction, &f32, true,
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v2);
 
   ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();

@@ -26,7 +26,7 @@ using BitcastExpressionTest = TestHelper;
 
 TEST_F(BitcastExpressionTest, Create) {
   type::F32 f32;
-  auto* expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
 
   BitcastExpression exp(&f32, expr);
   ASSERT_EQ(exp.type(), &f32);
@@ -35,7 +35,7 @@ TEST_F(BitcastExpressionTest, Create) {
 
 TEST_F(BitcastExpressionTest, CreateWithSource) {
   type::F32 f32;
-  auto* expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
 
   BitcastExpression exp(Source{Source::Location{20, 2}}, &f32, expr);
   auto src = exp.source();
@@ -45,7 +45,7 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
 
 TEST_F(BitcastExpressionTest, IsBitcast) {
   type::F32 f32;
-  auto* expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
 
   BitcastExpression exp(&f32, expr);
   EXPECT_TRUE(exp.Is<BitcastExpression>());
@@ -53,14 +53,14 @@ TEST_F(BitcastExpressionTest, IsBitcast) {
 
 TEST_F(BitcastExpressionTest, IsValid) {
   type::F32 f32;
-  auto* expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
 
   BitcastExpression exp(&f32, expr);
   EXPECT_TRUE(exp.IsValid());
 }
 
 TEST_F(BitcastExpressionTest, IsValid_MissingType) {
-  auto* expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
 
   BitcastExpression exp(nullptr, expr);
   EXPECT_FALSE(exp.IsValid());
@@ -75,20 +75,20 @@ TEST_F(BitcastExpressionTest, IsValid_MissingExpr) {
 
 TEST_F(BitcastExpressionTest, IsValid_InvalidExpr) {
   type::F32 f32;
-  auto* expr = create<IdentifierExpression>("");
+  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
   BitcastExpression e(&f32, expr);
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(BitcastExpressionTest, ToStr) {
   type::F32 f32;
-  auto* expr = create<IdentifierExpression>("expr");
+  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
 
   BitcastExpression exp(&f32, expr);
   std::ostringstream out;
   exp.to_str(out, 2);
 
-  EXPECT_EQ(out.str(), R"(  Bitcast[not set]<__f32>{
+  EXPECT_EQ(demangle(out.str()), R"(  Bitcast[not set]<__f32>{
     Identifier[not set]{expr}
   }
 )");

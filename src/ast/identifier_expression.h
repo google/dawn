@@ -21,6 +21,7 @@
 
 #include "src/ast/expression.h"
 #include "src/ast/intrinsic.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace ast {
@@ -29,16 +30,22 @@ namespace ast {
 class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
  public:
   /// Constructor
+  /// @param sym the symbol for the identifier
   /// @param name the name
-  explicit IdentifierExpression(const std::string& name);
+  explicit IdentifierExpression(Symbol sym, const std::string& name);
   /// Constructor
   /// @param source the source
+  /// @param sym the symbol for the identifier
   /// @param name the name
-  IdentifierExpression(const Source& source, const std::string& name);
+  IdentifierExpression(const Source& source,
+                       Symbol sym,
+                       const std::string& name);
   /// Move constructor
   IdentifierExpression(IdentifierExpression&&);
   ~IdentifierExpression() override;
 
+  /// @returns the symbol for the identifier
+  Symbol symbol() const { return sym_; }
   /// @returns the name part of the identifier
   std::string name() const { return name_; }
 
@@ -82,6 +89,7 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
 
   Intrinsic intrinsic_ = Intrinsic::kNone;
   std::unique_ptr<intrinsic::Signature> intrinsic_sig_;
+  Symbol sym_;
   std::string name_;
 };
 

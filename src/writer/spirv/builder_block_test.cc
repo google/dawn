@@ -50,7 +50,7 @@ TEST_F(BuilderTest, Block) {
                             nullptr,                           // constructor
                             ast::VariableDecorationList{})));  // decorations
   outer.append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 1.0f))));
 
@@ -64,13 +64,13 @@ TEST_F(BuilderTest, Block) {
                             nullptr,                           // constructor
                             ast::VariableDecorationList{})));  // decorations
   inner->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 2.0f))));
 
   outer.append(inner);
   outer.append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("var"),
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 3.0f))));
 

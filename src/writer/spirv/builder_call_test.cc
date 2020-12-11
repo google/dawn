@@ -1,3 +1,4 @@
+
 // Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,9 +63,11 @@ TEST_F(BuilderTest, Expression_Call) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::BinaryExpression>(
-                    ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
-                    create<ast::IdentifierExpression>("b"))));
+      Source{},
+      create<ast::BinaryExpression>(
+          ast::BinaryOp::kAdd,
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"))));
   ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
                        func_params, &f32, body, ast::FunctionDecorationList{});
 
@@ -78,7 +81,8 @@ TEST_F(BuilderTest, Expression_Call) {
   call_params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>("a_func"),
+  ast::CallExpression expr(create<ast::IdentifierExpression>(
+                               mod->RegisterSymbol("a_func"), "a_func"),
                            call_params);
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
@@ -139,9 +143,11 @@ TEST_F(BuilderTest, Statement_Call) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::BinaryExpression>(
-                    ast::BinaryOp::kAdd, create<ast::IdentifierExpression>("a"),
-                    create<ast::IdentifierExpression>("b"))));
+      Source{},
+      create<ast::BinaryExpression>(
+          ast::BinaryOp::kAdd,
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"),
+          create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"))));
 
   ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
                        func_params, &void_type, body,
@@ -157,8 +163,10 @@ TEST_F(BuilderTest, Statement_Call) {
   call_params.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.f)));
 
-  ast::CallStatement expr(create<ast::CallExpression>(
-      create<ast::IdentifierExpression>("a_func"), call_params));
+  ast::CallStatement expr(
+      create<ast::CallExpression>(create<ast::IdentifierExpression>(
+                                      mod->RegisterSymbol("a_func"), "a_func"),
+                                  call_params));
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();

@@ -237,7 +237,8 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}},
-      create<ast::IdentifierExpression>("func"), call_params);
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("func"), "func"),
+      call_params);
   ast::VariableList params0;
   auto* body0 = create<ast::BlockStatement>();
   body0->append(create<ast::CallStatement>(call_expr));
@@ -258,7 +259,8 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}},
-      create<ast::IdentifierExpression>("func"), call_params);
+      create<ast::IdentifierExpression>(mod()->RegisterSymbol("func"), "func"),
+      call_params);
   auto* var =
       create<ast::Variable>(Source{},                        // source
                             "a",                             // name
@@ -267,6 +269,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
                             false,                           // is_const
                             call_expr,                       // constructor
                             ast::VariableDecorationList{});  // decorations
+
   ast::VariableList params0;
   auto* body0 = create<ast::BlockStatement>();
   body0->append(create<ast::VariableDeclStatement>(var));

@@ -33,7 +33,8 @@ TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
   ast::type::I32 i32;
   auto* lit = create<ast::SintLiteral>(&i32, 5);
   auto* idx = create<ast::ScalarConstructorExpression>(lit);
-  auto* ary = create<ast::IdentifierExpression>("ary");
+  auto* ary =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
 
   ast::ArrayAccessorExpression expr(ary, idx);
 
@@ -42,8 +43,10 @@ TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
 }
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitArrayAccessor) {
-  auto* ary = create<ast::IdentifierExpression>("ary");
-  auto* idx = create<ast::IdentifierExpression>("idx");
+  auto* ary =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
+  auto* idx =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
 
   ast::ArrayAccessorExpression expr(ary, idx);
 

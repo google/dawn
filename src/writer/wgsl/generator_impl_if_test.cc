@@ -28,7 +28,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_If) {
-  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
@@ -44,11 +45,13 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
-  auto* else_cond = create<ast::IdentifierExpression>("else_cond");
+  auto* else_cond = create<ast::IdentifierExpression>(
+      mod.RegisterSymbol("else_cond"), "else_cond");
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
 
-  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
@@ -70,7 +73,8 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
 
-  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 
@@ -89,7 +93,8 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
-  auto* else_cond = create<ast::IdentifierExpression>("else_cond");
+  auto* else_cond = create<ast::IdentifierExpression>(
+      mod.RegisterSymbol("else_cond"), "else_cond");
 
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::DiscardStatement>());
@@ -97,7 +102,8 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   auto* else_body_2 = create<ast::BlockStatement>();
   else_body_2->append(create<ast::DiscardStatement>());
 
-  auto* cond = create<ast::IdentifierExpression>("cond");
+  auto* cond =
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::DiscardStatement>());
 

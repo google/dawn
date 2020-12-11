@@ -84,8 +84,9 @@ TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
   ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &f32,
                     false, nullptr, ast::VariableDecorationList{});
 
-  ast::ReturnStatement ret(Source{},
-                           create<ast::IdentifierExpression>("param"));
+  ast::ReturnStatement ret(
+      Source{},
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param"));
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();

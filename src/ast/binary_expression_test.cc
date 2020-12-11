@@ -26,8 +26,8 @@ namespace {
 using BinaryExpressionTest = TestHelper;
 
 TEST_F(BinaryExpressionTest, Creation) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(BinaryOp::kEqual, lhs, rhs);
   EXPECT_EQ(r.lhs(), lhs);
@@ -36,8 +36,8 @@ TEST_F(BinaryExpressionTest, Creation) {
 }
 
 TEST_F(BinaryExpressionTest, Creation_WithSource) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(Source{Source::Location{20, 2}}, BinaryOp::kEqual, lhs,
                      rhs);
@@ -47,67 +47,67 @@ TEST_F(BinaryExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(BinaryExpressionTest, IsBinary) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(BinaryOp::kEqual, lhs, rhs);
   EXPECT_TRUE(r.Is<BinaryExpression>());
 }
 
 TEST_F(BinaryExpressionTest, IsValid) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(BinaryOp::kEqual, lhs, rhs);
   EXPECT_TRUE(r.IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Null_LHS) {
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(BinaryOp::kEqual, nullptr, rhs);
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Invalid_LHS) {
-  auto* lhs = create<IdentifierExpression>("");
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(BinaryOp::kEqual, lhs, rhs);
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Null_RHS) {
-  auto* lhs = create<IdentifierExpression>("lhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
 
   BinaryExpression r(BinaryOp::kEqual, lhs, nullptr);
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Invalid_RHS) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
 
   BinaryExpression r(BinaryOp::kEqual, lhs, rhs);
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Binary_None) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(BinaryOp::kNone, lhs, rhs);
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(BinaryExpressionTest, ToStr) {
-  auto* lhs = create<IdentifierExpression>("lhs");
-  auto* rhs = create<IdentifierExpression>("rhs");
+  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
 
   BinaryExpression r(BinaryOp::kEqual, lhs, rhs);
   std::ostringstream out;
   r.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Binary[not set]{
+  EXPECT_EQ(demangle(out.str()), R"(  Binary[not set]{
     Identifier[not set]{lhs}
     equal
     Identifier[not set]{rhs}

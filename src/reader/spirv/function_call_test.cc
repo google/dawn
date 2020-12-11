@@ -48,18 +48,16 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   const auto module_ast_str = p->get_module().to_str();
   EXPECT_THAT(module_ast_str, Eq(R"(Module{
-  Function )" + p->get_module().GetSymbol("x_50").to_str() +
-                                 R"( -> __void
+  Function tint_symbol_1 -> __void
   ()
   {
     Return{}
   }
-  Function )" + p->get_module().GetSymbol("x_100").to_str() +
-                                 R"( -> __void
+  Function tint_symbol_2 -> __void
   ()
   {
     Call[not set]{
-      Identifier[not set]{x_50}
+      Identifier[not set]{tint_symbol_1}
       (
       )
     }
@@ -92,7 +90,8 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
     EXPECT_TRUE(fe.EmitBody());
-    EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+    EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+                HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
     none
@@ -107,17 +106,17 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
   }
 }
 Return{})"))
-        << ToString(fe.ast_body());
+        << ToString(p->get_module(), fe.ast_body());
   }
 
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
     EXPECT_TRUE(fe.EmitBody());
-    EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Return{
+    EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(Return{
   {
     ScalarConstructor[not set]{42}
   }
-})")) << ToString(fe.ast_body());
+})")) << ToString(p->get_module(), fe.ast_body());
   }
 }
 
@@ -148,7 +147,8 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+    EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+                HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_10
     function
@@ -178,16 +178,16 @@ Assignment{
   Identifier[not set]{x_1}
 }
 Return{})"))
-        << ToString(fe.ast_body());
+        << ToString(p->get_module(), fe.ast_body());
   }
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Return{
+    EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(Return{
   {
     ScalarConstructor[not set]{42}
   }
-})")) << ToString(fe.ast_body());
+})")) << ToString(p->get_module(), fe.ast_body());
   }
 }
 
@@ -218,8 +218,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   EXPECT_TRUE(p->error().empty());
   const auto module_ast_str = p->get_module().to_str();
   EXPECT_THAT(module_ast_str, HasSubstr(R"(Module{
-  Function )" + p->get_module().GetSymbol("x_50").to_str() +
-                                        R"( -> __u32
+  Function tint_symbol_3 -> __u32
   (
     VariableConst{
       x_51
@@ -236,9 +235,9 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
     Return{
       {
         Binary[not set]{
-          Identifier[not set]{x_51}
+          Identifier[not set]{tint_symbol_1}
           add
-          Identifier[not set]{x_52}
+          Identifier[not set]{tint_symbol_2}
         }
       }
     }
@@ -254,7 +253,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
         __u32
         {
           Call[not set]{
-            Identifier[not set]{x_50}
+            Identifier[not set]{tint_symbol_3}
             (
               ScalarConstructor[not set]{42}
               ScalarConstructor[not set]{84}

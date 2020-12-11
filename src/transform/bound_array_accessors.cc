@@ -135,7 +135,9 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
         ctx->mod->create<ast::UintLiteral>(u32, size - 1)));
 
     auto* call_expr = ctx->mod->create<ast::CallExpression>(
-        ctx->mod->create<ast::IdentifierExpression>("min"), std::move(params));
+        ctx->mod->create<ast::IdentifierExpression>(
+            ctx->mod->RegisterSymbol("min"), "min"),
+        std::move(params));
     call_expr->set_result_type(u32);
 
     idx_expr = call_expr;

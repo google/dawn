@@ -15,6 +15,7 @@
 #include <string>
 
 #include "gmock/gmock.h"
+#include "src/demangler.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -326,7 +327,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_StorePosition) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->module().to_str();
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_str, HasSubstr(R"(
     Assignment{
       Identifier[not set]{gl_Position}
@@ -357,7 +359,8 @@ TEST_F(SpvParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->module().to_str();
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_str, HasSubstr(R"(
     Assignment{
       MemberAccessor[not set]{
@@ -388,7 +391,8 @@ TEST_F(SpvParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->module().to_str();
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_str, HasSubstr(R"(
   {
     Assignment{
@@ -1654,7 +1658,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_UsedInFunction) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -1667,7 +1671,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_UsedInFunction) {
       }
     }
   })"))
-      << ToString(fe.ast_body());
+      << ToString(p->get_module(), fe.ast_body());
 }
 
 }  // namespace

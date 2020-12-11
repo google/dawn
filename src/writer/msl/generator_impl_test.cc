@@ -79,7 +79,8 @@ TEST_F(MslGeneratorImplTest, InputStructName_ConflictWithExisting) {
 TEST_F(MslGeneratorImplTest, NameConflictWith_InputStructName) {
   ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
 
-  ast::IdentifierExpression ident("func_main_in");
+  ast::IdentifierExpression ident(mod.RegisterSymbol("func_main_in"),
+                                  "func_main_in");
   ASSERT_TRUE(gen.EmitIdentifier(&ident));
   EXPECT_EQ(gen.result(), "func_main_in_0");
 }

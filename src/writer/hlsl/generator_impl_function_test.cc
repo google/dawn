@@ -171,8 +171,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
@@ -241,10 +241,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("depth"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("depth"), "depth"),
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("x"))));
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"), "x"))));
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
@@ -304,8 +305,10 @@ TEST_F(HlslGeneratorImplTest_Function,
       &f32,                          // type
       false,                         // is_const
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("x")),  // constructor
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"),
+                                            "x")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
   auto* body = create<ast::BlockStatement>();
@@ -375,9 +378,12 @@ TEST_F(HlslGeneratorImplTest_Function,
       false,                         // is_const
       create<ast::MemberAccessorExpression>(
           create<ast::MemberAccessorExpression>(
-              create<ast::IdentifierExpression>("uniforms"),
-              create<ast::IdentifierExpression>("coord")),
-          create<ast::IdentifierExpression>("x")),  // constructor
+              create<ast::IdentifierExpression>(mod.RegisterSymbol("uniforms"),
+                                                "uniforms"),
+              create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                                "coord")),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"),
+                                            "x")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
   auto* body = create<ast::BlockStatement>();
@@ -452,8 +458,10 @@ TEST_F(HlslGeneratorImplTest_Function,
       &f32,                          // type
       false,                         // is_const
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("b")),  // constructor
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("b"),
+                                            "b")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
   auto* body = create<ast::BlockStatement>();
@@ -524,8 +532,10 @@ TEST_F(HlslGeneratorImplTest_Function,
       &f32,                          // type
       false,                         // is_const
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("b")),  // constructor
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("b"),
+                                            "b")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
   auto* body = create<ast::BlockStatement>();
@@ -592,8 +602,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto* assign = create<ast::AssignmentStatement>(
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("b")),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b")),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 2.0f)));
 
@@ -683,13 +694,14 @@ TEST_F(
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("val"),
-      create<ast::IdentifierExpression>("param")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("val"), "val"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("param"), "param")));
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::IdentifierExpression>("foo")));
+      Source{},
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   auto* sub_func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
       ast::FunctionDecorationList{});
@@ -702,9 +714,11 @@ TEST_F(
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
-                                  expr)));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("sub_func"),
+                                            "sub_func"),
+          expr)));
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func_1 = create<ast::Function>(
       Source{}, mod.RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
@@ -774,7 +788,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::IdentifierExpression>("param")));
+      Source{},
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("param"), "param")));
   auto* sub_func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
       ast::FunctionDecorationList{});
@@ -787,9 +802,11 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("depth"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
-                                  expr)));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("depth"), "depth"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("sub_func"),
+                                            "sub_func"),
+          expr)));
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func_1 = create<ast::Function>(
       Source{}, mod.RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
@@ -867,12 +884,14 @@ TEST_F(
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("depth"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("depth"), "depth"),
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("x"))));
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"), "x"))));
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::IdentifierExpression>("param")));
+      Source{},
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("param"), "param")));
   auto* sub_func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
       ast::FunctionDecorationList{});
@@ -885,9 +904,11 @@ TEST_F(
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("depth"),
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
-                                  expr)));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("depth"), "depth"),
+      create<ast::CallExpression>(
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("sub_func"),
+                                            "sub_func"),
+          expr)));
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func_1 = create<ast::Function>(
       Source{}, mod.RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
@@ -956,9 +977,11 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::MemberAccessorExpression>(
-                    create<ast::IdentifierExpression>("coord"),
-                    create<ast::IdentifierExpression>("x"))));
+      Source{},
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"), "x"))));
   auto* sub_func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
       ast::FunctionDecorationList{});
@@ -969,15 +992,17 @@ TEST_F(HlslGeneratorImplTest_Function,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto* var = create<ast::Variable>(
-      Source{},                      // source
-      "v",                           // name
-      ast::StorageClass::kFunction,  // storage_class
-      &f32,                          // type
-      false,                         // is_const
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
-                                  expr),  // constructor
-      ast::VariableDecorationList{});     // decorations
+  auto* var =
+      create<ast::Variable>(Source{},                      // source
+                            "v",                           // name
+                            ast::StorageClass::kFunction,  // storage_class
+                            &f32,                          // type
+                            false,                         // is_const
+                            create<ast::CallExpression>(
+                                create<ast::IdentifierExpression>(
+                                    mod.RegisterSymbol("sub_func"), "sub_func"),
+                                expr),                       // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
@@ -1044,9 +1069,11 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::MemberAccessorExpression>(
-                    create<ast::IdentifierExpression>("coord"),
-                    create<ast::IdentifierExpression>("x"))));
+      Source{},
+      create<ast::MemberAccessorExpression>(
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"), "x"))));
   auto* sub_func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
       ast::FunctionDecorationList{});
@@ -1057,15 +1084,17 @@ TEST_F(HlslGeneratorImplTest_Function,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       create<ast::FloatLiteral>(&f32, 1.0f)));
 
-  auto* var = create<ast::Variable>(
-      Source{},                      // source
-      "v",                           // name
-      ast::StorageClass::kFunction,  // storage_class
-      &f32,                          // type
-      false,                         // is_const
-      create<ast::CallExpression>(create<ast::IdentifierExpression>("sub_func"),
-                                  expr),  // constructor
-      ast::VariableDecorationList{});     // decorations
+  auto* var =
+      create<ast::Variable>(Source{},                      // source
+                            "v",                           // name
+                            ast::StorageClass::kFunction,  // storage_class
+                            &f32,                          // type
+                            false,                         // is_const
+                            create<ast::CallExpression>(
+                                create<ast::IdentifierExpression>(
+                                    mod.RegisterSymbol("sub_func"), "sub_func"),
+                                expr),                       // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
@@ -1119,7 +1148,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
       create<ast::ScalarConstructorExpression>(
           create<ast::FloatLiteral>(&f32, 1.0f))));
 
@@ -1326,8 +1355,10 @@ TEST_F(HlslGeneratorImplTest_Function,
         &f32,                          // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
-            create<ast::IdentifierExpression>("data"),
-            create<ast::IdentifierExpression>("d")),  // constructor
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
+                                              "data"),
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("d"),
+                                              "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();
@@ -1352,8 +1383,10 @@ TEST_F(HlslGeneratorImplTest_Function,
         &f32,                          // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
-            create<ast::IdentifierExpression>("data"),
-            create<ast::IdentifierExpression>("d")),  // constructor
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
+                                              "data"),
+            create<ast::IdentifierExpression>(mod.RegisterSymbol("d"),
+                                              "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
     auto* body = create<ast::BlockStatement>();

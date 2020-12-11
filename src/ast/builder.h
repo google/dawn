@@ -206,13 +206,13 @@ class Builder {
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const std::string& name) {
-    return create<IdentifierExpression>(name);
+    return create<IdentifierExpression>(mod->RegisterSymbol(name), name);
   }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const char* name) {
-    return create<IdentifierExpression>(name);
+    return create<IdentifierExpression>(mod->RegisterSymbol(name), name);
   }
 
   /// @param value the boolean value

@@ -30,7 +30,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
   ast::type::F32 f32;
-  auto* id = create<ast::IdentifierExpression>("id");
+  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("id"), "id");
   ast::BitcastExpression bitcast(&f32, id);
 
   ASSERT_TRUE(gen.EmitExpression(&bitcast)) << gen.error();

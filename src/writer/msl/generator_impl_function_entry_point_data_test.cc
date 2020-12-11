@@ -83,11 +83,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("foo"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("bar")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
@@ -153,11 +153,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("foo"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("bar")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
@@ -223,11 +223,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("foo"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("bar")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
@@ -292,11 +292,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("foo"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("bar")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
@@ -359,11 +359,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("foo"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("bar")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
@@ -421,11 +421,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("foo"),
-      create<ast::IdentifierExpression>("foo")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("bar"),
-      create<ast::IdentifierExpression>("bar")));
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
@@ -490,10 +490,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>("depth"),
+      create<ast::IdentifierExpression>(mod.RegisterSymbol("depth"), "depth"),
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>("coord"),
-          create<ast::IdentifierExpression>("x"))));
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
+                                            "coord"),
+          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"), "x"))));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &void_type, body,

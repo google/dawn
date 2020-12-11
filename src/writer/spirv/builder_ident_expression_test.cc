@@ -68,7 +68,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  ast::IdentifierExpression expr("var");
+  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
 
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
@@ -91,7 +91,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 %1 = OpVariable %2 Output %4
 )");
 
-  ast::IdentifierExpression expr("var");
+  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
@@ -126,7 +126,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  ast::IdentifierExpression expr("var");
+  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
 }
@@ -152,7 +152,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
             R"(%1 = OpVariable %2 Function %4
 )");
 
-  ast::IdentifierExpression expr("var");
+  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
@@ -165,8 +165,10 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   td.RegisterVariableForTesting(&var);
 
-  auto* lhs = create<ast::IdentifierExpression>("var");
-  auto* rhs = create<ast::IdentifierExpression>("var");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* rhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
 
   ast::BinaryExpression expr(ast::BinaryOp::kAdd, lhs, rhs);
 
@@ -198,8 +200,10 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   td.RegisterVariableForTesting(&var);
 
-  auto* lhs = create<ast::IdentifierExpression>("var");
-  auto* rhs = create<ast::IdentifierExpression>("var");
+  auto* lhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* rhs =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
 
   ast::BinaryExpression expr(ast::BinaryOp::kAdd, lhs, rhs);
 

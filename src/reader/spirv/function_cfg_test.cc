@@ -7361,7 +7361,7 @@ TEST_F(SpvParserTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -7473,7 +7473,7 @@ TEST_F(SpvParserTest, EmitBody_IfBreak_FromElse_ForwardWithinElse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -7600,7 +7600,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error() << assembly;
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -7791,7 +7791,7 @@ TEST_F(SpvParserTest, EmitBody_If_Empty) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{false}
@@ -7827,7 +7827,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_NoElse) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -7875,7 +7875,7 @@ TEST_F(SpvParserTest, EmitBody_If_NoThen_Else) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -7931,7 +7931,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_Else) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -7998,7 +7998,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_Else_Premerge) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8070,7 +8070,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_Premerge) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8134,7 +8134,7 @@ TEST_F(SpvParserTest, EmitBody_If_Else_Premerge) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8219,7 +8219,7 @@ TEST_F(SpvParserTest, EmitBody_If_Nest_If) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8309,7 +8309,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_TrueBackedge) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8364,7 +8364,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_FalseBackedge) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8415,7 +8415,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_BothBackedge) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8458,7 +8458,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_UnconditionalBackege) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8509,7 +8509,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_SingleBlockContinue) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8574,7 +8574,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_MultiBlockContinue) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8648,7 +8648,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_ContinueNestIf) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8720,7 +8720,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_MultiBlockContinueIsEntireLoop) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -8778,7 +8778,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_Never) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -8838,7 +8838,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_TrueToBody_FalseBreaks) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -8905,7 +8905,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_FalseToBody_TrueBreaks) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -8979,7 +8979,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_NestedIfContinue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   If{
     (
@@ -9037,7 +9037,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyAlwaysBreaks) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -9086,7 +9086,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -9142,7 +9142,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -9204,7 +9204,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue_Early) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -9266,7 +9266,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse_Early) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -9319,7 +9319,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_NoCases) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9364,7 +9364,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_OneCase) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9418,7 +9418,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_TwoCases) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9478,7 +9478,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_CasesWithDup) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9544,7 +9544,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsCase_NoDupCases) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9615,7 +9615,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsCase_WithDupCase) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9687,7 +9687,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_Case_SintValue) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9757,7 +9757,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_Case_UintValue) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -9809,7 +9809,7 @@ TEST_F(SpvParserTest, EmitBody_Return_TopLevel) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Return{}
 )";
   ASSERT_EQ(expect, got);
@@ -9835,7 +9835,7 @@ TEST_F(SpvParserTest, EmitBody_Return_InsideIf) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{false}
@@ -9875,7 +9875,7 @@ TEST_F(SpvParserTest, EmitBody_Return_InsideLoop) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Return{}
 }
@@ -9905,7 +9905,7 @@ TEST_F(SpvParserTest, EmitBody_ReturnValue_TopLevel) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 200));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Return{
   {
     ScalarConstructor[not set]{2}
@@ -9944,7 +9944,7 @@ TEST_F(SpvParserTest, EmitBody_ReturnValue_InsideIf) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 200));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{false}
@@ -10001,7 +10001,7 @@ TEST_F(SpvParserTest, EmitBody_ReturnValue_Loop) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 200));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Return{
     {
@@ -10031,7 +10031,7 @@ TEST_F(SpvParserTest, EmitBody_Kill_TopLevel) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Discard{}
 )";
   ASSERT_EQ(expect, got);
@@ -10057,7 +10057,7 @@ TEST_F(SpvParserTest, EmitBody_Kill_InsideIf) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{false}
@@ -10097,7 +10097,7 @@ TEST_F(SpvParserTest, EmitBody_Kill_InsideLoop) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Discard{}
 }
@@ -10119,7 +10119,7 @@ TEST_F(SpvParserTest, EmitBody_Unreachable_TopLevel) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Return{}
 )";
   ASSERT_EQ(expect, got);
@@ -10145,7 +10145,7 @@ TEST_F(SpvParserTest, EmitBody_Unreachable_InsideIf) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{false}
@@ -10185,7 +10185,7 @@ TEST_F(SpvParserTest, EmitBody_Unreachable_InsideLoop) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Return{}
 }
@@ -10215,7 +10215,7 @@ TEST_F(SpvParserTest, EmitBody_Unreachable_InNonVoidFunction) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 200));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Return{
   {
     ScalarConstructor[not set]{0}
@@ -10249,7 +10249,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_BackEdge_MultiBlockLoop) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   continuing {
     Assignment{
@@ -10284,7 +10284,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_BackEdge_SingleBlockLoop) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -10321,7 +10321,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_SwitchBreak_LastInCase) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -10381,7 +10381,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_SwitchBreak_NotLastInCase) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -10452,7 +10452,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopBreak_MultiBlockLoop_FromBody) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -10534,7 +10534,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   continuing {
     Assignment{
@@ -10576,7 +10576,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopContinue_LastInLoopConstruct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
@@ -10630,7 +10630,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopContinue_BeforeLast) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Loop{
   If{
     (
@@ -10699,7 +10699,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopContinue_FromSwitch) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -10769,7 +10769,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_IfBreak_FromThen) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{false}
@@ -10812,7 +10812,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_IfBreak_FromElse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{false}
@@ -10864,7 +10864,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_Fallthrough) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -10915,7 +10915,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_Forward) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11019,7 +11019,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Back_SingleBlock_Back) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -11062,7 +11062,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -11113,7 +11113,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -11171,7 +11171,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -11227,7 +11227,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -11287,7 +11287,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11348,7 +11348,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11431,7 +11431,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Continue_OnTrue) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11526,7 +11526,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Continue_OnFalse) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11611,7 +11611,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Forward_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11680,7 +11680,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Forward_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11747,7 +11747,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11821,7 +11821,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -11890,7 +11890,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -11948,7 +11948,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12021,7 +12021,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Continue_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12117,7 +12117,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Continue_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12256,7 +12256,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Forward_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12337,7 +12337,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Forward_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12405,7 +12405,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Continue_FromHeader) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12462,7 +12462,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12534,7 +12534,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12622,7 +12622,7 @@ TEST_F(
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12701,7 +12701,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopContinue_FromSwitch) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -12789,7 +12789,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_IfBreak_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12886,7 +12886,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_IfBreak_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -12982,7 +12982,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Fallthrough_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -13091,7 +13091,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Fallthrough_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -13188,7 +13188,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Forward_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -13269,7 +13269,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Forward_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -13333,7 +13333,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_IfBreak_IfBreak_Same) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{0}
@@ -13418,7 +13418,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Fallthrough_Fallthrough_Same) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -13509,7 +13509,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Forward_Forward_Same) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
   ScalarConstructor[not set]{1}
@@ -13578,7 +13578,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = "unhandled case";
   ASSERT_EQ(expect, got);
 }
@@ -13613,7 +13613,7 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(fe.ast_body());
+  auto got = ToString(p->get_module(), fe.ast_body());
   auto* expect = "unhandled case";
   ASSERT_EQ(expect, got);
 }

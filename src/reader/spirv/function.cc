@@ -689,7 +689,8 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
   // as the statement block at the top of the stack.
   const auto& top = statements_stack_.back();
 
-  auto* cond = create<ast::IdentifierExpression>(guard_name);
+  auto* cond = create<ast::IdentifierExpression>(
+      ast_module_.RegisterSymbol(guard_name), guard_name);
   auto* body = create<ast::BlockStatement>();
   AddStatement(
       create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
@@ -1891,9 +1892,11 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
     return {};
   }
   if (identifier_values_.count(id) || parser_impl_.IsScalarSpecConstant(id)) {
+    auto name = namer_.Name(id);
     return TypedExpression{
         parser_impl_.ConvertType(def_use_mgr_->GetDef(id)->type_id()),
-        create<ast::IdentifierExpression>(namer_.Name(id))};
+        create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name),
+                                          name)};
   }
   if (singly_used_values_.count(id)) {
     auto expr = std::move(singly_used_values_[id]);
@@ -1910,11 +1913,13 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
     return {};
   }
   switch (inst->opcode()) {
-    case SpvOpVariable:
+    case SpvOpVariable: {
       // This occurs for module-scope variables.
-      return TypedExpression{
-          parser_impl_.ConvertType(inst->type_id()),
-          create<ast::IdentifierExpression>(namer_.Name(inst->result_id()))};
+      auto name = namer_.Name(inst->result_id());
+      return TypedExpression{parser_impl_.ConvertType(inst->type_id()),
+                             create<ast::IdentifierExpression>(
+                                 ast_module_.RegisterSymbol(name), name)};
+    }
     default:
       break;
   }
@@ -2579,7 +2584,9 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
         }
         // Signal an exit from the branch.
         return create<ast::AssignmentStatement>(
-            create<ast::IdentifierExpression>(flow_guard), MakeFalse());
+            create<ast::IdentifierExpression>(
+                ast_module_.RegisterSymbol(flow_guard), flow_guard),
+            MakeFalse());
       }
 
       // For an unconditional branch, the break out to an if-selection
@@ -2733,7 +2740,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
       const auto var_name = GetDefInfo(assignment.phi_id)->phi_var;
       auto expr = MakeExpression(assignment.value);
       AddStatement(create<ast::AssignmentStatement>(
-          create<ast::IdentifierExpression>(var_name), expr.expr));
+          create<ast::IdentifierExpression>(
+              ast_module_.RegisterSymbol(var_name), var_name),
+          expr.expr));
     }
   }
 
@@ -2766,12 +2775,13 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
   const auto result_id = inst.result_id();
   const auto* def_info = GetDefInfo(result_id);
   if (def_info && def_info->requires_hoisted_def) {
+    auto name = namer_.Name(result_id);
     // Emit an assignment of the expression to the hoisted variable.
-    AddStatementForInstruction(
-        create<ast::AssignmentStatement>(
-            create<ast::IdentifierExpression>(namer_.Name(result_id)),
-            ast_expr.expr),
-        inst);
+    AddStatementForInstruction(create<ast::AssignmentStatement>(
+                                   create<ast::IdentifierExpression>(
+                                       ast_module_.RegisterSymbol(name), name),
+                                   ast_expr.expr),
+                               inst);
     return true;
   }
   return EmitConstDefinition(inst, ast_expr);
@@ -2861,9 +2871,10 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     }
     case SpvOpPhi: {
       // Emit a read from the associated state variable.
-      TypedExpression expr{
-          parser_impl_.ConvertType(inst.type_id()),
-          create<ast::IdentifierExpression>(def_info->phi_var)};
+      TypedExpression expr{parser_impl_.ConvertType(inst.type_id()),
+                           create<ast::IdentifierExpression>(
+                               ast_module_.RegisterSymbol(def_info->phi_var),
+                               def_info->phi_var)};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
     case SpvOpFunctionCall:
@@ -2916,7 +2927,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     ast::ExpressionList params;
     params.emplace_back(MakeOperand(inst, 0).expr);
     return {ast_type, create<ast::CallExpression>(
-                          create<ast::IdentifierExpression>(unary_builtin_name),
+                          create<ast::IdentifierExpression>(
+                              ast_module_.RegisterSymbol(unary_builtin_name),
+                              unary_builtin_name),
                           std::move(params))};
   }
 
@@ -3017,7 +3030,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     return {};
   }
 
-  auto* func = create<ast::IdentifierExpression>(name);
+  auto* func =
+      create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name), name);
   ast::ExpressionList operands;
   ast::type::Type* first_operand_type = nullptr;
   // All parameters to GLSL.std.450 extended instructions are IDs.
@@ -3042,17 +3056,21 @@ ast::IdentifierExpression* FunctionEmitter::Swizzle(uint32_t i) {
     return nullptr;
   }
   const char* names[] = {"x", "y", "z", "w"};
-  return create<ast::IdentifierExpression>(names[i & 3]);
+  return create<ast::IdentifierExpression>(
+      ast_module_.RegisterSymbol(names[i & 3]), names[i & 3]);
 }
 
 ast::IdentifierExpression* FunctionEmitter::PrefixSwizzle(uint32_t n) {
   switch (n) {
     case 1:
-      return create<ast::IdentifierExpression>("x");
+      return create<ast::IdentifierExpression>(ast_module_.RegisterSymbol("x"),
+                                               "x");
     case 2:
-      return create<ast::IdentifierExpression>("xy");
+      return create<ast::IdentifierExpression>(ast_module_.RegisterSymbol("xy"),
+                                               "xy");
     case 3:
-      return create<ast::IdentifierExpression>("xyz");
+      return create<ast::IdentifierExpression>(
+          ast_module_.RegisterSymbol("xyz"), "xyz");
     default:
       break;
   }
@@ -3121,8 +3139,10 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       first_index = first_index + 1;
       // Replace the gl_PerVertex reference with the gl_Position reference
       ptr_ty_id = builtin_position_info.member_pointer_type_id;
-      current_expr.expr =
-          create<ast::IdentifierExpression>(namer_.Name(base_id));
+
+      auto name = namer_.Name(base_id);
+      current_expr.expr = create<ast::IdentifierExpression>(
+          ast_module_.RegisterSymbol(name), name);
       current_expr.type = parser_impl_.ConvertType(ptr_ty_id);
     }
   }
@@ -3212,8 +3232,10 @@ TypedExpression FunctionEmitter::MakeAccessChain(
                  << pointee_type_id << " having " << num_members << " members";
           return {};
         }
+        auto name =
+            namer_.GetMemberName(pointee_type_id, uint32_t(index_const_val));
         auto* member_access = create<ast::IdentifierExpression>(
-            namer_.GetMemberName(pointee_type_id, uint32_t(index_const_val)));
+            ast_module_.RegisterSymbol(name), name);
 
         next_expr = create<ast::MemberAccessorExpression>(current_expr.expr,
                                                           member_access);
@@ -3331,8 +3353,9 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
                  << current_type_id << " having " << num_members << " members";
           return {};
         }
+        auto name = namer_.GetMemberName(current_type_id, uint32_t(index_val));
         auto* member_access = create<ast::IdentifierExpression>(
-            namer_.GetMemberName(current_type_id, uint32_t(index_val)));
+            ast_module_.RegisterSymbol(name), name);
 
         next_expr = create<ast::MemberAccessorExpression>(current_expr.expr,
                                                           member_access);
@@ -3712,8 +3735,9 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
 
 bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   // We ignore function attributes such as Inline, DontInline, Pure, Const.
-  auto* function = create<ast::IdentifierExpression>(
-      namer_.Name(inst.GetSingleWordInOperand(0)));
+  auto name = namer_.Name(inst.GetSingleWordInOperand(0));
+  auto* function =
+      create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name), name);
 
   ast::ExpressionList params;
   for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
@@ -3739,7 +3763,9 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
   const auto intrinsic = GetIntrinsic(inst.opcode());
   std::ostringstream ss;
   ss << intrinsic;
-  auto* ident = create<ast::IdentifierExpression>(ss.str());
+  auto name = ss.str();
+  auto* ident =
+      create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name), name);
   ident->set_intrinsic(intrinsic);
 
   ast::ExpressionList params;
@@ -3781,9 +3807,11 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
     params.push_back(operand2.expr);
     // The condition goes last.
     params.push_back(condition.expr);
-    return {operand1.type, create<ast::CallExpression>(
-                               create<ast::IdentifierExpression>("select"),
-                               std::move(params))};
+    return {operand1.type,
+            create<ast::CallExpression>(
+                create<ast::IdentifierExpression>(
+                    ast_module_.RegisterSymbol("select"), "select"),
+                std::move(params))};
   }
   return {};
 }
@@ -3813,8 +3841,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     return Fail() << "internal error: couldn't find image for "
                   << inst.PrettyPrint();
   }
-  params.push_back(
-      create<ast::IdentifierExpression>(namer_.Name(image->result_id())));
+  auto name = namer_.Name(image->result_id());
+  params.push_back(create<ast::IdentifierExpression>(
+      ast_module_.RegisterSymbol(name), name));
 
   if (IsSampledImageAccess(inst.opcode())) {
     // Form the sampler operand.
@@ -3824,8 +3853,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       return Fail() << "internal error: couldn't find sampler for "
                     << inst.PrettyPrint();
     }
-    params.push_back(
-        create<ast::IdentifierExpression>(namer_.Name(sampler->result_id())));
+    auto param_name = namer_.Name(sampler->result_id());
+    params.push_back(create<ast::IdentifierExpression>(
+        ast_module_.RegisterSymbol(param_name), param_name));
   }
 
   ast::type::Pointer* texture_ptr_type =
@@ -3964,7 +3994,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                   << "): " << inst.PrettyPrint();
   }
 
-  auto* ident = create<ast::IdentifierExpression>(builtin_name);
+  auto* ident = create<ast::IdentifierExpression>(
+      ast_module_.RegisterSymbol(builtin_name), builtin_name);
   auto* call_expr = create<ast::CallExpression>(ident, std::move(params));
 
   if (inst.type_id() != 0) {

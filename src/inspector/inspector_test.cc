@@ -98,7 +98,8 @@ class InspectorHelper {
       std::string callee,
       ast::FunctionDecorationList decorations = {}) {
     auto* body = create<ast::BlockStatement>();
-    auto* ident_expr = create<ast::IdentifierExpression>(callee);
+    auto* ident_expr = create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(callee), callee);
     auto* call_expr =
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
@@ -152,8 +153,8 @@ class InspectorHelper {
       std::string in, out;
       std::tie(in, out) = inout;
       body->append(create<ast::AssignmentStatement>(
-          create<ast::IdentifierExpression>(out),
-          create<ast::IdentifierExpression>(in)));
+          create<ast::IdentifierExpression>(mod()->RegisterSymbol(out), out),
+          create<ast::IdentifierExpression>(mod()->RegisterSymbol(in), in)));
     }
     body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(name), name,
@@ -179,10 +180,11 @@ class InspectorHelper {
       std::string in, out;
       std::tie(in, out) = inout;
       body->append(create<ast::AssignmentStatement>(
-          create<ast::IdentifierExpression>(out),
-          create<ast::IdentifierExpression>(in)));
+          create<ast::IdentifierExpression>(mod()->RegisterSymbol(out), out),
+          create<ast::IdentifierExpression>(mod()->RegisterSymbol(in), in)));
     }
-    auto* ident_expr = create<ast::IdentifierExpression>(callee);
+    auto* ident_expr = create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(callee), callee);
     auto* call_expr =
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
@@ -442,10 +444,14 @@ class InspectorHelper {
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
       body->append(create<ast::AssignmentStatement>(
-          create<ast::IdentifierExpression>("local" + member_name),
+          create<ast::IdentifierExpression>(
+              mod()->RegisterSymbol("local" + member_name),
+              "local" + member_name),
           create<ast::MemberAccessorExpression>(
-              create<ast::IdentifierExpression>(struct_name),
-              create<ast::IdentifierExpression>(member_name))));
+              create<ast::IdentifierExpression>(
+                  mod()->RegisterSymbol(struct_name), struct_name),
+              create<ast::IdentifierExpression>(
+                  mod()->RegisterSymbol(member_name), member_name))));
     }
 
     body->append(create<ast::ReturnStatement>(Source{}));
@@ -581,14 +587,21 @@ class InspectorHelper {
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
-    call_params.push_back(create<ast::IdentifierExpression>(texture_name));
-    call_params.push_back(create<ast::IdentifierExpression>(sampler_name));
-    call_params.push_back(create<ast::IdentifierExpression>(coords_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(texture_name), texture_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(sampler_name), sampler_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(coords_name), coords_name));
     auto* call_expr = create<ast::CallExpression>(
-        create<ast::IdentifierExpression>("textureSample"), call_params);
+        create<ast::IdentifierExpression>(
+            mod()->RegisterSymbol("textureSample"), "textureSample"),
+        call_params);
 
     body->append(create<ast::AssignmentStatement>(
-        create<ast::IdentifierExpression>("sampler_result"), call_expr));
+        create<ast::IdentifierExpression>(
+            mod()->RegisterSymbol("sampler_result"), "sampler_result"),
+        call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
 
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
@@ -628,15 +641,23 @@ class InspectorHelper {
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
-    call_params.push_back(create<ast::IdentifierExpression>(texture_name));
-    call_params.push_back(create<ast::IdentifierExpression>(sampler_name));
-    call_params.push_back(create<ast::IdentifierExpression>(coords_name));
-    call_params.push_back(create<ast::IdentifierExpression>(array_index));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(texture_name), texture_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(sampler_name), sampler_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(coords_name), coords_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(array_index), array_index));
     auto* call_expr = create<ast::CallExpression>(
-        create<ast::IdentifierExpression>("textureSample"), call_params);
+        create<ast::IdentifierExpression>(
+            mod()->RegisterSymbol("textureSample"), "textureSample"),
+        call_params);
 
     body->append(create<ast::AssignmentStatement>(
-        create<ast::IdentifierExpression>("sampler_result"), call_expr));
+        create<ast::IdentifierExpression>(
+            mod()->RegisterSymbol("sampler_result"), "sampler_result"),
+        call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
 
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
@@ -677,15 +698,24 @@ class InspectorHelper {
     body->append(create<ast::VariableDeclStatement>(call_result));
 
     ast::ExpressionList call_params;
-    call_params.push_back(create<ast::IdentifierExpression>(texture_name));
-    call_params.push_back(create<ast::IdentifierExpression>(sampler_name));
-    call_params.push_back(create<ast::IdentifierExpression>(coords_name));
-    call_params.push_back(create<ast::IdentifierExpression>(depth_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(texture_name), texture_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(sampler_name), sampler_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(coords_name), coords_name));
+    call_params.push_back(create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(depth_name), depth_name));
     auto* call_expr = create<ast::CallExpression>(
-        create<ast::IdentifierExpression>("textureSampleCompare"), call_params);
+        create<ast::IdentifierExpression>(
+            mod()->RegisterSymbol("textureSampleCompare"),
+            "textureSampleCompare"),
+        call_params);
 
     body->append(create<ast::AssignmentStatement>(
-        create<ast::IdentifierExpression>("sampler_result"), call_expr));
+        create<ast::IdentifierExpression>(
+            mod()->RegisterSymbol("sampler_result"), "sampler_result"),
+        call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
 
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
@@ -1507,7 +1537,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   AddReferenceFunc("ub_baz_func", "ub_baz");
 
   auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
-    auto* ident_expr = create<ast::IdentifierExpression>(callee);
+    auto* ident_expr = create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(callee), callee);
     auto* call_expr =
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
@@ -1654,7 +1685,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   AddReferenceFunc("sb_baz_func", "sb_baz");
 
   auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
-    auto* ident_expr = create<ast::IdentifierExpression>(callee);
+    auto* ident_expr = create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(callee), callee);
     auto* call_expr =
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
@@ -1828,7 +1860,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   AddReferenceFunc("sb_baz_func", "sb_baz");
 
   auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
-    auto* ident_expr = create<ast::IdentifierExpression>(callee);
+    auto* ident_expr = create<ast::IdentifierExpression>(
+        mod()->RegisterSymbol(callee), callee);
     auto* call_expr =
         create<ast::CallExpression>(ident_expr, ast::ExpressionList());
     body->append(create<ast::CallStatement>(call_expr));
