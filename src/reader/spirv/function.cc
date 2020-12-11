@@ -3947,8 +3947,21 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsConstOffsetMask)) {
+    // TODO(dneto): convert to signed integer if needed
     params.push_back(MakeOperand(inst, arg_index).expr);
     image_operands_mask ^= SpvImageOperandsConstOffsetMask;
+    arg_index++;
+  }
+  if (arg_index < num_args &&
+      (image_operands_mask & SpvImageOperandsSampleMask)) {
+    TypedExpression sample = MakeOperand(inst, arg_index);
+    if (!sample.type->Is<ast::type::I32>()) {
+      sample.expr = ast_module_.create<ast::TypeConstructorExpression>(
+          ast_module_.create<ast::type::I32>(),
+          ast::ExpressionList{sample.expr});
+    }
+    params.push_back(sample.expr);
+    image_operands_mask ^= SpvImageOperandsSampleMask;
     arg_index++;
   }
   if (image_operands_mask) {

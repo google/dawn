@@ -2934,6 +2934,7 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
         // OpImageFetch with ConstOffset
+        // TODO(dneto): Seems this is not valid in WGSL.
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vu12 ConstOffset %offsets2d",
          R"(Variable{
@@ -2957,6 +2958,118 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_20}
               Identifier[not set]{vu12}
               Identifier[not set]{offsets2d}
+            )
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageFetch_Multisampled,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // SPIR-V requires a Sample image operand when operating on a
+        // multisampled image.
+
+        // ImageFetch non-arrayed
+        {"%float 2D 0 0 1 1 Unknown",
+         "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
+         R"(Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vi12}
+              Identifier[not set]{i1}
+            )
+          }
+        }
+      }
+    })"},
+        // ImageFetch arrayed
+        {"%float 2D 0 1 1 1 Unknown",
+         "%99 = OpImageFetch %v4float %im %vi123 Sample %i1",
+         R"(Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              MemberAccessor[not set]{
+                Identifier[not set]{vi123}
+                Identifier[not set]{xy}
+              }
+              TypeConstructor[not set]{
+                __i32
+                MemberAccessor[not set]{
+                  Identifier[not set]{vi123}
+                  Identifier[not set]{z}
+                }
+              }
+              Identifier[not set]{i1}
+            )
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageFetch_Multisampled_ConvertSampleOperand,
+    SpvParserTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        {"%float 2D 0 0 1 1 Unknown",
+         "%99 = OpImageFetch %v4float %im %vi12 Sample %u1",
+         R"(Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vi12}
+              TypeConstructor[not set]{
+                __i32
+                Identifier[not set]{u1}
+              }
             )
           }
         }
