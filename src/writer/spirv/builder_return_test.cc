@@ -51,11 +51,11 @@ TEST_F(BuilderTest, Return_WithValue) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* val = create<ast::TypeConstructorExpression>(&vec, vals);
 

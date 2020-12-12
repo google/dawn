@@ -29,14 +29,14 @@ using FloatLiteralTest = TestHelper;
 
 TEST_F(FloatLiteralTest, Value) {
   type::F32 f32;
-  FloatLiteral f{&f32, 47.2f};
+  FloatLiteral f{Source{}, &f32, 47.2f};
   ASSERT_TRUE(f.Is<FloatLiteral>());
   EXPECT_EQ(f.value(), 47.2f);
 }
 
 TEST_F(FloatLiteralTest, Is) {
   type::F32 f32;
-  FloatLiteral f{&f32, 42.f};
+  FloatLiteral f{Source{}, &f32, 42.f};
   Literal* l = &f;
   EXPECT_FALSE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
@@ -48,14 +48,14 @@ TEST_F(FloatLiteralTest, Is) {
 
 TEST_F(FloatLiteralTest, ToStr) {
   type::F32 f32;
-  FloatLiteral f{&f32, 42.1f};
+  FloatLiteral f{Source{}, &f32, 42.1f};
 
   EXPECT_EQ(f.to_str(), "42.099998");
 }
 
 TEST_F(FloatLiteralTest, ToName) {
   type::F32 f32;
-  FloatLiteral f{&f32, 42.1f};
+  FloatLiteral f{Source{}, &f32, 42.1f};
   EXPECT_EQ(f.name(), "__float42.0999985");
 }
 

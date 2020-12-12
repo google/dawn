@@ -43,11 +43,11 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
@@ -102,11 +102,11 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
@@ -195,7 +195,7 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   ast::Variable var(Source{}, "var", ast::StorageClass::kNone, &i32, true,
                     create<ast::ScalarConstructorExpression>(
-                        create<ast::SintLiteral>(&i32, 2)),
+                        create<ast::SintLiteral>(Source{}, &i32, 2)),
                     ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&var);

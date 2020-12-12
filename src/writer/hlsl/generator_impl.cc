@@ -779,7 +779,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
   auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
     auto* i32 = module_->create<ast::type::I32>();
-    ast::SintLiteral zero_lit(i32, 0);
+    ast::SintLiteral zero_lit(Source{}, i32, 0);
     ast::ScalarConstructorExpression zero(&zero_lit);
     zero.set_result_type(i32);
     return AppendVector(vector, &zero,

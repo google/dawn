@@ -30,7 +30,7 @@ using ElseStatementTest = TestHelper;
 TEST_F(ElseStatementTest, Creation) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
-      create<BoolLiteral>(&bool_type, true));
+      create<BoolLiteral>(Source{}, &bool_type, true));
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 
@@ -57,7 +57,7 @@ TEST_F(ElseStatementTest, IsElse) {
 TEST_F(ElseStatementTest, HasCondition) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
-      create<BoolLiteral>(&bool_type, true));
+      create<BoolLiteral>(Source{}, &bool_type, true));
   ElseStatement e(cond, create<BlockStatement>());
   EXPECT_TRUE(e.HasCondition());
 }
@@ -107,7 +107,7 @@ TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
 TEST_F(ElseStatementTest, ToStr) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
-      create<BoolLiteral>(&bool_type, true));
+      create<BoolLiteral>(Source{}, &bool_type, true));
   auto* body = create<BlockStatement>();
   body->append(create<DiscardStatement>());
 

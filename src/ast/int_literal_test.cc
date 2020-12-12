@@ -31,13 +31,13 @@ using IntLiteralTest = TestHelper;
 
 TEST_F(IntLiteralTest, Sint_IsInt) {
   type::I32 i32;
-  SintLiteral i{&i32, 47};
+  SintLiteral i{Source{}, &i32, 47};
   ASSERT_TRUE(i.Is<IntLiteral>());
 }
 
 TEST_F(IntLiteralTest, Uint_IsInt) {
   type::I32 i32;
-  UintLiteral i{&i32, 42};
+  UintLiteral i{Source{}, &i32, 42};
   EXPECT_TRUE(i.Is<IntLiteral>());
 }
 

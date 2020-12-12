@@ -22,8 +22,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::UintLiteral);
 namespace tint {
 namespace ast {
 
-UintLiteral::UintLiteral(type::Type* type, uint32_t value)
-    : Base(type), value_(value) {}
+UintLiteral::UintLiteral(const Source& source, type::Type* type, uint32_t value)
+    : Base(source, type), value_(value) {}
 
 UintLiteral::~UintLiteral() = default;
 
@@ -36,7 +36,8 @@ std::string UintLiteral::name() const {
 }
 
 UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<UintLiteral>(ctx->Clone(type()), value_);
+  return ctx->mod->create<UintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
+                                       value_);
 }
 
 }  // namespace ast

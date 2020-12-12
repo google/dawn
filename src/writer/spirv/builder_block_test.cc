@@ -52,7 +52,7 @@ TEST_F(BuilderTest, Block) {
   outer.append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(&f32, 1.0f))));
+          create<ast::FloatLiteral>(Source{}, &f32, 1.0f))));
 
   auto* inner = create<ast::BlockStatement>();
   inner->append(create<ast::VariableDeclStatement>(
@@ -66,13 +66,13 @@ TEST_F(BuilderTest, Block) {
   inner->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(&f32, 2.0f))));
+          create<ast::FloatLiteral>(Source{}, &f32, 2.0f))));
 
   outer.append(inner);
   outer.append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(&f32, 3.0f))));
+          create<ast::FloatLiteral>(Source{}, &f32, 3.0f))));
 
   ASSERT_TRUE(td.DetermineResultType(&outer)) << td.error();
 

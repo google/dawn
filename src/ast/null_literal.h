@@ -26,8 +26,9 @@ namespace ast {
 class NullLiteral : public Castable<NullLiteral, Literal> {
  public:
   /// Constructor
+  /// @param source the input source
   /// @param type the type
-  explicit NullLiteral(type::Type* type);
+  NullLiteral(const Source& source, type::Type* type);
   ~NullLiteral() override;
 
   /// @returns the name for this literal. This name is unique to this value.

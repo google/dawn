@@ -50,7 +50,7 @@ TEST_F(BuilderTest, Assign_Var) {
   auto* ident =
       create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -120,16 +120,16 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
   auto* first = create<ast::TypeConstructorExpression>(
       &vec2, ast::ExpressionList{
                  create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(&f32, 1.0f)),
+                     create<ast::FloatLiteral>(Source{}, &f32, 1.0f)),
                  create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(&f32, 2.0f)),
+                     create<ast::FloatLiteral>(Source{}, &f32, 2.0f)),
              });
 
   auto* init = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
                  first,
                  create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(&f32, 3.0f)),
+                     create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
              });
 
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
@@ -174,11 +174,11 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* init = create<ast::TypeConstructorExpression>(&vec3, vals);
 
@@ -239,7 +239,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
       create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"));
 
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 4.0f));
+      create<ast::FloatLiteral>(Source{}, &f32, 4.0f));
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -282,11 +282,11 @@ TEST_F(BuilderTest, Assign_Vector) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* val = create<ast::TypeConstructorExpression>(&vec3, vals);
 
@@ -330,7 +330,7 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
       create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::IdentifierExpression>(mod->RegisterSymbol("y"), "y"));
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -375,9 +375,9 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
   auto* ident = create<ast::ArrayAccessorExpression>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1)));
+          create<ast::SintLiteral>(Source{}, &i32, 1)));
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ast::AssignmentStatement assign(ident, val);
 

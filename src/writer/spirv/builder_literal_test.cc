@@ -35,7 +35,7 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Literal_Bool_True) {
   ast::type::Bool bool_type;
-  ast::BoolLiteral b_true(&bool_type, true);
+  ast::BoolLiteral b_true(Source{}, &bool_type, true);
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, &b_true);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -48,7 +48,7 @@ TEST_F(BuilderTest, Literal_Bool_True) {
 
 TEST_F(BuilderTest, Literal_Bool_False) {
   ast::type::Bool bool_type;
-  ast::BoolLiteral b_false(&bool_type, false);
+  ast::BoolLiteral b_false(Source{}, &bool_type, false);
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, &b_false);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -61,8 +61,8 @@ TEST_F(BuilderTest, Literal_Bool_False) {
 
 TEST_F(BuilderTest, Literal_Bool_Dedup) {
   ast::type::Bool bool_type;
-  ast::BoolLiteral b_true(&bool_type, true);
-  ast::BoolLiteral b_false(&bool_type, false);
+  ast::BoolLiteral b_true(Source{}, &bool_type, true);
+  ast::BoolLiteral b_false(Source{}, &bool_type, false);
 
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &b_true), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -79,7 +79,7 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 
 TEST_F(BuilderTest, Literal_I32) {
   ast::type::I32 i32;
-  ast::SintLiteral i(&i32, -23);
+  ast::SintLiteral i(Source{}, &i32, -23);
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, &i);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -92,8 +92,8 @@ TEST_F(BuilderTest, Literal_I32) {
 
 TEST_F(BuilderTest, Literal_I32_Dedup) {
   ast::type::I32 i32;
-  ast::SintLiteral i1(&i32, -23);
-  ast::SintLiteral i2(&i32, -23);
+  ast::SintLiteral i1(Source{}, &i32, -23);
+  ast::SintLiteral i2(Source{}, &i32, -23);
 
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i2), 0u);
@@ -106,7 +106,7 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
 
 TEST_F(BuilderTest, Literal_U32) {
   ast::type::U32 u32;
-  ast::UintLiteral i(&u32, 23);
+  ast::UintLiteral i(Source{}, &u32, 23);
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, &i);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -119,8 +119,8 @@ TEST_F(BuilderTest, Literal_U32) {
 
 TEST_F(BuilderTest, Literal_U32_Dedup) {
   ast::type::U32 u32;
-  ast::UintLiteral i1(&u32, 23);
-  ast::UintLiteral i2(&u32, 23);
+  ast::UintLiteral i1(Source{}, &u32, 23);
+  ast::UintLiteral i2(Source{}, &u32, 23);
 
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i2), 0u);
@@ -133,7 +133,7 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
 
 TEST_F(BuilderTest, Literal_F32) {
   ast::type::F32 f32;
-  ast::FloatLiteral i(&f32, 23.245f);
+  ast::FloatLiteral i(Source{}, &f32, 23.245f);
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, &i);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -146,8 +146,8 @@ TEST_F(BuilderTest, Literal_F32) {
 
 TEST_F(BuilderTest, Literal_F32_Dedup) {
   ast::type::F32 f32;
-  ast::FloatLiteral i1(&f32, 23.245f);
-  ast::FloatLiteral i2(&f32, 23.245f);
+  ast::FloatLiteral i1(Source{}, &f32, 23.245f);
+  ast::FloatLiteral i2(Source{}, &f32, 23.245f);
 
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, &i2), 0u);

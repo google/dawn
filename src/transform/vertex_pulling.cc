@@ -353,7 +353,7 @@ void VertexPulling::State::AddVertexPullingPreamble(
 
 ast::Expression* VertexPulling::State::GenUint(uint32_t value) {
   return mod->create<ast::ScalarConstructorExpression>(
-      mod->create<ast::UintLiteral>(GetU32Type(), value));
+      mod->create<ast::UintLiteral>(Source{}, GetU32Type(), value));
 }
 
 ast::Expression* VertexPulling::State::CreatePullingPositionIdent() {

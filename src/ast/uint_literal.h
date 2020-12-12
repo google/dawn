@@ -26,9 +26,10 @@ namespace ast {
 class UintLiteral : public Castable<UintLiteral, IntLiteral> {
  public:
   /// Constructor
+  /// @param source the input source
   /// @param type the type of the literal
   /// @param value the uint literals value
-  UintLiteral(type::Type* type, uint32_t value);
+  UintLiteral(const Source& source, type::Type* type, uint32_t value);
   ~UintLiteral() override;
 
   /// @returns the uint literal value

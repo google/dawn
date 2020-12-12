@@ -606,7 +606,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                                             "coord"),
           create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b")),
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(&f32, 2.0f)));
+          create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
 
   auto* body = create<ast::BlockStatement>();
   body->append(assign);
@@ -710,7 +710,7 @@ TEST_F(
 
   ast::ExpressionList expr;
   expr.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -798,7 +798,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::ExpressionList expr;
   expr.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -900,7 +900,7 @@ TEST_F(
 
   ast::ExpressionList expr;
   expr.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -990,7 +990,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::ExpressionList expr;
   expr.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
   auto* var =
       create<ast::Variable>(Source{},                      // source
@@ -1082,7 +1082,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::ExpressionList expr;
   expr.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
   auto* var =
       create<ast::Variable>(Source{},                      // source
@@ -1150,18 +1150,19 @@ TEST_F(HlslGeneratorImplTest_Function,
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(&f32, 1.0f))));
+          create<ast::FloatLiteral>(Source{}, &f32, 1.0f))));
 
   auto* list = create<ast::BlockStatement>();
   list->append(create<ast::ReturnStatement>(Source{}));
 
   body->append(create<ast::IfStatement>(
       Source{},
-      create<ast::BinaryExpression>(ast::BinaryOp::kEqual,
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::SintLiteral>(&i32, 1)),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::SintLiteral>(&i32, 1))),
+      create<ast::BinaryExpression>(
+          ast::BinaryOp::kEqual,
+          create<ast::ScalarConstructorExpression>(
+              create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              create<ast::SintLiteral>(Source{}, &i32, 1))),
       list, ast::ElseStatementList{}));
 
   body->append(create<ast::ReturnStatement>(Source{}));

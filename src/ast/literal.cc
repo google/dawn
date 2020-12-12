@@ -19,7 +19,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::Literal);
 namespace tint {
 namespace ast {
 
-Literal::Literal(type::Type* type) : type_(type) {}
+Literal::Literal(const Source& source, type::Type* type)
+    : Base(source), type_(type) {}
 
 Literal::~Literal() = default;
 

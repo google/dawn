@@ -55,7 +55,7 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
 
   auto* ident = create<ast::IdentifierExpression>(
       mod.RegisterSymbol(param.name), param.name);
@@ -99,7 +99,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
+      create<ast::SintLiteral>(Source{}, &i32, 1)));
 
   ast::CallExpression expr(
       create<ast::IdentifierExpression>(mod.RegisterSymbol("abs"), "abs"),
@@ -119,9 +119,9 @@ TEST_P(MslImportData_DualParamTest, FloatScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 2.f)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(
                                mod.RegisterSymbol(param.name), param.name),
@@ -155,21 +155,21 @@ TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
   params.push_back(create<ast::TypeConstructorExpression>(
       &vec, ast::ExpressionList{
                 create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(&f32, 1.f)),
+                    create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
                 create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(&f32, 2.f)),
+                    create<ast::FloatLiteral>(Source{}, &f32, 2.f)),
                 create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(&f32, 3.f)),
+                    create<ast::FloatLiteral>(Source{}, &f32, 3.f)),
             }));
 
   params.push_back(create<ast::TypeConstructorExpression>(
       &vec, ast::ExpressionList{
                 create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(&f32, 4.f)),
+                    create<ast::FloatLiteral>(Source{}, &f32, 4.f)),
                 create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(&f32, 5.f)),
+                    create<ast::FloatLiteral>(Source{}, &f32, 5.f)),
                 create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(&f32, 6.f)),
+                    create<ast::FloatLiteral>(Source{}, &f32, 6.f)),
             }));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(
@@ -194,9 +194,9 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
+      create<ast::SintLiteral>(Source{}, &i32, 1)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+      create<ast::SintLiteral>(Source{}, &i32, 2)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(
                                mod.RegisterSymbol(param.name), param.name),
@@ -219,11 +219,11 @@ TEST_P(MslImportData_TripleParamTest, FloatScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.f)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(
                                mod.RegisterSymbol(param.name), param.name),
@@ -251,11 +251,11 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1)));
+      create<ast::SintLiteral>(Source{}, &i32, 1)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2)));
+      create<ast::SintLiteral>(Source{}, &i32, 2)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 3)));
+      create<ast::SintLiteral>(Source{}, &i32, 3)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(
                                mod.RegisterSymbol(param.name), param.name),

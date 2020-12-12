@@ -47,8 +47,9 @@ class Literal : public Castable<Literal, Node> {
 
  protected:
   /// Constructor
+  /// @param source the input source
   /// @param type the type of the literal
-  explicit Literal(type::Type* type);
+  explicit Literal(const Source& source, type::Type* type);
 
  private:
   type::Type* type_ = nullptr;

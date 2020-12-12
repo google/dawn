@@ -698,7 +698,7 @@ class FunctionEmitter {
   /// return the given value.  Otherwise, wrap the value in a TypeConstructor
   /// expression.
   /// @param value the value to pass through or convert
-  /// @reutrns the value as an I32 value.
+  /// @returns the value as an I32 value.
   TypedExpression ToI32(TypedExpression value);
 
  private:
@@ -865,10 +865,10 @@ class FunctionEmitter {
   void PushTrueGuard(uint32_t end_id);
 
   /// @returns a boolean true expression.
-  ast::Expression* MakeTrue() const;
+  ast::Expression* MakeTrue(const Source&) const;
 
   /// @returns a boolean false expression.
-  ast::Expression* MakeFalse() const;
+  ast::Expression* MakeFalse(const Source&) const;
 
   /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.

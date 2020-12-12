@@ -27,8 +27,9 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
 
  protected:
   /// Constructor
+  /// @param source the input source
   /// @param type the type of the literal
-  explicit IntLiteral(type::Type* type);
+  IntLiteral(const Source& source, type::Type* type);
 };
 
 }  // namespace ast

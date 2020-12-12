@@ -376,7 +376,7 @@ void Builder::GenerateLabel(uint32_t id) {
 
 uint32_t Builder::GenerateU32Literal(uint32_t val) {
   ast::type::U32 u32;
-  ast::SintLiteral lit(&u32, val);
+  ast::SintLiteral lit(Source{}, &u32, val);
   return GenerateLiteralIfNeeded(nullptr, &lit);
 }
 
@@ -640,7 +640,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
-  ast::NullLiteral nl(var->type()->UnwrapPtrIfNeeded());
+  ast::NullLiteral nl(Source{}, var->type()->UnwrapPtrIfNeeded());
   auto null_id = GenerateLiteralIfNeeded(var, &nl);
   if (null_id == 0) {
     return 0;
@@ -741,16 +741,16 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     //    then WGSL requires an initializer.
     if (var->HasConstantIdDecoration()) {
       if (type->Is<ast::type::F32>()) {
-        ast::FloatLiteral l(type, 0.0f);
+        ast::FloatLiteral l(Source{}, type, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->Is<ast::type::U32>()) {
-        ast::UintLiteral l(type, 0);
+        ast::UintLiteral l(Source{}, type, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->Is<ast::type::I32>()) {
-        ast::SintLiteral l(type, 0);
+        ast::SintLiteral l(Source{}, type, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type->Is<ast::type::Bool>()) {
-        ast::BoolLiteral l(type, false);
+        ast::BoolLiteral l(Source{}, type, false);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else {
         error_ = "invalid type for constant_id, must be scalar";
@@ -763,7 +763,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     } else if (var->storage_class() == ast::StorageClass::kPrivate ||
                var->storage_class() == ast::StorageClass::kNone ||
                var->storage_class() == ast::StorageClass::kOutput) {
-      ast::NullLiteral nl(type);
+      ast::NullLiteral nl(Source{}, type);
       init_id = GenerateLiteralIfNeeded(var, &nl);
       if (init_id == 0) {
         return 0;
@@ -1015,7 +1015,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 
       auto ary_result = result_op();
 
-      ast::NullLiteral nl(ary_res_type);
+      ast::NullLiteral nl(Source{}, ary_res_type);
       auto init = GenerateLiteralIfNeeded(nullptr, &nl);
 
       // If we're access chaining into an array then we must be in a function
@@ -1220,7 +1220,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
-    ast::NullLiteral nl(init->type()->UnwrapPtrIfNeeded());
+    ast::NullLiteral nl(Source{}, init->type()->UnwrapPtrIfNeeded());
     return GenerateLiteralIfNeeded(nullptr, &nl);
   }
 
@@ -2053,7 +2053,7 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       spirv_params.emplace_back(gen_param(pidx.depth_ref));
 
       ast::type::F32 f32;
-      ast::FloatLiteral float_0(&f32, 0.0);
+      ast::FloatLiteral float_0(Source{}, &f32, 0.0);
       image_operands.emplace_back(ImageOperand{
           SpvImageOperandsLodMask,
           Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0))});

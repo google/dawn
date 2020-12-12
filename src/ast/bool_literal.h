@@ -26,9 +26,10 @@ namespace ast {
 class BoolLiteral : public Castable<BoolLiteral, Literal> {
  public:
   /// Constructor
+  /// @param source the input source
   /// @param type the type of the literal
   /// @param value the bool literals value
-  BoolLiteral(type::Type* type, bool value);
+  BoolLiteral(const Source& source, type::Type* type, bool value);
   ~BoolLiteral() override;
 
   /// @returns true if the bool literal is true

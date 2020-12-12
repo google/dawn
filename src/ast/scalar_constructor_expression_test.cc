@@ -26,14 +26,14 @@ using ScalarConstructorExpressionTest = TestHelper;
 
 TEST_F(ScalarConstructorExpressionTest, Creation) {
   type::Bool bool_type;
-  auto* b = create<BoolLiteral>(&bool_type, true);
+  auto* b = create<BoolLiteral>(Source{}, &bool_type, true);
   ScalarConstructorExpression c(b);
   EXPECT_EQ(c.literal(), b);
 }
 
 TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
   type::Bool bool_type;
-  auto* b = create<BoolLiteral>(&bool_type, true);
+  auto* b = create<BoolLiteral>(Source{}, &bool_type, true);
   ScalarConstructorExpression c(Source{Source::Location{20, 2}}, b);
   auto src = c.source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -42,7 +42,7 @@ TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
 
 TEST_F(ScalarConstructorExpressionTest, IsValid) {
   type::Bool bool_type;
-  auto* b = create<BoolLiteral>(&bool_type, true);
+  auto* b = create<BoolLiteral>(Source{}, &bool_type, true);
   ScalarConstructorExpression c(b);
   EXPECT_TRUE(c.IsValid());
 }
@@ -54,7 +54,7 @@ TEST_F(ScalarConstructorExpressionTest, IsValid_MissingLiteral) {
 
 TEST_F(ScalarConstructorExpressionTest, ToStr) {
   type::Bool bool_type;
-  auto* b = create<BoolLiteral>(&bool_type, true);
+  auto* b = create<BoolLiteral>(Source{}, &bool_type, true);
   ScalarConstructorExpression c(b);
   std::ostringstream out;
   c.to_str(out, 2);

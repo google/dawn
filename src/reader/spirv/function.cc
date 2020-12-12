@@ -695,7 +695,7 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
   assert(!statements_stack_.empty());
   const auto& top = statements_stack_.back();
 
-  auto* cond = MakeTrue();
+  auto* cond = MakeTrue(Source{});
   auto* body = create<ast::BlockStatement>();
   AddStatement(
       create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
@@ -2142,7 +2142,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
                               ast::StorageClass::kFunction,    // storage_class
                               parser_impl_.Bool(),             // type
                               false,                           // is_const
-                              MakeTrue(),                      // constructor
+                              MakeTrue(Source{}),              // constructor
                               ast::VariableDecorationList{});  // decorations
     auto* guard_decl = create<ast::VariableDeclStatement>(guard_var);
     AddStatement(guard_decl);
@@ -2354,10 +2354,10 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
         const uint32_t value32 = uint32_t(value & 0xFFFFFFFF);
         if (selector.type->is_unsigned_scalar_or_vector()) {
           selectors.emplace_back(
-              create<ast::UintLiteral>(selector.type, value32));
+              create<ast::UintLiteral>(Source{}, selector.type, value32));
         } else {
           selectors.emplace_back(
-              create<ast::SintLiteral>(selector.type, value32));
+              create<ast::SintLiteral>(Source{}, selector.type, value32));
         }
       }
     }
@@ -2572,7 +2572,7 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
         return create<ast::AssignmentStatement>(
             create<ast::IdentifierExpression>(
                 ast_module_.RegisterSymbol(flow_guard), flow_guard),
-            MakeFalse());
+            MakeFalse(Source{}));
       }
 
       // For an unconditional branch, the break out to an if-selection
@@ -3256,7 +3256,7 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   auto make_index = [this](uint32_t literal) {
     auto* type = create<ast::type::U32>();
     return create<ast::ScalarConstructorExpression>(
-        create<ast::UintLiteral>(type, literal));
+        create<ast::UintLiteral>(Source{}, type, literal));
   };
 
   const auto composite = inst.GetSingleWordInOperand(0);
@@ -3356,15 +3356,15 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   return current_expr;
 }
 
-ast::Expression* FunctionEmitter::MakeTrue() const {
+ast::Expression* FunctionEmitter::MakeTrue(const Source& source) const {
   return create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(parser_impl_.Bool(), true));
+      create<ast::BoolLiteral>(source, parser_impl_.Bool(), true));
 }
 
-ast::Expression* FunctionEmitter::MakeFalse() const {
+ast::Expression* FunctionEmitter::MakeFalse(const Source& source) const {
   ast::type::Bool bool_type;
   return create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(parser_impl_.Bool(), false));
+      create<ast::BoolLiteral>(source, parser_impl_.Bool(), false));
 }
 
 TypedExpression FunctionEmitter::MakeVectorShuffle(

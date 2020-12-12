@@ -32,7 +32,7 @@ TEST_F(SwitchStatementTest, Creation) {
   type::I32 i32;
 
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 1));
+  lit.push_back(create<SintLiteral>(Source{}, &i32, 1));
 
   auto* ident =
       create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
@@ -61,7 +61,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
   type::I32 i32;
 
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
 
   auto* ident =
       create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
@@ -76,7 +76,7 @@ TEST_F(SwitchStatementTest, IsValid) {
   type::I32 i32;
 
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
 
   auto* ident =
       create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
@@ -91,7 +91,7 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   type::I32 i32;
 
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
 
   CaseStatementList body;
   body.push_back(create<CaseStatement>(lit, create<BlockStatement>()));
@@ -104,7 +104,7 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
   type::I32 i32;
 
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
 
   auto* ident = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
   CaseStatementList body;
@@ -118,7 +118,7 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
   type::I32 i32;
 
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
 
   auto* ident =
       create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
@@ -163,7 +163,7 @@ TEST_F(SwitchStatementTest, ToStr) {
   type::I32 i32;
 
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(&i32, 2));
+  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
 
   auto* ident =
       create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");

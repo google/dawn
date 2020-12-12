@@ -22,8 +22,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::SintLiteral);
 namespace tint {
 namespace ast {
 
-SintLiteral::SintLiteral(type::Type* type, int32_t value)
-    : Base(type), value_(value) {}
+SintLiteral::SintLiteral(const Source& source, type::Type* type, int32_t value)
+    : Base(source, type), value_(value) {}
 
 SintLiteral::~SintLiteral() = default;
 
@@ -36,7 +36,8 @@ std::string SintLiteral::name() const {
 }
 
 SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<SintLiteral>(ctx->Clone(type()), value_);
+  return ctx->mod->create<SintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
+                                       value_);
 }
 
 }  // namespace ast

@@ -1033,7 +1033,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
         ast_type = ConvertType(inst.type_id());
         ast_expr =
             create<ast::ScalarConstructorExpression>(create<ast::BoolLiteral>(
-                ast_type, inst.opcode() == SpvOpSpecConstantTrue));
+                Source{}, ast_type, inst.opcode() == SpvOpSpecConstantTrue));
         break;
       }
       case SpvOpSpecConstant: {
@@ -1042,17 +1042,17 @@ bool ParserImpl::EmitScalarSpecConstants() {
         if (ast_type->Is<ast::type::I32>()) {
           ast_expr =
               create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
-                  ast_type, static_cast<int32_t>(literal_value)));
+                  Source{}, ast_type, static_cast<int32_t>(literal_value)));
         } else if (ast_type->Is<ast::type::U32>()) {
           ast_expr =
               create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
-                  ast_type, static_cast<uint32_t>(literal_value)));
+                  Source{}, ast_type, static_cast<uint32_t>(literal_value)));
         } else if (ast_type->Is<ast::type::F32>()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
           ast_expr = create<ast::ScalarConstructorExpression>(
-              create<ast::FloatLiteral>(ast_type, float_value));
+              create<ast::FloatLiteral>(Source{}, ast_type, float_value));
         } else {
           return Fail() << " invalid result type for OpSpecConstant "
                         << inst.PrettyPrint();
@@ -1314,6 +1314,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     return {};
   }
 
+  auto source = GetSourceForInst(inst);
   auto* ast_type = original_ast_type->UnwrapIfNeeded();
 
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
@@ -1322,25 +1323,25 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
   if (ast_type->Is<ast::type::U32>()) {
     return {ast_type,
-            create<ast::ScalarConstructorExpression>(
-                create<ast::UintLiteral>(ast_type, spirv_const->GetU32()))};
+            create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
+                source, ast_type, spirv_const->GetU32()))};
   }
   if (ast_type->Is<ast::type::I32>()) {
     return {ast_type,
-            create<ast::ScalarConstructorExpression>(
-                create<ast::SintLiteral>(ast_type, spirv_const->GetS32()))};
+            create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
+                source, ast_type, spirv_const->GetS32()))};
   }
   if (ast_type->Is<ast::type::F32>()) {
     return {ast_type,
-            create<ast::ScalarConstructorExpression>(
-                create<ast::FloatLiteral>(ast_type, spirv_const->GetFloat()))};
+            create<ast::ScalarConstructorExpression>(create<ast::FloatLiteral>(
+                source, ast_type, spirv_const->GetFloat()))};
   }
   if (ast_type->Is<ast::type::Bool>()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
     return {ast_type, create<ast::ScalarConstructorExpression>(
-                          create<ast::BoolLiteral>(ast_type, value))};
+                          create<ast::BoolLiteral>(source, ast_type, value))};
   }
   auto* spirv_composite_const = spirv_const->AsCompositeConstant();
   if (spirv_composite_const != nullptr) {
@@ -1394,19 +1395,19 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
 
   if (type->Is<ast::type::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::BoolLiteral>(type, false));
+        create<ast::BoolLiteral>(Source{}, type, false));
   }
   if (type->Is<ast::type::U32>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::UintLiteral>(type, 0u));
+        create<ast::UintLiteral>(Source{}, type, 0u));
   }
   if (type->Is<ast::type::I32>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::SintLiteral>(type, 0));
+        create<ast::SintLiteral>(Source{}, type, 0));
   }
   if (type->Is<ast::type::F32>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::FloatLiteral>(type, 0.0f));
+        create<ast::FloatLiteral>(Source{}, type, 0.0f));
   }
   if (const auto* vec_ty = type->As<ast::type::Vector>()) {
     ast::ExpressionList ast_components;

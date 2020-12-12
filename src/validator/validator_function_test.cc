@@ -46,8 +46,8 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
       &i32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2)),  // constructor
-      ast::VariableDecorationList{});          // decorations
+          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
+      ast::VariableDecorationList{});                    // decorations
 
   ast::VariableList params;
   ast::type::Void void_type;
@@ -94,8 +94,8 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
       &i32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2)),  // constructor
-      ast::VariableDecorationList{});          // decorations
+          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
+      ast::VariableDecorationList{});                    // decorations
 
   ast::VariableList params;
   ast::type::Void void_type;
@@ -155,7 +155,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   auto* return_expr = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2));
+      create<ast::SintLiteral>(Source{}, &i32, 2));
 
   body->append(create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
                                             return_expr));
@@ -179,7 +179,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   auto* return_expr = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2));
+      create<ast::SintLiteral>(Source{}, &i32, 2));
 
   body->append(create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
                                             return_expr));
@@ -205,7 +205,7 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   auto* return_expr = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2));
+      create<ast::SintLiteral>(Source{}, &i32, 2));
 
   body->append(create<ast::ReturnStatement>(Source{}, return_expr));
   auto* func =
@@ -215,7 +215,7 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   ast::VariableList params_copy;
   auto* body_copy = create<ast::BlockStatement>();
   auto* return_expr_copy = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2));
+      create<ast::SintLiteral>(Source{}, &i32, 2));
 
   body_copy->append(create<ast::ReturnStatement>(Source{}, return_expr_copy));
   auto* func_copy = create<ast::Function>(
@@ -274,7 +274,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   auto* body0 = create<ast::BlockStatement>();
   body0->append(create<ast::VariableDeclStatement>(var));
   auto* return_expr = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 2));
+      create<ast::SintLiteral>(Source{}, &i32, 2));
 
   body0->append(create<ast::ReturnStatement>(Source{}, return_expr));
   auto* func0 = create<ast::Function>(Source{}, mod()->RegisterSymbol("func"),
@@ -293,7 +293,7 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   ast::type::I32 i32;
   ast::VariableList params;
   auto* return_expr = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 0));
+      create<ast::SintLiteral>(Source{}, &i32, 0));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(Source{}, return_expr));

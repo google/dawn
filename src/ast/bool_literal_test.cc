@@ -29,7 +29,7 @@ using BoolLiteralTest = TestHelper;
 
 TEST_F(BoolLiteralTest, True) {
   type::Bool bool_type;
-  BoolLiteral b{&bool_type, true};
+  BoolLiteral b{Source{}, &bool_type, true};
   ASSERT_TRUE(b.Is<BoolLiteral>());
   ASSERT_TRUE(b.IsTrue());
   ASSERT_FALSE(b.IsFalse());
@@ -37,7 +37,7 @@ TEST_F(BoolLiteralTest, True) {
 
 TEST_F(BoolLiteralTest, False) {
   type::Bool bool_type;
-  BoolLiteral b{&bool_type, false};
+  BoolLiteral b{Source{}, &bool_type, false};
   ASSERT_TRUE(b.Is<BoolLiteral>());
   ASSERT_FALSE(b.IsTrue());
   ASSERT_TRUE(b.IsFalse());
@@ -45,7 +45,7 @@ TEST_F(BoolLiteralTest, False) {
 
 TEST_F(BoolLiteralTest, Is) {
   type::Bool bool_type;
-  BoolLiteral b{&bool_type, false};
+  BoolLiteral b{Source{}, &bool_type, false};
   Literal* l = &b;
   EXPECT_TRUE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
@@ -57,8 +57,8 @@ TEST_F(BoolLiteralTest, Is) {
 
 TEST_F(BoolLiteralTest, ToStr) {
   type::Bool bool_type;
-  BoolLiteral t{&bool_type, true};
-  BoolLiteral f{&bool_type, false};
+  BoolLiteral t{Source{}, &bool_type, true};
+  BoolLiteral f{Source{}, &bool_type, false};
 
   EXPECT_EQ(t.to_str(), "true");
   EXPECT_EQ(f.to_str(), "false");

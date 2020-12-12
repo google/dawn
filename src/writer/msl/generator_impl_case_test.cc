@@ -39,7 +39,7 @@ TEST_F(MslGeneratorImplTest, Emit_Case) {
   body->append(create<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
   ast::CaseStatement c(lit, body);
 
   gen.increment_indent();
@@ -55,7 +55,7 @@ TEST_F(MslGeneratorImplTest, Emit_Case_BreaksByDefault) {
   ast::type::I32 i32;
 
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
   ast::CaseStatement c(lit, create<ast::BlockStatement>());
 
   gen.increment_indent();
@@ -74,7 +74,7 @@ TEST_F(MslGeneratorImplTest, Emit_Case_WithFallthrough) {
   body->append(create<ast::FallthroughStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
   ast::CaseStatement c(lit, body);
 
   gen.increment_indent();
@@ -93,8 +93,8 @@ TEST_F(MslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   body->append(create<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(&i32, 5));
-  lit.push_back(create<ast::SintLiteral>(&i32, 6));
+  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
+  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 6));
   ast::CaseStatement c(lit, body);
 
   gen.increment_indent();

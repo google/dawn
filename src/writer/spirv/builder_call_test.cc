@@ -77,9 +77,9 @@ TEST_F(BuilderTest, Expression_Call) {
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   call_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
 
   ast::CallExpression expr(create<ast::IdentifierExpression>(
                                mod->RegisterSymbol("a_func"), "a_func"),
@@ -159,9 +159,9 @@ TEST_F(BuilderTest, Statement_Call) {
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   call_params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
 
   ast::CallStatement expr(
       create<ast::CallExpression>(create<ast::IdentifierExpression>(

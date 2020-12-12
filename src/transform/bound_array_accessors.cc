@@ -105,13 +105,15 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
       } else if (val >= int32_t(size)) {
         val = int32_t(size) - 1;
       }
-      lit = ctx->mod->create<ast::SintLiteral>(ctx->Clone(sint->type()), val);
+      lit = ctx->mod->create<ast::SintLiteral>(ctx->Clone(sint->source()),
+                                               ctx->Clone(sint->type()), val);
     } else if (auto* uint = lit->As<ast::UintLiteral>()) {
       uint32_t val = uint->value();
       if (val >= size - 1) {
         val = size - 1;
       }
-      lit = ctx->mod->create<ast::UintLiteral>(ctx->Clone(uint->type()), val);
+      lit = ctx->mod->create<ast::UintLiteral>(ctx->Clone(uint->source()),
+                                               ctx->Clone(uint->type()), val);
     } else {
       diag::Diagnostic err;
       err.severity = diag::Severity::Error;
@@ -132,7 +134,7 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     params.push_back(
         ctx->mod->create<ast::TypeConstructorExpression>(u32, cast_expr));
     params.push_back(ctx->mod->create<ast::ScalarConstructorExpression>(
-        ctx->mod->create<ast::UintLiteral>(u32, size - 1)));
+        ctx->mod->create<ast::UintLiteral>(Source{}, u32, size - 1)));
 
     auto* call_expr = ctx->mod->create<ast::CallExpression>(
         ctx->mod->create<ast::IdentifierExpression>(

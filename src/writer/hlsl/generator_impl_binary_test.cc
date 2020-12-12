@@ -193,15 +193,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
   auto* lhs = create<ast::TypeConstructorExpression>(
       &vec3, ast::ExpressionList{
                  create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(&f32, 1.f)),
+                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
                  create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(&f32, 1.f)),
+                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
                  create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(&f32, 1.f)),
+                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
              });
 
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -217,15 +217,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   auto* rhs = create<ast::TypeConstructorExpression>(&vec3, vals);
 
   ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -252,7 +252,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
   auto* lhs =
       create<ast::IdentifierExpression>(mod.RegisterSymbol("mat"), "mat");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
 
   td.RegisterVariableForTesting(var);
 
@@ -276,7 +276,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
   auto* rhs =
       create<ast::IdentifierExpression>(mod.RegisterSymbol("mat"), "mat");
 
@@ -307,11 +307,11 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   auto* rhs = create<ast::TypeConstructorExpression>(&vec3, vals);
 
   td.RegisterVariableForTesting(var);
@@ -339,11 +339,11 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   auto* lhs = create<ast::TypeConstructorExpression>(&vec3, vals);
 
   auto* rhs =
@@ -462,13 +462,13 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::ScalarConstructorExpression>(
-                    create<ast::SintLiteral>(&i32, 3))));
+                    create<ast::SintLiteral>(Source{}, &i32, 3))));
   auto* else_stmt = create<ast::ElseStatement>(body);
 
   body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::ScalarConstructorExpression>(
-                    create<ast::SintLiteral>(&i32, 2))));
+                    create<ast::SintLiteral>(Source{}, &i32, 2))));
   auto* else_if_stmt = create<ast::ElseStatement>(
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalOr,
@@ -479,7 +479,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::ScalarConstructorExpression>(
-                    create<ast::SintLiteral>(&i32, 1))));
+                    create<ast::SintLiteral>(Source{}, &i32, 1))));
 
   ast::IfStatement expr(
       Source{},

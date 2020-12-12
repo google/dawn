@@ -33,7 +33,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
   ast::type::I32 i32;
-  auto* lit = create<ast::SintLiteral>(&i32, 5);
+  auto* lit = create<ast::SintLiteral>(Source{}, &i32, 5);
   auto* idx = create<ast::ScalarConstructorExpression>(lit);
   auto* ary =
       create<ast::IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");

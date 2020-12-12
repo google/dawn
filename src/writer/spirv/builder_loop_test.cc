@@ -78,7 +78,7 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2))));
+          create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   ast::LoopStatement expr(body, create<ast::BlockStatement>());
 
@@ -131,13 +131,13 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2))));
+          create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 3))));
+          create<ast::SintLiteral>(Source{}, &i32, 3))));
   ast::LoopStatement expr(body, continuing);
 
   td.RegisterVariableForTesting(var);

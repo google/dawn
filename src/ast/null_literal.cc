@@ -22,7 +22,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::NullLiteral);
 namespace tint {
 namespace ast {
 
-NullLiteral::NullLiteral(type::Type* type) : Base(type) {}
+NullLiteral::NullLiteral(const Source& source, type::Type* type)
+    : Base(source, type) {}
 
 NullLiteral::~NullLiteral() = default;
 
@@ -35,7 +36,8 @@ std::string NullLiteral::name() const {
 }
 
 NullLiteral* NullLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<NullLiteral>(ctx->Clone(type()));
+  return ctx->mod->create<NullLiteral>(ctx->Clone(source()),
+                                       ctx->Clone(type()));
 }
 
 }  // namespace ast

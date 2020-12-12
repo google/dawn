@@ -45,7 +45,7 @@ TEST_F(BuilderTest, Switch_Empty) {
   // switch (1) {
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(&i32, 1));
+      create<ast::SintLiteral>(Source{}, &i32, 1));
 
   ast::SwitchStatement expr(cond, ast::CaseStatementList{});
 
@@ -97,19 +97,19 @@ TEST_F(BuilderTest, Switch_WithCase) {
   case_1_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1))));
+          create<ast::SintLiteral>(Source{}, &i32, 1))));
 
   auto* case_2_body = create<ast::BlockStatement>();
   case_2_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2))));
+          create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
+  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 2));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
@@ -191,7 +191,7 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   default_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1))));
+          create<ast::SintLiteral>(Source{}, &i32, 1))));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(default_body));
@@ -270,26 +270,26 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   case_1_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1))));
+          create<ast::SintLiteral>(Source{}, &i32, 1))));
 
   auto* case_2_body = create<ast::BlockStatement>();
   case_2_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2))));
+          create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   auto* default_body = create<ast::BlockStatement>();
   default_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 3))));
+          create<ast::SintLiteral>(Source{}, &i32, 3))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
-  selector_2.push_back(create<ast::SintLiteral>(&i32, 3));
+  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 2));
+  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 3));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
@@ -379,26 +379,26 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   case_1_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1))));
+          create<ast::SintLiteral>(Source{}, &i32, 1))));
   case_1_body->append(create<ast::FallthroughStatement>());
 
   auto* case_2_body = create<ast::BlockStatement>();
   case_2_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 2))));
+          create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   auto* default_body = create<ast::BlockStatement>();
   default_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 3))));
+          create<ast::SintLiteral>(Source{}, &i32, 3))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(create<ast::SintLiteral>(&i32, 2));
+  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 2));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
@@ -484,11 +484,11 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   case_1_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1))));
+          create<ast::SintLiteral>(Source{}, &i32, 1))));
   case_1_body->append(create<ast::FallthroughStatement>());
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
@@ -545,19 +545,19 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   if_body->append(create<ast::BreakStatement>());
 
   auto* case_1_body = create<ast::BlockStatement>();
-  case_1_body->append(
-      create<ast::IfStatement>(Source{},
-                               create<ast::ScalarConstructorExpression>(
-                                   create<ast::BoolLiteral>(&bool_type, true)),
-                               if_body, ast::ElseStatementList{}));
+  case_1_body->append(create<ast::IfStatement>(
+      Source{},
+      create<ast::ScalarConstructorExpression>(
+          create<ast::BoolLiteral>(Source{}, &bool_type, true)),
+      if_body, ast::ElseStatementList{}));
 
   case_1_body->append(create<ast::AssignmentStatement>(
       create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(&i32, 1))));
+          create<ast::SintLiteral>(Source{}, &i32, 1))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(&i32, 1));
+  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));

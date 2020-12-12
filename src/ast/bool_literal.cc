@@ -22,8 +22,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::BoolLiteral);
 namespace tint {
 namespace ast {
 
-BoolLiteral::BoolLiteral(type::Type* type, bool value)
-    : Base(type), value_(value) {}
+BoolLiteral::BoolLiteral(const Source& source, type::Type* type, bool value)
+    : Base(source, type), value_(value) {}
 
 BoolLiteral::~BoolLiteral() = default;
 
@@ -36,7 +36,8 @@ std::string BoolLiteral::name() const {
 }
 
 BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BoolLiteral>(ctx->Clone(type()), value_);
+  return ctx->mod->create<BoolLiteral>(ctx->Clone(source()), ctx->Clone(type()),
+                                       value_);
 }
 
 }  // namespace ast

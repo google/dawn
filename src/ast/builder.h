@@ -275,19 +275,27 @@ class Builder {
 
   /// @param val the boolan value
   /// @return a boolean literal with the given value
-  BoolLiteral* Literal(bool val) { return create<BoolLiteral>(ty.bool_, val); }
+  BoolLiteral* Literal(bool val) {
+    return create<BoolLiteral>(Source{}, ty.bool_, val);
+  }
 
   /// @param val the float value
   /// @return a float literal with the given value
-  FloatLiteral* Literal(f32 val) { return create<FloatLiteral>(ty.f32, val); }
+  FloatLiteral* Literal(f32 val) {
+    return create<FloatLiteral>(Source{}, ty.f32, val);
+  }
 
   /// @param val the unsigned int value
   /// @return a UintLiteral with the given value
-  UintLiteral* Literal(u32 val) { return create<UintLiteral>(ty.u32, val); }
+  UintLiteral* Literal(u32 val) {
+    return create<UintLiteral>(Source{}, ty.u32, val);
+  }
 
   /// @param val the integer value
   /// @return the SintLiteral with the given value
-  SintLiteral* Literal(i32 val) { return create<SintLiteral>(ty.i32, val); }
+  SintLiteral* Literal(i32 val) {
+    return create<SintLiteral>(Source{}, ty.i32, val);
+  }
 
   /// @param args the arguments for the type constructor
   /// @return an `TypeConstructorExpression` of type `ty`, with the values

@@ -26,9 +26,10 @@ namespace ast {
 class SintLiteral : public Castable<SintLiteral, IntLiteral> {
  public:
   /// Constructor
+  /// @param source the input source
   /// @param type the type
   /// @param value the signed int literals value
-  SintLiteral(type::Type* type, int32_t value);
+  SintLiteral(const Source& source, type::Type* type, int32_t value);
   ~SintLiteral() override;
 
   /// @returns the int literal value

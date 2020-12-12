@@ -25,8 +25,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::FloatLiteral);
 namespace tint {
 namespace ast {
 
-FloatLiteral::FloatLiteral(type::Type* type, float value)
-    : Base(type), value_(value) {}
+FloatLiteral::FloatLiteral(const Source& source, type::Type* type, float value)
+    : Base(source, type), value_(value) {}
 
 FloatLiteral::~FloatLiteral() = default;
 
@@ -43,7 +43,8 @@ std::string FloatLiteral::name() const {
 }
 
 FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<FloatLiteral>(ctx->Clone(type()), value_);
+  return ctx->mod->create<FloatLiteral>(ctx->Clone(source()),
+                                        ctx->Clone(type()), value_);
 }
 
 }  // namespace ast

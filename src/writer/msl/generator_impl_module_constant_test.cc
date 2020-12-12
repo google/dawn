@@ -40,11 +40,11 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 
   ast::ExpressionList exprs;
   exprs.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   exprs.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 2.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
   exprs.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* var = create<ast::Variable>(
       Source{},                                             // source
@@ -69,7 +69,7 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
       &f32,                      // type
       true,                      // is_const
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(&f32, 3.0f)),  // constructor
+          create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),  // constructor
       ast::VariableDecorationList{
           // decorations
           create<ast::ConstantIdDecoration>(23, Source{}),

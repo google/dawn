@@ -153,8 +153,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
       &f32,                          // type
       false,                         // is_const
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(&f32, 2.4)),  // constructor
-      ast::VariableDecorationList{});             // decorations
+          create<ast::FloatLiteral>(Source{}, &f32, 2.4)),  // constructor
+      ast::VariableDecorationList{});                       // decorations
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));

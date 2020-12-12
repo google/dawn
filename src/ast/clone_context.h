@@ -109,7 +109,8 @@ class CloneContext {
   ///   // Replace all ast::UintLiterals with the number 42
   ///   CloneCtx ctx(mod);
   ///   ctx.ReplaceAll([&] (ast::UintLiteral* in) {
-  ///     return ctx.mod->create<ast::UintLiteral>(ctx.Clone(in->type()), 42);
+  ///     return ctx.mod->create<ast::UintLiteral>(ctx.Clone(in->source()),
+  ///                                              ctx.Clone(in->type()), 42);
   ///   });
   ///   auto* out = ctx.Clone(tree);
   /// ```

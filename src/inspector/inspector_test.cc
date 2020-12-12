@@ -228,28 +228,28 @@ class InspectorHelper {
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
   ast::Literal* MakeLiteral(ast::type::Type* type, bool* val) {
-    return create<ast::BoolLiteral>(type, *val);
+    return create<ast::BoolLiteral>(Source{}, type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to UIntLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
   ast::Literal* MakeLiteral(ast::type::Type* type, uint32_t* val) {
-    return create<ast::UintLiteral>(type, *val);
+    return create<ast::UintLiteral>(Source{}, type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to IntLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
   ast::Literal* MakeLiteral(ast::type::Type* type, int32_t* val) {
-    return create<ast::SintLiteral>(type, *val);
+    return create<ast::SintLiteral>(Source{}, type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to FloattLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
   ast::Literal* MakeLiteral(ast::type::Type* type, float* val) {
-    return create<ast::FloatLiteral>(type, *val);
+    return create<ast::FloatLiteral>(Source{}, type, *val);
   }
 
   /// @param vec Vector of strings to be searched

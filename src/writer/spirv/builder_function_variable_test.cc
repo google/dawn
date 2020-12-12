@@ -70,11 +70,11 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 
@@ -110,16 +110,16 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   ast::type::F32 f32;
   ast::type::Vector vec(&f32, 2);
 
-  auto* rel =
-      create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::FloatLiteral>(&f32, 3.0f)),
-                                    create<ast::ScalarConstructorExpression>(
-                                        create<ast::FloatLiteral>(&f32, 3.0f)));
+  auto* rel = create<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd,
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
+      create<ast::ScalarConstructorExpression>(
+          create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(rel);
 
   auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
@@ -160,7 +160,7 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   ast::type::F32 f32;
 
   auto* init = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ASSERT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -207,7 +207,7 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   ast::type::F32 f32;
 
   auto* init = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -250,11 +250,11 @@ TEST_F(BuilderTest, FunctionVar_Const) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.0f)));
+      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
 

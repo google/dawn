@@ -26,9 +26,10 @@ namespace ast {
 class FloatLiteral : public Castable<FloatLiteral, Literal> {
  public:
   /// Constructor
+  /// @param source the input source
   /// @param type the type of the literal
   /// @param value the float literals value
-  FloatLiteral(type::Type* type, float value);
+  FloatLiteral(const Source& source, type::Type* type, float value);
   ~FloatLiteral() override;
 
   /// @returns the float literal value
