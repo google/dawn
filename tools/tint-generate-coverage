@@ -15,8 +15,6 @@
 
 # See https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
 
-set -e # Fail on any error.
-
 if [ ! -x "$(which llvm-profdata)" ] ; then
     echo "error: llvm-profdata needs to be on \$PATH to use $0"
     exit 1
@@ -49,6 +47,9 @@ SUMMARY_FILE="${ROOT_DIR}/coverage.summary"
 # Run the executable to generate the raw coverage data
 # https://clang.llvm.org/docs/SourceBasedCodeCoverage.html#running-the-instrumented-program
 LLVM_PROFILE_FILE="${PROFRAW_FILE}" $@
+
+# Fail on any error after running the target executable
+set -e
 
 # Index the coverage data
 # https://clang.llvm.org/docs/SourceBasedCodeCoverage.html#creating-coverage-reports
