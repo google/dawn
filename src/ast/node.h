@@ -47,9 +47,6 @@ class Node : public Castable<Node> {
 
   /// @returns the node source data
   const Source& source() const { return source_; }
-  /// Sets the source data
-  /// @param source the source data
-  void set_source(const Source& source) { source_ = source; }
 
   /// @returns true if the node is valid
   virtual bool IsValid() const = 0;

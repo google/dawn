@@ -608,12 +608,6 @@ class StructuredTraverser {
   std::unordered_set<uint32_t> visited_;
 };
 
-/// @param src a source record
-/// @returns true if `src` is a non-default Source
-bool HasSource(const Source& src) {
-  return src.range.begin.line > 0 || src.range.begin.column != 0;
-}
-
 }  // namespace
 
 BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb)
@@ -720,14 +714,6 @@ ast::Statement* FunctionEmitter::AddStatement(ast::Statement* statement) {
     statements_stack_.back().statements_->append(statement);
   }
   return result;
-}
-
-ast::Statement* FunctionEmitter::AddStatementForInstruction(
-    ast::Statement* statement,
-    const spvtools::opt::Instruction& inst) {
-  auto* node = AddStatement(statement);
-  ApplySourceForInstruction(node, inst);
-  return node;
 }
 
 ast::Statement* FunctionEmitter::LastStatement() {
@@ -1880,7 +1866,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
         inst.result_id(), ast::StorageClass::kFunction, var_store_type, false,
         constructor, ast::VariableDecorationList{});
     auto* var_decl_stmt = create<ast::VariableDeclStatement>(var);
-    AddStatementForInstruction(var_decl_stmt, inst);
+    AddStatement(var_decl_stmt);
     // Save this as an already-named value.
     identifier_values_.insert(inst.result_id());
   }
@@ -2762,8 +2748,7 @@ bool FunctionEmitter::EmitConstDefinition(
   if (!ast_const) {
     return false;
   }
-  AddStatementForInstruction(create<ast::VariableDeclStatement>(ast_const),
-                             inst);
+  AddStatement(create<ast::VariableDeclStatement>(ast_const));
   // Save this as an already-named value.
   identifier_values_.insert(inst.result_id());
   return success();
@@ -2777,11 +2762,10 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
   if (def_info && def_info->requires_hoisted_def) {
     auto name = namer_.Name(result_id);
     // Emit an assignment of the expression to the hoisted variable.
-    AddStatementForInstruction(create<ast::AssignmentStatement>(
-                                   create<ast::IdentifierExpression>(
-                                       ast_module_.RegisterSymbol(name), name),
-                                   ast_expr.expr),
-                               inst);
+    AddStatement(create<ast::AssignmentStatement>(
+        create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name),
+                                          namer_.Name(result_id)),
+        ast_expr.expr));
     return true;
   }
   return EmitConstDefinition(inst, ast_expr);
@@ -2848,8 +2832,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(ptr_id);
       auto rhs = MakeExpression(value_id);
-      AddStatementForInstruction(
-          create<ast::AssignmentStatement>(lhs.expr, rhs.expr), inst);
+      AddStatement(create<ast::AssignmentStatement>(lhs.expr, rhs.expr));
       return success();
     }
     case SpvOpLoad: {
@@ -3751,8 +3734,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   }
 
   if (result_type->Is<ast::type::Void>()) {
-    return nullptr != AddStatementForInstruction(
-                          create<ast::CallStatement>(call_expr), inst);
+    return nullptr != AddStatement(create<ast::CallStatement>(call_expr));
   }
 
   return EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
@@ -3816,16 +3798,9 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
   return {};
 }
 
-void FunctionEmitter::ApplySourceForInstruction(
-    ast::Node* node,
-    const spvtools::opt::Instruction& inst) {
-  if (!node) {
-    return;
-  }
-  const Source& existing = node->source();
-  if (!HasSource(existing)) {
-    node->set_source(parser_impl_.GetSourceForInst(&inst));
-  }
+Source FunctionEmitter::GetSourceForInst(
+    const spvtools::opt::Instruction& inst) const {
+  return parser_impl_.GetSourceForInst(&inst);
 }
 
 bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
@@ -4028,7 +4003,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   } else {
     // It's an image write. No value is returned, so make a statement out
     // of the call.
-    AddStatementForInstruction(create<ast::CallStatement>(call_expr), inst);
+    AddStatement(create<ast::CallStatement>(call_expr));
   }
   return success();
 }
