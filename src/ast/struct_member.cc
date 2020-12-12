@@ -23,11 +23,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::StructMember);
 namespace tint {
 namespace ast {
 
-StructMember::StructMember(const std::string& name,
-                           type::Type* type,
-                           StructMemberDecorationList decorations)
-    : Base(), name_(name), type_(type), decorations_(std::move(decorations)) {}
-
 StructMember::StructMember(const Source& source,
                            const std::string& name,
                            type::Type* type,

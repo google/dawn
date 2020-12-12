@@ -51,7 +51,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("mem", &f32, deco));
+  members.push_back(create<ast::StructMember>(Source{}, "mem", &f32, deco));
 
   auto* strct = create<ast::Struct>(members);
 
@@ -98,11 +98,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -151,11 +151,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -206,11 +206,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "z", &i32,
+          Source{}, "z", &i32,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
       create<ast::StructMember>(
-          "a", &mat,
+          Source{}, "a", &mat,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(4, Source{})}),
   });
@@ -283,11 +283,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("z", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("a", &mat, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -347,11 +347,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("z", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("a", &mat, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -407,11 +407,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("z", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("a", &mat, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -463,7 +463,7 @@ TEST_F(
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &mat, deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -515,11 +515,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("z", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
-  members.push_back(create<ast::StructMember>("a", &mat, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -579,7 +579,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &ary, a_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -635,7 +635,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &ary, a_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -697,11 +697,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -758,7 +758,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &ary, a_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -816,11 +816,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &i32, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -876,11 +876,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &ivec3, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &ivec3, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
-  members.push_back(create<ast::StructMember>("b", &fvec3, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &fvec3, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -932,11 +932,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("a", &ivec3, a_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &ivec3, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
-  members.push_back(create<ast::StructMember>("b", &fvec3, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &fvec3, b_deco));
 
   auto* str = create<ast::Struct>(members);
 
@@ -1004,11 +1004,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* data_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "a", &ivec3,
+          Source{}, "a", &ivec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
       create<ast::StructMember>(
-          "b", &fvec3,
+          Source{}, "b", &fvec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
@@ -1022,7 +1022,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "c", &ary,
+          Source{}, "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
   });
@@ -1089,11 +1089,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* data_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "a", &ivec3,
+          Source{}, "a", &ivec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
       create<ast::StructMember>(
-          "b", &fvec3,
+          Source{}, "b", &fvec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
@@ -1106,7 +1106,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          Source{}, "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
@@ -1174,11 +1174,11 @@ TEST_F(
 
   auto* data_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "a", &ivec3,
+          Source{}, "a", &ivec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
       create<ast::StructMember>(
-          "b", &fvec3,
+          Source{}, "b", &fvec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
@@ -1192,7 +1192,7 @@ TEST_F(
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          Source{}, "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
@@ -1259,11 +1259,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* data_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "a", &ivec3,
+          Source{}, "a", &ivec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
       create<ast::StructMember>(
-          "b", &fvec3,
+          Source{}, "b", &fvec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
@@ -1277,7 +1277,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          Source{}, "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
@@ -1344,11 +1344,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* data_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "a", &ivec3,
+          Source{}, "a", &ivec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
       create<ast::StructMember>(
-          "b", &fvec3,
+          Source{}, "b", &fvec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
@@ -1362,7 +1362,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          Source{}, "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 
@@ -1439,11 +1439,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* data_str = create<ast::Struct>(ast::StructMemberList{
       create<ast::StructMember>(
-          "a", &ivec3,
+          Source{}, "a", &ivec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})}),
       create<ast::StructMember>(
-          "b", &fvec3,
+          Source{}, "b", &fvec3,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(16, Source{})}),
   });
@@ -1457,7 +1457,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str =
       create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          Source{}, "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0, Source{})})});
 

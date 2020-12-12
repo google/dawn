@@ -163,13 +163,13 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
-  members.push_back(create<ast::StructMember>("c", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "c", &f32, decos));
 
   auto* str = create<ast::Struct>(members);
 
@@ -187,26 +187,26 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
-  members.push_back(create<ast::StructMember>("b", &fvec, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &fvec, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("c", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "c", &f32, decos));
 
   auto* inner_str = create<ast::Struct>(members);
 
   ast::type::Struct inner_s("Inner", inner_str);
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<ast::StructMember>("d", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "d", &f32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
-  members.push_back(create<ast::StructMember>("e", &inner_s, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "e", &inner_s, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(64, Source{}));
-  members.push_back(create<ast::StructMember>("f", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "f", &f32, decos));
 
   auto* outer_str = create<ast::Struct>(members);
 

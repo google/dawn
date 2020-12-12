@@ -126,11 +126,11 @@ TEST_F(AccessControlTest, MinBufferBindingSizeStruct) {
 
   StructMemberDecorationList deco;
   deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
-  members.push_back(create<StructMember>("foo", &u32, deco));
+  members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
 
   deco = StructMemberDecorationList();
   deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<StructMember>("bar", &u32, deco));
+  members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
 
   StructDecorationList decos;
 
@@ -170,12 +170,12 @@ TEST_F(AccessControlTest, BaseAlignmentStruct) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
-    members.push_back(create<StructMember>("foo", &u32, deco));
+    members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   StructDecorationList decos;
 

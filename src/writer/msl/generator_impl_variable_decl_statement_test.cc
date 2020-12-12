@@ -103,12 +103,12 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   ast::type::F32 f32;
 
   ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>("a", &f32, ast::StructMemberDecorationList{}));
+  members.push_back(create<ast::StructMember>(
+      Source{}, "a", &f32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
-  members.push_back(create<ast::StructMember>("b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str = create<ast::Struct>(members);
 

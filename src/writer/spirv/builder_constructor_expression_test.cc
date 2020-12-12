@@ -943,8 +943,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
   ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>("a", ty.f32, decos),
-      create<ast::StructMember>("b", ty.vec3<f32>(), decos),
+      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+      create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
   });
   ast::type::Struct s_type("my_struct", s);
 
@@ -1080,7 +1080,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>("a", ty.f32, decos),
+      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
   });
   ast::type::Struct s_type("my_struct", s);
 
@@ -1492,8 +1492,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
   ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>("a", ty.f32, decos),
-      create<ast::StructMember>("b", ty.vec3<f32>(), decos),
+      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+      create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
   });
   ast::type::Struct s_type("my_struct", s);
 
@@ -1509,8 +1509,8 @@ TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_Struct_WithIdentSubExpression) {
   ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>("a", ty.f32, decos),
-      create<ast::StructMember>("b", ty.vec3<f32>(), decos),
+      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+      create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
   });
 
   ast::type::Struct s_type("my_struct", s);

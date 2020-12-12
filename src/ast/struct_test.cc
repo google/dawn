@@ -33,7 +33,7 @@ TEST_F(StructTest, Creation) {
   type::I32 i32;
   StructMemberList members;
   members.push_back(
-      create<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
 
   Struct s{members};
   EXPECT_EQ(s.members().size(), 1u);
@@ -49,7 +49,7 @@ TEST_F(StructTest, Creation_WithDecorations) {
 
   StructMemberList members;
   members.push_back(
-      create<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>(Source{}));
@@ -69,7 +69,7 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
 
   StructMemberList members;
   members.emplace_back(
-      create<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>(Source{}));
@@ -96,7 +96,7 @@ TEST_F(StructTest, IsValid_Null_StructMember) {
 
   StructMemberList members;
   members.push_back(
-      create<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
   members.push_back(nullptr);
 
   Struct s{members};
@@ -108,7 +108,7 @@ TEST_F(StructTest, IsValid_Invalid_StructMember) {
 
   StructMemberList members;
   members.push_back(
-      create<StructMember>("", &i32, StructMemberDecorationList()));
+      create<StructMember>(Source{}, "", &i32, StructMemberDecorationList()));
 
   Struct s{members};
   EXPECT_FALSE(s.IsValid());
@@ -119,7 +119,7 @@ TEST_F(StructTest, ToStr) {
 
   StructMemberList members;
   members.emplace_back(
-      create<StructMember>("a", &i32, StructMemberDecorationList()));
+      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
 
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>(Source{}));

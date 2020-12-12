@@ -258,7 +258,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
       mod->create<ast::StructMemberOffsetDecoration>(0u, Source{}));
 
   members.push_back(mod->create<ast::StructMember>(
-      kStructBufferName, internal_array_type, std::move(member_dec)));
+      Source{}, kStructBufferName, internal_array_type, std::move(member_dec)));
 
   ast::StructDecorationList decos;
   decos.push_back(mod->create<ast::StructBlockDecoration>(Source{}));

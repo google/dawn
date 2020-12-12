@@ -301,8 +301,8 @@ TEST_F(BuilderTest, MemberAccessor) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &f32, decos));
-  members.push_back(create<ast::StructMember>("b", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
 
   auto* s = create<ast::Struct>(members);
   ast::type::Struct s_type("my_struct", s);
@@ -355,14 +355,16 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   // ident.inner.a
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
-  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "a", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "b", &f32, decos));
 
   ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>("inner", &inner_struct, decos));
+      create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
 
   ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
@@ -420,15 +422,18 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   // ident.inner.a
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
-  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "a", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "b", &f32, decos));
 
   ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
   ast::type::Alias alias(mod->RegisterSymbol("Inner"), "Inner", &inner_struct);
 
   ast::StructMemberList outer_members;
-  outer_members.push_back(create<ast::StructMember>("inner", &alias, decos));
+  outer_members.push_back(
+      create<ast::StructMember>(Source{}, "inner", &alias, decos));
 
   ast::type::Struct s_type("Outer", create<ast::Struct>(outer_members));
 
@@ -486,14 +491,16 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
-  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "a", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "b", &f32, decos));
 
   ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>("inner", &inner_struct, decos));
+      create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
 
   ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
@@ -558,14 +565,16 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(create<ast::StructMember>("a", &f32, decos));
-  inner_members.push_back(create<ast::StructMember>("b", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "a", &f32, decos));
+  inner_members.push_back(
+      create<ast::StructMember>(Source{}, "b", &f32, decos));
 
   ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>("inner", &inner_struct, decos));
+      create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
 
   ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
 
@@ -852,18 +861,18 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   ast::StructMemberDecorationList decos;
 
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{create<ast::StructMember>("baz", &vec3, decos)});
+  auto* s = create<ast::Struct>(ast::StructMemberList{
+      create<ast::StructMember>(Source{}, "baz", &vec3, decos)});
   ast::type::Struct c_type("C", s);
 
-  s = create<ast::Struct>(
-      ast::StructMemberList{create<ast::StructMember>("bar", &c_type, decos)});
+  s = create<ast::Struct>(ast::StructMemberList{
+      create<ast::StructMember>(Source{}, "bar", &c_type, decos)});
   ast::type::Struct b_type("B", s);
 
   ast::type::Array b_ary_type(&b_type, 3, ast::ArrayDecorationList{});
 
   s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>("foo", &b_ary_type, decos)});
+      create<ast::StructMember>(Source{}, "foo", &b_ary_type, decos)});
   ast::type::Struct a_type("A", s);
 
   ast::type::Array a_ary_type(&a_type, 2, ast::ArrayDecorationList{});

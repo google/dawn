@@ -32,13 +32,6 @@ namespace ast {
 class StructMember : public Castable<StructMember, Node> {
  public:
   /// Create a new struct member statement
-  /// @param name The struct member name
-  /// @param type The struct member type
-  /// @param decorations The struct member decorations
-  StructMember(const std::string& name,
-               type::Type* type,
-               StructMemberDecorationList decorations);
-  /// Create a new struct member statement
   /// @param source The input source for the struct member statement
   /// @param name The struct member name
   /// @param type The struct member type

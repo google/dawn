@@ -530,8 +530,8 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, decos));
-  members.push_back(create<ast::StructMember>("b", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "b", &i32, decos));
 
   ast::type::Struct A("A", create<ast::Struct>(members));
   ast::type::AccessControl ac{ast::AccessControl::kReadOnly, &A};
@@ -567,7 +567,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
 
   ast::type::Struct A("A", create<ast::Struct>(members));
   ast::type::Alias B(mod->RegisterSymbol("B"), "B", &A);
@@ -602,7 +602,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
 
   ast::type::Struct A("A", create<ast::Struct>(members));
   ast::type::AccessControl ac{ast::AccessControl::kReadOnly, &A};
@@ -637,7 +637,7 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
 
   ast::type::Struct A("A", create<ast::Struct>(members));
   ast::type::AccessControl read{ast::AccessControl::kReadOnly, &A};

@@ -1210,8 +1210,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("first_member", &i32, decos));
-  members.push_back(create<ast::StructMember>("second_member", &f32, decos));
+  members.push_back(
+      create<ast::StructMember>(Source{}, "first_member", &i32, decos));
+  members.push_back(
+      create<ast::StructMember>(Source{}, "second_member", &f32, decos));
 
   auto* strct = create<ast::Struct>(members);
 
@@ -1251,8 +1253,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("first_member", &i32, decos));
-  members.push_back(create<ast::StructMember>("second_member", &f32, decos));
+  members.push_back(
+      create<ast::StructMember>(Source{}, "first_member", &i32, decos));
+  members.push_back(
+      create<ast::StructMember>(Source{}, "second_member", &f32, decos));
 
   auto* strct = create<ast::Struct>(members);
 
@@ -1381,7 +1385,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList b_members;
-  b_members.push_back(create<ast::StructMember>("foo", &vec4, decos));
+  b_members.push_back(create<ast::StructMember>(Source{}, "foo", &vec4, decos));
 
   auto* strctB = create<ast::Struct>(b_members);
   ast::type::Struct stB("B", strctB);
@@ -1389,7 +1393,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   ast::type::Vector vecB(&stB, 3);
 
   ast::StructMemberList a_members;
-  a_members.push_back(create<ast::StructMember>("mem", &vecB, decos));
+  a_members.push_back(create<ast::StructMember>(Source{}, "mem", &vecB, decos));
 
   auto* strctA = create<ast::Struct>(a_members);
 

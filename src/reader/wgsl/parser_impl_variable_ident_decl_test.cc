@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   ast::type::I32 i32;
 
-  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   ast::type::I32 i32;
 
-  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -137,7 +137,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   ast::type::I32 i32;
 
-  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -160,7 +160,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   ast::type::I32 i32;
 
-  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -199,7 +199,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue) {
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   ast::type::I32 i32;
 
-  ast::StructMember mem("a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 

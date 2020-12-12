@@ -32,7 +32,7 @@ TEST_F(StructMemberTest, Creation) {
   StructMemberDecorationList decorations;
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
 
-  StructMember st{"a", &i32, decorations};
+  StructMember st{Source{}, "a", &i32, decorations};
   EXPECT_EQ(st.name(), "a");
   EXPECT_EQ(st.type(), &i32);
   EXPECT_EQ(st.decorations().size(), 1u);
@@ -59,18 +59,18 @@ TEST_F(StructMemberTest, CreationWithSource) {
 
 TEST_F(StructMemberTest, IsValid) {
   type::I32 i32;
-  StructMember st{"a", &i32, {}};
+  StructMember st{Source{}, "a", &i32, {}};
   EXPECT_TRUE(st.IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_EmptyName) {
   type::I32 i32;
-  StructMember st{"", &i32, {}};
+  StructMember st{Source{}, "", &i32, {}};
   EXPECT_FALSE(st.IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_NullType) {
-  StructMember st{"a", nullptr, {}};
+  StructMember st{Source{}, "a", nullptr, {}};
   EXPECT_FALSE(st.IsValid());
 }
 
@@ -80,7 +80,7 @@ TEST_F(StructMemberTest, IsValid_Null_Decoration) {
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
   decorations.push_back(nullptr);
 
-  StructMember st{"a", &i32, decorations};
+  StructMember st{Source{}, "a", &i32, decorations};
   EXPECT_FALSE(st.IsValid());
 }
 
@@ -89,7 +89,7 @@ TEST_F(StructMemberTest, ToStr) {
   StructMemberDecorationList decorations;
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
 
-  StructMember st{"a", &i32, decorations};
+  StructMember st{Source{}, "a", &i32, decorations};
   std::ostringstream out;
   st.to_str(out, 2);
   EXPECT_EQ(out.str(), "  StructMember{[[ offset 4 ]] a: __i32}\n");
@@ -97,7 +97,7 @@ TEST_F(StructMemberTest, ToStr) {
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {
   type::I32 i32;
-  StructMember st{"a", &i32, {}};
+  StructMember st{Source{}, "a", &i32, {}};
   std::ostringstream out;
   st.to_str(out, 2);
   EXPECT_EQ(out.str(), "  StructMember{a: __i32}\n");
