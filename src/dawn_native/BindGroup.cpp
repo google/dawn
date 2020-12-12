@@ -240,6 +240,9 @@ namespace dawn_native {
                     DAWN_TRY(ValidateTextureBinding(device, entry, wgpu::TextureUsage::Storage,
                                                     false, bindingInfo));
                     break;
+                case wgpu::BindingType::Undefined:
+                    UNREACHABLE();
+                    break;
             }
         }
 

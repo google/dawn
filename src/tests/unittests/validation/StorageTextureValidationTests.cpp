@@ -297,7 +297,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
          {wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, true}}};
 
     for (const auto& testSpec : kTestSpecs) {
-        wgpu::BindGroupLayoutEntry entry = {0, testSpec.stage, testSpec.type};
+        wgpu::BindGroupLayoutEntry entry =
+            utils::BindingLayoutEntryInitializationHelper(0, testSpec.stage, testSpec.type);
         entry.storageTextureFormat = wgpu::TextureFormat::R32Uint;
 
         wgpu::BindGroupLayoutDescriptor descriptor;
@@ -525,8 +526,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
             defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
 
             // Set common fileds of bind group layout binding.
-            wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry = {0, wgpu::ShaderStage::Compute,
-                                                                      bindingType};
+            utils::BindingLayoutEntryInitializationHelper defaultBindGroupLayoutEntry = {
+                0, wgpu::ShaderStage::Compute, bindingType};
 
             for (wgpu::TextureFormat storageTextureFormatInBindGroupLayout :
                  utils::kAllTextureFormats) {
@@ -581,8 +582,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderD
             defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
 
             // Set common fileds of bind group layout binding.
-            wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry = {0, wgpu::ShaderStage::Compute,
-                                                                      bindingType};
+            utils::BindingLayoutEntryInitializationHelper defaultBindGroupLayoutEntry = {
+                0, wgpu::ShaderStage::Compute, bindingType};
             defaultBindGroupLayoutEntry.storageTextureFormat = kStorageTextureFormat;
 
             for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kSupportedDimensions) {

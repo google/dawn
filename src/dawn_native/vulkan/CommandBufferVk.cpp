@@ -208,6 +208,9 @@ namespace dawn_native { namespace vulkan {
                             case wgpu::BindingType::ComparisonSampler:
                                 // Don't require barriers.
                                 break;
+
+                            case wgpu::BindingType::Undefined:
+                                UNREACHABLE();
                         }
                     }
                 }

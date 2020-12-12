@@ -100,8 +100,10 @@ TEST_P(DeviceLostTest, SubmitFails) {
 TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
     SetCallbackAndLoseForTesting();
 
-    wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::None,
-                                        wgpu::BindingType::UniformBuffer};
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::None;
+    entry.buffer.type = wgpu::BufferBindingType::Uniform;
     wgpu::BindGroupLayoutDescriptor descriptor;
     descriptor.entryCount = 1;
     descriptor.entries = &entry;

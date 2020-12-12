@@ -425,6 +425,9 @@ namespace dawn_native {
                     case wgpu::BindingType::Sampler:
                     case wgpu::BindingType::ComparisonSampler:
                         break;
+
+                    case wgpu::BindingType::Undefined:
+                        UNREACHABLE();
                 }
             }
 

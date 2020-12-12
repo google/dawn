@@ -687,9 +687,11 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
     // wgpu::BindingType::ReadonlyStorageTexture is a valid binding type to create a bind group
     // layout.
     {
-        wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::Compute,
-                                            wgpu::BindingType::ReadonlyStorageTexture};
-        entry.storageTextureFormat = wgpu::TextureFormat::R32Float;
+        wgpu::BindGroupLayoutEntry entry;
+        entry.binding = 0;
+        entry.visibility = wgpu::ShaderStage::Compute;
+        entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
+        entry.storageTexture.format = wgpu::TextureFormat::R32Float;
         wgpu::BindGroupLayoutDescriptor descriptor;
         descriptor.entryCount = 1;
         descriptor.entries = &entry;
@@ -699,9 +701,11 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
     // wgpu::BindingType::WriteonlyStorageTexture is a valid binding type to create a bind group
     // layout.
     {
-        wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::Compute,
-                                            wgpu::BindingType::WriteonlyStorageTexture};
-        entry.storageTextureFormat = wgpu::TextureFormat::R32Float;
+        wgpu::BindGroupLayoutEntry entry;
+        entry.binding = 0;
+        entry.visibility = wgpu::ShaderStage::Compute;
+        entry.storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
+        entry.storageTexture.format = wgpu::TextureFormat::R32Float;
         wgpu::BindGroupLayoutDescriptor descriptor;
         descriptor.entryCount = 1;
         descriptor.entries = &entry;

@@ -176,6 +176,9 @@ namespace dawn_native { namespace opengl {
                         }
                         break;
                     }
+
+                    case wgpu::BindingType::Undefined:
+                        UNREACHABLE();
                 }
             }
         }

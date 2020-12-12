@@ -108,6 +108,9 @@ namespace dawn_native { namespace vulkan {
                     write.pImageInfo = &writeImageInfo[numWrites];
                     break;
                 }
+
+                case wgpu::BindingType::Undefined:
+                    UNREACHABLE();
             }
 
             numWrites++;

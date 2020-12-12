@@ -29,8 +29,13 @@ TEST_P(PipelineLayoutTests, DynamicBuffersOverflow) {
     {
         std::vector<wgpu::BindGroupLayoutEntry> entries;
         for (uint32_t i = 0; i < kMaxDynamicStorageBuffersPerPipelineLayout; i++) {
-            entries.push_back(
-                {i, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, true});
+            wgpu::BindGroupLayoutEntry entry;
+            entry.binding = i;
+            entry.visibility = wgpu::ShaderStage::Compute;
+            entry.buffer.type = wgpu::BufferBindingType::Storage;
+            entry.buffer.hasDynamicOffset = true;
+
+            entries.push_back(entry);
         }
 
         wgpu::BindGroupLayoutDescriptor descriptor;
@@ -44,8 +49,11 @@ TEST_P(PipelineLayoutTests, DynamicBuffersOverflow) {
     wgpu::BindGroupLayout bglB;
     {
         wgpu::BindGroupLayoutDescriptor descriptor;
-        wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::Fragment,
-                                            wgpu::BindingType::StorageBuffer, false};
+        wgpu::BindGroupLayoutEntry entry;
+        entry.binding = 0;
+        entry.visibility = wgpu::ShaderStage::Fragment;
+        entry.buffer.type = wgpu::BufferBindingType::Storage;
+
         descriptor.entryCount = 1;
         descriptor.entries = &entry;
         bglB = device.CreateBindGroupLayout(&descriptor);

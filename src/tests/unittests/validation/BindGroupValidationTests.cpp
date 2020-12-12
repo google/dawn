@@ -345,10 +345,8 @@ TEST_F(BindGroupValidationTest, SamplingDepthStencilTexture) {
         viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
         utils::MakeBindGroup(device, layout, {{0, texture.CreateView(&viewDesc)}});
 
-        wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::Fragment,
-                                            wgpu::BindingType::SampledTexture};
-        entry.textureComponentType = wgpu::TextureComponentType::Uint;
-        layout = utils::MakeBindGroupLayout(device, {entry});
+        layout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Uint}});
 
         viewDesc.aspect = wgpu::TextureAspect::StencilOnly;
         utils::MakeBindGroup(device, layout, {{0, texture.CreateView(&viewDesc)}});
@@ -645,16 +643,16 @@ class BindGroupLayoutValidationTest : public ValidationTest {
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutStorageBindingsInVertexShader) {
     // Checks that storage buffer binding is not supported in vertex shader.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageBuffer}}));
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Storage}}));
 
     utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::ReadonlyStorageBuffer}});
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::ReadOnlyStorage}});
 
     utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
 
     utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage}});
 }
 
 // Tests setting that bind group layout bindings numbers may be very large.
@@ -710,11 +708,13 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
                                    {0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer},
                                });
 
-    wgpu::BindGroupLayoutEntry binding = {0, wgpu::ShaderStage::None,
-                                          wgpu::BindingType::UniformBuffer};
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::None;
+    entry.buffer.type = wgpu::BufferBindingType::Uniform;
     wgpu::BindGroupLayoutDescriptor descriptor;
     descriptor.entryCount = 1;
-    descriptor.entries = &binding;
+    descriptor.entries = &entry;
     device.CreateBindGroupLayout(&descriptor);
 }
 
@@ -761,9 +761,9 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
 
     for (TestInfo info : kTestInfos) {
         wgpu::BindGroupLayout bgl[2];
-        std::vector<wgpu::BindGroupLayoutEntry> maxBindings;
+        std::vector<utils::BindingLayoutEntryInitializationHelper> maxBindings;
 
-        auto PopulateEntry = [](wgpu::BindGroupLayoutEntry entry) {
+        auto PopulateEntry = [](utils::BindingLayoutEntryInitializationHelper entry) {
             switch (entry.type) {
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture:
@@ -772,6 +772,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
                 default:
                     break;
             }
+
             return entry;
         };
 
@@ -784,7 +785,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
 
         // Adding an extra binding of a different type works.
         {
-            std::vector<wgpu::BindGroupLayoutEntry> bindings = maxBindings;
+            std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
             bindings.push_back(
                 PopulateEntry({info.maxCount, wgpu::ShaderStage::Compute, info.otherBindingType}));
             MakeBindGroupLayout(bindings.data(), bindings.size());
@@ -792,7 +793,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
 
         // Adding an extra binding of the maxed type in a different stage works
         {
-            std::vector<wgpu::BindGroupLayoutEntry> bindings = maxBindings;
+            std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
             bindings.push_back(
                 PopulateEntry({info.maxCount, wgpu::ShaderStage::Fragment, info.bindingType}));
             MakeBindGroupLayout(bindings.data(), bindings.size());
@@ -800,7 +801,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
 
         // Adding an extra binding of the maxed type and stage exceeds the per stage limit.
         {
-            std::vector<wgpu::BindGroupLayoutEntry> bindings = maxBindings;
+            std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
             bindings.push_back(
                 PopulateEntry({info.maxCount, wgpu::ShaderStage::Compute, info.bindingType}));
             ASSERT_DEVICE_ERROR(MakeBindGroupLayout(bindings.data(), bindings.size()));
@@ -841,18 +842,18 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
                   "");
 
     for (uint32_t i = 0; i < kMaxDynamicUniformBuffersPerPipelineLayout; ++i) {
-        maxUniformDB.push_back(
-            {i, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, true});
+        maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(
+            i, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, true));
     }
 
     for (uint32_t i = 0; i < kMaxDynamicStorageBuffersPerPipelineLayout; ++i) {
-        maxStorageDB.push_back(
-            {i, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, true});
+        maxStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
+            i, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, true));
     }
 
     for (uint32_t i = 0; i < kMaxDynamicStorageBuffersPerPipelineLayout; ++i) {
-        maxReadonlyStorageDB.push_back(
-            {i, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true});
+        maxReadonlyStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
+            i, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true));
     }
 
     // Test creating with the maxes works
@@ -919,25 +920,25 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
 
     // Check dynamic uniform buffers exceed maximum in bind group layout.
     {
-        maxUniformDB.push_back({kMaxDynamicUniformBuffersPerPipelineLayout,
-                                wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer,
-                                true});
+        maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(
+            kMaxDynamicUniformBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
+            wgpu::BindingType::UniformBuffer, true));
         TestCreateBindGroupLayout(maxUniformDB.data(), maxUniformDB.size(), false);
     }
 
     // Check dynamic storage buffers exceed maximum in bind group layout.
     {
-        maxStorageDB.push_back({kMaxDynamicStorageBuffersPerPipelineLayout,
-                                wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer,
-                                true});
+        maxStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
+            kMaxDynamicStorageBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
+            wgpu::BindingType::StorageBuffer, true));
         TestCreateBindGroupLayout(maxStorageDB.data(), maxStorageDB.size(), false);
     }
 
     // Check dynamic readonly storage buffers exceed maximum in bind group layout.
     {
-        maxReadonlyStorageDB.push_back({kMaxDynamicStorageBuffersPerPipelineLayout,
-                                        wgpu::ShaderStage::Fragment,
-                                        wgpu::BindingType::ReadonlyStorageBuffer, true});
+        maxReadonlyStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
+            kMaxDynamicStorageBuffersPerPipelineLayout, wgpu::ShaderStage::Fragment,
+            wgpu::BindingType::ReadonlyStorageBuffer, true));
         TestCreateBindGroupLayout(maxReadonlyStorageDB.data(), maxReadonlyStorageDB.size(), false);
     }
 }
@@ -1491,7 +1492,8 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
 
             // Iterate through binding types and populate a list of BindGroupLayoutEntrys.
             for (uint32_t b = 0; b < layout.size(); ++b) {
-                bindings[b] = {b, wgpu::ShaderStage::Fragment, layout[b], false};
+                bindings[b] = utils::BindingLayoutEntryInitializationHelper(
+                    b, wgpu::ShaderStage::Fragment, layout[b], false);
             }
 
             // Create the bind group layout.

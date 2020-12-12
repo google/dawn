@@ -61,6 +61,9 @@ namespace dawn_native { namespace opengl {
                         mIndexInfo[group][bindingIndex] = storageTextureIndex;
                         storageTextureIndex++;
                         break;
+
+                    case wgpu::BindingType::Undefined:
+                        UNREACHABLE();
                 }
             }
         }

@@ -100,9 +100,53 @@ namespace utils {
     wgpu::SamplerDescriptor GetDefaultSamplerDescriptor();
     wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
                                                  const wgpu::BindGroupLayout* bindGroupLayout);
+
+    // Helpers to make creating bind group layouts look nicer:
+    //
+    //   utils::MakeBindGroupLayout(device, {
+    //       {0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform},
+    //       {1, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
+    //       {3, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}
+    //   });
+
+    struct BindingLayoutEntryInitializationHelper : wgpu::BindGroupLayoutEntry {
+        BindingLayoutEntryInitializationHelper(uint32_t entryBinding,
+                                               wgpu::ShaderStage entryVisibility,
+                                               wgpu::BufferBindingType bufferType,
+                                               bool bufferHasDynamicOffset = false,
+                                               uint64_t bufferMinBindingSize = 0);
+        BindingLayoutEntryInitializationHelper(uint32_t entryBinding,
+                                               wgpu::ShaderStage entryVisibility,
+                                               wgpu::SamplerBindingType samplerType);
+        BindingLayoutEntryInitializationHelper(
+            uint32_t entryBinding,
+            wgpu::ShaderStage entryVisibility,
+            wgpu::TextureSampleType textureSampleType,
+            wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D,
+            bool textureMultisampled = false);
+        BindingLayoutEntryInitializationHelper(
+            uint32_t entryBinding,
+            wgpu::ShaderStage entryVisibility,
+            wgpu::StorageTextureAccess storageTextureAccess,
+            wgpu::TextureFormat format,
+            wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D);
+
+        // Backwards compat support for the deprecated path
+        BindingLayoutEntryInitializationHelper(
+            uint32_t entryBinding,
+            wgpu::ShaderStage entryVisibility,
+            wgpu::BindingType entryType,
+            bool bufferHasDynamicOffset = false,
+            uint64_t bufferMinBindingSize = 0,
+            wgpu::TextureViewDimension textureViewDimension = wgpu::TextureViewDimension::Undefined,
+            wgpu::TextureComponentType textureComponent = wgpu::TextureComponentType::Float,
+            wgpu::TextureFormat storageFormat = wgpu::TextureFormat::Undefined);
+        BindingLayoutEntryInitializationHelper(const wgpu::BindGroupLayoutEntry& entry);
+    };
+
     wgpu::BindGroupLayout MakeBindGroupLayout(
         const wgpu::Device& device,
-        std::initializer_list<wgpu::BindGroupLayoutEntry> entriesInitializer);
+        std::initializer_list<BindingLayoutEntryInitializationHelper> entriesInitializer);
 
     // Helpers to make creating bind groups look nicer:
     //

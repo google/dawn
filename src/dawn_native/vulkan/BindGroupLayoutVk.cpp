@@ -68,6 +68,8 @@ namespace dawn_native { namespace vulkan {
             case wgpu::BindingType::ReadonlyStorageTexture:
             case wgpu::BindingType::WriteonlyStorageTexture:
                 return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            case wgpu::BindingType::Undefined:
+                UNREACHABLE();
         }
     }
 

@@ -850,8 +850,10 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::None,
-                                        wgpu::BindingType::UniformBuffer};
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::None;
+    entry.buffer.type = wgpu::BufferBindingType::Uniform;
     wgpu::BindGroupLayoutDescriptor descriptor;
     descriptor.entryCount = 1;
     descriptor.entries = &entry;
@@ -880,8 +882,11 @@ TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
 TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::None,
-                                        wgpu::BindingType::UniformBuffer, true};
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::None;
+    entry.buffer.type = wgpu::BufferBindingType::Uniform;
+    entry.buffer.hasDynamicOffset = true;
     wgpu::BindGroupLayoutDescriptor descriptor;
     descriptor.entryCount = 1;
     descriptor.entries = &entry;

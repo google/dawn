@@ -85,18 +85,100 @@
     "bind group layout": {
         "category": "object"
     },
+
+    "buffer binding type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "uniform"},
+            {"value": 2, "name": "storage"},
+            {"value": 3, "name": "read only storage", "jsrepr": "readonly-storage"}
+        ]
+    },
+    "buffer binding layout": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "type", "type": "buffer binding type", "default": "undefined"},
+            {"name": "has dynamic offset", "type": "bool", "default": "false"},
+            {"name": "min binding size", "type": "uint64_t", "default": "0"}
+        ]
+    },
+
+    "sampler binding type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "filtering"},
+            {"value": 2, "name": "non filtering"},
+            {"value": 3, "name": "comparison"}
+        ]
+    },
+    "sampler binding layout": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "type", "type": "sampler binding type", "default": "undefined"}
+        ]
+    },
+
+    "texture sample type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "float"},
+            {"value": 2, "name": "unfilterable float"},
+            {"value": 3, "name": "depth"},
+            {"value": 4, "name": "sint"},
+            {"value": 5, "name": "uint"}
+        ]
+    },
+    "texture binding layout": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "sample type", "type": "texture sample type", "default": "undefined"},
+            {"name": "view dimension", "type": "texture view dimension", "default": "undefined"},
+            {"name": "multisampled", "type": "bool", "default": "false"}
+        ]
+    },
+
+    "storage texture access": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "read only", "jsrepr": "readonly"},
+            {"value": 2, "name": "write only", "jsrepr": "writeonly"}
+        ]
+    },
+    "storage texture binding layout": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "access", "type": "storage texture access", "default": "undefined"},
+            {"name": "format", "type": "texture format", "default": "undefined"},
+            {"name": "view dimension", "type": "texture view dimension", "default": "undefined"}
+        ]
+    },
+
     "bind group layout entry": {
         "category": "structure",
         "extensible": false,
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage"},
+
             {"name": "type", "type": "binding type"},
             {"name": "has dynamic offset", "type": "bool", "default": "false"},
             {"name": "min buffer binding size", "type": "uint64_t", "default": "0"},
             {"name": "view dimension", "type": "texture view dimension", "default": "undefined"},
             {"name": "texture component type", "type": "texture component type", "default": "float"},
-            {"name": "storage texture format", "type": "texture format", "default": "undefined"}
+            {"name": "storage texture format", "type": "texture format", "default": "undefined"},
+
+            {"name": "buffer", "type": "buffer binding layout"},
+            {"name": "sampler", "type": "sampler binding layout"},
+            {"name": "texture", "type": "texture binding layout"},
+            {"name": "storage texture", "type": "storage texture binding layout"}
         ]
     },
     "bind group layout descriptor": {
@@ -111,15 +193,16 @@
     "binding type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "uniform buffer"},
-            {"value": 1, "name": "storage buffer"},
-            {"value": 2, "name": "readonly storage buffer"},
-            {"value": 3, "name": "sampler"},
-            {"value": 4, "name": "comparison sampler"},
-            {"value": 5, "name": "sampled texture"},
-            {"value": 6, "name": "multisampled texture"},
-            {"value": 7, "name": "readonly storage texture"},
-            {"value": 8, "name": "writeonly storage texture"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "uniform buffer"},
+            {"value": 2, "name": "storage buffer"},
+            {"value": 3, "name": "readonly storage buffer"},
+            {"value": 4, "name": "sampler"},
+            {"value": 5, "name": "comparison sampler"},
+            {"value": 6, "name": "sampled texture"},
+            {"value": 7, "name": "multisampled texture"},
+            {"value": 8, "name": "readonly storage texture"},
+            {"value": 9, "name": "writeonly storage texture"}
         ]
     },
     "blend descriptor": {

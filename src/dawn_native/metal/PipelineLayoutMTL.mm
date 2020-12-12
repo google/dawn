@@ -58,6 +58,8 @@ namespace dawn_native { namespace metal {
                             mIndexInfo[stage][group][bindingIndex] = textureIndex;
                             textureIndex++;
                             break;
+                        case wgpu::BindingType::Undefined:
+                            UNREACHABLE();
                     }
                 }
             }

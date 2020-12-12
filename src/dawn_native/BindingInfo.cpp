@@ -20,44 +20,86 @@ namespace dawn_native {
         bindingCounts->totalCount += 1;
 
         uint32_t PerStageBindingCounts::*perStageBindingCountMember = nullptr;
-        switch (entry.type) {
-            case wgpu::BindingType::UniformBuffer:
-                ++bindingCounts->bufferCount;
-                if (entry.hasDynamicOffset) {
-                    ++bindingCounts->dynamicUniformBufferCount;
-                }
-                if (entry.minBufferBindingSize == 0) {
-                    ++bindingCounts->unverifiedBufferCount;
-                }
-                perStageBindingCountMember = &PerStageBindingCounts::uniformBufferCount;
-                break;
 
-            case wgpu::BindingType::StorageBuffer:
-            case wgpu::BindingType::ReadonlyStorageBuffer:
-                ++bindingCounts->bufferCount;
-                if (entry.hasDynamicOffset) {
-                    ++bindingCounts->dynamicStorageBufferCount;
-                }
-                if (entry.minBufferBindingSize == 0) {
-                    ++bindingCounts->unverifiedBufferCount;
-                }
-                perStageBindingCountMember = &PerStageBindingCounts::storageBufferCount;
-                break;
+        if (entry.buffer.type != wgpu::BufferBindingType::Undefined) {
+            ++bindingCounts->bufferCount;
+            const BufferBindingLayout& buffer = entry.buffer;
 
-            case wgpu::BindingType::SampledTexture:
-            case wgpu::BindingType::MultisampledTexture:
-                perStageBindingCountMember = &PerStageBindingCounts::sampledTextureCount;
-                break;
+            if (buffer.minBindingSize == 0) {
+                ++bindingCounts->unverifiedBufferCount;
+            }
 
-            case wgpu::BindingType::Sampler:
-            case wgpu::BindingType::ComparisonSampler:
-                perStageBindingCountMember = &PerStageBindingCounts::samplerCount;
-                break;
+            switch (buffer.type) {
+                case wgpu::BufferBindingType::Uniform:
+                    if (buffer.hasDynamicOffset) {
+                        ++bindingCounts->dynamicUniformBufferCount;
+                    }
+                    perStageBindingCountMember = &PerStageBindingCounts::uniformBufferCount;
+                    break;
 
-            case wgpu::BindingType::ReadonlyStorageTexture:
-            case wgpu::BindingType::WriteonlyStorageTexture:
-                perStageBindingCountMember = &PerStageBindingCounts::storageTextureCount;
-                break;
+                case wgpu::BufferBindingType::Storage:
+                case wgpu::BufferBindingType::ReadOnlyStorage:
+                    if (buffer.hasDynamicOffset) {
+                        ++bindingCounts->dynamicStorageBufferCount;
+                    }
+                    perStageBindingCountMember = &PerStageBindingCounts::storageBufferCount;
+                    break;
+
+                case wgpu::BufferBindingType::Undefined:
+                    // Can't get here due to the enclosing if statement.
+                    UNREACHABLE();
+                    break;
+            }
+        } else if (entry.sampler.type != wgpu::SamplerBindingType::Undefined) {
+            perStageBindingCountMember = &PerStageBindingCounts::samplerCount;
+        } else if (entry.texture.sampleType != wgpu::TextureSampleType::Undefined) {
+            perStageBindingCountMember = &PerStageBindingCounts::sampledTextureCount;
+        } else if (entry.storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
+            perStageBindingCountMember = &PerStageBindingCounts::storageTextureCount;
+        } else {
+            // Deprecated path.
+            switch (entry.type) {
+                case wgpu::BindingType::UniformBuffer:
+                    ++bindingCounts->bufferCount;
+                    if (entry.hasDynamicOffset) {
+                        ++bindingCounts->dynamicUniformBufferCount;
+                    }
+                    if (entry.minBufferBindingSize == 0) {
+                        ++bindingCounts->unverifiedBufferCount;
+                    }
+                    perStageBindingCountMember = &PerStageBindingCounts::uniformBufferCount;
+                    break;
+
+                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
+                    ++bindingCounts->bufferCount;
+                    if (entry.hasDynamicOffset) {
+                        ++bindingCounts->dynamicStorageBufferCount;
+                    }
+                    if (entry.minBufferBindingSize == 0) {
+                        ++bindingCounts->unverifiedBufferCount;
+                    }
+                    perStageBindingCountMember = &PerStageBindingCounts::storageBufferCount;
+                    break;
+
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::MultisampledTexture:
+                    perStageBindingCountMember = &PerStageBindingCounts::sampledTextureCount;
+                    break;
+
+                case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::ComparisonSampler:
+                    perStageBindingCountMember = &PerStageBindingCounts::samplerCount;
+                    break;
+
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                case wgpu::BindingType::WriteonlyStorageTexture:
+                    perStageBindingCountMember = &PerStageBindingCounts::storageTextureCount;
+                    break;
+
+                case wgpu::BindingType::Undefined:
+                    UNREACHABLE();
+            }
         }
 
         ASSERT(perStageBindingCountMember != nullptr);

@@ -139,6 +139,9 @@ namespace dawn_native { namespace d3d12 {
                         viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
                     break;
                 }
+
+                case wgpu::BindingType::Undefined:
+                    UNREACHABLE();
             }
         }
     }

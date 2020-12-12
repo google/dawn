@@ -291,6 +291,9 @@ namespace dawn_native { namespace d3d12 {
                             case wgpu::BindingType::ComparisonSampler:
                                 // Don't require barriers.
                                 break;
+
+                            case wgpu::BindingType::Undefined:
+                                UNREACHABLE();
                         }
                     }
                 }
@@ -384,6 +387,7 @@ namespace dawn_native { namespace d3d12 {
                         case wgpu::BindingType::ComparisonSampler:
                         case wgpu::BindingType::ReadonlyStorageTexture:
                         case wgpu::BindingType::WriteonlyStorageTexture:
+                        case wgpu::BindingType::Undefined:
                             UNREACHABLE();
                     }
                 }
