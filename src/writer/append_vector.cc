@@ -55,7 +55,7 @@ bool AppendVector(
   }
 
   // Cast scalar to the vector element type
-  ast::TypeConstructorExpression scalar_cast(packed_el_ty, {scalar});
+  ast::TypeConstructorExpression scalar_cast(Source{}, packed_el_ty, {scalar});
   scalar_cast.set_result_type(packed_el_ty);
 
   ast::type::Vector packed_ty(packed_el_ty, packed_size);
@@ -74,7 +74,8 @@ bool AppendVector(
     packed.emplace_back(scalar);
   }
 
-  ast::TypeConstructorExpression constructor{&packed_ty, std::move(packed)};
+  ast::TypeConstructorExpression constructor{Source{}, &packed_ty,
+                                             std::move(packed)};
   constructor.set_result_type(&packed_ty);
 
   return callback(&constructor);

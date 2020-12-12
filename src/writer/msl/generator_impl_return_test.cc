@@ -39,8 +39,8 @@ TEST_F(MslGeneratorImplTest, Emit_Return) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
-  auto* expr =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
+  auto* expr = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr"), "expr");
   ast::ReturnStatement r(Source{}, expr);
 
   gen.increment_indent();

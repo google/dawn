@@ -29,10 +29,6 @@ class ArrayAccessorExpression
     : public Castable<ArrayAccessorExpression, Expression> {
  public:
   /// Constructor
-  /// @param array the array
-  /// @param idx_expr the index expression
-  ArrayAccessorExpression(Expression* array, Expression* idx_expr);
-  /// Constructor
   /// @param source the array accessor source
   /// @param array the array
   /// @param idx_expr the index expression

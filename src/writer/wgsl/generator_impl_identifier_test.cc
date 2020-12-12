@@ -24,7 +24,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
-  ast::IdentifierExpression i(mod.RegisterSymbol("glsl"), "glsl");
+  ast::IdentifierExpression i(Source{}, mod.RegisterSymbol("glsl"), "glsl");
 
   ASSERT_TRUE(gen.EmitExpression(&i)) << gen.error();
   EXPECT_EQ(gen.result(), "glsl");

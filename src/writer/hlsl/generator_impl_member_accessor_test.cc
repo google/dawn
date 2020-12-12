@@ -66,12 +66,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* str =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("str"), "str");
-  auto* mem =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("mem"), "mem");
+  auto* str = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("str"), "str");
+  auto* mem = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("mem"), "mem");
 
-  ast::MemberAccessorExpression expr(str, mem);
+  ast::MemberAccessorExpression expr(Source{}, str, mem);
 
   td.RegisterVariableForTesting(str_var);
   gen.register_global(str_var);
@@ -118,8 +118,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                        "b"));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -168,8 +171,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                        "a"));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -230,9 +236,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   auto* lhs = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
-  auto* rhs = create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b");
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                        "a"));
+  auto* rhs =
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
 
   ast::AssignmentStatement assign(lhs, rhs);
 
@@ -293,10 +303,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   auto* lhs = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
-  auto* rhs =
-      create<ast::TypeConstructorExpression>(&mat, ast::ExpressionList{});
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                        "a"));
+  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &mat,
+                                                     ast::ExpressionList{});
 
   ast::AssignmentStatement assign(lhs, rhs);
 
@@ -354,8 +367,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                        "a"));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -411,8 +427,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                        "a"));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -460,8 +479,11 @@ TEST_F(
                             ast::VariableDecorationList{});     // decorations
 
   ast::MemberAccessorExpression expr(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                        "a"));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -513,15 +535,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   ast::ArrayAccessorExpression expr(
+      Source{},
       create<ast::ArrayAccessorExpression>(
+          Source{},
           create<ast::MemberAccessorExpression>(
-              create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
-                                                "data"),
-              create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a")),
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod.RegisterSymbol("data"), "data"),
+              create<ast::IdentifierExpression>(Source{},
+                                                mod.RegisterSymbol("a"), "a")),
           create<ast::ScalarConstructorExpression>(
-              create<ast::SintLiteral>(Source{}, &i32, 2))),
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 1)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -569,11 +595,15 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   ast::ArrayAccessorExpression expr(
+      Source{},
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a")),
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod.RegisterSymbol("data"), "data"),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                            "a")),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -621,19 +651,23 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             ast::VariableDecorationList{});     // decorations
 
   ast::ArrayAccessorExpression expr(
+      Source{},
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a")),
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod.RegisterSymbol("data"), "data"),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                            "a")),
       create<ast::BinaryExpression>(
-          ast::BinaryOp::kSubtract,
+          Source{}, ast::BinaryOp::kSubtract,
           create<ast::BinaryExpression>(
-              ast::BinaryOp::kAdd,
+              Source{}, ast::BinaryOp::kAdd,
               create<ast::ScalarConstructorExpression>(
-                  create<ast::SintLiteral>(Source{}, &i32, 2)),
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)),
               create<ast::ScalarConstructorExpression>(
-                  create<ast::SintLiteral>(Source{}, &i32, 4))),
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 4))),
           create<ast::ScalarConstructorExpression>(
-              create<ast::SintLiteral>(Source{}, &i32, 3))));
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -689,10 +723,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   auto* lhs = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                        "b"));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f));
   ast::AssignmentStatement assign(lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
@@ -743,13 +780,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   auto* lhs = create<ast::ArrayAccessorExpression>(
+      Source{},
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a")),
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod.RegisterSymbol("data"), "data"),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                            "a")),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
   ast::AssignmentStatement assign(lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
@@ -801,10 +842,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   auto* lhs = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
+                                        "a"));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
   ast::AssignmentStatement assign(lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
@@ -858,8 +902,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ast::MemberAccessorExpression expr(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                        "b"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
@@ -914,14 +961,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* lit2 = create<ast::FloatLiteral>(Source{}, &f32, 2.f);
   auto* lit3 = create<ast::FloatLiteral>(Source{}, &f32, 3.f);
   ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(lit1));
-  values.push_back(create<ast::ScalarConstructorExpression>(lit2));
-  values.push_back(create<ast::ScalarConstructorExpression>(lit3));
+  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit1));
+  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit2));
+  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit3));
 
   auto* lhs = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("data"), "data"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b"));
-  auto* rhs = create<ast::TypeConstructorExpression>(&fvec3, values);
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
+                                        "data"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                        "b"));
+  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &fvec3, values);
 
   ast::AssignmentStatement assign(lhs, rhs);
 
@@ -995,14 +1045,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ast::MemberAccessorExpression expr(
+      Source{},
       create<ast::ArrayAccessorExpression>(
+          Source{},
           create<ast::MemberAccessorExpression>(
-              create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
-                                                "data"),
-              create<ast::IdentifierExpression>(mod.RegisterSymbol("c"), "c")),
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod.RegisterSymbol("data"), "data"),
+              create<ast::IdentifierExpression>(Source{},
+                                                mod.RegisterSymbol("c"), "c")),
           create<ast::ScalarConstructorExpression>(
-              create<ast::SintLiteral>(Source{}, &i32, 2))),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b"));
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                        "b"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
@@ -1073,17 +1128,23 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ast::MemberAccessorExpression expr(
+      Source{},
       create<ast::MemberAccessorExpression>(
+          Source{},
           create<ast::ArrayAccessorExpression>(
+              Source{},
               create<ast::MemberAccessorExpression>(
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
-                                                    "data"),
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("c"),
-                                                    "c")),
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("data"), "data"),
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("c"), "c")),
               create<ast::ScalarConstructorExpression>(
-                  create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b")),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("xy"), "xy"));
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                            "b")),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("xy"),
+                                        "xy"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
@@ -1153,17 +1214,23 @@ TEST_F(
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ast::MemberAccessorExpression expr(
+      Source{},
       create<ast::MemberAccessorExpression>(
+          Source{},
           create<ast::ArrayAccessorExpression>(
+              Source{},
               create<ast::MemberAccessorExpression>(
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
-                                                    "data"),
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("c"),
-                                                    "c")),
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("data"), "data"),
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("c"), "c")),
               create<ast::ScalarConstructorExpression>(
-                  create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b")),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("g"), "g"));
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                            "b")),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("g"),
+                                        "g"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
@@ -1232,18 +1299,23 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ast::ArrayAccessorExpression expr(
+      Source{},
       create<ast::MemberAccessorExpression>(
+          Source{},
           create<ast::ArrayAccessorExpression>(
+              Source{},
               create<ast::MemberAccessorExpression>(
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
-                                                    "data"),
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("c"),
-                                                    "c")),
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("data"), "data"),
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("c"), "c")),
               create<ast::ScalarConstructorExpression>(
-                  create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b")),
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                            "b")),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 1)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
 
   ASSERT_TRUE(td.DetermineResultType(&expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
@@ -1312,24 +1384,29 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   auto* lhs = create<ast::MemberAccessorExpression>(
+      Source{},
       create<ast::ArrayAccessorExpression>(
+          Source{},
           create<ast::MemberAccessorExpression>(
-              create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
-                                                "data"),
-              create<ast::IdentifierExpression>(mod.RegisterSymbol("c"), "c")),
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod.RegisterSymbol("data"), "data"),
+              create<ast::IdentifierExpression>(Source{},
+                                                mod.RegisterSymbol("c"), "c")),
           create<ast::ScalarConstructorExpression>(
-              create<ast::SintLiteral>(Source{}, &i32, 2))),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b"));
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                        "b"));
 
   auto* lit1 = create<ast::FloatLiteral>(Source{}, &f32, 1.f);
   auto* lit2 = create<ast::FloatLiteral>(Source{}, &f32, 2.f);
   auto* lit3 = create<ast::FloatLiteral>(Source{}, &f32, 3.f);
   ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(lit1));
-  values.push_back(create<ast::ScalarConstructorExpression>(lit2));
-  values.push_back(create<ast::ScalarConstructorExpression>(lit3));
+  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit1));
+  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit2));
+  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit3));
 
-  auto* rhs = create<ast::TypeConstructorExpression>(&fvec3, values);
+  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &fvec3, values);
 
   ast::AssignmentStatement assign(lhs, rhs);
 
@@ -1402,20 +1479,26 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(td.Determine()) << td.error();
 
   auto* lhs = create<ast::MemberAccessorExpression>(
+      Source{},
       create<ast::MemberAccessorExpression>(
+          Source{},
           create<ast::ArrayAccessorExpression>(
+              Source{},
               create<ast::MemberAccessorExpression>(
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("data"),
-                                                    "data"),
-                  create<ast::IdentifierExpression>(mod.RegisterSymbol("c"),
-                                                    "c")),
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("data"), "data"),
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod.RegisterSymbol("c"), "c")),
               create<ast::ScalarConstructorExpression>(
-                  create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b")),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("y"), "y"));
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
+                                            "b")),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("y"),
+                                        "y"));
 
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &i32, 1.f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &i32, 1.f));
 
   ast::AssignmentStatement assign(lhs, rhs);
 

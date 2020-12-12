@@ -21,8 +21,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ConstructorExpression);
 namespace tint {
 namespace ast {
 
-ConstructorExpression::ConstructorExpression() = default;
-
 ConstructorExpression::~ConstructorExpression() = default;
 
 ConstructorExpression::ConstructorExpression(ConstructorExpression&&) = default;

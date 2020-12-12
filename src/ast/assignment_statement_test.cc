@@ -24,8 +24,10 @@ namespace {
 using AssignmentStatementTest = TestHelper;
 
 TEST_F(AssignmentStatementTest, Creation) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_EQ(stmt.lhs(), lhs);
@@ -33,8 +35,10 @@ TEST_F(AssignmentStatementTest, Creation) {
 }
 
 TEST_F(AssignmentStatementTest, CreationWithSource) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   AssignmentStatement stmt(Source{Source::Location{20, 2}}, lhs, rhs);
   auto src = stmt.source();
@@ -43,52 +47,64 @@ TEST_F(AssignmentStatementTest, CreationWithSource) {
 }
 
 TEST_F(AssignmentStatementTest, IsAssign) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_TRUE(stmt.Is<AssignmentStatement>());
 }
 
 TEST_F(AssignmentStatementTest, IsValid) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   AssignmentStatement stmt(nullptr, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
 
   AssignmentStatement stmt(lhs, nullptr);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_InvalidLHS) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, IsValid_InvalidRHS) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
   AssignmentStatement stmt(lhs, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(AssignmentStatementTest, ToStr) {
-  auto* lhs = create<IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   AssignmentStatement stmt(lhs, rhs);
   std::ostringstream out;

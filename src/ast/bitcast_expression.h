@@ -29,10 +29,6 @@ namespace ast {
 class BitcastExpression : public Castable<BitcastExpression, Expression> {
  public:
   /// Constructor
-  /// @param type the type
-  /// @param expr the expr
-  BitcastExpression(type::Type* type, Expression* expr);
-  /// Constructor
   /// @param source the bitcast expression source
   /// @param type the type
   /// @param expr the expr

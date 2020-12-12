@@ -44,8 +44,6 @@ class Expression : public Castable<Expression, Node> {
 
  protected:
   /// Constructor
-  Expression();
-  /// Constructor
   /// @param source the source of the expression
   explicit Expression(const Source& source);
   /// Move constructor

@@ -30,10 +30,10 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Assign) {
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("rhs"), "rhs");
   ast::AssignmentStatement assign(lhs, rhs);
 
   gen.increment_indent();

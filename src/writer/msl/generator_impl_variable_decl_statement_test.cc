@@ -194,7 +194,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
   auto* ident = create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("initializer"), "initializer");
+      Source{}, mod.RegisterSymbol("initializer"), "initializer");
 
   ast::type::F32 f32;
   auto* var =
@@ -218,7 +218,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   ast::type::Vector vec(&f32, 3);
 
   ast::ExpressionList values;
-  auto* zero_vec = create<ast::TypeConstructorExpression>(&vec, values);
+  auto* zero_vec =
+      create<ast::TypeConstructorExpression>(Source{}, &vec, values);
 
   auto* var =
       create<ast::Variable>(Source{},                        // source

@@ -27,8 +27,8 @@ namespace {
 using HlslGeneratorImplTest_If = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_If, Emit_If) {
-  auto* cond =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
+  auto* cond = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(Source{}));
 
@@ -44,12 +44,12 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
   auto* else_cond = create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("else_cond"), "else_cond");
+      Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::ReturnStatement>(Source{}));
 
-  auto* cond =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
+  auto* cond = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(Source{}));
 
@@ -73,8 +73,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::ReturnStatement>(Source{}));
 
-  auto* cond =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
+  auto* cond = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(Source{}));
 
@@ -94,7 +94,7 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
   auto* else_cond = create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("else_cond"), "else_cond");
+      Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
 
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::ReturnStatement>(Source{}));
@@ -102,8 +102,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
   auto* else_body_2 = create<ast::BlockStatement>();
   else_body_2->append(create<ast::ReturnStatement>(Source{}));
 
-  auto* cond =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("cond"), "cond");
+  auto* cond = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::ReturnStatement>(Source{}));
 

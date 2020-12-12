@@ -27,7 +27,7 @@ using ScalarConstructorExpressionTest = TestHelper;
 TEST_F(ScalarConstructorExpressionTest, Creation) {
   type::Bool bool_type;
   auto* b = create<BoolLiteral>(Source{}, &bool_type, true);
-  ScalarConstructorExpression c(b);
+  ScalarConstructorExpression c(Source{}, b);
   EXPECT_EQ(c.literal(), b);
 }
 
@@ -43,19 +43,19 @@ TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
 TEST_F(ScalarConstructorExpressionTest, IsValid) {
   type::Bool bool_type;
   auto* b = create<BoolLiteral>(Source{}, &bool_type, true);
-  ScalarConstructorExpression c(b);
+  ScalarConstructorExpression c(Source{}, b);
   EXPECT_TRUE(c.IsValid());
 }
 
 TEST_F(ScalarConstructorExpressionTest, IsValid_MissingLiteral) {
-  ScalarConstructorExpression c(nullptr);
+  ScalarConstructorExpression c(Source{}, nullptr);
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(ScalarConstructorExpressionTest, ToStr) {
   type::Bool bool_type;
   auto* b = create<BoolLiteral>(Source{}, &bool_type, true);
-  ScalarConstructorExpression c(b);
+  ScalarConstructorExpression c(Source{}, b);
   std::ostringstream out;
   c.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  ScalarConstructor[not set]{true}

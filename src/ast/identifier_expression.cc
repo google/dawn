@@ -22,9 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::IdentifierExpression);
 namespace tint {
 namespace ast {
 
-IdentifierExpression::IdentifierExpression(Symbol sym, const std::string& name)
-    : Base(), sym_(sym), name_(name) {}
-
 IdentifierExpression::IdentifierExpression(const Source& source,
                                            Symbol sym,
                                            const std::string& name)

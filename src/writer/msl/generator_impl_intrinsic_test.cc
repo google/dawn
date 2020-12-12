@@ -88,14 +88,15 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
                             ast::VariableDecorationList{});  // decorations
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("a"), "a"));
-  params.push_back(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("b"), "b"));
+  params.push_back(create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("a"), "a"));
+  params.push_back(create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("b"), "b"));
 
   ast::CallExpression call(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("outer_product"),
-                                        "outer_product"),
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol("outer_product"), "outer_product"),
       params);
 
   td.RegisterVariableForTesting(a);
@@ -122,13 +123,14 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param1"), "param1"));
+      Source{}, mod.RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param2"), "param2"));
+      Source{}, mod.RegisterSymbol("param2"), "param2"));
 
-  ast::CallExpression call(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("dot"), "dot"),
-      params);
+  ast::CallExpression call(Source{},
+                           create<ast::IdentifierExpression>(
+                               Source{}, mod.RegisterSymbol("dot"), "dot"),
+                           params);
 
   ast::Variable v1(Source{}, "param1", ast::StorageClass::kFunction, &vec,
                    false, nullptr, ast::VariableDecorationList{});

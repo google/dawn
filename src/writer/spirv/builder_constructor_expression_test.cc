@@ -104,7 +104,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
 
   ast::type::Alias alias(mod->RegisterSymbol("Int"), "Int", ty.i32);
 
-  ast::TypeConstructorExpression cast(&alias, ExprList(2.3f));
+  ast::TypeConstructorExpression cast(Source{}, &alias, ExprList(2.3f));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -173,8 +173,8 @@ TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
-  auto* rel = create<ast::BinaryExpression>(ast::BinaryOp::kAdd, Expr(3.0f),
-                                            Expr(3.0f));
+  auto* rel = create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kAdd,
+                                            Expr(3.0f), Expr(3.0f));
 
   auto* t = vec2<f32>(1.0f, rel);
 
@@ -186,7 +186,7 @@ TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
-  ast::TypeConstructorExpression cast(ty.bool_, ExprList(true));
+  ast::TypeConstructorExpression cast(Source{}, ty.bool_, ExprList(true));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -202,7 +202,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
-  ast::TypeConstructorExpression cast(ty.i32, ExprList(2));
+  ast::TypeConstructorExpression cast(Source{}, ty.i32, ExprList(2));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -216,7 +216,7 @@ TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
-  ast::TypeConstructorExpression cast(ty.u32, ExprList(2u));
+  ast::TypeConstructorExpression cast(Source{}, ty.u32, ExprList(2u));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -230,7 +230,7 @@ TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
-  ast::TypeConstructorExpression cast(ty.f32, ExprList(2.0f));
+  ast::TypeConstructorExpression cast(Source{}, ty.f32, ExprList(2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 

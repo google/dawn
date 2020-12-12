@@ -30,10 +30,6 @@ namespace ast {
 class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
  public:
   /// Constructor
-  /// @param sym the symbol for the identifier
-  /// @param name the name
-  explicit IdentifierExpression(Symbol sym, const std::string& name);
-  /// Constructor
   /// @param source the source
   /// @param sym the symbol for the identifier
   /// @param name the name

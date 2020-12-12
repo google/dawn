@@ -19,8 +19,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::Expression);
 namespace tint {
 namespace ast {
 
-Expression::Expression() = default;
-
 Expression::Expression(const Source& source) : Base(source) {}
 
 Expression::Expression(Expression&&) = default;

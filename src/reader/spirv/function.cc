@@ -684,7 +684,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
   const auto& top = statements_stack_.back();
 
   auto* cond = create<ast::IdentifierExpression>(
-      ast_module_.RegisterSymbol(guard_name), guard_name);
+      Source{}, ast_module_.RegisterSymbol(guard_name), guard_name);
   auto* body = create<ast::BlockStatement>();
   AddStatement(
       create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
@@ -1881,8 +1881,8 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
     auto name = namer_.Name(id);
     return TypedExpression{
         parser_impl_.ConvertType(def_use_mgr_->GetDef(id)->type_id()),
-        create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name),
-                                          name)};
+        create<ast::IdentifierExpression>(
+            Source{}, ast_module_.RegisterSymbol(name), name)};
   }
   if (singly_used_values_.count(id)) {
     auto expr = std::move(singly_used_values_[id]);
@@ -1902,9 +1902,10 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
     case SpvOpVariable: {
       // This occurs for module-scope variables.
       auto name = namer_.Name(inst->result_id());
-      return TypedExpression{parser_impl_.ConvertType(inst->type_id()),
-                             create<ast::IdentifierExpression>(
-                                 ast_module_.RegisterSymbol(name), name)};
+      return TypedExpression{
+          parser_impl_.ConvertType(inst->type_id()),
+          create<ast::IdentifierExpression>(
+              Source{}, ast_module_.RegisterSymbol(name), name)};
     }
     default:
       break;
@@ -2571,7 +2572,7 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
         // Signal an exit from the branch.
         return create<ast::AssignmentStatement>(
             create<ast::IdentifierExpression>(
-                ast_module_.RegisterSymbol(flow_guard), flow_guard),
+                Source{}, ast_module_.RegisterSymbol(flow_guard), flow_guard),
             MakeFalse(Source{}));
       }
 
@@ -2727,7 +2728,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
       auto expr = MakeExpression(assignment.value);
       AddStatement(create<ast::AssignmentStatement>(
           create<ast::IdentifierExpression>(
-              ast_module_.RegisterSymbol(var_name), var_name),
+              Source{}, ast_module_.RegisterSymbol(var_name), var_name),
           expr.expr));
     }
   }
@@ -2763,8 +2764,8 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
     auto name = namer_.Name(result_id);
     // Emit an assignment of the expression to the hoisted variable.
     AddStatement(create<ast::AssignmentStatement>(
-        create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name),
-                                          namer_.Name(result_id)),
+        create<ast::IdentifierExpression>(
+            Source{}, ast_module_.RegisterSymbol(name), namer_.Name(result_id)),
         ast_expr.expr));
     return true;
   }
@@ -2854,10 +2855,11 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     }
     case SpvOpPhi: {
       // Emit a read from the associated state variable.
-      TypedExpression expr{parser_impl_.ConvertType(inst.type_id()),
-                           create<ast::IdentifierExpression>(
-                               ast_module_.RegisterSymbol(def_info->phi_var),
-                               def_info->phi_var)};
+      TypedExpression expr{
+          parser_impl_.ConvertType(inst.type_id()),
+          create<ast::IdentifierExpression>(
+              Source{}, ast_module_.RegisterSymbol(def_info->phi_var),
+              def_info->phi_var)};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
     case SpvOpFunctionCall:
@@ -2891,8 +2893,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (binary_op != ast::BinaryOp::kNone) {
     auto arg0 = MakeOperand(inst, 0);
     auto arg1 = MakeOperand(inst, 1);
-    auto* binary_expr =
-        create<ast::BinaryExpression>(binary_op, arg0.expr, arg1.expr);
+    auto* binary_expr = create<ast::BinaryExpression>(Source{}, binary_op,
+                                                      arg0.expr, arg1.expr);
     TypedExpression result{ast_type, binary_expr};
     return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
   }
@@ -2900,7 +2902,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   auto unary_op = ast::UnaryOp::kNegation;
   if (GetUnaryOp(opcode, &unary_op)) {
     auto arg0 = MakeOperand(inst, 0);
-    auto* unary_expr = create<ast::UnaryOpExpression>(unary_op, arg0.expr);
+    auto* unary_expr =
+        create<ast::UnaryOpExpression>(Source{}, unary_op, arg0.expr);
     TypedExpression result{ast_type, unary_expr};
     return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
   }
@@ -2909,11 +2912,13 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (unary_builtin_name != nullptr) {
     ast::ExpressionList params;
     params.emplace_back(MakeOperand(inst, 0).expr);
-    return {ast_type, create<ast::CallExpression>(
-                          create<ast::IdentifierExpression>(
-                              ast_module_.RegisterSymbol(unary_builtin_name),
-                              unary_builtin_name),
-                          std::move(params))};
+    return {ast_type,
+            create<ast::CallExpression>(
+                Source{},
+                create<ast::IdentifierExpression>(
+                    Source{}, ast_module_.RegisterSymbol(unary_builtin_name),
+                    unary_builtin_name),
+                std::move(params))};
   }
 
   const auto intrinsic = GetIntrinsic(opcode);
@@ -2927,17 +2932,17 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
   if (opcode == SpvOpBitcast) {
     return {ast_type, create<ast::BitcastExpression>(
-                          ast_type, MakeOperand(inst, 0).expr)};
+                          Source{}, ast_type, MakeOperand(inst, 0).expr)};
   }
 
   auto negated_op = NegatedFloatCompare(opcode);
   if (negated_op != ast::BinaryOp::kNone) {
     auto arg0 = MakeOperand(inst, 0);
     auto arg1 = MakeOperand(inst, 1);
-    auto* binary_expr =
-        create<ast::BinaryExpression>(negated_op, arg0.expr, arg1.expr);
-    auto* negated_expr =
-        create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, binary_expr);
+    auto* binary_expr = create<ast::BinaryExpression>(Source{}, negated_op,
+                                                      arg0.expr, arg1.expr);
+    auto* negated_expr = create<ast::UnaryOpExpression>(
+        Source{}, ast::UnaryOp::kNot, binary_expr);
     return {ast_type, negated_expr};
   }
 
@@ -2956,7 +2961,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
       operands.emplace_back(MakeOperand(inst, iarg).expr);
     }
     return {ast_type, create<ast::TypeConstructorExpression>(
-                          ast_type, std::move(operands))};
+                          Source{}, ast_type, std::move(operands))};
   }
 
   if (opcode == SpvOpCompositeExtract) {
@@ -3013,8 +3018,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     return {};
   }
 
-  auto* func =
-      create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name), name);
+  auto* func = create<ast::IdentifierExpression>(
+      Source{}, ast_module_.RegisterSymbol(name), name);
   ast::ExpressionList operands;
   ast::type::Type* first_operand_type = nullptr;
   // All parameters to GLSL.std.450 extended instructions are IDs.
@@ -3026,7 +3031,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     operands.emplace_back(operand.expr);
   }
   auto* ast_type = parser_impl_.ConvertType(inst.type_id());
-  auto* call = create<ast::CallExpression>(func, std::move(operands));
+  auto* call = create<ast::CallExpression>(Source{}, func, std::move(operands));
   TypedExpression call_expr{ast_type, call};
   return parser_impl_.RectifyForcedResultType(call_expr, inst,
                                               first_operand_type);
@@ -3040,20 +3045,20 @@ ast::IdentifierExpression* FunctionEmitter::Swizzle(uint32_t i) {
   }
   const char* names[] = {"x", "y", "z", "w"};
   return create<ast::IdentifierExpression>(
-      ast_module_.RegisterSymbol(names[i & 3]), names[i & 3]);
+      Source{}, ast_module_.RegisterSymbol(names[i & 3]), names[i & 3]);
 }
 
 ast::IdentifierExpression* FunctionEmitter::PrefixSwizzle(uint32_t n) {
   switch (n) {
     case 1:
-      return create<ast::IdentifierExpression>(ast_module_.RegisterSymbol("x"),
-                                               "x");
+      return create<ast::IdentifierExpression>(
+          Source{}, ast_module_.RegisterSymbol("x"), "x");
     case 2:
-      return create<ast::IdentifierExpression>(ast_module_.RegisterSymbol("xy"),
-                                               "xy");
+      return create<ast::IdentifierExpression>(
+          Source{}, ast_module_.RegisterSymbol("xy"), "xy");
     case 3:
       return create<ast::IdentifierExpression>(
-          ast_module_.RegisterSymbol("xyz"), "xyz");
+          Source{}, ast_module_.RegisterSymbol("xyz"), "xyz");
     default:
       break;
   }
@@ -3125,7 +3130,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
 
       auto name = namer_.Name(base_id);
       current_expr.expr = create<ast::IdentifierExpression>(
-          ast_module_.RegisterSymbol(name), name);
+          Source{}, ast_module_.RegisterSymbol(name), name);
       current_expr.type = parser_impl_.ConvertType(ptr_ty_id);
     }
   }
@@ -3174,11 +3179,11 @@ TypedExpression FunctionEmitter::MakeAccessChain(
                    << " is too big. Max handled index is " << kMaxVectorLen - 1;
           }
           next_expr = create<ast::MemberAccessorExpression>(
-              current_expr.expr, Swizzle(uint32_t(index_const_val)));
+              Source{}, current_expr.expr, Swizzle(uint32_t(index_const_val)));
         } else {
           // Non-constant index. Use array syntax
           next_expr = create<ast::ArrayAccessorExpression>(
-              current_expr.expr, MakeOperand(inst, index).expr);
+              Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         }
         // All vector components are the same type.
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
@@ -3186,18 +3191,18 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       case SpvOpTypeMatrix:
         // Use array syntax.
         next_expr = create<ast::ArrayAccessorExpression>(
-            current_expr.expr, MakeOperand(inst, index).expr);
+            Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         // All matrix components are the same type.
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeArray:
         next_expr = create<ast::ArrayAccessorExpression>(
-            current_expr.expr, MakeOperand(inst, index).expr);
+            Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeRuntimeArray:
         next_expr = create<ast::ArrayAccessorExpression>(
-            current_expr.expr, MakeOperand(inst, index).expr);
+            Source{}, current_expr.expr, MakeOperand(inst, index).expr);
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeStruct: {
@@ -3218,10 +3223,10 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         auto name =
             namer_.GetMemberName(pointee_type_id, uint32_t(index_const_val));
         auto* member_access = create<ast::IdentifierExpression>(
-            ast_module_.RegisterSymbol(name), name);
+            Source{}, ast_module_.RegisterSymbol(name), name);
 
-        next_expr = create<ast::MemberAccessorExpression>(current_expr.expr,
-                                                          member_access);
+        next_expr = create<ast::MemberAccessorExpression>(
+            Source{}, current_expr.expr, member_access);
         pointee_type_id = pointee_type_inst->GetSingleWordInOperand(
             static_cast<uint32_t>(index_const_val));
         break;
@@ -3251,12 +3256,13 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   // this as ever-deeper nested indexing expressions. Start off with an
   // expression for the composite, and then bury that inside nested indexing
   // expressions.
+  auto source = GetSourceForInst(inst);
   TypedExpression current_expr(MakeOperand(inst, 0));
 
-  auto make_index = [this](uint32_t literal) {
+  auto make_index = [this, source](uint32_t literal) {
     auto* type = create<ast::type::U32>();
     return create<ast::ScalarConstructorExpression>(
-        create<ast::UintLiteral>(Source{}, type, literal));
+        source, create<ast::UintLiteral>(source, type, literal));
   };
 
   const auto composite = inst.GetSingleWordInOperand(0);
@@ -3291,8 +3297,8 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
           Fail() << "internal error: swizzle index " << index_val
                  << " is too big. Max handled index is " << kMaxVectorLen - 1;
         }
-        next_expr = create<ast::MemberAccessorExpression>(current_expr.expr,
-                                                          Swizzle(index_val));
+        next_expr = create<ast::MemberAccessorExpression>(
+            Source{}, current_expr.expr, Swizzle(index_val));
         // All vector components are the same type.
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
         break;
@@ -3311,8 +3317,8 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
                  << " is too big. Max handled index is " << kMaxVectorLen - 1;
         }
         // Use array syntax.
-        next_expr = create<ast::ArrayAccessorExpression>(current_expr.expr,
-                                                         make_index(index_val));
+        next_expr = create<ast::ArrayAccessorExpression>(
+            Source{}, current_expr.expr, make_index(index_val));
         // All matrix components are the same type.
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
         break;
@@ -3321,8 +3327,8 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         // The array size could be a spec constant, and so it's not always
         // statically checkable.  Instead, rely on a runtime index clamp
         // or runtime check to keep this safe.
-        next_expr = create<ast::ArrayAccessorExpression>(current_expr.expr,
-                                                         make_index(index_val));
+        next_expr = create<ast::ArrayAccessorExpression>(
+            Source{}, current_expr.expr, make_index(index_val));
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeRuntimeArray:
@@ -3338,10 +3344,10 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         }
         auto name = namer_.GetMemberName(current_type_id, uint32_t(index_val));
         auto* member_access = create<ast::IdentifierExpression>(
-            ast_module_.RegisterSymbol(name), name);
+            Source{}, ast_module_.RegisterSymbol(name), name);
 
-        next_expr = create<ast::MemberAccessorExpression>(current_expr.expr,
-                                                          member_access);
+        next_expr = create<ast::MemberAccessorExpression>(
+            Source{}, current_expr.expr, member_access);
         current_type_id = current_type_inst->GetSingleWordInOperand(index_val);
         break;
       }
@@ -3358,13 +3364,13 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
 
 ast::Expression* FunctionEmitter::MakeTrue(const Source& source) const {
   return create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(source, parser_impl_.Bool(), true));
+      source, create<ast::BoolLiteral>(source, parser_impl_.Bool(), true));
 }
 
 ast::Expression* FunctionEmitter::MakeFalse(const Source& source) const {
   ast::type::Bool bool_type;
   return create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(source, parser_impl_.Bool(), false));
+      source, create<ast::BoolLiteral>(source, parser_impl_.Bool(), false));
 }
 
 TypedExpression FunctionEmitter::MakeVectorShuffle(
@@ -3382,6 +3388,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
 
   // Generate an ast::TypeConstructor expression.
   // Assume the literal indices are valid, and there is a valid number of them.
+  auto source = GetSourceForInst(inst);
   ast::type::Vector* result_type =
       parser_impl_.ConvertType(inst.type_id())->As<ast::type::Vector>();
   ast::ExpressionList values;
@@ -3389,12 +3396,12 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
     const auto index = inst.GetSingleWordInOperand(i);
     if (index < vec0_len) {
       values.emplace_back(create<ast::MemberAccessorExpression>(
-          MakeExpression(vec0_id).expr, Swizzle(index)));
+          source, MakeExpression(vec0_id).expr, Swizzle(index)));
     } else if (index < vec0_len + vec1_len) {
       const auto sub_index = index - vec0_len;
       assert(sub_index < kMaxVectorLen);
       values.emplace_back(create<ast::MemberAccessorExpression>(
-          MakeExpression(vec1_id).expr, Swizzle(sub_index)));
+          source, MakeExpression(vec1_id).expr, Swizzle(sub_index)));
     } else if (index == 0xFFFFFFFF) {
       // By rule, this maps to OpUndef.  Instead, make it zero.
       values.emplace_back(parser_impl_.MakeNullValue(result_type->type()));
@@ -3405,7 +3412,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
     }
   }
   return {result_type,
-          create<ast::TypeConstructorExpression>(result_type, values)};
+          create<ast::TypeConstructorExpression>(source, result_type, values)};
 }
 
 bool FunctionEmitter::RegisterLocallyDefinedValues() {
@@ -3706,27 +3713,29 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
 
   ast::ExpressionList params;
   params.push_back(arg_expr.expr);
-  TypedExpression result{expr_type, create<ast::TypeConstructorExpression>(
-                                        expr_type, std::move(params))};
+  TypedExpression result{
+      expr_type, create<ast::TypeConstructorExpression>(Source{}, expr_type,
+                                                        std::move(params))};
 
   if (requested_type == expr_type) {
     return result;
   }
-  return {requested_type,
-          create<ast::BitcastExpression>(requested_type, result.expr)};
+  return {requested_type, create<ast::BitcastExpression>(
+                              Source{}, requested_type, result.expr)};
 }
 
 bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   // We ignore function attributes such as Inline, DontInline, Pure, Const.
   auto name = namer_.Name(inst.GetSingleWordInOperand(0));
-  auto* function =
-      create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name), name);
+  auto* function = create<ast::IdentifierExpression>(
+      Source{}, ast_module_.RegisterSymbol(name), name);
 
   ast::ExpressionList params;
   for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
     params.emplace_back(MakeOperand(inst, iarg).expr);
   }
-  auto* call_expr = create<ast::CallExpression>(function, std::move(params));
+  auto* call_expr =
+      create<ast::CallExpression>(Source{}, function, std::move(params));
   auto* result_type = parser_impl_.ConvertType(inst.type_id());
   if (!result_type) {
     return Fail() << "internal error: no mapped type result of call: "
@@ -3746,8 +3755,8 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
   std::ostringstream ss;
   ss << intrinsic;
   auto name = ss.str();
-  auto* ident =
-      create<ast::IdentifierExpression>(ast_module_.RegisterSymbol(name), name);
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{}, ast_module_.RegisterSymbol(name), name);
   ident->set_intrinsic(intrinsic);
 
   ast::ExpressionList params;
@@ -3759,7 +3768,8 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
     }
     params.emplace_back(operand.expr);
   }
-  auto* call_expr = create<ast::CallExpression>(ident, std::move(params));
+  auto* call_expr =
+      create<ast::CallExpression>(Source{}, ident, std::move(params));
   auto* result_type = parser_impl_.ConvertType(inst.type_id());
   if (!result_type) {
     Fail() << "internal error: no mapped type result of call: "
@@ -3790,9 +3800,9 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
     // The condition goes last.
     params.push_back(condition.expr);
     return {operand1.type,
-            create<ast::CallExpression>(
+            create<ast::CallExpression>(Source{},
                 create<ast::IdentifierExpression>(
-                    ast_module_.RegisterSymbol("select"), "select"),
+                    Source{}, ast_module_.RegisterSymbol("select"), "select"),
                 std::move(params))};
   }
   return {};
@@ -3818,7 +3828,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   auto name = namer_.Name(image->result_id());
   params.push_back(create<ast::IdentifierExpression>(
-      ast_module_.RegisterSymbol(name), name));
+      Source{}, ast_module_.RegisterSymbol(name), name));
 
   if (IsSampledImageAccess(inst.opcode())) {
     // Form the sampler operand.
@@ -3830,7 +3840,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     }
     auto param_name = namer_.Name(sampler->result_id());
     params.push_back(create<ast::IdentifierExpression>(
-        ast_module_.RegisterSymbol(param_name), param_name));
+        Source{}, ast_module_.RegisterSymbol(param_name), param_name));
   }
 
   ast::type::Pointer* texture_ptr_type =
@@ -3937,7 +3947,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     if (texture_type->Is<ast::type::DepthTexture>()) {
       // Convert it to a signed integer type.
       lod_operand = create<ast::TypeConstructorExpression>(
-          create<ast::type::I32>(), ast::ExpressionList{lod_operand});
+          Source{}, create<ast::type::I32>(), ast::ExpressionList{lod_operand});
     }
     params.push_back(lod_operand);
     image_operands_mask ^= SpvImageOperandsLodMask;
@@ -3970,8 +3980,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
 
   auto* ident = create<ast::IdentifierExpression>(
-      ast_module_.RegisterSymbol(builtin_name), builtin_name);
-  auto* call_expr = create<ast::CallExpression>(ident, std::move(params));
+      Source{}, ast_module_.RegisterSymbol(builtin_name), builtin_name);
+  auto* call_expr =
+      create<ast::CallExpression>(Source{}, ident, std::move(params));
 
   if (inst.type_id() != 0) {
     // It returns a value.
@@ -3996,7 +4007,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     if (expected_component_type != result_component_type) {
       // This occurs if one is signed integer and the other is unsigned integer,
       // or vice versa. Perform a bitcast.
-      value = create<ast::BitcastExpression>(result_type, call_expr);
+      value = create<ast::BitcastExpression>(Source{}, result_type, call_expr);
     }
 
     EmitConstDefOrWriteToHoistedVar(inst, {result_type, value});
@@ -4112,14 +4123,14 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     // array component. Use a vector swizzle to get the first `num_axes`
     // components.
     result.push_back(create<ast::MemberAccessorExpression>(
-        raw_coords.expr, PrefixSwizzle(num_axes)));
+        Source{}, raw_coords.expr, PrefixSwizzle(num_axes)));
 
     // Now get the array index.
     ast::Expression* array_index = create<ast::MemberAccessorExpression>(
-        raw_coords.expr, Swizzle(num_axes));
+        Source{}, raw_coords.expr, Swizzle(num_axes));
     // Convert it to a signed integer type.
     result.push_back(create<ast::TypeConstructorExpression>(
-        create<ast::type::I32>(), ast::ExpressionList{array_index}));
+        Source{}, create<ast::type::I32>(), ast::ExpressionList{array_index}));
   } else {
     if (num_coords_supplied == num_coords_required) {
       // Pass the value through.
@@ -4128,7 +4139,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
       // There are more coordinates supplied than needed. So the source type is
       // a vector. Use a vector swizzle to get the first `num_axes` components.
       result.push_back(create<ast::MemberAccessorExpression>(
-          raw_coords.expr, PrefixSwizzle(num_axes)));
+          Source{}, raw_coords.expr, PrefixSwizzle(num_axes)));
     }
   }
   return result;
@@ -4173,7 +4184,7 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
   // higher-numbered components.
   auto* texel_prefix = (src_count == dest_count)
                            ? texel.expr
-                           : create<ast::MemberAccessorExpression>(
+                           : create<ast::MemberAccessorExpression>(Source{},
                                  texel.expr, PrefixSwizzle(dest_count));
 
   if (!(dest_type->is_float_scalar_or_vector() ||
@@ -4216,7 +4227,7 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     return texel_prefix;
   }
   // We must do a bitcast conversion.
-  return create<ast::BitcastExpression>(dest_type, texel_prefix);
+  return create<ast::BitcastExpression>(Source{}, dest_type, texel_prefix);
 }
 
 TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
@@ -4224,7 +4235,7 @@ TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
     return value;
   }
   return {i32_, create<ast::TypeConstructorExpression>(
-                    i32_, ast::ExpressionList{value.expr})};
+                    Source{}, i32_, ast::ExpressionList{value.expr})};
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;

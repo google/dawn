@@ -22,10 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ArrayAccessorExpression);
 namespace tint {
 namespace ast {
 
-ArrayAccessorExpression::ArrayAccessorExpression(Expression* array,
-                                                 Expression* idx_expr)
-    : Base(), array_(array), idx_expr_(idx_expr) {}
-
 ArrayAccessorExpression::ArrayAccessorExpression(const Source& source,
                                                  Expression* array,
                                                  Expression* idx_expr)
@@ -38,8 +34,8 @@ ArrayAccessorExpression::~ArrayAccessorExpression() = default;
 
 ArrayAccessorExpression* ArrayAccessorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->mod->create<ArrayAccessorExpression>(ctx->Clone(array_),
-                                                   ctx->Clone(idx_expr_));
+  return ctx->mod->create<ArrayAccessorExpression>(
+      ctx->Clone(source()), ctx->Clone(array_), ctx->Clone(idx_expr_));
 }
 
 bool ArrayAccessorExpression::IsValid() const {

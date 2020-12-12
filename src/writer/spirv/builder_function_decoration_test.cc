@@ -165,19 +165,20 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("my_out"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_out"),
                                         "my_out"),
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("my_in"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_in"),
                                         "my_in")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("my_wg"), "my_wg"),
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("my_wg"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_wg"),
+                                        "my_wg"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_wg"),
                                         "my_wg")));
   // Add duplicate usages so we show they don't get output multiple times.
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("my_out"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_out"),
                                         "my_out"),
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("my_in"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_in"),
                                         "my_in")));
 
   ast::Function func(

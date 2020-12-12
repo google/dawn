@@ -29,10 +29,6 @@ class TypeConstructorExpression
     : public Castable<TypeConstructorExpression, ConstructorExpression> {
  public:
   /// Constructor
-  /// @param type the type
-  /// @param values the values
-  TypeConstructorExpression(type::Type* type, ExpressionList values);
-  /// Constructor
   /// @param source the constructor source
   /// @param type the type
   /// @param values the constructor values

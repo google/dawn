@@ -29,10 +29,6 @@ namespace ast {
 class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
  public:
   /// Constructor
-  /// @param op the op
-  /// @param expr the expr
-  UnaryOpExpression(UnaryOp op, Expression* expr);
-  /// Constructor
   /// @param source the unary op expression source
   /// @param op the op
   /// @param expr the expr

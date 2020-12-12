@@ -57,11 +57,11 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
   ast::type::I32 i32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 3));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 3));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 4));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 4));
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -82,26 +82,28 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
   ast::type::Vector vec3(&i32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+      });
 
   auto* rhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+      });
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -124,12 +126,12 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &i32,
                     false, nullptr, ast::VariableDecorationList{});
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param");
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("param"), "param");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("param"), "param");
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -175,11 +177,11 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
   ast::type::U32 u32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(Source{}, &u32, 3));
+      Source{}, create<ast::UintLiteral>(Source{}, &u32, 3));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(Source{}, &u32, 4));
+      Source{}, create<ast::UintLiteral>(Source{}, &u32, 4));
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -200,26 +202,28 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
   ast::type::Vector vec3(&u32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+      });
 
   auto* rhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+      });
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -256,11 +260,11 @@ TEST_P(BinaryArithFloatTest, Scalar) {
   ast::type::F32 f32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.2f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.2f));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 4.5f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 4.5f));
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   b.push_function(Function{});
@@ -281,26 +285,28 @@ TEST_P(BinaryArithFloatTest, Vector) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+      });
 
   auto* rhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+      });
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -331,11 +337,11 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
   ast::type::U32 u32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(Source{}, &u32, 3));
+      Source{}, create<ast::UintLiteral>(Source{}, &u32, 3));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(Source{}, &u32, 4));
+      Source{}, create<ast::UintLiteral>(Source{}, &u32, 4));
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -358,26 +364,28 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
   ast::type::Vector vec3(&u32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+      });
 
   auto* rhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::UintLiteral>(Source{}, &u32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)),
+      });
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -412,11 +420,11 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
   ast::type::I32 i32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 3));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 3));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 4));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 4));
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -439,26 +447,28 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
   ast::type::Vector vec3(&i32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+      });
 
   auto* rhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::SintLiteral>(Source{}, &i32, 1)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+      });
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -493,11 +503,11 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
   ast::type::F32 f32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.2f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.2f));
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 4.5f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 4.5f));
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -520,26 +530,28 @@ TEST_P(BinaryCompareFloatTest, Vector) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+      });
 
   auto* rhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+      });
 
-  ast::BinaryExpression expr(param.op, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -572,19 +584,20 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+      });
 
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -605,18 +618,18 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
   ast::type::Vector vec3(&f32, 3);
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, vals);
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -644,14 +657,14 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
                             false,                           // is_const
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("mat"), "mat");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -685,13 +698,13 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f));
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("mat"), "mat");
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -725,21 +738,21 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
                             false,                           // is_const
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("mat"), "mat");
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* rhs = create<ast::TypeConstructorExpression>(&vec3, vals);
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -777,19 +790,19 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* lhs = create<ast::TypeConstructorExpression>(&vec3, vals);
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+  auto* lhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
 
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("mat"), "mat");
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -824,14 +837,14 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
                             false,                           // is_const
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("mat"), "mat");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("mat"), "mat");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("mat"), "mat");
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -856,20 +869,20 @@ TEST_F(BuilderTest, Binary_LogicalAnd) {
   ast::type::I32 i32;
 
   auto* lhs = create<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
+      Source{}, ast::BinaryOp::kEqual,
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 1)),
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
 
   auto* rhs = create<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
+      Source{}, ast::BinaryOp::kEqual,
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 3)),
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3)),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 4)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 4)));
 
-  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalAnd, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -907,6 +920,7 @@ TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
       &bool_type,                    // type
       false,                         // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::BoolLiteral>(Source{}, &bool_type, true)),  // constructor
       ast::VariableDecorationList{});                             // decorations
   auto* b_var = create<ast::Variable>(
@@ -915,17 +929,20 @@ TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
       ast::StorageClass::kFunction,  // storage_class
       &bool_type,                    // type
       false,                         // is_const
-      create<ast::ScalarConstructorExpression>(create<ast::BoolLiteral>(
-          Source{}, &bool_type, false)),  // constructor
-      ast::VariableDecorationList{});     // decorations
+      create<ast::ScalarConstructorExpression>(
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_type,
+                                             false)),  // constructor
+      ast::VariableDecorationList{});                  // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a");
-  auto* rhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b");
+  auto* lhs = create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("a"), "a");
+  auto* rhs = create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("b"), "b");
 
   td.RegisterVariableForTesting(a_var);
   td.RegisterVariableForTesting(b_var);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalAnd, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -964,16 +981,16 @@ TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
   // From: crbug.com/tint/355
 
   auto* logical_and_expr = create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalAnd,
+      Source{}, ast::BinaryOp::kLogicalAnd,
       create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
       create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(Source{}, &bool_ty, false)));
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_ty, false)));
 
   ast::BinaryExpression expr(
-      ast::BinaryOp::kLogicalOr,
+      Source{}, ast::BinaryOp::kLogicalOr,
       create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
       logical_and_expr);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -1011,16 +1028,16 @@ TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
   // From: crbug.com/tint/355
 
   auto* logical_or_expr = create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalOr,
+      Source{}, ast::BinaryOp::kLogicalOr,
       create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
       create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(Source{}, &bool_ty, false)));
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_ty, false)));
 
   ast::BinaryExpression expr(
-      ast::BinaryOp::kLogicalAnd,
+      Source{}, ast::BinaryOp::kLogicalAnd,
       create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_ty, true)),
       logical_or_expr);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -1054,20 +1071,20 @@ TEST_F(BuilderTest, Binary_LogicalOr) {
   ast::type::I32 i32;
 
   auto* lhs = create<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
+      Source{}, ast::BinaryOp::kEqual,
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 1)),
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
 
   auto* rhs = create<ast::BinaryExpression>(
-      ast::BinaryOp::kEqual,
+      Source{}, ast::BinaryOp::kEqual,
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 3)),
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3)),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 4)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 4)));
 
-  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalOr, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -1105,6 +1122,7 @@ TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
       &bool_type,                    // type
       false,                         // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::BoolLiteral>(Source{}, &bool_type, true)),  // constructor
       ast::VariableDecorationList{});                             // decorations
   auto* b_var = create<ast::Variable>(
@@ -1113,17 +1131,20 @@ TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
       ast::StorageClass::kFunction,  // storage_class
       &bool_type,                    // type
       false,                         // is_const
-      create<ast::ScalarConstructorExpression>(create<ast::BoolLiteral>(
-          Source{}, &bool_type, false)),  // constructor
-      ast::VariableDecorationList{});     // decorations
+      create<ast::ScalarConstructorExpression>(
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_type,
+                                             false)),  // constructor
+      ast::VariableDecorationList{});                  // decorations
 
-  auto* lhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a");
-  auto* rhs = create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b");
+  auto* lhs = create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("a"), "a");
+  auto* rhs = create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("b"), "b");
 
   td.RegisterVariableForTesting(a_var);
   td.RegisterVariableForTesting(b_var);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalOr, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

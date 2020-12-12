@@ -86,10 +86,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   body = create<ast::BlockStatement>();
   body->append(inner);
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::AssignmentStatement>(lhs, rhs));
@@ -153,6 +153,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
       &f32,                          // type
       false,                         // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.4)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
@@ -167,10 +168,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
                             nullptr,                           // constructor
                             ast::VariableDecorationList{})));  // decorations
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
   auto* continuing = create<ast::BlockStatement>();
   continuing->append(create<ast::AssignmentStatement>(lhs, rhs));

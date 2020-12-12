@@ -43,13 +43,13 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -68,7 +68,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
+  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
 
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
@@ -91,7 +91,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 %1 = OpVariable %2 Output %4
 )");
 
-  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
+  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
@@ -102,13 +102,13 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -126,7 +126,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
+  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
 }
@@ -152,7 +152,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
             R"(%1 = OpVariable %2 Function %4
 )");
 
-  ast::IdentifierExpression expr(mod->RegisterSymbol("var"), "var");
+  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
   ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
@@ -165,12 +165,12 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   td.RegisterVariableForTesting(&var);
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("var"), "var");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("var"), "var");
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kAdd, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -195,17 +195,17 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   ast::Variable var(Source{}, "var", ast::StorageClass::kNone, &i32, true,
                     create<ast::ScalarConstructorExpression>(
-                        create<ast::SintLiteral>(Source{}, &i32, 2)),
+                        Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)),
                     ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(&var);
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
-  auto* rhs =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("var"), "var");
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("var"), "var");
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kAdd, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

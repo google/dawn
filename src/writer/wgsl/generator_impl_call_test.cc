@@ -29,38 +29,38 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
-  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
-                                               "my_func");
-  ast::CallExpression call(id, {});
+  auto* id = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func");
+  ast::CallExpression call(Source{}, id, {});
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func()");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
-  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
-                                               "my_func");
+  auto* id = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param1"), "param1"));
+      Source{}, mod.RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param2"), "param2"));
-  ast::CallExpression call(id, params);
+      Source{}, mod.RegisterSymbol("param2"), "param2"));
+  ast::CallExpression call(Source{}, id, params);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func(param1, param2)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
-  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
-                                               "my_func");
+  auto* id = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param1"), "param1"));
+      Source{}, mod.RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param2"), "param2"));
+      Source{}, mod.RegisterSymbol("param2"), "param2"));
 
-  ast::CallStatement call(create<ast::CallExpression>(id, params));
+  ast::CallStatement call(create<ast::CallExpression>(Source{}, id, params));
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();

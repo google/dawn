@@ -24,14 +24,15 @@ namespace {
 using HlslGeneratorImplTest_Identifier = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Identifier, EmitIdentifierExpression) {
-  ast::IdentifierExpression i(mod.RegisterSymbol("foo"), "foo");
+  ast::IdentifierExpression i(Source{}, mod.RegisterSymbol("foo"), "foo");
   ASSERT_TRUE(gen.EmitExpression(pre, out, &i)) << gen.error();
   EXPECT_EQ(result(), "foo");
 }
 
 TEST_F(HlslGeneratorImplTest_Identifier,
        EmitIdentifierExpression_Single_WithCollision) {
-  ast::IdentifierExpression i(mod.RegisterSymbol("virtual"), "virtual");
+  ast::IdentifierExpression i(Source{}, mod.RegisterSymbol("virtual"),
+                              "virtual");
   ASSERT_TRUE(gen.EmitExpression(pre, out, &i)) << gen.error();
   EXPECT_EQ(result(), "virtual_tint_0");
 }

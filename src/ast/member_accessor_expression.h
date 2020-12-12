@@ -30,10 +30,6 @@ class MemberAccessorExpression
     : public Castable<MemberAccessorExpression, Expression> {
  public:
   /// Constructor
-  /// @param structure the structure
-  /// @param member the member
-  MemberAccessorExpression(Expression* structure, IdentifierExpression* member);
-  /// Constructor
   /// @param source the member accessor expression source
   /// @param structure the structure
   /// @param member the member

@@ -84,7 +84,8 @@ TEST_F(VariableTest, IsValid_WithConstructor) {
              StorageClass::kNone,
              &t,
              false,
-             create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident"),
+             create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ident"),
+                                          "ident"),
              ast::VariableDecorationList{}};
   EXPECT_TRUE(v.IsValid());
 }
@@ -115,7 +116,7 @@ TEST_F(VariableTest, IsValid_InvalidConstructor) {
              StorageClass::kNone,
              &t,
              false,
-             create<IdentifierExpression>(mod.RegisterSymbol(""), ""),
+             create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), ""),
              ast::VariableDecorationList{}};
   EXPECT_FALSE(v.IsValid());
 }
@@ -162,13 +163,14 @@ TEST_F(VariableTest, ConstantId) {
 
 TEST_F(VariableTest, Decorated_to_str) {
   type::F32 t;
-  auto* var = create<Variable>(
-      Source{}, "my_var", StorageClass::kFunction, &t, false,
-      create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr"),
-      VariableDecorationList{
-          create<BindingDecoration>(2, Source{}),
-          create<SetDecoration>(1, Source{}),
-      });
+  auto* var =
+      create<Variable>(Source{}, "my_var", StorageClass::kFunction, &t, false,
+                       create<IdentifierExpression>(
+                           Source{}, mod.RegisterSymbol("expr"), "expr"),
+                       VariableDecorationList{
+                           create<BindingDecoration>(2, Source{}),
+                           create<SetDecoration>(1, Source{}),
+                       });
 
   std::ostringstream out;
   var->to_str(out, 2);

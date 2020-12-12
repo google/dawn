@@ -2028,7 +2028,8 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
 
   return create<ast::CallStatement>(create<ast::CallExpression>(
       source,
-      create<ast::IdentifierExpression>(module_.RegisterSymbol(name), name),
+      create<ast::IdentifierExpression>(Source{}, module_.RegisterSymbol(name),
+                                        name),
       std::move(params)));
 }
 

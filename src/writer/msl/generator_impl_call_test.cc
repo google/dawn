@@ -34,9 +34,9 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   ast::type::Void void_type;
 
-  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
-                                               "my_func");
-  ast::CallExpression call(id, {});
+  auto* id = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func");
+  ast::CallExpression call(Source{}, id, {});
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
@@ -50,14 +50,14 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   ast::type::Void void_type;
 
-  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
-                                               "my_func");
+  auto* id = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param1"), "param1"));
+      Source{}, mod.RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param2"), "param2"));
-  ast::CallExpression call(id, params);
+      Source{}, mod.RegisterSymbol("param2"), "param2"));
+  ast::CallExpression call(Source{}, id, params);
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
@@ -71,14 +71,14 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
 TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
   ast::type::Void void_type;
 
-  auto* id = create<ast::IdentifierExpression>(mod.RegisterSymbol("my_func"),
-                                               "my_func");
+  auto* id = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param1"), "param1"));
+      Source{}, mod.RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("param2"), "param2"));
-  ast::CallStatement call(create<ast::CallExpression>(id, params));
+      Source{}, mod.RegisterSymbol("param2"), "param2"));
+  ast::CallStatement call(create<ast::CallExpression>(Source{}, id, params));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},

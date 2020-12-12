@@ -84,11 +84,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
@@ -157,11 +161,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
@@ -230,11 +238,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
@@ -302,11 +314,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
@@ -371,11 +387,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
@@ -435,11 +455,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("foo"), "foo")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
+                                        "foo")));
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar"),
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("bar"), "bar")));
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
+                                        "bar")));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
@@ -506,11 +530,14 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("depth"), "depth"),
+      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("depth"),
+                                        "depth"),
       create<ast::MemberAccessorExpression>(
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("coord"),
-                                            "coord"),
-          create<ast::IdentifierExpression>(mod.RegisterSymbol("x"), "x"))));
+          Source{},
+          create<ast::IdentifierExpression>(
+              Source{}, mod.RegisterSymbol("coord"), "coord"),
+          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("x"),
+                                            "x"))));
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &void_type, body,

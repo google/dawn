@@ -88,7 +88,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   auto* ident = create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("initializer"), "initializer");
+      Source{}, mod.RegisterSymbol("initializer"), "initializer");
 
   ast::type::F32 f32;
   ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, ident,
@@ -101,7 +101,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   auto* ident = create<ast::IdentifierExpression>(
-      mod.RegisterSymbol("initializer"), "initializer");
+      Source{}, mod.RegisterSymbol("initializer"), "initializer");
 
   ast::type::F32 f32;
   ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, true, ident,

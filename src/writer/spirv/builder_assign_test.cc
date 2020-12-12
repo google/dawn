@@ -47,10 +47,10 @@ TEST_F(BuilderTest, Assign_Var) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
                   nullptr, ast::VariableDecorationList{});
 
-  auto* ident =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("var"), "var");
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -83,10 +83,10 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec, false,
                   nullptr, ast::VariableDecorationList{});
 
-  auto* ident =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("var"), "var");
   ast::ExpressionList vals;
-  auto* val = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -118,25 +118,28 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
   ast::type::Vector vec2(&f32, 2);
 
   auto* first = create<ast::TypeConstructorExpression>(
-      &vec2, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.0f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 2.0f)),
-             });
+      Source{}, &vec2,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)),
+      });
 
   auto* init = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 first,
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          first,
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
+      });
 
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
                   nullptr, ast::VariableDecorationList{});
 
   ast::AssignmentStatement assign(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
+                                        "var"),
       init);
 
   td.RegisterVariableForTesting(&v);
@@ -174,19 +177,20 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec3, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
 
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
                   nullptr, ast::VariableDecorationList{});
 
   ast::AssignmentStatement assign(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
+                                        "var"),
       init);
 
   td.RegisterVariableForTesting(&v);
@@ -235,11 +239,14 @@ TEST_F(BuilderTest, Assign_StructMember) {
                   false, nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("ident"), "ident"),
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("b"), "b"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("ident"),
+                                        "ident"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("b"),
+                                        "b"));
 
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 4.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 4.0f));
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -277,18 +284,18 @@ TEST_F(BuilderTest, Assign_Vector) {
   ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
                   nullptr, ast::VariableDecorationList{});
 
-  auto* ident =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{}, mod->RegisterSymbol("var"), "var");
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* val = create<ast::TypeConstructorExpression>(&vec3, vals);
+  auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -327,10 +334,13 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
                   nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::MemberAccessorExpression>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("y"), "y"));
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
+                                        "var"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("y"),
+                                        "y"));
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ast::AssignmentStatement assign(ident, val);
 
@@ -373,11 +383,13 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
                   nullptr, ast::VariableDecorationList{});
 
   auto* ident = create<ast::ArrayAccessorExpression>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var"),
+      Source{},
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
+                                        "var"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 1)));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
   auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ast::AssignmentStatement assign(ident, val);
 

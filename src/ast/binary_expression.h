@@ -51,11 +51,6 @@ enum class BinaryOp {
 class BinaryExpression : public Castable<BinaryExpression, Expression> {
  public:
   /// Constructor
-  /// @param op the operation type
-  /// @param lhs the left side of the expression
-  /// @param rhs the right side of the expression
-  BinaryExpression(BinaryOp op, Expression* lhs, Expression* rhs);
-  /// Constructor
   /// @param source the binary expression source
   /// @param op the operation type
   /// @param lhs the left side of the expression

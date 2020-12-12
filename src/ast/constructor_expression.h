@@ -28,8 +28,6 @@ class ConstructorExpression
 
  protected:
   /// Constructor
-  ConstructorExpression();
-  /// Constructor
   /// @param source the constructor source
   explicit ConstructorExpression(const Source& source);
   /// Move constructor

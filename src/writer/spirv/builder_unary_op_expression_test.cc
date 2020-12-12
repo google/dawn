@@ -40,9 +40,10 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
   ast::type::I32 i32;
 
-  ast::UnaryOpExpression expr(ast::UnaryOp::kNegation,
-                              create<ast::ScalarConstructorExpression>(
-                                  create<ast::SintLiteral>(Source{}, &i32, 1)));
+  ast::UnaryOpExpression expr(
+      Source{}, ast::UnaryOp::kNegation,
+      create<ast::ScalarConstructorExpression>(
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -60,9 +61,9 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
   ast::type::F32 f32;
 
   ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNegation,
+      Source{}, ast::UnaryOp::kNegation,
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(Source{}, &f32, 1)));
+          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1)));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -80,9 +81,9 @@ TEST_F(BuilderTest, UnaryOp_Not) {
   ast::type::Bool bool_type;
 
   ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNot,
+      Source{}, ast::UnaryOp::kNot,
       create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(Source{}, &bool_type, false)));
+          Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, false)));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -104,8 +105,9 @@ TEST_F(BuilderTest, UnaryOp_LoadRequired) {
                     false, nullptr, ast::VariableDecorationList{});
 
   ast::UnaryOpExpression expr(
-      ast::UnaryOp::kNegation,
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param"));
+      Source{}, ast::UnaryOp::kNegation,
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("param"),
+                                        "param"));
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();

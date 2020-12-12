@@ -28,10 +28,6 @@ namespace ast {
 class CallExpression : public Castable<CallExpression, Expression> {
  public:
   /// Constructor
-  /// @param func the function
-  /// @param params the parameters
-  CallExpression(Expression* func, ExpressionList params);
-  /// Constructor
   /// @param source the call expression source
   /// @param func the function
   /// @param params the parameters

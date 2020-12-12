@@ -51,13 +51,13 @@ TEST_F(BuilderTest, Return_WithValue) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* val = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   ast::ReturnStatement ret(Source{}, val);
 
@@ -85,8 +85,8 @@ TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
                     false, nullptr, ast::VariableDecorationList{});
 
   ast::ReturnStatement ret(
-      Source{},
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("param"), "param"));
+      Source{}, create<ast::IdentifierExpression>(
+                    Source{}, mod->RegisterSymbol("param"), "param"));
 
   td.RegisterVariableForTesting(&var);
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();

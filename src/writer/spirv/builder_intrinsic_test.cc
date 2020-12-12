@@ -1315,8 +1315,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto expr = Call("arrayLength",
-                   create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")));
+  auto expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
+                                      Source{}, Expr("b"), Expr("a")));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -1355,8 +1355,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   ast::type::Struct s_type("my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
-  auto expr = Call("arrayLength",
-                   create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")));
+  auto expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
+                                      Source{}, Expr("b"), Expr("a")));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -1400,7 +1400,8 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 
   Var("ptr_var", ast::StorageClass::kPrivate, &ptr,
-      create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")), {});
+      create<ast::MemberAccessorExpression>(Source{}, Expr("b"), Expr("a")),
+      {});
 
   auto expr = Call("arrayLength", "ptr_var");
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();

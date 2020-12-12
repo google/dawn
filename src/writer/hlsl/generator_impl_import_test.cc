@@ -54,11 +54,11 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
 
   auto* ident = create<ast::IdentifierExpression>(
-      mod.RegisterSymbol(param.name), param.name);
-  ast::CallExpression expr(ident, params);
+      Source{}, mod.RegisterSymbol(param.name), param.name);
+  ast::CallExpression expr(Source{}, ident, params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -100,11 +100,13 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 1)));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(
-                               mod.RegisterSymbol(param.name), param.name),
-                           params);
+  ast::CallExpression expr(
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol(param.name), param.name),
+      params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -122,13 +124,15 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.f)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(
-                               mod.RegisterSymbol(param.name), param.name),
-                           params);
+  ast::CallExpression expr(
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol(param.name), param.name),
+      params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -153,28 +157,32 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::TypeConstructorExpression>(
-      &vec, ast::ExpressionList{
-                create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-                create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(Source{}, &f32, 2.f)),
-                create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(Source{}, &f32, 3.f)),
-            }));
+      Source{}, &vec,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.f)),
+      }));
 
   params.push_back(create<ast::TypeConstructorExpression>(
-      &vec, ast::ExpressionList{
-                create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(Source{}, &f32, 4.f)),
-                create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(Source{}, &f32, 5.f)),
-                create<ast::ScalarConstructorExpression>(
-                    create<ast::FloatLiteral>(Source{}, &f32, 6.f)),
-            }));
+      Source{}, &vec,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 4.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 5.f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 6.f)),
+      }));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(
-                               mod.RegisterSymbol(param.name), param.name),
-                           params);
+  ast::CallExpression expr(
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol(param.name), param.name),
+      params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -194,13 +202,15 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 1)));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2)));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(
-                               mod.RegisterSymbol(param.name), param.name),
-                           params);
+  ast::CallExpression expr(
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol(param.name), param.name),
+      params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -219,15 +229,17 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.f)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.f)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(
-                               mod.RegisterSymbol(param.name), param.name),
-                           params);
+  ast::CallExpression expr(
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol(param.name), param.name),
+      params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -253,15 +265,17 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 1)));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2)));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
   params.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 3)));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 3)));
 
-  ast::CallExpression expr(create<ast::IdentifierExpression>(
-                               mod.RegisterSymbol(param.name), param.name),
-                           params);
+  ast::CallExpression expr(
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol(param.name), param.name),
+      params);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, &expr)) << gen.error();
@@ -285,12 +299,13 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
                             ast::VariableDecorationList{});  // decorations
 
   ast::ExpressionList params;
-  params.push_back(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("var"), "var"));
+  params.push_back(create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("var"), "var"));
 
   ast::CallExpression expr(
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("determinant"),
-                                        "determinant"),
+      Source{},
+      create<ast::IdentifierExpression>(
+          Source{}, mod.RegisterSymbol("determinant"), "determinant"),
       params);
 
   mod.AddGlobalVariable(var);

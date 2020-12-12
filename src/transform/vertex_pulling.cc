@@ -326,13 +326,13 @@ void VertexPulling::State::AddVertexPullingPreamble(
                       : instance_index_name;
       // Identifier to index by
       auto* index_identifier = mod->create<ast::IdentifierExpression>(
-          mod->RegisterSymbol(name), name);
+          Source{}, mod->RegisterSymbol(name), name);
 
       // An expression for the start of the read in the buffer in bytes
       auto* pos_value = mod->create<ast::BinaryExpression>(
-          ast::BinaryOp::kAdd,
+          Source{}, ast::BinaryOp::kAdd,
           mod->create<ast::BinaryExpression>(
-              ast::BinaryOp::kMultiply, index_identifier,
+              Source{}, ast::BinaryOp::kMultiply, index_identifier,
               GenUint(static_cast<uint32_t>(buffer_layout.array_stride))),
           GenUint(static_cast<uint32_t>(attribute_desc.offset)));
 
@@ -342,8 +342,8 @@ void VertexPulling::State::AddVertexPullingPreamble(
       block->append(set_pos_expr);
 
       block->append(mod->create<ast::AssignmentStatement>(
-          mod->create<ast::IdentifierExpression>(mod->RegisterSymbol(v->name()),
-                                                 v->name()),
+          mod->create<ast::IdentifierExpression>(
+              Source{}, mod->RegisterSymbol(v->name()), v->name()),
           AccessByFormat(i, attribute_desc.format)));
     }
   }
@@ -353,12 +353,12 @@ void VertexPulling::State::AddVertexPullingPreamble(
 
 ast::Expression* VertexPulling::State::GenUint(uint32_t value) {
   return mod->create<ast::ScalarConstructorExpression>(
-      mod->create<ast::UintLiteral>(Source{}, GetU32Type(), value));
+      Source{}, mod->create<ast::UintLiteral>(Source{}, GetU32Type(), value));
 }
 
 ast::Expression* VertexPulling::State::CreatePullingPositionIdent() {
   return mod->create<ast::IdentifierExpression>(
-      mod->RegisterSymbol(kPullingPosVarName), kPullingPosVarName);
+      Source{}, mod->RegisterSymbol(kPullingPosVarName), kPullingPosVarName);
 }
 
 ast::Expression* VertexPulling::State::AccessByFormat(uint32_t buffer,
@@ -397,26 +397,29 @@ ast::Expression* VertexPulling::State::AccessU32(uint32_t buffer,
   // base case.
   auto vbuf_name = GetVertexBufferName(buffer);
   return mod->create<ast::ArrayAccessorExpression>(
+      Source{},
       mod->create<ast::MemberAccessorExpression>(
-          mod->create<ast::IdentifierExpression>(mod->RegisterSymbol(vbuf_name),
-                                                 vbuf_name),
+          Source{},
           mod->create<ast::IdentifierExpression>(
-              mod->RegisterSymbol(kStructBufferName), kStructBufferName)),
-      mod->create<ast::BinaryExpression>(ast::BinaryOp::kDivide, pos,
+              Source{}, mod->RegisterSymbol(vbuf_name), vbuf_name),
+          mod->create<ast::IdentifierExpression>(
+              Source{}, mod->RegisterSymbol(kStructBufferName),
+              kStructBufferName)),
+      mod->create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kDivide, pos,
                                          GenUint(4)));
 }
 
 ast::Expression* VertexPulling::State::AccessI32(uint32_t buffer,
                                                  ast::Expression* pos) {
   // as<T> reinterprets bits
-  return mod->create<ast::BitcastExpression>(GetI32Type(),
+  return mod->create<ast::BitcastExpression>(Source{}, GetI32Type(),
                                              AccessU32(buffer, pos));
 }
 
 ast::Expression* VertexPulling::State::AccessF32(uint32_t buffer,
                                                  ast::Expression* pos) {
   // as<T> reinterprets bits
-  return mod->create<ast::BitcastExpression>(GetF32Type(),
+  return mod->create<ast::BitcastExpression>(Source{}, GetF32Type(),
                                              AccessU32(buffer, pos));
 }
 
@@ -448,13 +451,14 @@ ast::Expression* VertexPulling::State::AccessVec(uint32_t buffer,
   for (uint32_t i = 0; i < count; ++i) {
     // Offset read position by element_stride for each component
     auto* cur_pos = mod->create<ast::BinaryExpression>(
-        ast::BinaryOp::kAdd, CreatePullingPositionIdent(),
+        Source{}, ast::BinaryOp::kAdd, CreatePullingPositionIdent(),
         GenUint(element_stride * i));
     expr_list.push_back(AccessPrimitive(buffer, cur_pos, base_format));
   }
 
   return mod->create<ast::TypeConstructorExpression>(
-      mod->create<ast::type::Vector>(base_type, count), std::move(expr_list));
+      Source{}, mod->create<ast::type::Vector>(base_type, count),
+      std::move(expr_list));
 }
 
 ast::type::Type* VertexPulling::State::GetU32Type() {

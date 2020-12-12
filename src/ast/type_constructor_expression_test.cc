@@ -32,10 +32,10 @@ using TypeConstructorExpressionTest = TestHelper;
 TEST_F(TypeConstructorExpressionTest, Creation) {
   type::F32 f32;
   ExpressionList expr;
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr"), "expr"));
 
-  TypeConstructorExpression t(&f32, expr);
+  TypeConstructorExpression t(Source{}, &f32, expr);
   EXPECT_EQ(t.type(), &f32);
   ASSERT_EQ(t.values().size(), 1u);
   EXPECT_EQ(t.values()[0], expr[0]);
@@ -44,8 +44,8 @@ TEST_F(TypeConstructorExpressionTest, Creation) {
 TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
   type::F32 f32;
   ExpressionList expr;
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr"), "expr"));
 
   TypeConstructorExpression t(Source{Source::Location{20, 2}}, &f32, expr);
   auto src = t.source();
@@ -56,20 +56,20 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
 TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {
   type::F32 f32;
   ExpressionList expr;
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr"), "expr"));
 
-  TypeConstructorExpression t(&f32, expr);
+  TypeConstructorExpression t(Source{}, &f32, expr);
   EXPECT_TRUE(t.Is<TypeConstructorExpression>());
 }
 
 TEST_F(TypeConstructorExpressionTest, IsValid) {
   type::F32 f32;
   ExpressionList expr;
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr"), "expr"));
 
-  TypeConstructorExpression t(&f32, expr);
+  TypeConstructorExpression t(Source{}, &f32, expr);
   EXPECT_TRUE(t.IsValid());
 }
 
@@ -77,36 +77,37 @@ TEST_F(TypeConstructorExpressionTest, IsValid_EmptyValue) {
   type::F32 f32;
   ExpressionList expr;
 
-  TypeConstructorExpression t(&f32, expr);
+  TypeConstructorExpression t(Source{}, &f32, expr);
   EXPECT_TRUE(t.IsValid());
 }
 
 TEST_F(TypeConstructorExpressionTest, IsValid_NullType) {
   ExpressionList expr;
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr"), "expr"));
 
-  TypeConstructorExpression t(nullptr, expr);
+  TypeConstructorExpression t(Source{}, nullptr, expr);
   EXPECT_FALSE(t.IsValid());
 }
 
 TEST_F(TypeConstructorExpressionTest, IsValid_NullValue) {
   type::F32 f32;
   ExpressionList expr;
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr"), "expr"));
   expr.push_back(nullptr);
 
-  TypeConstructorExpression t(&f32, expr);
+  TypeConstructorExpression t(Source{}, &f32, expr);
   EXPECT_FALSE(t.IsValid());
 }
 
 TEST_F(TypeConstructorExpressionTest, IsValid_InvalidValue) {
   type::F32 f32;
   ExpressionList expr;
-  expr.push_back(create<IdentifierExpression>(mod.RegisterSymbol(""), ""));
+  expr.push_back(
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), ""));
 
-  TypeConstructorExpression t(&f32, expr);
+  TypeConstructorExpression t(Source{}, &f32, expr);
   EXPECT_FALSE(t.IsValid());
 }
 
@@ -114,14 +115,14 @@ TEST_F(TypeConstructorExpressionTest, ToStr) {
   type::F32 f32;
   type::Vector vec(&f32, 3);
   ExpressionList expr;
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr_1"), "expr_1"));
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr_2"), "expr_2"));
-  expr.push_back(
-      create<IdentifierExpression>(mod.RegisterSymbol("expr_3"), "expr_3"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr_1"), "expr_1"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr_2"), "expr_2"));
+  expr.push_back(create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("expr_3"), "expr_3"));
 
-  TypeConstructorExpression t(&vec, expr);
+  TypeConstructorExpression t(Source{}, &vec, expr);
   std::ostringstream out;
   t.to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  TypeConstructor[not set]{

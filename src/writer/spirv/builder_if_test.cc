@@ -46,7 +46,7 @@ TEST_F(BuilderTest, If_Empty) {
   // if (true) {
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   ast::IfStatement expr(Source{}, cond, create<ast::BlockStatement>(),
                         ast::ElseStatementList{});
@@ -86,12 +86,13 @@ TEST_F(BuilderTest, If_WithStatements) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   ast::IfStatement expr(Source{}, cond, body, ast::ElseStatementList{});
 
@@ -140,18 +141,20 @@ TEST_F(BuilderTest, If_WithElse) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 3))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   ast::IfStatement expr(Source{}, cond, body,
                         {create<ast::ElseStatement>(else_body)});
@@ -206,21 +209,23 @@ TEST_F(BuilderTest, If_WithElseIf) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
 
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 3))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
 
   auto* else_cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   ast::IfStatement expr(Source{}, cond, body,
                         {create<ast::ElseStatement>(else_cond, else_body)});
@@ -284,32 +289,36 @@ TEST_F(BuilderTest, If_WithMultiple) {
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 2))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
   auto* elseif_1_body = create<ast::BlockStatement>();
   elseif_1_body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 3))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
   auto* elseif_2_body = create<ast::BlockStatement>();
   elseif_2_body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 4))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 4))));
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::AssignmentStatement>(
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
+      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
+                                        "v"),
       create<ast::ScalarConstructorExpression>(
-          create<ast::SintLiteral>(Source{}, &i32, 5))));
+          Source{}, create<ast::SintLiteral>(Source{}, &i32, 5))));
 
   auto* elseif_1_cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
   auto* elseif_2_cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, false));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, false));
 
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   ast::IfStatement expr(
       Source{}, cond, body,
@@ -376,7 +385,7 @@ TEST_F(BuilderTest, If_WithBreak) {
   //   }
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::BreakStatement>());
@@ -424,7 +433,7 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   //   }
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::BreakStatement>());
@@ -474,7 +483,7 @@ TEST_F(BuilderTest, If_WithContinue) {
   //   }
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ContinueStatement>());
@@ -522,7 +531,7 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   //   }
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   auto* else_body = create<ast::BlockStatement>();
   else_body->append(create<ast::ContinueStatement>());
@@ -570,7 +579,7 @@ TEST_F(BuilderTest, If_WithReturn) {
   //   return;
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ReturnStatement>(Source{}));
@@ -600,9 +609,9 @@ TEST_F(BuilderTest, If_WithReturnValue) {
   //   return false;
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
   auto* cond2 = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, false));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, false));
 
   auto* if_body = create<ast::BlockStatement>();
   if_body->append(create<ast::ReturnStatement>(Source{}, cond2));
@@ -643,10 +652,11 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
                             ast::VariableDecorationList{});  // decorations
   td.RegisterVariableForTesting(var);
 
-  ast::IfStatement expr(
-      Source{},
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("a"), "a"),
-      create<ast::BlockStatement>(), ast::ElseStatementList{});
+  ast::IfStatement expr(Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("a"), "a"),
+                        create<ast::BlockStatement>(),
+                        ast::ElseStatementList{});
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

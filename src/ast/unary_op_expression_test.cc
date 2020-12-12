@@ -26,17 +26,17 @@ namespace {
 using UnaryOpExpressionTest = TestHelper;
 
 TEST_F(UnaryOpExpressionTest, Creation) {
-  auto* ident =
-      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
+  auto* ident = create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("ident"), "ident");
 
-  UnaryOpExpression u(UnaryOp::kNot, ident);
+  UnaryOpExpression u(Source{}, UnaryOp::kNot, ident);
   EXPECT_EQ(u.op(), UnaryOp::kNot);
   EXPECT_EQ(u.expr(), ident);
 }
 
 TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
-  auto* ident =
-      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
+  auto* ident = create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("ident"), "ident");
   UnaryOpExpression u(Source{Source::Location{20, 2}}, UnaryOp::kNot, ident);
   auto src = u.source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -44,34 +44,35 @@ TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
-  auto* ident =
-      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
-  UnaryOpExpression u(UnaryOp::kNot, ident);
+  auto* ident = create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("ident"), "ident");
+  UnaryOpExpression u(Source{}, UnaryOp::kNot, ident);
   EXPECT_TRUE(u.Is<UnaryOpExpression>());
 }
 
 TEST_F(UnaryOpExpressionTest, IsValid) {
-  auto* ident =
-      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
-  UnaryOpExpression u(UnaryOp::kNot, ident);
+  auto* ident = create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("ident"), "ident");
+  UnaryOpExpression u(Source{}, UnaryOp::kNot, ident);
   EXPECT_TRUE(u.IsValid());
 }
 
 TEST_F(UnaryOpExpressionTest, IsValid_NullExpression) {
-  UnaryOpExpression u(UnaryOp::kNot, nullptr);
+  UnaryOpExpression u(Source{}, UnaryOp::kNot, nullptr);
   EXPECT_FALSE(u.IsValid());
 }
 
 TEST_F(UnaryOpExpressionTest, IsValid_InvalidExpression) {
-  auto* ident = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
-  UnaryOpExpression u(UnaryOp::kNot, ident);
+  auto* ident =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
+  UnaryOpExpression u(Source{}, UnaryOp::kNot, ident);
   EXPECT_FALSE(u.IsValid());
 }
 
 TEST_F(UnaryOpExpressionTest, ToStr) {
-  auto* ident =
-      create<IdentifierExpression>(mod.RegisterSymbol("ident"), "ident");
-  UnaryOpExpression u(UnaryOp::kNot, ident);
+  auto* ident = create<IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("ident"), "ident");
+  UnaryOpExpression u(Source{}, UnaryOp::kNot, ident);
   std::ostringstream out;
   u.to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  UnaryOp[not set]{

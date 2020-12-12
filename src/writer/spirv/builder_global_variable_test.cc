@@ -99,13 +99,13 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -135,13 +135,13 @@ TEST_F(BuilderTest, GlobalVar_Const) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -168,12 +168,12 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-  auto* init = create<ast::TypeConstructorExpression>(&vec3, vals);
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -199,19 +199,21 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
   ast::type::Vector vec2(&f32, 2);
 
   auto* first = create<ast::TypeConstructorExpression>(
-      &vec2, ast::ExpressionList{
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 1.0f)),
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 2.0f)),
-             });
+      Source{}, &vec2,
+      ast::ExpressionList{
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)),
+      });
 
   auto* init = create<ast::TypeConstructorExpression>(
-      &vec3, ast::ExpressionList{
-                 first,
-                 create<ast::ScalarConstructorExpression>(
-                     create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
-             });
+      Source{}, &vec3,
+      ast::ExpressionList{
+          first,
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
+      });
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -328,6 +330,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
       &bool_type,                // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::BoolLiteral>(Source{}, &bool_type, true)),  // constructor
       ast::VariableDecorationList{
           // decorations
@@ -383,6 +386,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{
           // decorations

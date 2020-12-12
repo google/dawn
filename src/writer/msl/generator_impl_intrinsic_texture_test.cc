@@ -263,7 +263,7 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
   param.buildTextureVariable(this);
   param.buildSamplerVariable(this);
 
-  ast::CallExpression call{Expr(param.function), param.args(this)};
+  ast::CallExpression call{Source{}, Expr(param.function), param.args(this)};
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();

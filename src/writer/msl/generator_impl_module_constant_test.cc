@@ -40,20 +40,21 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 
   ast::ExpressionList exprs;
   exprs.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   exprs.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
   exprs.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* var = create<ast::Variable>(
-      Source{},                                             // source
-      "pos",                                                // name
-      ast::StorageClass::kNone,                             // storage_class
-      &ary,                                                 // type
-      true,                                                 // is_const
-      create<ast::TypeConstructorExpression>(&ary, exprs),  // constructor
-      ast::VariableDecorationList{});                       // decorations
+  auto* var =
+      create<ast::Variable>(Source{},                  // source
+                            "pos",                     // name
+                            ast::StorageClass::kNone,  // storage_class
+                            &ary,                      // type
+                            true,                      // is_const
+                            create<ast::TypeConstructorExpression>(
+                                Source{}, &ary, exprs),      // constructor
+                            ast::VariableDecorationList{});  // decorations
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
@@ -69,6 +70,7 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
       &f32,                      // type
       true,                      // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),  // constructor
       ast::VariableDecorationList{
           // decorations

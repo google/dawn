@@ -2723,7 +2723,7 @@ TEST_P(IntrinsicTextureTest, Call) {
   auto* texture = param.buildTextureVariable(this);
   auto* sampler = param.buildSamplerVariable(this);
 
-  ast::CallExpression call{Expr(param.function), param.args(this)};
+  ast::CallExpression call{Source{}, Expr(param.function), param.args(this)};
 
   EXPECT_TRUE(td.Determine()) << td.error();
   EXPECT_TRUE(td.DetermineResultType(&call)) << td.error();

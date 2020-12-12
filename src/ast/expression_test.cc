@@ -24,7 +24,7 @@ namespace {
 
 class Expr : public Expression {
  public:
-  Expr() : Expression() {}
+  Expr() : Expression(Source{}) {}
 
   Expr* Clone(CloneContext*) const override { return nullptr; }
   bool IsValid() const override { return true; }

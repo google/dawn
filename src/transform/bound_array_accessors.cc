@@ -131,22 +131,23 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     cast_expr.push_back(ctx->Clone(expr->idx_expr()));
 
     ast::ExpressionList params;
-    params.push_back(
-        ctx->mod->create<ast::TypeConstructorExpression>(u32, cast_expr));
+    params.push_back(ctx->mod->create<ast::TypeConstructorExpression>(
+        Source{}, u32, cast_expr));
     params.push_back(ctx->mod->create<ast::ScalarConstructorExpression>(
-        ctx->mod->create<ast::UintLiteral>(Source{}, u32, size - 1)));
+        Source{}, ctx->mod->create<ast::UintLiteral>(Source{}, u32, size - 1)));
 
     auto* call_expr = ctx->mod->create<ast::CallExpression>(
+        Source{},
         ctx->mod->create<ast::IdentifierExpression>(
-            ctx->mod->RegisterSymbol("min"), "min"),
+            Source{}, ctx->mod->RegisterSymbol("min"), "min"),
         std::move(params));
     call_expr->set_result_type(u32);
 
     idx_expr = call_expr;
   }
 
-  auto* arr = ctx->Clone(expr->array());
-  return ctx->mod->create<ast::ArrayAccessorExpression>(arr, idx_expr);
+  return ctx->mod->create<ast::ArrayAccessorExpression>(
+      ctx->Clone(expr->source()), ctx->Clone(expr->array()), idx_expr);
 }
 
 }  // namespace transform

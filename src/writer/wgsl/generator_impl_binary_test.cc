@@ -37,12 +37,12 @@ using WgslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(WgslBinaryTest, Emit) {
   auto params = GetParam();
 
-  auto* left =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("left"), "left");
-  auto* right =
-      create<ast::IdentifierExpression>(mod.RegisterSymbol("right"), "right");
+  auto* left = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("left"), "left");
+  auto* right = create<ast::IdentifierExpression>(
+      Source{}, mod.RegisterSymbol("right"), "right");
 
-  ast::BinaryExpression expr(params.op, left, right);
+  ast::BinaryExpression expr(Source{}, params.op, left, right);
 
   ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
   EXPECT_EQ(gen.result(), params.result);

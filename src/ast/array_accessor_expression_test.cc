@@ -24,17 +24,21 @@ namespace {
 using ArrayAccessorExpressionTest = TestHelper;
 
 TEST_F(ArrayAccessorExpressionTest, Create) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("idx"), "idx");
 
-  ArrayAccessorExpression exp(ary, idx);
+  ArrayAccessorExpression exp(Source{}, ary, idx);
   ASSERT_EQ(exp.array(), ary);
   ASSERT_EQ(exp.idx_expr(), idx);
 }
 
 TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("idx"), "idx");
 
   ArrayAccessorExpression exp(Source{Source::Location{20, 2}}, ary, idx);
   auto src = exp.source();
@@ -43,54 +47,66 @@ TEST_F(ArrayAccessorExpressionTest, CreateWithSource) {
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("idx"), "idx");
 
-  ArrayAccessorExpression exp(ary, idx);
+  ArrayAccessorExpression exp(Source{}, ary, idx);
   EXPECT_TRUE(exp.Is<ArrayAccessorExpression>());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("idx"), "idx");
 
-  ArrayAccessorExpression exp(ary, idx);
+  ArrayAccessorExpression exp(Source{}, ary, idx);
   EXPECT_TRUE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_MissingArray) {
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("idx"), "idx");
 
-  ArrayAccessorExpression exp(nullptr, idx);
+  ArrayAccessorExpression exp(Source{}, nullptr, idx);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_MissingIndex) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ary"), "ary");
 
-  ArrayAccessorExpression exp(ary, nullptr);
+  ArrayAccessorExpression exp(Source{}, ary, nullptr);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidArray) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
-  ArrayAccessorExpression exp(ary, idx);
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("idx"), "idx");
+  ArrayAccessorExpression exp(Source{}, ary, idx);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidIndex) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
-  ArrayAccessorExpression exp(ary, idx);
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
+  ArrayAccessorExpression exp(Source{}, ary, idx);
   EXPECT_FALSE(exp.IsValid());
 }
 
 TEST_F(ArrayAccessorExpressionTest, ToStr) {
-  auto* ary = create<IdentifierExpression>(mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<IdentifierExpression>(mod.RegisterSymbol("idx"), "idx");
+  auto* ary =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* idx =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("idx"), "idx");
 
-  ArrayAccessorExpression exp(ary, idx);
+  ArrayAccessorExpression exp(Source{}, ary, idx);
   std::ostringstream out;
   exp.to_str(out, 2);
 

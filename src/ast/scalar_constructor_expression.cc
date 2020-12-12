@@ -22,9 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ScalarConstructorExpression);
 namespace tint {
 namespace ast {
 
-ScalarConstructorExpression::ScalarConstructorExpression(Literal* literal)
-    : literal_(literal) {}
-
 ScalarConstructorExpression::ScalarConstructorExpression(const Source& source,
                                                          Literal* litearl)
     : Base(source), literal_(litearl) {}

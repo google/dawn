@@ -26,7 +26,8 @@ namespace {
 using ReturnStatementTest = TestHelper;
 
 TEST_F(ReturnStatementTest, Creation) {
-  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
+  auto* expr = create<IdentifierExpression>(Source{},
+                                            mod.RegisterSymbol("expr"), "expr");
 
   ReturnStatement r(Source{}, expr);
   EXPECT_EQ(r.value(), expr);
@@ -50,7 +51,8 @@ TEST_F(ReturnStatementTest, HasValue_WithoutValue) {
 }
 
 TEST_F(ReturnStatementTest, HasValue_WithValue) {
-  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
+  auto* expr = create<IdentifierExpression>(Source{},
+                                            mod.RegisterSymbol("expr"), "expr");
   ReturnStatement r(Source{}, expr);
   EXPECT_TRUE(r.has_value());
 }
@@ -61,19 +63,22 @@ TEST_F(ReturnStatementTest, IsValid_WithoutValue) {
 }
 
 TEST_F(ReturnStatementTest, IsValid_WithValue) {
-  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
+  auto* expr = create<IdentifierExpression>(Source{},
+                                            mod.RegisterSymbol("expr"), "expr");
   ReturnStatement r(Source{}, expr);
   EXPECT_TRUE(r.IsValid());
 }
 
 TEST_F(ReturnStatementTest, IsValid_InvalidValue) {
-  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol(""), "");
+  auto* expr =
+      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
   ReturnStatement r(Source{}, expr);
   EXPECT_FALSE(r.IsValid());
 }
 
 TEST_F(ReturnStatementTest, ToStr_WithValue) {
-  auto* expr = create<IdentifierExpression>(mod.RegisterSymbol("expr"), "expr");
+  auto* expr = create<IdentifierExpression>(Source{},
+                                            mod.RegisterSymbol("expr"), "expr");
   ReturnStatement r(Source{}, expr);
   std::ostringstream out;
   r.to_str(out, 2);

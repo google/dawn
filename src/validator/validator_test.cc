@@ -65,9 +65,9 @@ TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
   ast::type::I32 i32;
 
   auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 1));
-  auto* rhs = create<ast::IdentifierExpression>(mod()->RegisterSymbol("my_var"),
-                                                "my_var");
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1));
+  auto* rhs = create<ast::IdentifierExpression>(
+      Source{}, mod()->RegisterSymbol("my_var"), "my_var");
   ast::AssignmentStatement assign(Source{Source::Location{12, 34}}, lhs, rhs);
 
   // TODO(sarahM0): Invalidate assignment to scalar.
@@ -83,7 +83,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
   auto* lhs = create<ast::IdentifierExpression>(
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("b"), "b");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
 
@@ -101,7 +101,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
   auto* lhs = create<ast::IdentifierExpression>(
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("b"), "b");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
@@ -123,13 +123,14 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
       &i32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
       ast::VariableDecorationList{});                    // decorations
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
   ast::AssignmentStatement assign(Source{Source::Location{12, 34}}, lhs, rhs);
   td()->RegisterVariableForTesting(var);
@@ -154,13 +155,14 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
       &i32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
       ast::VariableDecorationList{});                    // decorations
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
   ast::AssignmentStatement assign(Source{Source::Location{12, 34}}, lhs, rhs);
   td()->RegisterVariableForTesting(var);
@@ -188,13 +190,14 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
       &i32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
       ast::VariableDecorationList{});                    // decorations
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
@@ -223,12 +226,13 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
       &i32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
       ast::VariableDecorationList{});                    // decorations
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
   ast::BlockStatement block;
   block.append(create<ast::VariableDeclStatement>(var));
@@ -324,6 +328,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
       &f32,                         // type
       false,                        // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.1)),  // constructor
       ast::VariableDecorationList{}));                      // decorations
 
@@ -331,7 +336,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("not_global_var"),
       "not_global_var");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>();
@@ -363,13 +368,14 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       &f32,                         // type
       false,                        // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.1)),  // constructor
       ast::VariableDecorationList{}));                      // decorations
 
   auto* lhs = create<ast::IdentifierExpression>(
-      mod()->RegisterSymbol("global_var"), "global_var");
+      Source{}, mod()->RegisterSymbol("global_var"), "global_var");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
 
   ast::VariableList params;
 
@@ -402,19 +408,20 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
 
   auto* lhs = create<ast::IdentifierExpression>(
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
 
   auto* outer_body = create<ast::BlockStatement>();
   outer_body->append(
@@ -442,17 +449,18 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
   auto* lhs = create<ast::IdentifierExpression>(
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
 
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs));
@@ -479,6 +487,7 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
       &f32,                         // type
       false,                        // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 0.1)),  // constructor
       ast::VariableDecorationList{});                       // decorations
   mod()->AddGlobalVariable(var0);
@@ -490,6 +499,7 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
       &f32,                              // type
       false,                             // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 0)),  // constructor
       ast::VariableDecorationList{});                    // decorations
   mod()->AddGlobalVariable(var1);
@@ -510,6 +520,7 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
       &f32,                         // type
       false,                        // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 0.1)),  // constructor
       ast::VariableDecorationList{});                       // decorations
   mod()->AddGlobalVariable(var0);
@@ -521,6 +532,7 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
       &f32,                              // type
       false,                             // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 0)),  // constructor
       ast::VariableDecorationList{});                    // decorations
   mod()->AddGlobalVariable(var1);
@@ -543,13 +555,14 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
       &i32,                      // type
       true,                      // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
       ast::VariableDecorationList{});                    // decorations
 
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
@@ -580,6 +593,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
       &f32,                         // type
       false,                        // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.1)),  // constructor
       ast::VariableDecorationList{});                       // decorations
   mod()->AddGlobalVariable(global_var);
@@ -591,6 +605,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
   ast::VariableList params;
@@ -624,6 +639,7 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
       &i32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
       ast::VariableDecorationList{});                    // decorations
 
@@ -634,6 +650,7 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 0.1)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
@@ -667,12 +684,13 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));
 
@@ -683,6 +701,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 3.14)),  // constructor
       ast::VariableDecorationList{});                        // decorations
 
@@ -711,6 +730,7 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 3.14)),  // constructor
       ast::VariableDecorationList{});                        // decorations
 
@@ -721,12 +741,13 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var));
@@ -753,6 +774,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
       &f32,                      // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
@@ -763,6 +785,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
       &void_type,                // type
       false,                     // is_const
       create<ast::ScalarConstructorExpression>(
+          Source{},
           create<ast::FloatLiteral>(Source{}, &f32, 1.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
@@ -810,10 +833,10 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
                             ast::VariableDecorationList{});  // decorations
 
   td()->RegisterVariableForTesting(var);
-  auto* lhs =
-      create<ast::IdentifierExpression>(mod()->RegisterSymbol("a"), "a");
+  auto* lhs = create<ast::IdentifierExpression>(
+      Source{}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::SintLiteral>(Source{}, &i32, 2));
+      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
   auto* body = create<ast::BlockStatement>();
   body->append(create<ast::VariableDeclStatement>(var));

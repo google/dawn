@@ -1031,27 +1031,31 @@ bool ParserImpl::EmitScalarSpecConstants() {
       case SpvOpSpecConstantTrue:
       case SpvOpSpecConstantFalse: {
         ast_type = ConvertType(inst.type_id());
-        ast_expr =
-            create<ast::ScalarConstructorExpression>(create<ast::BoolLiteral>(
-                Source{}, ast_type, inst.opcode() == SpvOpSpecConstantTrue));
+        ast_expr = create<ast::ScalarConstructorExpression>(
+            Source{},
+            create<ast::BoolLiteral>(Source{}, ast_type,
+                                     inst.opcode() == SpvOpSpecConstantTrue));
         break;
       }
       case SpvOpSpecConstant: {
         ast_type = ConvertType(inst.type_id());
         const uint32_t literal_value = inst.GetSingleWordInOperand(0);
         if (ast_type->Is<ast::type::I32>()) {
-          ast_expr =
-              create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
-                  Source{}, ast_type, static_cast<int32_t>(literal_value)));
+          ast_expr = create<ast::ScalarConstructorExpression>(
+              Source{},
+              create<ast::SintLiteral>(Source{}, ast_type,
+                                       static_cast<int32_t>(literal_value)));
         } else if (ast_type->Is<ast::type::U32>()) {
-          ast_expr =
-              create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
-                  Source{}, ast_type, static_cast<uint32_t>(literal_value)));
+          ast_expr = create<ast::ScalarConstructorExpression>(
+              Source{},
+              create<ast::UintLiteral>(Source{}, ast_type,
+                                       static_cast<uint32_t>(literal_value)));
         } else if (ast_type->Is<ast::type::F32>()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
           ast_expr = create<ast::ScalarConstructorExpression>(
+              Source{},
               create<ast::FloatLiteral>(Source{}, ast_type, float_value));
         } else {
           return Fail() << " invalid result type for OpSpecConstant "
@@ -1323,25 +1327,29 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
   if (ast_type->Is<ast::type::U32>()) {
     return {ast_type,
-            create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
-                source, ast_type, spirv_const->GetU32()))};
+            create<ast::ScalarConstructorExpression>(
+                Source{}, create<ast::UintLiteral>(source, ast_type,
+                                                   spirv_const->GetU32()))};
   }
   if (ast_type->Is<ast::type::I32>()) {
     return {ast_type,
-            create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
-                source, ast_type, spirv_const->GetS32()))};
+            create<ast::ScalarConstructorExpression>(
+                Source{}, create<ast::SintLiteral>(source, ast_type,
+                                                   spirv_const->GetS32()))};
   }
   if (ast_type->Is<ast::type::F32>()) {
     return {ast_type,
-            create<ast::ScalarConstructorExpression>(create<ast::FloatLiteral>(
-                source, ast_type, spirv_const->GetFloat()))};
+            create<ast::ScalarConstructorExpression>(
+                Source{}, create<ast::FloatLiteral>(source, ast_type,
+                                                    spirv_const->GetFloat()))};
   }
   if (ast_type->Is<ast::type::Bool>()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
-    return {ast_type, create<ast::ScalarConstructorExpression>(
-                          create<ast::BoolLiteral>(source, ast_type, value))};
+    return {ast_type,
+            create<ast::ScalarConstructorExpression>(
+                Source{}, create<ast::BoolLiteral>(source, ast_type, value))};
   }
   auto* spirv_composite_const = spirv_const->AsCompositeConstant();
   if (spirv_composite_const != nullptr) {
@@ -1367,7 +1375,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
       ast_components.emplace_back(ast_component.expr);
     }
     return {original_ast_type,
-            create<ast::TypeConstructorExpression>(original_ast_type,
+            create<ast::TypeConstructorExpression>(Source{}, original_ast_type,
                                                    std::move(ast_components))};
   }
   auto* spirv_null_const = spirv_const->AsNullConstant();
@@ -1395,26 +1403,26 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
 
   if (type->Is<ast::type::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::BoolLiteral>(Source{}, type, false));
+        Source{}, create<ast::BoolLiteral>(Source{}, type, false));
   }
   if (type->Is<ast::type::U32>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::UintLiteral>(Source{}, type, 0u));
+        Source{}, create<ast::UintLiteral>(Source{}, type, 0u));
   }
   if (type->Is<ast::type::I32>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::SintLiteral>(Source{}, type, 0));
+        Source{}, create<ast::SintLiteral>(Source{}, type, 0));
   }
   if (type->Is<ast::type::F32>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::FloatLiteral>(Source{}, type, 0.0f));
+        Source{}, create<ast::FloatLiteral>(Source{}, type, 0.0f));
   }
   if (const auto* vec_ty = type->As<ast::type::Vector>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < vec_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(vec_ty->type()));
     }
-    return create<ast::TypeConstructorExpression>(type,
+    return create<ast::TypeConstructorExpression>(Source{}, type,
                                                   std::move(ast_components));
   }
   if (const auto* mat_ty = type->As<ast::type::Matrix>()) {
@@ -1425,7 +1433,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     for (size_t i = 0; i < mat_ty->columns(); ++i) {
       ast_components.emplace_back(MakeNullValue(column_ty));
     }
-    return create<ast::TypeConstructorExpression>(type,
+    return create<ast::TypeConstructorExpression>(Source{}, type,
                                                   std::move(ast_components));
   }
   if (auto* arr_ty = type->As<ast::type::Array>()) {
@@ -1433,7 +1441,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     for (size_t i = 0; i < arr_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(arr_ty->type()));
     }
-    return create<ast::TypeConstructorExpression>(original_type,
+    return create<ast::TypeConstructorExpression>(Source{}, original_type,
                                                   std::move(ast_components));
   }
   if (auto* struct_ty = type->As<ast::type::Struct>()) {
@@ -1441,7 +1449,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     for (auto* member : struct_ty->impl()->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));
     }
-    return create<ast::TypeConstructorExpression>(original_type,
+    return create<ast::TypeConstructorExpression>(Source{}, original_type,
                                                   std::move(ast_components));
   }
   Fail() << "can't make null value for type: " << type->type_name();
@@ -1481,13 +1489,14 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
     if (unsigned_ty != nullptr) {
       // Conversion is required.
       return {unsigned_ty,
-              create<ast::BitcastExpression>(unsigned_ty, expr.expr)};
+              create<ast::BitcastExpression>(Source{}, unsigned_ty, expr.expr)};
     }
   } else if (requires_signed) {
     auto* signed_ty = signed_type_for_[type];
     if (signed_ty != nullptr) {
       // Conversion is required.
-      return {signed_ty, create<ast::BitcastExpression>(signed_ty, expr.expr)};
+      return {signed_ty,
+              create<ast::BitcastExpression>(Source{}, signed_ty, expr.expr)};
     }
   }
   // We should not reach here.
@@ -1555,7 +1564,8 @@ TypedExpression ParserImpl::RectifyForcedResultType(
   if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
     return expr;
   }
-  return {expr.type, create<ast::BitcastExpression>(expr.type, expr.expr)};
+  return {expr.type,
+          create<ast::BitcastExpression>(Source{}, expr.type, expr.expr)};
 }
 
 bool ParserImpl::EmitFunctions() {

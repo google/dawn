@@ -70,13 +70,13 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -111,18 +111,18 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   ast::type::Vector vec(&f32, 2);
 
   auto* rel = create<ast::BinaryExpression>(
-      ast::BinaryOp::kAdd,
+      Source{}, ast::BinaryOp::kAdd,
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
+          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
       create<ast::ScalarConstructorExpression>(
-          create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(rel);
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -160,7 +160,7 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   ast::type::F32 f32;
 
   auto* init = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   ASSERT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -168,10 +168,10 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
                   init, ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v);
 
-  ast::Variable v2(
-      Source{}, "v2", ast::StorageClass::kFunction, &f32, false,
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
-      ast::VariableDecorationList{});
+  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32, false,
+                   create<ast::IdentifierExpression>(
+                       Source{}, mod->RegisterSymbol("v"), "v"),
+                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v2);
 
   ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();
@@ -207,7 +207,7 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   ast::type::F32 f32;
 
   auto* init = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
@@ -215,10 +215,10 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
                   init, ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v);
 
-  ast::Variable v2(
-      Source{}, "v2", ast::StorageClass::kFunction, &f32, true,
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("v"), "v"),
-      ast::VariableDecorationList{});
+  ast::Variable v2(Source{}, "v2", ast::StorageClass::kFunction, &f32, true,
+                   create<ast::IdentifierExpression>(
+                       Source{}, mod->RegisterSymbol("v"), "v"),
+                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(&v2);
 
   ASSERT_TRUE(td.DetermineResultType(v2.constructor())) << td.error();
@@ -250,13 +250,13 @@ TEST_F(BuilderTest, FunctionVar_Const) {
 
   ast::ExpressionList vals;
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
   vals.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
 
-  auto* init = create<ast::TypeConstructorExpression>(&vec, vals);
+  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
