@@ -30,10 +30,6 @@ namespace ast {
 class SwitchStatement : public Castable<SwitchStatement, Statement> {
  public:
   /// Constructor
-  /// @param condition the switch condition
-  /// @param body the switch body
-  SwitchStatement(Expression* condition, CaseStatementList body);
-  /// Constructor
   /// @param source the source information
   /// @param condition the switch condition
   /// @param body the switch body

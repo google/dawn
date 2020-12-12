@@ -203,7 +203,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
                             ast::VariableDecorationList{});  // decorations
   ast::VariableList params;
   ast::type::Void void_type;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::VariableDeclStatement>(
       Source{Source::Location{12, 34}}, var));
 

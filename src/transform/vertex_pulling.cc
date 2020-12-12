@@ -292,18 +292,18 @@ void VertexPulling::State::AddVertexPullingPreamble(
   // location.
 
   // A block statement allowing us to use append instead of insert
-  auto* block = mod->create<ast::BlockStatement>();
+  auto* block = mod->create<ast::BlockStatement>(Source{});
 
   // Declare the |kPullingPosVarName| variable in the shader
-  auto* pos_declaration =
-      mod->create<ast::VariableDeclStatement>(mod->create<ast::Variable>(
-          Source{},                         // source
-          kPullingPosVarName,               // name
-          ast::StorageClass::kFunction,     // storage_class
-          GetI32Type(),                     // type
-          false,                            // is_const
-          nullptr,                          // constructor
-          ast::VariableDecorationList{}));  // decorations
+  auto* pos_declaration = mod->create<ast::VariableDeclStatement>(
+      Source{}, mod->create<ast::Variable>(
+                    Source{},                         // source
+                    kPullingPosVarName,               // name
+                    ast::StorageClass::kFunction,     // storage_class
+                    GetI32Type(),                     // type
+                    false,                            // is_const
+                    nullptr,                          // constructor
+                    ast::VariableDecorationList{}));  // decorations
 
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression
@@ -338,10 +338,11 @@ void VertexPulling::State::AddVertexPullingPreamble(
 
       // Update position of the read
       auto* set_pos_expr = mod->create<ast::AssignmentStatement>(
-          CreatePullingPositionIdent(), pos_value);
+          Source{}, CreatePullingPositionIdent(), pos_value);
       block->append(set_pos_expr);
 
       block->append(mod->create<ast::AssignmentStatement>(
+          Source{},
           mod->create<ast::IdentifierExpression>(
               Source{}, mod->RegisterSymbol(v->name()), v->name()),
           AccessByFormat(i, attribute_desc.format)));

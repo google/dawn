@@ -28,7 +28,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Break) {
-  ast::BreakStatement b;
+  ast::BreakStatement b(Source{});
 
   gen.increment_indent();
 

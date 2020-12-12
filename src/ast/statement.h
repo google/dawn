@@ -33,8 +33,6 @@ class Statement : public Castable<Statement, Node> {
 
  protected:
   /// Constructor
-  Statement();
-  /// Constructor
   /// @param source the source of the expression
   explicit Statement(const Source& source);
   /// Move constructor

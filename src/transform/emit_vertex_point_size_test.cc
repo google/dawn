@@ -56,8 +56,8 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
       auto* block = create<ast::BlockStatement>(Source{});
 
       block->append(create<ast::VariableDeclStatement>(
-          Var("builtin_assignments_should_happen_before_this",
-              tint::ast::StorageClass::kFunction, ty.f32)));
+          Source{}, Var("builtin_assignments_should_happen_before_this",
+                        tint::ast::StorageClass::kFunction, ty.f32)));
 
       auto a_sym = mod->RegisterSymbol("non_entry_a");
       mod->AddFunction(create<ast::Function>(

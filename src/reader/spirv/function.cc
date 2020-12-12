@@ -667,7 +667,7 @@ void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
                                             ast::CaseStatementList* cases,
                                             CompletionAction action) {
   if (block == nullptr) {
-    block = create<ast::BlockStatement>();
+    block = create<ast::BlockStatement>(Source{});
   }
 
   statements_stack_.emplace_back(
@@ -685,7 +685,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
 
   auto* cond = create<ast::IdentifierExpression>(
       Source{}, ast_module_.RegisterSymbol(guard_name), guard_name);
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   AddStatement(
       create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
   PushNewStatementBlock(top.construct_, end_id, body, nullptr, nullptr);
@@ -696,7 +696,7 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
   const auto& top = statements_stack_.back();
 
   auto* cond = MakeTrue(Source{});
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   AddStatement(
       create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
   PushNewStatementBlock(top.construct_, end_id, body, nullptr, nullptr);
@@ -1865,7 +1865,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
     auto* var = parser_impl_.MakeVariable(
         inst.result_id(), ast::StorageClass::kFunction, var_store_type, false,
         constructor, ast::VariableDecorationList{});
-    auto* var_decl_stmt = create<ast::VariableDeclStatement>(var);
+    auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
     AddStatement(var_decl_stmt);
     // Save this as an already-named value.
     identifier_values_.insert(inst.result_id());
@@ -2145,14 +2145,14 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
                               false,                           // is_const
                               MakeTrue(Source{}),              // constructor
                               ast::VariableDecorationList{});  // decorations
-    auto* guard_decl = create<ast::VariableDeclStatement>(guard_var);
+    auto* guard_decl = create<ast::VariableDeclStatement>(Source{}, guard_var);
     AddStatement(guard_decl);
   }
 
   const auto condition_id =
       block_info.basic_block->terminator()->GetSingleWordInOperand(0);
   auto* cond = MakeExpression(condition_id).expr;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
 
   // Generate the code for the condition.
   // Use the IfBuilder to create the if-statement. The IfBuilder is constructed
@@ -2227,7 +2227,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   // But make sure we do it in the right order.
   auto push_else = [this, if_builder, else_end, construct]() {
     // Push the else clause onto the stack first.
-    auto* else_body = create<ast::BlockStatement>();
+    auto* else_body = create<ast::BlockStatement>(Source{});
     PushNewStatementBlock(
         construct, else_end, else_body, nullptr,
         [this, if_builder, else_body]() {
@@ -2236,7 +2236,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
             // The "else" consists of the statement list from the top of
             // statements stack, without an elseif condition.
             if_builder->else_stmts_.emplace_back(
-                create<ast::ElseStatement>(nullptr, else_body));
+                create<ast::ElseStatement>(Source{}, nullptr, else_body));
           }
         });
   };
@@ -2294,7 +2294,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 
   // First, push the statement block for the entire switch.
   ast::CaseStatementList case_list;
-  auto* swch = create<ast::SwitchStatement>(selector.expr, case_list);
+  auto* swch = create<ast::SwitchStatement>(Source{}, selector.expr, case_list);
   AddStatement(swch)->As<ast::SwitchStatement>();
 
   // Grab a pointer to the case list.  It will get buried in the statement block
@@ -2369,17 +2369,18 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 
     // Create the case clause.  Temporarily put it in the wrong order
     // on the case statement list.
-    auto* body = create<ast::BlockStatement>();
-    cases->emplace_back(create<ast::CaseStatement>(selectors, body));
+    auto* body = create<ast::BlockStatement>(Source{});
+    cases->emplace_back(create<ast::CaseStatement>(Source{}, selectors, body));
 
     PushNewStatementBlock(construct, end_id, body, nullptr, nullptr);
 
     if ((default_info == clause_heads[i]) && has_selectors &&
         construct->ContainsPos(default_info->pos)) {
       // Generate a default clause with a just fallthrough.
-      auto* stmts = create<ast::BlockStatement>();
-      stmts->append(create<ast::FallthroughStatement>());
-      auto* case_stmt = create<ast::CaseStatement>(stmts);
+      auto* stmts = create<ast::BlockStatement>(Source{});
+      stmts->append(create<ast::FallthroughStatement>(Source{}));
+      auto* case_stmt =
+          create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{}, stmts);
       cases->emplace_back(case_stmt);
     }
 
@@ -2396,8 +2397,9 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 }
 
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
-  auto* body = create<ast::BlockStatement>();
-  AddStatement(create<ast::LoopStatement>(body, create<ast::BlockStatement>()));
+  auto* body = create<ast::BlockStatement>(Source{});
+  AddStatement(create<ast::LoopStatement>(
+      Source{}, body, create<ast::BlockStatement>(Source{})));
   PushNewStatementBlock(construct, construct->end_id, body, nullptr, nullptr);
   return success();
 }
@@ -2431,7 +2433,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
     case SpvOpKill:
       // For now, assume SPIR-V OpKill has same semantics as WGSL discard.
       // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
-      AddStatement(create<ast::DiscardStatement>());
+      AddStatement(create<ast::DiscardStatement>(Source{}));
       return true;
     case SpvOpUnreachable:
       // Translate as if it's a return. This avoids the problem where WGSL
@@ -2525,7 +2527,7 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
       break;
     case EdgeKind::kSwitchBreak: {
       if (forced) {
-        return create<ast::BreakStatement>();
+        return create<ast::BreakStatement>(Source{});
       }
       // Unless forced, don't bother with a break at the end of a case/default
       // clause.
@@ -2550,10 +2552,10 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
         }
       }
       // We need a break.
-      return create<ast::BreakStatement>();
+      return create<ast::BreakStatement>(Source{});
     }
     case EdgeKind::kLoopBreak:
-      return create<ast::BreakStatement>();
+      return create<ast::BreakStatement>(Source{});
     case EdgeKind::kLoopContinue:
       // An unconditional continue to the next block is redundant and ugly.
       // Skip it in that case.
@@ -2561,7 +2563,7 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
         break;
       }
       // Otherwise, emit a regular continue statement.
-      return create<ast::ContinueStatement>();
+      return create<ast::ContinueStatement>(Source{});
     case EdgeKind::kIfBreak: {
       const auto& flow_guard =
           GetBlockInfo(dest_info.header_for_merge)->flow_guard_name;
@@ -2571,6 +2573,7 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
         }
         // Signal an exit from the branch.
         return create<ast::AssignmentStatement>(
+            Source{},
             create<ast::IdentifierExpression>(
                 Source{}, ast_module_.RegisterSymbol(flow_guard), flow_guard),
             MakeFalse(Source{}));
@@ -2581,7 +2584,7 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
       break;
     }
     case EdgeKind::kCaseFallThrough:
-      return create<ast::FallthroughStatement>();
+      return create<ast::FallthroughStatement>(Source{});
     case EdgeKind::kForward:
       // Unconditional forward branch is implicit.
       break;
@@ -2597,11 +2600,12 @@ ast::Statement* FunctionEmitter::MakeSimpleIf(ast::Expression* condition,
   }
   ast::ElseStatementList else_stmts;
   if (else_stmt != nullptr) {
-    auto* stmts = create<ast::BlockStatement>();
+    auto* stmts = create<ast::BlockStatement>(Source{});
     stmts->append(else_stmt);
-    else_stmts.emplace_back(create<ast::ElseStatement>(nullptr, stmts));
+    else_stmts.emplace_back(
+        create<ast::ElseStatement>(Source{}, nullptr, stmts));
   }
-  auto* if_block = create<ast::BlockStatement>();
+  auto* if_block = create<ast::BlockStatement>(Source{});
   auto* if_stmt =
       create<ast::IfStatement>(Source{}, condition, if_block, else_stmts);
   if (then_stmt != nullptr) {
@@ -2649,7 +2653,7 @@ bool FunctionEmitter::EmitConditionalCaseFallThrough(
   } else {
     AddStatement(MakeSimpleIf(cond, other_branch, nullptr));
   }
-  AddStatement(create<ast::FallthroughStatement>());
+  AddStatement(create<ast::FallthroughStatement>(Source{}));
 
   return success();
 }
@@ -2676,9 +2680,10 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     assert(def_inst);
     auto* ast_type =
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
-    AddStatement(create<ast::VariableDeclStatement>(parser_impl_.MakeVariable(
-        id, ast::StorageClass::kFunction, ast_type, false, nullptr,
-        ast::VariableDecorationList{})));
+    AddStatement(create<ast::VariableDeclStatement>(
+        Source{}, parser_impl_.MakeVariable(id, ast::StorageClass::kFunction,
+                                            ast_type, false, nullptr,
+                                            ast::VariableDecorationList{})));
     // Save this as an already-named value.
     identifier_values_.insert(id);
   }
@@ -2696,7 +2701,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         false,                                          // is_const
         nullptr,                                        // constructor
         ast::VariableDecorationList{});                 // decorations
-    AddStatement(create<ast::VariableDeclStatement>(var));
+    AddStatement(create<ast::VariableDeclStatement>(Source{}, var));
   }
 
   // Emit regular statements.
@@ -2727,6 +2732,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
       const auto var_name = GetDefInfo(assignment.phi_id)->phi_var;
       auto expr = MakeExpression(assignment.value);
       AddStatement(create<ast::AssignmentStatement>(
+          Source{},
           create<ast::IdentifierExpression>(
               Source{}, ast_module_.RegisterSymbol(var_name), var_name),
           expr.expr));
@@ -2749,7 +2755,7 @@ bool FunctionEmitter::EmitConstDefinition(
   if (!ast_const) {
     return false;
   }
-  AddStatement(create<ast::VariableDeclStatement>(ast_const));
+  AddStatement(create<ast::VariableDeclStatement>(Source{}, ast_const));
   // Save this as an already-named value.
   identifier_values_.insert(inst.result_id());
   return success();
@@ -2764,6 +2770,7 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
     auto name = namer_.Name(result_id);
     // Emit an assignment of the expression to the hoisted variable.
     AddStatement(create<ast::AssignmentStatement>(
+        Source{},
         create<ast::IdentifierExpression>(
             Source{}, ast_module_.RegisterSymbol(name), namer_.Name(result_id)),
         ast_expr.expr));
@@ -2833,7 +2840,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(ptr_id);
       auto rhs = MakeExpression(value_id);
-      AddStatement(create<ast::AssignmentStatement>(lhs.expr, rhs.expr));
+      AddStatement(
+          create<ast::AssignmentStatement>(Source{}, lhs.expr, rhs.expr));
       return success();
     }
     case SpvOpLoad: {
@@ -3743,7 +3751,8 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   }
 
   if (result_type->Is<ast::type::Void>()) {
-    return nullptr != AddStatement(create<ast::CallStatement>(call_expr));
+    return nullptr !=
+           AddStatement(create<ast::CallStatement>(Source{}, call_expr));
   }
 
   return EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
@@ -3800,7 +3809,8 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
     // The condition goes last.
     params.push_back(condition.expr);
     return {operand1.type,
-            create<ast::CallExpression>(Source{},
+            create<ast::CallExpression>(
+                Source{},
                 create<ast::IdentifierExpression>(
                     Source{}, ast_module_.RegisterSymbol("select"), "select"),
                 std::move(params))};
@@ -4014,7 +4024,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   } else {
     // It's an image write. No value is returned, so make a statement out
     // of the call.
-    AddStatement(create<ast::CallStatement>(call_expr));
+    AddStatement(create<ast::CallStatement>(Source{}, call_expr));
   }
   return success();
 }
@@ -4182,10 +4192,11 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
   }
   // If the texel has more components than necessary, then we will ignore the
   // higher-numbered components.
-  auto* texel_prefix = (src_count == dest_count)
-                           ? texel.expr
-                           : create<ast::MemberAccessorExpression>(Source{},
-                                 texel.expr, PrefixSwizzle(dest_count));
+  auto* texel_prefix =
+      (src_count == dest_count)
+          ? texel.expr
+          : create<ast::MemberAccessorExpression>(Source{}, texel.expr,
+                                                  PrefixSwizzle(dest_count));
 
   if (!(dest_type->is_float_scalar_or_vector() ||
         dest_type->is_unsigned_scalar_or_vector() ||

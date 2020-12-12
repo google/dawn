@@ -27,7 +27,7 @@ namespace {
 using HlslGeneratorImplTest_Break = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Break, Emit_Break) {
-  ast::BreakStatement b;
+  ast::BreakStatement b(Source{});
 
   gen.increment_indent();
 

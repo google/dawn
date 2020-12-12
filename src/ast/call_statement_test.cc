@@ -31,17 +31,18 @@ TEST_F(CallStatementTest, Creation) {
                                  Source{}, mod.RegisterSymbol("func"), "func"),
                              ExpressionList{});
 
-  CallStatement c(expr);
+  CallStatement c(Source{}, expr);
   EXPECT_EQ(c.expr(), expr);
 }
 
 TEST_F(CallStatementTest, IsCall) {
-  CallStatement c(nullptr);
+  CallStatement c(Source{}, nullptr);
   EXPECT_TRUE(c.Is<CallStatement>());
 }
 
 TEST_F(CallStatementTest, IsValid) {
   CallStatement c(
+      Source{},
       create<CallExpression>(Source{},
                              create<IdentifierExpression>(
                                  Source{}, mod.RegisterSymbol("func"), "func"),
@@ -50,18 +51,19 @@ TEST_F(CallStatementTest, IsValid) {
 }
 
 TEST_F(CallStatementTest, IsValid_MissingExpr) {
-  CallStatement c(nullptr);
+  CallStatement c(Source{}, nullptr);
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(CallStatementTest, IsValid_InvalidExpr) {
   CallExpression stmt(Source{}, nullptr, {});
-  CallStatement c(&stmt);
+  CallStatement c(Source{}, &stmt);
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(CallStatementTest, ToStr) {
   CallStatement c(
+      Source{},
       create<CallExpression>(Source{},
                              create<IdentifierExpression>(
                                  Source{}, mod.RegisterSymbol("func"), "func"),

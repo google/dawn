@@ -31,18 +31,19 @@ namespace {
 using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
-  auto* def_body = create<ast::BlockStatement>();
-  def_body->append(create<ast::BreakStatement>());
-  auto* def = create<ast::CaseStatement>(def_body);
+  auto* def_body = create<ast::BlockStatement>(Source{});
+  def_body->append(create<ast::BreakStatement>(Source{}));
+  auto* def =
+      create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{}, def_body);
 
   ast::type::I32 i32;
   ast::CaseSelectorList case_val;
   case_val.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
 
-  auto* case_body = create<ast::BlockStatement>();
-  case_body->append(create<ast::BreakStatement>());
+  auto* case_body = create<ast::BlockStatement>(Source{});
+  case_body->append(create<ast::BreakStatement>(Source{}));
 
-  auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
+  auto* case_stmt = create<ast::CaseStatement>(Source{}, case_val, case_body);
 
   ast::CaseStatementList body;
   body.push_back(case_stmt);
@@ -50,7 +51,7 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 
   auto* cond = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("cond"), "cond");
-  ast::SwitchStatement s(cond, body);
+  ast::SwitchStatement s(Source{}, cond, body);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &s)) << gen.error();

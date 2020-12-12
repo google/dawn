@@ -24,8 +24,6 @@ namespace ast {
 class DiscardStatement : public Castable<DiscardStatement, Statement> {
  public:
   /// Constructor
-  DiscardStatement();
-  /// Constructor
   /// @param source the discard statement source
   explicit DiscardStatement(const Source& source);
   /// Move constructor

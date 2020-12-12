@@ -30,17 +30,6 @@ namespace ast {
 class ElseStatement : public Castable<ElseStatement, Statement> {
  public:
   /// Constructor
-  /// @param body the else body
-  explicit ElseStatement(BlockStatement* body);
-  /// Constructor
-  /// @param condition the else condition
-  /// @param body the else body
-  ElseStatement(Expression* condition, BlockStatement* body);
-  /// Constructor
-  /// @param source the source information
-  /// @param body the else body
-  ElseStatement(const Source& source, BlockStatement* body);
-  /// Constructor
   /// @param source the source information
   /// @param condition the else condition
   /// @param body the else body

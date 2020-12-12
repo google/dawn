@@ -25,7 +25,7 @@ namespace {
 using DiscardStatementTest = TestHelper;
 
 TEST_F(DiscardStatementTest, Creation) {
-  DiscardStatement stmt;
+  DiscardStatement stmt(Source{});
   EXPECT_EQ(stmt.source().range.begin.line, 0u);
   EXPECT_EQ(stmt.source().range.begin.column, 0u);
   EXPECT_EQ(stmt.source().range.end.line, 0u);
@@ -42,17 +42,17 @@ TEST_F(DiscardStatementTest, Creation_WithSource) {
 }
 
 TEST_F(DiscardStatementTest, IsDiscard) {
-  DiscardStatement stmt;
+  DiscardStatement stmt(Source{});
   EXPECT_TRUE(stmt.Is<DiscardStatement>());
 }
 
 TEST_F(DiscardStatementTest, IsValid) {
-  DiscardStatement stmt;
+  DiscardStatement stmt(Source{});
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(DiscardStatementTest, ToStr) {
-  DiscardStatement stmt;
+  DiscardStatement stmt(Source{});
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Discard{}

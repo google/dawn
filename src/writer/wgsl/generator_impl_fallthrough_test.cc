@@ -25,7 +25,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
-  ast::FallthroughStatement f;
+  ast::FallthroughStatement f(Source{});
 
   gen.increment_indent();
 

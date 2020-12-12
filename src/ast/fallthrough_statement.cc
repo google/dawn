@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::FallthroughStatement);
 namespace tint {
 namespace ast {
 
-FallthroughStatement::FallthroughStatement() : Base() {}
-
 FallthroughStatement::FallthroughStatement(const Source& source)
     : Base(source) {}
 

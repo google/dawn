@@ -48,7 +48,7 @@ class VertexPullingHelper {
   void InitBasicModule() {
     auto* func = create<ast::Function>(
         Source{}, mod_->RegisterSymbol("main"), "main", ast::VariableList{},
-        mod_->create<ast::type::Void>(), create<ast::BlockStatement>(),
+        mod_->create<ast::type::Void>(), create<ast::BlockStatement>(Source{}),
         ast::FunctionDecorationList{create<ast::StageDecoration>(
             ast::PipelineStage::kVertex, Source{})});
     mod()->AddFunction(func);
@@ -135,7 +135,7 @@ TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
   auto* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("main"), "main", ast::VariableList{},
-      mod()->create<ast::type::Void>(), create<ast::BlockStatement>(),
+      mod()->create<ast::type::Void>(), create<ast::BlockStatement>(Source{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });

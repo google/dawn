@@ -270,7 +270,7 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
                                  true,                            // is_const
                                  constructor,                     // constructor
                                  ast::VariableDecorationList{});  // decorations
-  return mod->create<ast::VariableDeclStatement>(var);
+  return mod->create<ast::VariableDeclStatement>(Source{}, var);
 }
 
 }  // namespace transform

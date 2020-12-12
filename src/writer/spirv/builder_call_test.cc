@@ -61,7 +61,7 @@ TEST_F(BuilderTest, Expression_Call) {
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::BinaryExpression>(
                     Source{}, ast::BinaryOp::kAdd,
@@ -73,7 +73,7 @@ TEST_F(BuilderTest, Expression_Call) {
                        func_params, &f32, body, ast::FunctionDecorationList{});
 
   ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
-                     &void_type, create<ast::BlockStatement>(),
+                     &void_type, create<ast::BlockStatement>(Source{}),
                      ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;
@@ -144,7 +144,7 @@ TEST_F(BuilderTest, Statement_Call) {
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::BinaryExpression>(
                     Source{}, ast::BinaryOp::kAdd,
@@ -158,7 +158,7 @@ TEST_F(BuilderTest, Statement_Call) {
                        ast::FunctionDecorationList{});
 
   ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
-                     &void_type, create<ast::BlockStatement>(),
+                     &void_type, create<ast::BlockStatement>(Source{}),
                      ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;
@@ -167,11 +167,12 @@ TEST_F(BuilderTest, Statement_Call) {
   call_params.push_back(create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
 
-  ast::CallStatement expr(create<ast::CallExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a_func"),
-                                        "a_func"),
-      call_params));
+  ast::CallStatement expr(
+      Source{}, create<ast::CallExpression>(
+                    Source{},
+                    create<ast::IdentifierExpression>(
+                        Source{}, mod->RegisterSymbol("a_func"), "a_func"),
+                    call_params));
 
   ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();

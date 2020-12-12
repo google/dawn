@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::BreakStatement);
 namespace tint {
 namespace ast {
 
-BreakStatement::BreakStatement() : Base() {}
-
 BreakStatement::BreakStatement(const Source& source) : Base(source) {}
 
 BreakStatement::BreakStatement(BreakStatement&&) = default;

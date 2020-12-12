@@ -39,9 +39,10 @@ TEST_F(BuilderTest, Block) {
 
   // Note, this test uses shadow variables which aren't allowed in WGSL but
   // serves to prove the block code is pushing new scopes as needed.
-  ast::BlockStatement outer;
+  ast::BlockStatement outer(Source{});
 
   outer.append(create<ast::VariableDeclStatement>(
+      Source{},
       create<ast::Variable>(Source{},                          // source
                             "var",                             // name
                             ast::StorageClass::kFunction,      // storage_class
@@ -50,13 +51,15 @@ TEST_F(BuilderTest, Block) {
                             nullptr,                           // constructor
                             ast::VariableDecorationList{})));  // decorations
   outer.append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
                                         "var"),
       create<ast::ScalarConstructorExpression>(
           Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f))));
 
-  auto* inner = create<ast::BlockStatement>();
+  auto* inner = create<ast::BlockStatement>(Source{});
   inner->append(create<ast::VariableDeclStatement>(
+      Source{},
       create<ast::Variable>(Source{},                          // source
                             "var",                             // name
                             ast::StorageClass::kFunction,      // storage_class
@@ -65,6 +68,7 @@ TEST_F(BuilderTest, Block) {
                             nullptr,                           // constructor
                             ast::VariableDecorationList{})));  // decorations
   inner->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
                                         "var"),
       create<ast::ScalarConstructorExpression>(
@@ -72,6 +76,7 @@ TEST_F(BuilderTest, Block) {
 
   outer.append(inner);
   outer.append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
                                         "var"),
       create<ast::ScalarConstructorExpression>(

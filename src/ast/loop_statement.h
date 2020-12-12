@@ -28,10 +28,6 @@ namespace ast {
 class LoopStatement : public Castable<LoopStatement, Statement> {
  public:
   /// Constructor
-  /// @param body the body statements
-  /// @param continuing the continuing statements
-  LoopStatement(BlockStatement* body, BlockStatement* continuing);
-  /// Constructor
   /// @param source the loop statement source
   /// @param body the body statements
   /// @param continuing the continuing statements

@@ -25,7 +25,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Discard) {
-  ast::DiscardStatement k;
+  ast::DiscardStatement k(Source{});
 
   gen.increment_indent();
 

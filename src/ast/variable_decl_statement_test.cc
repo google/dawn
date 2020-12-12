@@ -29,7 +29,7 @@ TEST_F(VariableDeclStatementTest, Creation) {
   auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
                                nullptr, ast::VariableDecorationList{});
 
-  VariableDeclStatement stmt(var);
+  VariableDeclStatement stmt(Source{}, var);
   EXPECT_EQ(stmt.variable(), var);
 }
 
@@ -49,15 +49,15 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
   auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
                                nullptr, ast::VariableDecorationList{});
 
-  VariableDeclStatement s(var);
-  EXPECT_TRUE(s.Is<VariableDeclStatement>());
+  VariableDeclStatement stmt(Source{}, var);
+  EXPECT_TRUE(stmt.Is<VariableDeclStatement>());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid) {
   type::F32 f32;
   auto* var = create<Variable>(Source{}, "a", StorageClass::kNone, &f32, false,
                                nullptr, ast::VariableDecorationList{});
-  VariableDeclStatement stmt(var);
+  VariableDeclStatement stmt(Source{}, var);
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -65,12 +65,12 @@ TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
   type::F32 f32;
   auto* var = create<Variable>(Source{}, "", StorageClass::kNone, &f32, false,
                                nullptr, ast::VariableDecorationList{});
-  VariableDeclStatement stmt(var);
+  VariableDeclStatement stmt(Source{}, var);
   EXPECT_FALSE(stmt.IsValid());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid_NullVariable) {
-  VariableDeclStatement stmt(nullptr);
+  VariableDeclStatement stmt(Source{}, nullptr);
   EXPECT_FALSE(stmt.IsValid());
 }
 

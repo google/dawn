@@ -23,9 +23,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::SwitchStatement);
 namespace tint {
 namespace ast {
 
-SwitchStatement::SwitchStatement(Expression* condition, CaseStatementList body)
-    : condition_(condition), body_(body) {}
-
 SwitchStatement::SwitchStatement(const Source& source,
                                  Expression* condition,
                                  CaseStatementList body)

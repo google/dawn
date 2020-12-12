@@ -29,7 +29,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Continue) {
-  ast::ContinueStatement c;
+  ast::ContinueStatement c(Source{});
 
   gen.increment_indent();
 

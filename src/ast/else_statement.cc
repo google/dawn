@@ -22,14 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ElseStatement);
 namespace tint {
 namespace ast {
 
-ElseStatement::ElseStatement(BlockStatement* body) : Base(), body_(body) {}
-
-ElseStatement::ElseStatement(Expression* condition, BlockStatement* body)
-    : Base(), condition_(condition), body_(body) {}
-
-ElseStatement::ElseStatement(const Source& source, BlockStatement* body)
-    : Base(source), body_(body) {}
-
 ElseStatement::ElseStatement(const Source& source,
                              Expression* condition,
                              BlockStatement* body)

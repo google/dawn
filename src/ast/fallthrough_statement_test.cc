@@ -23,7 +23,7 @@ namespace {
 using FallthroughStatementTest = TestHelper;
 
 TEST_F(FallthroughStatementTest, Creation) {
-  FallthroughStatement stmt;
+  FallthroughStatement stmt(Source{});
   EXPECT_EQ(stmt.source().range.begin.line, 0u);
   EXPECT_EQ(stmt.source().range.begin.column, 0u);
   EXPECT_EQ(stmt.source().range.end.line, 0u);
@@ -38,17 +38,17 @@ TEST_F(FallthroughStatementTest, Creation_WithSource) {
 }
 
 TEST_F(FallthroughStatementTest, IsFallthrough) {
-  FallthroughStatement stmt;
+  FallthroughStatement stmt(Source{});
   EXPECT_TRUE(stmt.Is<FallthroughStatement>());
 }
 
 TEST_F(FallthroughStatementTest, IsValid) {
-  FallthroughStatement stmt;
+  FallthroughStatement stmt(Source{});
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(FallthroughStatementTest, ToStr) {
-  FallthroughStatement stmt;
+  FallthroughStatement stmt(Source{});
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Fallthrough{}

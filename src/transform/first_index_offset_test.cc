@@ -61,7 +61,7 @@ struct ModuleBuilder : public ast::BuilderWithModule {
                              ast::VariableList params = {}) {
     auto* func = create<ast::Function>(
         Source{}, mod->RegisterSymbol(name), name, std::move(params), ty.u32,
-        create<ast::BlockStatement>(), ast::FunctionDecorationList());
+        create<ast::BlockStatement>(Source{}), ast::FunctionDecorationList());
     mod->AddFunction(func);
     return func;
   }

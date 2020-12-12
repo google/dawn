@@ -23,14 +23,16 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::CallStatement);
 namespace tint {
 namespace ast {
 
-CallStatement::CallStatement(CallExpression* call) : Base(), call_(call) {}
+CallStatement::CallStatement(const Source& source, CallExpression* call)
+    : Base(source), call_(call) {}
 
 CallStatement::CallStatement(CallStatement&&) = default;
 
 CallStatement::~CallStatement() = default;
 
 CallStatement* CallStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<CallStatement>(ctx->Clone(call_));
+  return ctx->mod->create<CallStatement>(ctx->Clone(source()),
+                                         ctx->Clone(call_));
 }
 
 bool CallStatement::IsValid() const {

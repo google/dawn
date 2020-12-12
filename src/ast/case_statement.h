@@ -34,14 +34,6 @@ using CaseSelectorList = std::vector<IntLiteral*>;
 class CaseStatement : public Castable<CaseStatement, Statement> {
  public:
   /// Constructor
-  /// Creates a default case statement
-  /// @param body the case body
-  explicit CaseStatement(BlockStatement* body);
-  /// Constructor
-  /// @param selectors the case selectors
-  /// @param body the case body
-  CaseStatement(CaseSelectorList selectors, BlockStatement* body);
-  /// Constructor
   /// @param source the source information
   /// @param selectors the case selectors
   /// @param body the case body

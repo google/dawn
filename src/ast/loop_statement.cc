@@ -22,9 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::LoopStatement);
 namespace tint {
 namespace ast {
 
-LoopStatement::LoopStatement(BlockStatement* body, BlockStatement* continuing)
-    : Base(), body_(body), continuing_(continuing) {}
-
 LoopStatement::LoopStatement(const Source& source,
                              BlockStatement* body,
                              BlockStatement* continuing)

@@ -1438,7 +1438,7 @@ Expect<ast::Expression*> ParserImpl::expect_paren_rhs_stmt() {
 //   : statement*
 Expect<ast::BlockStatement*> ParserImpl::expect_statements() {
   bool errored = false;
-  auto* ret = create<ast::BlockStatement>();
+  auto* ret = create<ast::BlockStatement>(Source{});
 
   while (synchronized_) {
     auto stmt = statement();
@@ -1724,7 +1724,7 @@ Maybe<ast::ElseStatement*> ParserImpl::else_stmt() {
   if (body.errored)
     return Failure::kErrored;
 
-  return create<ast::ElseStatement>(source, body.value);
+  return create<ast::ElseStatement>(source, nullptr, body.value);
 }
 
 // switch_stmt
@@ -1827,7 +1827,7 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 //   | statement case_body
 //   | FALLTHROUGH SEMICOLON
 Maybe<ast::BlockStatement*> ParserImpl::case_body() {
-  auto* ret = create<ast::BlockStatement>();
+  auto* ret = create<ast::BlockStatement>(Source{});
   for (;;) {
     Source source;
     if (match(Token::Type::kFallthrough, &source)) {
@@ -2026,11 +2026,12 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
   if (!expect("call statement", Token::Type::kParenRight))
     return Failure::kErrored;
 
-  return create<ast::CallStatement>(create<ast::CallExpression>(
-      source,
-      create<ast::IdentifierExpression>(Source{}, module_.RegisterSymbol(name),
-                                        name),
-      std::move(params)));
+  return create<ast::CallStatement>(
+      Source{}, create<ast::CallExpression>(
+                    source,
+                    create<ast::IdentifierExpression>(
+                        source, module_.RegisterSymbol(name), name),
+                    std::move(params)));
 }
 
 // break_stmt
@@ -2057,7 +2058,7 @@ Maybe<ast::ContinueStatement*> ParserImpl::continue_stmt() {
 //   : CONTINUING body_stmt
 Maybe<ast::BlockStatement*> ParserImpl::continuing_stmt() {
   if (!match(Token::Type::kContinuing))
-    return create<ast::BlockStatement>();
+    return create<ast::BlockStatement>(Source{});
 
   return expect_body_stmt();
 }

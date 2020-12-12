@@ -36,8 +36,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::Statement);
 namespace tint {
 namespace ast {
 
-Statement::Statement() = default;
-
 Statement::Statement(const Source& source) : Base(source) {}
 
 Statement::Statement(Statement&&) = default;

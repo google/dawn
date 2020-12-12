@@ -514,7 +514,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.f));
 
-  ast::AssignmentStatement expr(lhs, rhs);
+  ast::AssignmentStatement expr(Source{}, lhs, rhs);
 
   td.RegisterVariableForTesting(&var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -588,7 +588,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
       create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a"),
                                         "a"));
 
-  ast::AssignmentStatement expr(lhs, rhs);
+  ast::AssignmentStatement expr(Source{}, lhs, rhs);
 
   td.RegisterVariableForTesting(&var);
   td.RegisterVariableForTesting(&store);

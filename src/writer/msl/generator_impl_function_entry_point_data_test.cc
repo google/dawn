@@ -81,13 +81,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -155,13 +157,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -229,13 +233,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -302,13 +308,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -373,13 +381,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -439,13 +449,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -512,8 +524,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
 
   ast::VariableList params;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("depth"),
                                         "depth"),
       create<ast::MemberAccessorExpression>(

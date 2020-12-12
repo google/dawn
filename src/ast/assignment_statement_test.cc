@@ -29,7 +29,7 @@ TEST_F(AssignmentStatementTest, Creation) {
   auto* rhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  AssignmentStatement stmt(lhs, rhs);
+  AssignmentStatement stmt(Source{}, lhs, rhs);
   EXPECT_EQ(stmt.lhs(), lhs);
   EXPECT_EQ(stmt.rhs(), rhs);
 }
@@ -52,7 +52,7 @@ TEST_F(AssignmentStatementTest, IsAssign) {
   auto* rhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  AssignmentStatement stmt(lhs, rhs);
+  AssignmentStatement stmt(Source{}, lhs, rhs);
   EXPECT_TRUE(stmt.Is<AssignmentStatement>());
 }
 
@@ -62,7 +62,7 @@ TEST_F(AssignmentStatementTest, IsValid) {
   auto* rhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  AssignmentStatement stmt(lhs, rhs);
+  AssignmentStatement stmt(Source{}, lhs, rhs);
   EXPECT_TRUE(stmt.IsValid());
 }
 
@@ -70,7 +70,7 @@ TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
   auto* rhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  AssignmentStatement stmt(nullptr, rhs);
+  AssignmentStatement stmt(Source{}, nullptr, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -78,7 +78,7 @@ TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
   auto* lhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
 
-  AssignmentStatement stmt(lhs, nullptr);
+  AssignmentStatement stmt(Source{}, lhs, nullptr);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -87,7 +87,7 @@ TEST_F(AssignmentStatementTest, IsValid_InvalidLHS) {
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
   auto* rhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
-  AssignmentStatement stmt(lhs, rhs);
+  AssignmentStatement stmt(Source{}, lhs, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -96,7 +96,7 @@ TEST_F(AssignmentStatementTest, IsValid_InvalidRHS) {
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
   auto* rhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
-  AssignmentStatement stmt(lhs, rhs);
+  AssignmentStatement stmt(Source{}, lhs, rhs);
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -106,7 +106,7 @@ TEST_F(AssignmentStatementTest, ToStr) {
   auto* rhs =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  AssignmentStatement stmt(lhs, rhs);
+  AssignmentStatement stmt(Source{}, lhs, rhs);
   std::ostringstream out;
   stmt.to_str(out, 2);
 

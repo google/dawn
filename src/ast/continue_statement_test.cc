@@ -30,17 +30,17 @@ TEST_F(ContinueStatementTest, Creation_WithSource) {
 }
 
 TEST_F(ContinueStatementTest, IsContinue) {
-  ContinueStatement stmt;
+  ContinueStatement stmt(Source{});
   EXPECT_TRUE(stmt.Is<ContinueStatement>());
 }
 
 TEST_F(ContinueStatementTest, IsValid) {
-  ContinueStatement stmt;
+  ContinueStatement stmt(Source{});
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(ContinueStatementTest, ToStr) {
-  ContinueStatement stmt;
+  ContinueStatement stmt(Source{});
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Continue{}

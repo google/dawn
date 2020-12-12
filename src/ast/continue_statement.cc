@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ContinueStatement);
 namespace tint {
 namespace ast {
 
-ContinueStatement::ContinueStatement() : Base() {}
-
 ContinueStatement::ContinueStatement(const Source& source) : Base(source) {}
 
 ContinueStatement::ContinueStatement(ContinueStatement&&) = default;

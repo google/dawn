@@ -29,9 +29,10 @@ using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
   ast::type::Void void_type;
-  auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
+                                     "my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>(Source{}),
+                                     ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();

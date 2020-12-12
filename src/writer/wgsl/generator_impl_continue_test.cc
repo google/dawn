@@ -28,7 +28,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Continue) {
-  ast::ContinueStatement c;
+  ast::ContinueStatement c(Source{});
 
   gen.increment_indent();
 

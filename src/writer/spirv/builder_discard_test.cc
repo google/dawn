@@ -27,7 +27,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Discard) {
-  ast::DiscardStatement expr;
+  ast::DiscardStatement expr(Source{});
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateStatement(&expr), 1u) << b.error();

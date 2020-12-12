@@ -58,7 +58,7 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Emit_Function) {
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
                                      "my_func", ast::VariableList{}, &void_type,
@@ -80,7 +80,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("main"),
                                      "main", ast::VariableList{}, &void_type,
@@ -123,7 +123,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
                                      "my_func", params, &void_type, body,
@@ -177,8 +177,9 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
@@ -252,8 +253,9 @@ TEST_F(MslGeneratorImplTest,
   mod.AddGlobalVariable(depth_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("depth"),
                                         "depth"),
       create<ast::MemberAccessorExpression>(
@@ -328,8 +330,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
                                             "x")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(var));
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::VariableDeclStatement>(Source{}, var));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
@@ -408,8 +410,8 @@ TEST_F(MslGeneratorImplTest,
                                             "b")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(var));
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::VariableDeclStatement>(Source{}, var));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
@@ -493,8 +495,8 @@ TEST_F(MslGeneratorImplTest,
                                             "b")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(var));
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::VariableDeclStatement>(Source{}, var));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
@@ -584,13 +586,15 @@ TEST_F(
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("val"),
                                         "val"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("param"),
@@ -608,8 +612,9 @@ TEST_F(
   expr.push_back(create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
-  body = create<ast::BlockStatement>();
+  body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::CallExpression>(
@@ -687,7 +692,7 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::IdentifierExpression>(
                     Source{}, mod.RegisterSymbol("param"), "param")));
@@ -701,8 +706,9 @@ TEST_F(MslGeneratorImplTest,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
-  body = create<ast::BlockStatement>();
+  body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("depth"),
                                         "depth"),
       create<ast::CallExpression>(
@@ -789,8 +795,9 @@ TEST_F(
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("depth"),
                                         "depth"),
       create<ast::MemberAccessorExpression>(
@@ -812,8 +819,9 @@ TEST_F(
   expr.push_back(create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
-  body = create<ast::BlockStatement>();
+  body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("depth"),
                                         "depth"),
       create<ast::CallExpression>(
@@ -885,7 +893,7 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::MemberAccessorExpression>(
                     Source{},
@@ -916,8 +924,8 @@ TEST_F(MslGeneratorImplTest,
           expr),                       // constructor
       ast::VariableDecorationList{});  // decorations
 
-  body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(var));
+  body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::VariableDeclStatement>(Source{}, var));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
@@ -993,7 +1001,7 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::MemberAccessorExpression>(
                     Source{},
@@ -1024,8 +1032,8 @@ TEST_F(MslGeneratorImplTest,
           expr),                       // constructor
       ast::VariableDecorationList{});  // decorations
 
-  body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(var));
+  body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::VariableDeclStatement>(Source{}, var));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
@@ -1107,7 +1115,7 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::MemberAccessorExpression>(
                     Source{},
@@ -1138,8 +1146,8 @@ TEST_F(MslGeneratorImplTest,
           expr),                       // constructor
       ast::VariableDecorationList{});  // decorations
 
-  body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(var));
+  body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::VariableDeclStatement>(Source{}, var));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* func = create<ast::Function>(
@@ -1195,14 +1203,15 @@ TEST_F(MslGeneratorImplTest,
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::ScalarConstructorExpression>(
           Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f))));
 
-  auto* list = create<ast::BlockStatement>();
+  auto* list = create<ast::BlockStatement>(Source{});
   list->append(create<ast::ReturnStatement>(Source{}));
 
   body->append(create<ast::IfStatement>(
@@ -1251,7 +1260,7 @@ TEST_F(MslGeneratorImplTest,
 
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(),
+      &void_type, create<ast::BlockStatement>(Source{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
       });
@@ -1283,7 +1292,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
 
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
   auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
                                      "my_func", params, &void_type, body,
@@ -1371,8 +1380,8 @@ TEST_F(MslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(var));
+    auto* body = create<ast::BlockStatement>(Source{});
+    body->append(create<ast::VariableDeclStatement>(Source{}, var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func = create<ast::Function>(
@@ -1401,8 +1410,8 @@ TEST_F(MslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(var));
+    auto* body = create<ast::BlockStatement>(Source{});
+    body->append(create<ast::VariableDeclStatement>(Source{}, var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func = create<ast::Function>(

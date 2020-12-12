@@ -41,8 +41,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::type::Void void_type;
@@ -60,8 +60,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::type::F32 f32;
@@ -99,8 +99,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::type::Void void_type;
@@ -122,8 +122,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::type::Void void_type;
@@ -145,8 +145,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::type::Void void_type;
@@ -237,8 +237,8 @@ TEST_F(WgslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(var));
+    auto* body = create<ast::BlockStatement>(Source{});
+    body->append(create<ast::VariableDeclStatement>(Source{}, var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func = create<ast::Function>(
@@ -267,8 +267,8 @@ TEST_F(WgslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>();
-    body->append(create<ast::VariableDeclStatement>(var));
+    auto* body = create<ast::BlockStatement>(Source{});
+    body->append(create<ast::VariableDeclStatement>(Source{}, var));
     body->append(create<ast::ReturnStatement>(Source{}));
 
     auto* func = create<ast::Function>(

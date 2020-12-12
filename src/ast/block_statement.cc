@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::BlockStatement);
 namespace tint {
 namespace ast {
 
-BlockStatement::BlockStatement() : Base() {}
-
 BlockStatement::BlockStatement(const Source& source) : Base(source) {}
 
 BlockStatement::BlockStatement(BlockStatement&&) = default;

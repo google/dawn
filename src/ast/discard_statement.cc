@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::DiscardStatement);
 namespace tint {
 namespace ast {
 
-DiscardStatement::DiscardStatement() : Base() {}
-
 DiscardStatement::DiscardStatement(const Source& source) : Base(source) {}
 
 DiscardStatement::DiscardStatement(DiscardStatement&&) = default;

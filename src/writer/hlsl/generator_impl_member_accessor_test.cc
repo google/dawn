@@ -244,7 +244,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* rhs =
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
 
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(b_var);
@@ -311,7 +311,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &mat,
                                                      ast::ExpressionList{});
 
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -730,7 +730,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                                         "b"));
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f));
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
@@ -791,7 +791,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
           Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
@@ -849,7 +849,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                                         "a"));
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
@@ -973,7 +973,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                                         "b"));
   auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &fvec3, values);
 
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
@@ -1408,7 +1408,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &fvec3, values);
 
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
@@ -1500,7 +1500,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &i32, 1.f));
 
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&assign));
   ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();

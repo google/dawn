@@ -43,7 +43,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -61,7 +61,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -81,7 +81,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -100,7 +100,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -118,7 +118,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
@@ -140,7 +140,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
                             ident,                           // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float a = initializer;
 )");
@@ -164,7 +164,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
                             zero_vec,                        // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float3 a = float3(0.0f);
 )");
@@ -188,7 +188,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
                             zero_mat,                        // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
   ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
   EXPECT_EQ(result(),
             R"(float3x2 a = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);

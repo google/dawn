@@ -24,8 +24,6 @@ namespace ast {
 class FallthroughStatement : public Castable<FallthroughStatement, Statement> {
  public:
   /// Constructor
-  FallthroughStatement();
-  /// Constructor
   /// @param source the source information
   explicit FallthroughStatement(const Source& source);
   /// Move constructor

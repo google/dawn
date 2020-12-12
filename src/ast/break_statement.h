@@ -24,8 +24,6 @@ namespace ast {
 class BreakStatement : public Castable<BreakStatement, Statement> {
  public:
   /// Constructor
-  BreakStatement();
-  /// Constructor
   /// @param source the break statement source
   explicit BreakStatement(const Source& source);
   /// Move constructor

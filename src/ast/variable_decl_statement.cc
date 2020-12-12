@@ -22,9 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::VariableDeclStatement);
 namespace tint {
 namespace ast {
 
-VariableDeclStatement::VariableDeclStatement(Variable* variable)
-    : Base(), variable_(variable) {}
-
 VariableDeclStatement::VariableDeclStatement(const Source& source,
                                              Variable* variable)
     : Base(source), variable_(variable) {}

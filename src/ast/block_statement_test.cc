@@ -28,10 +28,10 @@ namespace {
 using BlockStatementTest = TestHelper;
 
 TEST_F(BlockStatementTest, Creation) {
-  auto* d = create<DiscardStatement>();
+  auto* d = create<DiscardStatement>(Source{});
   auto* ptr = d;
 
-  BlockStatement b;
+  BlockStatement b(Source{});
   b.append(d);
 
   ASSERT_EQ(b.size(), 1u);
@@ -39,11 +39,11 @@ TEST_F(BlockStatementTest, Creation) {
 }
 
 TEST_F(BlockStatementTest, Creation_WithInsert) {
-  auto* s1 = create<DiscardStatement>();
-  auto* s2 = create<DiscardStatement>();
-  auto* s3 = create<DiscardStatement>();
+  auto* s1 = create<DiscardStatement>(Source{});
+  auto* s2 = create<DiscardStatement>(Source{});
+  auto* s3 = create<DiscardStatement>(Source{});
 
-  BlockStatement b;
+  BlockStatement b(Source{});
   b.insert(0, s1);
   b.insert(0, s2);
   b.insert(1, s3);
@@ -64,38 +64,39 @@ TEST_F(BlockStatementTest, Creation_WithSource) {
 }
 
 TEST_F(BlockStatementTest, IsBlock) {
-  BlockStatement b;
+  BlockStatement b(Source{});
   EXPECT_TRUE(b.Is<BlockStatement>());
 }
 
 TEST_F(BlockStatementTest, IsValid) {
-  BlockStatement b;
-  b.append(create<DiscardStatement>());
+  BlockStatement b(Source{});
+  b.append(create<DiscardStatement>(Source{}));
   EXPECT_TRUE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_Empty) {
-  BlockStatement b;
+  BlockStatement b(Source{});
   EXPECT_TRUE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_NullBodyStatement) {
-  BlockStatement b;
-  b.append(create<DiscardStatement>());
+  BlockStatement b(Source{});
+  b.append(create<DiscardStatement>(Source{}));
   b.append(nullptr);
   EXPECT_FALSE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_InvalidBodyStatement) {
-  BlockStatement b;
-  b.append(create<IfStatement>(Source{}, nullptr, create<BlockStatement>(),
+  BlockStatement b(Source{});
+  b.append(create<IfStatement>(Source{}, nullptr,
+                               create<BlockStatement>(Source{}),
                                ElseStatementList{}));
   EXPECT_FALSE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, ToStr) {
-  BlockStatement b;
-  b.append(create<DiscardStatement>());
+  BlockStatement b(Source{});
+  b.append(create<DiscardStatement>(Source{}));
 
   std::ostringstream out;
   b.to_str(out, 2);

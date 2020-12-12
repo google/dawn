@@ -27,7 +27,7 @@ namespace {
 using HlslGeneratorImplTest_Continue = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Continue, Emit_Continue) {
-  ast::ContinueStatement c;
+  ast::ContinueStatement c(Source{});
 
   gen.increment_indent();
 

@@ -30,9 +30,6 @@ class VariableDeclStatement
     : public Castable<VariableDeclStatement, Statement> {
  public:
   /// Constructor
-  /// @param variable the variable
-  explicit VariableDeclStatement(Variable* variable);
-  /// Constructor
   /// @param source the variable statement source
   /// @param variable the variable
   VariableDeclStatement(const Source& source, Variable* variable);

@@ -24,7 +24,7 @@ namespace {
 using HlslGeneratorImplTest_Discard = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
-  ast::DiscardStatement stmt;
+  ast::DiscardStatement stmt(Source{});
 
   gen.increment_indent();
 

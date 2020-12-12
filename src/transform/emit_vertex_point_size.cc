@@ -65,12 +65,12 @@ Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
   mod->AddGlobalVariable(pointsize_var);
 
   // Build the AST expression & statement for assigning pointsize one.
-  auto* one = mod->create<ast::ScalarConstructorExpression>(Source{},
-      mod->create<ast::FloatLiteral>(Source{}, f32, 1.0f));
+  auto* one = mod->create<ast::ScalarConstructorExpression>(
+      Source{}, mod->create<ast::FloatLiteral>(Source{}, f32, 1.0f));
   auto* pointsize_ident = mod->create<ast::IdentifierExpression>(
       Source{}, mod->RegisterSymbol(kPointSizeVar), kPointSizeVar);
   auto* pointsize_assign =
-      mod->create<ast::AssignmentStatement>(pointsize_ident, one);
+      mod->create<ast::AssignmentStatement>(Source{}, pointsize_ident, one);
 
   // Add the pointsize assignment statement to the front of all vertex stages.
   for (auto* func : mod->functions()) {

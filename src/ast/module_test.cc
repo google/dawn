@@ -49,9 +49,9 @@ TEST_F(ModuleTest, LookupFunction) {
   Module m;
 
   auto func_sym = m.RegisterSymbol("main");
-  auto* func =
-      create<Function>(Source{}, func_sym, "main", VariableList{}, &f32,
-                       create<BlockStatement>(), ast::FunctionDecorationList{});
+  auto* func = create<Function>(Source{}, func_sym, "main", VariableList{},
+                                &f32, create<BlockStatement>(Source{}),
+                                ast::FunctionDecorationList{});
   m.AddFunction(func);
   EXPECT_EQ(func, m.FindFunctionBySymbol(func_sym));
 }
@@ -131,9 +131,9 @@ TEST_F(ModuleTest, IsValid_Function) {
 
   Module m;
 
-  auto* func = create<Function>(Source{}, m.RegisterSymbol("main"), "main",
-                                VariableList(), &f32, create<BlockStatement>(),
-                                ast::FunctionDecorationList{});
+  auto* func = create<Function>(
+      Source{}, m.RegisterSymbol("main"), "main", VariableList(), &f32,
+      create<BlockStatement>(Source{}), ast::FunctionDecorationList{});
   m.AddFunction(func);
   EXPECT_TRUE(m.IsValid());
 }

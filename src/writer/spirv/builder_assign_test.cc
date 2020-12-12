@@ -52,7 +52,7 @@ TEST_F(BuilderTest, Assign_Var) {
   auto* val = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
-  ast::AssignmentStatement assign(ident, val);
+  ast::AssignmentStatement assign(Source{}, ident, val);
 
   td.RegisterVariableForTesting(&v);
 
@@ -88,7 +88,7 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
   ast::ExpressionList vals;
   auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
 
-  ast::AssignmentStatement assign(ident, val);
+  ast::AssignmentStatement assign(Source{}, ident, val);
 
   td.RegisterVariableForTesting(&v);
 
@@ -138,6 +138,7 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
                   nullptr, ast::VariableDecorationList{});
 
   ast::AssignmentStatement assign(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
                                         "var"),
       init);
@@ -189,6 +190,7 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
                   nullptr, ast::VariableDecorationList{});
 
   ast::AssignmentStatement assign(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
                                         "var"),
       init);
@@ -248,7 +250,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
   auto* val = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 4.0f));
 
-  ast::AssignmentStatement assign(ident, val);
+  ast::AssignmentStatement assign(Source{}, ident, val);
 
   td.RegisterVariableForTesting(&v);
 
@@ -297,7 +299,7 @@ TEST_F(BuilderTest, Assign_Vector) {
 
   auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
 
-  ast::AssignmentStatement assign(ident, val);
+  ast::AssignmentStatement assign(Source{}, ident, val);
 
   td.RegisterVariableForTesting(&v);
 
@@ -342,7 +344,7 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
   auto* val = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
-  ast::AssignmentStatement assign(ident, val);
+  ast::AssignmentStatement assign(Source{}, ident, val);
 
   td.RegisterVariableForTesting(&v);
 
@@ -391,7 +393,7 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
   auto* val = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
 
-  ast::AssignmentStatement assign(ident, val);
+  ast::AssignmentStatement assign(Source{}, ident, val);
 
   td.RegisterVariableForTesting(&v);
 

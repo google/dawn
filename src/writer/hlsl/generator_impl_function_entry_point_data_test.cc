@@ -82,13 +82,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -159,13 +161,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ast::VariableList params;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -236,13 +240,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ast::VariableList params;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -312,13 +318,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -385,13 +393,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -453,13 +463,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod.AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
                                         "foo")));
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
                                         "bar"),
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("bar"),
@@ -528,8 +540,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod.AddGlobalVariable(depth_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::AssignmentStatement>(
+      Source{},
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("depth"),
                                         "depth"),
       create<ast::MemberAccessorExpression>(

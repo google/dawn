@@ -81,7 +81,7 @@ class InspectorHelper {
   ast::Function* MakeEmptyBodyFunction(
       std::string name,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
     body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(name), name,
                                  ast::VariableList(), void_type(), body,
@@ -97,12 +97,12 @@ class InspectorHelper {
       std::string caller,
       std::string callee,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
     auto* ident_expr = create<ast::IdentifierExpression>(
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(call_expr));
+    body->append(create<ast::CallStatement>(Source{}, call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(caller),
                                  caller, ast::VariableList(), void_type(), body,
@@ -148,11 +148,12 @@ class InspectorHelper {
       std::string name,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
       body->append(create<ast::AssignmentStatement>(
+          Source{},
           create<ast::IdentifierExpression>(Source{},
                                             mod()->RegisterSymbol(out), out),
           create<ast::IdentifierExpression>(Source{}, mod()->RegisterSymbol(in),
@@ -177,11 +178,12 @@ class InspectorHelper {
       std::string callee,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
       body->append(create<ast::AssignmentStatement>(
+          Source{},
           create<ast::IdentifierExpression>(Source{},
                                             mod()->RegisterSymbol(out), out),
           create<ast::IdentifierExpression>(Source{}, mod()->RegisterSymbol(in),
@@ -191,7 +193,7 @@ class InspectorHelper {
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(call_expr));
+    body->append(create<ast::CallStatement>(Source{}, call_expr));
     body->append(create<ast::ReturnStatement>(Source{}));
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(caller),
                                  caller, ast::VariableList(), void_type(), body,
@@ -425,21 +427,22 @@ class InspectorHelper {
       std::string func_name,
       std::string struct_name,
       std::vector<std::tuple<size_t, ast::type::Type*>> members) {
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
 
     for (auto member : members) {
       size_t member_idx;
       ast::type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
-      body->append(create<ast::VariableDeclStatement>(create<ast::Variable>(
-          Source{},                          // source
-          "local" + member_name,             // name
-          ast::StorageClass::kNone,          // storage_class
-          member_type,                       // type
-          false,                             // is_const
-          nullptr,                           // constructor
-          ast::VariableDecorationList{})));  // decorations
+      body->append(create<ast::VariableDeclStatement>(
+          Source{}, create<ast::Variable>(
+                        Source{},                          // source
+                        "local" + member_name,             // name
+                        ast::StorageClass::kNone,          // storage_class
+                        member_type,                       // type
+                        false,                             // is_const
+                        nullptr,                           // constructor
+                        ast::VariableDecorationList{})));  // decorations
     }
 
     for (auto member : members) {
@@ -448,10 +451,12 @@ class InspectorHelper {
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
       body->append(create<ast::AssignmentStatement>(
+          Source{},
           create<ast::IdentifierExpression>(
               Source{}, mod()->RegisterSymbol("local" + member_name),
               "local" + member_name),
-          create<ast::MemberAccessorExpression>(Source{},
+          create<ast::MemberAccessorExpression>(
+              Source{},
               create<ast::IdentifierExpression>(
                   Source{}, mod()->RegisterSymbol(struct_name), struct_name),
               create<ast::IdentifierExpression>(
@@ -578,7 +583,7 @@ class InspectorHelper {
       ast::FunctionDecorationList decorations = {}) {
     std::string result_name = "sampler_result";
 
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
 
     auto* call_result =
         create<ast::Variable>(Source{},                        // source
@@ -588,7 +593,7 @@ class InspectorHelper {
                               false,                           // is_const
                               nullptr,                         // constructor
                               ast::VariableDecorationList{});  // decorations
-    body->append(create<ast::VariableDeclStatement>(call_result));
+    body->append(create<ast::VariableDeclStatement>(Source{}, call_result));
 
     ast::ExpressionList call_params;
     call_params.push_back(create<ast::IdentifierExpression>(
@@ -604,6 +609,7 @@ class InspectorHelper {
         call_params);
 
     body->append(create<ast::AssignmentStatement>(
+        Source{},
         create<ast::IdentifierExpression>(
             Source{}, mod()->RegisterSymbol("sampler_result"),
             "sampler_result"),
@@ -634,7 +640,7 @@ class InspectorHelper {
       ast::FunctionDecorationList decorations = {}) {
     std::string result_name = "sampler_result";
 
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
 
     auto* call_result =
         create<ast::Variable>(Source{},                        // source
@@ -644,7 +650,7 @@ class InspectorHelper {
                               false,                           // is_const
                               nullptr,                         // constructor
                               ast::VariableDecorationList{});  // decorations
-    body->append(create<ast::VariableDeclStatement>(call_result));
+    body->append(create<ast::VariableDeclStatement>(Source{}, call_result));
 
     ast::ExpressionList call_params;
     call_params.push_back(create<ast::IdentifierExpression>(
@@ -662,6 +668,7 @@ class InspectorHelper {
         call_params);
 
     body->append(create<ast::AssignmentStatement>(
+        Source{},
         create<ast::IdentifierExpression>(
             Source{}, mod()->RegisterSymbol("sampler_result"),
             "sampler_result"),
@@ -693,7 +700,7 @@ class InspectorHelper {
       ast::FunctionDecorationList decorations = {}) {
     std::string result_name = "sampler_result";
 
-    auto* body = create<ast::BlockStatement>();
+    auto* body = create<ast::BlockStatement>(Source{});
 
     auto* call_result =
         create<ast::Variable>(Source{},                        // source
@@ -703,7 +710,7 @@ class InspectorHelper {
                               false,                           // is_const
                               nullptr,                         // constructor
                               ast::VariableDecorationList{});  // decorations
-    body->append(create<ast::VariableDeclStatement>(call_result));
+    body->append(create<ast::VariableDeclStatement>(Source{}, call_result));
 
     ast::ExpressionList call_params;
     call_params.push_back(create<ast::IdentifierExpression>(
@@ -722,6 +729,7 @@ class InspectorHelper {
         call_params);
 
     body->append(create<ast::AssignmentStatement>(
+        Source{},
         create<ast::IdentifierExpression>(
             Source{}, mod()->RegisterSymbol("sampler_result"),
             "sampler_result"),
@@ -1551,9 +1559,9 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(call_expr));
+    body->append(create<ast::CallStatement>(Source{}, call_expr));
   };
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
 
   AddFuncCall(body, "ub_foo_func");
   AddFuncCall(body, "ub_bar_func");
@@ -1699,9 +1707,9 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(call_expr));
+    body->append(create<ast::CallStatement>(Source{}, call_expr));
   };
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
 
   AddFuncCall(body, "sb_foo_func");
   AddFuncCall(body, "sb_bar_func");
@@ -1874,9 +1882,9 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(call_expr));
+    body->append(create<ast::CallStatement>(Source{}, call_expr));
   };
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
 
   AddFuncCall(body, "sb_foo_func");
   AddFuncCall(body, "sb_bar_func");

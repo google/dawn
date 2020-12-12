@@ -30,17 +30,17 @@ TEST_F(BreakStatementTest, Creation_WithSource) {
 }
 
 TEST_F(BreakStatementTest, IsBreak) {
-  BreakStatement stmt;
+  BreakStatement stmt(Source{});
   EXPECT_TRUE(stmt.Is<BreakStatement>());
 }
 
 TEST_F(BreakStatementTest, IsValid) {
-  BreakStatement stmt;
+  BreakStatement stmt(Source{});
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(BreakStatementTest, ToStr) {
-  BreakStatement stmt;
+  BreakStatement stmt(Source{});
   std::ostringstream out;
   stmt.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Break{}

@@ -464,17 +464,18 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
 
   ast::type::I32 i32;
 
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::ScalarConstructorExpression>(
                     Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
-  auto* else_stmt = create<ast::ElseStatement>(body);
+  auto* else_stmt = create<ast::ElseStatement>(Source{}, nullptr, body);
 
-  body = create<ast::BlockStatement>();
+  body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::ScalarConstructorExpression>(
                     Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
   auto* else_if_stmt = create<ast::ElseStatement>(
+      Source{},
       create<ast::BinaryExpression>(
           Source{}, ast::BinaryOp::kLogicalOr,
           create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
@@ -483,7 +484,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
                                             "c")),
       body);
 
-  body = create<ast::BlockStatement>();
+  body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(
       Source{}, create<ast::ScalarConstructorExpression>(
                     Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
@@ -563,11 +564,12 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
       create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("d"), "d");
 
   ast::AssignmentStatement expr(
-      a, create<ast::BinaryExpression>(
-             Source{}, ast::BinaryOp::kLogicalAnd,
-             create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kLogicalOr,
-                                           b, c),
-             d));
+      Source{}, a,
+      create<ast::BinaryExpression>(
+          Source{}, ast::BinaryOp::kLogicalAnd,
+          create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kLogicalOr, b,
+                                        c),
+          d));
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
@@ -606,7 +608,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
                                 d),                          // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement expr(var);
+  ast::VariableDeclStatement expr(Source{}, var);
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
@@ -657,9 +659,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   ast::type::Void void_type;
 
-  auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("foo"), "foo", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("foo"), "foo",
+                                     ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>(Source{}),
+                                     ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ast::ExpressionList params;
@@ -688,11 +691,12 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
           create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("d"),
                                             "d"))));
 
-  ast::CallStatement expr(create<ast::CallExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("foo"),
-                                        "foo"),
-      params));
+  ast::CallStatement expr(Source{},
+                          create<ast::CallExpression>(
+                              Source{},
+                              create<ast::IdentifierExpression>(
+                                  Source{}, mod.RegisterSymbol("foo"), "foo"),
+                              params));
 
   ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;

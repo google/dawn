@@ -29,10 +29,6 @@ namespace ast {
 class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
  public:
   /// Constructor
-  /// @param lhs the left side of the expression
-  /// @param rhs the right side of the expression
-  AssignmentStatement(Expression* lhs, Expression* rhs);
-  /// Constructor
   /// @param source the assignment statement source
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression

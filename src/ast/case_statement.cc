@@ -22,11 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::CaseStatement);
 namespace tint {
 namespace ast {
 
-CaseStatement::CaseStatement(BlockStatement* body) : Base(), body_(body) {}
-
-CaseStatement::CaseStatement(CaseSelectorList selectors, BlockStatement* body)
-    : Base(), selectors_(selectors), body_(body) {}
-
 CaseStatement::CaseStatement(const Source& source,
                              CaseSelectorList selectors,
                              BlockStatement* body)

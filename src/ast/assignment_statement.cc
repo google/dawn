@@ -22,9 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::AssignmentStatement);
 namespace tint {
 namespace ast {
 
-AssignmentStatement::AssignmentStatement(Expression* lhs, Expression* rhs)
-    : Base(), lhs_(lhs), rhs_(rhs) {}
-
 AssignmentStatement::AssignmentStatement(const Source& source,
                                          Expression* lhs,
                                          Expression* rhs)

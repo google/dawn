@@ -51,7 +51,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -70,7 +70,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -91,7 +91,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -123,7 +123,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -145,7 +145,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -165,7 +165,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -184,7 +184,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -206,7 +206,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
                             ident,                           // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float a = initializer;
@@ -230,7 +230,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
                             zero_vec,                        // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);

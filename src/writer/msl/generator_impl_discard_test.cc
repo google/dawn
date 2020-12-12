@@ -26,7 +26,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Discard) {
-  ast::DiscardStatement stmt;
+  ast::DiscardStatement stmt(Source{});
 
   gen.increment_indent();
 

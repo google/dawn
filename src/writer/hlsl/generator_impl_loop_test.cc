@@ -34,10 +34,10 @@ namespace {
 using HlslGeneratorImplTest_Loop = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
 
-  ast::LoopStatement l(body, {});
+  ast::LoopStatement l(Source{}, body, {});
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &l)) << gen.error();
@@ -48,13 +48,13 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
 
-  auto* continuing = create<ast::BlockStatement>();
+  auto* continuing = create<ast::BlockStatement>(Source{});
   continuing->append(create<ast::ReturnStatement>(Source{}));
 
-  ast::LoopStatement l(body, continuing);
+  ast::LoopStatement l(Source{}, body, continuing);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &l)) << gen.error();
@@ -75,15 +75,15 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   ast::type::F32 f32;
 
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::DiscardStatement>());
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::DiscardStatement>(Source{}));
 
-  auto* continuing = create<ast::BlockStatement>();
+  auto* continuing = create<ast::BlockStatement>(Source{});
   continuing->append(create<ast::ReturnStatement>(Source{}));
 
-  auto* inner = create<ast::LoopStatement>(body, continuing);
+  auto* inner = create<ast::LoopStatement>(Source{}, body, continuing);
 
-  body = create<ast::BlockStatement>();
+  body = create<ast::BlockStatement>(Source{});
   body->append(inner);
 
   auto* lhs = create<ast::IdentifierExpression>(
@@ -91,10 +91,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   auto* rhs = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  continuing = create<ast::BlockStatement>();
-  continuing->append(create<ast::AssignmentStatement>(lhs, rhs));
+  continuing = create<ast::BlockStatement>(Source{});
+  continuing->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
 
-  ast::LoopStatement outer(body, continuing);
+  ast::LoopStatement outer(Source{}, body, continuing);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &outer)) << gen.error();
@@ -157,9 +157,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
           create<ast::FloatLiteral>(Source{}, &f32, 2.4)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
-  auto* body = create<ast::BlockStatement>();
-  body->append(create<ast::VariableDeclStatement>(var));
+  auto* body = create<ast::BlockStatement>(Source{});
+  body->append(create<ast::VariableDeclStatement>(Source{}, var));
   body->append(create<ast::VariableDeclStatement>(
+      Source{},
       create<ast::Variable>(Source{},                          // source
                             "other",                           // name
                             ast::StorageClass::kFunction,      // storage_class
@@ -173,10 +174,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
   auto* rhs = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  auto* continuing = create<ast::BlockStatement>();
-  continuing->append(create<ast::AssignmentStatement>(lhs, rhs));
+  auto* continuing = create<ast::BlockStatement>(Source{});
+  continuing->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
 
-  ast::LoopStatement outer(body, continuing);
+  ast::LoopStatement outer(Source{}, body, continuing);
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &outer)) << gen.error();

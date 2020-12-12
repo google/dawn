@@ -31,7 +31,7 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Emit_If) {
   auto* cond = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
 
   ast::IfStatement i(Source{}, cond, body, ast::ElseStatementList{});
@@ -48,16 +48,17 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
   auto* else_cond = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
-  auto* else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>(Source{});
   else_body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* cond = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
 
-  ast::IfStatement i(Source{}, cond, body,
-                     {create<ast::ElseStatement>(else_cond, else_body)});
+  ast::IfStatement i(
+      Source{}, cond, body,
+      {create<ast::ElseStatement>(Source{}, else_cond, else_body)});
 
   gen.increment_indent();
 
@@ -71,16 +72,17 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
-  auto* else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>(Source{});
   else_body->append(create<ast::ReturnStatement>(Source{}));
 
   auto* cond = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
 
-  ast::IfStatement i(Source{}, cond, body,
-                     {create<ast::ElseStatement>(else_body)});
+  ast::IfStatement i(
+      Source{}, cond, body,
+      {create<ast::ElseStatement>(Source{}, nullptr, else_body)});
 
   gen.increment_indent();
 
@@ -97,22 +99,23 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
   auto* else_cond = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
 
-  auto* else_body = create<ast::BlockStatement>();
+  auto* else_body = create<ast::BlockStatement>(Source{});
   else_body->append(create<ast::ReturnStatement>(Source{}));
 
-  auto* else_body_2 = create<ast::BlockStatement>();
+  auto* else_body_2 = create<ast::BlockStatement>(Source{});
   else_body_2->append(create<ast::ReturnStatement>(Source{}));
 
   auto* cond = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>();
+  auto* body = create<ast::BlockStatement>(Source{});
   body->append(create<ast::ReturnStatement>(Source{}));
 
-  ast::IfStatement i(Source{}, cond, body,
-                     {
-                         create<ast::ElseStatement>(else_cond, else_body),
-                         create<ast::ElseStatement>(else_body_2),
-                     });
+  ast::IfStatement i(
+      Source{}, cond, body,
+      {
+          create<ast::ElseStatement>(Source{}, else_cond, else_body),
+          create<ast::ElseStatement>(Source{}, nullptr, else_body_2),
+      });
 
   gen.increment_indent();
 

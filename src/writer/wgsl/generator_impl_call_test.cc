@@ -60,7 +60,8 @@ TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
   params.push_back(create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("param2"), "param2"));
 
-  ast::CallStatement call(create<ast::CallExpression>(Source{}, id, params));
+  ast::CallStatement call(Source{},
+                          create<ast::CallExpression>(Source{}, id, params));
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();

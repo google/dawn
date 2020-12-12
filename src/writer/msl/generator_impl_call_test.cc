@@ -38,9 +38,10 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
       Source{}, mod.RegisterSymbol("my_func"), "my_func");
   ast::CallExpression call(Source{}, id, {});
 
-  auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
+                                     "my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>(Source{}),
+                                     ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -59,9 +60,10 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
       Source{}, mod.RegisterSymbol("param2"), "param2"));
   ast::CallExpression call(Source{}, id, params);
 
-  auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
+                                     "my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>(Source{}),
+                                     ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
@@ -78,11 +80,13 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
       Source{}, mod.RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("param2"), "param2"));
-  ast::CallStatement call(create<ast::CallExpression>(Source{}, id, params));
+  ast::CallStatement call(Source{},
+                          create<ast::CallExpression>(Source{}, id, params));
 
-  auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(), ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
+                                     "my_func", ast::VariableList{}, &void_type,
+                                     create<ast::BlockStatement>(Source{}),
+                                     ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   gen.increment_indent();

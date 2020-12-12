@@ -28,8 +28,9 @@ namespace ast {
 class CallStatement : public Castable<CallStatement, Statement> {
  public:
   /// Constructor
+  /// @param source the input source for the statement
   /// @param call the function
-  explicit CallStatement(CallExpression* call);
+  CallStatement(const Source& source, CallExpression* call);
   /// Move constructor
   CallStatement(CallStatement&&);
   ~CallStatement() override;

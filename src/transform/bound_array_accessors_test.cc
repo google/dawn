@@ -91,7 +91,7 @@ class BoundArrayAccessorsTest : public testing::Test {
 };
 
 struct ModuleBuilder : public ast::BuilderWithModule {
-  ModuleBuilder() : body_(create<ast::BlockStatement>()) {
+  ModuleBuilder() : body_(create<ast::BlockStatement>(Source{})) {
     mod->AddFunction(create<ast::Function>(
         Source{}, mod->RegisterSymbol("func"), "func", ast::VariableList{},
         ty.void_, body_, ast::FunctionDecorationList{}));
@@ -106,7 +106,7 @@ struct ModuleBuilder : public ast::BuilderWithModule {
   virtual void Build() = 0;
   void OnVariableBuilt(ast::Variable* var) override {
     ASSERT_NE(body_, nullptr);
-    body_->append(create<ast::VariableDeclStatement>(var));
+    body_->append(create<ast::VariableDeclStatement>(Source{}, var));
   }
   ast::BlockStatement* body_ = nullptr;
 };

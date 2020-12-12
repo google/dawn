@@ -27,8 +27,8 @@ using IfStatementTest = TestHelper;
 TEST_F(IfStatementTest, Creation) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{Source::Location{20, 2}}, cond, body,
                    ElseStatementList{});
@@ -38,7 +38,7 @@ TEST_F(IfStatementTest, Creation) {
 }
 
 TEST_F(IfStatementTest, IsIf) {
-  IfStatement stmt(Source{}, nullptr, create<BlockStatement>(),
+  IfStatement stmt(Source{}, nullptr, create<BlockStatement>(Source{}),
                    ElseStatementList{});
   EXPECT_TRUE(stmt.Is<IfStatement>());
 }
@@ -46,8 +46,8 @@ TEST_F(IfStatementTest, IsIf) {
 TEST_F(IfStatementTest, IsValid) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body, ElseStatementList{});
   EXPECT_TRUE(stmt.IsValid());
@@ -56,23 +56,25 @@ TEST_F(IfStatementTest, IsValid) {
 TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body,
                    {
                        create<ElseStatement>(
+                           Source{},
                            create<IdentifierExpression>(
                                Source{}, mod.RegisterSymbol("Ident"), "Ident"),
-                           create<BlockStatement>()),
-                       create<ElseStatement>(create<BlockStatement>()),
+                           create<BlockStatement>(Source{})),
+                       create<ElseStatement>(Source{}, nullptr,
+                                             create<BlockStatement>(Source{})),
                    });
   EXPECT_TRUE(stmt.IsValid());
 }
 
 TEST_F(IfStatementTest, IsValid_MissingCondition) {
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, nullptr, body, ElseStatementList{});
   EXPECT_FALSE(stmt.IsValid());
@@ -81,8 +83,8 @@ TEST_F(IfStatementTest, IsValid_MissingCondition) {
 TEST_F(IfStatementTest, IsValid_InvalidCondition) {
   auto* cond =
       create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body, ElseStatementList{});
   EXPECT_FALSE(stmt.IsValid());
@@ -91,8 +93,8 @@ TEST_F(IfStatementTest, IsValid_InvalidCondition) {
 TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
   body->append(nullptr);
 
   IfStatement stmt(Source{}, cond, body, ElseStatementList{});
@@ -102,9 +104,10 @@ TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
 TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
-  body->append(create<IfStatement>(Source{}, nullptr, create<BlockStatement>(),
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
+  body->append(create<IfStatement>(Source{}, nullptr,
+                                   create<BlockStatement>(Source{}),
                                    ast::ElseStatementList{}));
 
   IfStatement stmt(Source{}, cond, body, ElseStatementList{});
@@ -114,16 +117,18 @@ TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
 TEST_F(IfStatementTest, IsValid_NullElseStatement) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body,
                    {
                        create<ElseStatement>(
+                           Source{},
                            create<IdentifierExpression>(
                                Source{}, mod.RegisterSymbol("Ident"), "Ident"),
-                           create<BlockStatement>()),
-                       create<ElseStatement>(create<BlockStatement>()),
+                           create<BlockStatement>(Source{})),
+                       create<ElseStatement>(Source{}, nullptr,
+                                             create<BlockStatement>(Source{})),
                        nullptr,
                    });
   EXPECT_FALSE(stmt.IsValid());
@@ -132,15 +137,16 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
 TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(
       Source{}, cond, body,
       {
-          create<ElseStatement>(create<IdentifierExpression>(
+          create<ElseStatement>(Source{},
+                                create<IdentifierExpression>(
                                     Source{}, mod.RegisterSymbol(""), ""),
-                                create<BlockStatement>()),
+                                create<BlockStatement>(Source{})),
       });
   EXPECT_FALSE(stmt.IsValid());
 }
@@ -148,13 +154,15 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
 TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body,
                    {
-                       create<ElseStatement>(create<BlockStatement>()),
-                       create<ElseStatement>(create<BlockStatement>()),
+                       create<ElseStatement>(Source{}, nullptr,
+                                             create<BlockStatement>(Source{})),
+                       create<ElseStatement>(Source{}, nullptr,
+                                             create<BlockStatement>(Source{})),
                    });
   EXPECT_FALSE(stmt.IsValid());
 }
@@ -162,16 +170,18 @@ TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
 TEST_F(IfStatementTest, IsValid_ElseNotLast) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body,
                    {
-                       create<ElseStatement>(create<BlockStatement>()),
+                       create<ElseStatement>(Source{}, nullptr,
+                                             create<BlockStatement>(Source{})),
                        create<ElseStatement>(
+                           Source{},
                            create<IdentifierExpression>(
                                Source{}, mod.RegisterSymbol("ident"), "ident"),
-                           create<BlockStatement>()),
+                           create<BlockStatement>(Source{})),
                    });
   EXPECT_FALSE(stmt.IsValid());
 }
@@ -179,8 +189,8 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
 TEST_F(IfStatementTest, ToStr) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body, ElseStatementList{});
 
@@ -200,23 +210,24 @@ TEST_F(IfStatementTest, ToStr) {
 TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   auto* cond = create<IdentifierExpression>(Source{},
                                             mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
-  auto* else_if_body = create<BlockStatement>();
-  else_if_body->append(create<DiscardStatement>());
+  auto* else_if_body = create<BlockStatement>(Source{});
+  else_if_body->append(create<DiscardStatement>(Source{}));
 
-  auto* else_body = create<BlockStatement>();
-  else_body->append(create<DiscardStatement>());
-  else_body->append(create<DiscardStatement>());
+  auto* else_body = create<BlockStatement>(Source{});
+  else_body->append(create<DiscardStatement>(Source{}));
+  else_body->append(create<DiscardStatement>(Source{}));
 
   IfStatement stmt(Source{}, cond, body,
                    {
                        create<ElseStatement>(
+                           Source{},
                            create<IdentifierExpression>(
                                Source{}, mod.RegisterSymbol("ident"), "ident"),
                            else_if_body),
-                       create<ElseStatement>(else_body),
+                       create<ElseStatement>(Source{}, nullptr, else_body),
                    });
 
   std::ostringstream out;

@@ -32,7 +32,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
       Source{}, mod.RegisterSymbol("lhs"), "lhs");
   auto* rhs = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("rhs"), "rhs");
-  ast::AssignmentStatement assign(lhs, rhs);
+  ast::AssignmentStatement assign(Source{}, lhs, rhs);
 
   gen.increment_indent();
 

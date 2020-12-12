@@ -28,8 +28,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Block) {
-  ast::BlockStatement b;
-  b.append(create<ast::DiscardStatement>());
+  ast::BlockStatement b(Source{});
+  b.append(create<ast::DiscardStatement>(Source{}));
 
   gen.increment_indent();
 
@@ -41,8 +41,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Block) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Block_WithoutNewline) {
-  ast::BlockStatement b;
-  b.append(create<ast::DiscardStatement>());
+  ast::BlockStatement b(Source{});
+  b.append(create<ast::DiscardStatement>(Source{}));
 
   gen.increment_indent();
 

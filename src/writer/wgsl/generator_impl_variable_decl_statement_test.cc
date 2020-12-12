@@ -41,7 +41,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -63,7 +63,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 
@@ -82,7 +82,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(var);
+  ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
 

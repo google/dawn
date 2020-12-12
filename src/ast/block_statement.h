@@ -28,8 +28,6 @@ namespace ast {
 class BlockStatement : public Castable<BlockStatement, Statement> {
  public:
   /// Constructor
-  BlockStatement();
-  /// Constructor
   /// @param source the block statement source
   explicit BlockStatement(const Source& source);
   /// Move constructor

@@ -44,7 +44,7 @@ TEST_F(FunctionTest, Creation) {
   auto* var = params[0];
 
   Function f(Source{}, func_sym, "func", params, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
   EXPECT_EQ(f.symbol(), func_sym);
   EXPECT_EQ(f.name(), "func");
   ASSERT_EQ(f.params().size(), 1u);
@@ -64,7 +64,8 @@ TEST_F(FunctionTest, Creation_WithSource) {
                                     ast::VariableDecorationList{}));
 
   Function f(Source{Source::Location{20, 2}}, func_sym, "func", params,
-             &void_type, create<BlockStatement>(), FunctionDecorationList{});
+             &void_type, create<BlockStatement>(Source{}),
+             FunctionDecorationList{});
   auto src = f.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -79,7 +80,7 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   Variable v(Source{}, "var", StorageClass::kInput, &i32, false, nullptr,
              ast::VariableDecorationList{});
   Function f(Source{}, func_sym, "func", VariableList{}, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
 
   f.add_referenced_module_variable(&v);
   ASSERT_EQ(f.referenced_module_variables().size(), 1u);
@@ -126,7 +127,7 @@ TEST_F(FunctionTest, GetReferenceLocations) {
       });
 
   Function f(Source{}, func_sym, "func", VariableList{}, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
 
   f.add_referenced_module_variable(loc1);
   f.add_referenced_module_variable(builtin1);
@@ -173,7 +174,7 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
       });
 
   Function f(Source{}, func_sym, "func", VariableList{}, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
 
   f.add_referenced_module_variable(loc1);
   f.add_referenced_module_variable(builtin1);
@@ -196,7 +197,7 @@ TEST_F(FunctionTest, AddDuplicateEntryPoints) {
   auto main_sym = mod.RegisterSymbol("main");
 
   Function f(Source{}, func_sym, "func", VariableList{}, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
 
   f.add_ancestor_entry_point(main_sym);
   ASSERT_EQ(1u, f.ancestor_entry_points().size());
@@ -218,8 +219,8 @@ TEST_F(FunctionTest, IsValid) {
                                     false, nullptr,
                                     ast::VariableDecorationList{}));
 
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   Function f(Source{}, func_sym, "func", params, &void_type, body,
              FunctionDecorationList{});
@@ -237,8 +238,8 @@ TEST_F(FunctionTest, IsValid_InvalidName) {
                                     false, nullptr,
                                     ast::VariableDecorationList{}));
 
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   Function f(Source{}, func_sym, "", params, &void_type, body,
              FunctionDecorationList{});
@@ -256,7 +257,7 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
                                     ast::VariableDecorationList{}));
 
   Function f(Source{}, func_sym, "func", params, nullptr,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -273,7 +274,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
   params.push_back(nullptr);
 
   Function f(Source{}, func_sym, "func", params, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -288,7 +289,7 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
                                     ast::VariableDecorationList{}));
 
   Function f(Source{}, func_sym, "func", params, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
   EXPECT_FALSE(f.IsValid());
 }
 
@@ -303,8 +304,8 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
                                     false, nullptr,
                                     ast::VariableDecorationList{}));
 
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
   body->append(nullptr);
 
   Function f(Source{}, func_sym, "func", params, &void_type, body,
@@ -324,8 +325,8 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
                                     false, nullptr,
                                     ast::VariableDecorationList{}));
 
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
   body->append(nullptr);
 
   Function f(Source{}, func_sym, "func", params, &void_type, body,
@@ -339,8 +340,8 @@ TEST_F(FunctionTest, ToStr) {
 
   auto func_sym = mod.RegisterSymbol("func");
 
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   Function f(Source{}, func_sym, "func", {}, &void_type, body,
              FunctionDecorationList{});
@@ -361,8 +362,8 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
 
   auto func_sym = mod.RegisterSymbol("func");
 
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   Function f(
       Source{}, func_sym, "func", {}, &void_type, body,
@@ -390,8 +391,8 @@ TEST_F(FunctionTest, ToStr_WithParams) {
                                     false, nullptr,
                                     ast::VariableDecorationList{}));
 
-  auto* body = create<BlockStatement>();
-  body->append(create<DiscardStatement>());
+  auto* body = create<BlockStatement>(Source{});
+  body->append(create<DiscardStatement>(Source{}));
 
   Function f(Source{}, func_sym, "func", params, &void_type, body,
              FunctionDecorationList{});
@@ -418,7 +419,7 @@ TEST_F(FunctionTest, TypeName) {
   auto func_sym = mod.RegisterSymbol("func");
 
   Function f(Source{}, func_sym, "func", {}, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
   EXPECT_EQ(f.type_name(), "__func__void");
 }
 
@@ -438,7 +439,7 @@ TEST_F(FunctionTest, TypeName_WithParams) {
                                     ast::VariableDecorationList{}));
 
   Function f(Source{}, func_sym, "func", params, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
   EXPECT_EQ(f.type_name(), "__func__void__i32__f32");
 }
 
@@ -448,8 +449,8 @@ TEST_F(FunctionTest, GetLastStatement) {
   auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
-  auto* body = create<BlockStatement>();
-  auto* stmt = create<DiscardStatement>();
+  auto* body = create<BlockStatement>(Source{});
+  auto* stmt = create<DiscardStatement>(Source{});
   body->append(stmt);
   Function f(Source{}, func_sym, "func", params, &void_type, body,
              FunctionDecorationList{});
@@ -463,7 +464,7 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
   auto func_sym = mod.RegisterSymbol("func");
 
   VariableList params;
-  auto* body = create<BlockStatement>();
+  auto* body = create<BlockStatement>(Source{});
   Function f(Source{}, func_sym, "func", params, &void_type, body,
              FunctionDecorationList{});
 
@@ -476,7 +477,7 @@ TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
   auto func_sym = mod.RegisterSymbol("func");
 
   Function f(Source{}, func_sym, "func", {}, &void_type,
-             create<BlockStatement>(), FunctionDecorationList{});
+             create<BlockStatement>(Source{}), FunctionDecorationList{});
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
@@ -492,7 +493,7 @@ TEST_F(FunctionTest, WorkgroupSize) {
   auto func_sym = mod.RegisterSymbol("func");
 
   Function f(Source{}, func_sym, "func", {}, &void_type,
-             create<BlockStatement>(),
+             create<BlockStatement>(Source{}),
              {create<WorkgroupDecoration>(2u, 4u, 6u, Source{})});
 
   uint32_t x = 0;

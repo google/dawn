@@ -27,8 +27,6 @@ namespace ast {
 class ContinueStatement : public Castable<ContinueStatement, Statement> {
  public:
   /// Constructor
-  ContinueStatement();
-  /// Constructor
   /// @param source the continue statement source
   explicit ContinueStatement(const Source& source);
   /// Move constructor
