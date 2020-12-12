@@ -62,8 +62,6 @@ class Node : public Castable<Node> {
 
  protected:
   /// Create a new node
-  Node();
-  /// Create a new node
   /// @param source the input source for the node
   explicit Node(const Source& source);
   /// Move constructor

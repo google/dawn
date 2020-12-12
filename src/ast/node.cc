@@ -21,8 +21,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::Node);
 namespace tint {
 namespace ast {
 
-Node::Node() = default;
-
 Node::Node(const Source& source) : source_(source) {}
 
 Node::Node(Node&&) = default;

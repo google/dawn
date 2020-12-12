@@ -23,6 +23,8 @@ namespace ast {
 namespace {
 
 struct Cloneable : public Castable<Cloneable, Node> {
+  Cloneable() : Base(Source{}) {}
+
   Cloneable* a = nullptr;
   Cloneable* b = nullptr;
   Cloneable* c = nullptr;
