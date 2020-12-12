@@ -1311,7 +1311,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   members.push_back(
       create<ast::StructMember>(Source{}, "a", ty.array<f32>(), decos));
 
-  auto* s = create<ast::Struct>(members);
+  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type("my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
@@ -1353,7 +1353,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   members.push_back(
       create<ast::StructMember>(Source{}, "a", ty.array<f32>(), decos));
 
-  auto* s = create<ast::Struct>(members);
+  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type("my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
@@ -1397,7 +1397,7 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   members.push_back(
       create<ast::StructMember>(Source{}, "a", ty.array<f32>(), decos));
 
-  auto* s = create<ast::Struct>(members);
+  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type("my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);

@@ -41,7 +41,8 @@ using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
   StructMemberList members;
-  auto* impl = create<ast::Struct>(members);
+  auto* impl =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   auto* ptr = impl;
   Struct s{"S", impl};
   EXPECT_EQ(s.impl(), ptr);
@@ -49,7 +50,8 @@ TEST_F(StructTest, Creation) {
 
 TEST_F(StructTest, Is) {
   StructMemberList members;
-  auto* impl = create<ast::Struct>(members);
+  auto* impl =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   Struct s{"S", impl};
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
@@ -69,7 +71,8 @@ TEST_F(StructTest, Is) {
 
 TEST_F(StructTest, TypeName) {
   StructMemberList members;
-  auto* impl = create<ast::Struct>(members);
+  auto* impl =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   Struct s{"my_struct", impl};
   EXPECT_EQ(s.type_name(), "__struct_my_struct");
 }
@@ -90,7 +93,7 @@ TEST_F(StructTest, MinBufferBindingSize) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -120,7 +123,7 @@ TEST_F(StructTest, MinBufferBindingSizeArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(32u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -151,7 +154,7 @@ TEST_F(StructTest, MinBufferBindingSizeRuntimeArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(12u,
             struct_type.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
@@ -169,7 +172,7 @@ TEST_F(StructTest, MinBufferBindingSizeVec2) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -188,7 +191,7 @@ TEST_F(StructTest, MinBufferBindingSizeVec3) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -208,7 +211,7 @@ TEST_F(StructTest, MinBufferBindingSizeVec4) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u,
             struct_type.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -232,7 +235,7 @@ TEST_F(StructTest, BaseAlignment) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -261,7 +264,7 @@ TEST_F(StructTest, BaseAlignmentArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -290,7 +293,7 @@ TEST_F(StructTest, BaseAlignmentRuntimeArray) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(4u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
@@ -307,7 +310,7 @@ TEST_F(StructTest, BaseAlignmentVec2) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -325,7 +328,7 @@ TEST_F(StructTest, BaseAlignmentVec3) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -343,7 +346,7 @@ TEST_F(StructTest, BaseAlignmentVec4) {
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
   Struct struct_type("struct_type", str);
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(16u, struct_type.BaseAlignment(MemoryLayout::kStorageBuffer));

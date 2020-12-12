@@ -942,10 +942,13 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
   ast::StructMemberDecorationList decos;
-  auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
-      create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
-  });
+  auto* s = create<ast::Struct>(
+      Source{},
+      ast::StructMemberList{
+          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+          create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
+      },
+      ast::StructDecorationList{});
   ast::type::Struct s_type("my_struct", s);
 
   auto* t = Construct(&s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
@@ -1079,9 +1082,12 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   ast::StructMemberDecorationList decos;
-  auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
-  });
+  auto* s = create<ast::Struct>(
+      Source{},
+      ast::StructMemberList{
+          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+      },
+      ast::StructDecorationList{});
   ast::type::Struct s_type("my_struct", s);
 
   auto* t = Construct(&s_type);
@@ -1491,10 +1497,13 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
   ast::StructMemberDecorationList decos;
-  auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
-      create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
-  });
+  auto* s = create<ast::Struct>(
+      Source{},
+      ast::StructMemberList{
+          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+          create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
+      },
+      ast::StructDecorationList{});
   ast::type::Struct s_type("my_struct", s);
 
   auto* t = Construct(&s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
@@ -1508,10 +1517,13 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_Struct_WithIdentSubExpression) {
   ast::StructMemberDecorationList decos;
-  auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "a", ty.f32, decos),
-      create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
-  });
+  auto* s = create<ast::Struct>(
+      Source{},
+      ast::StructMemberList{
+          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+          create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
+      },
+      ast::StructDecorationList{});
 
   ast::type::Struct s_type("my_struct", s);
 

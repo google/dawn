@@ -23,23 +23,12 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::Struct);
 namespace tint {
 namespace ast {
 
-Struct::Struct(StructMemberList members)
-    : Base(), members_(std::move(members)) {}
-
-Struct::Struct(StructDecorationList decorations, StructMemberList members)
-    : Base(),
-      decorations_(std::move(decorations)),
-      members_(std::move(members)) {}
-
-Struct::Struct(const Source& source, StructMemberList members)
-    : Base(source), members_(std::move(members)) {}
-
 Struct::Struct(const Source& source,
-               StructDecorationList decorations,
-               StructMemberList members)
+               StructMemberList members,
+               StructDecorationList decorations)
     : Base(source),
-      decorations_(std::move(decorations)),
-      members_(std::move(members)) {}
+      members_(std::move(members)),
+      decorations_(std::move(decorations)) {}
 
 Struct::Struct(Struct&&) = default;
 
@@ -64,8 +53,8 @@ bool Struct::IsBlockDecorated() const {
 }
 
 Struct* Struct::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Struct>(
-      ctx->Clone(source()), ctx->Clone(decorations_), ctx->Clone(members_));
+  return ctx->mod->create<Struct>(ctx->Clone(source()), ctx->Clone(members_),
+                                  ctx->Clone(decorations_));
 }
 
 bool Struct::IsValid() const {

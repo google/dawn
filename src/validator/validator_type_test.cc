@@ -56,7 +56,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   }
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(decos, members);
+  auto* st = create<ast::Struct>(Source{}, members, decos);
   ast::type::Struct struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
@@ -82,7 +82,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
         Source{Source::Location{12, 34}}, "rt", &arr, deco));
   }
   ast::StructDecorationList decos;
-  auto* st = create<ast::Struct>(decos, members);
+  auto* st = create<ast::Struct>(Source{}, members, decos);
   ast::type::Struct struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
@@ -113,7 +113,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   }
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(decos, members);
+  auto* st = create<ast::Struct>(Source{}, members, decos);
   ast::type::Struct struct_type("Foo", st);
 
   mod()->AddConstructedType(&struct_type);
@@ -148,7 +148,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(decos, members);
+  auto* st = create<ast::Struct>(Source{}, members, decos);
   ast::type::Struct struct_type("s", st);
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
@@ -181,7 +181,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   }
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(decos, members);
+  auto* st = create<ast::Struct>(Source{}, members, decos);
   ast::type::Struct struct_type("s", st);
   mod()->AddConstructedType(&struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));

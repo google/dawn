@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   ast::StructDecorationList decos;
   decos.push_back(&block_deco);
 
-  ast::Struct str(decos, members);
+  ast::Struct str(Source{}, members, decos);
   ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read)]] S");
@@ -119,7 +119,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   ast::StructDecorationList decos;
   decos.push_back(&block_deco);
 
-  ast::Struct str(decos, members);
+  ast::Struct str(Source{}, members, decos);
   ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read_write)]] S");
@@ -145,7 +145,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   ast::StructDecorationList decos;
   decos.push_back(&block_deco);
 
-  ast::Struct str(decos, members);
+  ast::Struct str(Source{}, members, decos);
   ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read), access(read_write)]] S");
@@ -168,7 +168,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   ast::StructDecorationList decos;
   decos.push_back(&block_deco);
 
-  ast::Struct str(decos, members);
+  ast::Struct str(Source{}, members, decos);
   ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
@@ -207,7 +207,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   ast::StructDecorationList decos;
   decos.push_back(&block_deco);
 
-  ast::Struct str(decos, members);
+  ast::Struct str(Source{}, members, decos);
   ast::type::Struct s("S", &str);
 
   auto p = parser("my_var : [[stride(1)]] S");

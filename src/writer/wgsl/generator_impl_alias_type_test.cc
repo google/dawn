@@ -51,7 +51,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("A", str);
   ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
@@ -79,7 +80,8 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("A", str);
   ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);

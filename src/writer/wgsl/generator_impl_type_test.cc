@@ -74,7 +74,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
   ast::StructDecorationList decos;
   decos.push_back(&block_deco);
 
-  ast::Struct str(decos, members);
+  ast::Struct str(Source{}, members, decos);
   ast::type::Struct s("S", &str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadOnly, &s);
@@ -94,7 +94,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
   ast::StructDecorationList decos;
   decos.push_back(&block_deco);
 
-  ast::Struct str(decos, members);
+  ast::Struct str(Source{}, members, decos);
   ast::type::Struct s("S", &str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadWrite, &s);
@@ -183,7 +183,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("S", str);
 
@@ -203,7 +204,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("S", str);
 
@@ -231,7 +233,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* str = create<ast::Struct>(decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, decos);
 
   ast::type::Struct s("S", str);
 

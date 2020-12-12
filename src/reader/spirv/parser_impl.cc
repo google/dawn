@@ -947,8 +947,8 @@ ast::type::Type* ParserImpl::ConvertType(
   }
 
   // Now make the struct.
-  auto* ast_struct = create<ast::Struct>(std::move(ast_struct_decorations),
-                                         std::move(ast_members));
+  auto* ast_struct = create<ast::Struct>(Source{}, std::move(ast_members),
+                                         std::move(ast_struct_decorations));
 
   namer_.SuggestSanitizedName(type_id, "S");
 

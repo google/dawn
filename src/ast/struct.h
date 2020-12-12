@@ -30,23 +30,12 @@ namespace ast {
 class Struct : public Castable<Struct, Node> {
  public:
   /// Create a new struct statement
-  /// @param members The struct members
-  explicit Struct(StructMemberList members);
-  /// Create a new struct statement
-  /// @param decorations The struct decorations
-  /// @param members The struct members
-  Struct(StructDecorationList decorations, StructMemberList members);
-  /// Create a new struct statement
   /// @param source The input source for the import statement
   /// @param members The struct members
-  Struct(const Source& source, StructMemberList members);
-  /// Create a new struct statement
-  /// @param source The input source for the import statement
   /// @param decorations The struct decorations
-  /// @param members The struct members
   Struct(const Source& source,
-         StructDecorationList decorations,
-         StructMemberList members);
+         StructMemberList members,
+         StructDecorationList decorations);
   /// Move constructor
   Struct(Struct&&);
 
@@ -85,8 +74,8 @@ class Struct : public Castable<Struct, Node> {
  private:
   Struct(const Struct&) = delete;
 
-  StructDecorationList decorations_;
   StructMemberList members_;
+  StructDecorationList decorations_;
 };
 
 }  // namespace ast

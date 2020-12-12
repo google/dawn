@@ -371,7 +371,8 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
@@ -455,7 +456,8 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
@@ -968,7 +970,8 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
@@ -1082,7 +1085,8 @@ TEST_F(MslGeneratorImplTest,
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
-  auto* str = create<ast::Struct>(members);
+  auto* str =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
@@ -1341,7 +1345,7 @@ TEST_F(MslGeneratorImplTest,
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* str = create<ast::Struct>(s_decos, members);
+  auto* str = create<ast::Struct>(Source{}, members, s_decos);
 
   ast::type::Struct s("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);

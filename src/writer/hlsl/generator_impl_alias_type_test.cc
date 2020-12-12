@@ -50,14 +50,17 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   ast::type::I32 i32;
   ast::type::F32 f32;
 
-  auto* str = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "a", &f32,
-                                ast::StructMemberDecorationList{}),
-      create<ast::StructMember>(
-          Source{}, "b", &i32,
-          ast::StructMemberDecorationList{
-              create<ast::StructMemberOffsetDecoration>(4, Source{})}),
-  });
+  auto* str = create<ast::Struct>(
+      Source{},
+      ast::StructMemberList{
+          create<ast::StructMember>(Source{}, "a", &f32,
+                                    ast::StructMemberDecorationList{}),
+          create<ast::StructMember>(
+              Source{}, "b", &i32,
+              ast::StructMemberDecorationList{
+                  create<ast::StructMemberOffsetDecoration>(4, Source{})}),
+      },
+      ast::StructDecorationList{});
 
   ast::type::Struct s("A", str);
   ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);

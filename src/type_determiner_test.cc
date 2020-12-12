@@ -1215,7 +1215,8 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   members.push_back(
       create<ast::StructMember>(Source{}, "second_member", &f32, decos));
 
-  auto* strct = create<ast::Struct>(members);
+  auto* strct =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   ast::type::Struct st("S", strct);
 
@@ -1258,7 +1259,8 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   members.push_back(
       create<ast::StructMember>(Source{}, "second_member", &f32, decos));
 
-  auto* strct = create<ast::Struct>(members);
+  auto* strct =
+      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
   auto st = std::make_unique<ast::type::Struct>("alias", strct);
   ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", st.get());
@@ -1387,7 +1389,8 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   ast::StructMemberList b_members;
   b_members.push_back(create<ast::StructMember>(Source{}, "foo", &vec4, decos));
 
-  auto* strctB = create<ast::Struct>(b_members);
+  auto* strctB =
+      create<ast::Struct>(Source{}, b_members, ast::StructDecorationList{});
   ast::type::Struct stB("B", strctB);
 
   ast::type::Vector vecB(&stB, 3);
@@ -1395,7 +1398,8 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   ast::StructMemberList a_members;
   a_members.push_back(create<ast::StructMember>(Source{}, "mem", &vecB, decos));
 
-  auto* strctA = create<ast::Struct>(a_members);
+  auto* strctA =
+      create<ast::Struct>(Source{}, a_members, ast::StructDecorationList{});
 
   ast::type::Struct stA("A", strctA);
 

@@ -265,7 +265,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
 
   auto* struct_type = mod->create<ast::type::Struct>(
       kStructName,
-      mod->create<ast::Struct>(std::move(decos), std::move(members)));
+      mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
     // The decorated variable with struct type

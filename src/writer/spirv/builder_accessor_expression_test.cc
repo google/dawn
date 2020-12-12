@@ -304,7 +304,7 @@ TEST_F(BuilderTest, MemberAccessor) {
   members.push_back(create<ast::StructMember>(Source{}, "a", &f32, decos));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
 
-  auto* s = create<ast::Struct>(members);
+  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type("my_struct", s);
 
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
@@ -360,13 +360,17 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   inner_members.push_back(
       create<ast::StructMember>(Source{}, "b", &f32, decos));
 
-  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct(
+      "Inner", create<ast::Struct>(Source{}, inner_members,
+                                   ast::StructDecorationList{}));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
       create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
 
-  ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("my_struct",
+                           create<ast::Struct>(Source{}, outer_members,
+                                               ast::StructDecorationList{}));
 
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
                     false, nullptr, ast::VariableDecorationList{});
@@ -427,7 +431,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   inner_members.push_back(
       create<ast::StructMember>(Source{}, "b", &f32, decos));
 
-  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct(
+      "Inner", create<ast::Struct>(Source{}, inner_members,
+                                   ast::StructDecorationList{}));
 
   ast::type::Alias alias(mod->RegisterSymbol("Inner"), "Inner", &inner_struct);
 
@@ -435,7 +441,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   outer_members.push_back(
       create<ast::StructMember>(Source{}, "inner", &alias, decos));
 
-  ast::type::Struct s_type("Outer", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("Outer",
+                           create<ast::Struct>(Source{}, outer_members,
+                                               ast::StructDecorationList{}));
 
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
                     false, nullptr, ast::VariableDecorationList{});
@@ -496,13 +504,17 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   inner_members.push_back(
       create<ast::StructMember>(Source{}, "b", &f32, decos));
 
-  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct(
+      "Inner", create<ast::Struct>(Source{}, inner_members,
+                                   ast::StructDecorationList{}));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
       create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
 
-  ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("my_struct",
+                           create<ast::Struct>(Source{}, outer_members,
+                                               ast::StructDecorationList{}));
 
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
                     false, nullptr, ast::VariableDecorationList{});
@@ -570,13 +582,17 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   inner_members.push_back(
       create<ast::StructMember>(Source{}, "b", &f32, decos));
 
-  ast::type::Struct inner_struct("Inner", create<ast::Struct>(inner_members));
+  ast::type::Struct inner_struct(
+      "Inner", create<ast::Struct>(Source{}, inner_members,
+                                   ast::StructDecorationList{}));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
       create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
 
-  ast::type::Struct s_type("my_struct", create<ast::Struct>(outer_members));
+  ast::type::Struct s_type("my_struct",
+                           create<ast::Struct>(Source{}, outer_members,
+                                               ast::StructDecorationList{}));
 
   ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
                     false, nullptr, ast::VariableDecorationList{});
@@ -861,18 +877,24 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   ast::StructMemberDecorationList decos;
 
-  auto* s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "baz", &vec3, decos)});
+  auto* s = create<ast::Struct>(Source{},
+                                ast::StructMemberList{create<ast::StructMember>(
+                                    Source{}, "baz", &vec3, decos)},
+                                ast::StructDecorationList{});
   ast::type::Struct c_type("C", s);
 
-  s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "bar", &c_type, decos)});
+  s = create<ast::Struct>(Source{},
+                          ast::StructMemberList{create<ast::StructMember>(
+                              Source{}, "bar", &c_type, decos)},
+                          ast::StructDecorationList{});
   ast::type::Struct b_type("B", s);
 
   ast::type::Array b_ary_type(&b_type, 3, ast::ArrayDecorationList{});
 
-  s = create<ast::Struct>(ast::StructMemberList{
-      create<ast::StructMember>(Source{}, "foo", &b_ary_type, decos)});
+  s = create<ast::Struct>(Source{},
+                          ast::StructMemberList{create<ast::StructMember>(
+                              Source{}, "foo", &b_ary_type, decos)},
+                          ast::StructDecorationList{});
   ast::type::Struct a_type("A", s);
 
   ast::type::Array a_ary_type(&a_type, 2, ast::ArrayDecorationList{});

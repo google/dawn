@@ -225,7 +225,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
 
   auto* struct_type = mod->create<ast::type::Struct>(
       kStructName,
-      mod->create<ast::Struct>(std::move(decos), std::move(members)));
+      mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   auto* idx_var = mod->create<ast::Variable>(
       Source{},                     // source
