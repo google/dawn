@@ -374,7 +374,7 @@ TEST_F(MslGeneratorImplTest,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   mod.AddConstructedType(&s);
@@ -459,7 +459,7 @@ TEST_F(MslGeneratorImplTest,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
 
   mod.AddConstructedType(&s);
@@ -973,7 +973,7 @@ TEST_F(MslGeneratorImplTest,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   mod.AddConstructedType(&s);
@@ -1088,7 +1088,7 @@ TEST_F(MslGeneratorImplTest,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
 
   mod.AddConstructedType(&s);
@@ -1347,7 +1347,7 @@ TEST_F(MslGeneratorImplTest,
 
   auto* str = create<ast::Struct>(Source{}, members, s_decos);
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var =

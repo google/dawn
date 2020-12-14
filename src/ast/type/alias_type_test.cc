@@ -208,7 +208,7 @@ TEST_F(AliasTest, MinBufferBindingSizeStruct) {
   StructDecorationList decos;
 
   auto* str = create<ast::Struct>(Source{}, members, decos);
-  Struct struct_type("struct_type", str);
+  Struct struct_type(mod.RegisterSymbol("struct_type"), "struct_type", str);
   Alias alias{mod.RegisterSymbol("alias"), "alias", &struct_type};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, alias.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
@@ -257,7 +257,7 @@ TEST_F(AliasTest, BaseAlignmentStruct) {
   StructDecorationList decos;
 
   auto* str = create<ast::Struct>(Source{}, members, decos);
-  Struct struct_type("struct_type", str);
+  Struct struct_type(mod.RegisterSymbol("struct_type"), "struct_type", str);
   Alias alias{mod.RegisterSymbol("alias"), "alias", &struct_type};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, alias.BaseAlignment(MemoryLayout::kStorageBuffer));

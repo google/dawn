@@ -271,7 +271,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   auto* str = create<ast::Struct>(Source{}, members, s_decos);
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var =

@@ -56,7 +56,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   auto* strct =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Str", strct);
+  ast::type::Struct s(mod.RegisterSymbol("Str"), "Str", strct);
 
   auto* str_var =
       create<ast::Variable>(Source{},                        // source
@@ -108,7 +108,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -162,7 +162,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -221,7 +221,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* b_var =
       create<ast::Variable>(Source{},                        // source
@@ -298,7 +298,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -363,7 +363,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -424,7 +424,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -477,7 +477,7 @@ TEST_F(
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -534,7 +534,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -595,7 +595,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -652,7 +652,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -719,7 +719,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -777,7 +777,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -840,7 +840,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -901,7 +901,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -958,7 +958,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -1034,7 +1034,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data("Data", data_str);
+  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
@@ -1051,7 +1051,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -1125,7 +1125,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data("Data", data_str);
+  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(
       &data, 4,
@@ -1139,7 +1139,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(0, Source{})})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -1215,7 +1215,7 @@ TEST_F(
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data("Data", data_str);
+  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
@@ -1230,7 +1230,7 @@ TEST_F(
               create<ast::StructMemberOffsetDecoration>(0, Source{})})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -1305,7 +1305,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data("Data", data_str);
+  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
@@ -1320,7 +1320,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(0, Source{})})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -1395,7 +1395,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data("Data", data_str);
+  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
@@ -1410,7 +1410,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(0, Source{})})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source
@@ -1495,7 +1495,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data("Data", data_str);
+  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
@@ -1510,7 +1510,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
               create<ast::StructMemberOffsetDecoration>(0, Source{})})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct("Pre", pre_str);
+  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                           // source

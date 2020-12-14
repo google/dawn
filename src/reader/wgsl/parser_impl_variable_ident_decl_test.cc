@@ -85,6 +85,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   ast::type::I32 i32;
 
+  auto p = parser("my_var : [[access(read)]] S");
+
   ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
@@ -94,9 +96,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   decos.push_back(&block_deco);
 
   ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s("S", &str);
+  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
 
-  auto p = parser("my_var : [[access(read)]] S");
   p->register_constructed("S", &s);
 
   auto decl = p->expect_variable_ident_decl("test");
@@ -111,6 +112,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   ast::type::I32 i32;
 
+  auto p = parser("my_var : [[access(read_write)]] S");
+
   ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
@@ -120,9 +123,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   decos.push_back(&block_deco);
 
   ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s("S", &str);
+  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
 
-  auto p = parser("my_var : [[access(read_write)]] S");
   p->register_constructed("S", &s);
 
   auto decl = p->expect_variable_ident_decl("test");
@@ -137,6 +139,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   ast::type::I32 i32;
 
+  auto p = parser("my_var : [[access(read), access(read_write)]] S");
+
   ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
@@ -146,9 +150,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   decos.push_back(&block_deco);
 
   ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s("S", &str);
+  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
 
-  auto p = parser("my_var : [[access(read), access(read_write)]] S");
   p->register_constructed("S", &s);
 
   auto decl = p->expect_variable_ident_decl("test");
@@ -160,6 +163,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   ast::type::I32 i32;
 
+  auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
+
   ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
@@ -169,9 +174,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   decos.push_back(&block_deco);
 
   ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s("S", &str);
+  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
 
-  auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
   p->register_constructed("S", &s);
 
   auto decl = p->expect_variable_ident_decl("test");
@@ -199,6 +203,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue) {
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   ast::type::I32 i32;
 
+  auto p = parser("my_var : [[stride(1)]] S");
+
   ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
@@ -208,9 +214,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   decos.push_back(&block_deco);
 
   ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s("S", &str);
+  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
 
-  auto p = parser("my_var : [[stride(1)]] S");
   p->register_constructed("S", &s);
 
   auto decl = p->expect_variable_ident_decl("test");

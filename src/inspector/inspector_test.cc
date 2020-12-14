@@ -310,7 +310,8 @@ class InspectorHelper {
 
     auto* str = create<ast::Struct>(Source{}, members, decos);
 
-    return std::make_unique<ast::type::Struct>(name, str);
+    return std::make_unique<ast::type::Struct>(mod()->RegisterSymbol(name),
+                                               name, str);
   }
 
   /// Generates types appropriate for using in an uniform buffer
@@ -1455,7 +1456,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   ast::StructDecorationList decos;
 
   auto* str = create<ast::Struct>(Source{}, members, decos);
-  auto foo_type = std::make_unique<ast::type::Struct>("foo_type", str);
+  auto foo_type = std::make_unique<ast::type::Struct>(
+      mod()->RegisterSymbol("foo_type"), "foo_type", str);
 
   AddUniformBuffer("foo_ub", foo_type.get(), 0, 0);
 

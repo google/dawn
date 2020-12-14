@@ -280,7 +280,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   auto* s = create<ast::Struct>(Source{}, ast::StructMemberList{},
                                 ast::StructDecorationList{});
-  ast::type::Struct s_type("S", s);
+  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -301,7 +301,7 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   members.push_back(create<ast::StructMember>(Source{}, "a", &f32, decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-  ast::type::Struct s_type("my_struct", s);
+  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -326,7 +326,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   struct_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
   auto* s = create<ast::Struct>(Source{}, members, struct_decos);
-  ast::type::Struct s_type("my_struct", s);
+  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -355,7 +355,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-  ast::type::Struct s_type("S", s);
+  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -392,7 +392,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
       create<ast::StructMember>(Source{}, "c", &glsl_mat4x4, empty_c));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-  ast::type::Struct s_type("S", s);
+  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -438,7 +438,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
       create<ast::StructMember>(Source{}, "c", &glsl_mat4x4, c_decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-  ast::type::Struct s_type("S", s);
+  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -505,7 +505,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
       create<ast::StructMember>(Source{}, "c", &glsl_mat4x4, c_decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-  ast::type::Struct s_type("S", s);
+  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();

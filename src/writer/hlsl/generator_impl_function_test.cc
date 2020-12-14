@@ -358,7 +358,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Uniforms", str);
+  ast::type::Struct s(mod.RegisterSymbol("Uniforms"), "Uniforms", str);
 
   auto* coord_var =
       create<ast::Variable>(Source{},                     // source
@@ -443,7 +443,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* coord_var =
@@ -519,7 +519,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
 
   auto* coord_var =
@@ -595,7 +595,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* coord_var =
@@ -1371,7 +1371,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* str = create<ast::Struct>(Source{}, members, s_decos);
 
-  ast::type::Struct s("Data", str);
+  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
 
   auto* data_var =

@@ -113,7 +113,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   auto* var =
       create<ast::Variable>(Source{},                        // source

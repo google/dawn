@@ -20,6 +20,7 @@
 
 #include "src/ast/struct.h"
 #include "src/ast/type/type.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace ast {
@@ -29,13 +30,16 @@ namespace type {
 class Struct : public Castable<Struct, Type> {
  public:
   /// Constructor
+  /// @param sym the symbol representing the struct
   /// @param name the name of the struct
   /// @param impl the struct data
-  Struct(const std::string& name, ast::Struct* impl);
+  Struct(const Symbol& sym, const std::string& name, ast::Struct* impl);
   /// Move constructor
   Struct(Struct&&);
   ~Struct() override;
 
+  /// @returns the struct symbol
+  const Symbol& symbol() const { return symbol_; }
   /// @returns the struct name
   const std::string& name() const { return name_; }
 
@@ -64,6 +68,7 @@ class Struct : public Castable<Struct, Type> {
   Struct* Clone(CloneContext* ctx) const override;
 
  private:
+  Symbol symbol_;
   std::string name_;
   ast::Struct* struct_ = nullptr;
 

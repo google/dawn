@@ -57,7 +57,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type("Foo", st);
+  ast::type::Struct struct_type(mod()->RegisterSymbol("Foo"), "Foo", st);
 
   mod()->AddConstructedType(&struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
@@ -83,7 +83,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   }
   ast::StructDecorationList decos;
   auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type("Foo", st);
+  ast::type::Struct struct_type(mod()->RegisterSymbol("Foo"), "Foo", st);
 
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
@@ -114,7 +114,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type("Foo", st);
+  ast::type::Struct struct_type(mod()->RegisterSymbol("Foo"), "Foo", st);
 
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
@@ -149,7 +149,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type("s", st);
+  ast::type::Struct struct_type(mod()->RegisterSymbol("s"), "s", st);
   mod()->AddConstructedType(&struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
   EXPECT_EQ(v()->error(),
@@ -182,7 +182,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type("s", st);
+  ast::type::Struct struct_type(mod()->RegisterSymbol("s"), "s", st);
   mod()->AddConstructedType(&struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
 }

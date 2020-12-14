@@ -75,7 +75,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
   decos.push_back(&block_deco);
 
   ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s("S", &str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", &str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadOnly, &s);
 
@@ -95,7 +95,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
   decos.push_back(&block_deco);
 
   ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s("S", &str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", &str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadWrite, &s);
 
@@ -186,7 +186,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), "S");
@@ -207,7 +207,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -235,7 +235,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
 
   auto* str = create<ast::Struct>(Source{}, members, decos);
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]

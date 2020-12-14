@@ -952,8 +952,9 @@ ast::type::Type* ParserImpl::ConvertType(
 
   namer_.SuggestSanitizedName(type_id, "S");
 
-  auto* result = ast_module_.create<ast::type::Struct>(namer_.GetName(type_id),
-                                                       ast_struct);
+  auto name = namer_.GetName(type_id);
+  auto* result = ast_module_.create<ast::type::Struct>(
+      ast_module_.RegisterSymbol(name), name, ast_struct);
   id_to_type_[type_id] = result;
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(result);

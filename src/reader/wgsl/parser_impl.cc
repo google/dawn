@@ -1192,8 +1192,9 @@ Maybe<std::unique_ptr<ast::type::Struct>> ParserImpl::struct_decl(
     return Failure::kErrored;
 
   return std::make_unique<ast::type::Struct>(
-      name.value, create<ast::Struct>(source, std::move(body.value),
-                                      std::move(struct_decos.value)));
+      module_.RegisterSymbol(name.value), name.value,
+      create<ast::Struct>(source, std::move(body.value),
+                          std::move(struct_decos.value)));
 }
 
 // struct_body_decl

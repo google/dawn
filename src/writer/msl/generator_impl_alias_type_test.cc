@@ -64,7 +64,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("a", str);
+  ast::type::Struct s(mod.RegisterSymbol("a"), "a", str);
 
   ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct a {
@@ -89,7 +89,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("b", str);
+  ast::type::Struct s(mod.RegisterSymbol("b"), "b", str);
   ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();

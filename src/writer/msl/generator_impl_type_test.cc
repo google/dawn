@@ -185,7 +185,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), "S");
@@ -206,7 +206,7 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -238,7 +238,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -266,7 +266,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -293,7 +293,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
   auto* str = create<ast::Struct>(Source{}, members, decos);
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct {

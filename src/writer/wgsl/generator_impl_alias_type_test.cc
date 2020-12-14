@@ -54,7 +54,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("A", str);
+  ast::type::Struct s(mod.RegisterSymbol("A"), "A", str);
   ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
@@ -83,7 +83,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("A", str);
+  ast::type::Struct s(mod.RegisterSymbol("A"), "A", str);
   ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();

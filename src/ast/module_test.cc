@@ -108,7 +108,7 @@ TEST_F(ModuleTest, IsValid_Null_Alias) {
 
 TEST_F(ModuleTest, IsValid_Struct) {
   type::F32 f32;
-  type::Struct st("name", {});
+  type::Struct st(mod.RegisterSymbol("name"), "name", {});
   type::Alias alias(mod.RegisterSymbol("name"), "name", &st);
 
   Module m;
@@ -118,7 +118,7 @@ TEST_F(ModuleTest, IsValid_Struct) {
 
 TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
   type::F32 f32;
-  type::Struct st("", {});
+  type::Struct st(mod.RegisterSymbol(""), "", {});
   type::Alias alias(mod.RegisterSymbol("name"), "name", &st);
 
   Module m;

@@ -62,7 +62,7 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s("A", str);
+  ast::type::Struct s(mod.RegisterSymbol("A"), "A", str);
   ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();

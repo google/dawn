@@ -1218,7 +1218,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   auto* strct =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct st("S", strct);
+  ast::type::Struct st(mod->RegisterSymbol("S"), "S", strct);
 
   auto* var =
       create<ast::Variable>(Source{},                        // source
@@ -1262,7 +1262,8 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   auto* strct =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  auto st = std::make_unique<ast::type::Struct>("alias", strct);
+  auto st = std::make_unique<ast::type::Struct>(mod->RegisterSymbol("alias"),
+                                                "alias", strct);
   ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", st.get());
 
   auto* var =
@@ -1391,7 +1392,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
 
   auto* strctB =
       create<ast::Struct>(Source{}, b_members, ast::StructDecorationList{});
-  ast::type::Struct stB("B", strctB);
+  ast::type::Struct stB(mod->RegisterSymbol("B"), "B", strctB);
 
   ast::type::Vector vecB(&stB, 3);
 
@@ -1401,7 +1402,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   auto* strctA =
       create<ast::Struct>(Source{}, a_members, ast::StructDecorationList{});
 
-  ast::type::Struct stA("A", strctA);
+  ast::type::Struct stA(mod->RegisterSymbol("A"), "A", strctA);
 
   auto* var =
       create<ast::Variable>(Source{},                        // source

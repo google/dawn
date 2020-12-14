@@ -174,7 +174,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct s("S", str);
+  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
 
   EXPECT_EQ(132u, gen.calculate_alignment_size(&s));
 }
@@ -199,7 +199,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   auto* inner_str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct inner_s("Inner", inner_str);
+  ast::type::Struct inner_s(mod.RegisterSymbol("Inner"), "Inner", inner_str);
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
   members.push_back(create<ast::StructMember>(Source{}, "d", &f32, decos));
@@ -213,7 +213,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   auto* outer_str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
 
-  ast::type::Struct outer_s("Outer", outer_str);
+  ast::type::Struct outer_s(mod.RegisterSymbol("Outer"), "Outer", outer_str);
 
   EXPECT_EQ(80u, gen.calculate_alignment_size(&outer_s));
 }

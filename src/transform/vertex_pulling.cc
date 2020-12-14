@@ -264,7 +264,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
   decos.push_back(mod->create<ast::StructBlockDecoration>(Source{}));
 
   auto* struct_type = mod->create<ast::type::Struct>(
-      kStructName,
+      mod->RegisterSymbol(kStructName), kStructName,
       mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
