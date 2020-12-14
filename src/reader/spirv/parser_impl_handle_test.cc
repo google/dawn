@@ -2389,7 +2389,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // OpImageWrite with no extra params
-        {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vu12 %vf1234",
+        {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vf1234",
          R"(
   Variable{
     Decorations{
@@ -2404,13 +2404,13 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Identifier[not set]{vf1234}
       )
     })"},
         // OpImageWrite with ConstOffset
         {"%float 2D 0 0 0 2 Rgba32f",
-         "OpImageWrite %im %vu12 %vf1234 ConstOffset %offsets2d",
+         "OpImageWrite %im %vi12 %vf1234 ConstOffset %offsets2d",
          R"(
   Variable{
     Decorations{
@@ -2425,7 +2425,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Identifier[not set]{vf1234}
         Identifier[not set]{offsets2d}
       )
@@ -2439,7 +2439,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Source 1 component, dest 1 component
-        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %f1",
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %f1",
          R"(
   Variable{
     Decorations{
@@ -2454,12 +2454,12 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Identifier[not set]{f1}
       )
     })"},
         // Source 2 component, dest 1 component
-        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf12",
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf12",
          R"(
   Variable{
     Decorations{
@@ -2474,7 +2474,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         MemberAccessor[not set]{
           Identifier[not set]{vf12}
           Identifier[not set]{x}
@@ -2482,7 +2482,7 @@ INSTANTIATE_TEST_SUITE_P(
       )
     })"},
         // Source 3 component, dest 1 component
-        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf123",
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf123",
          R"(
   Variable{
     Decorations{
@@ -2497,7 +2497,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         MemberAccessor[not set]{
           Identifier[not set]{vf123}
           Identifier[not set]{x}
@@ -2505,7 +2505,7 @@ INSTANTIATE_TEST_SUITE_P(
       )
     })"},
         // Source 4 component, dest 1 component
-        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vu12 %vf1234",
+        {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf1234",
          R"(
   Variable{
     Decorations{
@@ -2520,7 +2520,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         MemberAccessor[not set]{
           Identifier[not set]{vf1234}
           Identifier[not set]{x}
@@ -2528,7 +2528,7 @@ INSTANTIATE_TEST_SUITE_P(
       )
     })"},
         // Source 2 component, dest 2 component
-        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf12",
+        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf12",
          R"(
   Variable{
     Decorations{
@@ -2543,12 +2543,12 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Identifier[not set]{vf12}
       )
     })"},
         // Source 3 component, dest 2 component
-        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf123",
+        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf123",
          R"(
   Variable{
     Decorations{
@@ -2563,7 +2563,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         MemberAccessor[not set]{
           Identifier[not set]{vf123}
           Identifier[not set]{xy}
@@ -2571,7 +2571,7 @@ INSTANTIATE_TEST_SUITE_P(
       )
     })"},
         // Source 4 component, dest 2 component
-        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vu12 %vf1234",
+        {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf1234",
          R"(
   Variable{
     Decorations{
@@ -2586,7 +2586,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         MemberAccessor[not set]{
           Identifier[not set]{vf1234}
           Identifier[not set]{xy}
@@ -2595,7 +2595,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // WGSL does not support 3-component storage textures.
         // Source 4 component, dest 4 component
-        {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vu12 %vf1234",
+        {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vf1234",
          R"(
   Variable{
     Decorations{
@@ -2610,7 +2610,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Identifier[not set]{vf1234}
       )
     })"}}));
@@ -2761,7 +2761,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Sampled type is unsigned int, texel is unsigned int
-        {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vu12 %vu1234",
+        {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vu1234",
          R"(
   Variable{
     Decorations{
@@ -2776,12 +2776,12 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Identifier[not set]{vu1234}
       )
     })"},
         // Sampled type is unsigned int, texel is signed int
-        {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vu12 %vi1234",
+        {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vi1234",
          R"(
   Variable{
     Decorations{
@@ -2796,14 +2796,14 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Bitcast[not set]<__vec_4__u32>{
           Identifier[not set]{vi1234}
         }
       )
     })"},
         // Sampled type is signed int, texel is unsigned int
-        {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vu12 %vu1234",
+        {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vu1234",
          R"(
   Variable{
     Decorations{
@@ -2818,14 +2818,14 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Bitcast[not set]<__vec_4__i32>{
           Identifier[not set]{vu1234}
         }
       )
     })"},
         // Sampled type is signed int, texel is signed int
-        {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vu12 %vi1234",
+        {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vi1234",
          R"(
   Variable{
     Decorations{
@@ -2840,7 +2840,7 @@ INSTANTIATE_TEST_SUITE_P(
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
-        Identifier[not set]{vu12}
+        Identifier[not set]{vi12}
         Identifier[not set]{vi1234}
       )
     })"}}));
@@ -2850,7 +2850,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // OpImageRead with no extra params
-        {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vu12",
+        {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -2870,7 +2870,7 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
@@ -2878,7 +2878,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageRead with ConstOffset
         {"%float 2D 0 0 0 2 Rgba32f",
-         "%99 = OpImageRead %v4float %im %vu12 ConstOffset %offsets2d",
+         "%99 = OpImageRead %v4float %im %vi12 ConstOffset %offsets2d",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -2898,7 +2898,7 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
               Identifier[not set]{offsets2d}
             )
           }
@@ -2911,7 +2911,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // OpImageFetch with no extra params
-        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vu12",
+        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -2931,7 +2931,7 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
@@ -2940,7 +2940,7 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageFetch with ConstOffset
         // TODO(dneto): Seems this is not valid in WGSL.
         {"%float 2D 0 0 0 1 Unknown",
-         "%99 = OpImageFetch %v4float %im %vu12 ConstOffset %offsets2d",
+         "%99 = OpImageFetch %v4float %im %vi12 ConstOffset %offsets2d",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -2960,7 +2960,7 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
               Identifier[not set]{offsets2d}
             )
           }
@@ -3030,12 +3030,9 @@ INSTANTIATE_TEST_SUITE_P(
                 Identifier[not set]{vi123}
                 Identifier[not set]{xy}
               }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{vi123}
-                  Identifier[not set]{z}
-                }
+              MemberAccessor[not set]{
+                Identifier[not set]{vi123}
+                Identifier[not set]{z}
               }
               Identifier[not set]{i1}
             )
@@ -3099,7 +3096,7 @@ INSTANTIATE_TEST_SUITE_P(
         //
 
         // OpImageFetch requires no conversion, float -> v4float
-        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vu12",
+        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3119,14 +3116,14 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
       }
     })"},
         // OpImageFetch requires no conversion, uint -> v4uint
-        {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vu12",
+        {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3146,14 +3143,14 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
       }
     })"},
         // OpImageFetch requires conversion, uint -> v4int
-        {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vu12",
+        {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3174,7 +3171,7 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{textureLoad}
               (
                 Identifier[not set]{x_20}
-                Identifier[not set]{vu12}
+                Identifier[not set]{vi12}
               )
             }
           }
@@ -3182,7 +3179,7 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
         // OpImageFetch requires no conversion, int -> v4int
-        {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vu12",
+        {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3202,14 +3199,14 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
       }
     })"},
         // OpImageFetch requires conversion, int -> v4uint
-        {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vu12",
+        {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3230,7 +3227,7 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{textureLoad}
               (
                 Identifier[not set]{x_20}
-                Identifier[not set]{vu12}
+                Identifier[not set]{vi12}
               )
             }
           }
@@ -3243,7 +3240,7 @@ INSTANTIATE_TEST_SUITE_P(
         //
 
         // OpImageRead requires no conversion, float -> v4float
-        {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageRead %v4float %im %vu12",
+        {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3263,14 +3260,14 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
       }
     })"},
         // OpImageRead requires no conversion, uint -> v4uint
-        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4uint %im %vu12",
+        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4uint %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3290,14 +3287,14 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
       }
     })"},
         // OpImageRead requires conversion, uint -> v4int
-        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4int %im %vu12",
+        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4int %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3318,7 +3315,7 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{textureLoad}
               (
                 Identifier[not set]{x_20}
-                Identifier[not set]{vu12}
+                Identifier[not set]{vi12}
               )
             }
           }
@@ -3326,7 +3323,7 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
         // OpImageRead requires no conversion, int -> v4int
-        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4int %im %vu12",
+        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4int %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3346,14 +3343,14 @@ INSTANTIATE_TEST_SUITE_P(
             Identifier[not set]{textureLoad}
             (
               Identifier[not set]{x_20}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vi12}
             )
           }
         }
       }
     })"},
         // OpImageRead requires conversion, int -> v4uint
-        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4uint %im %vu12",
+        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4uint %im %vi12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3374,7 +3371,7 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{textureLoad}
               (
                 Identifier[not set]{x_20}
-                Identifier[not set]{vu12}
+                Identifier[not set]{vi12}
               )
             }
           }
@@ -3388,7 +3385,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageSampleImplicitLod requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4float %sampled_image %vu12",
+         "%99 = OpImageSampleImplicitLod %v4float %sampled_image %vf12",
          R"(
   Variable{
     Decorations{
@@ -3419,7 +3416,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vf12}
             )
           }
         }
@@ -3427,7 +3424,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageSampleImplicitLod requires no conversion, uint -> v4uint
         {"%uint 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vu12",
+         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vf12",
          R"(
   Variable{
     Decorations{
@@ -3458,7 +3455,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vf12}
             )
           }
         }
@@ -3466,7 +3463,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageSampleImplicitLod requires conversion, uint -> v4int
         {"%uint 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vu12",
+         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vf12",
          R"(
   Variable{
     Decorations{
@@ -3498,7 +3495,7 @@ INSTANTIATE_TEST_SUITE_P(
               (
                 Identifier[not set]{x_20}
                 Identifier[not set]{x_10}
-                Identifier[not set]{vu12}
+                Identifier[not set]{vf12}
               )
             }
           }
@@ -3507,7 +3504,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageSampleImplicitLod requires no conversion, int -> v4int
         {"%int 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vu12",
+         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vf12",
          R"(
   Variable{
     Decorations{
@@ -3538,7 +3535,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
-              Identifier[not set]{vu12}
+              Identifier[not set]{vf12}
             )
           }
         }
@@ -3546,7 +3543,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
         // OpImageSampleImplicitLod requires conversion, int -> v4uint
         {"%int 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vu12",
+         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vf12",
          R"(Variable{
     Decorations{
       SetDecoration{2}
@@ -3568,7 +3565,7 @@ INSTANTIATE_TEST_SUITE_P(
               (
                 Identifier[not set]{x_20}
                 Identifier[not set]{x_10}
-                Identifier[not set]{vu12}
+                Identifier[not set]{vf12}
               )
             }
           }
@@ -3604,6 +3601,14 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
      OpExecutionMode %100 OriginUpperLeft
      OpName %float_var "float_var"
      OpName %ptr_float "ptr_float"
+     OpName %i1 "i1"
+     OpName %vi12 "vi12"
+     OpName %vi123 "vi123"
+     OpName %vi1234 "vi1234"
+     OpName %u1 "u1"
+     OpName %vu12 "vu12"
+     OpName %vu123 "vu123"
+     OpName %vu1234 "vu1234"
      OpName %f1 "f1"
      OpName %vf12 "vf12"
      OpName %vf123 "vf123"
@@ -3634,6 +3639,16 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
      %entry = OpLabel
 
      %float_var = OpVariable %ptr_float Function
+
+     %i1 = OpCopyObject %int %int_1
+     %vi12 = OpCopyObject %v2int %the_vi12
+     %vi123 = OpCopyObject %v3int %the_vi123
+     %vi1234 = OpCopyObject %v4int %the_vi1234
+
+     %u1 = OpCopyObject %uint %uint_1
+     %vu12 = OpCopyObject %v2uint %the_vu12
+     %vu123 = OpCopyObject %v3uint %the_vu123
+     %vu1234 = OpCopyObject %v4uint %the_vu1234
 
      %f1 = OpCopyObject %float %float_1
      %vf12 = OpCopyObject %v2float %the_vf12
@@ -3913,6 +3928,333 @@ INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
 )"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
+    PreserveFloatCoords_NonArrayed,
+    // In SPIR-V, sampling and dref sampling operations use floating point
+    // coordinates.  Prove that we preserve floating point-ness.
+    // Test across all such instructions.
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // Scalar cases
+        {"%float 1D 0 0 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4float %sampled_image %f1",
+         "",
+         {"Identifier[not set]{f1}\n"}},
+        {"%float 1D 0 0 0 1 Unknown",
+         "%result = OpImageSampleExplicitLod %v4float %sampled_image %f1 Lod "
+         "%f1",
+         "",
+         {"Identifier[not set]{f1}\n"}},
+        // WGSL does not support depth textures with 1D coordinates
+        // Vector cases
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf12",
+         "",
+         {"Identifier[not set]{vf12}\n"}},
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleExplicitLod %v4float %sampled_image %vf12 Lod "
+         "%f1",
+         "",
+         {"Identifier[not set]{vf12}\n"}},
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleDrefImplicitLod %v4float %sampled_image %vf12 "
+         "%depth",
+         "",
+         {"Identifier[not set]{vf12}\n"}},
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleDrefExplicitLod %v4float %sampled_image %vf12 "
+         "%depth Lod %f1",
+         "",
+         {"Identifier[not set]{vf12}\n"}},
+    }));
+
+INSTANTIATE_TEST_SUITE_P(
+    PreserveFloatCoords_Arrayed,
+    // In SPIR-V, sampling and dref sampling operations use floating point
+    // coordinates.  Prove that we preserve floating point-ness of the
+    // coordinate part, but convert the array index to signed integer. Test
+    // across all such instructions.
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 0 1 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf123",
+         "",
+         {
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vf123}
+  Identifier[not set]{xy}
+}
+)",
+             R"(TypeConstructor[not set]{
+  __i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vf123}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+
+        {"%float 2D 0 1 0 1 Unknown",
+         "%result = OpImageSampleExplicitLod %v4float %sampled_image %vf123 "
+         "Lod %f1",
+         "",
+         {
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vf123}
+  Identifier[not set]{xy}
+}
+)",
+             R"(TypeConstructor[not set]{
+  __i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vf123}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+        {"%float 2D 1 1 0 1 Unknown",
+         "%result = OpImageSampleDrefImplicitLod %v4float %sampled_image "
+         "%vf123 %depth",
+         "",
+         {
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vf123}
+  Identifier[not set]{xy}
+}
+)",
+             R"(TypeConstructor[not set]{
+  __i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vf123}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+        {"%float 2D 1 1 0 1 Unknown",
+         "%result = OpImageSampleDrefExplicitLod %v4float %sampled_image "
+         "%vf123 %depth Lod %f1",
+         "",
+         {
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vf123}
+  Identifier[not set]{xy}
+}
+)",
+             R"(TypeConstructor[not set]{
+  __i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vf123}
+    Identifier[not set]{z}
+  }
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    PreserveIntCoords_NonArrayed,
+    // In SPIR-V, image read, fetch, and write use integer coordinates.
+    // Prove that we preserve signed integer coordinates.
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // Scalar cases
+        {"%float 1D 0 0 0 1 Unknown",
+         "%result = OpImageFetch %float %im %i1",
+         "",
+         {"Identifier[not set]{i1}\n"}},
+        {"%float 1D 0 0 0 2 R32f",
+         "%result = OpImageRead %float %im %i1",
+         "",
+         {"Identifier[not set]{i1}\n"}},
+        {"%float 1D 0 0 0 2 R32f",
+         "OpImageWrite %im %i1 %float_1",
+         "",
+         {"Identifier[not set]{i1}\n"}},
+        // Vector cases
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageFetch %float %im %vi12",
+         "",
+         {"Identifier[not set]{vi12}\n"}},
+        {"%float 2D 0 0 0 2 R32f",
+         "%result = OpImageRead %float %im %vi12",
+         "",
+         {"Identifier[not set]{vi12}\n"}},
+        {"%float 2D 0 0 0 2 R32f",
+         "OpImageWrite %im %vi12 %float_1",
+         "",
+         {"Identifier[not set]{vi12}\n"}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    PreserveIntCoords_Arrayed,
+    // In SPIR-V, image read, fetch, and write use integer coordinates.
+    // Prove that we preserve signed integer coordinates.
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 0 1 0 1 Unknown",
+         "%result = OpImageFetch %float %im %vi123",
+         "",
+         {
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vi123}
+  Identifier[not set]{xy}
+}
+)",
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vi123}
+  Identifier[not set]{z}
+}
+)"}},
+        {"%float 2D 0 1 0 2 R32f",
+         "%result = OpImageRead %float %im %vi123",
+         "",
+         {
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vi123}
+  Identifier[not set]{xy}
+}
+)",
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vi123}
+  Identifier[not set]{z}
+}
+)"}},
+        {"%float 2D 0 1 0 2 R32f",
+         "OpImageWrite %im %vi123 %float_1",
+         "",
+         {
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vi123}
+  Identifier[not set]{xy}
+}
+)",
+             R"(MemberAccessor[not set]{
+  Identifier[not set]{vi123}
+  Identifier[not set]{z}
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ConvertUintCoords_NonArrayed,
+    // In SPIR-V, image read, fetch, and write use integer coordinates.
+    // Prove that we convert unsigned integer coordinates to signed.
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // Scalar cases
+        {"%float 1D 0 0 0 1 Unknown",
+         "%result = OpImageFetch %float %im %u1",
+         "",
+         {R"(TypeConstructor[not set]{
+  __i32
+  Identifier[not set]{u1}
+}
+)"}},
+        {"%float 1D 0 0 0 2 R32f",
+         "%result = OpImageRead %float %im %u1",
+         "",
+         {R"(TypeConstructor[not set]{
+  __i32
+  Identifier[not set]{u1}
+}
+)"}},
+        {"%float 1D 0 0 0 2 R32f",
+         "OpImageWrite %im %u1 %float_1",
+         "",
+         {R"(TypeConstructor[not set]{
+  __i32
+  Identifier[not set]{u1}
+}
+)"}},
+        // Vector cases
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageFetch %float %im %vu12",
+         "",
+         {R"(TypeConstructor[not set]{
+  __vec_2__i32
+  Identifier[not set]{vu12}
+}
+)"}},
+        {"%float 2D 0 0 0 2 R32f",
+         "%result = OpImageRead %float %im %vu12",
+         "",
+         {R"(TypeConstructor[not set]{
+  __vec_2__i32
+  Identifier[not set]{vu12}
+}
+)"}},
+        {"%float 2D 0 0 0 2 R32f",
+         "OpImageWrite %im %vu12 %float_1",
+         "",
+         {R"(TypeConstructor[not set]{
+  __vec_2__i32
+  Identifier[not set]{vu12}
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ConvertUintCoords_Arrayed,
+    // In SPIR-V, image read, fetch, and write use integer coordinates.
+    // Prove that we convert unsigned integer coordinates to signed.
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 0 1 0 1 Unknown",
+         "%result = OpImageFetch %float %im %vu123",
+         "",
+         {
+             R"(TypeConstructor[not set]{
+  __vec_2__i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vu123}
+    Identifier[not set]{xy}
+  }
+}
+)",
+             R"(TypeConstructor[not set]{
+  __i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vu123}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+        {"%float 2D 0 1 0 2 R32f",
+         "%result = OpImageRead %float %im %vu123",
+         "",
+         {
+             R"(TypeConstructor[not set]{
+  __vec_2__i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vu123}
+    Identifier[not set]{xy}
+  }
+}
+)",
+             R"(TypeConstructor[not set]{
+  __i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vu123}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+        {"%float 2D 0 1 0 2 R32f",
+         "OpImageWrite %im %vu123 %float_1",
+         "",
+         {
+             R"(TypeConstructor[not set]{
+  __vec_2__i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vu123}
+    Identifier[not set]{xy}
+  }
+}
+)",
+             R"(TypeConstructor[not set]{
+  __i32
+  MemberAccessor[not set]{
+    Identifier[not set]{vu123}
+    Identifier[not set]{z}
+  }
+}
+)"}}}));
+
+INSTANTIATE_TEST_SUITE_P(
     BadInstructions,
     SpvParserTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
@@ -3924,7 +4266,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 1D 0 0 0 1 Unknown",
          "%50 = OpCopyObject %float %float_1",
          "internal error: couldn't find image for "
-         "%50 = OpCopyObject %9 %36",
+         "%50 = OpCopyObject %18 %44",
          {}},
         {"%float 1D 0 0 0 1 Unknown",
          "OpStore %float_var %float_1",
@@ -3939,40 +4281,40 @@ INSTANTIATE_TEST_SUITE_P(
     Bad_Coordinate,
     SpvParserTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
-        {"%float 2D 0 0 0 1 Unknown",
+        {"%float 1D 0 0 0 1 Unknown",
          "%result = OpImageSampleImplicitLod "
          // bad type for coordinate: not a number
          "%v4float %sampled_image %float_var",
-         "bad or unsupported coordinate type for image access: %63 = "
-         "OpImageSampleImplicitLod %34 %62 %1",
+         "bad or unsupported coordinate type for image access: %71 = "
+         "OpImageSampleImplicitLod %42 %70 %1",
          {}},
         {"%float 1D 0 1 0 1 Unknown",  // 1DArray
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
          "%v4float %sampled_image %f1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %63 = OpImageSampleImplicitLod %34 %62 %3",
+         "in: %71 = OpImageSampleImplicitLod %42 %70 %12",
          {}},
         {"%float 2D 0 0 0 1 Unknown",  // 2D
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
          "%v4float %sampled_image %f1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %63 = OpImageSampleImplicitLod %34 %62 %3",
+         "in: %71 = OpImageSampleImplicitLod %42 %70 %12",
          {}},
         {"%float 2D 0 1 0 1 Unknown",  // 2DArray
          "%result = OpImageSampleImplicitLod "
          // 2 component, but need 3
          "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %63 = OpImageSampleImplicitLod %34 %62 %4",
+         "in: %71 = OpImageSampleImplicitLod %42 %70 %13",
          {}},
         {"%float 3D 0 0 0 1 Unknown",  // 3D
          "%result = OpImageSampleImplicitLod "
          // 2 components, but need 3
          "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %63 = OpImageSampleImplicitLod %34 %62 %4",
+         "in: %71 = OpImageSampleImplicitLod %42 %70 %13",
          {}},
     }));
 

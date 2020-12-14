@@ -3868,11 +3868,6 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   arg_index++;
 
   // Push the coordinates operands.
-  // TODO(dneto): For explicit-Lod variations, we may have to convert from
-  // integral coordinates to floating point coordinates.
-  // In WGSL, integer (unnormalized) coordinates are only used for texture
-  // fetch (textureLoad on sampled image) or textureLoad or textureStore
-  // on storage images.
   auto coords = MakeCoordinateOperandsForImageAccess(inst);
   if (coords.empty()) {
     return false;
@@ -3951,15 +3946,13 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args && (image_operands_mask & SpvImageOperandsLodMask)) {
     builtin_name += "Level";
-    auto* lod_operand = MakeOperand(inst, arg_index).expr;
-    // When sampling from a depth texture, the Lod operand must be an unsigned
-    // integer.
+    TypedExpression lod = MakeOperand(inst, arg_index);
+    // When sampling from a depth texture, the Lod operand must be an I32.
     if (texture_type->Is<ast::type::DepthTexture>()) {
       // Convert it to a signed integer type.
-      lod_operand = create<ast::TypeConstructorExpression>(
-          Source{}, create<ast::type::I32>(), ast::ExpressionList{lod_operand});
+      lod = ToI32(lod);
     }
-    params.push_back(lod_operand);
+    params.push_back(lod.expr);
     image_operands_mask ^= SpvImageOperandsLodMask;
     arg_index++;
   }
@@ -4053,6 +4046,17 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     return {};
   }
 
+  // In SPIR-V for Shader, coordinates are:
+  //  - floating point for sampling, dref sampling, gather, dref gather
+  //  - integral for fetch, read, write
+  // In WGSL:
+  //  - floating point for sampling, dref sampling, gather, dref gather
+  //  - signed integral for textureLoad, textureStore
+  //
+  // The only conversions we have to do for WGSL are:
+  //  - When the coordinates are unsigned integral, convert them to signed.
+  //  - Array index is always i32
+
   // The coordinates parameter is always in position 1.
   TypedExpression raw_coords(MakeOperand(inst, 1));
   if (!raw_coords.type) {
@@ -4107,11 +4111,13 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   assert(num_axes <= 3);
   const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
   uint32_t num_coords_supplied = 0;
-  if (raw_coords.type->is_float_scalar() ||
-      raw_coords.type->is_integer_scalar()) {
+  auto* component_type = raw_coords.type;
+  if (component_type->is_float_scalar() ||
+      component_type->is_integer_scalar()) {
     num_coords_supplied = 1;
-  } else if (auto* vec_ty = raw_coords.type->As<ast::type::Vector>()) {
-    num_coords_supplied = vec_ty->size();
+  } else if (auto* vec_type = raw_coords.type->As<ast::type::Vector>()) {
+    component_type = vec_type->type();
+    num_coords_supplied = vec_type->size();
   }
   if (num_coords_supplied == 0) {
     Fail() << "bad or unsupported coordinate type for image access: "
@@ -4127,29 +4133,41 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
 
   ast::ExpressionList result;
 
-  // TODO(dneto): Convert coordinate component type if needed.
+  // Generates the expression for the WGSL coordinates, when it is a prefix
+  // swizzle with num_axes.  If the result would be unsigned, also converts
+  // it to a signed value of the same shape (scalar or vector).
+  // Use a lambda to make it easy to only generate the expressions when we
+  // will actually use them.
+  auto prefix_swizzle_expr = [this, num_axes, component_type,
+                              raw_coords]() -> ast::Expression* {
+    auto* swizzle_type =
+        (num_axes == 1) ? component_type
+                        : create<ast::type::Vector>(component_type, num_axes);
+    auto* swizzle = create<ast::MemberAccessorExpression>(
+        Source{}, raw_coords.expr, PrefixSwizzle(num_axes));
+    return ToSignedIfUnsigned({swizzle_type, swizzle}).expr;
+  };
+
   if (is_arrayed) {
-    // The source must be a vector, because it has enough components and has an
-    // array component. Use a vector swizzle to get the first `num_axes`
-    // components.
-    result.push_back(create<ast::MemberAccessorExpression>(
-        Source{}, raw_coords.expr, PrefixSwizzle(num_axes)));
+    // The source must be a vector. It has at least one coordinate component
+    // and it must have an array component.  Use a vector swizzle to get the
+    // first `num_axes` components.
+    result.push_back(prefix_swizzle_expr());
 
     // Now get the array index.
     ast::Expression* array_index = create<ast::MemberAccessorExpression>(
         Source{}, raw_coords.expr, Swizzle(num_axes));
-    // Convert it to a signed integer type.
-    result.push_back(create<ast::TypeConstructorExpression>(
-        Source{}, create<ast::type::I32>(), ast::ExpressionList{array_index}));
+    // Convert it to a signed integer type, if needed
+    result.push_back(ToI32({component_type, array_index}).expr);
   } else {
     if (num_coords_supplied == num_coords_required) {
-      // Pass the value through.
-      result.push_back(std::move(raw_coords.expr));
+      // Pass the value through, with possible unsigned->signed conversion.
+      result.push_back(ToSignedIfUnsigned(raw_coords).expr);
     } else {
-      // There are more coordinates supplied than needed. So the source type is
-      // a vector. Use a vector swizzle to get the first `num_axes` components.
-      result.push_back(create<ast::MemberAccessorExpression>(
-          Source{}, raw_coords.expr, PrefixSwizzle(num_axes)));
+      // There are more coordinates supplied than needed. So the source type
+      // is a vector. Use a vector swizzle to get the first `num_axes`
+      // components.
+      result.push_back(prefix_swizzle_expr());
     }
   }
   return result;
@@ -4247,6 +4265,18 @@ TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
   }
   return {i32_, create<ast::TypeConstructorExpression>(
                     Source{}, i32_, ast::ExpressionList{value.expr})};
+}
+
+TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
+  if (!value.type || !value.type->is_unsigned_scalar_or_vector()) {
+    return value;
+  }
+  if (auto* vec_type = value.type->As<ast::type::Vector>()) {
+    auto* new_type = create<ast::type::Vector>(i32_, vec_type->size());
+    return {new_type, create<ast::TypeConstructorExpression>(
+                          Source{}, new_type, ast::ExpressionList{value.expr})};
+  }
+  return ToI32(value);
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;

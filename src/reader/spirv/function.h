@@ -701,6 +701,14 @@ class FunctionEmitter {
   /// @returns the value as an I32 value.
   TypedExpression ToI32(TypedExpression value);
 
+  /// Returns the given value as a signed integer type of the same shape
+  /// if the value is unsigned scalar or vector, by wrapping the value
+  /// with a TypeConstructor expression.  Returns the value itself if the
+  /// value otherwise.
+  /// @param value the value to pass through or convert
+  /// @returns the value itself, or converted to signed integral
+  TypedExpression ToSignedIfUnsigned(TypedExpression value);
+
  private:
   /// FunctionDeclaration contains the parsed information for a function header.
   struct FunctionDeclaration {
