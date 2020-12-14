@@ -27,9 +27,9 @@ class StructMemberOffsetDecoration
     : public Castable<StructMemberOffsetDecoration, StructMemberDecoration> {
  public:
   /// constructor
-  /// @param offset the offset value
   /// @param source the source of this decoration
-  StructMemberOffsetDecoration(uint32_t offset, const Source& source);
+  /// @param offset the offset value
+  StructMemberOffsetDecoration(const Source& source, uint32_t offset);
   ~StructMemberOffsetDecoration() override;
 
   /// @returns the offset value

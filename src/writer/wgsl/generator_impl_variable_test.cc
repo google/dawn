@@ -58,7 +58,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 
   ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
                   ast::VariableDecorationList{
-                      create<ast::LocationDecoration>(2, Source{}),
+                      create<ast::LocationDecoration>(Source{}, 2),
                   });
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
@@ -72,11 +72,11 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ast::Variable v(
       Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
       ast::VariableDecorationList{
-          create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}),
-          create<ast::BindingDecoration>(0, Source{}),
-          create<ast::SetDecoration>(1, Source{}),
-          create<ast::LocationDecoration>(2, Source{}),
-          create<ast::ConstantIdDecoration>(42, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
+          create<ast::BindingDecoration>(Source{}, 0),
+          create<ast::SetDecoration>(Source{}, 1),
+          create<ast::LocationDecoration>(Source{}, 2),
+          create<ast::ConstantIdDecoration>(Source{}, 42),
       });
 
   ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();

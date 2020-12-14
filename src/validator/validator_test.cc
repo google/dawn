@@ -398,7 +398,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       Source{}, mod()->RegisterSymbol("my_func"), "my_func", params, &void_type,
       body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
   mod()->AddFunction(func);
 
@@ -848,7 +848,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
       Source{}, mod()->RegisterSymbol("func1"), "func1", params1, &void_type,
       body1,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   mod()->AddFunction(func0);

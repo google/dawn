@@ -251,7 +251,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(5, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 5),
                             });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -277,8 +277,8 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(2, Source{}),
-                                create<ast::SetDecoration>(3, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 2),
+                                create<ast::SetDecoration>(Source{}, 3),
                             });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -305,7 +305,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
       nullptr,                     // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
       });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -334,7 +334,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
           create<ast::BoolLiteral>(Source{}, &bool_type, true)),  // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::ConstantIdDecoration>(1200, Source{}),
+          create<ast::ConstantIdDecoration>(Source{}, 1200),
       });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -361,7 +361,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
       nullptr,                   // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::ConstantIdDecoration>(1200, Source{}),
+          create<ast::ConstantIdDecoration>(Source{}, 1200),
       });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -390,7 +390,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::ConstantIdDecoration>(0, Source{}),
+          create<ast::ConstantIdDecoration>(Source{}, 0),
       });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -417,7 +417,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
                             nullptr,                   // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::ConstantIdDecoration>(0, Source{}),
+                                create<ast::ConstantIdDecoration>(Source{}, 0),
                             });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -444,7 +444,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
                             nullptr,                   // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::ConstantIdDecoration>(0, Source{}),
+                                create<ast::ConstantIdDecoration>(Source{}, 0),
                             });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -471,7 +471,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
                             nullptr,                   // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::ConstantIdDecoration>(0, Source{}),
+                                create<ast::ConstantIdDecoration>(Source{}, 0),
                             });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();

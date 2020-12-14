@@ -179,7 +179,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
       Source{}, "a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str =
@@ -200,7 +200,7 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
       Source{}, "a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str =
@@ -226,15 +226,15 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
           create<ast::StructMember>(
               Source{}, "a", &i32,
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(4, Source{})}),
+                  create<ast::StructMemberOffsetDecoration>(Source{}, 4)}),
           create<ast::StructMember>(
               Source{}, "b", &f32,
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(32, Source{})}),
+                  create<ast::StructMemberOffsetDecoration>(Source{}, 32)}),
           create<ast::StructMember>(
               Source{}, "c", &f32,
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(128, Source{})}),
+                  create<ast::StructMemberOffsetDecoration>(Source{}, 128)}),
       },
       ast::StructDecorationList{});
 
@@ -286,7 +286,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
       Source{}, "a", &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   ast::StructDecorationList decos;

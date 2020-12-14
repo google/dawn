@@ -59,7 +59,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -71,7 +71,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -99,7 +99,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   mod.AddFunction(func);
@@ -136,7 +136,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -148,7 +148,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -176,7 +176,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   mod.AddFunction(func);
@@ -213,7 +213,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -225,7 +225,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -253,7 +253,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -290,7 +290,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -302,7 +302,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -330,7 +330,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -364,7 +364,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -376,7 +376,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -404,7 +404,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
 
   mod.AddFunction(func);
@@ -433,7 +433,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -445,7 +445,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -473,7 +473,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
 
   mod.AddFunction(func);
@@ -508,7 +508,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
       nullptr,                    // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragCoord),
       });
 
   auto* depth_var = create<ast::Variable>(
@@ -520,7 +520,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
       nullptr,                     // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragDepth),
       });
 
   td.RegisterVariableForTesting(coord_var);
@@ -547,7 +547,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   auto* func = create<ast::Function>(
       Source{}, mod.RegisterSymbol("main"), "main", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);

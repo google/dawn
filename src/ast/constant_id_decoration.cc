@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::ConstantIdDecoration);
 namespace tint {
 namespace ast {
 
-ConstantIdDecoration::ConstantIdDecoration(uint32_t val, const Source& source)
+ConstantIdDecoration::ConstantIdDecoration(const Source& source, uint32_t val)
     : Base(source), value_(val) {}
 
 ConstantIdDecoration::~ConstantIdDecoration() = default;
@@ -33,7 +33,7 @@ void ConstantIdDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 ConstantIdDecoration* ConstantIdDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<ConstantIdDecoration>(value_, ctx->Clone(source()));
+  return ctx->mod->create<ConstantIdDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

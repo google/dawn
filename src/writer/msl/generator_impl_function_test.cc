@@ -164,7 +164,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -176,7 +176,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -200,7 +200,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{create<ast::StageDecoration>(
-          ast::PipelineStage::kFragment, Source{})});
+          Source{}, ast::PipelineStage::kFragment)});
 
   mod.AddFunction(func);
 
@@ -241,7 +241,7 @@ TEST_F(MslGeneratorImplTest,
       nullptr,                    // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragCoord),
       });
 
   auto* depth_var = create<ast::Variable>(
@@ -253,7 +253,7 @@ TEST_F(MslGeneratorImplTest,
       nullptr,                     // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragDepth),
       });
 
   td.RegisterVariableForTesting(coord_var);
@@ -281,7 +281,7 @@ TEST_F(MslGeneratorImplTest,
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -318,8 +318,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
                             nullptr,                      // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(1, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(coord_var);
@@ -350,7 +350,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -376,11 +376,11 @@ TEST_F(MslGeneratorImplTest,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str =
@@ -400,8 +400,8 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                            // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(1, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(coord_var);
@@ -432,7 +432,7 @@ TEST_F(MslGeneratorImplTest,
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -462,11 +462,11 @@ TEST_F(MslGeneratorImplTest,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str =
@@ -486,8 +486,8 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                            // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(1, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(coord_var);
@@ -519,7 +519,7 @@ TEST_F(MslGeneratorImplTest,
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -557,7 +557,7 @@ TEST_F(
                             nullptr,                    // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   auto* bar_var =
@@ -569,7 +569,7 @@ TEST_F(
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   auto* val_var =
@@ -581,7 +581,7 @@ TEST_F(
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(0, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 0),
                             });
 
   td.RegisterVariableForTesting(foo_var);
@@ -648,7 +648,7 @@ TEST_F(
   auto* func_1 = create<ast::Function>(
       Source{}, mod.RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func_1);
@@ -697,7 +697,7 @@ TEST_F(MslGeneratorImplTest,
       nullptr,                     // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragDepth),
       });
 
   td.RegisterVariableForTesting(depth_var);
@@ -749,7 +749,7 @@ TEST_F(MslGeneratorImplTest,
   auto* func_1 = create<ast::Function>(
       Source{}, mod.RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func_1);
@@ -792,7 +792,7 @@ TEST_F(
       nullptr,                    // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragCoord),
       });
 
   auto* depth_var = create<ast::Variable>(
@@ -804,7 +804,7 @@ TEST_F(
       nullptr,                     // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragDepth),
       });
 
   td.RegisterVariableForTesting(coord_var);
@@ -867,7 +867,7 @@ TEST_F(
   auto* func_1 = create<ast::Function>(
       Source{}, mod.RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func_1);
@@ -909,8 +909,8 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                      // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(1, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(coord_var);
@@ -971,7 +971,7 @@ TEST_F(MslGeneratorImplTest,
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -1000,11 +1000,11 @@ TEST_F(MslGeneratorImplTest,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str =
@@ -1024,8 +1024,8 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                            // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(1, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(coord_var);
@@ -1085,7 +1085,7 @@ TEST_F(MslGeneratorImplTest,
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -1120,11 +1120,11 @@ TEST_F(MslGeneratorImplTest,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
 
   auto* str =
@@ -1144,8 +1144,8 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                            // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(1, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(coord_var);
@@ -1205,7 +1205,7 @@ TEST_F(MslGeneratorImplTest,
       Source{}, mod.RegisterSymbol("frag_main"), "frag_main", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func);
@@ -1247,7 +1247,7 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                     // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::LocationDecoration>(1, Source{}),
+                                create<ast::LocationDecoration>(Source{}, 1),
                             });
 
   td.RegisterVariableForTesting(bar_var);
@@ -1283,7 +1283,7 @@ TEST_F(MslGeneratorImplTest,
   auto* func_1 = create<ast::Function>(
       Source{}, mod.RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod.AddFunction(func_1);
@@ -1316,7 +1316,7 @@ TEST_F(MslGeneratorImplTest,
       Source{}, mod.RegisterSymbol("main"), "main", ast::VariableList{},
       &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
 
   mod.AddFunction(func);
@@ -1392,7 +1392,7 @@ TEST_F(MslGeneratorImplTest,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "d", &f32, a_deco));
 
   ast::StructDecorationList s_decos;
@@ -1412,8 +1412,8 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                            // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(0, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 0),
                             });
 
   mod.AddConstructedType(&s);
@@ -1445,8 +1445,8 @@ TEST_F(MslGeneratorImplTest,
     auto* func = create<ast::Function>(
         Source{}, mod.RegisterSymbol("a"), "a", params, &void_type, body,
         ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
-                                         Source{}),
+            create<ast::StageDecoration>(Source{},
+                                         ast::PipelineStage::kCompute),
         });
 
     mod.AddFunction(func);
@@ -1476,8 +1476,8 @@ TEST_F(MslGeneratorImplTest,
     auto* func = create<ast::Function>(
         Source{}, mod.RegisterSymbol("b"), "b", params, &void_type, body,
         ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
-                                         Source{}),
+            create<ast::StageDecoration>(Source{},
+                                         ast::PipelineStage::kCompute),
         });
 
     mod.AddFunction(func);

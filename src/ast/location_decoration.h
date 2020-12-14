@@ -27,9 +27,9 @@ class LocationDecoration
     : public Castable<LocationDecoration, VariableDecoration> {
  public:
   /// constructor
-  /// @param value the location value
   /// @param source the source of this decoration
-  LocationDecoration(uint32_t value, const Source& source);
+  /// @param value the location value
+  LocationDecoration(const Source& source, uint32_t value);
   ~LocationDecoration() override;
 
   /// @returns the location value

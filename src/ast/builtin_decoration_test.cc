@@ -24,12 +24,12 @@ namespace {
 using BuiltinDecorationTest = TestHelper;
 
 TEST_F(BuiltinDecorationTest, Creation) {
-  BuiltinDecoration d{Builtin::kFragDepth, Source{}};
+  BuiltinDecoration d{Source{}, Builtin::kFragDepth};
   EXPECT_EQ(Builtin::kFragDepth, d.value());
 }
 
 TEST_F(BuiltinDecorationTest, Is) {
-  BuiltinDecoration bd{Builtin::kFragDepth, Source{}};
+  BuiltinDecoration bd{Source{}, Builtin::kFragDepth};
   Decoration* d = &bd;
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_TRUE(d->Is<BuiltinDecoration>());
@@ -39,7 +39,7 @@ TEST_F(BuiltinDecorationTest, Is) {
 }
 
 TEST_F(BuiltinDecorationTest, ToStr) {
-  BuiltinDecoration d{Builtin::kFragDepth, Source{}};
+  BuiltinDecoration d{Source{}, Builtin::kFragDepth};
   std::ostringstream out;
   d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(BuiltinDecoration{frag_depth}

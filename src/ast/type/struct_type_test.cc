@@ -83,12 +83,12 @@ TEST_F(StructTest, MinBufferBindingSize) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   StructDecorationList decos;
@@ -103,22 +103,22 @@ TEST_F(StructTest, MinBufferBindingSize) {
 TEST_F(StructTest, MinBufferBindingSizeArray) {
   U32 u32;
   Array arr(&u32, 4,
-            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
+            ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(8, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 8));
     members.push_back(create<StructMember>(Source{}, "bar", &arr, deco));
   }
   StructDecorationList decos;
@@ -134,22 +134,22 @@ TEST_F(StructTest, MinBufferBindingSizeArray) {
 TEST_F(StructTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
   Array arr(&u32, 0,
-            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
+            ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(8, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 8));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   StructDecorationList decos;
@@ -167,7 +167,7 @@ TEST_F(StructTest, MinBufferBindingSizeVec2) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &vec2, deco));
   }
   StructDecorationList decos;
@@ -186,7 +186,7 @@ TEST_F(StructTest, MinBufferBindingSizeVec3) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &vec3, deco));
   }
   StructDecorationList decos;
@@ -206,7 +206,7 @@ TEST_F(StructTest, MinBufferBindingSizeVec4) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &vec4, deco));
   }
   StructDecorationList decos;
@@ -225,12 +225,12 @@ TEST_F(StructTest, BaseAlignment) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   StructDecorationList decos;
@@ -244,22 +244,22 @@ TEST_F(StructTest, BaseAlignment) {
 TEST_F(StructTest, BaseAlignmentArray) {
   U32 u32;
   Array arr(&u32, 4,
-            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
+            ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(8, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 8));
     members.push_back(create<StructMember>(Source{}, "bar", &arr, deco));
   }
   StructDecorationList decos;
@@ -273,22 +273,22 @@ TEST_F(StructTest, BaseAlignmentArray) {
 TEST_F(StructTest, BaseAlignmentRuntimeArray) {
   U32 u32;
   Array arr(&u32, 0,
-            ArrayDecorationList{create<StrideDecoration>(4, Source{})});
+            ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
 
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(8, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 8));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   StructDecorationList decos;
@@ -305,7 +305,7 @@ TEST_F(StructTest, BaseAlignmentVec2) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &vec2, deco));
   }
   StructDecorationList decos;
@@ -323,7 +323,7 @@ TEST_F(StructTest, BaseAlignmentVec3) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &vec3, deco));
   }
   StructDecorationList decos;
@@ -341,7 +341,7 @@ TEST_F(StructTest, BaseAlignmentVec4) {
   StructMemberList members;
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &vec4, deco));
   }
   StructDecorationList decos;

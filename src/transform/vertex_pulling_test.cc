@@ -51,7 +51,7 @@ class VertexPullingHelper {
         mod_->create<ast::type::Void>(),
         create<ast::BlockStatement>(Source{}, ast::StatementList{}),
         ast::FunctionDecorationList{create<ast::StageDecoration>(
-            ast::PipelineStage::kVertex, Source{})});
+            Source{}, ast::PipelineStage::kVertex)});
     mod()->AddFunction(func);
   }
 
@@ -79,7 +79,7 @@ class VertexPullingHelper {
         nullptr,                    // constructor
         ast::VariableDecorationList{
             // decorations
-            create<ast::LocationDecoration>(location, Source{}),
+            create<ast::LocationDecoration>(Source{}, location),
         });
 
     mod_->AddGlobalVariable(var);
@@ -139,7 +139,7 @@ TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
       mod()->create<ast::type::Void>(),
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
   mod()->AddFunction(func);
 
@@ -437,7 +437,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
       nullptr,                    // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kVertexIdx),
       }));
 
   mod()->AddGlobalVariable(create<ast::Variable>(
@@ -449,7 +449,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
       nullptr,                    // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx, Source{}),
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kInstanceIdx),
       }));
 
   InitTransform(

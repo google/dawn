@@ -125,7 +125,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 
   ast::type::Array ary(&i32, 4,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(16u, Source{}),
+                           create<ast::StrideDecoration>(Source{}, 16u),
                        });
 
   auto id = b.GenerateTypeIfNeeded(&ary);
@@ -346,9 +346,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   ast::type::F32 f32;
 
   ast::StructMemberDecorationList a_decos;
-  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   ast::StructMemberDecorationList b_decos;
-  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(8, Source{}));
+  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 8));
 
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(Source{}, "a", &f32, a_decos));
@@ -423,11 +423,11 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
   ast::type::Matrix glsl_mat4x4(&f32, 4, 4);
 
   ast::StructMemberDecorationList a_decos;
-  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   ast::StructMemberDecorationList b_decos;
-  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
+  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
   ast::StructMemberDecorationList c_decos;
-  c_decos.push_back(create<ast::StructMemberOffsetDecoration>(48, Source{}));
+  c_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 48));
 
   ast::StructMemberList members;
   members.push_back(
@@ -490,11 +490,11 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
                                 ast::ArrayDecorationList{});  // Runtime array
 
   ast::StructMemberDecorationList a_decos;
-  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   ast::StructMemberDecorationList b_decos;
-  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
+  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
   ast::StructMemberDecorationList c_decos;
-  c_decos.push_back(create<ast::StructMemberOffsetDecoration>(48, Source{}));
+  c_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 48));
 
   ast::StructMemberList members;
   members.push_back(

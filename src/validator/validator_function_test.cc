@@ -60,7 +60,7 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("func"), "func",
       params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
   mod()->AddFunction(func);
 
@@ -79,7 +79,7 @@ TEST_F(ValidateFunctionTest,
       params, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
   mod()->AddFunction(func);
 
@@ -149,7 +149,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   auto* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("func"), "func", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
   mod()->AddFunction(func);
 
@@ -329,7 +329,7 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("vtx_main"),
       "vtx_main", params, &i32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   mod()->AddFunction(func);
@@ -361,7 +361,7 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("vtx_func"),
       "vtx_func", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   mod()->AddFunction(func);
@@ -386,8 +386,8 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("main"), "main",
       params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   mod()->AddFunction(func);
@@ -411,7 +411,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
       Source{}, mod()->RegisterSymbol("vtx_func"), "vtx_func", params,
       &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
   mod()->AddFunction(func);
 

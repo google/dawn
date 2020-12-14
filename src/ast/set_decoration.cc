@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::SetDecoration);
 namespace tint {
 namespace ast {
 
-SetDecoration::SetDecoration(uint32_t val, const Source& source)
+SetDecoration::SetDecoration(const Source& source, uint32_t val)
     : Base(source), value_(val) {}
 
 SetDecoration::~SetDecoration() = default;
@@ -33,7 +33,7 @@ void SetDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 SetDecoration* SetDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<SetDecoration>(value_, ctx->Clone(source()));
+  return ctx->mod->create<SetDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

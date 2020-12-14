@@ -107,25 +107,25 @@ TEST_F(FunctionTest, GetReferenceLocations) {
   auto* loc1 = create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32,
                                 false, nullptr,
                                 ast::VariableDecorationList{
-                                    create<LocationDecoration>(0, Source{}),
+                                    create<LocationDecoration>(Source{}, 0),
                                 });
 
   auto* loc2 = create<Variable>(Source{}, "loc2", StorageClass::kInput, &i32,
                                 false, nullptr,
                                 ast::VariableDecorationList{
-                                    create<LocationDecoration>(1, Source{}),
+                                    create<LocationDecoration>(Source{}, 1),
                                 });
 
   auto* builtin1 = create<Variable>(
       Source{}, "builtin1", StorageClass::kInput, &i32, false, nullptr,
       ast::VariableDecorationList{
-          create<BuiltinDecoration>(Builtin::kPosition, Source{}),
+          create<BuiltinDecoration>(Source{}, Builtin::kPosition),
       });
 
   auto* builtin2 = create<Variable>(
       Source{}, "builtin2", StorageClass::kInput, &i32, false, nullptr,
       ast::VariableDecorationList{
-          create<BuiltinDecoration>(Builtin::kFragDepth, Source{}),
+          create<BuiltinDecoration>(Source{}, Builtin::kFragDepth),
       });
 
   Function f(Source{}, func_sym, "func", VariableList{}, &void_type,
@@ -155,25 +155,25 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
   auto* loc1 = create<Variable>(Source{}, "loc1", StorageClass::kInput, &i32,
                                 false, nullptr,
                                 ast::VariableDecorationList{
-                                    create<LocationDecoration>(0, Source{}),
+                                    create<LocationDecoration>(Source{}, 0),
                                 });
 
   auto* loc2 = create<Variable>(Source{}, "loc2", StorageClass::kInput, &i32,
                                 false, nullptr,
                                 ast::VariableDecorationList{
-                                    create<LocationDecoration>(1, Source{}),
+                                    create<LocationDecoration>(Source{}, 1),
                                 });
 
   auto* builtin1 = create<Variable>(
       Source{}, "builtin1", StorageClass::kInput, &i32, false, nullptr,
       ast::VariableDecorationList{
-          create<BuiltinDecoration>(Builtin::kPosition, Source{}),
+          create<BuiltinDecoration>(Source{}, Builtin::kPosition),
       });
 
   auto* builtin2 = create<Variable>(
       Source{}, "builtin2", StorageClass::kInput, &i32, false, nullptr,
       ast::VariableDecorationList{
-          create<BuiltinDecoration>(Builtin::kFragDepth, Source{}),
+          create<BuiltinDecoration>(Source{}, Builtin::kFragDepth),
       });
 
   Function f(Source{}, func_sym, "func", VariableList{}, &void_type,
@@ -382,7 +382,7 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
                                        });
   Function f(
       Source{}, func_sym, "func", {}, &void_type, body,
-      FunctionDecorationList{create<WorkgroupDecoration>(2, 4, 6, Source{})});
+      FunctionDecorationList{create<WorkgroupDecoration>(Source{}, 2, 4, 6)});
 
   std::ostringstream out;
   f.to_str(out, 2);
@@ -512,7 +512,7 @@ TEST_F(FunctionTest, WorkgroupSize) {
 
   Function f(Source{}, func_sym, "func", {}, &void_type,
              create<BlockStatement>(Source{}, StatementList{}),
-             {create<WorkgroupDecoration>(2u, 4u, 6u, Source{})});
+             {create<WorkgroupDecoration>(Source{}, 2u, 4u, 6u)});
 
   uint32_t x = 0;
   uint32_t y = 0;

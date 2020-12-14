@@ -54,7 +54,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
       Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
       &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
   mod.AddFunction(func);
 
@@ -160,15 +160,15 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   ast::type::F32 f32;
 
   ast::StructMemberDecorationList decos;
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
 
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 32));
   members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(128, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 128));
   members.push_back(create<ast::StructMember>(Source{}, "c", &f32, decos));
 
   auto* str =
@@ -185,15 +185,15 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   ast::type::Vector fvec(&f32, 3);
 
   ast::StructMemberDecorationList decos;
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
 
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(16, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
   members.push_back(create<ast::StructMember>(Source{}, "b", &fvec, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 32));
   members.push_back(create<ast::StructMember>(Source{}, "c", &f32, decos));
 
   auto* inner_str =
@@ -201,13 +201,13 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
 
   ast::type::Struct inner_s(mod.RegisterSymbol("Inner"), "Inner", inner_str);
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "d", &f32, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(32, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 32));
   members.push_back(create<ast::StructMember>(Source{}, "e", &inner_s, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(64, Source{}));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 64));
   members.push_back(create<ast::StructMember>(Source{}, "f", &f32, decos));
 
   auto* outer_str =

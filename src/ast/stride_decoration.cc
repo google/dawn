@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::StrideDecoration);
 namespace tint {
 namespace ast {
 
-StrideDecoration::StrideDecoration(uint32_t stride, const Source& source)
+StrideDecoration::StrideDecoration(const Source& source, uint32_t stride)
     : Base(source), stride_(stride) {}
 
 StrideDecoration::~StrideDecoration() = default;
@@ -33,7 +33,7 @@ void StrideDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 StrideDecoration* StrideDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StrideDecoration>(stride_, ctx->Clone(source()));
+  return ctx->mod->create<StrideDecoration>(ctx->Clone(source()), stride_);
 }
 
 }  // namespace ast

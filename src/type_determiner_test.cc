@@ -5338,7 +5338,7 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   auto* ep_1 = create<ast::Function>(
       Source{}, mod->RegisterSymbol("ep_1"), "ep_1", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   body = create<ast::BlockStatement>(
@@ -5356,7 +5356,7 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   auto* ep_2 = create<ast::Function>(
       Source{}, mod->RegisterSymbol("ep_2"), "ep_2", params, &f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   mod->AddFunction(func_b);

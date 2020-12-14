@@ -30,7 +30,7 @@ using StructMemberTest = TestHelper;
 TEST_F(StructMemberTest, Creation) {
   type::I32 i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
+  decorations.emplace_back(create<StructMemberOffsetDecoration>(Source{}, 4));
 
   StructMember st{Source{}, "a", &i32, decorations};
   EXPECT_EQ(st.name(), "a");
@@ -77,7 +77,7 @@ TEST_F(StructMemberTest, IsValid_NullType) {
 TEST_F(StructMemberTest, IsValid_Null_Decoration) {
   type::I32 i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
+  decorations.emplace_back(create<StructMemberOffsetDecoration>(Source{}, 4));
   decorations.push_back(nullptr);
 
   StructMember st{Source{}, "a", &i32, decorations};
@@ -87,7 +87,7 @@ TEST_F(StructMemberTest, IsValid_Null_Decoration) {
 TEST_F(StructMemberTest, ToStr) {
   type::I32 i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(create<StructMemberOffsetDecoration>(4, Source{}));
+  decorations.emplace_back(create<StructMemberOffsetDecoration>(Source{}, 4));
 
   StructMember st{Source{}, "a", &i32, decorations};
   std::ostringstream out;

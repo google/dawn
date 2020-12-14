@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::AccessDecoration);
 namespace tint {
 namespace ast {
 
-AccessDecoration::AccessDecoration(AccessControl val, const Source& source)
+AccessDecoration::AccessDecoration(const Source& source, AccessControl val)
     : Base(source), value_(val) {}
 
 AccessDecoration::~AccessDecoration() = default;
@@ -33,7 +33,7 @@ void AccessDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 AccessDecoration* AccessDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<AccessDecoration>(value_, ctx->Clone(source()));
+  return ctx->mod->create<AccessDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

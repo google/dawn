@@ -175,7 +175,7 @@ TEST_F(AliasTest, MinBufferBindingSizeArray) {
   U32 u32;
   Array array(&u32, 4,
               ArrayDecorationList{
-                  create<StrideDecoration>(4, Source{}),
+                  create<StrideDecoration>(Source{}, 4),
               });
   Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -185,7 +185,7 @@ TEST_F(AliasTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
   Array array(&u32, 0,
               ArrayDecorationList{
-                  create<StrideDecoration>(4, Source{}),
+                  create<StrideDecoration>(Source{}, 4),
               });
   Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -197,12 +197,12 @@ TEST_F(AliasTest, MinBufferBindingSizeStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   StructDecorationList decos;
@@ -224,7 +224,7 @@ TEST_F(AliasTest, BaseAlignmentArray) {
   U32 u32;
   Array array(&u32, 4,
               ArrayDecorationList{
-                  create<StrideDecoration>(4, Source{}),
+                  create<StrideDecoration>(Source{}, 4),
               });
   Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -234,7 +234,7 @@ TEST_F(AliasTest, BaseAlignmentRuntimeArray) {
   U32 u32;
   Array array(&u32, 0,
               ArrayDecorationList{
-                  create<StrideDecoration>(4, Source{}),
+                  create<StrideDecoration>(Source{}, 4),
               });
   Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -246,12 +246,12 @@ TEST_F(AliasTest, BaseAlignmentStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(0, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
     members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(4, Source{}));
+    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
     members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
   }
   StructDecorationList decos;

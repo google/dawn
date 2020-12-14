@@ -74,7 +74,7 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
           create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),  // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::ConstantIdDecoration>(23, Source{}),
+          create<ast::ConstantIdDecoration>(Source{}, 23),
       });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();

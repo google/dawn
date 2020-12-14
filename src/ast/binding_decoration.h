@@ -29,7 +29,7 @@ class BindingDecoration
   /// constructor
   /// @param value the binding value
   /// @param source the source of this decoration
-  BindingDecoration(uint32_t value, const Source& source);
+  BindingDecoration(const Source& source, uint32_t value);
   ~BindingDecoration() override;
 
   /// @returns the binding value

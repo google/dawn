@@ -72,7 +72,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
           create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),  // constructor
       ast::VariableDecorationList{
           // decorations
-          create<ast::ConstantIdDecoration>(23, Source{}),
+          create<ast::ConstantIdDecoration>(Source{}, 23),
       });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
@@ -96,7 +96,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
                             nullptr,                   // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::ConstantIdDecoration>(23, Source{}),
+                                create<ast::ConstantIdDecoration>(Source{}, 23),
                             });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();

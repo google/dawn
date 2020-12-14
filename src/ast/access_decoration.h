@@ -27,9 +27,9 @@ namespace ast {
 class AccessDecoration : public Castable<AccessDecoration, TypeDecoration> {
  public:
   /// constructor
-  /// @param value the access value
   /// @param source the source of this decoration
-  explicit AccessDecoration(AccessControl value, const Source& source);
+  /// @param value the access value
+  explicit AccessDecoration(const Source& source, AccessControl value);
   ~AccessDecoration() override;
 
   /// @returns the access control value

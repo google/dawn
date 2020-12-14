@@ -24,12 +24,12 @@ namespace {
 using BindingDecorationTest = TestHelper;
 
 TEST_F(BindingDecorationTest, Creation) {
-  BindingDecoration d{2, Source{}};
+  BindingDecoration d{Source{}, 2};
   EXPECT_EQ(2u, d.value());
 }
 
 TEST_F(BindingDecorationTest, Is) {
-  BindingDecoration bd{2, Source{}};
+  BindingDecoration bd{Source{}, 2};
   Decoration* d = &bd;
   EXPECT_TRUE(d->Is<BindingDecoration>());
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
@@ -39,7 +39,7 @@ TEST_F(BindingDecorationTest, Is) {
 }
 
 TEST_F(BindingDecorationTest, ToStr) {
-  BindingDecoration d{2, Source{}};
+  BindingDecoration d{Source{}, 2};
   std::ostringstream out;
   d.to_str(out, 0);
   EXPECT_EQ(out.str(), R"(BindingDecoration{2}

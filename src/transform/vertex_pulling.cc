@@ -173,7 +173,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
                                  ast::VariableDecorationList{
                                      // decorations
                                      out->create<ast::BuiltinDecoration>(
-                                         ast::Builtin::kVertexIdx, Source{}),
+                                         Source{}, ast::Builtin::kVertexIdx),
                                  });
 
   out->AddGlobalVariable(var);
@@ -220,7 +220,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
                                  ast::VariableDecorationList{
                                      // decorations
                                      out->create<ast::BuiltinDecoration>(
-                                         ast::Builtin::kInstanceIdx, Source{}),
+                                         Source{}, ast::Builtin::kInstanceIdx),
                                  });
   out->AddGlobalVariable(var);
 }
@@ -258,14 +258,14 @@ void VertexPulling::State::AddVertexStorageBuffers() {
   auto* internal_array_type = out->create<ast::type::Array>(
       GetU32Type(), 0,
       ast::ArrayDecorationList{
-          out->create<ast::StrideDecoration>(4u, Source{}),
+          out->create<ast::StrideDecoration>(Source{}, 4u),
       });
 
   // Creating the struct type
   ast::StructMemberList members;
   ast::StructMemberDecorationList member_dec;
   member_dec.push_back(
-      out->create<ast::StructMemberOffsetDecoration>(0u, Source{}));
+      out->create<ast::StructMemberOffsetDecoration>(Source{}, 0u));
 
   members.push_back(out->create<ast::StructMember>(
       Source{}, kStructBufferName, internal_array_type, std::move(member_dec)));
@@ -288,8 +288,8 @@ void VertexPulling::State::AddVertexStorageBuffers() {
         nullptr,                            // constructor
         ast::VariableDecorationList{
             // decorations
-            out->create<ast::BindingDecoration>(i, Source{}),
-            out->create<ast::SetDecoration>(cfg.pulling_set, Source{}),
+            out->create<ast::BindingDecoration>(Source{}, i),
+            out->create<ast::SetDecoration>(Source{}, cfg.pulling_set),
         });
     out->AddGlobalVariable(var);
   }

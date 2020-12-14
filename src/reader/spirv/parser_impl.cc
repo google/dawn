@@ -447,7 +447,7 @@ ast::StructMemberDecoration* ParserImpl::ConvertMemberDecoration(
             << ShowType(struct_type_id);
         return nullptr;
       }
-      return create<ast::StructMemberOffsetDecoration>(decoration[1], Source{});
+      return create<ast::StructMemberOffsetDecoration>(Source{}, decoration[1]);
     case SpvDecorationNonReadable:
       // WGSL doesn't have a member decoration for this.  Silently drop it.
       return nullptr;
@@ -845,7 +845,7 @@ bool ParserImpl::ParseArrayDecorations(
                       << ": multiple ArrayStride decorations";
       }
       has_array_stride = true;
-      decorations->push_back(create<ast::StrideDecoration>(stride, Source{}));
+      decorations->push_back(create<ast::StrideDecoration>(Source{}, stride));
     } else {
       return Fail() << "invalid array type ID " << type_id
                     << ": unknown decoration "
@@ -1072,7 +1072,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
       ast::VariableDecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
-          auto* cid = create<ast::ConstantIdDecoration>(deco[1], Source{});
+          auto* cid = create<ast::ConstantIdDecoration>(Source{}, deco[1]);
           spec_id_decos.push_back(cid);
           break;
         }
@@ -1210,7 +1210,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
         ConvertType(builtin_position_.member_type_id), false, nullptr,
         ast::VariableDecorationList{
-            create<ast::BuiltinDecoration>(ast::Builtin::kPosition, Source{}),
+            create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
         });
 
     ast_module_.AddGlobalVariable(var);
@@ -1255,7 +1255,7 @@ ast::Variable* ParserImpl::MakeVariable(
         return nullptr;
       }
       decorations.emplace_back(
-          create<ast::BuiltinDecoration>(ast_builtin, Source{}));
+          create<ast::BuiltinDecoration>(Source{}, ast_builtin));
     }
     if (deco[0] == SpvDecorationLocation) {
       if (deco.size() != 2) {
@@ -1264,7 +1264,7 @@ ast::Variable* ParserImpl::MakeVariable(
         return nullptr;
       }
       decorations.emplace_back(
-          create<ast::LocationDecoration>(deco[1], Source{}));
+          create<ast::LocationDecoration>(Source{}, deco[1]));
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
       if (deco.size() == 1) {
@@ -1272,7 +1272,7 @@ ast::Variable* ParserImpl::MakeVariable(
                << ": has no operand";
         return nullptr;
       }
-      decorations.emplace_back(create<ast::SetDecoration>(deco[1], Source{}));
+      decorations.emplace_back(create<ast::SetDecoration>(Source{}, deco[1]));
     }
     if (deco[0] == SpvDecorationBinding) {
       if (deco.size() == 1) {
@@ -1281,7 +1281,7 @@ ast::Variable* ParserImpl::MakeVariable(
         return nullptr;
       }
       decorations.emplace_back(
-          create<ast::BindingDecoration>(deco[1], Source{}));
+          create<ast::BindingDecoration>(Source{}, deco[1]));
     }
   }
 

@@ -197,7 +197,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
   if (has_vertex_index_) {
     ast::StructMemberDecorationList member_dec;
     member_dec.push_back(
-        mod->create<ast::StructMemberOffsetDecoration>(offset, Source{}));
+        mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(mod->create<ast::StructMember>(
         Source{}, kFirstVertexName, u32_type, std::move(member_dec)));
     vertex_index_offset_ = offset;
@@ -207,7 +207,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
   if (has_instance_index_) {
     ast::StructMemberDecorationList member_dec;
     member_dec.push_back(
-        mod->create<ast::StructMemberOffsetDecoration>(offset, Source{}));
+        mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(mod->create<ast::StructMember>(
         Source{}, kFirstInstanceName, u32_type, std::move(member_dec)));
     instance_index_offset_ = offset;
@@ -229,8 +229,8 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
       false,                        // is_const
       nullptr,                      // constructor
       ast::VariableDecorationList{
-          mod->create<ast::BindingDecoration>(binding_, Source{}),
-          mod->create<ast::SetDecoration>(set_, Source{}),
+          mod->create<ast::BindingDecoration>(Source{}, binding_),
+          mod->create<ast::SetDecoration>(Source{}, set_),
       });  // decorations
 
   mod->AddGlobalVariable(idx_var);

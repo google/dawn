@@ -110,7 +110,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   ast::Function func(Source{}, mod.RegisterSymbol("my_func"), "my_func", {},
                      &void_type, body,
                      ast::FunctionDecorationList{
-                         create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
+                         create<ast::WorkgroupDecoration>(Source{}, 2u, 4u, 6u),
                      });
 
   gen.increment_indent();
@@ -134,7 +134,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
   ast::Function func(
       Source{}, mod.RegisterSymbol("my_func"), "my_func", {}, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   gen.increment_indent();
@@ -158,8 +158,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
   ast::Function func(
       Source{}, mod.RegisterSymbol("my_func"), "my_func", {}, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
-          create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
+          create<ast::WorkgroupDecoration>(Source{}, 2u, 4u, 6u),
       });
 
   gen.increment_indent();
@@ -197,7 +197,7 @@ TEST_F(WgslGeneratorImplTest,
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "d", &f32, a_deco));
 
   ast::StructDecorationList s_decos;
@@ -217,8 +217,8 @@ TEST_F(WgslGeneratorImplTest,
                             nullptr,                            // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(0, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 0),
                             });
 
   mod.AddConstructedType(&s);
@@ -250,8 +250,8 @@ TEST_F(WgslGeneratorImplTest,
     auto* func = create<ast::Function>(
         Source{}, mod.RegisterSymbol("a"), "a", params, &void_type, body,
         ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
-                                         Source{}),
+            create<ast::StageDecoration>(Source{},
+                                         ast::PipelineStage::kCompute),
         });
 
     mod.AddFunction(func);
@@ -281,8 +281,8 @@ TEST_F(WgslGeneratorImplTest,
     auto* func = create<ast::Function>(
         Source{}, mod.RegisterSymbol("b"), "b", params, &void_type, body,
         ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
-                                         Source{}),
+            create<ast::StageDecoration>(Source{},
+                                         ast::PipelineStage::kCompute),
         });
 
     mod.AddFunction(func);

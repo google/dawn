@@ -29,20 +29,20 @@ class WorkgroupDecoration
     : public Castable<WorkgroupDecoration, FunctionDecoration> {
  public:
   /// constructor
-  /// @param x the workgroup x dimension size
   /// @param source the source of this decoration
-  WorkgroupDecoration(uint32_t x, const Source& source);
+  /// @param x the workgroup x dimension size
+  WorkgroupDecoration(const Source& source, uint32_t x);
   /// constructor
+  /// @param source the source of this decoration
   /// @param x the workgroup x dimension size
   /// @param y the workgroup x dimension size
-  /// @param source the source of this decoration
-  WorkgroupDecoration(uint32_t x, uint32_t y, const Source& source);
+  WorkgroupDecoration(const Source& source, uint32_t x, uint32_t y);
   /// constructor
+  /// @param source the source of this decoration
   /// @param x the workgroup x dimension size
   /// @param y the workgroup x dimension size
   /// @param z the workgroup x dimension size
-  /// @param source the source of this decoration
-  WorkgroupDecoration(uint32_t x, uint32_t y, uint32_t z, const Source& source);
+  WorkgroupDecoration(const Source& source, uint32_t x, uint32_t y, uint32_t z);
   ~WorkgroupDecoration() override;
 
   /// @returns the workgroup dimensions

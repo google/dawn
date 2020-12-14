@@ -66,7 +66,7 @@ Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
                                    ast::VariableDecorationList{
                                        // decorations
                                        mod->create<ast::BuiltinDecoration>(
-                                           ast::Builtin::kPointSize, Source{}),
+                                           Source{}, ast::Builtin::kPointSize),
                                    });
     mod->AddGlobalVariable(pointsize_var);
 

@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::BindingDecoration);
 namespace tint {
 namespace ast {
 
-BindingDecoration::BindingDecoration(uint32_t val, const Source& source)
+BindingDecoration::BindingDecoration(const Source& source, uint32_t val)
     : Base(source), value_(val) {}
 
 BindingDecoration::~BindingDecoration() = default;
@@ -33,7 +33,7 @@ void BindingDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 BindingDecoration* BindingDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BindingDecoration>(value_, ctx->Clone(source()));
+  return ctx->mod->create<BindingDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

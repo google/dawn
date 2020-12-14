@@ -2865,7 +2865,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::AccessDecoration>(val.value, val.source);
+      return create<ast::AccessDecoration>(val.source, val.value);
     });
   }
 
@@ -2876,7 +2876,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::LocationDecoration>(val.value, val.source);
+      return create<ast::LocationDecoration>(val.source, val.value);
     });
   }
 
@@ -2887,7 +2887,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::BindingDecoration>(val.value, val.source);
+      return create<ast::BindingDecoration>(val.source, val.value);
     });
   }
 
@@ -2898,7 +2898,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::SetDecoration>(val.value, val.source);
+      return create<ast::SetDecoration>(val.source, val.value);
     });
   }
 
@@ -2908,7 +2908,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (builtin.errored)
         return Failure::kErrored;
 
-      return create<ast::BuiltinDecoration>(builtin.value, builtin.source);
+      return create<ast::BuiltinDecoration>(builtin.source, builtin.value);
     });
   }
 
@@ -2937,7 +2937,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
         }
       }
 
-      return create<ast::WorkgroupDecoration>(x, y, z, t.source());
+      return create<ast::WorkgroupDecoration>(t.source(), x, y, z);
     });
   }
 
@@ -2947,7 +2947,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (stage.errored)
         return Failure::kErrored;
 
-      return create<ast::StageDecoration>(stage.value, stage.source);
+      return create<ast::StageDecoration>(stage.source, stage.value);
     });
   }
 
@@ -2962,7 +2962,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::StrideDecoration>(val.value, t.source());
+      return create<ast::StrideDecoration>(t.source(), val.value);
     });
   }
 
@@ -2973,7 +2973,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::StructMemberOffsetDecoration>(val.value, t.source());
+      return create<ast::StructMemberOffsetDecoration>(t.source(), val.value);
     });
   }
 

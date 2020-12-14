@@ -26,9 +26,9 @@ class ConstantIdDecoration
     : public Castable<ConstantIdDecoration, VariableDecoration> {
  public:
   /// constructor
-  /// @param val the constant_id value
   /// @param source the source of this decoration
-  ConstantIdDecoration(uint32_t val, const Source& source);
+  /// @param val the constant_id value
+  ConstantIdDecoration(const Source& source, uint32_t val);
   ~ConstantIdDecoration() override;
 
   /// @returns the constant id value

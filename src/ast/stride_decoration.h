@@ -28,7 +28,7 @@ class StrideDecoration : public Castable<StrideDecoration, ArrayDecoration> {
   /// constructor
   /// @param stride the stride value
   /// @param source the source of this decoration
-  StrideDecoration(uint32_t stride, const Source& source);
+  StrideDecoration(const Source& source, uint32_t stride);
   ~StrideDecoration() override;
 
   /// @returns the stride value

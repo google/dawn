@@ -54,7 +54,7 @@ struct ModuleBuilder : public ast::BuilderWithModule {
   void AddBuiltinInput(const std::string& name, ast::Builtin builtin) {
     mod->AddGlobalVariable(
         Var(name, ast::StorageClass::kInput, ty.u32, nullptr,
-            {create<ast::BuiltinDecoration>(builtin, Source{})}));
+            {create<ast::BuiltinDecoration>(Source{}, builtin)}));
   }
 
   ast::Function* AddFunction(const std::string& name,

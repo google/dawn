@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::LocationDecoration);
 namespace tint {
 namespace ast {
 
-LocationDecoration::LocationDecoration(uint32_t val, const Source& source)
+LocationDecoration::LocationDecoration(const Source& source, uint32_t val)
     : Base(source), value_(val) {}
 
 LocationDecoration::~LocationDecoration() = default;
@@ -33,7 +33,7 @@ void LocationDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 LocationDecoration* LocationDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<LocationDecoration>(value_, ctx->Clone(source()));
+  return ctx->mod->create<LocationDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

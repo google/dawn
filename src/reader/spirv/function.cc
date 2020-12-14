@@ -906,7 +906,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
   }
   ast::FunctionDecorationList decos;
   if (ep_info_ != nullptr) {
-    decos.emplace_back(create<ast::StageDecoration>(ep_info_->stage, Source{}));
+    decos.emplace_back(create<ast::StageDecoration>(Source{}, ep_info_->stage));
   }
 
   decl->name = name;

@@ -22,8 +22,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::StructMemberOffsetDecoration);
 namespace tint {
 namespace ast {
 
-StructMemberOffsetDecoration::StructMemberOffsetDecoration(uint32_t offset,
-                                                           const Source& source)
+StructMemberOffsetDecoration::StructMemberOffsetDecoration(const Source& source,
+                                                           uint32_t offset)
     : Base(source), offset_(offset) {}
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
@@ -36,8 +36,8 @@ void StructMemberOffsetDecoration::to_str(std::ostream& out,
 
 StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
     CloneContext* ctx) const {
-  return ctx->mod->create<StructMemberOffsetDecoration>(offset_,
-                                                        ctx->Clone(source()));
+  return ctx->mod->create<StructMemberOffsetDecoration>(ctx->Clone(source()),
+                                                        offset_);
 }
 
 }  // namespace ast

@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::StageDecoration);
 namespace tint {
 namespace ast {
 
-StageDecoration::StageDecoration(PipelineStage stage, const Source& source)
+StageDecoration::StageDecoration(const Source& source, PipelineStage stage)
     : Base(source), stage_(stage) {}
 
 StageDecoration::~StageDecoration() = default;
@@ -33,7 +33,7 @@ void StageDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 StageDecoration* StageDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StageDecoration>(stage_, ctx->Clone(source()));
+  return ctx->mod->create<StageDecoration>(ctx->Clone(source()), stage_);
 }
 
 }  // namespace ast

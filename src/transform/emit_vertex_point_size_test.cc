@@ -71,8 +71,8 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
       auto* entry = create<ast::Function>(
           Source{}, entry_sym, "entry", ast::VariableList{}, ty.void_, block,
           ast::FunctionDecorationList{
-              create<ast::StageDecoration>(ast::PipelineStage::kVertex,
-                                           Source{}),
+              create<ast::StageDecoration>(Source{},
+                                           ast::PipelineStage::kVertex),
           });
       mod->AddFunction(entry);
 
@@ -141,8 +141,8 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
           Source{}, entry_sym, "entry", ast::VariableList{}, ty.void_,
           create<ast::BlockStatement>(Source{}, ast::StatementList{}),
           ast::FunctionDecorationList{
-              create<ast::StageDecoration>(ast::PipelineStage::kVertex,
-                                           Source{}),
+              create<ast::StageDecoration>(Source{},
+                                           ast::PipelineStage::kVertex),
           }));
 
       auto b_sym = mod->RegisterSymbol("non_entry_b");
@@ -197,8 +197,8 @@ TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
           Source{}, frag_sym, "fragment_entry", ast::VariableList{}, ty.void_,
           create<ast::BlockStatement>(Source{}, ast::StatementList{}),
           ast::FunctionDecorationList{
-              create<ast::StageDecoration>(ast::PipelineStage::kFragment,
-                                           Source{}),
+              create<ast::StageDecoration>(Source{},
+                                           ast::PipelineStage::kFragment),
           });
       mod->AddFunction(fragment_entry);
 
@@ -207,8 +207,8 @@ TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
           Source{}, comp_sym, "compute_entry", ast::VariableList{}, ty.void_,
           create<ast::BlockStatement>(Source{}, ast::StatementList{}),
           ast::FunctionDecorationList{
-              create<ast::StageDecoration>(ast::PipelineStage::kCompute,
-                                           Source{}),
+              create<ast::StageDecoration>(Source{},
+                                           ast::PipelineStage::kCompute),
           });
       mod->AddFunction(compute_entry);
     }

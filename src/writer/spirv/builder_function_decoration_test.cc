@@ -45,7 +45,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -72,7 +72,7 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(params.stage, Source{}),
+          create<ast::StageDecoration>(Source{}, params.stage),
       });
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
@@ -102,7 +102,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   auto* v_in =
@@ -191,7 +191,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   ast::Function func(
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
   auto* v_in =
@@ -262,7 +262,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
@@ -278,7 +278,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
 
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
@@ -294,8 +294,8 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
+          create<ast::WorkgroupDecoration>(Source{}, 2u, 4u, 6u),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
 
   ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
@@ -311,14 +311,14 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
       Source{}, mod->RegisterSymbol("main1"), "main1", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   ast::Function func2(
       Source{}, mod->RegisterSymbol("main2"), "main2", {}, &void_type,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
   ASSERT_TRUE(b.GenerateFunction(&func1)) << b.error();

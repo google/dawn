@@ -140,9 +140,9 @@ TEST_F(VariableTest, WithDecorations) {
   auto* var = create<Variable>(
       Source{}, "my_var", StorageClass::kFunction, &t, false, nullptr,
       VariableDecorationList{
-          create<LocationDecoration>(1, Source{}),
-          create<BuiltinDecoration>(Builtin::kPosition, Source{}),
-          create<ConstantIdDecoration>(1200, Source{}),
+          create<LocationDecoration>(Source{}, 1),
+          create<BuiltinDecoration>(Source{}, Builtin::kPosition),
+          create<ConstantIdDecoration>(Source{}, 1200),
       });
 
   EXPECT_TRUE(var->HasLocationDecoration());
@@ -155,7 +155,7 @@ TEST_F(VariableTest, ConstantId) {
   auto* var = create<Variable>(Source{}, "my_var", StorageClass::kFunction, &t,
                                false, nullptr,
                                VariableDecorationList{
-                                   create<ConstantIdDecoration>(1200, Source{}),
+                                   create<ConstantIdDecoration>(Source{}, 1200),
                                });
 
   EXPECT_EQ(var->constant_id(), 1200u);
@@ -168,8 +168,8 @@ TEST_F(VariableTest, Decorated_to_str) {
                        create<IdentifierExpression>(
                            Source{}, mod.RegisterSymbol("expr"), "expr"),
                        VariableDecorationList{
-                           create<BindingDecoration>(2, Source{}),
-                           create<SetDecoration>(1, Source{}),
+                           create<BindingDecoration>(Source{}, 2),
+                           create<SetDecoration>(Source{}, 1),
                        });
 
   std::ostringstream out;

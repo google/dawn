@@ -23,18 +23,18 @@ namespace {
 using StrideDecorationTest = TestHelper;
 
 TEST_F(StrideDecorationTest, Creation) {
-  StrideDecoration d{2, Source{}};
+  StrideDecoration d{Source{}, 2};
   EXPECT_EQ(2u, d.stride());
 }
 
 TEST_F(StrideDecorationTest, Is) {
-  StrideDecoration d{2, Source{}};
+  StrideDecoration d{Source{}, 2};
   EXPECT_TRUE(d.Is<StrideDecoration>());
 }
 
 TEST_F(StrideDecorationTest, Source) {
   StrideDecoration d{
-      2, Source{Source::Range{Source::Location{1, 2}, Source::Location{3, 4}}}};
+      Source{Source::Range{Source::Location{1, 2}, Source::Location{3, 4}}}, 2};
   EXPECT_EQ(d.source().range.begin.line, 1u);
   EXPECT_EQ(d.source().range.begin.column, 2u);
   EXPECT_EQ(d.source().range.end.line, 3u);

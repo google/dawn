@@ -274,7 +274,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0, Source{}));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
   members.push_back(create<ast::StructMember>(Source{}, "d", &f32, a_deco));
 
   ast::StructDecorationList s_decos;
@@ -294,8 +294,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                             nullptr,                            // constructor
                             ast::VariableDecorationList{
                                 // decorations
-                                create<ast::BindingDecoration>(0, Source{}),
-                                create<ast::SetDecoration>(0, Source{}),
+                                create<ast::BindingDecoration>(Source{}, 0),
+                                create<ast::SetDecoration>(Source{}, 0),
                             });
 
   mod->AddConstructedType(&s);
@@ -328,8 +328,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     auto* func = create<ast::Function>(
         Source{}, mod->RegisterSymbol("a"), "a", params, &void_type, body,
         ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
-                                         Source{}),
+            create<ast::StageDecoration>(Source{},
+                                         ast::PipelineStage::kCompute),
         });
 
     mod->AddFunction(func);
@@ -360,8 +360,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     auto* func = create<ast::Function>(
         Source{}, mod->RegisterSymbol("b"), "b", params, &void_type, body,
         ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute,
-                                         Source{}),
+            create<ast::StageDecoration>(Source{},
+                                         ast::PipelineStage::kCompute),
         });
 
     mod->AddFunction(func);

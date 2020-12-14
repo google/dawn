@@ -27,7 +27,7 @@ class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
   /// constructor
   /// @param stage the pipeline stage
   /// @param source the source of this decoration
-  StageDecoration(PipelineStage stage, const Source& source);
+  StageDecoration(const Source& source, PipelineStage stage);
   ~StageDecoration() override;
 
   /// @returns the stage

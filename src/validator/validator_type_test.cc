@@ -211,7 +211,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   auto* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("func"), "func", params, &void_type, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
+          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
   mod()->AddFunction(func);
 

@@ -58,7 +58,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
       Source{}, "a", &f32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
 
   auto* str =
@@ -83,7 +83,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
       Source{}, "a", &f32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4, Source{}));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
   members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
 
   auto* str =

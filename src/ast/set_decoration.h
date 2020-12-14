@@ -28,7 +28,7 @@ class SetDecoration : public Castable<SetDecoration, VariableDecoration> {
   /// constructor
   /// @param value the set value
   /// @param source the source of this decoration
-  SetDecoration(uint32_t value, const Source& source);
+  SetDecoration(const Source& source, uint32_t value);
   ~SetDecoration() override;
 
   /// @returns the set value

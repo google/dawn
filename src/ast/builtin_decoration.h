@@ -26,9 +26,9 @@ class BuiltinDecoration
     : public Castable<BuiltinDecoration, VariableDecoration> {
  public:
   /// constructor
-  /// @param builtin the builtin value
   /// @param source the source of this decoration
-  BuiltinDecoration(Builtin builtin, const Source& source);
+  /// @param builtin the builtin value
+  BuiltinDecoration(const Source& source, Builtin builtin);
   ~BuiltinDecoration() override;
 
   /// @returns the builtin value

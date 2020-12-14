@@ -22,7 +22,7 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::BuiltinDecoration);
 namespace tint {
 namespace ast {
 
-BuiltinDecoration::BuiltinDecoration(Builtin builtin, const Source& source)
+BuiltinDecoration::BuiltinDecoration(const Source& source, Builtin builtin)
     : Base(source), builtin_(builtin) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
@@ -33,7 +33,7 @@ void BuiltinDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BuiltinDecoration>(builtin_, ctx->Clone(source()));
+  return ctx->mod->create<BuiltinDecoration>(ctx->Clone(source()), builtin_);
 }
 
 }  // namespace ast
