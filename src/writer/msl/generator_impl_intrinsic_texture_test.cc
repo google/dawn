@@ -263,12 +263,13 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
   param.buildTextureVariable(this);
   param.buildSamplerVariable(this);
 
-  ast::CallExpression call{Source{}, Expr(param.function), param.args(this)};
+  auto* call =
+      create<ast::CallExpression>(Expr(param.function), param.args(this));
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
 
-  ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
 
   auto expected = expected_texture_overload(param.overload);
   EXPECT_EQ(gen.result(), expected);

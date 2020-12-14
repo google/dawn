@@ -93,17 +93,17 @@ class BoundArrayAccessorsTest : public testing::Test {
 struct ModuleBuilder : public ast::BuilderWithModule {
   ast::Module Module() {
     Build();
-    auto* body = create<ast::BlockStatement>(Source{}, statements);
-    mod->AddFunction(create<ast::Function>(
-        Source{}, mod->RegisterSymbol("func"), "func", ast::VariableList{},
-        ty.void_, body, ast::FunctionDecorationList{}));
+    auto* body = create<ast::BlockStatement>(statements);
+    mod->AddFunction(create<ast::Function>(mod->RegisterSymbol("func"), "func",
+                                           ast::VariableList{}, ty.void_, body,
+                                           ast::FunctionDecorationList{}));
     return std::move(*mod);
   }
 
  protected:
   virtual void Build() = 0;
   void OnVariableBuilt(ast::Variable* var) override {
-    statements.emplace_back(create<ast::VariableDeclStatement>(Source{}, var));
+    statements.emplace_back(create<ast::VariableDeclStatement>(var));
   }
   ast::StatementList statements;
 };

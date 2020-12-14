@@ -52,17 +52,15 @@ struct ModuleBuilder : public ast::BuilderWithModule {
 
  protected:
   void AddBuiltinInput(const std::string& name, ast::Builtin builtin) {
-    mod->AddGlobalVariable(
-        Var(name, ast::StorageClass::kInput, ty.u32, nullptr,
-            {create<ast::BuiltinDecoration>(Source{}, builtin)}));
+    mod->AddGlobalVariable(Var(name, ast::StorageClass::kInput, ty.u32, nullptr,
+                               {create<ast::BuiltinDecoration>(builtin)}));
   }
 
   ast::Function* AddFunction(const std::string& name,
                              ast::StatementList stmts) {
     auto* func = create<ast::Function>(
-        Source{}, mod->RegisterSymbol(name), name, ast::VariableList{}, ty.u32,
-        create<ast::BlockStatement>(Source{}, stmts),
-        ast::FunctionDecorationList{});
+        mod->RegisterSymbol(name), name, ast::VariableList{}, ty.u32,
+        create<ast::BlockStatement>(stmts), ast::FunctionDecorationList{});
     mod->AddFunction(func);
     return func;
   }
@@ -77,10 +75,8 @@ TEST_F(FirstIndexOffsetTest, Error_AlreadyTransformed) {
       AddFunction(
           "test",
           {
-              create<ast::ReturnStatement>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")),
+              create<ast::ReturnStatement>(create<ast::IdentifierExpression>(
+                  mod->RegisterSymbol("vert_idx"), "vert_idx")),
           });
     }
   };
@@ -124,10 +120,8 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
       AddFunction(
           "test",
           {
-              create<ast::ReturnStatement>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")),
+              create<ast::ReturnStatement>(create<ast::IdentifierExpression>(
+                  mod->RegisterSymbol("vert_idx"), "vert_idx")),
           });
     }
   };
@@ -206,10 +200,8 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
       AddFunction(
           "test",
           {
-              create<ast::ReturnStatement>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("inst_idx"), "inst_idx")),
+              create<ast::ReturnStatement>(create<ast::IdentifierExpression>(
+                  mod->RegisterSymbol("inst_idx"), "inst_idx")),
           });
     }
   };
@@ -286,7 +278,7 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
       AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
       AddFunction("test", {
-                              create<ast::ReturnStatement>(Source{}, Expr(1u)),
+                              create<ast::ReturnStatement>(Expr(1u)),
                           });
     }
   };
@@ -365,22 +357,16 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
       AddFunction(
           "func1",
           {
-              create<ast::ReturnStatement>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")),
+              create<ast::ReturnStatement>(create<ast::IdentifierExpression>(
+                  mod->RegisterSymbol("vert_idx"), "vert_idx")),
           });
-      AddFunction(
-          "func2",
-          {
-              create<ast::ReturnStatement>(
-                  Source{},
-                  create<ast::CallExpression>(
-                      Source{},
-                      create<ast::IdentifierExpression>(
-                          Source{}, mod->RegisterSymbol("func1"), "func1"),
-                      ast::ExpressionList{})),
-          });
+      AddFunction("func2",
+                  {
+                      create<ast::ReturnStatement>(create<ast::CallExpression>(
+                          create<ast::IdentifierExpression>(
+                              mod->RegisterSymbol("func1"), "func1"),
+                          ast::ExpressionList{})),
+                  });
     }
   };
 

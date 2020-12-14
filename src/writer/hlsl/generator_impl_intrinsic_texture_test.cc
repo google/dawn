@@ -272,12 +272,13 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   param.buildTextureVariable(this);
   param.buildSamplerVariable(this);
 
-  ast::CallExpression call{Source{}, Expr(param.function), param.args(this)};
+  auto* call =
+      create<ast::CallExpression>(Expr(param.function), param.args(this));
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
 
   EXPECT_TRUE(pre_result().empty());
 

@@ -26,6 +26,7 @@
 #include "src/ast/expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
@@ -259,7 +260,7 @@ class Builder {
     Append(list, std::forward<ARGS>(args)...);
   }
 
-  /// @return an empty list of expressions,
+  /// @return an empty list of expressions
   ExpressionList ExprList() { return {}; }
 
   /// @param args the list of expressions
@@ -272,6 +273,10 @@ class Builder {
     Append(list, std::forward<ARGS>(args)...);
     return list;
   }
+
+  /// @param list the list of expressions
+  /// @return `list`
+  ExpressionList ExprList(ExpressionList list) { return list; }
 
   /// @param val the boolan value
   /// @return a boolean literal with the given value
@@ -471,8 +476,8 @@ class Builder {
   /// @param args the function call arguments
   /// @returns a `CallExpression` to the function `func`, with the
   /// arguments of `args` converted to `Expression`s using `Expr()`.
-  template <typename... ARGS>
-  CallExpression* Call(const std::string& func, ARGS&&... args) {
+  template <typename NAME, typename... ARGS>
+  CallExpression* Call(NAME&& func, ARGS&&... args) {
     return create<CallExpression>(Expr(func),
                                   ExprList(std::forward<ARGS>(args)...));
   }
@@ -482,7 +487,7 @@ class Builder {
   /// @returns a `BinaryExpression` summing the arguments `lhs` and `rhs`
   template <typename LHS, typename RHS>
   Expression* Add(LHS&& lhs, RHS&& rhs) {
-    return create<BinaryExpression>(ast::BinaryOp::kAdd,
+    return create<BinaryExpression>(BinaryOp::kAdd,
                                     Expr(std::forward<LHS>(lhs)),
                                     Expr(std::forward<RHS>(rhs)));
   }
@@ -492,7 +497,17 @@ class Builder {
   /// @returns a `BinaryExpression` subtracting `rhs` from `lhs`
   template <typename LHS, typename RHS>
   Expression* Sub(LHS&& lhs, RHS&& rhs) {
-    return create<BinaryExpression>(ast::BinaryOp::kSubtract,
+    return create<BinaryExpression>(BinaryOp::kSubtract,
+                                    Expr(std::forward<LHS>(lhs)),
+                                    Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the multiplication operation
+  /// @param rhs the right hand argument to the multiplication operation
+  /// @returns a `BinaryExpression` multiplying `rhs` from `lhs`
+  template <typename LHS, typename RHS>
+  Expression* Mul(LHS&& lhs, RHS&& rhs) {
+    return create<BinaryExpression>(BinaryOp::kMultiply,
                                     Expr(std::forward<LHS>(lhs)),
                                     Expr(std::forward<RHS>(rhs)));
   }
@@ -506,35 +521,43 @@ class Builder {
         Source{}, Expr(std::forward<ARR>(arr)), Expr(std::forward<IDX>(idx)));
   }
 
-  /// Creates a new ast::Node owned by the Module, with the explicit Source.
+  /// @param obj the object for the member accessor expression
+  /// @param idx the index argument for the array accessor expression
+  /// @returns a `MemberAccessorExpression` that indexes `obj` with `idx`
+  template <typename OBJ, typename IDX>
+  Expression* Member(OBJ&& obj, IDX&& idx) {
+    return create<MemberAccessorExpression>(
+        Source{}, Expr(std::forward<OBJ>(obj)), Expr(std::forward<IDX>(idx)));
+  }
+
+  /// Creates a new Node owned by the Module, with the explicit Source.
   /// When the Module is destructed, the `Node` will also be destructed.
   /// @param source the source to apply to the Node
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  ast::traits::EnableIfIsType<T, ast::Node>* create(const Source& source,
-                                                    ARGS&&... args) {
+  traits::EnableIfIsType<T, Node>* create(const Source& source,
+                                          ARGS&&... args) {
     return mod->create<T>(source, std::forward<ARGS>(args)...);
   }
 
-  /// Creates a new ast::Node owned by the Module, with the explicit Source.
+  /// Creates a new Node owned by the Module, with the explicit Source.
   /// When the Module is destructed, the `Node` will also be destructed.
   /// @param source the source to apply to the Node
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  ast::traits::EnableIfIsType<T, ast::Node>* create(Source&& source,
-                                                    ARGS&&... args) {
+  traits::EnableIfIsType<T, Node>* create(Source&& source, ARGS&&... args) {
     return mod->create<T>(std::move(source), std::forward<ARGS>(args)...);
   }
 
-  /// Creates a new ast::type::Type owned by the Module, using the Builder's
+  /// Creates a new type::Type owned by the Module, using the Builder's
   /// current Source. When the Module is destructed, the `Node` will also be
   /// destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  ast::traits::EnableIfIsType<T, ast::Node>* create(ARGS&&... args) {
+  traits::EnableIfIsType<T, Node>* create(ARGS&&... args) {
     return mod->create<T>(source_, std::forward<ARGS>(args)...);
   }
 
@@ -550,11 +573,19 @@ class Builder {
   /// @param args the arguments to pass to the type constructor
   /// @returns the de-aliased type pointer
   template <typename T, typename... ARGS>
-  traits::EnableIfIsType<T, ast::type::Type>* create(ARGS&&... args) {
+  traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
     static_assert(std::is_base_of<type::Type, T>::value,
                   "T does not derive from type::Type");
     return mod->create<T>(std::forward<ARGS>(args)...);
   }
+
+  /// Sets the current builder source to `src`
+  /// @param src the Source used for future create() calls
+  void SetSource(const Source& src) { source_ = src; }
+
+  /// Sets the current builder source to `loc`
+  /// @param loc the Source used for future create() calls
+  void SetSource(const Source::Location& loc) { source_ = Source(loc); }
 
   /// The builder module
   Module* const mod;

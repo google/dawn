@@ -46,30 +46,23 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, ArrayAccessor) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // vec3<f32> ary;
   // ary[1]  -> ptr<f32>
 
-  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3, false,
-                    nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("ary"), "ary");
-  auto* idx_expr = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1));
+  auto* ary = Expr("ary");
+  auto* idx_expr = Expr(1);
 
-  ast::ArrayAccessorExpression expr(Source{}, ary, idx_expr);
+  auto* expr = Index(ary, idx_expr);
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -88,35 +81,27 @@ TEST_F(BuilderTest, ArrayAccessor) {
 }
 
 TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // ary : vec3<f32>;
   // idx : i32;
   // ary[idx]  -> ptr<f32>
 
-  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3, false,
-                    nullptr, ast::VariableDecorationList{});
-  ast::Variable idx(Source{}, "idx", ast::StorageClass::kFunction, &i32, false,
-                    nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* idx = Var("idx", ast::StorageClass::kFunction, ty.i32);
 
-  auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("ary"), "ary");
-  auto* idx_expr = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("idx"), "idx");
+  auto* ary = Expr("ary");
+  auto* idx_expr = Expr("idx");
 
-  ast::ArrayAccessorExpression expr(Source{}, ary, idx_expr);
+  auto* expr = Index(ary, idx_expr);
 
-  td.RegisterVariableForTesting(&var);
-  td.RegisterVariableForTesting(&idx);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  td.RegisterVariableForTesting(idx);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunctionVariable(&idx)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(idx)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 12u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 12u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -138,35 +123,22 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
 }
 
 TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // vec3<f32> ary;
   // ary[1 + 2]  -> ptr<f32>
 
-  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &vec3, false,
-                    nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("ary"), "ary");
+  auto* ary = Expr("ary");
 
-  ast::ArrayAccessorExpression expr(
-      Source{}, ary,
-      create<ast::BinaryExpression>(
-          Source{}, ast::BinaryOp::kAdd,
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
+  auto* expr = Index(ary, Add(1, 2));
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 11u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -187,35 +159,22 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 }
 
 TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Array ary4(&vec3, 4, ast::ArrayDecorationList{});
+  ast::type::Array ary4(ty.vec3<f32>(), 4, ast::ArrayDecorationList{});
 
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
 
-  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &ary4, false,
-                    nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ary", ast::StorageClass::kFunction, &ary4);
 
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::ArrayAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(Source{},
-                                            mod->RegisterSymbol("ary"), "ary"),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
+  auto* expr = Index(Index("ary", 3), 2);
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 13u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
@@ -238,34 +197,21 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 }
 
 TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Array ary4(&vec3, 4, ast::ArrayDecorationList{});
+  ast::type::Array ary4(ty.vec3<f32>(), 4, ast::ArrayDecorationList{});
 
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
 
-  ast::Variable var(Source{}, "ary", ast::StorageClass::kFunction, &ary4, false,
-                    nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ary", ast::StorageClass::kFunction, &ary4);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::ArrayAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(Source{},
-                                            mod->RegisterSymbol("ary"), "ary"),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("xy"),
-                                        "xy"));
+  auto* expr = Member(Index("ary", 2), "xy");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 15u);
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 15u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
@@ -290,8 +236,6 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
 }
 
 TEST_F(BuilderTest, MemberAccessor) {
-  ast::type::F32 f32;
-
   // my_struct {
   //   a : f32
   //   b : f32
@@ -301,29 +245,23 @@ TEST_F(BuilderTest, MemberAccessor) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &f32, decos));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
+  members.push_back(create<ast::StructMember>("a", ty.f32, decos));
+  members.push_back(create<ast::StructMember>("b", ty.f32, decos));
 
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("ident"),
-                                        "ident"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("b"),
-                                        "b"));
+  auto* expr = Member("ident", "b");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeStruct %4 %4
@@ -342,8 +280,6 @@ TEST_F(BuilderTest, MemberAccessor) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested) {
-  ast::type::F32 f32;
-
   // inner_struct {
   //   a : f32
   // }
@@ -355,45 +291,32 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   // ident.inner.a
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "a", &f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "b", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("a", ty.f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", ty.f32, decos));
 
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(Source{}, inner_members,
-                          ast::StructDecorationList{}));
+      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
+      create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct",
-                           create<ast::Struct>(Source{}, outer_members,
-                                               ast::StructDecorationList{}));
+  ast::type::Struct s_type(
+      mod->RegisterSymbol("my_struct"), "my_struct",
+      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("ident"), "ident"),
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("inner"), "inner")),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a"),
-                                        "a"));
+  auto* expr = Member(Member("ident", "inner"), "a");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 10u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeStruct %5 %5
@@ -413,8 +336,6 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
-  ast::type::F32 f32;
-
   // type Inner = struct {
   //   a : f32
   //   b : f32
@@ -427,47 +348,33 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   // ident.inner.a
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "a", &f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "b", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("a", ty.f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", ty.f32, decos));
 
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(Source{}, inner_members,
-                          ast::StructDecorationList{}));
+      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
 
   ast::type::Alias alias(mod->RegisterSymbol("Inner"), "Inner", &inner_struct);
 
   ast::StructMemberList outer_members;
-  outer_members.push_back(
-      create<ast::StructMember>(Source{}, "inner", &alias, decos));
+  outer_members.push_back(create<ast::StructMember>("inner", &alias, decos));
 
-  ast::type::Struct s_type(mod->RegisterSymbol("Outer"), "Outer",
-                           create<ast::Struct>(Source{}, outer_members,
-                                               ast::StructDecorationList{}));
+  ast::type::Struct s_type(
+      mod->RegisterSymbol("Outer"), "Outer",
+      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("ident"), "ident"),
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("inner"), "inner")),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a"),
-                                        "a"));
+  auto* expr = Member(Member("ident", "inner"), "a");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 10u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeStruct %5 %5
@@ -487,8 +394,6 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
-  ast::type::F32 f32;
-
   // inner_struct {
   //   a : f32
   // }
@@ -501,50 +406,36 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "a", &f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "b", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("a", ty.f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", ty.f32, decos));
 
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(Source{}, inner_members,
-                          ast::StructDecorationList{}));
+      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
+      create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct",
-                           create<ast::Struct>(Source{}, outer_members,
-                                               ast::StructDecorationList{}));
+  ast::type::Struct s_type(
+      mod->RegisterSymbol("my_struct"), "my_struct",
+      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("ident"), "ident"),
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("inner"), "inner")),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a"),
-                                        "a"));
+  auto* lhs = Member(Member("ident", "inner"), "a");
 
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.f));
+  auto* rhs = Expr(2.0f);
 
-  ast::AssignmentStatement expr(Source{}, lhs, rhs);
+  auto* expr = create<ast::AssignmentStatement>(lhs, rhs);
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(expr)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeStruct %5 %5
@@ -566,8 +457,6 @@ OpStore %10 %11
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
-  ast::type::F32 f32;
-
   // inner_struct {
   //   a : f32
   // }
@@ -580,54 +469,38 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "a", &f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(Source{}, "b", &f32, decos));
+  inner_members.push_back(create<ast::StructMember>("a", ty.f32, decos));
+  inner_members.push_back(create<ast::StructMember>("b", ty.f32, decos));
 
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(Source{}, inner_members,
-                          ast::StructDecorationList{}));
+      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
 
   ast::StructMemberList outer_members;
   outer_members.push_back(
-      create<ast::StructMember>(Source{}, "inner", &inner_struct, decos));
+      create<ast::StructMember>("inner", &inner_struct, decos));
 
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct",
-                           create<ast::Struct>(Source{}, outer_members,
-                                               ast::StructDecorationList{}));
+  ast::type::Struct s_type(
+      mod->RegisterSymbol("my_struct"), "my_struct",
+      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
-                    false, nullptr, ast::VariableDecorationList{});
-  ast::Variable store(Source{}, "store", ast::StorageClass::kFunction, &f32,
-                      false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
+  auto* store = Var("store", ast::StorageClass::kFunction, ty.f32);
 
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("store"), "store");
+  auto* lhs = Expr("store");
+  auto* rhs = Member(Member("ident", "inner"), "a");
 
-  auto* rhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("ident"), "ident"),
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("inner"), "inner")),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a"),
-                                        "a"));
+  auto* expr = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ast::AssignmentStatement expr(Source{}, lhs, rhs);
-
-  td.RegisterVariableForTesting(&var);
-  td.RegisterVariableForTesting(&store);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  td.RegisterVariableForTesting(store);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunctionVariable(&store)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(store)) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(expr)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeStruct %5 %5
@@ -651,28 +524,19 @@ OpStore %7 %13
 }
 
 TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // ident.y
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("ident"),
-                                        "ident"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("y"),
-                                        "y"));
+  auto* expr = Member("ident", "y");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -691,28 +555,19 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // ident.yx
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("ident"),
-                                        "ident"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("yx"),
-                                        "yx"));
+  auto* expr = Member("ident", "yx");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -730,32 +585,19 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // ident.yxz.xz
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("ident"), "ident"),
-          create<ast::IdentifierExpression>(Source{},
-                                            mod->RegisterSymbol("yxz"), "yxz")),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("xz"),
-                                        "xz"));
+  auto* expr = Member(Member("ident", "yxz"), "xz");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -774,32 +616,19 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // ident.yxz.x
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("ident"), "ident"),
-          create<ast::IdentifierExpression>(Source{},
-                                            mod->RegisterSymbol("yxz"), "yxz")),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("x"),
-                                        "x"));
+  auto* expr = Member(Member("ident", "yxz"), "x");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -817,33 +646,19 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // index.yxz[1]
 
-  ast::Variable var(Source{}, "ident", ast::StorageClass::kFunction, &vec3,
-                    false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("ident"), "ident"),
-          create<ast::IdentifierExpression>(Source{},
-                                            mod->RegisterSymbol("yxz"), "yxz")),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
+  auto* expr = Index(Member("ident", "yxz"), 1);
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 10u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -863,10 +678,6 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 }
 
 TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // type C = struct {
   //   baz : vec3<f32>
   // }
@@ -881,66 +692,38 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   ast::StructMemberDecorationList decos;
 
-  auto* s = create<ast::Struct>(Source{},
-                                ast::StructMemberList{create<ast::StructMember>(
-                                    Source{}, "baz", &vec3, decos)},
+  auto* s = create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
+                                    "baz", ty.vec3<f32>(), decos)},
                                 ast::StructDecorationList{});
   ast::type::Struct c_type(mod->RegisterSymbol("C"), "C", s);
 
-  s = create<ast::Struct>(Source{},
-                          ast::StructMemberList{create<ast::StructMember>(
-                              Source{}, "bar", &c_type, decos)},
-                          ast::StructDecorationList{});
+  s = create<ast::Struct>(
+      ast::StructMemberList{create<ast::StructMember>("bar", &c_type, decos)},
+      ast::StructDecorationList{});
   ast::type::Struct b_type(mod->RegisterSymbol("B"), "B", s);
 
   ast::type::Array b_ary_type(&b_type, 3, ast::ArrayDecorationList{});
 
-  s = create<ast::Struct>(Source{},
-                          ast::StructMemberList{create<ast::StructMember>(
-                              Source{}, "foo", &b_ary_type, decos)},
+  s = create<ast::Struct>(ast::StructMemberList{create<ast::StructMember>(
+                              "foo", &b_ary_type, decos)},
                           ast::StructDecorationList{});
   ast::type::Struct a_type(mod->RegisterSymbol("A"), "A", s);
 
   ast::type::Array a_ary_type(&a_type, 2, ast::ArrayDecorationList{});
 
-  ast::Variable var(Source{}, "index", ast::StorageClass::kFunction,
-                    &a_ary_type, false, nullptr, ast::VariableDecorationList{});
+  auto* var = Var("index", ast::StorageClass::kFunction, &a_ary_type);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::MemberAccessorExpression>(
-              Source{},
-              create<ast::ArrayAccessorExpression>(
-                  Source{},
-                  create<ast::MemberAccessorExpression>(
-                      Source{},
-                      create<ast::ArrayAccessorExpression>(
-                          Source{},
-                          create<ast::IdentifierExpression>(
-                              Source{}, mod->RegisterSymbol("index"), "index"),
-                          create<ast::ScalarConstructorExpression>(
-                              Source{},
-                              create<ast::SintLiteral>(Source{}, &i32, 0))),
-                      create<ast::IdentifierExpression>(
-                          Source{}, mod->RegisterSymbol("foo"), "foo")),
-                  create<ast::ScalarConstructorExpression>(
-                      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("bar"), "bar")),
-          create<ast::IdentifierExpression>(Source{},
-                                            mod->RegisterSymbol("baz"), "baz")),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("yx"),
-                                        "yx"));
+  auto* expr = Member(
+      Member(Member(Index(Member(Index("index", 0), "foo"), 2), "bar"), "baz"),
+      "yx");
 
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 22u);
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 22u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%9 = OpTypeFloat 32
 %8 = OpTypeVector %9 3
@@ -978,58 +761,23 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   //   vec2<f32>(0.5, -0.5));
   // pos[1]
 
-  ast::type::F32 f32;
   ast::type::U32 u32;
-  ast::type::Vector vec(&f32, 2);
-  ast::type::Array arr(&vec, 3, ast::ArrayDecorationList{});
+  ast::type::Array arr(ty.vec2<f32>(), 3, ast::ArrayDecorationList{});
 
-  ast::ExpressionList ary_params;
-  ary_params.push_back(create<ast::TypeConstructorExpression>(
-      Source{}, &vec,
-      ast::ExpressionList{
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 0.0)),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 0.5)),
-      }));
+  auto* var = Const("pos", ast::StorageClass::kPrivate, &arr,
+                    Construct(&arr, vec2<f32>(0.0f, 0.5f),
+                              vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)),
+                    {});
 
-  ary_params.push_back(create<ast::TypeConstructorExpression>(
-      Source{}, &vec,
-      ast::ExpressionList{
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, -0.5)),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, -0.5)),
-      }));
+  auto* expr = Index("pos", 1u);
 
-  ary_params.push_back(create<ast::TypeConstructorExpression>(
-      Source{}, &vec,
-      ast::ExpressionList{
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 0.5)),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, -0.5)),
-      }));
-
-  ast::Variable var(
-      Source{}, "pos", ast::StorageClass::kPrivate, &arr, true,
-      create<ast::TypeConstructorExpression>(Source{}, &arr, ary_params),
-      ast::VariableDecorationList{});
-
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("pos"),
-                                        "pos"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)));
-
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 18u) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 18u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 2
@@ -1061,35 +809,18 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   // const pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
-  ast::type::F32 f32;
-  ast::type::U32 u32;
-  ast::type::Vector vec(&f32, 2);
+  auto* var = Const("pos", ast::StorageClass::kPrivate, ty.vec2<f32>(),
+                    vec2<f32>(0.0f, 0.5f), {});
 
-  ast::ExpressionList vec_params;
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 0.0)));
-  vec_params.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 0.5)));
+  auto* expr = Index("pos", 1u);
 
-  ast::Variable var(Source{}, "pos", ast::StorageClass::kPrivate, &vec, true,
-                    create<ast::TypeConstructorExpression>(
-                        Source{}, &vec, std::move(vec_params)),
-                    ast::VariableDecorationList{});
-
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("pos"),
-                                        "pos"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::UintLiteral>(Source{}, &u32, 1)));
-
-  td.RegisterVariableForTesting(&var);
-  ASSERT_TRUE(td.DetermineResultType(var.constructor())) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  td.RegisterVariableForTesting(var);
+  ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 8u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2
