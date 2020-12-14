@@ -106,16 +106,14 @@ TEST_F(AccessControlTest, MinBufferBindingSizeU32) {
 
 TEST_F(AccessControlTest, MinBufferBindingSizeArray) {
   U32 u32;
-  Array array(&u32, 4,
-              ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
+  Array array(&u32, 4, ArrayDecorationList{create<StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AccessControlTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
-  Array array(&u32, 0,
-              ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
+  Array array(&u32, 0, ArrayDecorationList{create<StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(4u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
@@ -125,17 +123,17 @@ TEST_F(AccessControlTest, MinBufferBindingSizeStruct) {
   StructMemberList members;
 
   StructMemberDecorationList deco;
-  deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
+  deco.push_back(create<StructMemberOffsetDecoration>(0));
+  members.push_back(create<StructMember>("foo", &u32, deco));
 
   deco = StructMemberDecorationList();
-  deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
+  deco.push_back(create<StructMemberOffsetDecoration>(4));
+  members.push_back(create<StructMember>("bar", &u32, deco));
 
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(Source{}, members, decos);
-  Struct struct_type(mod.RegisterSymbol("struct_type"), "struct_type", str);
+  auto* str = create<ast::Struct>(members, decos);
+  Struct struct_type(mod->RegisterSymbol("struct_type"), "struct_type", str);
   AccessControl at{ast::AccessControl::kReadOnly, &struct_type};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, at.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
@@ -149,16 +147,14 @@ TEST_F(AccessControlTest, BaseAlignmentU32) {
 
 TEST_F(AccessControlTest, BaseAlignmentArray) {
   U32 u32;
-  Array array(&u32, 4,
-              ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
+  Array array(&u32, 4, ArrayDecorationList{create<StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AccessControlTest, BaseAlignmentRuntimeArray) {
   U32 u32;
-  Array array(&u32, 0,
-              ArrayDecorationList{create<StrideDecoration>(Source{}, 4)});
+  Array array(&u32, 0, ArrayDecorationList{create<StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
@@ -169,18 +165,18 @@ TEST_F(AccessControlTest, BaseAlignmentStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
-    members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
+    deco.push_back(create<StructMemberOffsetDecoration>(0));
+    members.push_back(create<StructMember>("foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
-    members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
+    deco.push_back(create<StructMemberOffsetDecoration>(4));
+    members.push_back(create<StructMember>("bar", &u32, deco));
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(Source{}, members, decos);
-  Struct struct_type(mod.RegisterSymbol("struct_type"), "struct_type", str);
+  auto* str = create<ast::Struct>(members, decos);
+  Struct struct_type(mod->RegisterSymbol("struct_type"), "struct_type", str);
   AccessControl at{ast::AccessControl::kReadOnly, &struct_type};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, at.BaseAlignment(MemoryLayout::kStorageBuffer));

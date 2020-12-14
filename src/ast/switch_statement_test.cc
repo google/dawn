@@ -29,136 +29,115 @@ namespace {
 using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
-  type::I32 i32;
-
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(Source{}, &i32, 1));
+  lit.push_back(create<SintLiteral>(ty.i32, 1));
 
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
   CaseStatementList body;
-  auto* case_stmt = create<CaseStatement>(
-      Source{}, lit, create<BlockStatement>(Source{}, StatementList{}));
+  auto* case_stmt =
+      create<CaseStatement>(lit, create<BlockStatement>(StatementList{}));
   body.push_back(case_stmt);
 
-  SwitchStatement stmt(Source{}, ident, body);
-  EXPECT_EQ(stmt.condition(), ident);
-  ASSERT_EQ(stmt.body().size(), 1u);
-  EXPECT_EQ(stmt.body()[0], case_stmt);
+  auto* stmt = create<SwitchStatement>(ident, body);
+  EXPECT_EQ(stmt->condition(), ident);
+  ASSERT_EQ(stmt->body().size(), 1u);
+  EXPECT_EQ(stmt->body()[0], case_stmt);
 }
 
 TEST_F(SwitchStatementTest, Creation_WithSource) {
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
 
-  SwitchStatement stmt(Source{Source::Location{20, 2}}, ident,
-                       CaseStatementList());
-  auto src = stmt.source();
+  auto* stmt = create<SwitchStatement>(Source{Source::Location{20, 2}}, ident,
+                                       CaseStatementList());
+  auto src = stmt->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(SwitchStatementTest, IsSwitch) {
-  type::I32 i32;
-
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32, 2));
 
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(
-      Source{}, lit, create<BlockStatement>(Source{}, StatementList{})));
+  body.push_back(
+      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
 
-  SwitchStatement stmt(Source{}, ident, body);
-  EXPECT_TRUE(stmt.Is<SwitchStatement>());
+  auto* stmt = create<SwitchStatement>(ident, body);
+  EXPECT_TRUE(stmt->Is<SwitchStatement>());
 }
 
 TEST_F(SwitchStatementTest, IsValid) {
-  type::I32 i32;
-
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32, 2));
 
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(
-      Source{}, lit, create<BlockStatement>(Source{}, StatementList{})));
+  body.push_back(
+      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
 
-  SwitchStatement stmt(Source{}, ident, body);
-  EXPECT_TRUE(stmt.IsValid());
+  auto* stmt = create<SwitchStatement>(ident, body);
+  EXPECT_TRUE(stmt->IsValid());
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
-  type::I32 i32;
-
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32, 2));
 
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(
-      Source{}, lit, create<BlockStatement>(Source{}, StatementList{})));
+  body.push_back(
+      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
 
-  SwitchStatement stmt(Source{}, nullptr, body);
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<SwitchStatement>(nullptr, body);
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
-  type::I32 i32;
-
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32, 2));
 
-  auto* ident =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
+  auto* ident = Expr("");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(
-      Source{}, lit, create<BlockStatement>(Source{}, StatementList{})));
+  body.push_back(
+      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
 
-  SwitchStatement stmt(Source{}, ident, body);
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<SwitchStatement>(ident, body);
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
-  type::I32 i32;
-
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32, 2));
 
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(
-      Source{}, lit, create<BlockStatement>(Source{}, StatementList{})));
+  body.push_back(
+      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
   body.push_back(nullptr);
 
-  SwitchStatement stmt(Source{}, ident, body);
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<SwitchStatement>(ident, body);
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
 
-  auto* case_body = create<BlockStatement>(Source{}, StatementList{
-                                                         nullptr,
-                                                     });
+  auto* case_body = create<BlockStatement>(StatementList{
+      nullptr,
+  });
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(Source{}, CaseSelectorList{}, case_body));
+  body.push_back(create<CaseStatement>(CaseSelectorList{}, case_body));
 
-  SwitchStatement stmt(Source{}, ident, body);
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<SwitchStatement>(ident, body);
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(SwitchStatementTest, ToStr_Empty) {
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
 
-  SwitchStatement stmt(Source{}, ident, {});
+  auto* stmt = create<SwitchStatement>(ident, CaseStatementList{});
   std::ostringstream out;
-  stmt.to_str(out, 2);
+  stmt->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Switch{
     Identifier[not set]{ident}
     {
@@ -168,20 +147,17 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 }
 
 TEST_F(SwitchStatementTest, ToStr) {
-  type::I32 i32;
-
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(Source{}, &i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32, 2));
 
-  auto* ident = create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* ident = Expr("ident");
   CaseStatementList body;
-  body.push_back(create<CaseStatement>(
-      Source{}, lit, create<BlockStatement>(Source{}, StatementList{})));
+  body.push_back(
+      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
 
-  SwitchStatement stmt(Source{}, ident, body);
+  auto* stmt = create<SwitchStatement>(ident, body);
   std::ostringstream out;
-  stmt.to_str(out, 2);
+  stmt->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Switch{
     Identifier[not set]{ident}
     {

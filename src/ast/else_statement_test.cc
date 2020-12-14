@@ -30,103 +30,98 @@ using ElseStatementTest = TestHelper;
 TEST_F(ElseStatementTest, Creation) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
-      Source{}, create<BoolLiteral>(Source{}, &bool_type, true));
-  auto* body =
-      create<BlockStatement>(Source{}, StatementList{
-                                           create<DiscardStatement>(Source{}),
-                                       });
+      create<BoolLiteral>(&bool_type, true));
+  auto* body = create<BlockStatement>(StatementList{
+      create<DiscardStatement>(),
+  });
   auto* discard = body->get(0);
 
-  ElseStatement e(Source{}, cond, body);
-  EXPECT_EQ(e.condition(), cond);
-  ASSERT_EQ(e.body()->size(), 1u);
-  EXPECT_EQ(e.body()->get(0), discard);
+  auto* e = create<ElseStatement>(cond, body);
+  EXPECT_EQ(e->condition(), cond);
+  ASSERT_EQ(e->body()->size(), 1u);
+  EXPECT_EQ(e->body()->get(0), discard);
 }
 
 TEST_F(ElseStatementTest, Creation_WithSource) {
-  ElseStatement e(Source{Source::Location{20, 2}}, nullptr,
-                  create<BlockStatement>(Source{}, StatementList{}));
-  auto src = e.source();
+  auto* e = create<ElseStatement>(Source{Source::Location{20, 2}}, nullptr,
+                                  create<BlockStatement>(StatementList{}));
+  auto src = e->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(ElseStatementTest, IsElse) {
-  ElseStatement e(Source{}, nullptr,
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_TRUE(e.Is<ElseStatement>());
+  auto* e =
+      create<ElseStatement>(nullptr, create<BlockStatement>(StatementList{}));
+  EXPECT_TRUE(e->Is<ElseStatement>());
 }
 
 TEST_F(ElseStatementTest, HasCondition) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
-      Source{}, create<BoolLiteral>(Source{}, &bool_type, true));
-  ElseStatement e(Source{}, cond,
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_TRUE(e.HasCondition());
+      create<BoolLiteral>(&bool_type, true));
+  auto* e =
+      create<ElseStatement>(cond, create<BlockStatement>(StatementList{}));
+  EXPECT_TRUE(e->HasCondition());
 }
 
 TEST_F(ElseStatementTest, HasContition_NullCondition) {
-  ElseStatement e(Source{}, nullptr,
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_FALSE(e.HasCondition());
+  auto* e =
+      create<ElseStatement>(nullptr, create<BlockStatement>(StatementList{}));
+  EXPECT_FALSE(e->HasCondition());
 }
 
 TEST_F(ElseStatementTest, IsValid) {
-  ElseStatement e(Source{}, nullptr,
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_TRUE(e.IsValid());
+  auto* e =
+      create<ElseStatement>(nullptr, create<BlockStatement>(StatementList{}));
+  EXPECT_TRUE(e->IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_WithBody) {
-  auto* body =
-      create<BlockStatement>(Source{}, StatementList{
-                                           create<DiscardStatement>(Source{}),
-                                       });
-  ElseStatement e(Source{}, nullptr, body);
-  EXPECT_TRUE(e.IsValid());
+  auto* body = create<BlockStatement>(StatementList{
+      create<DiscardStatement>(),
+  });
+  auto* e = create<ElseStatement>(nullptr, body);
+  EXPECT_TRUE(e->IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
-  auto* body =
-      create<BlockStatement>(Source{}, StatementList{
-                                           create<DiscardStatement>(Source{}),
-                                           nullptr,
-                                       });
-  ElseStatement e(Source{}, nullptr, body);
-  EXPECT_FALSE(e.IsValid());
+  auto* body = create<BlockStatement>(StatementList{
+      create<DiscardStatement>(),
+      nullptr,
+  });
+  auto* e = create<ElseStatement>(nullptr, body);
+  EXPECT_FALSE(e->IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
-  auto* cond = create<ScalarConstructorExpression>(Source{}, nullptr);
-  ElseStatement e(Source{}, cond,
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_FALSE(e.IsValid());
+  auto* cond = create<ScalarConstructorExpression>(nullptr);
+  auto* e =
+      create<ElseStatement>(cond, create<BlockStatement>(StatementList{}));
+  EXPECT_FALSE(e->IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
   auto* body = create<BlockStatement>(
-      Source{},
+
       StatementList{
-          create<IfStatement>(Source{}, nullptr,
-                              create<BlockStatement>(Source{}, StatementList{}),
+          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
                               ElseStatementList{}),
       });
-  ElseStatement e(Source{}, nullptr, body);
-  EXPECT_FALSE(e.IsValid());
+  auto* e = create<ElseStatement>(nullptr, body);
+  EXPECT_FALSE(e->IsValid());
 }
 
 TEST_F(ElseStatementTest, ToStr) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
-      Source{}, create<BoolLiteral>(Source{}, &bool_type, true));
-  auto* body =
-      create<BlockStatement>(Source{}, StatementList{
-                                           create<DiscardStatement>(Source{}),
-                                       });
-  ElseStatement e(Source{}, cond, body);
+      create<BoolLiteral>(&bool_type, true));
+  auto* body = create<BlockStatement>(StatementList{
+      create<DiscardStatement>(),
+  });
+  auto* e = create<ElseStatement>(cond, body);
   std::ostringstream out;
-  e.to_str(out, 2);
+  e->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
     (
       ScalarConstructor[not set]{true}
@@ -139,13 +134,12 @@ TEST_F(ElseStatementTest, ToStr) {
 }
 
 TEST_F(ElseStatementTest, ToStr_NoCondition) {
-  auto* body =
-      create<BlockStatement>(Source{}, StatementList{
-                                           create<DiscardStatement>(Source{}),
-                                       });
-  ElseStatement e(Source{}, nullptr, body);
+  auto* body = create<BlockStatement>(StatementList{
+      create<DiscardStatement>(),
+  });
+  auto* e = create<ElseStatement>(nullptr, body);
   std::ostringstream out;
-  e.to_str(out, 2);
+  e->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
     {
       Discard{}

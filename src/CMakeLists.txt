@@ -387,6 +387,7 @@ endif()
 
 if(${TINT_BUILD_TESTS})
   set(TINT_TEST_SRCS
+    ast/access_decoration_test.cc
     ast/array_accessor_expression_test.cc
     ast/assignment_statement_test.cc
     ast/binding_decoration_test.cc

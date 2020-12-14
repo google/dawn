@@ -26,48 +26,47 @@ namespace {
 using WorkgroupDecorationTest = TestHelper;
 
 TEST_F(WorkgroupDecorationTest, Creation_1param) {
-  WorkgroupDecoration d{Source{}, 2};
+  auto* d = create<WorkgroupDecoration>(2);
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  std::tie(x, y, z) = d.values();
+  std::tie(x, y, z) = d->values();
   EXPECT_EQ(x, 2u);
   EXPECT_EQ(y, 1u);
   EXPECT_EQ(z, 1u);
 }
 TEST_F(WorkgroupDecorationTest, Creation_2param) {
-  WorkgroupDecoration d{Source{}, 2, 4};
+  auto* d = create<WorkgroupDecoration>(2, 4);
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  std::tie(x, y, z) = d.values();
+  std::tie(x, y, z) = d->values();
   EXPECT_EQ(x, 2u);
   EXPECT_EQ(y, 4u);
   EXPECT_EQ(z, 1u);
 }
 
 TEST_F(WorkgroupDecorationTest, Creation_3param) {
-  WorkgroupDecoration d{Source{}, 2, 4, 6};
+  auto* d = create<WorkgroupDecoration>(2, 4, 6);
   uint32_t x = 0;
   uint32_t y = 0;
   uint32_t z = 0;
-  std::tie(x, y, z) = d.values();
+  std::tie(x, y, z) = d->values();
   EXPECT_EQ(x, 2u);
   EXPECT_EQ(y, 4u);
   EXPECT_EQ(z, 6u);
 }
 
 TEST_F(WorkgroupDecorationTest, Is) {
-  WorkgroupDecoration wd{Source{}, 2, 4, 6};
-  Decoration* d = &wd;
+  Decoration* d = create<WorkgroupDecoration>(2, 4, 6);
   EXPECT_TRUE(d->Is<WorkgroupDecoration>());
   EXPECT_FALSE(d->Is<StageDecoration>());
 }
 
 TEST_F(WorkgroupDecorationTest, ToStr) {
-  WorkgroupDecoration d{Source{}, 2, 4, 6};
+  auto* d = create<WorkgroupDecoration>(2, 4, 6);
   std::ostringstream out;
-  d.to_str(out, 0);
+  d->to_str(out, 0);
   EXPECT_EQ(out.str(), R"(WorkgroupDecoration{2 4 6}
 )");
 }

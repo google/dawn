@@ -750,6 +750,7 @@ config("tint_unittests_config") {
 
 source_set("tint_unittests_core_src") {
   sources = [
+    "src/ast/access_decoration_test.cc",
     "src/ast/array_accessor_expression_test.cc",
     "src/ast/assignment_statement_test.cc",
     "src/ast/binary_expression_test.cc",

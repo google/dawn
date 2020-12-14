@@ -45,14 +45,12 @@ TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
 }
 
 TEST_F(ModuleTest, LookupFunction) {
-  type::F32 f32;
   Module m;
 
   auto func_sym = m.RegisterSymbol("main");
-  auto* func =
-      create<Function>(Source{}, func_sym, "main", VariableList{}, &f32,
-                       create<BlockStatement>(Source{}, StatementList{}),
-                       ast::FunctionDecorationList{});
+  auto* func = create<Function>(func_sym, "main", VariableList{}, ty.f32,
+                                create<BlockStatement>(StatementList{}),
+                                ast::FunctionDecorationList{});
   m.AddFunction(func);
   EXPECT_EQ(func, m.FindFunctionBySymbol(func_sym));
 }
@@ -68,9 +66,8 @@ TEST_F(ModuleTest, IsValid_Empty) {
 }
 
 TEST_F(ModuleTest, IsValid_GlobalVariable) {
-  type::F32 f32;
-  auto* var = create<Variable>(Source{}, "var", StorageClass::kInput, &f32,
-                               false, nullptr, ast::VariableDecorationList{});
+  auto* var = create<Variable>("var", StorageClass::kInput, ty.f32, false,
+                               nullptr, ast::VariableDecorationList{});
 
   Module m;
   m.AddGlobalVariable(var);
@@ -84,8 +81,8 @@ TEST_F(ModuleTest, IsValid_Null_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
-  auto* var = create<Variable>(Source{}, "var", StorageClass::kInput, nullptr,
-                               false, nullptr, ast::VariableDecorationList{});
+  auto* var = create<Variable>("var", StorageClass::kInput, nullptr, false,
+                               nullptr, ast::VariableDecorationList{});
 
   Module m;
   m.AddGlobalVariable(var);
@@ -93,8 +90,7 @@ TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, IsValid_Alias) {
-  type::F32 f32;
-  type::Alias alias(mod.RegisterSymbol("alias"), "alias", &f32);
+  type::Alias alias(mod->RegisterSymbol("alias"), "alias", ty.f32);
 
   Module m;
   m.AddConstructedType(&alias);
@@ -108,9 +104,8 @@ TEST_F(ModuleTest, IsValid_Null_Alias) {
 }
 
 TEST_F(ModuleTest, IsValid_Struct) {
-  type::F32 f32;
-  type::Struct st(mod.RegisterSymbol("name"), "name", {});
-  type::Alias alias(mod.RegisterSymbol("name"), "name", &st);
+  type::Struct st(mod->RegisterSymbol("name"), "name", {});
+  type::Alias alias(mod->RegisterSymbol("name"), "name", &st);
 
   Module m;
   m.AddConstructedType(&alias);
@@ -118,9 +113,8 @@ TEST_F(ModuleTest, IsValid_Struct) {
 }
 
 TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
-  type::F32 f32;
-  type::Struct st(mod.RegisterSymbol(""), "", {});
-  type::Alias alias(mod.RegisterSymbol("name"), "name", &st);
+  type::Struct st(mod->RegisterSymbol(""), "", {});
+  type::Alias alias(mod->RegisterSymbol("name"), "name", &st);
 
   Module m;
   m.AddConstructedType(&alias);
@@ -128,14 +122,11 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
 }
 
 TEST_F(ModuleTest, IsValid_Function) {
-  type::F32 f32;
-
   Module m;
 
   auto* func = create<Function>(
-      Source{}, m.RegisterSymbol("main"), "main", VariableList(), &f32,
-      create<BlockStatement>(Source{}, StatementList{}),
-      ast::FunctionDecorationList{});
+      m.RegisterSymbol("main"), "main", VariableList(), ty.f32,
+      create<BlockStatement>(StatementList{}), ast::FunctionDecorationList{});
 
   m.AddFunction(func);
   EXPECT_TRUE(m.IsValid());
@@ -152,9 +143,8 @@ TEST_F(ModuleTest, IsValid_Invalid_Function) {
 
   Module m;
 
-  auto* func =
-      create<Function>(Source{}, m.RegisterSymbol("main"), "main", p, nullptr,
-                       nullptr, ast::FunctionDecorationList{});
+  auto* func = create<Function>(m.RegisterSymbol("main"), "main", p, nullptr,
+                                nullptr, ast::FunctionDecorationList{});
 
   m.AddFunction(func);
   EXPECT_FALSE(m.IsValid());

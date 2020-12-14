@@ -23,34 +23,34 @@ namespace {
 using FallthroughStatementTest = TestHelper;
 
 TEST_F(FallthroughStatementTest, Creation) {
-  FallthroughStatement stmt(Source{});
-  EXPECT_EQ(stmt.source().range.begin.line, 0u);
-  EXPECT_EQ(stmt.source().range.begin.column, 0u);
-  EXPECT_EQ(stmt.source().range.end.line, 0u);
-  EXPECT_EQ(stmt.source().range.end.column, 0u);
+  auto* stmt = create<FallthroughStatement>();
+  EXPECT_EQ(stmt->source().range.begin.line, 0u);
+  EXPECT_EQ(stmt->source().range.begin.column, 0u);
+  EXPECT_EQ(stmt->source().range.end.line, 0u);
+  EXPECT_EQ(stmt->source().range.end.column, 0u);
 }
 
 TEST_F(FallthroughStatementTest, Creation_WithSource) {
-  FallthroughStatement stmt(Source{Source::Location{20, 2}});
-  auto src = stmt.source();
+  auto* stmt = create<FallthroughStatement>(Source{Source::Location{20, 2}});
+  auto src = stmt->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(FallthroughStatementTest, IsFallthrough) {
-  FallthroughStatement stmt(Source{});
-  EXPECT_TRUE(stmt.Is<FallthroughStatement>());
+  auto* stmt = create<FallthroughStatement>();
+  EXPECT_TRUE(stmt->Is<FallthroughStatement>());
 }
 
 TEST_F(FallthroughStatementTest, IsValid) {
-  FallthroughStatement stmt(Source{});
-  EXPECT_TRUE(stmt.IsValid());
+  auto* stmt = create<FallthroughStatement>();
+  EXPECT_TRUE(stmt->IsValid());
 }
 
 TEST_F(FallthroughStatementTest, ToStr) {
-  FallthroughStatement stmt(Source{});
+  auto* stmt = create<FallthroughStatement>();
   std::ostringstream out;
-  stmt.to_str(out, 2);
+  stmt->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Fallthrough{}
 )");
 }

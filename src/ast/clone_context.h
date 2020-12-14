@@ -78,7 +78,7 @@ class CloneContext {
   /// @return the cloned source
   Source Clone(const Source& s) { return s; }
 
-  /// Clones each of the elements of the vector `v` into the module #mod.
+  /// Clones each of the elements of the vector `v` into the module #mod->
   /// @param v the vector to clone
   /// @return the cloned vector
   template <typename T>

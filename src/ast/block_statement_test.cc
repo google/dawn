@@ -28,66 +28,66 @@ namespace {
 using BlockStatementTest = TestHelper;
 
 TEST_F(BlockStatementTest, Creation) {
-  auto* d = create<DiscardStatement>(Source{});
+  auto* d = create<DiscardStatement>();
   auto* ptr = d;
 
-  BlockStatement b(Source{}, StatementList{d});
+  auto* b = create<BlockStatement>(StatementList{d});
 
-  ASSERT_EQ(b.size(), 1u);
-  EXPECT_EQ(b[0], ptr);
+  ASSERT_EQ(b->size(), 1u);
+  EXPECT_EQ((*b)[0], ptr);
 }
 
 TEST_F(BlockStatementTest, Creation_WithSource) {
-  BlockStatement b(Source{Source::Location{20, 2}}, ast::StatementList{});
-  auto src = b.source();
+  auto* b = create<BlockStatement>(Source{Source::Location{20, 2}},
+                                   ast::StatementList{});
+  auto src = b->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BlockStatementTest, IsBlock) {
-  BlockStatement b(Source{}, ast::StatementList{});
-  EXPECT_TRUE(b.Is<BlockStatement>());
+  auto* b = create<BlockStatement>(ast::StatementList{});
+  EXPECT_TRUE(b->Is<BlockStatement>());
 }
 
 TEST_F(BlockStatementTest, IsValid) {
-  BlockStatement b(Source{}, ast::StatementList{
-                                 create<DiscardStatement>(Source{}),
-                             });
-  EXPECT_TRUE(b.IsValid());
+  auto* b = create<BlockStatement>(ast::StatementList{
+      create<DiscardStatement>(),
+  });
+  EXPECT_TRUE(b->IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_Empty) {
-  BlockStatement b(Source{}, ast::StatementList{});
-  EXPECT_TRUE(b.IsValid());
+  auto* b = create<BlockStatement>(ast::StatementList{});
+  EXPECT_TRUE(b->IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_NullBodyStatement) {
-  BlockStatement b(Source{}, ast::StatementList{
-                                 create<DiscardStatement>(Source{}),
-                                 nullptr,
-                             });
+  auto* b = create<BlockStatement>(ast::StatementList{
+      create<DiscardStatement>(),
+      nullptr,
+  });
 
-  EXPECT_FALSE(b.IsValid());
+  EXPECT_FALSE(b->IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_InvalidBodyStatement) {
-  BlockStatement b(
-      Source{},
+  auto* b = create<BlockStatement>(
+
       ast::StatementList{
-          create<IfStatement>(Source{}, nullptr,
-                              create<BlockStatement>(Source{}, StatementList{}),
+          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
                               ElseStatementList{}),
       });
-  EXPECT_FALSE(b.IsValid());
+  EXPECT_FALSE(b->IsValid());
 }
 
 TEST_F(BlockStatementTest, ToStr) {
-  BlockStatement b(Source{}, ast::StatementList{
-                                 create<DiscardStatement>(Source{}),
-                             });
+  auto* b = create<BlockStatement>(ast::StatementList{
+      create<DiscardStatement>(),
+  });
 
   std::ostringstream out;
-  b.to_str(out, 2);
+  b->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Block{
     Discard{}
   }

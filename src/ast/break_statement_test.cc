@@ -23,26 +23,26 @@ namespace {
 using BreakStatementTest = TestHelper;
 
 TEST_F(BreakStatementTest, Creation_WithSource) {
-  BreakStatement stmt(Source{Source::Location{20, 2}});
-  auto src = stmt.source();
+  auto* stmt = create<BreakStatement>(Source{Source::Location{20, 2}});
+  auto src = stmt->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BreakStatementTest, IsBreak) {
-  BreakStatement stmt(Source{});
-  EXPECT_TRUE(stmt.Is<BreakStatement>());
+  auto* stmt = create<BreakStatement>();
+  EXPECT_TRUE(stmt->Is<BreakStatement>());
 }
 
 TEST_F(BreakStatementTest, IsValid) {
-  BreakStatement stmt(Source{});
-  EXPECT_TRUE(stmt.IsValid());
+  auto* stmt = create<BreakStatement>();
+  EXPECT_TRUE(stmt->IsValid());
 }
 
 TEST_F(BreakStatementTest, ToStr) {
-  BreakStatement stmt(Source{});
+  auto* stmt = create<BreakStatement>();
   std::ostringstream out;
-  stmt.to_str(out, 2);
+  stmt->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Break{}
 )");
 }

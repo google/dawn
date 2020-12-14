@@ -23,13 +23,13 @@ namespace {
 using StructMemberOffsetDecorationTest = TestHelper;
 
 TEST_F(StructMemberOffsetDecorationTest, Creation) {
-  StructMemberOffsetDecoration d{Source{}, 2};
-  EXPECT_EQ(2u, d.offset());
+  auto* d = create<StructMemberOffsetDecoration>(2);
+  EXPECT_EQ(2u, d->offset());
 }
 
 TEST_F(StructMemberOffsetDecorationTest, Is) {
-  StructMemberOffsetDecoration d{Source{}, 2};
-  EXPECT_TRUE(d.Is<StructMemberOffsetDecoration>());
+  auto* d = create<StructMemberOffsetDecoration>(2);
+  EXPECT_TRUE(d->Is<StructMemberOffsetDecoration>());
 }
 
 }  // namespace

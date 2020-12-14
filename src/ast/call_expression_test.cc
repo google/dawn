@@ -24,93 +24,80 @@ namespace {
 using CallExpressionTest = TestHelper;
 
 TEST_F(CallExpressionTest, Creation) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
+  auto* func = Expr("func");
   ExpressionList params;
-  params.push_back(create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
-  params.push_back(create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
+  params.push_back(Expr("param1"));
+  params.push_back(Expr("param2"));
 
-  CallExpression stmt(Source{}, func, params);
-  EXPECT_EQ(stmt.func(), func);
+  auto* stmt = create<CallExpression>(func, params);
+  EXPECT_EQ(stmt->func(), func);
 
-  const auto& vec = stmt.params();
+  const auto& vec = stmt->params();
   ASSERT_EQ(vec.size(), 2u);
   EXPECT_EQ(vec[0], params[0]);
   EXPECT_EQ(vec[1], params[1]);
 }
 
 TEST_F(CallExpressionTest, Creation_WithSource) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
-  CallExpression stmt(Source{Source::Location{20, 2}}, func, {});
-  auto src = stmt.source();
+  auto* func = Expr("func");
+  auto* stmt = create<CallExpression>(Source{Source::Location{20, 2}}, func,
+                                      ExpressionList{});
+  auto src = stmt->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(CallExpressionTest, IsCall) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
-  CallExpression stmt(Source{}, func, {});
-  EXPECT_TRUE(stmt.Is<CallExpression>());
+  auto* func = Expr("func");
+  auto* stmt = create<CallExpression>(func, ExpressionList{});
+  EXPECT_TRUE(stmt->Is<CallExpression>());
 }
 
 TEST_F(CallExpressionTest, IsValid) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
-  CallExpression stmt(Source{}, func, {});
-  EXPECT_TRUE(stmt.IsValid());
+  auto* func = Expr("func");
+  auto* stmt = create<CallExpression>(func, ExpressionList{});
+  EXPECT_TRUE(stmt->IsValid());
 }
 
 TEST_F(CallExpressionTest, IsValid_MissingFunction) {
-  CallExpression stmt(Source{}, nullptr, {});
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<CallExpression>(nullptr, ExpressionList{});
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(CallExpressionTest, IsValid_NullParam) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
+  auto* func = Expr("func");
   ExpressionList params;
-  params.push_back(create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
+  params.push_back(Expr("param1"));
   params.push_back(nullptr);
-  params.push_back(create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
+  params.push_back(Expr("param2"));
 
-  CallExpression stmt(Source{}, func, params);
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<CallExpression>(func, params);
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(CallExpressionTest, IsValid_InvalidFunction) {
-  auto* func =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
+  auto* func = Expr("");
   ExpressionList params;
-  params.push_back(create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
+  params.push_back(Expr("param1"));
 
-  CallExpression stmt(Source{}, func, params);
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<CallExpression>(func, params);
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(CallExpressionTest, IsValid_InvalidParam) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
+  auto* func = Expr("func");
   ExpressionList params;
-  params.push_back(
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), ""));
+  params.push_back(Expr(""));
 
-  CallExpression stmt(Source{}, func, params);
-  EXPECT_FALSE(stmt.IsValid());
+  auto* stmt = create<CallExpression>(func, params);
+  EXPECT_FALSE(stmt->IsValid());
 }
 
 TEST_F(CallExpressionTest, ToStr_NoParams) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
-  CallExpression stmt(Source{}, func, {});
+  auto* func = Expr("func");
+  auto* stmt = create<CallExpression>(func, ExpressionList{});
   std::ostringstream out;
-  stmt.to_str(out, 2);
+  stmt->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
     Identifier[not set]{func}
     (
@@ -120,17 +107,14 @@ TEST_F(CallExpressionTest, ToStr_NoParams) {
 }
 
 TEST_F(CallExpressionTest, ToStr_WithParams) {
-  auto* func = create<IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("func"), "func");
+  auto* func = Expr("func");
   ExpressionList params;
-  params.push_back(create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
-  params.push_back(create<IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
+  params.push_back(Expr("param1"));
+  params.push_back(Expr("param2"));
 
-  CallExpression stmt(Source{}, func, params);
+  auto* stmt = create<CallExpression>(func, params);
   std::ostringstream out;
-  stmt.to_str(out, 2);
+  stmt->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
     Identifier[not set]{func}
     (

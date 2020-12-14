@@ -28,153 +28,150 @@ namespace {
 using LoopStatementTest = TestHelper;
 
 TEST_F(LoopStatementTest, Creation) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
   auto* b = body->last();
 
-  auto* continuing = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* continuing =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, continuing);
-  ASSERT_EQ(l.body()->size(), 1u);
-  EXPECT_EQ(l.body()->get(0), b);
-  ASSERT_EQ(l.continuing()->size(), 1u);
-  EXPECT_EQ(l.continuing()->get(0), continuing->last());
+  auto* l = create<LoopStatement>(body, continuing);
+  ASSERT_EQ(l->body()->size(), 1u);
+  EXPECT_EQ(l->body()->get(0), b);
+  ASSERT_EQ(l->continuing()->size(), 1u);
+  EXPECT_EQ(l->continuing()->get(0), continuing->last());
 }
 
 TEST_F(LoopStatementTest, Creation_WithSource) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  auto* continuing = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* continuing =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{Source::Location{20, 2}}, body, continuing);
-  auto src = l.source();
+  auto* l =
+      create<LoopStatement>(Source{Source::Location{20, 2}}, body, continuing);
+  auto src = l->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(LoopStatementTest, IsLoop) {
-  LoopStatement l(Source{}, create<BlockStatement>(Source{}, StatementList{}),
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_TRUE(l.Is<LoopStatement>());
+  auto* l = create<LoopStatement>(create<BlockStatement>(StatementList{}),
+                                  create<BlockStatement>(StatementList{}));
+  EXPECT_TRUE(l->Is<LoopStatement>());
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, {});
-  EXPECT_FALSE(l.has_continuing());
+  auto* l = create<LoopStatement>(body, nullptr);
+  EXPECT_FALSE(l->has_continuing());
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  auto* continuing = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* continuing =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, continuing);
-  EXPECT_TRUE(l.has_continuing());
+  auto* l = create<LoopStatement>(body, continuing);
+  EXPECT_TRUE(l->has_continuing());
 }
 
 TEST_F(LoopStatementTest, IsValid) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  auto* continuing = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* continuing =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, continuing);
-  EXPECT_TRUE(l.IsValid());
+  auto* l = create<LoopStatement>(body, continuing);
+  EXPECT_TRUE(l->IsValid());
 }
 
 TEST_F(LoopStatementTest, IsValid_WithoutContinuing) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body,
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_TRUE(l.IsValid());
+  auto* l =
+      create<LoopStatement>(body, create<BlockStatement>(StatementList{}));
+  EXPECT_TRUE(l->IsValid());
 }
 
 TEST_F(LoopStatementTest, IsValid_WithoutBody) {
-  LoopStatement l(Source{}, create<BlockStatement>(Source{}, StatementList{}),
-                  create<BlockStatement>(Source{}, StatementList{}));
-  EXPECT_TRUE(l.IsValid());
+  auto* l = create<LoopStatement>(create<BlockStatement>(StatementList{}),
+                                  create<BlockStatement>(StatementList{}));
+  EXPECT_TRUE(l->IsValid());
 }
 
 TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
-  auto* body =
-      create<BlockStatement>(Source{}, StatementList{
-                                           create<DiscardStatement>(Source{}),
-                                           nullptr,
-                                       });
+  auto* body = create<BlockStatement>(StatementList{
+      create<DiscardStatement>(),
+      nullptr,
+  });
 
-  auto* continuing = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* continuing =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, continuing);
-  EXPECT_FALSE(l.IsValid());
+  auto* l = create<LoopStatement>(body, continuing);
+  EXPECT_FALSE(l->IsValid());
 }
 
 TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
   auto* body = create<BlockStatement>(
-      Source{},
+
       StatementList{
-          create<DiscardStatement>(Source{}),
-          create<IfStatement>(Source{}, nullptr,
-                              create<BlockStatement>(Source{}, StatementList{}),
+          create<DiscardStatement>(),
+          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
                               ElseStatementList{}),
       });
 
-  auto* continuing = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* continuing =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, continuing);
-  EXPECT_FALSE(l.IsValid());
+  auto* l = create<LoopStatement>(body, continuing);
+  EXPECT_FALSE(l->IsValid());
 }
 
 TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  auto* continuing =
-      create<BlockStatement>(Source{}, StatementList{
-                                           create<DiscardStatement>(Source{}),
-                                           nullptr,
-                                       });
+  auto* continuing = create<BlockStatement>(StatementList{
+      create<DiscardStatement>(),
+      nullptr,
+  });
 
-  LoopStatement l(Source{}, body, continuing);
-  EXPECT_FALSE(l.IsValid());
+  auto* l = create<LoopStatement>(body, continuing);
+  EXPECT_FALSE(l->IsValid());
 }
 
 TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
   auto* continuing = create<BlockStatement>(
-      Source{},
+
       StatementList{
-          create<DiscardStatement>(Source{}),
-          create<IfStatement>(Source{}, nullptr,
-                              create<BlockStatement>(Source{}, StatementList{}),
+          create<DiscardStatement>(),
+          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
                               ElseStatementList{}),
       });
 
-  LoopStatement l(Source{}, body, continuing);
-  EXPECT_FALSE(l.IsValid());
+  auto* l = create<LoopStatement>(body, continuing);
+  EXPECT_FALSE(l->IsValid());
 }
 
 TEST_F(LoopStatementTest, ToStr) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, {});
+  auto* l = create<LoopStatement>(body, nullptr);
   std::ostringstream out;
-  l.to_str(out, 2);
+  l->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Loop{
     Discard{}
   }
@@ -182,15 +179,15 @@ TEST_F(LoopStatementTest, ToStr) {
 }
 
 TEST_F(LoopStatementTest, ToStr_WithContinuing) {
-  auto* body = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* body =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  auto* continuing = create<BlockStatement>(
-      Source{}, StatementList{create<DiscardStatement>(Source{})});
+  auto* continuing =
+      create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
-  LoopStatement l(Source{}, body, continuing);
+  auto* l = create<LoopStatement>(body, continuing);
   std::ostringstream out;
-  l.to_str(out, 2);
+  l->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Loop{
     Discard{}
     continuing {

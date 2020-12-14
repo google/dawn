@@ -29,16 +29,13 @@ namespace {
 using SintLiteralTest = TestHelper;
 
 TEST_F(SintLiteralTest, Value) {
-  type::I32 i32;
-  SintLiteral i{Source{}, &i32, 47};
-  ASSERT_TRUE(i.Is<SintLiteral>());
-  EXPECT_EQ(i.value(), 47);
+  auto* i = create<SintLiteral>(ty.i32, 47);
+  ASSERT_TRUE(i->Is<SintLiteral>());
+  EXPECT_EQ(i->value(), 47);
 }
 
 TEST_F(SintLiteralTest, Is) {
-  type::I32 i32;
-  SintLiteral i{Source{}, &i32, 42};
-  Literal* l = &i;
+  ast::Literal* l = create<SintLiteral>(ty.i32, 42);
   EXPECT_FALSE(l->Is<BoolLiteral>());
   EXPECT_TRUE(l->Is<SintLiteral>());
   EXPECT_FALSE(l->Is<FloatLiteral>());
@@ -47,22 +44,20 @@ TEST_F(SintLiteralTest, Is) {
 }
 
 TEST_F(SintLiteralTest, ToStr) {
-  type::I32 i32;
-  SintLiteral i{Source{}, &i32, -42};
+  auto* i = create<SintLiteral>(ty.i32, -42);
 
-  EXPECT_EQ(i.to_str(), "-42");
+  EXPECT_EQ(i->to_str(), "-42");
 }
 
 TEST_F(SintLiteralTest, Name_I32) {
-  type::I32 i32;
-  SintLiteral i{Source{}, &i32, 2};
-  EXPECT_EQ("__sint__i32_2", i.name());
+  auto* i = create<SintLiteral>(ty.i32, 2);
+  EXPECT_EQ("__sint__i32_2", i->name());
 }
 
 TEST_F(SintLiteralTest, Name_U32) {
   type::U32 u32;
-  SintLiteral i{Source{}, &u32, 2};
-  EXPECT_EQ("__sint__u32_2", i.name());
+  auto* i = create<SintLiteral>(&u32, 2);
+  EXPECT_EQ("__sint__u32_2", i->name());
 }
 
 }  // namespace

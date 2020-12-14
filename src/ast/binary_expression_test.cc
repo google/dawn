@@ -26,105 +26,87 @@ namespace {
 using BinaryExpressionTest = TestHelper;
 
 TEST_F(BinaryExpressionTest, Creation) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, lhs, rhs);
-  EXPECT_EQ(r.lhs(), lhs);
-  EXPECT_EQ(r.rhs(), rhs);
-  EXPECT_EQ(r.op(), BinaryOp::kEqual);
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
+  EXPECT_EQ(r->lhs(), lhs);
+  EXPECT_EQ(r->rhs(), rhs);
+  EXPECT_EQ(r->op(), BinaryOp::kEqual);
 }
 
 TEST_F(BinaryExpressionTest, Creation_WithSource) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{Source::Location{20, 2}}, BinaryOp::kEqual, lhs,
-                     rhs);
-  auto src = r.source();
+  auto* r = create<BinaryExpression>(Source{Source::Location{20, 2}},
+                                     BinaryOp::kEqual, lhs, rhs);
+  auto src = r->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BinaryExpressionTest, IsBinary) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, lhs, rhs);
-  EXPECT_TRUE(r.Is<BinaryExpression>());
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
+  EXPECT_TRUE(r->Is<BinaryExpression>());
 }
 
 TEST_F(BinaryExpressionTest, IsValid) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, lhs, rhs);
-  EXPECT_TRUE(r.IsValid());
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
+  EXPECT_TRUE(r->IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Null_LHS) {
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, nullptr, rhs);
-  EXPECT_FALSE(r.IsValid());
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, nullptr, rhs);
+  EXPECT_FALSE(r->IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Invalid_LHS) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = Expr("");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, lhs, rhs);
-  EXPECT_FALSE(r.IsValid());
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
+  EXPECT_FALSE(r->IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Null_RHS) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
+  auto* lhs = Expr("lhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, lhs, nullptr);
-  EXPECT_FALSE(r.IsValid());
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, nullptr);
+  EXPECT_FALSE(r->IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Invalid_RHS) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), "");
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, lhs, rhs);
-  EXPECT_FALSE(r.IsValid());
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
+  EXPECT_FALSE(r->IsValid());
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Binary_None) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kNone, lhs, rhs);
-  EXPECT_FALSE(r.IsValid());
+  auto* r = create<BinaryExpression>(BinaryOp::kNone, lhs, rhs);
+  EXPECT_FALSE(r->IsValid());
 }
 
 TEST_F(BinaryExpressionTest, ToStr) {
-  auto* lhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs =
-      create<IdentifierExpression>(Source{}, mod.RegisterSymbol("rhs"), "rhs");
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
 
-  BinaryExpression r(Source{}, BinaryOp::kEqual, lhs, rhs);
+  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
   std::ostringstream out;
-  r.to_str(out, 2);
+  r->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Binary[not set]{
     Identifier[not set]{lhs}
     equal

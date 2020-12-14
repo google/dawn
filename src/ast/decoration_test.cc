@@ -43,21 +43,21 @@ namespace {
 using DecorationTest = TestHelper;
 
 TEST_F(DecorationTest, AsCorrectType) {
-  auto* decoration = create<ConstantIdDecoration>(Source{}, 1);
+  auto* decoration = create<ConstantIdDecoration>(1);
   auto* upcast = static_cast<Decoration*>(decoration);
   auto* downcast = As<VariableDecoration>(upcast);
   EXPECT_EQ(decoration, downcast);
 }
 
 TEST_F(DecorationTest, AsIncorrectType) {
-  auto* decoration = create<ConstantIdDecoration>(Source{}, 1);
+  auto* decoration = create<ConstantIdDecoration>(1);
   auto* upcast = static_cast<Decoration*>(decoration);
   auto* downcast = As<ArrayDecoration>(upcast);
   EXPECT_EQ(nullptr, downcast);
 }
 
 TEST_F(DecorationTest, Is) {
-  Decoration* decoration = create<ConstantIdDecoration>(Source{}, 1);
+  Decoration* decoration = create<ConstantIdDecoration>(1);
   EXPECT_TRUE(decoration->Is<VariableDecoration>());
   EXPECT_FALSE(decoration->Is<ArrayDecoration>());
 }

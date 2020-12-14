@@ -29,24 +29,23 @@ using BoolLiteralTest = TestHelper;
 
 TEST_F(BoolLiteralTest, True) {
   type::Bool bool_type;
-  BoolLiteral b{Source{}, &bool_type, true};
-  ASSERT_TRUE(b.Is<BoolLiteral>());
-  ASSERT_TRUE(b.IsTrue());
-  ASSERT_FALSE(b.IsFalse());
+  auto* b = create<BoolLiteral>(&bool_type, true);
+  ASSERT_TRUE(b->Is<BoolLiteral>());
+  ASSERT_TRUE(b->IsTrue());
+  ASSERT_FALSE(b->IsFalse());
 }
 
 TEST_F(BoolLiteralTest, False) {
   type::Bool bool_type;
-  BoolLiteral b{Source{}, &bool_type, false};
-  ASSERT_TRUE(b.Is<BoolLiteral>());
-  ASSERT_FALSE(b.IsTrue());
-  ASSERT_TRUE(b.IsFalse());
+  auto* b = create<BoolLiteral>(&bool_type, false);
+  ASSERT_TRUE(b->Is<BoolLiteral>());
+  ASSERT_FALSE(b->IsTrue());
+  ASSERT_TRUE(b->IsFalse());
 }
 
 TEST_F(BoolLiteralTest, Is) {
   type::Bool bool_type;
-  BoolLiteral b{Source{}, &bool_type, false};
-  Literal* l = &b;
+  ast::Literal* l = create<BoolLiteral>(&bool_type, false);
   EXPECT_TRUE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
   EXPECT_FALSE(l->Is<FloatLiteral>());
@@ -57,11 +56,11 @@ TEST_F(BoolLiteralTest, Is) {
 
 TEST_F(BoolLiteralTest, ToStr) {
   type::Bool bool_type;
-  BoolLiteral t{Source{}, &bool_type, true};
-  BoolLiteral f{Source{}, &bool_type, false};
+  auto* t = create<BoolLiteral>(&bool_type, true);
+  auto* f = create<BoolLiteral>(&bool_type, false);
 
-  EXPECT_EQ(t.to_str(), "true");
-  EXPECT_EQ(f.to_str(), "false");
+  EXPECT_EQ(t->to_str(), "true");
+  EXPECT_EQ(f->to_str(), "false");
 }
 
 }  // namespace

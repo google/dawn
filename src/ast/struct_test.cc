@@ -30,104 +30,93 @@ namespace {
 using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
-  type::I32 i32;
   StructMemberList members;
   members.push_back(
-      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", ty.i32, StructMemberDecorationList{}));
 
-  Struct s{Source{}, members, ast::StructDecorationList{}};
-  EXPECT_EQ(s.members().size(), 1u);
-  EXPECT_TRUE(s.decorations().empty());
-  EXPECT_EQ(s.source().range.begin.line, 0u);
-  EXPECT_EQ(s.source().range.begin.column, 0u);
-  EXPECT_EQ(s.source().range.end.line, 0u);
-  EXPECT_EQ(s.source().range.end.column, 0u);
-}
+  auto* s = create<Struct>(members, ast::StructDecorationList{});
+  EXPECT_EQ(s->members().size(), 1u);
+  EXPECT_TRUE(s->decorations().empty());
+  EXPECT_EQ(s->source().range.begin.line, 0u);
+  EXPECT_EQ(s->source().range.begin.column, 0u);
+  EXPECT_EQ(s->source().range.end.line, 0u);
+  EXPECT_EQ(s->source().range.end.column, 0u);
+}  // namespace
 
 TEST_F(StructTest, Creation_WithDecorations) {
-  type::I32 i32;
-
   StructMemberList members;
   members.push_back(
-      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", ty.i32, StructMemberDecorationList{}));
 
   StructDecorationList decos;
-  decos.push_back(create<StructBlockDecoration>(Source{}));
+  decos.push_back(create<StructBlockDecoration>());
 
-  Struct s{Source{}, members, decos};
-  EXPECT_EQ(s.members().size(), 1u);
-  ASSERT_EQ(s.decorations().size(), 1u);
-  EXPECT_TRUE(s.decorations()[0]->Is<StructBlockDecoration>());
-  EXPECT_EQ(s.source().range.begin.line, 0u);
-  EXPECT_EQ(s.source().range.begin.column, 0u);
-  EXPECT_EQ(s.source().range.end.line, 0u);
-  EXPECT_EQ(s.source().range.end.column, 0u);
+  auto* s = create<Struct>(members, decos);
+  EXPECT_EQ(s->members().size(), 1u);
+  ASSERT_EQ(s->decorations().size(), 1u);
+  EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
+  EXPECT_EQ(s->source().range.begin.line, 0u);
+  EXPECT_EQ(s->source().range.begin.column, 0u);
+  EXPECT_EQ(s->source().range.end.line, 0u);
+  EXPECT_EQ(s->source().range.end.column, 0u);
 }
 
 TEST_F(StructTest, CreationWithSourceAndDecorations) {
-  type::I32 i32;
-
   StructMemberList members;
   members.emplace_back(
-      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", ty.i32, StructMemberDecorationList{}));
 
   StructDecorationList decos;
-  decos.push_back(create<StructBlockDecoration>(Source{}));
+  decos.push_back(create<StructBlockDecoration>());
 
-  Struct s{
+  auto* s = create<Struct>(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-      members, decos};
-  EXPECT_EQ(s.members().size(), 1u);
-  ASSERT_EQ(s.decorations().size(), 1u);
-  EXPECT_TRUE(s.decorations()[0]->Is<StructBlockDecoration>());
-  EXPECT_EQ(s.source().range.begin.line, 27u);
-  EXPECT_EQ(s.source().range.begin.column, 4u);
-  EXPECT_EQ(s.source().range.end.line, 27u);
-  EXPECT_EQ(s.source().range.end.column, 8u);
+      members, decos);
+  EXPECT_EQ(s->members().size(), 1u);
+  ASSERT_EQ(s->decorations().size(), 1u);
+  EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
+  EXPECT_EQ(s->source().range.begin.line, 27u);
+  EXPECT_EQ(s->source().range.begin.column, 4u);
+  EXPECT_EQ(s->source().range.end.line, 27u);
+  EXPECT_EQ(s->source().range.end.column, 8u);
 }
 
 TEST_F(StructTest, IsValid) {
-  Struct s(Source{}, StructMemberList{}, StructDecorationList{});
-  EXPECT_TRUE(s.IsValid());
+  auto* s = create<Struct>(StructMemberList{}, StructDecorationList{});
+  EXPECT_TRUE(s->IsValid());
 }
 
 TEST_F(StructTest, IsValid_Null_StructMember) {
-  type::I32 i32;
-
   StructMemberList members;
   members.push_back(
-      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", ty.i32, StructMemberDecorationList{}));
   members.push_back(nullptr);
 
-  Struct s{Source{}, members, ast::StructDecorationList{}};
-  EXPECT_FALSE(s.IsValid());
-}
+  auto* s = create<Struct>(members, ast::StructDecorationList{});
+  EXPECT_FALSE(s->IsValid());
+}  // namespace ast
 
 TEST_F(StructTest, IsValid_Invalid_StructMember) {
-  type::I32 i32;
-
   StructMemberList members;
   members.push_back(
-      create<StructMember>(Source{}, "", &i32, StructMemberDecorationList()));
+      create<StructMember>("", ty.i32, StructMemberDecorationList{}));
 
-  Struct s{Source{}, members, ast::StructDecorationList{}};
-  EXPECT_FALSE(s.IsValid());
-}
+  auto* s = create<Struct>(members, ast::StructDecorationList{});
+  EXPECT_FALSE(s->IsValid());
+}  // namespace tint
 
 TEST_F(StructTest, ToStr) {
-  type::I32 i32;
-
   StructMemberList members;
   members.emplace_back(
-      create<StructMember>(Source{}, "a", &i32, StructMemberDecorationList()));
+      create<StructMember>("a", ty.i32, StructMemberDecorationList{}));
 
   StructDecorationList decos;
-  decos.push_back(create<StructBlockDecoration>(Source{}));
+  decos.push_back(create<StructBlockDecoration>());
 
-  Struct s{Source{}, members, decos};
+  auto* s = create<Struct>(members, decos);
 
   std::ostringstream out;
-  s.to_str(out, 2);
+  s->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(Struct{
     [[block]]
     StructMember{a: __i32}

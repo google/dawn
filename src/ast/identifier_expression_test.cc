@@ -23,36 +23,36 @@ namespace {
 using IdentifierExpressionTest = TestHelper;
 
 TEST_F(IdentifierExpressionTest, Creation) {
-  IdentifierExpression i(Source{}, mod.RegisterSymbol("ident"), "ident");
-  EXPECT_EQ(i.symbol(), Symbol(1));
-  EXPECT_EQ(i.name(), "ident");
+  auto* i = Expr("ident");
+  EXPECT_EQ(i->symbol(), Symbol(1));
+  EXPECT_EQ(i->name(), "ident");
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
-  IdentifierExpression i(Source{Source::Location{20, 2}},
-                         mod.RegisterSymbol("ident"), "ident");
-  EXPECT_EQ(i.symbol(), Symbol(1));
-  EXPECT_EQ(i.name(), "ident");
+  auto* i = create<IdentifierExpression>(Source{Source::Location{20, 2}},
+                                         mod->RegisterSymbol("ident"), "ident");
+  EXPECT_EQ(i->symbol(), Symbol(1));
+  EXPECT_EQ(i->name(), "ident");
 
-  auto src = i.source();
+  auto src = i->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IdentifierExpressionTest, IsIdentifier) {
-  IdentifierExpression i(Source{}, mod.RegisterSymbol("ident"), "ident");
-  EXPECT_TRUE(i.Is<IdentifierExpression>());
+  auto* i = Expr("ident");
+  EXPECT_TRUE(i->Is<IdentifierExpression>());
 }
 
 TEST_F(IdentifierExpressionTest, IsValid) {
-  IdentifierExpression i(Source{}, mod.RegisterSymbol("ident"), "ident");
-  EXPECT_TRUE(i.IsValid());
+  auto* i = Expr("ident");
+  EXPECT_TRUE(i->IsValid());
 }
 
 TEST_F(IdentifierExpressionTest, ToStr) {
-  IdentifierExpression i(Source{}, mod.RegisterSymbol("ident"), "ident");
+  auto* i = Expr("ident");
   std::ostringstream out;
-  i.to_str(out, 2);
+  i->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Identifier[not set]{ident}
 )");
 }

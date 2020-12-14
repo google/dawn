@@ -26,13 +26,12 @@ namespace {
 using LocationDecorationTest = TestHelper;
 
 TEST_F(LocationDecorationTest, Creation) {
-  LocationDecoration d{Source{}, 2};
-  EXPECT_EQ(2u, d.value());
+  auto* d = create<LocationDecoration>(2);
+  EXPECT_EQ(2u, d->value());
 }
 
 TEST_F(LocationDecorationTest, Is) {
-  LocationDecoration ld{Source{}, 2};
-  Decoration* d = &ld;
+  Decoration* d = create<LocationDecoration>(2);
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_FALSE(d->Is<ConstantIdDecoration>());
@@ -41,9 +40,9 @@ TEST_F(LocationDecorationTest, Is) {
 }
 
 TEST_F(LocationDecorationTest, ToStr) {
-  LocationDecoration d{Source{}, 2};
+  auto* d = create<LocationDecoration>(2);
   std::ostringstream out;
-  d.to_str(out, 0);
+  d->to_str(out, 0);
   EXPECT_EQ(out.str(), R"(LocationDecoration{2}
 )");
 }

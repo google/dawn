@@ -22,11 +22,11 @@ namespace tint {
 namespace ast {
 namespace {
 
-class Expr : public Expression {
+class FakeExpr : public Expression {
  public:
-  Expr() : Expression(Source{}) {}
+  FakeExpr() : Expression(Source{}) {}
 
-  Expr* Clone(CloneContext*) const override { return nullptr; }
+  FakeExpr* Clone(CloneContext*) const override { return nullptr; }
   bool IsValid() const override { return true; }
   void to_str(std::ostream&, size_t) const override {}
 };
@@ -34,20 +34,17 @@ class Expr : public Expression {
 using ExpressionTest = TestHelper;
 
 TEST_F(ExpressionTest, set_result_type) {
-  type::I32 i32;
-
-  Expr e;
-  e.set_result_type(&i32);
+  FakeExpr e;
+  e.set_result_type(ty.i32);
   ASSERT_NE(e.result_type(), nullptr);
   EXPECT_TRUE(e.result_type()->Is<type::I32>());
 }
 
 TEST_F(ExpressionTest, set_result_type_alias) {
-  type::I32 i32;
-  type::Alias a(mod.RegisterSymbol("a"), "a", &i32);
-  type::Alias b(mod.RegisterSymbol("b"), "b", &a);
+  type::Alias a(mod->RegisterSymbol("a"), "a", ty.i32);
+  type::Alias b(mod->RegisterSymbol("b"), "b", &a);
 
-  Expr e;
+  FakeExpr e;
   e.set_result_type(&b);
   ASSERT_NE(e.result_type(), nullptr);
   EXPECT_TRUE(e.result_type()->Is<type::I32>());

@@ -28,78 +28,71 @@ namespace {
 using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
-  type::I32 i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(create<StructMemberOffsetDecoration>(Source{}, 4));
+  decorations.emplace_back(create<StructMemberOffsetDecoration>(4));
 
-  StructMember st{Source{}, "a", &i32, decorations};
-  EXPECT_EQ(st.name(), "a");
-  EXPECT_EQ(st.type(), &i32);
-  EXPECT_EQ(st.decorations().size(), 1u);
-  EXPECT_TRUE(st.decorations()[0]->Is<StructMemberOffsetDecoration>());
-  EXPECT_EQ(st.source().range.begin.line, 0u);
-  EXPECT_EQ(st.source().range.begin.column, 0u);
-  EXPECT_EQ(st.source().range.end.line, 0u);
-  EXPECT_EQ(st.source().range.end.column, 0u);
+  auto* st = create<StructMember>("a", ty.i32, decorations);
+  EXPECT_EQ(st->name(), "a");
+  EXPECT_EQ(st->type(), ty.i32);
+  EXPECT_EQ(st->decorations().size(), 1u);
+  EXPECT_TRUE(st->decorations()[0]->Is<StructMemberOffsetDecoration>());
+  EXPECT_EQ(st->source().range.begin.line, 0u);
+  EXPECT_EQ(st->source().range.begin.column, 0u);
+  EXPECT_EQ(st->source().range.end.line, 0u);
+  EXPECT_EQ(st->source().range.end.column, 0u);
 }
 
 TEST_F(StructMemberTest, CreationWithSource) {
-  type::I32 i32;
-  Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}};
-
-  StructMember st{s, "a", &i32, {}};
-  EXPECT_EQ(st.name(), "a");
-  EXPECT_EQ(st.type(), &i32);
-  EXPECT_EQ(st.decorations().size(), 0u);
-  EXPECT_EQ(st.source().range.begin.line, 27u);
-  EXPECT_EQ(st.source().range.begin.column, 4u);
-  EXPECT_EQ(st.source().range.end.line, 27u);
-  EXPECT_EQ(st.source().range.end.column, 8u);
+  auto* st = create<StructMember>(
+      Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
+      "a", ty.i32, StructMemberDecorationList{});
+  EXPECT_EQ(st->name(), "a");
+  EXPECT_EQ(st->type(), ty.i32);
+  EXPECT_EQ(st->decorations().size(), 0u);
+  EXPECT_EQ(st->source().range.begin.line, 27u);
+  EXPECT_EQ(st->source().range.begin.column, 4u);
+  EXPECT_EQ(st->source().range.end.line, 27u);
+  EXPECT_EQ(st->source().range.end.column, 8u);
 }
 
 TEST_F(StructMemberTest, IsValid) {
-  type::I32 i32;
-  StructMember st{Source{}, "a", &i32, {}};
-  EXPECT_TRUE(st.IsValid());
+  auto* st = create<StructMember>("a", ty.i32, StructMemberDecorationList{});
+  EXPECT_TRUE(st->IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_EmptyName) {
-  type::I32 i32;
-  StructMember st{Source{}, "", &i32, {}};
-  EXPECT_FALSE(st.IsValid());
+  auto* st = create<StructMember>("", ty.i32, StructMemberDecorationList{});
+  EXPECT_FALSE(st->IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_NullType) {
-  StructMember st{Source{}, "a", nullptr, {}};
-  EXPECT_FALSE(st.IsValid());
+  auto* st = create<StructMember>("a", nullptr, StructMemberDecorationList{});
+  EXPECT_FALSE(st->IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_Null_Decoration) {
-  type::I32 i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(create<StructMemberOffsetDecoration>(Source{}, 4));
+  decorations.emplace_back(create<StructMemberOffsetDecoration>(4));
   decorations.push_back(nullptr);
 
-  StructMember st{Source{}, "a", &i32, decorations};
-  EXPECT_FALSE(st.IsValid());
+  auto* st = create<StructMember>("a", ty.i32, decorations);
+  EXPECT_FALSE(st->IsValid());
 }
 
 TEST_F(StructMemberTest, ToStr) {
-  type::I32 i32;
   StructMemberDecorationList decorations;
-  decorations.emplace_back(create<StructMemberOffsetDecoration>(Source{}, 4));
+  decorations.emplace_back(create<StructMemberOffsetDecoration>(4));
 
-  StructMember st{Source{}, "a", &i32, decorations};
+  auto* st = create<StructMember>("a", ty.i32, decorations);
   std::ostringstream out;
-  st.to_str(out, 2);
+  st->to_str(out, 2);
   EXPECT_EQ(out.str(), "  StructMember{[[ offset 4 ]] a: __i32}\n");
 }
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {
-  type::I32 i32;
-  StructMember st{Source{}, "a", &i32, {}};
+  auto* st = create<StructMember>("a", ty.i32, StructMemberDecorationList{});
   std::ostringstream out;
-  st.to_str(out, 2);
+  st->to_str(out, 2);
   EXPECT_EQ(out.str(), "  StructMember{a: __i32}\n");
 }
 

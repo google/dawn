@@ -23,26 +23,26 @@ namespace {
 using ContinueStatementTest = TestHelper;
 
 TEST_F(ContinueStatementTest, Creation_WithSource) {
-  ContinueStatement stmt(Source{Source::Location{20, 2}});
-  auto src = stmt.source();
+  auto* stmt = create<ContinueStatement>(Source{Source::Location{20, 2}});
+  auto src = stmt->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(ContinueStatementTest, IsContinue) {
-  ContinueStatement stmt(Source{});
-  EXPECT_TRUE(stmt.Is<ContinueStatement>());
+  auto* stmt = create<ContinueStatement>();
+  EXPECT_TRUE(stmt->Is<ContinueStatement>());
 }
 
 TEST_F(ContinueStatementTest, IsValid) {
-  ContinueStatement stmt(Source{});
-  EXPECT_TRUE(stmt.IsValid());
+  auto* stmt = create<ContinueStatement>();
+  EXPECT_TRUE(stmt->IsValid());
 }
 
 TEST_F(ContinueStatementTest, ToStr) {
-  ContinueStatement stmt(Source{});
+  auto* stmt = create<ContinueStatement>();
   std::ostringstream out;
-  stmt.to_str(out, 2);
+  stmt->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Continue{}
 )");
 }

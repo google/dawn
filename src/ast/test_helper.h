@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/ast/builder.h"
 #include "src/ast/module.h"
 #include "src/demangler.h"
 
@@ -28,29 +29,15 @@ namespace ast {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public BASE {
+class TestHelperBase : public BASE, public BuilderWithModule {
  public:
-  TestHelperBase() {}
-  ~TestHelperBase() = default;
-
-  /// Creates a new `Node` owned by the Module. When the Module is
-  /// destructed, the `Node` will also be destructed.
-  /// @param args the arguments to pass to the type constructor
-  /// @returns the node pointer
-  template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
-    return mod.create<T>(std::forward<ARGS>(args)...);
-  }
-
   /// Demangles the given string
   /// @param s the string to demangle
   /// @returns the demangled string
   std::string demangle(const std::string& s) {
-    return demanger.Demangle(mod, s);
+    return demanger.Demangle(*mod, s);
   }
 
-  /// The module
-  Module mod;
   /// A demangler
   Demangler demanger;
 };

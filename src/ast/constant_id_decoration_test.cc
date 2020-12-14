@@ -23,13 +23,12 @@ namespace {
 using ConstantIdDecorationTest = TestHelper;
 
 TEST_F(ConstantIdDecorationTest, Creation) {
-  ConstantIdDecoration d{Source{}, 12};
-  EXPECT_EQ(12u, d.value());
+  auto* d = create<ConstantIdDecoration>(12);
+  EXPECT_EQ(12u, d->value());
 }
 
 TEST_F(ConstantIdDecorationTest, Is) {
-  ConstantIdDecoration cd{Source{}, 27};
-  Decoration* d = &cd;
+  Decoration* d = create<ConstantIdDecoration>(27);
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_TRUE(d->Is<ConstantIdDecoration>());
@@ -38,9 +37,9 @@ TEST_F(ConstantIdDecorationTest, Is) {
 }
 
 TEST_F(ConstantIdDecorationTest, ToStr) {
-  ConstantIdDecoration d{Source{}, 1200};
+  auto* d = create<ConstantIdDecoration>(1200);
   std::ostringstream out;
-  d.to_str(out, 0);
+  d->to_str(out, 0);
   EXPECT_EQ(out.str(), R"(ConstantIdDecoration{1200}
 )");
 }

@@ -27,106 +27,83 @@ namespace {
 using VariableTest = TestHelper;
 
 TEST_F(VariableTest, Creation) {
-  type::I32 t;
-  Variable v(Source{}, "my_var", StorageClass::kFunction, &t, false, nullptr,
-             ast::VariableDecorationList{});
+  auto* v = Var("my_var", StorageClass::kFunction, ty.i32);
 
-  EXPECT_EQ(v.name(), "my_var");
-  EXPECT_EQ(v.storage_class(), StorageClass::kFunction);
-  EXPECT_EQ(v.type(), &t);
-  EXPECT_EQ(v.source().range.begin.line, 0u);
-  EXPECT_EQ(v.source().range.begin.column, 0u);
-  EXPECT_EQ(v.source().range.end.line, 0u);
-  EXPECT_EQ(v.source().range.end.column, 0u);
+  EXPECT_EQ(v->name(), "my_var");
+  EXPECT_EQ(v->storage_class(), StorageClass::kFunction);
+  EXPECT_EQ(v->type(), ty.i32);
+  EXPECT_EQ(v->source().range.begin.line, 0u);
+  EXPECT_EQ(v->source().range.begin.column, 0u);
+  EXPECT_EQ(v->source().range.end.line, 0u);
+  EXPECT_EQ(v->source().range.end.column, 0u);
 }
 
 TEST_F(VariableTest, CreationWithSource) {
-  Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}};
-  type::F32 t;
-  Variable v(s, "i", StorageClass::kPrivate, &t, false, nullptr,
-             ast::VariableDecorationList{});
+  auto* v = Var(
+      Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}},
+      "i", StorageClass::kPrivate, ty.f32, nullptr, VariableDecorationList{});
 
-  EXPECT_EQ(v.name(), "i");
-  EXPECT_EQ(v.storage_class(), StorageClass::kPrivate);
-  EXPECT_EQ(v.type(), &t);
-  EXPECT_EQ(v.source().range.begin.line, 27u);
-  EXPECT_EQ(v.source().range.begin.column, 4u);
-  EXPECT_EQ(v.source().range.end.line, 27u);
-  EXPECT_EQ(v.source().range.end.column, 5u);
+  EXPECT_EQ(v->name(), "i");
+  EXPECT_EQ(v->storage_class(), StorageClass::kPrivate);
+  EXPECT_EQ(v->type(), ty.f32);
+  EXPECT_EQ(v->source().range.begin.line, 27u);
+  EXPECT_EQ(v->source().range.begin.column, 4u);
+  EXPECT_EQ(v->source().range.end.line, 27u);
+  EXPECT_EQ(v->source().range.end.column, 5u);
 }
 
 TEST_F(VariableTest, CreationEmpty) {
-  type::I32 t;
-  Source s{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}};
-  Variable v(s, "a_var", StorageClass::kWorkgroup, &t, false, nullptr,
-             ast::VariableDecorationList{});
+  auto* v = Var(
+      Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}},
+      "a_var", StorageClass::kWorkgroup, ty.i32, nullptr,
+      VariableDecorationList{});
 
-  EXPECT_EQ(v.name(), "a_var");
-  EXPECT_EQ(v.storage_class(), StorageClass::kWorkgroup);
-  EXPECT_EQ(v.type(), &t);
-  EXPECT_EQ(v.source().range.begin.line, 27u);
-  EXPECT_EQ(v.source().range.begin.column, 4u);
-  EXPECT_EQ(v.source().range.end.line, 27u);
-  EXPECT_EQ(v.source().range.end.column, 7u);
+  EXPECT_EQ(v->name(), "a_var");
+  EXPECT_EQ(v->storage_class(), StorageClass::kWorkgroup);
+  EXPECT_EQ(v->type(), ty.i32);
+  EXPECT_EQ(v->source().range.begin.line, 27u);
+  EXPECT_EQ(v->source().range.begin.column, 4u);
+  EXPECT_EQ(v->source().range.end.line, 27u);
+  EXPECT_EQ(v->source().range.end.column, 7u);
 }
 
 TEST_F(VariableTest, IsValid) {
-  type::I32 t;
-  Variable v{Source{}, "my_var", StorageClass::kNone,          &t,
-             false,    nullptr,  ast::VariableDecorationList{}};
-  EXPECT_TRUE(v.IsValid());
+  auto* v = Var("my_var", StorageClass::kNone, ty.i32);
+  EXPECT_TRUE(v->IsValid());
 }
 
 TEST_F(VariableTest, IsValid_WithConstructor) {
-  type::I32 t;
-  Variable v{Source{},
-             "my_var",
-             StorageClass::kNone,
-             &t,
-             false,
-             create<IdentifierExpression>(Source{}, mod.RegisterSymbol("ident"),
-                                          "ident"),
-             ast::VariableDecorationList{}};
-  EXPECT_TRUE(v.IsValid());
+  auto* v = Var("my_var", StorageClass::kNone, ty.i32, Expr("ident"),
+                ast::VariableDecorationList{});
+  EXPECT_TRUE(v->IsValid());
 }
 
 TEST_F(VariableTest, IsValid_MissinName) {
-  type::I32 t;
-  Variable v{Source{}, "",      StorageClass::kNone,          &t,
-             false,    nullptr, ast::VariableDecorationList{}};
-  EXPECT_FALSE(v.IsValid());
+  auto* v = Var("", StorageClass::kNone, ty.i32);
+  EXPECT_FALSE(v->IsValid());
 }
 
 TEST_F(VariableTest, IsValid_MissingType) {
-  Variable v{Source{}, "x",     StorageClass::kNone,          nullptr,
-             false,    nullptr, ast::VariableDecorationList{}};
-  EXPECT_FALSE(v.IsValid());
+  auto* v = Var("x", StorageClass::kNone, nullptr);
+  EXPECT_FALSE(v->IsValid());
 }
 
 TEST_F(VariableTest, IsValid_MissingBoth) {
-  Variable v{Source{}, "",      StorageClass::kNone,          nullptr,
-             false,    nullptr, ast::VariableDecorationList{}};
-  EXPECT_FALSE(v.IsValid());
+  auto* v = Var("", StorageClass::kNone, nullptr);
+  EXPECT_FALSE(v->IsValid());
 }
 
 TEST_F(VariableTest, IsValid_InvalidConstructor) {
-  type::I32 t;
-  Variable v{Source{},
-             "my_var",
-             StorageClass::kNone,
-             &t,
-             false,
-             create<IdentifierExpression>(Source{}, mod.RegisterSymbol(""), ""),
-             ast::VariableDecorationList{}};
-  EXPECT_FALSE(v.IsValid());
+  auto* v = Var("my_var", StorageClass::kNone, ty.i32, Expr(""),
+                ast::VariableDecorationList{});
+  EXPECT_FALSE(v->IsValid());
 }
 
 TEST_F(VariableTest, to_str) {
-  type::F32 t;
-  Variable v{Source{}, "my_var", StorageClass::kFunction,      &t,
-             false,    nullptr,  ast::VariableDecorationList{}};
+  auto* v = Var("my_var", StorageClass::kFunction, ty.f32, nullptr,
+                ast::VariableDecorationList{});
   std::ostringstream out;
-  v.to_str(out, 2);
+  v->to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Variable{
     my_var
     function
@@ -136,14 +113,12 @@ TEST_F(VariableTest, to_str) {
 }
 
 TEST_F(VariableTest, WithDecorations) {
-  type::F32 t;
-  auto* var = create<Variable>(
-      Source{}, "my_var", StorageClass::kFunction, &t, false, nullptr,
-      VariableDecorationList{
-          create<LocationDecoration>(Source{}, 1),
-          create<BuiltinDecoration>(Source{}, Builtin::kPosition),
-          create<ConstantIdDecoration>(Source{}, 1200),
-      });
+  auto* var = Var("my_var", StorageClass::kFunction, ty.i32, nullptr,
+                  VariableDecorationList{
+                      create<LocationDecoration>(1),
+                      create<BuiltinDecoration>(Builtin::kPosition),
+                      create<ConstantIdDecoration>(1200),
+                  });
 
   EXPECT_TRUE(var->HasLocationDecoration());
   EXPECT_TRUE(var->HasBuiltinDecoration());
@@ -151,26 +126,20 @@ TEST_F(VariableTest, WithDecorations) {
 }
 
 TEST_F(VariableTest, ConstantId) {
-  type::F32 t;
-  auto* var = create<Variable>(Source{}, "my_var", StorageClass::kFunction, &t,
-                               false, nullptr,
-                               VariableDecorationList{
-                                   create<ConstantIdDecoration>(Source{}, 1200),
-                               });
+  auto* var = Var("my_var", StorageClass::kFunction, ty.i32, nullptr,
+                  VariableDecorationList{
+                      create<ConstantIdDecoration>(1200),
+                  });
 
   EXPECT_EQ(var->constant_id(), 1200u);
 }
 
 TEST_F(VariableTest, Decorated_to_str) {
-  type::F32 t;
-  auto* var =
-      create<Variable>(Source{}, "my_var", StorageClass::kFunction, &t, false,
-                       create<IdentifierExpression>(
-                           Source{}, mod.RegisterSymbol("expr"), "expr"),
-                       VariableDecorationList{
-                           create<BindingDecoration>(Source{}, 2),
-                           create<SetDecoration>(Source{}, 1),
-                       });
+  auto* var = Var("my_var", StorageClass::kFunction, ty.f32, Expr("expr"),
+                  VariableDecorationList{
+                      create<BindingDecoration>(2),
+                      create<SetDecoration>(1),
+                  });
 
   std::ostringstream out;
   var->to_str(out, 2);

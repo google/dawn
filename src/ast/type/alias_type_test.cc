@@ -44,7 +44,7 @@ using AliasTest = TestHelper;
 
 TEST_F(AliasTest, Create) {
   U32 u32;
-  Alias a{mod.RegisterSymbol("a_type"), "a_type", &u32};
+  Alias a{mod->RegisterSymbol("a_type"), "a_type", &u32};
   EXPECT_EQ(a.symbol(), Symbol(1));
   // EXPECT_EQ(a.name(), "a_type");
   EXPECT_EQ(a.type(), &u32);
@@ -53,7 +53,7 @@ TEST_F(AliasTest, Create) {
 TEST_F(AliasTest, Is) {
   I32 i32;
 
-  Alias at{mod.RegisterSymbol("a"), "a", &i32};
+  Alias at{mod->RegisterSymbol("a"), "a", &i32};
   Type* ty = &at;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_TRUE(ty->Is<Alias>());
@@ -72,13 +72,13 @@ TEST_F(AliasTest, Is) {
 
 TEST_F(AliasTest, TypeName) {
   I32 i32;
-  Alias at{mod.RegisterSymbol("Particle"), "Particle", &i32};
+  Alias at{mod->RegisterSymbol("Particle"), "Particle", &i32};
   EXPECT_EQ(at.type_name(), "__alias_tint_symbol_1__i32");
 }
 
 TEST_F(AliasTest, UnwrapIfNeeded_Alias) {
   U32 u32;
-  Alias a{mod.RegisterSymbol("a_type"), "a_type", &u32};
+  Alias a{mod->RegisterSymbol("a_type"), "a_type", &u32};
   EXPECT_EQ(a.symbol(), Symbol(1));
   // EXPECT_EQ(a.name(), "a_type");
   EXPECT_EQ(a.type(), &u32);
@@ -95,8 +95,8 @@ TEST_F(AliasTest, UnwrapIfNeeded_AccessControl) {
 
 TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel) {
   U32 u32;
-  Alias a{mod.RegisterSymbol("a_type"), "a_type", &u32};
-  Alias aa{mod.RegisterSymbol("aa_type"), "aa_type", &a};
+  Alias a{mod->RegisterSymbol("a_type"), "a_type", &u32};
+  Alias aa{mod->RegisterSymbol("aa_type"), "aa_type", &a};
   EXPECT_EQ(aa.symbol(), Symbol(2));
   // EXPECT_EQ(aa.name(), "aa_type");
   EXPECT_EQ(aa.type(), &a);
@@ -105,7 +105,7 @@ TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel) {
 
 TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
   U32 u32;
-  Alias a{mod.RegisterSymbol("a_type"), "a_type", &u32};
+  Alias a{mod->RegisterSymbol("a_type"), "a_type", &u32};
   AccessControl aa{ast::AccessControl::kReadWrite, &a};
   EXPECT_EQ(aa.type(), &a);
   EXPECT_EQ(aa.UnwrapIfNeeded(), &u32);
@@ -113,11 +113,11 @@ TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
 
 TEST_F(AliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   U32 u32;
-  Alias a{mod.RegisterSymbol("a_type"), "a_type", &u32};
-  Alias aa{mod.RegisterSymbol("aa_type"), "aa_type", &a};
+  Alias a{mod->RegisterSymbol("a_type"), "a_type", &u32};
+  Alias aa{mod->RegisterSymbol("aa_type"), "aa_type", &a};
   Pointer paa{&aa, StorageClass::kUniform};
-  Alias apaa{mod.RegisterSymbol("paa_type"), "paa_type", &paa};
-  Alias aapaa{mod.RegisterSymbol("aapaa_type"), "aapaa_type", &apaa};
+  Alias apaa{mod->RegisterSymbol("paa_type"), "paa_type", &paa};
+  Alias aapaa{mod->RegisterSymbol("aapaa_type"), "aapaa_type", &apaa};
   EXPECT_EQ(aapaa.symbol(), Symbol(4));
   // EXPECT_EQ(aapaa.name(), "aapaa_type");
   EXPECT_EQ(aapaa.type(), &apaa);
@@ -127,23 +127,23 @@ TEST_F(AliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
 
 TEST_F(AliasTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
   U32 u32;
-  Alias a{mod.RegisterSymbol("a_type"), "a_type", &u32};
-  Alias aa{mod.RegisterSymbol("aa_type"), "aa_type", &a};
+  Alias a{mod->RegisterSymbol("a_type"), "a_type", &u32};
+  Alias aa{mod->RegisterSymbol("aa_type"), "aa_type", &a};
   Pointer paa{&aa, StorageClass::kUniform};
   Pointer ppaa{&paa, StorageClass::kUniform};
-  Alias appaa{mod.RegisterSymbol("appaa_type"), "appaa_type", &ppaa};
+  Alias appaa{mod->RegisterSymbol("appaa_type"), "appaa_type", &ppaa};
   EXPECT_EQ(appaa.UnwrapAll(), &paa);
 }
 
 TEST_F(AliasTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
   U32 u32;
-  Alias a{mod.RegisterSymbol("a_type"), "a_type", &u32};
-  Alias aa{mod.RegisterSymbol("aa_type"), "aa_type", &a};
+  Alias a{mod->RegisterSymbol("a_type"), "a_type", &u32};
+  Alias aa{mod->RegisterSymbol("aa_type"), "aa_type", &a};
   Pointer paa{&aa, StorageClass::kUniform};
-  Alias apaa{mod.RegisterSymbol("apaa_type"), "apaa_type", &paa};
-  Alias aapaa{mod.RegisterSymbol("aapaa_type"), "aapaa_type", &apaa};
+  Alias apaa{mod->RegisterSymbol("apaa_type"), "apaa_type", &paa};
+  Alias aapaa{mod->RegisterSymbol("aapaa_type"), "aapaa_type", &apaa};
   Pointer paapaa{&aapaa, StorageClass::kUniform};
-  Alias apaapaa{mod.RegisterSymbol("apaapaa_type"), "apaapaa_type", &paapaa};
+  Alias apaapaa{mod->RegisterSymbol("apaapaa_type"), "apaapaa_type", &paapaa};
   EXPECT_EQ(apaapaa.UnwrapAll(), &paa);
 }
 
@@ -167,7 +167,7 @@ TEST_F(AliasTest, UnwrapAll_PointerAccessControl) {
 
 TEST_F(AliasTest, MinBufferBindingSizeU32) {
   U32 u32;
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &u32};
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &u32};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
@@ -175,9 +175,9 @@ TEST_F(AliasTest, MinBufferBindingSizeArray) {
   U32 u32;
   Array array(&u32, 4,
               ArrayDecorationList{
-                  create<StrideDecoration>(Source{}, 4),
+                  create<StrideDecoration>(4),
               });
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
@@ -185,9 +185,9 @@ TEST_F(AliasTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
   Array array(&u32, 0,
               ArrayDecorationList{
-                  create<StrideDecoration>(Source{}, 4),
+                  create<StrideDecoration>(4),
               });
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(4u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
@@ -197,26 +197,26 @@ TEST_F(AliasTest, MinBufferBindingSizeStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
-    members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
+    deco.push_back(create<StructMemberOffsetDecoration>(0));
+    members.push_back(create<StructMember>("foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
-    members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
+    deco.push_back(create<StructMemberOffsetDecoration>(4));
+    members.push_back(create<StructMember>("bar", &u32, deco));
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(Source{}, members, decos);
-  Struct struct_type(mod.RegisterSymbol("struct_type"), "struct_type", str);
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &struct_type};
+  auto* str = create<ast::Struct>(members, decos);
+  Struct struct_type(mod->RegisterSymbol("struct_type"), "struct_type", str);
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &struct_type};
   EXPECT_EQ(16u, alias.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(8u, alias.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
 }
 
 TEST_F(AliasTest, BaseAlignmentU32) {
   U32 u32;
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &u32};
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &u32};
   EXPECT_EQ(4u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
@@ -224,9 +224,9 @@ TEST_F(AliasTest, BaseAlignmentArray) {
   U32 u32;
   Array array(&u32, 4,
               ArrayDecorationList{
-                  create<StrideDecoration>(Source{}, 4),
+                  create<StrideDecoration>(4),
               });
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
@@ -234,9 +234,9 @@ TEST_F(AliasTest, BaseAlignmentRuntimeArray) {
   U32 u32;
   Array array(&u32, 0,
               ArrayDecorationList{
-                  create<StrideDecoration>(Source{}, 4),
+                  create<StrideDecoration>(4),
               });
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &array};
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &array};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
@@ -246,19 +246,19 @@ TEST_F(AliasTest, BaseAlignmentStruct) {
 
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 0));
-    members.push_back(create<StructMember>(Source{}, "foo", &u32, deco));
+    deco.push_back(create<StructMemberOffsetDecoration>(0));
+    members.push_back(create<StructMember>("foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
-    deco.push_back(create<StructMemberOffsetDecoration>(Source{}, 4));
-    members.push_back(create<StructMember>(Source{}, "bar", &u32, deco));
+    deco.push_back(create<StructMemberOffsetDecoration>(4));
+    members.push_back(create<StructMember>("bar", &u32, deco));
   }
   StructDecorationList decos;
 
-  auto* str = create<ast::Struct>(Source{}, members, decos);
-  Struct struct_type(mod.RegisterSymbol("struct_type"), "struct_type", str);
-  Alias alias{mod.RegisterSymbol("alias"), "alias", &struct_type};
+  auto* str = create<ast::Struct>(members, decos);
+  Struct struct_type(mod->RegisterSymbol("struct_type"), "struct_type", str);
+  Alias alias{mod->RegisterSymbol("alias"), "alias", &struct_type};
   EXPECT_EQ(16u, alias.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, alias.BaseAlignment(MemoryLayout::kStorageBuffer));
 }

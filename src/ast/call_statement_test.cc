@@ -25,52 +25,40 @@ namespace {
 using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
-  auto* expr =
-      create<CallExpression>(Source{},
-                             create<IdentifierExpression>(
-                                 Source{}, mod.RegisterSymbol("func"), "func"),
-                             ExpressionList{});
+  auto* expr = create<CallExpression>(Expr("func"), ExpressionList{});
 
-  CallStatement c(Source{}, expr);
-  EXPECT_EQ(c.expr(), expr);
+  auto* c = create<CallStatement>(expr);
+  EXPECT_EQ(c->expr(), expr);
 }
 
 TEST_F(CallStatementTest, IsCall) {
-  CallStatement c(Source{}, nullptr);
-  EXPECT_TRUE(c.Is<CallStatement>());
+  auto* c = create<CallStatement>(nullptr);
+  EXPECT_TRUE(c->Is<CallStatement>());
 }
 
 TEST_F(CallStatementTest, IsValid) {
-  CallStatement c(
-      Source{},
-      create<CallExpression>(Source{},
-                             create<IdentifierExpression>(
-                                 Source{}, mod.RegisterSymbol("func"), "func"),
-                             ExpressionList{}));
-  EXPECT_TRUE(c.IsValid());
+  auto* c = create<CallStatement>(
+      create<CallExpression>(Expr("func"), ExpressionList{}));
+  EXPECT_TRUE(c->IsValid());
 }
 
 TEST_F(CallStatementTest, IsValid_MissingExpr) {
-  CallStatement c(Source{}, nullptr);
-  EXPECT_FALSE(c.IsValid());
+  auto* c = create<CallStatement>(nullptr);
+  EXPECT_FALSE(c->IsValid());
 }
 
 TEST_F(CallStatementTest, IsValid_InvalidExpr) {
-  CallExpression stmt(Source{}, nullptr, {});
-  CallStatement c(Source{}, &stmt);
-  EXPECT_FALSE(c.IsValid());
+  auto* c = create<CallStatement>(
+      create<CallExpression>(nullptr, ast::ExpressionList{}));
+  EXPECT_FALSE(c->IsValid());
 }
 
 TEST_F(CallStatementTest, ToStr) {
-  CallStatement c(
-      Source{},
-      create<CallExpression>(Source{},
-                             create<IdentifierExpression>(
-                                 Source{}, mod.RegisterSymbol("func"), "func"),
-                             ExpressionList{}));
+  auto* c = create<CallStatement>(
+      create<CallExpression>(Expr("func"), ExpressionList{}));
 
   std::ostringstream out;
-  c.to_str(out, 2);
+  c->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
     Identifier[not set]{func}
     (
