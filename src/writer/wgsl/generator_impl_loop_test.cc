@@ -28,8 +28,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                });
   ast::LoopStatement l(Source{}, body, {});
 
   gen.increment_indent();
@@ -42,12 +44,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-
-  auto* continuing = create<ast::BlockStatement>(Source{});
-  continuing->append(create<ast::DiscardStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                });
+  auto* continuing = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                });
   ast::LoopStatement l(Source{}, body, continuing);
 
   gen.increment_indent();

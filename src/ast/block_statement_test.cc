@@ -31,8 +31,7 @@ TEST_F(BlockStatementTest, Creation) {
   auto* d = create<DiscardStatement>(Source{});
   auto* ptr = d;
 
-  BlockStatement b(Source{});
-  b.append(d);
+  BlockStatement b(Source{}, StatementList{d});
 
   ASSERT_EQ(b.size(), 1u);
   EXPECT_EQ(b[0], ptr);
@@ -43,7 +42,7 @@ TEST_F(BlockStatementTest, Creation_WithInsert) {
   auto* s2 = create<DiscardStatement>(Source{});
   auto* s3 = create<DiscardStatement>(Source{});
 
-  BlockStatement b(Source{});
+  BlockStatement b(Source{}, StatementList{});
   b.insert(0, s1);
   b.insert(0, s2);
   b.insert(1, s3);
@@ -57,46 +56,53 @@ TEST_F(BlockStatementTest, Creation_WithInsert) {
 }
 
 TEST_F(BlockStatementTest, Creation_WithSource) {
-  BlockStatement b(Source{Source::Location{20, 2}});
+  BlockStatement b(Source{Source::Location{20, 2}}, ast::StatementList{});
   auto src = b.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BlockStatementTest, IsBlock) {
-  BlockStatement b(Source{});
+  BlockStatement b(Source{}, ast::StatementList{});
   EXPECT_TRUE(b.Is<BlockStatement>());
 }
 
 TEST_F(BlockStatementTest, IsValid) {
-  BlockStatement b(Source{});
-  b.append(create<DiscardStatement>(Source{}));
+  BlockStatement b(Source{}, ast::StatementList{
+                                 create<DiscardStatement>(Source{}),
+                             });
   EXPECT_TRUE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_Empty) {
-  BlockStatement b(Source{});
+  BlockStatement b(Source{}, ast::StatementList{});
   EXPECT_TRUE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_NullBodyStatement) {
-  BlockStatement b(Source{});
-  b.append(create<DiscardStatement>(Source{}));
-  b.append(nullptr);
+  BlockStatement b(Source{}, ast::StatementList{
+                                 create<DiscardStatement>(Source{}),
+                                 nullptr,
+                             });
+
   EXPECT_FALSE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, IsValid_InvalidBodyStatement) {
-  BlockStatement b(Source{});
-  b.append(create<IfStatement>(Source{}, nullptr,
-                               create<BlockStatement>(Source{}),
-                               ElseStatementList{}));
+  BlockStatement b(
+      Source{},
+      ast::StatementList{
+          create<IfStatement>(Source{}, nullptr,
+                              create<BlockStatement>(Source{}, StatementList{}),
+                              ElseStatementList{}),
+      });
   EXPECT_FALSE(b.IsValid());
 }
 
 TEST_F(BlockStatementTest, ToStr) {
-  BlockStatement b(Source{});
-  b.append(create<DiscardStatement>(Source{}));
+  BlockStatement b(Source{}, ast::StatementList{
+                                 create<DiscardStatement>(Source{}),
+                             });
 
   std::ostringstream out;
   b.to_str(out, 2);

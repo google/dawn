@@ -464,16 +464,22 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
 
   ast::type::I32 i32;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::ScalarConstructorExpression>(
-                    Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(
+                        Source{}, create<ast::ScalarConstructorExpression>(
+                                      Source{}, create<ast::SintLiteral>(
+                                                    Source{}, &i32, 3))),
+                });
   auto* else_stmt = create<ast::ElseStatement>(Source{}, nullptr, body);
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::ScalarConstructorExpression>(
-                    Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
+  body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(
+                        Source{}, create<ast::ScalarConstructorExpression>(
+                                      Source{}, create<ast::SintLiteral>(
+                                                    Source{}, &i32, 2))),
+                });
   auto* else_if_stmt = create<ast::ElseStatement>(
       Source{},
       create<ast::BinaryExpression>(
@@ -484,10 +490,13 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
                                             "c")),
       body);
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::ScalarConstructorExpression>(
-                    Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
+  body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(
+                        Source{}, create<ast::ScalarConstructorExpression>(
+                                      Source{}, create<ast::SintLiteral>(
+                                                    Source{}, &i32, 1))),
+                });
 
   ast::IfStatement expr(Source{},
                         create<ast::BinaryExpression>(
@@ -659,10 +668,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   ast::type::Void void_type;
 
-  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("foo"), "foo",
-                                     ast::VariableList{}, &void_type,
-                                     create<ast::BlockStatement>(Source{}),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("foo"), "foo", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ast::ExpressionList params;

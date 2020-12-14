@@ -151,9 +151,10 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, lhs, rhs),
+                });
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 3));
   ast::CaseStatement cse(Source{}, lit, body);
@@ -174,8 +175,10 @@ TEST_F(TypeDeterminerTest, Stmt_Block) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  ast::BlockStatement block(Source{});
-  block.append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
+  ast::BlockStatement block(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, lhs, rhs),
+                });
 
   EXPECT_TRUE(td()->DetermineResultType(&block));
   ASSERT_NE(lhs->result_type(), nullptr);
@@ -193,9 +196,10 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, lhs, rhs),
+                });
   ast::ElseStatement stmt(
       Source{},
       create<ast::ScalarConstructorExpression>(
@@ -220,9 +224,11 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   auto* else_rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  auto* else_body = create<ast::BlockStatement>(Source{});
-  else_body->append(
-      create<ast::AssignmentStatement>(Source{}, else_lhs, else_rhs));
+  auto* else_body = create<ast::BlockStatement>(
+      Source{},
+      ast::StatementList{
+          create<ast::AssignmentStatement>(Source{}, else_lhs, else_rhs),
+      });
 
   auto* else_stmt = create<ast::ElseStatement>(
       Source{},
@@ -235,9 +241,10 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, lhs, rhs),
+                });
   ast::IfStatement stmt(
       Source{},
       create<ast::ScalarConstructorExpression>(
@@ -266,18 +273,21 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
   auto* body_rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(Source{}, body_lhs, body_rhs));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{},
+      ast::StatementList{
+          create<ast::AssignmentStatement>(Source{}, body_lhs, body_rhs),
+      });
   auto* continuing_lhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
   auto* continuing_rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  auto* continuing = create<ast::BlockStatement>(Source{});
-  continuing->append(create<ast::AssignmentStatement>(Source{}, continuing_lhs,
-                                                      continuing_rhs));
-
+  auto* continuing = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, continuing_lhs,
+                                                     continuing_rhs),
+                });
   ast::LoopStatement stmt(Source{}, body, continuing);
 
   EXPECT_TRUE(td()->DetermineResultType(&stmt));
@@ -319,9 +329,10 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, lhs, rhs),
+                });
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 3));
 
@@ -350,7 +361,8 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   ast::VariableList params;
   auto* func = create<ast::Function>(
       Source{}, mod->RegisterSymbol("my_func"), "my_func", params, &f32,
-      create<ast::BlockStatement>(Source{}), ast::FunctionDecorationList{});
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -380,16 +392,21 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
                                         mod->RegisterSymbol("func"), "func"),
       call_params);
   ast::VariableList params0;
-  auto* main_body = create<ast::BlockStatement>(Source{});
-  main_body->append(create<ast::CallStatement>(Source{}, call_expr));
-  main_body->append(create<ast::ReturnStatement>(Source{}));
+  auto* main_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::CallStatement>(Source{}, call_expr),
+                    create<ast::ReturnStatement>(Source{}),
+                });
+
   auto* func_main = create<ast::Function>(Source{}, mod->RegisterSymbol("main"),
                                           "main", params0, &f32, main_body,
                                           ast::FunctionDecorationList{});
   mod->AddFunction(func_main);
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(Source{}));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(Source{}),
+                });
   auto* func =
       create<ast::Function>(Source{}, mod->RegisterSymbol("func"), "func",
                             params0, &f32, body, ast::FunctionDecorationList{});
@@ -675,7 +692,8 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   ast::VariableList params;
   auto* func = create<ast::Function>(
       Source{}, mod->RegisterSymbol("my_func"), "my_func", params, &f32,
-      create<ast::BlockStatement>(Source{}), ast::FunctionDecorationList{});
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -698,7 +716,8 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   ast::VariableList params;
   auto* func = create<ast::Function>(
       Source{}, mod->RegisterSymbol("my_func"), "my_func", params, &f32,
-      create<ast::BlockStatement>(Source{}), ast::FunctionDecorationList{});
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -851,13 +870,14 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  body->append(create<ast::AssignmentStatement>(
-      Source{}, my_var,
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_var"),
-                                        "my_var")));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                    create<ast::AssignmentStatement>(
+                        Source{}, my_var,
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("my_var"), "my_var")),
+                });
   ast::Function f(Source{}, mod->RegisterSymbol("my_func"), "my_func", {}, &f32,
                   body, ast::FunctionDecorationList{});
 
@@ -873,21 +893,23 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   auto* my_var = create<ast::IdentifierExpression>(
       Source{}, mod->RegisterSymbol("my_var"), "my_var");
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::Variable>(Source{},                          // source
-                            "my_var",                          // name
-                            ast::StorageClass::kNone,          // storage_class
-                            &f32,                              // type
-                            false,                             // is_const
-                            nullptr,                           // constructor
-                            ast::VariableDecorationList{})));  // decorations
-
-  body->append(create<ast::AssignmentStatement>(
-      Source{}, my_var,
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_var"),
-                                        "my_var")));
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(
+              Source{}, create<ast::Variable>(
+                            Source{},                         // source
+                            "my_var",                         // name
+                            ast::StorageClass::kNone,         // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{})),  // decorations
+          create<ast::AssignmentStatement>(
+              Source{}, my_var,
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("my_var"), "my_var")),
+      });
 
   ast::Function f(Source{}, mod->RegisterSymbol("myfunc"), "my_func", {}, &f32,
                   body, ast::FunctionDecorationList{});
@@ -909,21 +931,23 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   auto* my_var = create<ast::IdentifierExpression>(
       Source{}, mod->RegisterSymbol("my_var"), "my_var");
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::Variable>(Source{},                          // source
-                            "my_var",                          // name
-                            ast::StorageClass::kNone,          // storage_class
-                            &ptr,                              // type
-                            false,                             // is_const
-                            nullptr,                           // constructor
-                            ast::VariableDecorationList{})));  // decorations
-
-  body->append(create<ast::AssignmentStatement>(
-      Source{}, my_var,
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_var"),
-                                        "my_var")));
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(
+              Source{}, create<ast::Variable>(
+                            Source{},                         // source
+                            "my_var",                         // name
+                            ast::StorageClass::kNone,         // storage_class
+                            &ptr,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{})),  // decorations
+          create<ast::AssignmentStatement>(
+              Source{}, my_var,
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("my_var"), "my_var")),
+      });
 
   ast::Function f(Source{}, mod->RegisterSymbol("my_func"), "my_func", {}, &f32,
                   body, ast::FunctionDecorationList{});
@@ -944,7 +968,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   ast::VariableList params;
   auto* func = create<ast::Function>(
       Source{}, mod->RegisterSymbol("my_func"), "my_func", params, &f32,
-      create<ast::BlockStatement>(Source{}), ast::FunctionDecorationList{});
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   // Register the function
@@ -1013,31 +1038,34 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   mod->AddGlobalVariable(priv_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol("out_var"), "out_var"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("in_var"),
-                                        "in_var")));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("wg_var"),
-                                        "wg_var"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("wg_var"),
-                                        "wg_var")));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("sb_var"),
-                                        "sb_var"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("sb_var"),
-                                        "sb_var")));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol("priv_var"), "priv_var"),
-      create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol("priv_var"), "priv_var")));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("out_var"), "out_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("in_var"), "in_var")),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("wg_var"), "wg_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("wg_var"), "wg_var")),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("sb_var"), "sb_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("sb_var"), "sb_var")),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("priv_var"), "priv_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("priv_var"), "priv_var")),
+      });
   auto* func =
       create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"), "my_func",
                             params, &f32, body, ast::FunctionDecorationList{});
@@ -1106,31 +1134,34 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   mod->AddGlobalVariable(wg_var);
   mod->AddGlobalVariable(priv_var);
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol("out_var"), "out_var"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("in_var"),
-                                        "in_var")));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("wg_var"),
-                                        "wg_var"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("wg_var"),
-                                        "wg_var")));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("sb_var"),
-                                        "sb_var"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("sb_var"),
-                                        "sb_var")));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol("priv_var"), "priv_var"),
-      create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol("priv_var"), "priv_var")));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("out_var"), "out_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("in_var"), "in_var")),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("wg_var"), "wg_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("wg_var"), "wg_var")),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("sb_var"), "sb_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("sb_var"), "sb_var")),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("priv_var"), "priv_var"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("priv_var"), "priv_var")),
+      });
   ast::VariableList params;
   auto* func =
       create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"), "my_func",
@@ -1138,16 +1169,20 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   mod->AddFunction(func);
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
+  body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol("out_var"), "out_var"),
-      create<ast::CallExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("my_func"), "my_func"),
-          ast::ExpressionList{})));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("out_var"), "out_var"),
+              create<ast::CallExpression>(
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod->RegisterSymbol("my_func"), "my_func"),
+                  ast::ExpressionList{})),
+      });
+
   auto* func2 =
       create<ast::Function>(Source{}, mod->RegisterSymbol("func"), "func",
                             params, &f32, body, ast::FunctionDecorationList{});
@@ -1178,15 +1213,17 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  body->append(create<ast::AssignmentStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f))));
-
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("var"), "var"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f))),
+      });
   ast::VariableList params;
   auto* func =
       create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"), "my_func",
@@ -2869,8 +2906,9 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
                             ast::VariableDecorationList{});  // decorations
   auto* stmt = create<ast::VariableDeclStatement>(Source{}, var);
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(stmt);
+  auto* body = create<ast::BlockStatement>(Source{}, ast::StatementList{
+                                                         stmt,
+                                                     });
   auto* func = create<ast::Function>(Source{}, mod->RegisterSymbol("func"),
                                      "func", ast::VariableList{}, &i32, body,
                                      ast::FunctionDecorationList{});
@@ -2894,8 +2932,9 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
                             ast::VariableDecorationList{});  // decorations
   auto* stmt = create<ast::VariableDeclStatement>(Source{}, var);
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(stmt);
+  auto* body = create<ast::BlockStatement>(Source{}, ast::StatementList{
+                                                         stmt,
+                                                     });
   auto* func = create<ast::Function>(Source{}, mod->RegisterSymbol("func"),
                                      "func", ast::VariableList{}, &i32, body,
                                      ast::FunctionDecorationList{});
@@ -2919,8 +2958,9 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
                             ast::VariableDecorationList{});  // decorations
   auto* stmt = create<ast::VariableDeclStatement>(Source{}, var);
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(stmt);
+  auto* body = create<ast::BlockStatement>(Source{}, ast::StatementList{
+                                                         stmt,
+                                                     });
   auto* func = create<ast::Function>(Source{}, mod->RegisterSymbol("func"),
                                      "func", ast::VariableList{}, &i32, body,
                                      ast::FunctionDecorationList{});
@@ -5237,69 +5277,82 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   // ep_2 -> {}
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(Source{});
+  auto* body = create<ast::BlockStatement>(Source{}, ast::StatementList{});
   auto* func_b =
       create<ast::Function>(Source{}, mod->RegisterSymbol("b"), "b", params,
                             &f32, body, ast::FunctionDecorationList{});
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("second"),
-                                        "second"),
-      create<ast::CallExpression>(Source{},
-                                  create<ast::IdentifierExpression>(
-                                      Source{}, mod->RegisterSymbol("b"), "b"),
-                                  ast::ExpressionList{})));
+  body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("second"), "second"),
+                        create<ast::CallExpression>(
+                            Source{},
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("b"), "b"),
+                            ast::ExpressionList{})),
+                });
   auto* func_c =
       create<ast::Function>(Source{}, mod->RegisterSymbol("c"), "c", params,
                             &f32, body, ast::FunctionDecorationList{});
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("first"),
-                                        "first"),
-      create<ast::CallExpression>(Source{},
-                                  create<ast::IdentifierExpression>(
-                                      Source{}, mod->RegisterSymbol("c"), "c"),
-                                  ast::ExpressionList{})));
+  body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("first"), "first"),
+                        create<ast::CallExpression>(
+                            Source{},
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("c"), "c"),
+                            ast::ExpressionList{})),
+                });
   auto* func_a =
       create<ast::Function>(Source{}, mod->RegisterSymbol("a"), "a", params,
                             &f32, body, ast::FunctionDecorationList{});
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("call_a"),
-                                        "call_a"),
-      create<ast::CallExpression>(Source{},
-                                  create<ast::IdentifierExpression>(
-                                      Source{}, mod->RegisterSymbol("a"), "a"),
-                                  ast::ExpressionList{})));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("call_b"),
-                                        "call_b"),
-      create<ast::CallExpression>(Source{},
-                                  create<ast::IdentifierExpression>(
-                                      Source{}, mod->RegisterSymbol("b"), "b"),
-                                  ast::ExpressionList{})));
+  body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("call_a"), "call_a"),
+                        create<ast::CallExpression>(
+                            Source{},
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("a"), "a"),
+                            ast::ExpressionList{})),
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("call_b"), "call_b"),
+                        create<ast::CallExpression>(
+                            Source{},
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("b"), "b"),
+                            ast::ExpressionList{})),
+                });
   auto* ep_1 = create<ast::Function>(
       Source{}, mod->RegisterSymbol("ep_1"), "ep_1", params, &f32, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("call_c"),
-                                        "call_c"),
-      create<ast::CallExpression>(Source{},
-                                  create<ast::IdentifierExpression>(
-                                      Source{}, mod->RegisterSymbol("c"), "c"),
-                                  ast::ExpressionList{})));
+  body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("call_c"), "call_c"),
+                        create<ast::CallExpression>(
+                            Source{},
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("c"), "c"),
+                            ast::ExpressionList{})),
+                });
   auto* ep_2 = create<ast::Function>(
       Source{}, mod->RegisterSymbol("ep_2"), "ep_2", params, &f32, body,
       ast::FunctionDecorationList{

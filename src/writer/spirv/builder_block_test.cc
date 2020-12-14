@@ -39,48 +39,51 @@ TEST_F(BuilderTest, Block) {
 
   // Note, this test uses shadow variables which aren't allowed in WGSL but
   // serves to prove the block code is pushing new scopes as needed.
-  ast::BlockStatement outer(Source{});
-
-  outer.append(create<ast::VariableDeclStatement>(
+  auto* inner = create<ast::BlockStatement>(
       Source{},
-      create<ast::Variable>(Source{},                          // source
-                            "var",                             // name
-                            ast::StorageClass::kFunction,      // storage_class
-                            &f32,                              // type
-                            false,                             // is_const
-                            nullptr,                           // constructor
-                            ast::VariableDecorationList{})));  // decorations
-  outer.append(create<ast::AssignmentStatement>(
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(
+              Source{}, create<ast::Variable>(
+                            Source{},                      // source
+                            "var",                         // name
+                            ast::StorageClass::kFunction,  // storage_class
+                            &f32,                          // type
+                            false,                         // is_const
+                            nullptr,                       // constructor
+                            ast::VariableDecorationList{})),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("var"), "var"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f))),
+      });  // decorations
+  ast::BlockStatement outer(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f))));
-
-  auto* inner = create<ast::BlockStatement>(Source{});
-  inner->append(create<ast::VariableDeclStatement>(
-      Source{},
-      create<ast::Variable>(Source{},                          // source
-                            "var",                             // name
-                            ast::StorageClass::kFunction,      // storage_class
-                            &f32,                              // type
-                            false,                             // is_const
-                            nullptr,                           // constructor
-                            ast::VariableDecorationList{})));  // decorations
-  inner->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f))));
-
-  outer.append(inner);
-  outer.append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f))));
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(
+              Source{}, create<ast::Variable>(
+                            Source{},                         // source
+                            "var",                            // name
+                            ast::StorageClass::kFunction,     // storage_class
+                            &f32,                             // type
+                            false,                            // is_const
+                            nullptr,                          // constructor
+                            ast::VariableDecorationList{})),  // decorations
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("var"), "var"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f))),
+          inner,
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("var"), "var"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f))),
+      });
 
   ASSERT_TRUE(td.DetermineResultType(&outer)) << td.error();
 

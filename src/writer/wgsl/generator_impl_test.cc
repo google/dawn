@@ -34,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, Generate) {
 
   mod.AddFunction(create<ast::Function>(
       Source{}, mod.RegisterSymbol("a_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(Source{}),
+      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{}));
 
   ASSERT_TRUE(gen.Generate(mod)) << gen.error();

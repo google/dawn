@@ -91,24 +91,21 @@ class BoundArrayAccessorsTest : public testing::Test {
 };
 
 struct ModuleBuilder : public ast::BuilderWithModule {
-  ModuleBuilder() : body_(create<ast::BlockStatement>(Source{})) {
-    mod->AddFunction(create<ast::Function>(
-        Source{}, mod->RegisterSymbol("func"), "func", ast::VariableList{},
-        ty.void_, body_, ast::FunctionDecorationList{}));
-  }
-
   ast::Module Module() {
     Build();
+    auto* body = create<ast::BlockStatement>(Source{}, statements);
+    mod->AddFunction(create<ast::Function>(
+        Source{}, mod->RegisterSymbol("func"), "func", ast::VariableList{},
+        ty.void_, body, ast::FunctionDecorationList{}));
     return std::move(*mod);
   }
 
  protected:
   virtual void Build() = 0;
   void OnVariableBuilt(ast::Variable* var) override {
-    ASSERT_NE(body_, nullptr);
-    body_->append(create<ast::VariableDeclStatement>(Source{}, var));
+    statements.emplace_back(create<ast::VariableDeclStatement>(Source{}, var));
   }
-  ast::BlockStatement* body_ = nullptr;
+  ast::StatementList statements;
 };
 
 TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {

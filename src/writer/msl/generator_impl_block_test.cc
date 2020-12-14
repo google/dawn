@@ -28,9 +28,9 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Block) {
-  ast::BlockStatement b(Source{});
-  b.append(create<ast::DiscardStatement>(Source{}));
-
+  ast::BlockStatement b(Source{}, ast::StatementList{
+                                      create<ast::DiscardStatement>(Source{}),
+                                  });
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(&b)) << gen.error();
@@ -41,9 +41,9 @@ TEST_F(MslGeneratorImplTest, Emit_Block) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Block_WithoutNewline) {
-  ast::BlockStatement b(Source{});
-  b.append(create<ast::DiscardStatement>(Source{}));
-
+  ast::BlockStatement b(Source{}, ast::StatementList{
+                                      create<ast::DiscardStatement>(Source{}),
+                                  });
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitBlock(&b)) << gen.error();

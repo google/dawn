@@ -22,8 +22,6 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::BlockStatement);
 namespace tint {
 namespace ast {
 
-BlockStatement::BlockStatement(const Source& source) : Base(source) {}
-
 BlockStatement::BlockStatement(const Source& source,
                                const StatementList& statements)
     : Base(source), statements_(std::move(statements)) {}
@@ -33,9 +31,8 @@ BlockStatement::BlockStatement(BlockStatement&&) = default;
 BlockStatement::~BlockStatement() = default;
 
 BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
-  auto* cloned = ctx->mod->create<BlockStatement>(ctx->Clone(source()));
-  cloned->statements_ = ctx->Clone(statements_);
-  return cloned;
+  return ctx->mod->create<BlockStatement>(ctx->Clone(source()),
+                                          ctx->Clone(statements_));
 }
 
 bool BlockStatement::IsValid() const {

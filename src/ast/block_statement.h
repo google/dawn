@@ -29,18 +29,11 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
  public:
   /// Constructor
   /// @param source the block statement source
-  explicit BlockStatement(const Source& source);
-  /// Constructor
-  /// @param source the block statement source
-  /// @param statements the block statements
+  /// @param statements the statements
   BlockStatement(const Source& source, const StatementList& statements);
   /// Move constructor
   BlockStatement(BlockStatement&&);
   ~BlockStatement() override;
-
-  /// Appends a statement to the block
-  /// @param stmt the statement to append
-  void append(Statement* stmt) { statements_.push_back(stmt); }
 
   /// Insert a statement to the block
   /// @param index the index to insert at
@@ -79,13 +72,9 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   const Statement* operator[](size_t idx) const { return statements_[idx]; }
 
   /// @returns the beginning iterator
-  std::vector<Statement*>::const_iterator begin() const {
-    return statements_.begin();
-  }
+  StatementList::const_iterator begin() const { return statements_.begin(); }
   /// @returns the ending iterator
-  std::vector<Statement*>::const_iterator end() const {
-    return statements_.end();
-  }
+  StatementList::const_iterator end() const { return statements_.end(); }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -106,7 +95,7 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
  private:
   BlockStatement(const BlockStatement&) = delete;
 
-  std::vector<Statement*> statements_;
+  StatementList statements_;
 };
 
 }  // namespace ast

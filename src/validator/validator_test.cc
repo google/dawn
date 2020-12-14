@@ -103,9 +103,11 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
   EXPECT_FALSE(td()->DetermineStatements(body));
   EXPECT_EQ(td()->error(),
@@ -199,10 +201,12 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
@@ -234,10 +238,12 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.3f));
 
-  ast::BlockStatement block(Source{});
-  block.append(create<ast::VariableDeclStatement>(Source{}, var));
-  block.append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  ast::BlockStatement block(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
   EXPECT_TRUE(td()->DetermineStatements(&block)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
@@ -339,9 +345,11 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
   auto* func = create<ast::Function>(Source{}, mod()->RegisterSymbol("my_func"),
                                      "my_func", params, &f32, body,
@@ -379,10 +387,13 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
 
   ast::VariableList params;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
-  body->append(create<ast::ReturnStatement>(Source{}));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                    create<ast::ReturnStatement>(Source{}),
+                });
+
   auto* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("my_func"), "my_func", params, &void_type,
       body,
@@ -415,19 +426,23 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                });
 
   auto* lhs = create<ast::IdentifierExpression>(
       Source{Source::Location{12, 34}}, mod()->RegisterSymbol("a"), "a");
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.14f));
 
-  auto* outer_body = create<ast::BlockStatement>(Source{});
-  outer_body->append(
-      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
-  outer_body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  auto* outer_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::IfStatement>(Source{}, cond, body,
+                                             ast::ElseStatementList{}),
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
@@ -461,14 +476,19 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
-  auto* outer_body = create<ast::BlockStatement>(Source{});
-  outer_body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  outer_body->append(
-      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
+  auto* outer_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                    create<ast::IfStatement>(Source{}, cond, body,
+                                             ast::ElseStatementList{}),
+                });
+
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
@@ -564,10 +584,12 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
@@ -609,9 +631,12 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
           create<ast::FloatLiteral>(Source{}, &f32, 2.0)),  // constructor
       ast::VariableDecorationList{});                       // decorations
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, var));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(
+                        Source{Source::Location{12, 34}}, var),
+                });
+
   auto* func = create<ast::Function>(Source{}, mod()->RegisterSymbol("my_func"),
                                      "my_func", params, &void_type, body,
                                      ast::FunctionDecorationList{});
@@ -655,10 +680,13 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
       ast::VariableDecorationList{});                       // decorations
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, var_a_float));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                    create<ast::VariableDeclStatement>(
+                        Source{Source::Location{12, 34}}, var_a_float),
+                });
+
   auto* func = create<ast::Function>(Source{}, mod()->RegisterSymbol("my_func"),
                                      "my_func", params, &void_type, body,
                                      ast::FunctionDecorationList{});
@@ -691,8 +719,10 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                });
 
   auto* var_a_float = create<ast::Variable>(
       Source{},                  // source
@@ -705,11 +735,13 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
           create<ast::FloatLiteral>(Source{}, &f32, 3.14)),  // constructor
       ast::VariableDecorationList{});                        // decorations
 
-  auto* outer_body = create<ast::BlockStatement>(Source{});
-  outer_body->append(
-      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
-  outer_body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, var_a_float));
+  auto* outer_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::IfStatement>(Source{}, cond, body,
+                                             ast::ElseStatementList{}),
+                    create<ast::VariableDeclStatement>(
+                        Source{Source::Location{12, 34}}, var_a_float),
+                });
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(outer_body)) << v()->error();
@@ -748,14 +780,18 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   ast::type::Bool bool_type;
   auto* cond = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, var));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(
+                        Source{Source::Location{12, 34}}, var),
+                });
 
-  auto* outer_body = create<ast::BlockStatement>(Source{});
-  outer_body->append(create<ast::VariableDeclStatement>(Source{}, var_a_float));
-  outer_body->append(
-      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
+  auto* outer_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var_a_float),
+                    create<ast::IfStatement>(Source{}, cond, body,
+                                             ast::ElseStatementList{}),
+                });
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(outer_body));
@@ -790,19 +826,24 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
       ast::VariableDecorationList{});                       // decorations
 
   ast::VariableList params0;
-  auto* body0 = create<ast::BlockStatement>(Source{});
-  body0->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, var0));
-  body0->append(create<ast::ReturnStatement>(Source{}));
+  auto* body0 = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(
+                        Source{Source::Location{12, 34}}, var0),
+                    create<ast::ReturnStatement>(Source{}),
+                });
+
   auto* func0 = create<ast::Function>(Source{}, mod()->RegisterSymbol("func0"),
                                       "func0", params0, &void_type, body0,
                                       ast::FunctionDecorationList{});
 
   ast::VariableList params1;
-  auto* body1 = create<ast::BlockStatement>(Source{});
-  body1->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{13, 34}}, var1));
-  body1->append(create<ast::ReturnStatement>(Source{}));
+  auto* body1 = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(
+                        Source{Source::Location{13, 34}}, var1),
+                    create<ast::ReturnStatement>(Source{}),
+                });
   auto* func1 = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("func1"), "func1", params1, &void_type,
       body1,
@@ -838,10 +879,12 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   auto* rhs = create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  body->append(create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(Source{}, var),
+                    create<ast::AssignmentStatement>(
+                        Source{Source::Location{12, 34}}, lhs, rhs),
+                });
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);

@@ -154,24 +154,25 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
         if (buffer_var == nullptr) {
           return nullptr;  // no transform need, just clone func
         }
-        auto* body = ctx.mod->create<ast::BlockStatement>(
-            ctx.Clone(func->body()->source()));
+        ast::StatementList statements;
         for (const auto& data : func->local_referenced_builtin_variables()) {
           if (data.second->value() == ast::Builtin::kVertexIdx) {
-            body->append(CreateFirstIndexOffset(
+            statements.emplace_back(CreateFirstIndexOffset(
                 vertex_index_name, kFirstVertexName, buffer_var, ctx.mod));
           } else if (data.second->value() == ast::Builtin::kInstanceIdx) {
-            body->append(CreateFirstIndexOffset(
+            statements.emplace_back(CreateFirstIndexOffset(
                 instance_index_name, kFirstInstanceName, buffer_var, ctx.mod));
           }
         }
         for (auto* s : *func->body()) {
-          body->append(ctx.Clone(s));
+          statements.emplace_back(ctx.Clone(s));
         }
         return ctx.mod->create<ast::Function>(
             ctx.Clone(func->source()), func->symbol(), func->name(),
             ctx.Clone(func->params()), ctx.Clone(func->return_type()),
-            ctx.Clone(body), ctx.Clone(func->decorations()));
+            ctx.mod->create<ast::BlockStatement>(
+                ctx.Clone(func->body()->source()), statements),
+            ctx.Clone(func->decorations()));
       });
 
   in->Clone(&ctx);

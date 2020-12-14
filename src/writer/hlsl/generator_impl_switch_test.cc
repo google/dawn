@@ -31,8 +31,10 @@ namespace {
 using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
-  auto* def_body = create<ast::BlockStatement>(Source{});
-  def_body->append(create<ast::BreakStatement>(Source{}));
+  auto* def_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::BreakStatement>(Source{}),
+                });
   auto* def =
       create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{}, def_body);
 
@@ -40,8 +42,10 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
   ast::CaseSelectorList case_val;
   case_val.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
 
-  auto* case_body = create<ast::BlockStatement>(Source{});
-  case_body->append(create<ast::BreakStatement>(Source{}));
+  auto* case_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::BreakStatement>(Source{}),
+                });
 
   auto* case_stmt = create<ast::CaseStatement>(Source{}, case_val, case_body);
 

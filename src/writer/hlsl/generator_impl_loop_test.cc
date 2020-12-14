@@ -34,9 +34,10 @@ namespace {
 using HlslGeneratorImplTest_Loop = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                });
   ast::LoopStatement l(Source{}, body, {});
   gen.increment_indent();
 
@@ -48,12 +49,14 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-
-  auto* continuing = create<ast::BlockStatement>(Source{});
-  continuing->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                });
+  auto* continuing = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::LoopStatement l(Source{}, body, continuing);
   gen.increment_indent();
 
@@ -75,24 +78,29 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   ast::type::F32 f32;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-
-  auto* continuing = create<ast::BlockStatement>(Source{});
-  continuing->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                });
+  auto* continuing = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(Source{}),
+                });
   auto* inner = create<ast::LoopStatement>(Source{}, body, continuing);
 
-  body = create<ast::BlockStatement>(Source{});
-  body->append(inner);
+  body = create<ast::BlockStatement>(Source{}, ast::StatementList{
+                                                   inner,
+                                               });
 
   auto* lhs = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("lhs"), "lhs");
   auto* rhs = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  continuing = create<ast::BlockStatement>(Source{});
-  continuing->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
+  continuing = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, lhs, rhs),
+                });
 
   ast::LoopStatement outer(Source{}, body, continuing);
   gen.increment_indent();
@@ -157,26 +165,30 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
           create<ast::FloatLiteral>(Source{}, &f32, 2.4)),  // constructor
       ast::VariableDecorationList{});                       // decorations
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(Source{}, var));
-  body->append(create<ast::VariableDeclStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::Variable>(Source{},                          // source
-                            "other",                           // name
-                            ast::StorageClass::kFunction,      // storage_class
-                            &f32,                              // type
-                            false,                             // is_const
-                            nullptr,                           // constructor
-                            ast::VariableDecorationList{})));  // decorations
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::VariableDeclStatement>(
+              Source{}, create<ast::Variable>(
+                            Source{},                      // source
+                            "other",                       // name
+                            ast::StorageClass::kFunction,  // storage_class
+                            &f32,                          // type
+                            false,                         // is_const
+                            nullptr,                       // constructor
+                            ast::VariableDecorationList{})),
+      });
 
   auto* lhs = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("lhs"), "lhs");
   auto* rhs = create<ast::IdentifierExpression>(
       Source{}, mod.RegisterSymbol("rhs"), "rhs");
 
-  auto* continuing = create<ast::BlockStatement>(Source{});
-  continuing->append(create<ast::AssignmentStatement>(Source{}, lhs, rhs));
-
+  auto* continuing = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(Source{}, lhs, rhs),
+                });
   ast::LoopStatement outer(Source{}, body, continuing);
   gen.increment_indent();
 

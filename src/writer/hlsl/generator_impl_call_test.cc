@@ -36,10 +36,10 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
       Source{}, mod.RegisterSymbol("my_func"), "my_func");
   ast::CallExpression call(Source{}, id, {});
 
-  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
-                                     "my_func", ast::VariableList{}, &void_type,
-                                     create<ast::BlockStatement>(Source{}),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
@@ -58,10 +58,10 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
       Source{}, mod.RegisterSymbol("param2"), "param2"));
   ast::CallExpression call(Source{}, id, params);
 
-  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
-                                     "my_func", ast::VariableList{}, &void_type,
-                                     create<ast::BlockStatement>(Source{}),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod.AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
@@ -81,10 +81,10 @@ TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   ast::CallStatement call(Source{},
                           create<ast::CallExpression>(Source{}, id, params));
 
-  auto* func = create<ast::Function>(Source{}, mod.RegisterSymbol("my_func"),
-                                     "my_func", ast::VariableList{}, &void_type,
-                                     create<ast::BlockStatement>(Source{}),
-                                     ast::FunctionDecorationList{});
+  auto* func = create<ast::Function>(
+      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
   mod.AddFunction(func);
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(out, &call)) << gen.error();

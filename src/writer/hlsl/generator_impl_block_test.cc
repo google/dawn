@@ -26,9 +26,9 @@ namespace {
 using HlslGeneratorImplTest_Block = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
-  ast::BlockStatement b(Source{});
-  b.append(create<ast::DiscardStatement>(Source{}));
-
+  ast::BlockStatement b(Source{}, ast::StatementList{
+                                      create<ast::DiscardStatement>(Source{}),
+                                  });
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, &b)) << gen.error();
@@ -39,9 +39,9 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
 }
 
 TEST_F(HlslGeneratorImplTest_Block, Emit_Block_WithoutNewline) {
-  ast::BlockStatement b(Source{});
-  b.append(create<ast::DiscardStatement>(Source{}));
-
+  ast::BlockStatement b(Source{}, ast::StatementList{
+                                      create<ast::DiscardStatement>(Source{}),
+                                  });
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitBlock(out, &b)) << gen.error();

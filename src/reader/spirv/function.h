@@ -834,12 +834,15 @@ class FunctionEmitter {
   /// @returns a pointer to the statement.
   ast::Statement* AddStatement(ast::Statement* statement);
 
+  /// AddStatementBuilder() constructs and adds the StatementBuilder of type
+  /// `T` to the top of the statement stack.
+  /// @param args the arguments forwarded to the T constructor
+  /// @return the built StatementBuilder
   template <typename T, typename... ARGS>
   T* AddStatementBuilder(ARGS&&... args) {
-    // The builder is temporary and is not owned by the module.
-    auto builder = new T(std::forward<ARGS>(args)...);
-    AddStatement(builder);
-    return builder;
+    assert(!statements_stack_.empty());
+    return statements_stack_.back().AddStatementBuilder<T>(
+        std::forward<ARGS>(args)...);
   }
 
   /// Returns the source record for the given instruction.
@@ -876,6 +879,20 @@ class FunctionEmitter {
     /// Add() must not be called after calling Finalize().
     void Add(ast::Statement* statement);
 
+    /// AddStatementBuilder() constructs and adds the StatementBuilder of type
+    /// `T` to the block.
+    /// Add() must not be called after calling Finalize().
+    /// @param args the arguments forwarded to the T constructor
+    /// @return the built StatementBuilder
+    template <typename T, typename... ARGS>
+    T* AddStatementBuilder(ARGS&&... args) {
+      auto builder = std::make_unique<T>(std::forward<ARGS>(args)...);
+      auto* ptr = builder.get();
+      Add(ptr);
+      builders_.emplace_back(std::move(builder));
+      return ptr;
+    }
+
     /// @param construct the construct which this construct constributes to
     void SetConstruct(const Construct* construct) { construct_ = construct; }
 
@@ -883,7 +900,7 @@ class FunctionEmitter {
     const Construct* Construct() const { return construct_; }
 
     /// @return the ID of the block at which the completion action should be
-    /// triggerd and this statement block discarded. This is often the `end_id`
+    /// triggered and this statement block discarded. This is often the `end_id`
     /// of `construct` itself.
     uint32_t EndId() const { return end_id_; }
 
@@ -901,7 +918,7 @@ class FunctionEmitter {
    private:
     /// The construct to which this construct constributes.
     const spirv::Construct* construct_;
-    /// The ID of the block at which the completion action should be triggerd
+    /// The ID of the block at which the completion action should be triggered
     /// and this statement block discarded. This is often the `end_id` of
     /// `construct` itself.
     uint32_t const end_id_;
@@ -914,6 +931,9 @@ class FunctionEmitter {
     ast::StatementList statements_;
     /// The list of switch cases being built, if this construct is a switch.
     ast::CaseStatementList* cases_ = nullptr;
+
+    /// Owned statement builders
+    std::vector<std::unique_ptr<StatementBuilder>> builders_;
     /// True if Finalize() has been called.
     bool finalized_ = false;
   };

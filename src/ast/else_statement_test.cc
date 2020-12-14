@@ -31,9 +31,10 @@ TEST_F(ElseStatementTest, Creation) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
       Source{}, create<BoolLiteral>(Source{}, &bool_type, true));
-  auto* body = create<BlockStatement>(Source{});
-  body->append(create<DiscardStatement>(Source{}));
-
+  auto* body =
+      create<BlockStatement>(Source{}, StatementList{
+                                           create<DiscardStatement>(Source{}),
+                                       });
   auto* discard = body->get(0);
 
   ElseStatement e(Source{}, cond, body);
@@ -44,14 +45,15 @@ TEST_F(ElseStatementTest, Creation) {
 
 TEST_F(ElseStatementTest, Creation_WithSource) {
   ElseStatement e(Source{Source::Location{20, 2}}, nullptr,
-                  create<BlockStatement>(Source{}));
+                  create<BlockStatement>(Source{}, StatementList{}));
   auto src = e.source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(ElseStatementTest, IsElse) {
-  ElseStatement e(Source{}, nullptr, create<BlockStatement>(Source{}));
+  ElseStatement e(Source{}, nullptr,
+                  create<BlockStatement>(Source{}, StatementList{}));
   EXPECT_TRUE(e.Is<ElseStatement>());
 }
 
@@ -59,49 +61,57 @@ TEST_F(ElseStatementTest, HasCondition) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
       Source{}, create<BoolLiteral>(Source{}, &bool_type, true));
-  ElseStatement e(Source{}, cond, create<BlockStatement>(Source{}));
+  ElseStatement e(Source{}, cond,
+                  create<BlockStatement>(Source{}, StatementList{}));
   EXPECT_TRUE(e.HasCondition());
 }
 
 TEST_F(ElseStatementTest, HasContition_NullCondition) {
-  ElseStatement e(Source{}, nullptr, create<BlockStatement>(Source{}));
+  ElseStatement e(Source{}, nullptr,
+                  create<BlockStatement>(Source{}, StatementList{}));
   EXPECT_FALSE(e.HasCondition());
 }
 
 TEST_F(ElseStatementTest, IsValid) {
-  ElseStatement e(Source{}, nullptr, create<BlockStatement>(Source{}));
+  ElseStatement e(Source{}, nullptr,
+                  create<BlockStatement>(Source{}, StatementList{}));
   EXPECT_TRUE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_WithBody) {
-  auto* body = create<BlockStatement>(Source{});
-  body->append(create<DiscardStatement>(Source{}));
-
+  auto* body =
+      create<BlockStatement>(Source{}, StatementList{
+                                           create<DiscardStatement>(Source{}),
+                                       });
   ElseStatement e(Source{}, nullptr, body);
   EXPECT_TRUE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
-  auto* body = create<BlockStatement>(Source{});
-  body->append(create<DiscardStatement>(Source{}));
-  body->append(nullptr);
-
+  auto* body =
+      create<BlockStatement>(Source{}, StatementList{
+                                           create<DiscardStatement>(Source{}),
+                                           nullptr,
+                                       });
   ElseStatement e(Source{}, nullptr, body);
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
   auto* cond = create<ScalarConstructorExpression>(Source{}, nullptr);
-  ElseStatement e(Source{}, cond, create<BlockStatement>(Source{}));
+  ElseStatement e(Source{}, cond,
+                  create<BlockStatement>(Source{}, StatementList{}));
   EXPECT_FALSE(e.IsValid());
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
-  auto* body = create<BlockStatement>(Source{});
-  body->append(create<IfStatement>(Source{}, nullptr,
-                                   create<BlockStatement>(Source{}),
-                                   ElseStatementList{}));
-
+  auto* body = create<BlockStatement>(
+      Source{},
+      StatementList{
+          create<IfStatement>(Source{}, nullptr,
+                              create<BlockStatement>(Source{}, StatementList{}),
+                              ElseStatementList{}),
+      });
   ElseStatement e(Source{}, nullptr, body);
   EXPECT_FALSE(e.IsValid());
 }
@@ -110,9 +120,10 @@ TEST_F(ElseStatementTest, ToStr) {
   type::Bool bool_type;
   auto* cond = create<ScalarConstructorExpression>(
       Source{}, create<BoolLiteral>(Source{}, &bool_type, true));
-  auto* body = create<BlockStatement>(Source{});
-  body->append(create<DiscardStatement>(Source{}));
-
+  auto* body =
+      create<BlockStatement>(Source{}, StatementList{
+                                           create<DiscardStatement>(Source{}),
+                                       });
   ElseStatement e(Source{}, cond, body);
   std::ostringstream out;
   e.to_str(out, 2);
@@ -128,9 +139,10 @@ TEST_F(ElseStatementTest, ToStr) {
 }
 
 TEST_F(ElseStatementTest, ToStr_NoCondition) {
-  auto* body = create<BlockStatement>(Source{});
-  body->append(create<DiscardStatement>(Source{}));
-
+  auto* body =
+      create<BlockStatement>(Source{}, StatementList{
+                                           create<DiscardStatement>(Source{}),
+                                       });
   ElseStatement e(Source{}, nullptr, body);
   std::ostringstream out;
   e.to_str(out, 2);

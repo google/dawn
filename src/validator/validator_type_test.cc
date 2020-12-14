@@ -203,10 +203,11 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
                             ast::VariableDecorationList{});  // decorations
   ast::VariableList params;
   ast::type::Void void_type;
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::VariableDeclStatement>(
-      Source{Source::Location{12, 34}}, var));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::VariableDeclStatement>(
+                        Source{Source::Location{12, 34}}, var),
+                });
   auto* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("func"), "func", params, &void_type, body,
       ast::FunctionDecorationList{

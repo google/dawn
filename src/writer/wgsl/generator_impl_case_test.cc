@@ -33,9 +33,10 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_Case) {
   ast::type::I32 i32;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::BreakStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::BreakStatement>(Source{}),
+                });
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
   ast::CaseStatement c(Source{}, lit, body);
@@ -52,9 +53,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
 TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   ast::type::I32 i32;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::BreakStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::BreakStatement>(Source{}),
+                });
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
   lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 6));
@@ -70,8 +72,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::BreakStatement>(Source{}));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::BreakStatement>(Source{}),
+                });
   ast::CaseStatement c(Source{}, ast::CaseSelectorList{}, body);
 
   gen.increment_indent();

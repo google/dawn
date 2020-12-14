@@ -43,7 +43,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -68,11 +68,12 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
 
   ast::type::Void void_type;
 
-  ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
-                     &void_type, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{
-                         create<ast::StageDecoration>(params.stage, Source{}),
-                     });
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(params.stage, Source{}),
+      });
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
@@ -99,7 +100,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex, Source{}),
       });
@@ -163,26 +164,29 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   ast::type::F32 f32;
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_out"),
-                                        "my_out"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_in"),
-                                        "my_in")));
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_wg"),
-                                        "my_wg"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_wg"),
-                                        "my_wg")));
-  // Add duplicate usages so we show they don't get output multiple times.
-  body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_out"),
-                                        "my_out"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("my_in"),
-                                        "my_in")));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("my_out"), "my_out"),
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("my_in"), "my_in")),
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("my_wg"), "my_wg"),
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("my_wg"), "my_wg")),
+                    // Add duplicate usages so we show they don't get output
+                    // multiple times.
+                    create<ast::AssignmentStatement>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("my_out"), "my_out"),
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("my_in"), "my_in")),
+                });
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type, body,
@@ -256,7 +260,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });
@@ -272,7 +276,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
       });
@@ -288,7 +292,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
           create<ast::WorkgroupDecoration>(2u, 4u, 6u, Source{}),
           create<ast::StageDecoration>(ast::PipelineStage::kCompute, Source{}),
@@ -305,14 +309,14 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
 
   ast::Function func1(
       Source{}, mod->RegisterSymbol("main1"), "main1", {}, &void_type,
-      create<ast::BlockStatement>(Source{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });
 
   ast::Function func2(
       Source{}, mod->RegisterSymbol("main2"), "main2", {}, &void_type,
-      create<ast::BlockStatement>(Source{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment, Source{}),
       });

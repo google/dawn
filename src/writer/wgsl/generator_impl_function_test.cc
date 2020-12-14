@@ -41,10 +41,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-  body->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::type::Void void_type;
   ast::Function func(Source{}, mod.RegisterSymbol("my_func"), "my_func", {},
                      &void_type, body, ast::FunctionDecorationList{});
@@ -60,10 +61,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-  body->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::type::F32 f32;
   ast::type::I32 i32;
   ast::VariableList params;
@@ -99,10 +101,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-  body->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::type::Void void_type;
   ast::Function func(Source{}, mod.RegisterSymbol("my_func"), "my_func", {},
                      &void_type, body,
@@ -122,10 +125,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-  body->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::type::Void void_type;
   ast::Function func(
       Source{}, mod.RegisterSymbol("my_func"), "my_func", {}, &void_type, body,
@@ -145,10 +149,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-  body->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::type::Void void_type;
   ast::Function func(
       Source{}, mod.RegisterSymbol("my_func"), "my_func", {}, &void_type, body,
@@ -237,10 +242,11 @@ TEST_F(WgslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(Source{});
-    body->append(create<ast::VariableDeclStatement>(Source{}, var));
-    body->append(create<ast::ReturnStatement>(Source{}));
-
+    auto* body = create<ast::BlockStatement>(
+        Source{}, ast::StatementList{
+                      create<ast::VariableDeclStatement>(Source{}, var),
+                      create<ast::ReturnStatement>(Source{}),
+                  });
     auto* func = create<ast::Function>(
         Source{}, mod.RegisterSymbol("a"), "a", params, &void_type, body,
         ast::FunctionDecorationList{
@@ -267,10 +273,11 @@ TEST_F(WgslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(Source{});
-    body->append(create<ast::VariableDeclStatement>(Source{}, var));
-    body->append(create<ast::ReturnStatement>(Source{}));
-
+    auto* body = create<ast::BlockStatement>(
+        Source{}, ast::StatementList{
+                      create<ast::VariableDeclStatement>(Source{}, var),
+                      create<ast::ReturnStatement>(Source{}),
+                  });
     auto* func = create<ast::Function>(
         Source{}, mod.RegisterSymbol("b"), "b", params, &void_type, body,
         ast::FunctionDecorationList{

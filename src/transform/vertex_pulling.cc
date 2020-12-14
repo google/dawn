@@ -105,7 +105,7 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
   state.FindOrInsertInstanceIndexIfUsed();
   state.ConvertVertexInputVariablesToPrivate();
   state.AddVertexStorageBuffers();
-  state.AddVertexPullingPreamble(func);
+  func->body()->insert(0, state.CreateVertexPullingPreamble());
 
   return out;
 }
@@ -286,13 +286,11 @@ void VertexPulling::State::AddVertexStorageBuffers() {
   mod->AddConstructedType(struct_type);
 }
 
-void VertexPulling::State::AddVertexPullingPreamble(
-    ast::Function* vertex_func) {
+ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() {
   // Assign by looking at the vertex descriptor to find attributes with matching
   // location.
 
-  // A block statement allowing us to use append instead of insert
-  auto* block = mod->create<ast::BlockStatement>(Source{});
+  ast::StatementList stmts;
 
   // Declare the |kPullingPosVarName| variable in the shader
   auto* pos_declaration = mod->create<ast::VariableDeclStatement>(
@@ -308,7 +306,7 @@ void VertexPulling::State::AddVertexPullingPreamble(
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression
   // objects.
-  block->append(pos_declaration);
+  stmts.emplace_back(pos_declaration);
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
     const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[i];
@@ -339,9 +337,9 @@ void VertexPulling::State::AddVertexPullingPreamble(
       // Update position of the read
       auto* set_pos_expr = mod->create<ast::AssignmentStatement>(
           Source{}, CreatePullingPositionIdent(), pos_value);
-      block->append(set_pos_expr);
+      stmts.emplace_back(set_pos_expr);
 
-      block->append(mod->create<ast::AssignmentStatement>(
+      stmts.emplace_back(mod->create<ast::AssignmentStatement>(
           Source{},
           mod->create<ast::IdentifierExpression>(
               Source{}, mod->RegisterSymbol(v->name()), v->name()),
@@ -349,7 +347,7 @@ void VertexPulling::State::AddVertexPullingPreamble(
     }
   }
 
-  vertex_func->body()->insert(0, block);
+  return mod->create<ast::BlockStatement>(Source{}, stmts);
 }
 
 ast::Expression* VertexPulling::State::GenUint(uint32_t value) {

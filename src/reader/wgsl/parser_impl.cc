@@ -1439,14 +1439,14 @@ Expect<ast::Expression*> ParserImpl::expect_paren_rhs_stmt() {
 //   : statement*
 Expect<ast::BlockStatement*> ParserImpl::expect_statements() {
   bool errored = false;
-  auto* ret = create<ast::BlockStatement>(Source{});
+  ast::StatementList stmts;
 
   while (synchronized_) {
     auto stmt = statement();
     if (stmt.errored) {
       errored = true;
     } else if (stmt.matched) {
-      ret->append(stmt.value);
+      stmts.emplace_back(stmt.value);
     } else {
       break;
     }
@@ -1455,7 +1455,7 @@ Expect<ast::BlockStatement*> ParserImpl::expect_statements() {
   if (errored)
     return Failure::kErrored;
 
-  return ret;
+  return create<ast::BlockStatement>(Source{}, stmts);
 }
 
 // statement
@@ -1828,14 +1828,14 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 //   | statement case_body
 //   | FALLTHROUGH SEMICOLON
 Maybe<ast::BlockStatement*> ParserImpl::case_body() {
-  auto* ret = create<ast::BlockStatement>(Source{});
+  ast::StatementList stmts;
   for (;;) {
     Source source;
     if (match(Token::Type::kFallthrough, &source)) {
       if (!expect("fallthrough statement", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      ret->append(create<ast::FallthroughStatement>(source));
+      stmts.emplace_back(create<ast::FallthroughStatement>(source));
       break;
     }
 
@@ -1845,10 +1845,10 @@ Maybe<ast::BlockStatement*> ParserImpl::case_body() {
     if (!stmt.matched)
       break;
 
-    ret->append(stmt.value);
+    stmts.emplace_back(stmt.value);
   }
 
-  return ret;
+  return create<ast::BlockStatement>(Source{}, stmts);
 }
 
 // loop_stmt
@@ -1972,8 +1972,10 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
         header->condition->source(), ast::UnaryOp::kNot, header->condition);
     // { break; }
     auto* break_stmt = create<ast::BreakStatement>(not_condition->source());
-    auto* break_body = create<ast::BlockStatement>(not_condition->source());
-    break_body->append(break_stmt);
+    auto* break_body =
+        create<ast::BlockStatement>(not_condition->source(), ast::StatementList{
+                                                                 break_stmt,
+                                                             });
     // if (!condition) { break; }
     auto* break_if_not_condition =
         create<ast::IfStatement>(not_condition->source(), not_condition,
@@ -1983,17 +1985,19 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
 
   ast::BlockStatement* continuing_body = nullptr;
   if (header->continuing != nullptr) {
-    continuing_body = create<ast::BlockStatement>(header->continuing->source());
-    continuing_body->append(header->continuing);
+    continuing_body = create<ast::BlockStatement>(header->continuing->source(),
+                                                  ast::StatementList{
+                                                      header->continuing,
+                                                  });
   }
 
   auto* loop = create<ast::LoopStatement>(source, body.value, continuing_body);
 
   if (header->initializer != nullptr) {
-    auto* result = create<ast::BlockStatement>(source);
-    result->append(header->initializer);
-    result->append(loop);
-    return result;
+    return create<ast::BlockStatement>(source, ast::StatementList{
+                                                   header->initializer,
+                                                   loop,
+                                               });
   }
 
   return loop;
@@ -2059,7 +2063,7 @@ Maybe<ast::ContinueStatement*> ParserImpl::continue_stmt() {
 //   : CONTINUING body_stmt
 Maybe<ast::BlockStatement*> ParserImpl::continuing_stmt() {
   if (!match(Token::Type::kContinuing))
-    return create<ast::BlockStatement>(Source{});
+    return create<ast::BlockStatement>(Source{}, ast::StatementList{});
 
   return expect_body_stmt();
 }

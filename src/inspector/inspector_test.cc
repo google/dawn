@@ -81,8 +81,10 @@ class InspectorHelper {
   ast::Function* MakeEmptyBodyFunction(
       std::string name,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>(Source{});
-    body->append(create<ast::ReturnStatement>(Source{}));
+    auto* body = create<ast::BlockStatement>(
+        Source{}, ast::StatementList{
+                      create<ast::ReturnStatement>(Source{}),
+                  });
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(name), name,
                                  ast::VariableList(), void_type(), body,
                                  decorations);
@@ -97,13 +99,15 @@ class InspectorHelper {
       std::string caller,
       std::string callee,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>(Source{});
     auto* ident_expr = create<ast::IdentifierExpression>(
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(Source{}, call_expr));
-    body->append(create<ast::ReturnStatement>(Source{}));
+    auto* body = create<ast::BlockStatement>(
+        Source{}, ast::StatementList{
+                      create<ast::CallStatement>(Source{}, call_expr),
+                      create<ast::ReturnStatement>(Source{}),
+                  });
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(caller),
                                  caller, ast::VariableList(), void_type(), body,
                                  decorations);
@@ -148,18 +152,19 @@ class InspectorHelper {
       std::string name,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>(Source{});
+    ast::StatementList stmts;
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      body->append(create<ast::AssignmentStatement>(
+      stmts.emplace_back(create<ast::AssignmentStatement>(
           Source{},
           create<ast::IdentifierExpression>(Source{},
                                             mod()->RegisterSymbol(out), out),
           create<ast::IdentifierExpression>(Source{}, mod()->RegisterSymbol(in),
                                             in)));
     }
-    body->append(create<ast::ReturnStatement>(Source{}));
+    stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
+    auto* body = create<ast::BlockStatement>(Source{}, stmts);
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(name), name,
                                  ast::VariableList(), void_type(), body,
                                  decorations);
@@ -178,11 +183,11 @@ class InspectorHelper {
       std::string callee,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
       ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>(Source{});
+    ast::StatementList stmts;
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      body->append(create<ast::AssignmentStatement>(
+      stmts.emplace_back(create<ast::AssignmentStatement>(
           Source{},
           create<ast::IdentifierExpression>(Source{},
                                             mod()->RegisterSymbol(out), out),
@@ -193,8 +198,9 @@ class InspectorHelper {
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(Source{}, call_expr));
-    body->append(create<ast::ReturnStatement>(Source{}));
+    stmts.emplace_back(create<ast::CallStatement>(Source{}, call_expr));
+    stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
+    auto* body = create<ast::BlockStatement>(Source{}, stmts);
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(caller),
                                  caller, ast::VariableList(), void_type(), body,
                                  decorations);
@@ -428,14 +434,13 @@ class InspectorHelper {
       std::string func_name,
       std::string struct_name,
       std::vector<std::tuple<size_t, ast::type::Type*>> members) {
-    auto* body = create<ast::BlockStatement>(Source{});
-
+    ast::StatementList stmts;
     for (auto member : members) {
       size_t member_idx;
       ast::type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
-      body->append(create<ast::VariableDeclStatement>(
+      stmts.emplace_back(create<ast::VariableDeclStatement>(
           Source{}, create<ast::Variable>(
                         Source{},                          // source
                         "local" + member_name,             // name
@@ -451,7 +456,7 @@ class InspectorHelper {
       ast::type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
-      body->append(create<ast::AssignmentStatement>(
+      stmts.emplace_back(create<ast::AssignmentStatement>(
           Source{},
           create<ast::IdentifierExpression>(
               Source{}, mod()->RegisterSymbol("local" + member_name),
@@ -464,7 +469,8 @@ class InspectorHelper {
                   Source{}, mod()->RegisterSymbol(member_name), member_name))));
     }
 
-    body->append(create<ast::ReturnStatement>(Source{}));
+    stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
+    auto* body = create<ast::BlockStatement>(Source{}, stmts);
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
                                  func_name, ast::VariableList(), void_type(),
                                  body, ast::FunctionDecorationList{});
@@ -584,8 +590,7 @@ class InspectorHelper {
       ast::FunctionDecorationList decorations = {}) {
     std::string result_name = "sampler_result";
 
-    auto* body = create<ast::BlockStatement>(Source{});
-
+    ast::StatementList stmts;
     auto* call_result =
         create<ast::Variable>(Source{},                        // source
                               "sampler_result",                // name
@@ -594,7 +599,8 @@ class InspectorHelper {
                               false,                           // is_const
                               nullptr,                         // constructor
                               ast::VariableDecorationList{});  // decorations
-    body->append(create<ast::VariableDeclStatement>(Source{}, call_result));
+    stmts.emplace_back(
+        create<ast::VariableDeclStatement>(Source{}, call_result));
 
     ast::ExpressionList call_params;
     call_params.push_back(create<ast::IdentifierExpression>(
@@ -609,14 +615,15 @@ class InspectorHelper {
             Source{}, mod()->RegisterSymbol("textureSample"), "textureSample"),
         call_params);
 
-    body->append(create<ast::AssignmentStatement>(
+    stmts.emplace_back(create<ast::AssignmentStatement>(
         Source{},
         create<ast::IdentifierExpression>(
             Source{}, mod()->RegisterSymbol("sampler_result"),
             "sampler_result"),
         call_expr));
-    body->append(create<ast::ReturnStatement>(Source{}));
+    stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
 
+    auto* body = create<ast::BlockStatement>(Source{}, stmts);
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
                                  func_name, ast::VariableList(), void_type(),
                                  body, decorations);
@@ -641,7 +648,7 @@ class InspectorHelper {
       ast::FunctionDecorationList decorations = {}) {
     std::string result_name = "sampler_result";
 
-    auto* body = create<ast::BlockStatement>(Source{});
+    ast::StatementList stmts;
 
     auto* call_result =
         create<ast::Variable>(Source{},                        // source
@@ -651,7 +658,8 @@ class InspectorHelper {
                               false,                           // is_const
                               nullptr,                         // constructor
                               ast::VariableDecorationList{});  // decorations
-    body->append(create<ast::VariableDeclStatement>(Source{}, call_result));
+    stmts.emplace_back(
+        create<ast::VariableDeclStatement>(Source{}, call_result));
 
     ast::ExpressionList call_params;
     call_params.push_back(create<ast::IdentifierExpression>(
@@ -668,14 +676,15 @@ class InspectorHelper {
             Source{}, mod()->RegisterSymbol("textureSample"), "textureSample"),
         call_params);
 
-    body->append(create<ast::AssignmentStatement>(
+    stmts.emplace_back(create<ast::AssignmentStatement>(
         Source{},
         create<ast::IdentifierExpression>(
             Source{}, mod()->RegisterSymbol("sampler_result"),
             "sampler_result"),
         call_expr));
-    body->append(create<ast::ReturnStatement>(Source{}));
+    stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
 
+    auto* body = create<ast::BlockStatement>(Source{}, stmts);
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
                                  func_name, ast::VariableList(), void_type(),
                                  body, decorations);
@@ -701,7 +710,7 @@ class InspectorHelper {
       ast::FunctionDecorationList decorations = {}) {
     std::string result_name = "sampler_result";
 
-    auto* body = create<ast::BlockStatement>(Source{});
+    ast::StatementList stmts;
 
     auto* call_result =
         create<ast::Variable>(Source{},                        // source
@@ -711,7 +720,8 @@ class InspectorHelper {
                               false,                           // is_const
                               nullptr,                         // constructor
                               ast::VariableDecorationList{});  // decorations
-    body->append(create<ast::VariableDeclStatement>(Source{}, call_result));
+    stmts.emplace_back(
+        create<ast::VariableDeclStatement>(Source{}, call_result));
 
     ast::ExpressionList call_params;
     call_params.push_back(create<ast::IdentifierExpression>(
@@ -729,14 +739,15 @@ class InspectorHelper {
             "textureSampleCompare"),
         call_params);
 
-    body->append(create<ast::AssignmentStatement>(
+    stmts.emplace_back(create<ast::AssignmentStatement>(
         Source{},
         create<ast::IdentifierExpression>(
             Source{}, mod()->RegisterSymbol("sampler_result"),
             "sampler_result"),
         call_expr));
-    body->append(create<ast::ReturnStatement>(Source{}));
+    stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
 
+    auto* body = create<ast::BlockStatement>(Source{}, stmts);
     return create<ast::Function>(Source{}, mod()->RegisterSymbol(func_name),
                                  func_name, ast::VariableList(), void_type(),
                                  body, decorations);
@@ -1557,20 +1568,21 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   AddReferenceFunc("ub_bar_func", "ub_bar");
   AddReferenceFunc("ub_baz_func", "ub_baz");
 
-  auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
+  auto FuncCall = [&](const std::string& callee) {
     auto* ident_expr = create<ast::IdentifierExpression>(
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(Source{}, call_expr));
+    return create<ast::CallStatement>(Source{}, call_expr);
   };
-  auto* body = create<ast::BlockStatement>(Source{});
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    FuncCall("ub_foo_func"),
+                    FuncCall("ub_bar_func"),
+                    FuncCall("ub_baz_func"),
+                    create<ast::ReturnStatement>(Source{}),
+                });
 
-  AddFuncCall(body, "ub_foo_func");
-  AddFuncCall(body, "ub_bar_func");
-  AddFuncCall(body, "ub_baz_func");
-
-  body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("ep_func"), "ep_func",
       ast::VariableList(), void_type(), body,
@@ -1705,20 +1717,21 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   AddReferenceFunc("sb_bar_func", "sb_bar");
   AddReferenceFunc("sb_baz_func", "sb_baz");
 
-  auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
+  auto FuncCall = [&](const std::string& callee) {
     auto* ident_expr = create<ast::IdentifierExpression>(
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(Source{}, call_expr));
+    return create<ast::CallStatement>(Source{}, call_expr);
   };
-  auto* body = create<ast::BlockStatement>(Source{});
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    FuncCall("sb_foo_func"),
+                    FuncCall("sb_bar_func"),
+                    FuncCall("sb_baz_func"),
+                    create<ast::ReturnStatement>(Source{}),
+                });
 
-  AddFuncCall(body, "sb_foo_func");
-  AddFuncCall(body, "sb_bar_func");
-  AddFuncCall(body, "sb_baz_func");
-
-  body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("ep_func"), "ep_func",
       ast::VariableList(), void_type(), body,
@@ -1880,20 +1893,21 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   AddReferenceFunc("sb_bar_func", "sb_bar");
   AddReferenceFunc("sb_baz_func", "sb_baz");
 
-  auto AddFuncCall = [&](ast::BlockStatement* body, const std::string& callee) {
+  auto FuncCall = [&](const std::string& callee) {
     auto* ident_expr = create<ast::IdentifierExpression>(
         Source{}, mod()->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    body->append(create<ast::CallStatement>(Source{}, call_expr));
+    return create<ast::CallStatement>(Source{}, call_expr);
   };
-  auto* body = create<ast::BlockStatement>(Source{});
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    FuncCall("sb_foo_func"),
+                    FuncCall("sb_bar_func"),
+                    FuncCall("sb_baz_func"),
+                    create<ast::ReturnStatement>(Source{}),
+                });
 
-  AddFuncCall(body, "sb_foo_func");
-  AddFuncCall(body, "sb_bar_func");
-  AddFuncCall(body, "sb_baz_func");
-
-  body->append(create<ast::ReturnStatement>(Source{}));
   ast::Function* func = create<ast::Function>(
       Source{}, mod()->RegisterSymbol("ep_func"), "ep_func",
       ast::VariableList(), void_type(), body,

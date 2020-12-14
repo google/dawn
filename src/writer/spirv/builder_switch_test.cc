@@ -93,21 +93,27 @@ TEST_F(BuilderTest, Switch_WithCase) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* case_1_body = create<ast::BlockStatement>(Source{});
-  case_1_body->append(create<ast::AssignmentStatement>(
+  auto* case_1_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+      });
 
-  auto* case_2_body = create<ast::BlockStatement>(Source{});
-  case_2_body->append(create<ast::AssignmentStatement>(
+  auto* case_2_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+      });
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
@@ -130,9 +136,10 @@ TEST_F(BuilderTest, Switch_WithCase) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &i32, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -195,13 +202,16 @@ TEST_F(BuilderTest, Switch_WithDefault) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* default_body = create<ast::BlockStatement>(Source{});
-  default_body->append(create<ast::AssignmentStatement>(
+  auto* default_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+      });
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{},
@@ -216,9 +226,10 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &i32, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -279,29 +290,38 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* case_1_body = create<ast::BlockStatement>(Source{});
-  case_1_body->append(create<ast::AssignmentStatement>(
+  auto* case_1_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+      });
 
-  auto* case_2_body = create<ast::BlockStatement>(Source{});
-  case_2_body->append(create<ast::AssignmentStatement>(
+  auto* case_2_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+      });
 
-  auto* default_body = create<ast::BlockStatement>(Source{});
-  default_body->append(create<ast::AssignmentStatement>(
+  auto* default_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
+      });
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
@@ -327,9 +347,10 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &i32, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -399,30 +420,38 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* case_1_body = create<ast::BlockStatement>(Source{});
-  case_1_body->append(create<ast::AssignmentStatement>(
+  auto* case_1_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
-  case_1_body->append(create<ast::FallthroughStatement>(Source{}));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+          create<ast::FallthroughStatement>(Source{})});
 
-  auto* case_2_body = create<ast::BlockStatement>(Source{});
-  case_2_body->append(create<ast::AssignmentStatement>(
+  auto* case_2_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+      });
 
-  auto* default_body = create<ast::BlockStatement>(Source{});
-  default_body->append(create<ast::AssignmentStatement>(
+  auto* default_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
+      });
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
@@ -447,9 +476,10 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &i32, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -515,14 +545,16 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* case_1_body = create<ast::BlockStatement>(Source{});
-  case_1_body->append(create<ast::AssignmentStatement>(
+  auto* case_1_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
-  case_1_body->append(create<ast::FallthroughStatement>(Source{}));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+          create<ast::FallthroughStatement>(Source{})});
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
@@ -540,9 +572,10 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &i32, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -581,22 +614,26 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* if_body = create<ast::BlockStatement>(Source{});
-  if_body->append(create<ast::BreakStatement>(Source{}));
+  auto* if_body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::BreakStatement>(Source{}),
+                });
 
-  auto* case_1_body = create<ast::BlockStatement>(Source{});
-  case_1_body->append(create<ast::IfStatement>(
+  auto* case_1_body = create<ast::BlockStatement>(
       Source{},
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true)),
-      if_body, ast::ElseStatementList{}));
-
-  case_1_body->append(create<ast::AssignmentStatement>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))));
+      ast::StatementList{
+          create<ast::IfStatement>(
+              Source{},
+              create<ast::ScalarConstructorExpression>(
+                  Source{},
+                  create<ast::BoolLiteral>(Source{}, &bool_type, true)),
+              if_body, ast::ElseStatementList{}),
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)))});
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
@@ -614,9 +651,10 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &i32, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();

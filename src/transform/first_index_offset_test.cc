@@ -58,10 +58,11 @@ struct ModuleBuilder : public ast::BuilderWithModule {
   }
 
   ast::Function* AddFunction(const std::string& name,
-                             ast::VariableList params = {}) {
+                             ast::StatementList stmts) {
     auto* func = create<ast::Function>(
-        Source{}, mod->RegisterSymbol(name), name, std::move(params), ty.u32,
-        create<ast::BlockStatement>(Source{}), ast::FunctionDecorationList());
+        Source{}, mod->RegisterSymbol(name), name, ast::VariableList{}, ty.u32,
+        create<ast::BlockStatement>(Source{}, stmts),
+        ast::FunctionDecorationList{});
     mod->AddFunction(func);
     return func;
   }
@@ -73,10 +74,14 @@ TEST_F(FirstIndexOffsetTest, Error_AlreadyTransformed) {
   struct Builder : public ModuleBuilder {
     void Build() override {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      AddFunction("test")->body()->append(create<ast::ReturnStatement>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")));
+      AddFunction(
+          "test",
+          {
+              create<ast::ReturnStatement>(
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")),
+          });
     }
   };
 
@@ -116,10 +121,14 @@ TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
   struct Builder : public ModuleBuilder {
     void Build() override {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      AddFunction("test")->body()->append(create<ast::ReturnStatement>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")));
+      AddFunction(
+          "test",
+          {
+              create<ast::ReturnStatement>(
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")),
+          });
     }
   };
 
@@ -194,10 +203,14 @@ TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
   struct Builder : public ModuleBuilder {
     void Build() override {
       AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
-      AddFunction("test")->body()->append(create<ast::ReturnStatement>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("inst_idx"), "inst_idx")));
+      AddFunction(
+          "test",
+          {
+              create<ast::ReturnStatement>(
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod->RegisterSymbol("inst_idx"), "inst_idx")),
+          });
     }
   };
 
@@ -272,8 +285,9 @@ TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
     void Build() override {
       AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      AddFunction("test")->body()->append(
-          create<ast::ReturnStatement>(Source{}, Expr(1u)));
+      AddFunction("test", {
+                              create<ast::ReturnStatement>(Source{}, Expr(1u)),
+                          });
     }
   };
 
@@ -348,18 +362,25 @@ TEST_F(FirstIndexOffsetTest, NestedCalls) {
   struct Builder : public ModuleBuilder {
     void Build() override {
       AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      ast::Function* func1 = AddFunction("func1");
-      func1->body()->append(create<ast::ReturnStatement>(
-          Source{},
-          create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")));
-      ast::Function* func2 = AddFunction("func2");
-      func2->body()->append(create<ast::ReturnStatement>(
-          Source{}, create<ast::CallExpression>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("func1"), "func1"),
-                        ast::ExpressionList{})));
+      AddFunction(
+          "func1",
+          {
+              create<ast::ReturnStatement>(
+                  Source{},
+                  create<ast::IdentifierExpression>(
+                      Source{}, mod->RegisterSymbol("vert_idx"), "vert_idx")),
+          });
+      AddFunction(
+          "func2",
+          {
+              create<ast::ReturnStatement>(
+                  Source{},
+                  create<ast::CallExpression>(
+                      Source{},
+                      create<ast::IdentifierExpression>(
+                          Source{}, mod->RegisterSymbol("func1"), "func1"),
+                      ast::ExpressionList{})),
+          });
     }
   };
 

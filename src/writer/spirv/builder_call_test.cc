@@ -61,20 +61,24 @@ TEST_F(BuilderTest, Expression_Call) {
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::BinaryExpression>(
-                    Source{}, ast::BinaryOp::kAdd,
-                    create<ast::IdentifierExpression>(
-                        Source{}, mod->RegisterSymbol("a"), "a"),
-                    create<ast::IdentifierExpression>(
-                        Source{}, mod->RegisterSymbol("b"), "b"))));
+  auto* body = create<ast::BlockStatement>(
+      Source{},
+      ast::StatementList{
+          create<ast::ReturnStatement>(
+              Source{}, create<ast::BinaryExpression>(
+                            Source{}, ast::BinaryOp::kAdd,
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("a"), "a"),
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("b"), "b"))),
+      });
   ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
                        func_params, &f32, body, ast::FunctionDecorationList{});
 
-  ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
-                     &void_type, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(
@@ -144,22 +148,25 @@ TEST_F(BuilderTest, Statement_Call) {
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::BinaryExpression>(
-                    Source{}, ast::BinaryOp::kAdd,
-                    create<ast::IdentifierExpression>(
-                        Source{}, mod->RegisterSymbol("a"), "a"),
-                    create<ast::IdentifierExpression>(
-                        Source{}, mod->RegisterSymbol("b"), "b"))));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{},
+      ast::StatementList{
+          create<ast::ReturnStatement>(
+              Source{}, create<ast::BinaryExpression>(
+                            Source{}, ast::BinaryOp::kAdd,
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("a"), "a"),
+                            create<ast::IdentifierExpression>(
+                                Source{}, mod->RegisterSymbol("b"), "b"))),
+      });
   ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
                        func_params, &void_type, body,
                        ast::FunctionDecorationList{});
 
-  ast::Function func(Source{}, mod->RegisterSymbol("main"), "main", {},
-                     &void_type, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ast::ExpressionList call_params;
   call_params.push_back(create<ast::ScalarConstructorExpression>(

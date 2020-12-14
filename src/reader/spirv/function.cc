@@ -608,7 +608,7 @@ class StructuredTraverser {
   std::unordered_set<uint32_t> visited_;
 };
 
-/// A StatementBuilder for ast::SwitchStatment
+/// A StatementBuilder for ast::SwitchStatement
 /// @see StatementBuilder
 struct SwitchStatementBuilder
     : public Castable<SwitchStatementBuilder, StatementBuilder> {
@@ -730,32 +730,17 @@ FunctionEmitter::StatementBlock::StatementBlock(
       completion_action_(completion_action),
       cases_(cases) {}
 
-FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&& other)
-    : construct_(other.construct_),
-      end_id_(other.end_id_),
-      completion_action_(std::move(other.completion_action_)),
-      statements_(std::move(other.statements_)),
-      cases_(std::move(other.cases_)) {
-  other.statements_.clear();
-}
+FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&& other) =
+    default;
 
-FunctionEmitter::StatementBlock::~StatementBlock() {
-  if (!finalized_) {
-    // Delete builders that have not been built with Finalize()
-    for (auto* statement : statements_) {
-      if (auto* builder = statement->As<StatementBuilder>()) {
-        delete builder;
-      }
-    }
-  }
-}
+FunctionEmitter::StatementBlock::~StatementBlock() = default;
 
 void FunctionEmitter::StatementBlock::Finalize(ast::Module* mod) {
   assert(!finalized_ /* Finalize() must only be called once */);
+
   for (size_t i = 0; i < statements_.size(); i++) {
     if (auto* builder = statements_[i]->As<StatementBuilder>()) {
       statements_[i] = builder->Build(mod);
-      delete builder;
     }
   }
 
@@ -820,12 +805,10 @@ const ast::StatementList FunctionEmitter::ast_body() {
 
 ast::Statement* FunctionEmitter::AddStatement(ast::Statement* statement) {
   assert(!statements_stack_.empty());
-  auto* result = statement;
-  if (result != nullptr) {
-    auto& block = statements_stack_.back();
-    block.Add(statement);
+  if (statement != nullptr) {
+    statements_stack_.back().Add(statement);
   }
-  return result;
+  return statement;
 }
 
 ast::Statement* FunctionEmitter::LastStatement() {

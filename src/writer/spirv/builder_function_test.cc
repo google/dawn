@@ -47,9 +47,10 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
   ast::type::Void void_type;
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &void_type, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &void_type,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
@@ -65,9 +66,10 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_Return) {
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
                      &void_type, body, ast::FunctionDecorationList{});
 
@@ -96,10 +98,12 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
                             ast::VariableDecorationList{});  // decorations
   td.RegisterVariableForTesting(var_a);
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::IdentifierExpression>(
-                    Source{}, mod->RegisterSymbol("a"), "a")));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(
+                        Source{}, create<ast::IdentifierExpression>(
+                                      Source{}, mod->RegisterSymbol("a"), "a")),
+                });
   ASSERT_TRUE(td.DetermineResultType(body)) << td.error();
 
   ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
@@ -126,9 +130,10 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_Discard) {
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::DiscardStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::DiscardStatement>(Source{}),
+                });
   ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
                      &void_type, body, ast::FunctionDecorationList{});
 
@@ -166,10 +171,12 @@ TEST_F(BuilderTest, Function_WithParams) {
                             ast::VariableDecorationList{}),  // decorations
   };
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(
-      Source{}, create<ast::IdentifierExpression>(
-                    Source{}, mod->RegisterSymbol("a"), "a")));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(
+                        Source{}, create<ast::IdentifierExpression>(
+                                      Source{}, mod->RegisterSymbol("a"), "a")),
+                });
   ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", params,
                      &f32, body, ast::FunctionDecorationList{});
 
@@ -196,9 +203,10 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_WithBody) {
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ReturnStatement>(Source{}));
-
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ReturnStatement>(Source{}),
+                });
   ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
                      &void_type, body, ast::FunctionDecorationList{});
 
@@ -215,9 +223,10 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, FunctionType) {
   ast::type::Void void_type;
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &void_type, create<ast::BlockStatement>(Source{}),
-                     ast::FunctionDecorationList{});
+  ast::Function func(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &void_type,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
@@ -227,12 +236,14 @@ TEST_F(BuilderTest, FunctionType) {
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
   ast::type::Void void_type;
-  ast::Function func1(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                      &void_type, create<ast::BlockStatement>(Source{}),
-                      ast::FunctionDecorationList{});
-  ast::Function func2(Source{}, mod->RegisterSymbol("b_func"), "b_func", {},
-                      &void_type, create<ast::BlockStatement>(Source{}),
-                      ast::FunctionDecorationList{});
+  ast::Function func1(
+      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &void_type,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
+  ast::Function func2(
+      Source{}, mod->RegisterSymbol("b_func"), "b_func", {}, &void_type,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(&func1));
   ASSERT_TRUE(b.GenerateFunction(&func2));
@@ -309,10 +320,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(Source{});
-    body->append(create<ast::VariableDeclStatement>(Source{}, var));
-    body->append(create<ast::ReturnStatement>(Source{}));
-
+    auto* body = create<ast::BlockStatement>(
+        Source{}, ast::StatementList{
+                      create<ast::VariableDeclStatement>(Source{}, var),
+                      create<ast::ReturnStatement>(Source{}),
+                  });
     auto* func = create<ast::Function>(
         Source{}, mod->RegisterSymbol("a"), "a", params, &void_type, body,
         ast::FunctionDecorationList{
@@ -340,10 +352,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(Source{});
-    body->append(create<ast::VariableDeclStatement>(Source{}, var));
-    body->append(create<ast::ReturnStatement>(Source{}));
-
+    auto* body = create<ast::BlockStatement>(
+        Source{}, ast::StatementList{
+                      create<ast::VariableDeclStatement>(Source{}, var),
+                      create<ast::ReturnStatement>(Source{}),
+                  });
     auto* func = create<ast::Function>(
         Source{}, mod->RegisterSymbol("b"), "b", params, &void_type, body,
         ast::FunctionDecorationList{

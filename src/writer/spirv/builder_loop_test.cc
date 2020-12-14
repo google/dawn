@@ -39,8 +39,9 @@ TEST_F(BuilderTest, Loop_Empty) {
   // loop {
   // }
 
-  ast::LoopStatement loop(Source{}, create<ast::BlockStatement>(Source{}),
-                          create<ast::BlockStatement>(Source{}));
+  ast::LoopStatement loop(
+      Source{}, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
 
   ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
   b.push_function(Function{});
@@ -74,16 +75,19 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
-
-  ast::LoopStatement loop(Source{}, body,
-                          create<ast::BlockStatement>(Source{}));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+      });
+  ast::LoopStatement loop(
+      Source{}, body,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
@@ -130,21 +134,26 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
                             nullptr,                         // constructor
                             ast::VariableDecorationList{});  // decorations
 
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::AssignmentStatement>(
+  auto* body = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))));
-
-  auto* continuing = create<ast::BlockStatement>(Source{});
-  continuing->append(create<ast::AssignmentStatement>(
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
+      });
+  auto* continuing = create<ast::BlockStatement>(
       Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("v"),
-                                        "v"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
+      ast::StatementList{
+          create<ast::AssignmentStatement>(
+              Source{},
+              create<ast::IdentifierExpression>(Source{},
+                                                mod->RegisterSymbol("v"), "v"),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
+      });
   ast::LoopStatement loop(Source{}, body, continuing);
 
   td.RegisterVariableForTesting(var);
@@ -180,11 +189,13 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   // loop {
   //   continue;
   // }
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::ContinueStatement>(Source{}));
-
-  ast::LoopStatement loop(Source{}, body,
-                          create<ast::BlockStatement>(Source{}));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::ContinueStatement>(Source{}),
+                });
+  ast::LoopStatement loop(
+      Source{}, body,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
 
   ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
 
@@ -208,11 +219,13 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   // loop {
   //   break;
   // }
-  auto* body = create<ast::BlockStatement>(Source{});
-  body->append(create<ast::BreakStatement>(Source{}));
-
-  ast::LoopStatement loop(Source{}, body,
-                          create<ast::BlockStatement>(Source{}));
+  auto* body = create<ast::BlockStatement>(
+      Source{}, ast::StatementList{
+                    create<ast::BreakStatement>(Source{}),
+                });
+  ast::LoopStatement loop(
+      Source{}, body,
+      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
 
   ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
 

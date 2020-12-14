@@ -197,8 +197,8 @@ class VertexPulling : public Transform {
     /// Adds storage buffer decorated variables for the vertex buffers
     void AddVertexStorageBuffers();
 
-    /// Adds assignment to the variables from the buffers
-    void AddVertexPullingPreamble(ast::Function* vertex_func);
+    /// Creates and returns the assignment to the variables from the buffers
+    ast::BlockStatement* CreateVertexPullingPreamble();
 
     /// Generates an expression holding a constant uint
     /// @param value uint value
