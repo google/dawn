@@ -4080,6 +4080,13 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       // or vice versa. Perform a bitcast.
       value = create<ast::BitcastExpression>(Source{}, result_type, call_expr);
     }
+    if (!expected_component_type->Is<ast::type::F32>() &&
+        IsSampledImageAccess(inst.opcode())) {
+      // WGSL permits sampled image access only on float textures.
+      // Reject this case in the SPIR-V reader, at least until SPIR-V validation
+      // catches up with this rule and can reject it earlier in the workflow.
+      return Fail() << "sampled image must have float component type";
+    }
 
     EmitConstDefOrWriteToHoistedVar(inst, {result_type, value});
   } else {

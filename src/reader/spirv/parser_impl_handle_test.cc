@@ -3549,7 +3549,9 @@ INSTANTIATE_TEST_SUITE_P(
 
         //
         // Sampling operations, using OpImageSampleImplicitLod as an example.
-        //
+        // WGSL sampling operations only work on textures with a float sampled
+        // component.  So we can only test the float -> float (non-conversion)
+        // case.
 
         // OpImageSampleImplicitLod requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Unknown",
@@ -3586,156 +3588,6 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_10}
               Identifier[not set]{vf12}
             )
-          }
-        }
-      }
-    })"},
-        // OpImageSampleImplicitLod requires no conversion, uint -> v4uint
-        {"%uint 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vf12",
-         R"(
-  Variable{
-    Decorations{
-      SetDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    uniform_constant
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      SetDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_2d__u32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__u32
-        {
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{vf12}
-            )
-          }
-        }
-      }
-    })"},
-        // OpImageSampleImplicitLod requires conversion, uint -> v4int
-        {"%uint 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vf12",
-         R"(
-  Variable{
-    Decorations{
-      SetDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    uniform_constant
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      SetDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_2d__u32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__i32
-        {
-          Bitcast[not set]<__vec_4__i32>{
-            Call[not set]{
-              Identifier[not set]{textureSample}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
-                Identifier[not set]{vf12}
-              )
-            }
-          }
-        }
-      }
-    })"},
-        // OpImageSampleImplicitLod requires no conversion, int -> v4int
-        {"%int 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4int %sampled_image %vf12",
-         R"(
-  Variable{
-    Decorations{
-      SetDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    uniform_constant
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      SetDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_2d__i32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{vf12}
-            )
-          }
-        }
-      }
-    })"},
-        // OpImageSampleImplicitLod requires conversion, int -> v4uint
-        {"%int 2D 0 0 0 1 Unknown",
-         "%99 = OpImageSampleImplicitLod %v4uint %sampled_image %vf12",
-         R"(Variable{
-    Decorations{
-      SetDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_2d__i32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__u32
-        {
-          Bitcast[not set]<__vec_4__u32>{
-            Call[not set]{
-              Identifier[not set]{textureSample}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
-                Identifier[not set]{vf12}
-              )
-            }
           }
         }
       }
@@ -3837,7 +3689,7 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
   )";
   auto p = parser(test::Assemble(assembly));
   if (!p->BuildAndParseInternalModule()) {
-    EXPECT_THAT(p->error(), Eq(GetParam().expected_error));
+    EXPECT_THAT(p->error(), Eq(GetParam().expected_error)) << assembly;
   } else {
     EXPECT_TRUE(p->error().empty()) << p->error();
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
@@ -4485,6 +4337,53 @@ INSTANTIATE_TEST_SUITE_P(
          "in: %71 = OpImageSampleImplicitLod %42 %70 %13",
          {}},
     }));
+
+INSTANTIATE_TEST_SUITE_P(
+    SampleNonFloatTexture_IsError,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // ImageSampleImplicitLod
+        {"%uint 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4uint %sampled_image %vf12",
+         "sampled image must have float component type",
+         {}},
+        {"%int 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4int %sampled_image %vf12",
+         "sampled image must have float component type",
+         {}},
+        // ImageSampleExplicitLod
+        {"%uint 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleExplicitLod %v4uint %sampled_image %vf12 "
+         "Lod %f1",
+         "sampled image must have float component type",
+         {}},
+        {"%int 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleExplicitLod %v4int %sampled_image %vf12 "
+         "Lod %f1",
+         "sampled image must have float component type",
+         {}},
+        // ImageSampleDrefImplicitLod
+        {"%uint 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleDrefImplicitLod %v4uint %sampled_image %vf12 "
+         "%f1",
+         "sampled image must have float component type",
+         {}},
+        {"%int 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleDrefImplicitLod %v4int %sampled_image %vf12 "
+         "%f1",
+         "sampled image must have float component type",
+         {}},
+        // ImageSampleDrefExplicitLod
+        {"%uint 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleDrefExplicitLod %v4uint %sampled_image %vf12 "
+         "%f1 Lod %f1",
+         "sampled image must have float component type",
+         {}},
+        {"%int 2D 0 0 0 1 Unknown",
+         "%result = OpImageSampleDrefExplicitLod %v4int %sampled_image %vf12 "
+         "%f1 Lod %f1",
+         "sampled image must have float component type",
+         {}}}));
 
 }  // namespace
 }  // namespace spirv
