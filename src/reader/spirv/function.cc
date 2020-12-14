@@ -4052,8 +4052,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsConstOffsetMask)) {
-    // TODO(dneto): convert to signed integer if needed
-    params.push_back(MakeOperand(inst, arg_index).expr);
+    params.push_back(ToSignedIfUnsigned(MakeOperand(inst, arg_index)).expr);
     image_operands_mask ^= SpvImageOperandsConstOffsetMask;
     arg_index++;
   }

@@ -1244,6 +1244,7 @@ TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
      OpName %coords123 "coords123"
      OpName %coords1234 "coords1234"
      OpName %offsets2d "offsets2d"
+     OpName %u_offsets2d "u_offsets2d"
      OpDecorate %10 DescriptorSet 0
      OpDecorate %10 Binding 0
      OpDecorate %20 DescriptorSet 2
@@ -1288,6 +1289,9 @@ TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
 
      %value_offset = OpCompositeConstruct %v2int %int_3 %int_4
      %offsets2d = OpCopyObject %v2int %value_offset
+
+     %u_value_offset = OpCompositeConstruct %v2uint %uint_3 %uint_4
+     %u_offsets2d = OpCopyObject %v2uint %u_value_offset
 
      %sam = OpLoad %sampler %10
      %im = OpLoad %im_ty %20
@@ -1575,9 +1579,7 @@ INSTANTIATE_TEST_SUITE_P(
             )
           })"},
 
-        // OpImageSampleImplicitLod with Bias and ConstOffset
-        // TODO(dneto): OpImageSampleImplicitLod with Bias and unsigned
-        // ConstOffset
+        // OpImageSampleImplicitLod with Bias and signed ConstOffset
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords12 Bias|ConstOffset "
@@ -1610,6 +1612,46 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{coords12}
               ScalarConstructor[not set]{7.000000}
               Identifier[not set]{offsets2d}
+            )
+          })"},
+
+        // OpImageSampleImplicitLod with Bias and unsigned ConstOffset
+        // Convert ConstOffset to signed
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleImplicitLod "
+                        "%v4float %sampled_image %coords12 Bias|ConstOffset "
+                        "%float_7 %u_offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleBias}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{coords12}
+              ScalarConstructor[not set]{7.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                Identifier[not set]{u_offsets2d}
+              }
             )
           })"},
         // OpImageSampleImplicitLod arrayed with Bias
@@ -1984,8 +2026,6 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleExplicitLod - using Lod and ConstOffset
-        // TODO(dneto) OpImageSampleExplicitLod - using Lod and unsigned
-        // ConstOffset
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords12 Lod|ConstOffset "
@@ -2018,6 +2058,46 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.000000}
               Identifier[not set]{offsets2d}
+            )
+          })"},
+
+        // OpImageSampleExplicitLod - using Lod and unsigned ConstOffset
+        // Convert the ConstOffset operand to signed
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords12 Lod|ConstOffset "
+                        "%float_null %u_offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{coords12}
+              ScalarConstructor[not set]{0.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                Identifier[not set]{u_offsets2d}
+              }
             )
           })"},
 
@@ -2150,8 +2230,6 @@ INSTANTIATE_TEST_SUITE_P(
           })"},
 
         // OpImageSampleExplicitLod - using Grad and ConstOffset
-        // TODO(dneto): OpImageSampleExplicitLod - using Grad and unsigned
-        // ConstOffset
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords12 Grad|ConstOffset "
@@ -2187,9 +2265,48 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{offsets2d}
             )
           })"},
+
+        // OpImageSampleExplicitLod - using Grad and unsigned ConstOffset
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords12 Grad|ConstOffset "
+                        "%float_7 %float_null %u_offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleGrad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{coords12}
+              ScalarConstructor[not set]{7.000000}
+              ScalarConstructor[not set]{0.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                Identifier[not set]{u_offsets2d}
+              }
+            )
+          })"},
+
         // OpImageSampleExplicitLod arrayed - using Grad and ConstOffset
-        // TODO(dneto): OpImageSampleExplicitLod - using Grad and unsigned
-        // ConstOffset
         ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords123 Grad|ConstOffset "
@@ -2233,6 +2350,57 @@ INSTANTIATE_TEST_SUITE_P(
               ScalarConstructor[not set]{7.000000}
               ScalarConstructor[not set]{0.000000}
               Identifier[not set]{offsets2d}
+            )
+          })"},
+
+        // OpImageSampleExplicitLod arrayed - using Grad and unsigned
+        // ConstOffset
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords123 Grad|ConstOffset "
+                        "%float_7 %float_null %u_offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      SetDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    uniform_constant
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d_array__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleGrad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              MemberAccessor[not set]{
+                Identifier[not set]{coords123}
+                Identifier[not set]{xy}
+              }
+              TypeConstructor[not set]{
+                __i32
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              ScalarConstructor[not set]{7.000000}
+              ScalarConstructor[not set]{0.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                Identifier[not set]{u_offsets2d}
+              }
             )
           })"}));
 
