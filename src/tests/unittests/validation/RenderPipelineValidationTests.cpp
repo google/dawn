@@ -480,9 +480,6 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 // Test that declaring a storage buffer in the vertex shader without setting pipeline layout won't
 // cause crash.
 TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
-    // TODO(rharrison): Re-enable once tint:383 is resolved.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_inspector"));
-
     wgpu::ShaderModule vsModuleWithStorageBuffer = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Dst {
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
