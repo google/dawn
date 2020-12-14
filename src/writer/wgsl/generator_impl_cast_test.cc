@@ -29,15 +29,9 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
-  ast::type::F32 f32;
+  auto* cast = Construct<f32>("id");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("id"), "id"));
-
-  ast::TypeConstructorExpression cast(Source{}, &f32, params);
-
-  ASSERT_TRUE(gen.EmitExpression(&cast)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
   EXPECT_EQ(gen.result(), "f32(id)");
 }
 

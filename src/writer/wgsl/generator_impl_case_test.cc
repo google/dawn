@@ -31,19 +31,16 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Case) {
-  ast::type::I32 i32;
-
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
-  ast::CaseStatement c(Source{}, lit, body);
+  lit.push_back(create<ast::SintLiteral>(ty.i32, 5));
+  auto* c = create<ast::CaseStatement>(lit, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -51,20 +48,17 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
-  ast::type::I32 i32;
-
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 6));
-  ast::CaseStatement c(Source{}, lit, body);
+  lit.push_back(create<ast::SintLiteral>(ty.i32, 5));
+  lit.push_back(create<ast::SintLiteral>(ty.i32, 6));
+  auto* c = create<ast::CaseStatement>(lit, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5, 6: {
     break;
   }
@@ -72,15 +66,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
-  ast::CaseStatement c(Source{}, ast::CaseSelectorList{}, body);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
+  auto* c = create<ast::CaseStatement>(ast::CaseSelectorList{}, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }

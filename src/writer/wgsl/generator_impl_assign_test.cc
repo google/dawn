@@ -29,15 +29,13 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Assign) {
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("rhs"), "rhs");
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&assign)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
   EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
 }
 

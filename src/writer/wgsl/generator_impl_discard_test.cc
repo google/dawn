@@ -25,11 +25,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Discard) {
-  ast::DiscardStatement k(Source{});
+  auto* k = create<ast::DiscardStatement>();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&k)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(k)) << gen.error();
   EXPECT_EQ(gen.result(), "  discard;\n");
 }
 

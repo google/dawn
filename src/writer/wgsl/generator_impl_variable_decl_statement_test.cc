@@ -31,21 +31,13 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32);
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  var a : f32;\n");
 }
 
@@ -53,40 +45,25 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   // Variable declarations with Function storage class don't mention their
   // storage class.  Rely on defaulting.
   // https://github.com/gpuweb/gpuweb/issues/654
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* var = Var("a", ast::StorageClass::kFunction, ty.f32);
+
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  var a : f32;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  var<private> a : f32;\n");
 }
 

@@ -28,11 +28,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Break) {
-  ast::BreakStatement b(Source{});
+  auto* b = create<ast::BreakStatement>();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&b)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
   EXPECT_EQ(gen.result(), "  break;\n");
 }
 

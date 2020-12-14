@@ -25,11 +25,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
-  ast::FallthroughStatement f(Source{});
+  auto* f = create<ast::FallthroughStatement>();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&f)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), "  fallthrough;\n");
 }
 

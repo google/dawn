@@ -31,8 +31,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
-  ast::type::F32 f32;
-  ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &f32);
+  ast::type::Alias alias(mod->RegisterSymbol("a"), "a", ty.f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type a = f32;
@@ -40,22 +39,18 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(
-      Source{}, "a", &f32, ast::StructMemberDecorationList{}));
+      "a", ty.f32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.i32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("A"), "A", str);
-  ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
+  ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
+  ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
@@ -69,22 +64,18 @@ type B = A;
 }
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(
-      Source{}, "a", &f32, ast::StructMemberDecorationList{}));
+      "a", ty.f32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.i32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("A"), "A", str);
-  ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
+  ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
+  ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type B = A;

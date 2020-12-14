@@ -28,12 +28,12 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Block) {
-  ast::BlockStatement b(Source{}, ast::StatementList{
-                                      create<ast::DiscardStatement>(Source{}),
-                                  });
+  auto* b = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::DiscardStatement>(),
+  });
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&b)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
     discard;
   }
@@ -41,12 +41,12 @@ TEST_F(WgslGeneratorImplTest, Emit_Block) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Block_WithoutNewline) {
-  ast::BlockStatement b(Source{}, ast::StatementList{
-                                      create<ast::DiscardStatement>(Source{}),
-                                  });
+  auto* b = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::DiscardStatement>(),
+  });
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitBlock(&b)) << gen.error();
+  ASSERT_TRUE(gen.EmitBlock(b)) << gen.error();
   EXPECT_EQ(gen.result(), R"({
     discard;
   })");

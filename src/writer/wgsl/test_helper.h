@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/ast/module.h"
+#include "src/ast/builder.h"
 #include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -29,23 +29,12 @@ namespace wgsl {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public BASE {
+class TestHelperBase : public BASE, public ast::BuilderWithModule {
  public:
-  TestHelperBase() : td(&mod), gen() {}
+  TestHelperBase() : td(mod), gen() {}
 
   ~TestHelperBase() = default;
 
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
-  /// @param args the arguments to pass to the type constructor
-  /// @returns the node pointer
-  template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
-    return mod.create<T>(std::forward<ARGS>(args)...);
-  }
-
-  /// The module
-  ast::Module mod;
   /// The type determiner
   TypeDeterminer td;
   /// The generator

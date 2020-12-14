@@ -144,7 +144,7 @@ class TypesBuilder {
   }
 
   /// @param subtype the array element type
-  /// @param n the array size. 0 represents unbounded
+  /// @param n the array size. 0 represents a runtime-array.
   /// @return the tint AST type for a array of size `n` of type `T`
   type::Array* array(type::Type* subtype, uint32_t n) const {
     return mod_->create<type::Array>(subtype, n, ArrayDecorationList{});
@@ -422,12 +422,25 @@ class Builder {
   }
 
   /// @param args the arguments for the array constructor
-  /// @return an `TypeConstructorExpression` of a 4x4 matrix of type
+  /// @return an `TypeConstructorExpression` of an array with element type
   /// `T`, constructed with the values `args`.
   template <typename T, int N = 0, typename... ARGS>
   TypeConstructorExpression* array(ARGS&&... args) {
     return create<TypeConstructorExpression>(
         Source{}, ty.array<T, N>(), ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param subtype the array element type
+  /// @param n the array size. 0 represents a runtime-array.
+  /// @param args the arguments for the array constructor
+  /// @return an `TypeConstructorExpression` of an array with element type
+  /// `subtype`, constructed with the values `args`.
+  template <typename... ARGS>
+  TypeConstructorExpression* array(type::Type* subtype,
+                                   uint32_t n,
+                                   ARGS&&... args) {
+    return create<TypeConstructorExpression>(
+        Source{}, ty.array(subtype, n), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param name the variable name

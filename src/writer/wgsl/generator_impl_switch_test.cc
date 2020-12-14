@@ -32,35 +32,30 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Switch) {
-  auto* def_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
-  auto* def =
-      create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{}, def_body);
+  auto* def_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
+  auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
-  ast::type::I32 i32;
   ast::CaseSelectorList case_val;
-  case_val.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
+  case_val.push_back(create<ast::SintLiteral>(ty.i32, 5));
 
-  auto* case_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* case_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
 
-  auto* case_stmt = create<ast::CaseStatement>(Source{}, case_val, case_body);
+  auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
 
   ast::CaseStatementList body;
   body.push_back(case_stmt);
   body.push_back(def);
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
-  ast::SwitchStatement s(Source{}, cond, body);
+  auto* cond = Expr("cond");
+  auto* s = create<ast::SwitchStatement>(cond, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&s)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;

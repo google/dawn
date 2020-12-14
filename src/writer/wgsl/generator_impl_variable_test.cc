@@ -34,52 +34,43 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
-                  ast::VariableDecorationList{});
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32);
 
-  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var a : f32;
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kInput, &f32, false,
-                  nullptr, ast::VariableDecorationList{});
+  auto* v = Var("a", ast::StorageClass::kInput, ty.f32);
 
-  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var<in> a : f32;
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-  ast::type::F32 f32;
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, nullptr,
+                ast::VariableDecorationList{
+                    create<ast::LocationDecoration>(2),
+                });
 
-  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
-                  ast::VariableDecorationList{
-                      create<ast::LocationDecoration>(Source{}, 2),
-                  });
-
-  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[location(2)]] var a : f32;
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
-  ast::type::F32 f32;
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, nullptr,
+                ast::VariableDecorationList{
+                    create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
+                    create<ast::BindingDecoration>(0),
+                    create<ast::SetDecoration>(1),
+                    create<ast::LocationDecoration>(2),
+                    create<ast::ConstantIdDecoration>(42),
+                });
 
-  ast::Variable v(
-      Source{}, "a", ast::StorageClass::kNone, &f32, false, nullptr,
-      ast::VariableDecorationList{
-          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
-          create<ast::BindingDecoration>(Source{}, 0),
-          create<ast::SetDecoration>(Source{}, 1),
-          create<ast::LocationDecoration>(Source{}, 2),
-          create<ast::ConstantIdDecoration>(Source{}, 42),
-      });
-
-  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(
       gen.result(),
       R"([[builtin(position), binding(0), set(1), location(2), constant_id(42)]] var a : f32;
@@ -88,26 +79,24 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("initializer"), "initializer");
+      mod->RegisterSymbol("initializer"), "initializer");
 
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, false, ident,
-                  ast::VariableDecorationList{});
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, ident,
+                ast::VariableDecorationList{});
 
-  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var a : f32 = initializer;
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("initializer"), "initializer");
+      mod->RegisterSymbol("initializer"), "initializer");
 
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "a", ast::StorageClass::kNone, &f32, true, ident,
+  auto* v = Const("a", ast::StorageClass::kNone, ty.f32, ident,
                   ast::VariableDecorationList{});
 
-  ASSERT_TRUE(gen.EmitVariable(&v)) << gen.error();
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(const a : f32 = initializer;
 )");
 }

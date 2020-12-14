@@ -28,15 +28,14 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::DiscardStatement>(Source{}),
-                });
-  ast::LoopStatement l(Source{}, body, {});
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::DiscardStatement>(),
+  });
+  auto* l = create<ast::LoopStatement>(body, nullptr);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&l)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  loop {
     discard;
   }
@@ -44,19 +43,17 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::DiscardStatement>(Source{}),
-                });
-  auto* continuing = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::DiscardStatement>(Source{}),
-                });
-  ast::LoopStatement l(Source{}, body, continuing);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::DiscardStatement>(),
+  });
+  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::DiscardStatement>(),
+  });
+  auto* l = create<ast::LoopStatement>(body, continuing);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&l)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  loop {
     discard;
 

@@ -31,27 +31,23 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_ArrayAccessor) {
-  ast::type::I32 i32;
-  auto* lit = create<ast::SintLiteral>(Source{}, &i32, 5);
-  auto* idx = create<ast::ScalarConstructorExpression>(Source{}, lit);
-  auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* lit = create<ast::SintLiteral>(ty.i32, 5);
+  auto* idx = create<ast::ScalarConstructorExpression>(lit);
+  auto* ary = Expr("ary");
 
-  ast::ArrayAccessorExpression expr(Source{}, ary, idx);
+  auto* expr = create<ast::ArrayAccessorExpression>(ary, idx);
 
-  ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "ary[5]");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitArrayAccessor) {
-  auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("idx"), "idx");
+  auto* ary = Expr("ary");
+  auto* idx = Expr("idx");
 
-  ast::ArrayAccessorExpression expr(Source{}, ary, idx);
+  auto* expr = create<ast::ArrayAccessorExpression>(ary, idx);
 
-  ASSERT_TRUE(gen.EmitArrayAccessor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitArrayAccessor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "ary[idx]");
 }
 

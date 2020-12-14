@@ -29,12 +29,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
-  ast::type::F32 f32;
-  auto* id = create<ast::IdentifierExpression>(Source{},
-                                               mod.RegisterSymbol("id"), "id");
-  ast::BitcastExpression bitcast(Source{}, &f32, id);
+  auto* id = Expr("id");
+  auto* bitcast = create<ast::BitcastExpression>(ty.f32, id);
 
-  ASSERT_TRUE(gen.EmitExpression(&bitcast)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(bitcast)) << gen.error();
   EXPECT_EQ(gen.result(), "bitcast<f32>(id)");
 }
 
