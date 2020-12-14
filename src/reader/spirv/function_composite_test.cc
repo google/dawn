@@ -479,7 +479,8 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  auto got = fe.ast_body();
+  EXPECT_THAT(ToString(p->get_module(), got), HasSubstr(R"(
   VariableConst{
     x_2
     none
@@ -491,8 +492,8 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+      << ToString(p->get_module(), got);
+  EXPECT_THAT(ToString(p->get_module(), got), HasSubstr(R"(
   VariableConst{
     x_4
     none
@@ -504,7 +505,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_module(), got);
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {

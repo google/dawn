@@ -42,6 +42,9 @@ class Statement : public Castable<Statement, Node> {
   Statement(const Statement&) = delete;
 };
 
+/// A list of statements
+using StatementList = std::vector<Statement*>;
+
 }  // namespace ast
 }  // namespace tint
 

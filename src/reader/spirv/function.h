@@ -289,6 +289,29 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
   return o;
 }
 
+/// A placeholder Statement that exists for the duration of building a
+/// StatementBlock. Once the StatementBlock is built, Build() will be called to
+/// construct the final AST node, which will be used in the place of this
+/// StatementBuilder.
+/// StatementBuilders are used to simplify construction of AST nodes that will
+/// become immutable. The builders may hold mutable state while the
+/// StatementBlock is being constructed, which becomes an immutable node on
+/// StatementBlock::Finalize().
+class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
+ public:
+  /// Constructor
+  StatementBuilder() : Base(Source{}) {}
+
+  /// @param mod the ast Module to build into
+  /// @returns the build AST node
+  virtual ast::Statement* Build(ast::Module* mod) const = 0;
+
+ private:
+  bool IsValid() const override;
+  Node* Clone(ast::CloneContext*) const override;
+  void to_str(std::ostream& out, size_t indent) const override;
+};
+
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
 class FunctionEmitter {
  public:
@@ -317,10 +340,10 @@ class FunctionEmitter {
   /// @returns true if emission has failed.
   bool failed() const { return !success(); }
 
-  /// Returns the body of the function.  It is the bottom of the statement
-  /// stack.
+  /// Finalizes any StatementBuilders returns the body of the function.
+  /// Must only be called once, and to be used only for testing.
   /// @returns the body of the function.
-  const ast::BlockStatement* ast_body();
+  const ast::StatementList ast_body();
 
   /// Records failure.
   /// @returns a FailStream on which to emit diagnostics.
@@ -811,6 +834,14 @@ class FunctionEmitter {
   /// @returns a pointer to the statement.
   ast::Statement* AddStatement(ast::Statement* statement);
 
+  template <typename T, typename... ARGS>
+  T* AddStatementBuilder(ARGS&&... args) {
+    // The builder is temporary and is not owned by the module.
+    auto builder = new T(std::forward<ARGS>(args)...);
+    AddStatement(builder);
+    return builder;
+  }
+
   /// Returns the source record for the given instruction.
   /// @param inst the SPIR-V instruction
   /// @return the Source record, or a default one
@@ -819,43 +850,79 @@ class FunctionEmitter {
   /// @returns the last statetment in the top of the statement stack.
   ast::Statement* LastStatement();
 
-  using CompletionAction = std::function<void()>;
+  using CompletionAction = std::function<void(const ast::StatementList&)>;
 
   // A StatementBlock represents a braced-list of statements while it is being
   // constructed.
-  struct StatementBlock {
+  class StatementBlock {
+   public:
     StatementBlock(const Construct* construct,
                    uint32_t end_id,
                    CompletionAction completion_action,
-                   ast::BlockStatement* statements,
                    ast::CaseStatementList* cases);
     StatementBlock(StatementBlock&&);
     ~StatementBlock();
 
-    // The construct to which this construct constributes.
-    const Construct* construct_;
-    // The ID of the block at which the completion action should be triggerd
-    // and this statement block discarded. This is often the |end_id| of
-    // |construct| itself.
-    uint32_t end_id_;
-    // The completion action finishes processing this statement block.
-    CompletionAction completion_action_;
+    StatementBlock(const StatementBlock&) = delete;
+    StatementBlock& operator=(const StatementBlock&) = delete;
 
-    // Only one of |statements| or |cases| is active.
+    /// Replaces any StatementBuilders with the built result, and calls the
+    /// completion callback (if set). Must only be called once, after all
+    /// statements have been added with Add().
+    /// @param mod the module
+    void Finalize(ast::Module* mod);
 
-    // The list of statements being built, if this construct is not a switch.
-    ast::BlockStatement* statements_ = nullptr;
-    // The list of switch cases being built, if this construct is a switch.
+    /// Add() adds `statement` to the block.
+    /// Add() must not be called after calling Finalize().
+    void Add(ast::Statement* statement);
+
+    /// @param construct the construct which this construct constributes to
+    void SetConstruct(const Construct* construct) { construct_ = construct; }
+
+    /// @return the construct to which this construct constributes
+    const Construct* Construct() const { return construct_; }
+
+    /// @return the ID of the block at which the completion action should be
+    /// triggerd and this statement block discarded. This is often the `end_id`
+    /// of `construct` itself.
+    uint32_t EndId() const { return end_id_; }
+
+    /// @return the completion action finishes processing this statement block
+    CompletionAction CompletionAction() const { return completion_action_; }
+
+    /// @return the list of statements being built, if this construct is not a
+    /// switch.
+    const ast::StatementList& Statements() const { return statements_; }
+
+    /// @return the list of switch cases being built, if this construct is a
+    /// switch
+    ast::CaseStatementList* Cases() const { return cases_; }
+
+   private:
+    /// The construct to which this construct constributes.
+    const spirv::Construct* construct_;
+    /// The ID of the block at which the completion action should be triggerd
+    /// and this statement block discarded. This is often the `end_id` of
+    /// `construct` itself.
+    uint32_t const end_id_;
+    /// The completion action finishes processing this statement block.
+    FunctionEmitter::CompletionAction const completion_action_;
+
+    // Only one of `statements` or `cases` is active.
+
+    /// The list of statements being built, if this construct is not a switch.
+    ast::StatementList statements_;
+    /// The list of switch cases being built, if this construct is a switch.
     ast::CaseStatementList* cases_ = nullptr;
+    /// True if Finalize() has been called.
+    bool finalized_ = false;
   };
 
   /// Pushes an empty statement block onto the statements stack.
-  /// @param block the block to push into
   /// @param cases the case list to push into
   /// @param action the completion action for this block
   void PushNewStatementBlock(const Construct* construct,
                              uint32_t end_id,
-                             ast::BlockStatement* block,
                              ast::CaseStatementList* cases,
                              CompletionAction action);
 
@@ -887,6 +954,8 @@ class FunctionEmitter {
     return ast_module_.create<T>(std::forward<ARGS>(args)...);
   }
 
+  using StatementsStack = std::vector<StatementBlock>;
+
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
   spvtools::opt::IRContext& ir_context_;
@@ -901,9 +970,9 @@ class FunctionEmitter {
   // A stack of statement lists. Each list is contained in a construct in
   // the next deeper element of stack. The 0th entry represents the statements
   // for the entire function.  This stack is never empty.
-  // The |construct| member for the 0th element is only valid during the
+  // The `construct` member for the 0th element is only valid during the
   // lifetime of the EmitFunctionBodyStatements method.
-  std::vector<StatementBlock> statements_stack_;
+  StatementsStack statements_stack_;
 
   // The set of IDs that have already had an identifier name generated for it.
   std::unordered_set<uint32_t> identifier_values_;

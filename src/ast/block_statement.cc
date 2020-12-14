@@ -24,6 +24,10 @@ namespace ast {
 
 BlockStatement::BlockStatement(const Source& source) : Base(source) {}
 
+BlockStatement::BlockStatement(const Source& source,
+                               const StatementList& statements)
+    : Base(source), statements_(std::move(statements)) {}
+
 BlockStatement::BlockStatement(BlockStatement&&) = default;
 
 BlockStatement::~BlockStatement() = default;

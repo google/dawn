@@ -608,6 +608,70 @@ class StructuredTraverser {
   std::unordered_set<uint32_t> visited_;
 };
 
+/// A StatementBuilder for ast::SwitchStatment
+/// @see StatementBuilder
+struct SwitchStatementBuilder
+    : public Castable<SwitchStatementBuilder, StatementBuilder> {
+  /// Constructor
+  /// @param cond the switch statement condition
+  explicit SwitchStatementBuilder(ast::Expression* cond) : condition(cond) {}
+
+  /// @param mod the ast Module to build into
+  /// @returns the built ast::SwitchStatement
+  ast::SwitchStatement* Build(ast::Module* mod) const override {
+    // We've listed cases in reverse order in the switch statement.
+    // Reorder them to match the presentation order in WGSL.
+    auto reversed_cases = cases;
+    std::reverse(reversed_cases.begin(), reversed_cases.end());
+
+    return mod->create<ast::SwitchStatement>(Source{}, condition,
+                                             reversed_cases);
+  }
+
+  /// Switch statement condition
+  ast::Expression* const condition;
+  /// Switch statement cases
+  ast::CaseStatementList cases;
+};
+
+/// A StatementBuilder for ast::IfStatement
+/// @see StatementBuilder
+struct IfStatementBuilder
+    : public Castable<IfStatementBuilder, StatementBuilder> {
+  /// Constructor
+  /// @param c the if-statement condition
+  explicit IfStatementBuilder(ast::Expression* c) : cond(c) {}
+
+  /// @param mod the ast Module to build into
+  /// @returns the built ast::IfStatement
+  ast::IfStatement* Build(ast::Module* mod) const override {
+    return mod->create<ast::IfStatement>(Source{}, cond, body, else_stmts);
+  }
+
+  /// If-statement condition
+  ast::Expression* const cond;
+  /// If-statement block body
+  ast::BlockStatement* body = nullptr;
+  /// Optional if-statement else statements
+  ast::ElseStatementList else_stmts;
+};
+
+/// A StatementBuilder for ast::LoopStatement
+/// @see StatementBuilder
+struct LoopStatementBuilder
+    : public Castable<LoopStatementBuilder, StatementBuilder> {
+  /// @param mod the ast Module to build into
+  /// @returns the built ast::LoopStatement
+  ast::LoopStatement* Build(ast::Module* mod) const override {
+    return mod->create<ast::LoopStatement>(Source{}, body, continuing);
+  }
+
+  /// Loop-statement block body
+  ast::BlockStatement* body = nullptr;
+  /// Loop-statement continuing body
+  ast::BlockStatement* continuing = nullptr;
+};
+
 }  // namespace
 
 BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb)
@@ -621,6 +685,17 @@ DefInfo::DefInfo(const spvtools::opt::Instruction& def_inst,
     : inst(def_inst), block_pos(the_block_pos), index(the_index) {}
 
 DefInfo::~DefInfo() = default;
+
+bool StatementBuilder::IsValid() const {
+  return true;
+}
+ast::Node* StatementBuilder::Clone(ast::CloneContext*) const {
+  return nullptr;
+}
+void StatementBuilder::to_str(std::ostream& out, size_t indent) const {
+  make_indent(out, indent);
+  out << "StatementBuilder" << std::endl;
+}
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
                                  const spvtools::opt::Function& function,
@@ -636,7 +711,7 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       function_(function),
       i32_(ast_module_.create<ast::type::I32>()),
       ep_info_(ep_info) {
-  PushNewStatementBlock(nullptr, 0, nullptr, nullptr, nullptr);
+  PushNewStatementBlock(nullptr, 0, nullptr, nullptr);
 }
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
@@ -646,32 +721,62 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
 FunctionEmitter::~FunctionEmitter() = default;
 
 FunctionEmitter::StatementBlock::StatementBlock(
-    const Construct* construct,
+    const spirv::Construct* construct,
     uint32_t end_id,
-    CompletionAction completion_action,
-    ast::BlockStatement* statements,
+    FunctionEmitter::CompletionAction completion_action,
     ast::CaseStatementList* cases)
     : construct_(construct),
       end_id_(end_id),
       completion_action_(completion_action),
-      statements_(statements),
       cases_(cases) {}
 
-FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&&) = default;
+FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&& other)
+    : construct_(other.construct_),
+      end_id_(other.end_id_),
+      completion_action_(std::move(other.completion_action_)),
+      statements_(std::move(other.statements_)),
+      cases_(std::move(other.cases_)) {
+  other.statements_.clear();
+}
 
-FunctionEmitter::StatementBlock::~StatementBlock() = default;
+FunctionEmitter::StatementBlock::~StatementBlock() {
+  if (!finalized_) {
+    // Delete builders that have not been built with Finalize()
+    for (auto* statement : statements_) {
+      if (auto* builder = statement->As<StatementBuilder>()) {
+        delete builder;
+      }
+    }
+  }
+}
+
+void FunctionEmitter::StatementBlock::Finalize(ast::Module* mod) {
+  assert(!finalized_ /* Finalize() must only be called once */);
+  for (size_t i = 0; i < statements_.size(); i++) {
+    if (auto* builder = statements_[i]->As<StatementBuilder>()) {
+      statements_[i] = builder->Build(mod);
+      delete builder;
+    }
+  }
+
+  if (completion_action_ != nullptr) {
+    completion_action_(statements_);
+  }
+
+  finalized_ = true;
+}
+
+void FunctionEmitter::StatementBlock::Add(ast::Statement* statement) {
+  assert(!finalized_ /* Add() must not be called after Finalize() */);
+  statements_.emplace_back(statement);
+}
 
 void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
                                             uint32_t end_id,
-                                            ast::BlockStatement* block,
                                             ast::CaseStatementList* cases,
                                             CompletionAction action) {
-  if (block == nullptr) {
-    block = create<ast::BlockStatement>(Source{});
-  }
-
   statements_stack_.emplace_back(
-      StatementBlock{construct, end_id, action, block, cases});
+      StatementBlock{construct, end_id, action, cases});
 }
 
 void FunctionEmitter::PushGuard(const std::string& guard_name,
@@ -685,10 +790,12 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
 
   auto* cond = create<ast::IdentifierExpression>(
       Source{}, ast_module_.RegisterSymbol(guard_name), guard_name);
-  auto* body = create<ast::BlockStatement>(Source{});
-  AddStatement(
-      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
-  PushNewStatementBlock(top.construct_, end_id, body, nullptr, nullptr);
+  auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
+
+  PushNewStatementBlock(
+      top.Construct(), end_id, nullptr, [=](const ast::StatementList& stmts) {
+        builder->body = create<ast::BlockStatement>(Source{}, stmts);
+      });
 }
 
 void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
@@ -696,31 +803,36 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
   const auto& top = statements_stack_.back();
 
   auto* cond = MakeTrue(Source{});
-  auto* body = create<ast::BlockStatement>(Source{});
-  AddStatement(
-      create<ast::IfStatement>(Source{}, cond, body, ast::ElseStatementList{}));
-  PushNewStatementBlock(top.construct_, end_id, body, nullptr, nullptr);
+  auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
+
+  PushNewStatementBlock(
+      top.Construct(), end_id, nullptr, [=](const ast::StatementList& stmts) {
+        builder->body = create<ast::BlockStatement>(Source{}, stmts);
+      });
 }
 
-const ast::BlockStatement* FunctionEmitter::ast_body() {
+const ast::StatementList FunctionEmitter::ast_body() {
   assert(!statements_stack_.empty());
-  return statements_stack_[0].statements_;
+  auto& entry = statements_stack_[0];
+  entry.Finalize(&ast_module_);
+  return entry.Statements();
 }
 
 ast::Statement* FunctionEmitter::AddStatement(ast::Statement* statement) {
   assert(!statements_stack_.empty());
   auto* result = statement;
   if (result != nullptr) {
-    statements_stack_.back().statements_->append(statement);
+    auto& block = statements_stack_.back();
+    block.Add(statement);
   }
   return result;
 }
 
 ast::Statement* FunctionEmitter::LastStatement() {
   assert(!statements_stack_.empty());
-  auto* statement_list = statements_stack_.back().statements_;
-  assert(!statement_list->empty());
-  return statement_list->last();
+  auto& statement_list = statements_stack_.back().Statements();
+  assert(!statement_list.empty());
+  return statement_list.back();
 }
 
 bool FunctionEmitter::Emit() {
@@ -748,7 +860,10 @@ bool FunctionEmitter::Emit() {
                   << statements_stack_.size();
   }
 
-  auto* body = statements_stack_[0].statements_;
+  statements_stack_[0].Finalize(&ast_module_);
+
+  auto& statements = statements_stack_[0].Statements();
+  auto* body = create<ast::BlockStatement>(Source{}, statements);
   ast_module_.AddFunction(
       create<ast::Function>(decl.source, ast_module_.RegisterSymbol(decl.name),
                             decl.name, std::move(decl.params), decl.return_type,
@@ -756,7 +871,7 @@ bool FunctionEmitter::Emit() {
 
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();
-  PushNewStatementBlock(constructs_[0].get(), 0, nullptr, nullptr, nullptr);
+  PushNewStatementBlock(constructs_[0].get(), 0, nullptr, nullptr);
 
   return success();
 }
@@ -1935,7 +2050,7 @@ bool FunctionEmitter::EmitFunctionBodyStatements() {
   // TODO(dneto): refactor how the first construct is created vs.
   // this statements stack entry is populated.
   assert(statements_stack_.size() == 1);
-  statements_stack_[0].construct_ = function_construct;
+  statements_stack_[0].SetConstruct(function_construct);
 
   for (auto block_id : block_order()) {
     if (!EmitBasicBlock(*GetBlockInfo(block_id))) {
@@ -1948,11 +2063,8 @@ bool FunctionEmitter::EmitFunctionBodyStatements() {
 bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   // Close off previous constructs.
   while (!statements_stack_.empty() &&
-         (statements_stack_.back().end_id_ == block_info.id)) {
-    StatementBlock& sb = statements_stack_.back();
-    if (sb.completion_action_ != nullptr) {
-      sb.completion_action_();
-    }
+         (statements_stack_.back().EndId() == block_info.id)) {
+    statements_stack_.back().Finalize(&ast_module_);
     statements_stack_.pop_back();
   }
   if (statements_stack_.empty()) {
@@ -1965,7 +2077,7 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   std::vector<const Construct*> entering_constructs;  // inner most comes first
   {
     auto* here = block_info.construct;
-    auto* const top_construct = statements_stack_.back().construct_;
+    auto* const top_construct = statements_stack_.back().Construct();
     while (here != top_construct) {
       // Only enter a construct at its header block.
       if (here->begin_id == block_info.id) {
@@ -2152,42 +2264,9 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   const auto condition_id =
       block_info.basic_block->terminator()->GetSingleWordInOperand(0);
   auto* cond = MakeExpression(condition_id).expr;
-  auto* body = create<ast::BlockStatement>(Source{});
 
   // Generate the code for the condition.
-  // Use the IfBuilder to create the if-statement. The IfBuilder is constructed
-  // as a std::shared_ptr and is captured by the then and else clause
-  // CompletionAction lambdas, and so will only be destructed when the last
-  // block is completed. The IfBuilder destructor constructs the IfStatement,
-  // inserting it at the current insertion point in the current
-  // ast::BlockStatement.
-  struct IfBuilder {
-    IfBuilder(ast::Module* mod,
-              StatementBlock& statement_block,
-              tint::ast::Expression* cond,
-              ast::BlockStatement* body)
-        : mod_(mod),
-          dst_block_(statement_block.statements_),
-          dst_block_insertion_point_(statement_block.statements_->size()),
-          cond_(cond),
-          body_(body) {}
-
-    ~IfBuilder() {
-      dst_block_->insert(
-          dst_block_insertion_point_,
-          mod_->create<ast::IfStatement>(Source{}, cond_, body_, else_stmts_));
-    }
-
-    ast::Module* mod_;
-    ast::BlockStatement* dst_block_;
-    size_t dst_block_insertion_point_;
-    tint::ast::Expression* cond_;
-    ast::BlockStatement* body_;
-    ast::ElseStatementList else_stmts_;
-  };
-
-  auto if_builder = std::make_shared<IfBuilder>(
-      &ast_module_, statements_stack_.back(), cond, body);
+  auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
   // Compute the block IDs that should end the then-clause and the else-clause.
 
@@ -2225,17 +2304,16 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 
   // Push statement blocks for the then-clause and the else-clause.
   // But make sure we do it in the right order.
-  auto push_else = [this, if_builder, else_end, construct]() {
+  auto push_else = [this, builder, else_end, construct]() {
     // Push the else clause onto the stack first.
-    auto* else_body = create<ast::BlockStatement>(Source{});
     PushNewStatementBlock(
-        construct, else_end, else_body, nullptr,
-        [this, if_builder, else_body]() {
+        construct, else_end, nullptr, [=](const ast::StatementList& stmts) {
           // Only set the else-clause if there are statements to fill it.
-          if (!else_body->empty()) {
+          if (!stmts.empty()) {
             // The "else" consists of the statement list from the top of
             // statements stack, without an elseif condition.
-            if_builder->else_stmts_.emplace_back(
+            auto* else_body = create<ast::BlockStatement>(Source{}, stmts);
+            builder->else_stmts.emplace_back(
                 create<ast::ElseStatement>(Source{}, nullptr, else_body));
           }
         });
@@ -2275,7 +2353,10 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     }
 
     // Push the then clause onto the stack.
-    PushNewStatementBlock(construct, then_end, body, nullptr, [if_builder] {});
+    PushNewStatementBlock(
+        construct, then_end, nullptr, [=](const ast::StatementList& stmts) {
+          builder->body = create<ast::BlockStatement>(Source{}, stmts);
+        });
   }
 
   return success();
@@ -2293,14 +2374,11 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   auto selector = MakeExpression(selector_id);
 
   // First, push the statement block for the entire switch.
-  ast::CaseStatementList case_list;
-  auto* swch = create<ast::SwitchStatement>(Source{}, selector.expr, case_list);
-  AddStatement(swch)->As<ast::SwitchStatement>();
+  auto* swch = AddStatementBuilder<SwitchStatementBuilder>(selector.expr);
 
   // Grab a pointer to the case list.  It will get buried in the statement block
   // stack.
-  auto* cases = &(swch->body());
-  PushNewStatementBlock(construct, construct->end_id, nullptr, cases, nullptr);
+  PushNewStatementBlock(construct, construct->end_id, &swch->cases, nullptr);
 
   // We will push statement-blocks onto the stack to gather the statements in
   // the default clause and cases clauses. Determine the list of blocks
@@ -2367,21 +2445,27 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     const auto end_id = (i + 1 < clause_heads.size()) ? clause_heads[i + 1]->id
                                                       : construct->end_id;
 
-    // Create the case clause.  Temporarily put it in the wrong order
-    // on the case statement list.
-    auto* body = create<ast::BlockStatement>(Source{});
-    cases->emplace_back(create<ast::CaseStatement>(Source{}, selectors, body));
-
-    PushNewStatementBlock(construct, end_id, body, nullptr, nullptr);
+    // Reserve the case clause slot in swch->cases, push the new statement block
+    // for the case, and fill the case clause once the block is generated.
+    auto case_idx = swch->cases.size();
+    swch->cases.emplace_back(nullptr);
+    PushNewStatementBlock(
+        construct, end_id, nullptr, [=](const ast::StatementList& stmts) {
+          auto* body = create<ast::BlockStatement>(Source{}, stmts);
+          swch->cases[case_idx] =
+              create<ast::CaseStatement>(Source{}, selectors, body);
+        });
 
     if ((default_info == clause_heads[i]) && has_selectors &&
         construct->ContainsPos(default_info->pos)) {
       // Generate a default clause with a just fallthrough.
-      auto* stmts = create<ast::BlockStatement>(Source{});
-      stmts->append(create<ast::FallthroughStatement>(Source{}));
+      auto* stmts = create<ast::BlockStatement>(
+          Source{}, ast::StatementList{
+                        create<ast::FallthroughStatement>(Source{}),
+                    });
       auto* case_stmt =
           create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{}, stmts);
-      cases->emplace_back(case_stmt);
+      swch->cases.emplace_back(case_stmt);
     }
 
     if (i == 0) {
@@ -2389,18 +2473,16 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     }
   }
 
-  // We've listed cases in reverse order in the switch statement. Reorder them
-  // to match the presentation order in WGSL.
-  std::reverse(cases->begin(), cases->end());
-
   return success();
 }
 
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
-  auto* body = create<ast::BlockStatement>(Source{});
-  AddStatement(create<ast::LoopStatement>(
-      Source{}, body, create<ast::BlockStatement>(Source{})));
-  PushNewStatementBlock(construct, construct->end_id, body, nullptr, nullptr);
+  auto* builder = AddStatementBuilder<LoopStatementBuilder>();
+  PushNewStatementBlock(construct, construct->end_id, nullptr,
+                        [=](const ast::StatementList& stmts) {
+                          builder->body =
+                              create<ast::BlockStatement>(Source{}, stmts);
+                        });
   return success();
 }
 
@@ -2408,13 +2490,16 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
   // A continue construct has the same depth as its associated loop
   // construct. Start a continue construct.
   auto* loop_candidate = LastStatement();
-  auto* loop = loop_candidate->As<ast::LoopStatement>();
+  auto* loop = loop_candidate->As<LoopStatementBuilder>();
   if (loop == nullptr) {
     return Fail() << "internal error: starting continue construct, "
                      "expected loop on top of stack";
   }
-  PushNewStatementBlock(construct, construct->end_id, loop->continuing(),
-                        nullptr, nullptr);
+  PushNewStatementBlock(construct, construct->end_id, nullptr,
+                        [=](const ast::StatementList& stmts) {
+                          loop->continuing =
+                              create<ast::BlockStatement>(Source{}, stmts);
+                        });
 
   return success();
 }
@@ -2502,7 +2587,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
 
       AddStatement(MakeSimpleIf(cond, true_branch, false_branch));
       if (!flow_guard.empty()) {
-        PushGuard(flow_guard, statements_stack_.back().end_id_);
+        PushGuard(flow_guard, statements_stack_.back().EndId());
       }
       return true;
     }
@@ -2600,17 +2685,18 @@ ast::Statement* FunctionEmitter::MakeSimpleIf(ast::Expression* condition,
   }
   ast::ElseStatementList else_stmts;
   if (else_stmt != nullptr) {
-    auto* stmts = create<ast::BlockStatement>(Source{});
-    stmts->append(else_stmt);
-    else_stmts.emplace_back(
-        create<ast::ElseStatement>(Source{}, nullptr, stmts));
+    ast::StatementList stmts{else_stmt};
+    else_stmts.emplace_back(create<ast::ElseStatement>(
+        Source{}, nullptr, create<ast::BlockStatement>(Source{}, stmts)));
   }
-  auto* if_block = create<ast::BlockStatement>(Source{});
+  ast::StatementList if_stmts;
+  if (then_stmt != nullptr) {
+    if_stmts.emplace_back(then_stmt);
+  }
+  auto* if_block = create<ast::BlockStatement>(Source{}, if_stmts);
   auto* if_stmt =
       create<ast::IfStatement>(Source{}, condition, if_block, else_stmts);
-  if (then_stmt != nullptr) {
-    if_block->append(then_stmt);
-  }
+
   return if_stmt;
 }
 
@@ -4285,3 +4371,8 @@ FunctionEmitter::FunctionDeclaration::~FunctionDeclaration() = default;
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint
+
+TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::StatementBuilder);
+TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::SwitchStatementBuilder);
+TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::IfStatementBuilder);
+TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::LoopStatementBuilder);

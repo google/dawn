@@ -57,13 +57,14 @@ class SpvParserTestBase : public T {
 // Use this form when you don't need to template any further.
 using SpvParserTest = SpvParserTestBase<::testing::Test>;
 
-/// Returns the string dump of a function body.
-/// @param body the statement in the body
-/// @returnss the string dump of a function body.
+/// Returns the string dump of a statement list.
+/// @param mod the module
+/// @param stmts the statement list
+/// @returns the string dump of a statement list.
 inline std::string ToString(const ast::Module& mod,
-                            const ast::BlockStatement* body) {
+                            const ast::StatementList& stmts) {
   std::ostringstream outs;
-  for (const auto* stmt : *body) {
+  for (const auto* stmt : stmts) {
     stmt->to_str(outs, 0);
   }
   return Demangler().Demangle(mod, outs.str());

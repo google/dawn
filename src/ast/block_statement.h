@@ -30,6 +30,10 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   /// Constructor
   /// @param source the block statement source
   explicit BlockStatement(const Source& source);
+  /// Constructor
+  /// @param source the block statement source
+  /// @param statements the block statements
+  BlockStatement(const Source& source, const StatementList& statements);
   /// Move constructor
   BlockStatement(BlockStatement&&);
   ~BlockStatement() override;
