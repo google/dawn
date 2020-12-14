@@ -655,8 +655,9 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect =
+      R"(VariableDeclStatement{
   Variable{
     x_25
     function
@@ -676,7 +677,8 @@ Assignment{
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
@@ -701,8 +703,8 @@ TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   Variable{
     x_25
     function
@@ -736,7 +738,8 @@ Assignment{
   Identifier[not set]{x_2}
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest,
@@ -772,8 +775,8 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   Variable{
     x_25
     function
@@ -811,7 +814,8 @@ Assignment{
   ScalarConstructor[not set]{2}
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(
@@ -870,7 +874,8 @@ TEST_F(
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), Eq(R"(Assignment{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(Assignment{
   Identifier[not set]{x_1}
   ScalarConstructor[not set]{0}
 }
@@ -942,7 +947,8 @@ Assignment{
   ScalarConstructor[not set]{5}
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(
@@ -986,8 +992,8 @@ TEST_F(
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
   // a const definition.
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_1
     none
@@ -1019,7 +1025,8 @@ Assignment{
   Identifier[not set]{x_3}
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest,
@@ -1070,7 +1077,8 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), Eq(R"(If{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(If{
   (
     ScalarConstructor[not set]{true}
   )
@@ -1109,7 +1117,8 @@ TEST_F(SpvParserTest,
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(
@@ -1155,7 +1164,8 @@ TEST_F(
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), Eq(R"(If{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(If{
   (
     ScalarConstructor[not set]{true}
   )
@@ -1196,7 +1206,8 @@ TEST_F(
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest,
@@ -1236,8 +1247,8 @@ TEST_F(SpvParserTest,
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
   // a const definition.
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_1
     none
@@ -1265,7 +1276,8 @@ If{
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
@@ -1309,7 +1321,8 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), Eq(R"(Loop{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(Loop{
   VariableDeclStatement{
     Variable{
       x_2_phi
@@ -1404,7 +1417,8 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
@@ -1451,7 +1465,8 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), Eq(R"(Loop{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(Loop{
   VariableDeclStatement{
     Variable{
       x_2_phi
@@ -1559,7 +1574,8 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
@@ -1607,8 +1623,8 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_101
     none
@@ -1726,8 +1742,8 @@ Loop{
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body())
-     << assembly;
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
@@ -1776,8 +1792,8 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_101
     none
@@ -1851,7 +1867,8 @@ Loop{
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
@@ -1897,8 +1914,8 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_101
     none
@@ -1967,7 +1984,8 @@ Loop{
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
@@ -2004,8 +2022,8 @@ TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  auto got = ToString(p->get_module(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
   Variable{
     x_101_phi
     function
@@ -2065,7 +2083,8 @@ VariableDeclStatement{
   }
 }
 Return{}
-)")) << ToString(p->get_module(), fe.ast_body());
+)";
+  EXPECT_EQ(expect, got);
 }
 
 }  // namespace
