@@ -1418,7 +1418,12 @@ Expect<ast::Builtin> ParserImpl::expect_builtin() {
 // body_stmt
 //   : BRACKET_LEFT statements BRACKET_RIGHT
 Expect<ast::BlockStatement*> ParserImpl::expect_body_stmt() {
-  return expect_brace_block("", [&] { return expect_statements(); });
+  return expect_brace_block("", [&]() -> Expect<ast::BlockStatement*> {
+    auto stmts = expect_statements();
+    if (stmts.errored)
+      return Failure::kErrored;
+    return create<ast::BlockStatement>(Source{}, stmts.value);
+  });
 }
 
 // paren_rhs_stmt
@@ -1437,7 +1442,7 @@ Expect<ast::Expression*> ParserImpl::expect_paren_rhs_stmt() {
 
 // statements
 //   : statement*
-Expect<ast::BlockStatement*> ParserImpl::expect_statements() {
+Expect<ast::StatementList> ParserImpl::expect_statements() {
   bool errored = false;
   ast::StatementList stmts;
 
@@ -1455,7 +1460,7 @@ Expect<ast::BlockStatement*> ParserImpl::expect_statements() {
   if (errored)
     return Failure::kErrored;
 
-  return create<ast::BlockStatement>(Source{}, stmts);
+  return stmts;
 }
 
 // statement
@@ -1859,15 +1864,16 @@ Maybe<ast::LoopStatement*> ParserImpl::loop_stmt() {
     return Failure::kNoMatch;
 
   return expect_brace_block("loop", [&]() -> Maybe<ast::LoopStatement*> {
-    auto body = expect_statements();
-    if (body.errored)
+    auto stmts = expect_statements();
+    if (stmts.errored)
       return Failure::kErrored;
 
     auto continuing = continuing_stmt();
     if (continuing.errored)
       return Failure::kErrored;
 
-    return create<ast::LoopStatement>(source, body.value, continuing.value);
+    auto* body = create<ast::BlockStatement>(source, stmts.value);
+    return create<ast::LoopStatement>(source, body, continuing.value);
   });
 }
 
@@ -1958,9 +1964,9 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
   if (header.errored)
     return Failure::kErrored;
 
-  auto body =
+  auto stmts =
       expect_brace_block("for loop", [&] { return expect_statements(); });
-  if (body.errored)
+  if (stmts.errored)
     return Failure::kErrored;
 
   // The for statement is a syntactic sugar on top of the loop statement.
@@ -1980,7 +1986,7 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
     auto* break_if_not_condition =
         create<ast::IfStatement>(not_condition->source(), not_condition,
                                  break_body, ast::ElseStatementList{});
-    body->insert(0, break_if_not_condition);
+    stmts.value.insert(stmts.value.begin(), break_if_not_condition);
   }
 
   ast::BlockStatement* continuing_body = nullptr;
@@ -1991,7 +1997,8 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
                                                   });
   }
 
-  auto* loop = create<ast::LoopStatement>(source, body.value, continuing_body);
+  auto* body = create<ast::BlockStatement>(source, stmts.value);
+  auto* loop = create<ast::LoopStatement>(source, body, continuing_body);
 
   if (header->initializer != nullptr) {
     return create<ast::BlockStatement>(source, ast::StatementList{

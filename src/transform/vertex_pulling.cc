@@ -20,6 +20,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
+#include "src/ast/clone_context.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/stride_decoration.h"
@@ -69,27 +70,24 @@ void VertexPulling::SetPullingBufferBindingSet(uint32_t number) {
 }
 
 Transform::Output VertexPulling::Run(ast::Module* in) {
-  Output out;
-  out.module = in->Clone();
-
-  ast::Module* mod = &out.module;
-
   // Check SetVertexState was called
   if (!cfg.vertex_state_set) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;
     err.message = "SetVertexState not called";
+    Output out;
     out.diagnostics.add(std::move(err));
     return out;
   }
 
   // Find entry point
-  auto* func = mod->FindFunctionBySymbolAndStage(
-      mod->GetSymbol(cfg.entry_point_name), ast::PipelineStage::kVertex);
+  auto* func = in->FindFunctionBySymbolAndStage(
+      in->GetSymbol(cfg.entry_point_name), ast::PipelineStage::kVertex);
   if (func == nullptr) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;
     err.message = "Vertex stage entry point not found";
+    Output out;
     out.diagnostics.add(std::move(err));
     return out;
   }
@@ -99,13 +97,22 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
 
   // TODO(idanr): Make sure we covered all error cases, to guarantee the
   // following stages will pass
+  Output out;
+  out.module = in->Clone([&](ast::CloneContext* ctx) {
+    State state{in, ctx->mod, cfg};
+    state.FindOrInsertVertexIndexIfUsed();
+    state.FindOrInsertInstanceIndexIfUsed();
+    state.ConvertVertexInputVariablesToPrivate();
+    state.AddVertexStorageBuffers();
 
-  State state{mod, cfg};
-  state.FindOrInsertVertexIndexIfUsed();
-  state.FindOrInsertInstanceIndexIfUsed();
-  state.ConvertVertexInputVariablesToPrivate();
-  state.AddVertexStorageBuffers();
-  func->body()->insert(0, state.CreateVertexPullingPreamble());
+    ctx->ReplaceAll([func, ctx, state](ast::Function* f) -> ast::Function* {
+      if (f == func) {
+        return CloneWithStatementsAtStart(
+            ctx, f, {state.CreateVertexPullingPreamble()});
+      }
+      return nullptr;  // Just clone func
+    });
+  });
 
   return out;
 }
@@ -114,11 +121,14 @@ VertexPulling::Config::Config() = default;
 VertexPulling::Config::Config(const Config&) = default;
 VertexPulling::Config::~Config() = default;
 
-VertexPulling::State::State(ast::Module* m, const Config& c) : mod(m), cfg(c) {}
+VertexPulling::State::State(ast::Module* i, ast::Module* o, const Config& c)
+    : in(i), out(o), cfg(c) {}
+
+VertexPulling::State::State(const State&) = default;
 
 VertexPulling::State::~State() = default;
 
-std::string VertexPulling::State::GetVertexBufferName(uint32_t index) {
+std::string VertexPulling::State::GetVertexBufferName(uint32_t index) const {
   return kVertexBufferNamePrefix + std::to_string(index);
 }
 
@@ -135,7 +145,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   }
 
   // Look for an existing vertex index builtin
-  for (auto* v : mod->global_variables()) {
+  for (auto* v : in->global_variables()) {
     if (v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
@@ -154,7 +164,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   vertex_index_name = kDefaultVertexIndexName;
 
   auto* var =
-      mod->create<ast::Variable>(Source{},                   // source
+      out->create<ast::Variable>(Source{},                   // source
                                  vertex_index_name,          // name
                                  ast::StorageClass::kInput,  // storage_class
                                  GetI32Type(),               // type
@@ -162,11 +172,11 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
                                  nullptr,                    // constructor
                                  ast::VariableDecorationList{
                                      // decorations
-                                     mod->create<ast::BuiltinDecoration>(
+                                     out->create<ast::BuiltinDecoration>(
                                          ast::Builtin::kVertexIdx, Source{}),
                                  });
 
-  mod->AddGlobalVariable(var);
+  out->AddGlobalVariable(var);
 }
 
 void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
@@ -182,7 +192,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   }
 
   // Look for an existing instance index builtin
-  for (auto* v : mod->global_variables()) {
+  for (auto* v : in->global_variables()) {
     if (v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
@@ -201,7 +211,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   instance_index_name = kDefaultInstanceIndexName;
 
   auto* var =
-      mod->create<ast::Variable>(Source{},                   // source
+      out->create<ast::Variable>(Source{},                   // source
                                  instance_index_name,        // name
                                  ast::StorageClass::kInput,  // storage_class
                                  GetI32Type(),               // type
@@ -209,14 +219,14 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
                                  nullptr,                    // constructor
                                  ast::VariableDecorationList{
                                      // decorations
-                                     mod->create<ast::BuiltinDecoration>(
+                                     out->create<ast::BuiltinDecoration>(
                                          ast::Builtin::kInstanceIdx, Source{}),
                                  });
-  mod->AddGlobalVariable(var);
+  out->AddGlobalVariable(var);
 }
 
 void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
-  for (auto*& v : mod->global_variables()) {
+  for (auto*& v : in->global_variables()) {
     if (v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
@@ -227,7 +237,7 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
         // This is where the replacement happens. Expressions use identifier
         // strings instead of pointers, so we don't need to update any other
         // place in the AST.
-        v = mod->create<ast::Variable>(
+        v = out->create<ast::Variable>(
             Source{},                        // source
             v->name(),                       // name
             ast::StorageClass::kPrivate,     // storage_class
@@ -245,31 +255,31 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
 void VertexPulling::State::AddVertexStorageBuffers() {
   // TODO(idanr): Make this readonly https://github.com/gpuweb/gpuweb/issues/935
   // The array inside the struct definition
-  auto* internal_array_type = mod->create<ast::type::Array>(
+  auto* internal_array_type = out->create<ast::type::Array>(
       GetU32Type(), 0,
       ast::ArrayDecorationList{
-          mod->create<ast::StrideDecoration>(4u, Source{}),
+          out->create<ast::StrideDecoration>(4u, Source{}),
       });
 
   // Creating the struct type
   ast::StructMemberList members;
   ast::StructMemberDecorationList member_dec;
   member_dec.push_back(
-      mod->create<ast::StructMemberOffsetDecoration>(0u, Source{}));
+      out->create<ast::StructMemberOffsetDecoration>(0u, Source{}));
 
-  members.push_back(mod->create<ast::StructMember>(
+  members.push_back(out->create<ast::StructMember>(
       Source{}, kStructBufferName, internal_array_type, std::move(member_dec)));
 
   ast::StructDecorationList decos;
-  decos.push_back(mod->create<ast::StructBlockDecoration>(Source{}));
+  decos.push_back(out->create<ast::StructBlockDecoration>(Source{}));
 
-  auto* struct_type = mod->create<ast::type::Struct>(
-      mod->RegisterSymbol(kStructName), kStructName,
-      mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
+  auto* struct_type = out->create<ast::type::Struct>(
+      out->RegisterSymbol(kStructName), kStructName,
+      out->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
     // The decorated variable with struct type
-    auto* var = mod->create<ast::Variable>(
+    auto* var = out->create<ast::Variable>(
         Source{},                           // source
         GetVertexBufferName(i),             // name
         ast::StorageClass::kStorageBuffer,  // storage_class
@@ -278,23 +288,23 @@ void VertexPulling::State::AddVertexStorageBuffers() {
         nullptr,                            // constructor
         ast::VariableDecorationList{
             // decorations
-            mod->create<ast::BindingDecoration>(i, Source{}),
-            mod->create<ast::SetDecoration>(cfg.pulling_set, Source{}),
+            out->create<ast::BindingDecoration>(i, Source{}),
+            out->create<ast::SetDecoration>(cfg.pulling_set, Source{}),
         });
-    mod->AddGlobalVariable(var);
+    out->AddGlobalVariable(var);
   }
-  mod->AddConstructedType(struct_type);
+  out->AddConstructedType(struct_type);
 }
 
-ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() {
+ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
   // Assign by looking at the vertex descriptor to find attributes with matching
   // location.
 
   ast::StatementList stmts;
 
   // Declare the |kPullingPosVarName| variable in the shader
-  auto* pos_declaration = mod->create<ast::VariableDeclStatement>(
-      Source{}, mod->create<ast::Variable>(
+  auto* pos_declaration = out->create<ast::VariableDeclStatement>(
+      Source{}, out->create<ast::Variable>(
                     Source{},                         // source
                     kPullingPosVarName,               // name
                     ast::StorageClass::kFunction,     // storage_class
@@ -323,45 +333,46 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() {
                       ? vertex_index_name
                       : instance_index_name;
       // Identifier to index by
-      auto* index_identifier = mod->create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol(name), name);
+      auto* index_identifier = out->create<ast::IdentifierExpression>(
+          Source{}, out->RegisterSymbol(name), name);
 
       // An expression for the start of the read in the buffer in bytes
-      auto* pos_value = mod->create<ast::BinaryExpression>(
+      auto* pos_value = out->create<ast::BinaryExpression>(
           Source{}, ast::BinaryOp::kAdd,
-          mod->create<ast::BinaryExpression>(
+          out->create<ast::BinaryExpression>(
               Source{}, ast::BinaryOp::kMultiply, index_identifier,
               GenUint(static_cast<uint32_t>(buffer_layout.array_stride))),
           GenUint(static_cast<uint32_t>(attribute_desc.offset)));
 
       // Update position of the read
-      auto* set_pos_expr = mod->create<ast::AssignmentStatement>(
+      auto* set_pos_expr = out->create<ast::AssignmentStatement>(
           Source{}, CreatePullingPositionIdent(), pos_value);
       stmts.emplace_back(set_pos_expr);
 
-      stmts.emplace_back(mod->create<ast::AssignmentStatement>(
+      stmts.emplace_back(out->create<ast::AssignmentStatement>(
           Source{},
-          mod->create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol(v->name()), v->name()),
+          out->create<ast::IdentifierExpression>(
+              Source{}, out->RegisterSymbol(v->name()), v->name()),
           AccessByFormat(i, attribute_desc.format)));
     }
   }
 
-  return mod->create<ast::BlockStatement>(Source{}, stmts);
+  return out->create<ast::BlockStatement>(Source{}, stmts);
 }
 
-ast::Expression* VertexPulling::State::GenUint(uint32_t value) {
-  return mod->create<ast::ScalarConstructorExpression>(
-      Source{}, mod->create<ast::UintLiteral>(Source{}, GetU32Type(), value));
+ast::Expression* VertexPulling::State::GenUint(uint32_t value) const {
+  return out->create<ast::ScalarConstructorExpression>(
+      Source{}, out->create<ast::UintLiteral>(Source{}, GetU32Type(), value));
 }
 
-ast::Expression* VertexPulling::State::CreatePullingPositionIdent() {
-  return mod->create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol(kPullingPosVarName), kPullingPosVarName);
+ast::Expression* VertexPulling::State::CreatePullingPositionIdent() const {
+  return out->create<ast::IdentifierExpression>(
+      Source{}, out->RegisterSymbol(kPullingPosVarName), kPullingPosVarName);
 }
 
-ast::Expression* VertexPulling::State::AccessByFormat(uint32_t buffer,
-                                                      VertexFormat format) {
+ast::Expression* VertexPulling::State::AccessByFormat(
+    uint32_t buffer,
+    VertexFormat format) const {
   // TODO(idanr): this doesn't account for the format of the attribute in the
   // shader. ex: vec<u32> in shader, and attribute claims VertexFormat::Float4
   // right now, we would try to assign a vec4<f32> to this attribute, but we
@@ -388,43 +399,44 @@ ast::Expression* VertexPulling::State::AccessByFormat(uint32_t buffer,
 }
 
 ast::Expression* VertexPulling::State::AccessU32(uint32_t buffer,
-                                                 ast::Expression* pos) {
+                                                 ast::Expression* pos) const {
   // Here we divide by 4, since the buffer is uint32 not uint8. The input buffer
   // has byte offsets for each attribute, and we will convert it to u32 indexes
   // by dividing. Then, that element is going to be read, and if needed,
   // unpacked into an appropriate variable. All reads should end up here as a
   // base case.
   auto vbuf_name = GetVertexBufferName(buffer);
-  return mod->create<ast::ArrayAccessorExpression>(
+  return out->create<ast::ArrayAccessorExpression>(
       Source{},
-      mod->create<ast::MemberAccessorExpression>(
+      out->create<ast::MemberAccessorExpression>(
           Source{},
-          mod->create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol(vbuf_name), vbuf_name),
-          mod->create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol(kStructBufferName),
+          out->create<ast::IdentifierExpression>(
+              Source{}, out->RegisterSymbol(vbuf_name), vbuf_name),
+          out->create<ast::IdentifierExpression>(
+              Source{}, out->RegisterSymbol(kStructBufferName),
               kStructBufferName)),
-      mod->create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kDivide, pos,
+      out->create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kDivide, pos,
                                          GenUint(4)));
 }
 
 ast::Expression* VertexPulling::State::AccessI32(uint32_t buffer,
-                                                 ast::Expression* pos) {
+                                                 ast::Expression* pos) const {
   // as<T> reinterprets bits
-  return mod->create<ast::BitcastExpression>(Source{}, GetI32Type(),
+  return out->create<ast::BitcastExpression>(Source{}, GetI32Type(),
                                              AccessU32(buffer, pos));
 }
 
 ast::Expression* VertexPulling::State::AccessF32(uint32_t buffer,
-                                                 ast::Expression* pos) {
+                                                 ast::Expression* pos) const {
   // as<T> reinterprets bits
-  return mod->create<ast::BitcastExpression>(Source{}, GetF32Type(),
+  return out->create<ast::BitcastExpression>(Source{}, GetF32Type(),
                                              AccessU32(buffer, pos));
 }
 
-ast::Expression* VertexPulling::State::AccessPrimitive(uint32_t buffer,
-                                                       ast::Expression* pos,
-                                                       VertexFormat format) {
+ast::Expression* VertexPulling::State::AccessPrimitive(
+    uint32_t buffer,
+    ast::Expression* pos,
+    VertexFormat format) const {
   // This function uses a position expression to read, rather than using the
   // position variable. This allows us to read from offset positions relative to
   // |kPullingPosVarName|. We can't call AccessByFormat because it reads only
@@ -445,31 +457,31 @@ ast::Expression* VertexPulling::State::AccessVec(uint32_t buffer,
                                                  uint32_t element_stride,
                                                  ast::type::Type* base_type,
                                                  VertexFormat base_format,
-                                                 uint32_t count) {
+                                                 uint32_t count) const {
   ast::ExpressionList expr_list;
   for (uint32_t i = 0; i < count; ++i) {
     // Offset read position by element_stride for each component
-    auto* cur_pos = mod->create<ast::BinaryExpression>(
+    auto* cur_pos = out->create<ast::BinaryExpression>(
         Source{}, ast::BinaryOp::kAdd, CreatePullingPositionIdent(),
         GenUint(element_stride * i));
     expr_list.push_back(AccessPrimitive(buffer, cur_pos, base_format));
   }
 
-  return mod->create<ast::TypeConstructorExpression>(
-      Source{}, mod->create<ast::type::Vector>(base_type, count),
+  return out->create<ast::TypeConstructorExpression>(
+      Source{}, out->create<ast::type::Vector>(base_type, count),
       std::move(expr_list));
 }
 
-ast::type::Type* VertexPulling::State::GetU32Type() {
-  return mod->create<ast::type::U32>();
+ast::type::Type* VertexPulling::State::GetU32Type() const {
+  return out->create<ast::type::U32>();
 }
 
-ast::type::Type* VertexPulling::State::GetI32Type() {
-  return mod->create<ast::type::I32>();
+ast::type::Type* VertexPulling::State::GetI32Type() const {
+  return out->create<ast::type::I32>();
 }
 
-ast::type::Type* VertexPulling::State::GetF32Type() {
-  return mod->create<ast::type::F32>();
+ast::type::Type* VertexPulling::State::GetF32Type() const {
+  return out->create<ast::type::F32>();
 }
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;

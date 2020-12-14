@@ -14,11 +14,30 @@
 
 #include "src/transform/transform.h"
 
+#include "src/ast/block_statement.h"
+#include "src/ast/clone_context.h"
+#include "src/ast/function.h"
+
 namespace tint {
 namespace transform {
 
 Transform::Transform() = default;
 Transform::~Transform() = default;
+
+ast::Function* Transform::CloneWithStatementsAtStart(
+    ast::CloneContext* ctx,
+    ast::Function* in,
+    ast::StatementList statements) {
+  for (auto* s : *in->body()) {
+    statements.emplace_back(ctx->Clone(s));
+  }
+  return ctx->mod->create<ast::Function>(
+      ctx->Clone(in->source()), in->symbol(), in->name(),
+      ctx->Clone(in->params()), ctx->Clone(in->return_type()),
+      ctx->mod->create<ast::BlockStatement>(ctx->Clone(in->body()->source()),
+                                            statements),
+      ctx->Clone(in->decorations()));
+}
 
 }  // namespace transform
 }  // namespace tint

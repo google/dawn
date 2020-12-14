@@ -55,11 +55,11 @@ BoundArrayAccessors::~BoundArrayAccessors() = default;
 
 Transform::Output BoundArrayAccessors::Run(ast::Module* mod) {
   Output out;
-  ast::CloneContext ctx(&out.module);
-  ctx.ReplaceAll([&](ast::ArrayAccessorExpression* expr) {
-    return Transform(expr, &ctx, &out.diagnostics);
+  out.module = mod->Clone([&](ast::CloneContext* ctx) {
+    ctx->ReplaceAll([&, ctx](ast::ArrayAccessorExpression* expr) {
+      return Transform(expr, ctx, &out.diagnostics);
+    });
   });
-  mod->Clone(&ctx);
   return out;
 }
 

@@ -468,7 +468,7 @@ class ParserImpl {
   Expect<ast::Expression*> expect_paren_rhs_stmt();
   /// Parses a `statements` grammar element
   /// @returns the statements parsed
-  Expect<ast::BlockStatement*> expect_statements();
+  Expect<ast::StatementList> expect_statements();
   /// Parses a `statement` grammar element
   /// @returns the parsed statement or nullptr
   Maybe<ast::Statement*> statement();

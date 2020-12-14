@@ -176,11 +176,6 @@ TEST_F(VertexPullingTest, OneAttribute) {
     StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Variable{
-    var_a
-    private
-    __f32
-  }
-  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -196,6 +191,11 @@ TEST_F(VertexPullingTest, OneAttribute) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_TintVertexData
+  }
+  Variable{
+    var_a
+    private
+    __f32
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -263,11 +263,6 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
     StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Variable{
-    var_a
-    private
-    __f32
-  }
-  Variable{
     Decorations{
       BuiltinDecoration{instance_idx}
     }
@@ -283,6 +278,11 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_TintVertexData
+  }
+  Variable{
+    var_a
+    private
+    __f32
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -350,11 +350,6 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
     StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Variable{
-    var_a
-    private
-    __f32
-  }
-  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -370,6 +365,11 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_TintVertexData
+  }
+  Variable{
+    var_a
+    private
+    __f32
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -466,6 +466,24 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Variable{
+    Decorations{
+      BindingDecoration{0}
+      SetDecoration{4}
+    }
+    _tint_pulling_vertex_buffer_0
+    storage_buffer
+    __struct_TintVertexData
+  }
+  Variable{
+    Decorations{
+      BindingDecoration{1}
+      SetDecoration{4}
+    }
+    _tint_pulling_vertex_buffer_1
+    storage_buffer
+    __struct_TintVertexData
+  }
+  Variable{
     var_a
     private
     __f32
@@ -490,24 +508,6 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     custom_instance_index
     in
     __i32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{0}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_0
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{1}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_1
-    storage_buffer
-    __struct_TintVertexData
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -608,16 +608,6 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
     StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Variable{
-    var_a
-    private
-    __f32
-  }
-  Variable{
-    var_b
-    private
-    __array__f32_4
-  }
-  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -633,6 +623,16 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
     _tint_pulling_vertex_buffer_0
     storage_buffer
     __struct_TintVertexData
+  }
+  Variable{
+    var_a
+    private
+    __f32
+  }
+  Variable{
+    var_b
+    private
+    __array__f32_4
   }
   Function main -> __void
   StageDecoration{vertex}
@@ -795,21 +795,6 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
   }
   Variable{
-    var_a
-    private
-    __array__f32_2
-  }
-  Variable{
-    var_b
-    private
-    __array__f32_3
-  }
-  Variable{
-    var_c
-    private
-    __array__f32_4
-  }
-  Variable{
     Decorations{
       BuiltinDecoration{vertex_idx}
     }
@@ -843,6 +828,21 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
     _tint_pulling_vertex_buffer_2
     storage_buffer
     __struct_TintVertexData
+  }
+  Variable{
+    var_a
+    private
+    __array__f32_2
+  }
+  Variable{
+    var_b
+    private
+    __array__f32_3
+  }
+  Variable{
+    var_c
+    private
+    __array__f32_4
   }
   Function main -> __void
   StageDecoration{vertex}

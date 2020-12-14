@@ -37,24 +37,6 @@ TEST_F(BlockStatementTest, Creation) {
   EXPECT_EQ(b[0], ptr);
 }
 
-TEST_F(BlockStatementTest, Creation_WithInsert) {
-  auto* s1 = create<DiscardStatement>(Source{});
-  auto* s2 = create<DiscardStatement>(Source{});
-  auto* s3 = create<DiscardStatement>(Source{});
-
-  BlockStatement b(Source{}, StatementList{});
-  b.insert(0, s1);
-  b.insert(0, s2);
-  b.insert(1, s3);
-
-  // |b| should contain s2, s3, s1
-
-  ASSERT_EQ(b.size(), 3u);
-  EXPECT_EQ(b[0], s2);
-  EXPECT_EQ(b[1], s3);
-  EXPECT_EQ(b[2], s1);
-}
-
 TEST_F(BlockStatementTest, Creation_WithSource) {
   BlockStatement b(Source{Source::Location{20, 2}}, ast::StatementList{});
   auto src = b.source();

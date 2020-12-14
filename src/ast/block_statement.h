@@ -35,14 +35,6 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   BlockStatement(BlockStatement&&);
   ~BlockStatement() override;
 
-  /// Insert a statement to the block
-  /// @param index the index to insert at
-  /// @param stmt the statement to insert
-  void insert(size_t index, Statement* stmt) {
-    auto offset = static_cast<decltype(statements_)::difference_type>(index);
-    statements_.insert(statements_.begin() + offset, stmt);
-  }
-
   /// @returns true if the block is empty
   bool empty() const { return statements_.empty(); }
   /// @returns the number of statements directly in the block
@@ -60,16 +52,12 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   /// Retrieves the statement at `idx`
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at `idx`
-  const Statement* get(size_t idx) const { return statements_[idx]; }
+  Statement* get(size_t idx) const { return statements_[idx]; }
 
   /// Retrieves the statement at `idx`
   /// @param idx the index. The index is not bounds checked.
   /// @returns the statement at `idx`
-  Statement* operator[](size_t idx) { return statements_[idx]; }
-  /// Retrieves the statement at `idx`
-  /// @param idx the index. The index is not bounds checked.
-  /// @returns the statement at `idx`
-  const Statement* operator[](size_t idx) const { return statements_[idx]; }
+  Statement* operator[](size_t idx) const { return statements_[idx]; }
 
   /// @returns the beginning iterator
   StatementList::const_iterator begin() const { return statements_.begin(); }

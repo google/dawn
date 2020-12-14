@@ -19,6 +19,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/block_statement.h"
+#include "src/ast/clone_context.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -39,45 +40,56 @@ EmitVertexPointSize::~EmitVertexPointSize() = default;
 
 Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
   Output out;
-  out.module = in->Clone();
-  auto* mod = &out.module;
 
-  if (!mod->HasStage(ast::PipelineStage::kVertex)) {
+  if (!in->HasStage(ast::PipelineStage::kVertex)) {
     // If the module doesn't have any vertex stages, then there's nothing to do.
+    out.module = in->Clone();
     return out;
   }
 
-  auto* f32 = mod->create<ast::type::F32>();
+  tint::ast::AssignmentStatement* pointsize_assign = nullptr;
+  auto get_pointsize_assign = [&pointsize_assign](ast::Module* mod) {
+    if (pointsize_assign != nullptr) {
+      return pointsize_assign;
+    }
 
-  // Declare the pointsize builtin output variable.
-  auto* pointsize_var =
-      mod->create<ast::Variable>(Source{},                    // source
-                                 kPointSizeVar,               // name
-                                 ast::StorageClass::kOutput,  // storage_class
-                                 f32,                         // type
-                                 false,                       // is_const
-                                 nullptr,                     // constructor
-                                 ast::VariableDecorationList{
-                                     // decorations
-                                     mod->create<ast::BuiltinDecoration>(
-                                         ast::Builtin::kPointSize, Source{}),
-                                 });
-  mod->AddGlobalVariable(pointsize_var);
+    auto* f32 = mod->create<ast::type::F32>();
 
-  // Build the AST expression & statement for assigning pointsize one.
-  auto* one = mod->create<ast::ScalarConstructorExpression>(
-      Source{}, mod->create<ast::FloatLiteral>(Source{}, f32, 1.0f));
-  auto* pointsize_ident = mod->create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol(kPointSizeVar), kPointSizeVar);
-  auto* pointsize_assign =
-      mod->create<ast::AssignmentStatement>(Source{}, pointsize_ident, one);
+    // Declare the pointsize builtin output variable.
+    auto* pointsize_var =
+        mod->create<ast::Variable>(Source{},                    // source
+                                   kPointSizeVar,               // name
+                                   ast::StorageClass::kOutput,  // storage_class
+                                   f32,                         // type
+                                   false,                       // is_const
+                                   nullptr,                     // constructor
+                                   ast::VariableDecorationList{
+                                       // decorations
+                                       mod->create<ast::BuiltinDecoration>(
+                                           ast::Builtin::kPointSize, Source{}),
+                                   });
+    mod->AddGlobalVariable(pointsize_var);
+
+    // Build the AST expression & statement for assigning pointsize one.
+    auto* one = mod->create<ast::ScalarConstructorExpression>(
+        Source{}, mod->create<ast::FloatLiteral>(Source{}, f32, 1.0f));
+    auto* pointsize_ident = mod->create<ast::IdentifierExpression>(
+        Source{}, mod->RegisterSymbol(kPointSizeVar), kPointSizeVar);
+    pointsize_assign =
+        mod->create<ast::AssignmentStatement>(Source{}, pointsize_ident, one);
+    return pointsize_assign;
+  };
 
   // Add the pointsize assignment statement to the front of all vertex stages.
-  for (auto* func : mod->functions()) {
-    if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
-      func->body()->insert(0, pointsize_assign);
-    }
-  }
+  out.module = in->Clone([&](ast::CloneContext* ctx) {
+    ctx->ReplaceAll([&, ctx](ast::Function* func) -> ast::Function* {
+      if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
+        return nullptr;  // Just clone func
+      }
+      return CloneWithStatementsAtStart(ctx, func,
+                                        {get_pointsize_assign(ctx->mod)});
+    });
+  });
 
   return out;
 }

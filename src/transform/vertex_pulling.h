@@ -178,12 +178,13 @@ class VertexPulling : public Transform {
   Config cfg;
 
   struct State {
-    State(ast::Module* m, const Config& c);
+    State(ast::Module* in, ast::Module* out, const Config& c);
+    explicit State(const State&);
     ~State();
 
     /// Generate the vertex buffer binding name
     /// @param index index to append to buffer name
-    std::string GetVertexBufferName(uint32_t index);
+    std::string GetVertexBufferName(uint32_t index) const;
 
     /// Inserts vertex_idx binding, or finds the existing one
     void FindOrInsertVertexIndexIfUsed();
@@ -198,36 +199,36 @@ class VertexPulling : public Transform {
     void AddVertexStorageBuffers();
 
     /// Creates and returns the assignment to the variables from the buffers
-    ast::BlockStatement* CreateVertexPullingPreamble();
+    ast::BlockStatement* CreateVertexPullingPreamble() const;
 
     /// Generates an expression holding a constant uint
     /// @param value uint value
-    ast::Expression* GenUint(uint32_t value);
+    ast::Expression* GenUint(uint32_t value) const;
 
     /// Generates an expression to read the shader value `kPullingPosVarName`
-    ast::Expression* CreatePullingPositionIdent();
+    ast::Expression* CreatePullingPositionIdent() const;
 
     /// Generates an expression reading from a buffer a specific format.
     /// This reads the value wherever `kPullingPosVarName` points to at the time
     /// of the read.
     /// @param buffer the index of the vertex buffer
     /// @param format the format to read
-    ast::Expression* AccessByFormat(uint32_t buffer, VertexFormat format);
+    ast::Expression* AccessByFormat(uint32_t buffer, VertexFormat format) const;
 
     /// Generates an expression reading a uint32 from a vertex buffer
     /// @param buffer the index of the vertex buffer
     /// @param pos an expression for the position of the access, in bytes
-    ast::Expression* AccessU32(uint32_t buffer, ast::Expression* pos);
+    ast::Expression* AccessU32(uint32_t buffer, ast::Expression* pos) const;
 
     /// Generates an expression reading an int32 from a vertex buffer
     /// @param buffer the index of the vertex buffer
     /// @param pos an expression for the position of the access, in bytes
-    ast::Expression* AccessI32(uint32_t buffer, ast::Expression* pos);
+    ast::Expression* AccessI32(uint32_t buffer, ast::Expression* pos) const;
 
     /// Generates an expression reading a float from a vertex buffer
     /// @param buffer the index of the vertex buffer
     /// @param pos an expression for the position of the access, in bytes
-    ast::Expression* AccessF32(uint32_t buffer, ast::Expression* pos);
+    ast::Expression* AccessF32(uint32_t buffer, ast::Expression* pos) const;
 
     /// Generates an expression reading a basic type (u32, i32, f32) from a
     /// vertex buffer
@@ -236,7 +237,7 @@ class VertexPulling : public Transform {
     /// @param format the underlying vertex format
     ast::Expression* AccessPrimitive(uint32_t buffer,
                                      ast::Expression* pos,
-                                     VertexFormat format);
+                                     VertexFormat format) const;
 
     /// Generates an expression reading a vec2/3/4 from a vertex buffer.
     /// This reads the value wherever `kPullingPosVarName` points to at the time
@@ -250,14 +251,15 @@ class VertexPulling : public Transform {
                                uint32_t element_stride,
                                ast::type::Type* base_type,
                                VertexFormat base_format,
-                               uint32_t count);
+                               uint32_t count) const;
 
     // Used to grab corresponding types from the type manager
-    ast::type::Type* GetU32Type();
-    ast::type::Type* GetI32Type();
-    ast::type::Type* GetF32Type();
+    ast::type::Type* GetU32Type() const;
+    ast::type::Type* GetI32Type() const;
+    ast::type::Type* GetF32Type() const;
 
-    ast::Module* const mod;
+    ast::Module* const in;
+    ast::Module* const out;
     Config const cfg;
 
     std::unordered_map<uint32_t, ast::Variable*> location_to_var;

@@ -48,6 +48,18 @@ class Transform {
   /// @param module the source module to transform
   /// @returns the transformation result
   virtual Output Run(ast::Module* module) = 0;
+
+ protected:
+  /// Clones the function `in` adding `statements` to the beginning of the
+  /// cloned function body.
+  /// @param ctx the clone context
+  /// @param in the function to clone
+  /// @param statements the statements to prepend to `in`'s body
+  /// @return the cloned function
+  static ast::Function* CloneWithStatementsAtStart(
+      ast::CloneContext* ctx,
+      ast::Function* in,
+      ast::StatementList statements);
 };
 
 }  // namespace transform

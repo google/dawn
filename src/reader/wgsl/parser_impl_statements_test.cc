@@ -29,8 +29,8 @@ TEST_F(ParserImplTest, Statements) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e->size(), 2u);
-  EXPECT_TRUE(e->get(0)->Is<ast::DiscardStatement>());
-  EXPECT_TRUE(e->get(1)->Is<ast::ReturnStatement>());
+  EXPECT_TRUE(e.value[0]->Is<ast::DiscardStatement>());
+  EXPECT_TRUE(e.value[1]->Is<ast::ReturnStatement>());
 }
 
 TEST_F(ParserImplTest, Statements_Empty) {
