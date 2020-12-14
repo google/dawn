@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "src/ast/function.h"
+#include "src/ast/traits.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type_manager.h"
 #include "src/ast/variable.h"
@@ -34,10 +35,6 @@ namespace ast {
 
 /// Represents all the source in a given program.
 class Module {
-  template <typename T, typename BASE>
-  using EnableIfIsType =
-      typename std::enable_if<std::is_base_of<BASE, T>::value, T>::type;
-
  public:
   /// Constructor
   Module();
@@ -107,12 +104,12 @@ class Module {
   /// @returns a string representation of the module
   std::string to_str() const;
 
-  /// Creates a new `Node` owned by the Module. When the Module is
-  /// destructed, the `Node` will also be destructed.
+  /// Creates a new Node owned by the Module. When the Module is
+  /// destructed, the Node will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  EnableIfIsType<T, Node>* create(ARGS&&... args) {
+  traits::EnableIfIsType<T, Node>* create(ARGS&&... args) {
     static_assert(std::is_base_of<Node, T>::value,
                   "T does not derive from Node");
     auto uptr = std::make_unique<T>(std::forward<ARGS>(args)...);
@@ -121,7 +118,7 @@ class Module {
     return ptr;
   }
 
-  /// Creates a new `Type` owned by the Module.
+  /// Creates a new type::Type owned by the Module.
   /// When the Module is destructed, owned Module and the returned
   /// `Type` will also be destructed.
   /// Types are unique (de-aliased), and so calling create() for the same `T`
@@ -134,7 +131,7 @@ class Module {
   /// @param args the arguments to pass to the type constructor
   /// @returns the de-aliased type pointer
   template <typename T, typename... ARGS>
-  EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
+  traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
     static_assert(std::is_base_of<type::Type, T>::value,
                   "T does not derive from type::Type");
     return type_mgr_.Get<T>(std::forward<ARGS>(args)...);
@@ -148,7 +145,7 @@ class Module {
   /// @param ty the type to add to the module
   /// @returns the de-aliased type pointer
   template <typename T>
-  EnableIfIsType<T, type::Type>* unique_type(std::unique_ptr<T> ty) {
+  traits::EnableIfIsType<T, type::Type>* unique_type(std::unique_ptr<T> ty) {
     return static_cast<T*>(type_mgr_.Get(std::move(ty)));
   }
 

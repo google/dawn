@@ -55,6 +55,12 @@ struct FirstParamType<R (C::*)(Arg) const> {
 template <typename F>
 using FirstParamTypeT = typename FirstParamType<F>::type;
 
+/// If T is a base of BASE then EnableIfIsType resolves to type T, otherwise an
+/// invalid type.
+template <typename T, typename BASE>
+using EnableIfIsType =
+    typename std::enable_if<std::is_base_of<BASE, T>::value, T>::type;
+
 }  // namespace traits
 }  // namespace ast
 }  // namespace tint

@@ -80,14 +80,14 @@ TEST_P(IntrinsicBoolTest, Call_Bool) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<bool>());
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeBool
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
@@ -109,14 +109,14 @@ TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32);
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -133,14 +133,14 @@ TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
@@ -164,14 +164,14 @@ TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -187,14 +187,14 @@ TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<i32>());
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
@@ -211,14 +211,14 @@ TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.u32);
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -234,14 +234,14 @@ TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<u32>());
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
@@ -261,14 +261,14 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(IntrinsicBuilderTest, Call_Dot) {
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
-  auto expr = Call("dot", "v", "v");
+  auto* expr = Call("dot", "v", "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
@@ -287,14 +287,14 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32);
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -310,14 +310,14 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto param = GetParam();
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
-  auto expr = Call(param.name, "v");
+  auto* expr = Call(param.name, "v");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
 
   if (param.name != "dpdx" && param.name != "dpdy" && param.name != "fwidth") {
     EXPECT_EQ(DumpInstructions(b.capabilities()),
@@ -353,15 +353,15 @@ TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
   auto* v2 = Var("v2", ast::StorageClass::kPrivate, ty.vec2<f32>());
   auto* v3 = Var("v3", ast::StorageClass::kPrivate, ty.vec3<f32>());
 
-  auto expr = Call("outerProduct", "v2", "v3");
+  auto* expr = Call("outerProduct", "v2", "v3");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(v2)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 10u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 10u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 2
@@ -384,15 +384,15 @@ TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
 TEST_F(IntrinsicBuilderTest, Call_Select) {
   auto* v3 = Var("v3", ast::StorageClass::kPrivate, ty.vec3<f32>());
   auto* bool_v3 = Var("bool_v3", ast::StorageClass::kPrivate, ty.vec3<bool>());
-  auto expr = Call("select", "v3", "v3", "bool_v3");
+  auto* expr = Call("select", "v3", "v3", "bool_v3");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 11u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 11u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -426,17 +426,17 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  auto expr1 = Call("textureSampleCompare", "texture", "sampler",
-                    vec2<f32>(1.0f, 2.0f), 2.0f);
+  auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
+                     vec2<f32>(1.0f, 2.0f), 2.0f);
 
-  auto expr2 = Call("textureSampleCompare", "texture", "sampler",
-                    vec2<f32>(1.0f, 2.0f), 2.0f);
+  auto* expr2 = Call("textureSampleCompare", "texture", "sampler",
+                     vec2<f32>(1.0f, 2.0f), 2.0f);
 
-  EXPECT_TRUE(td.DetermineResultType(&expr1)) << td.error();
-  EXPECT_TRUE(td.DetermineResultType(&expr2)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(expr1)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(expr2)) << td.error();
 
-  EXPECT_EQ(b.GenerateExpression(&expr1), 8u) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&expr2), 18u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(expr2), 18u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
@@ -467,9 +467,9 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 
 TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
   auto* var = Var("ident", ast::StorageClass::kPrivate, ty.f32);
-  auto expr = Call("round", "ident");
+  auto* expr = Call("round", "ident");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -479,7 +479,7 @@ TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 9u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 9u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%10 = OpExtInstImport "GLSL.std.450"
 OpName %1 "ident"
 OpName %7 "a_func"
@@ -503,8 +503,8 @@ using Intrinsic_Builtin_SingleParam_Float_Test =
 TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1.0f);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1.0f);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -513,7 +513,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -532,8 +532,8 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -542,7 +542,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -586,9 +586,9 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                                          IntrinsicData{"trunc", "Trunc"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
-  auto expr = Call("length", 1.0f);
+  auto* expr = Call("length", 1.0f);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -597,7 +597,7 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -613,8 +613,8 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
-  auto expr = Call("length", vec2<f32>(1.0f, 1.0f));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call("length", vec2<f32>(1.0f, 1.0f));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -623,7 +623,7 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -641,8 +641,8 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Normalize) {
-  auto expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -651,7 +651,7 @@ TEST_F(IntrinsicBuilderTest, Call_Normalize) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -673,9 +673,9 @@ using Intrinsic_Builtin_DualParam_Float_Test =
 TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1.0f, 1.0f);
+  auto* expr = Call(param.name, 1.0f, 1.0f);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -684,7 +684,7 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -703,9 +703,9 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+  auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -714,7 +714,7 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -741,9 +741,9 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                                          IntrinsicData{"step", "Step"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
-  auto expr = Call("distance", 1.0f, 1.0f);
+  auto* expr = Call("distance", 1.0f, 1.0f);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -752,7 +752,7 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -768,9 +768,9 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
-  auto expr = Call("distance", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+  auto* expr = Call("distance", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -779,7 +779,7 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -797,10 +797,10 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Cross) {
-  auto expr =
+  auto* expr =
       Call("cross", vec3<f32>(1.0f, 1.0f, 1.0f), vec3<f32>(1.0f, 1.0f, 1.0f));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -809,7 +809,7 @@ TEST_F(IntrinsicBuilderTest, Call_Cross) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -831,8 +831,8 @@ using Intrinsic_Builtin_ThreeParam_Float_Test =
 TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1.0f, 1.0f, 1.0f);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1.0f, 1.0f, 1.0f);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -841,7 +841,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -860,10 +860,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f),
-                   vec2<f32>(1.0f, 1.0f));
+  auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f),
+                    vec2<f32>(1.0f, 1.0f));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -872,7 +872,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -904,8 +904,8 @@ using Intrinsic_Builtin_SingleParam_Sint_Test =
 TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -914,7 +914,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -933,8 +933,8 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, vec2<i32>(1, 1));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, vec2<i32>(1, 1));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -943,7 +943,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -969,8 +969,8 @@ using Intrinsic_Builtin_SingleParam_Uint_Test =
 TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1u);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1u);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -979,7 +979,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -998,8 +998,8 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, vec2<u32>(1u, 1u));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, vec2<u32>(1u, 1u));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1008,7 +1008,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1034,8 +1034,8 @@ using Intrinsic_Builtin_DualParam_SInt_Test =
 TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1, 1);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1, 1);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1044,7 +1044,7 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1063,8 +1063,8 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1073,7 +1073,7 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1100,8 +1100,8 @@ using Intrinsic_Builtin_DualParam_UInt_Test =
 TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1u, 1u);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1u, 1u);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1110,7 +1110,7 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1129,8 +1129,8 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1139,7 +1139,7 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1166,8 +1166,8 @@ using Intrinsic_Builtin_ThreeParam_Sint_Test =
 TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1, 1, 1);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1, 1, 1);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1176,7 +1176,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1195,10 +1195,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr =
+  auto* expr =
       Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1), vec2<i32>(1, 1));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1207,7 +1207,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1233,8 +1233,8 @@ using Intrinsic_Builtin_ThreeParam_Uint_Test =
 TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
   auto param = GetParam();
 
-  auto expr = Call(param.name, 1u, 1u, 1u);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call(param.name, 1u, 1u, 1u);
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1243,7 +1243,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1262,10 +1262,10 @@ OpFunctionEnd
 TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
   auto param = GetParam();
 
-  auto expr =
+  auto* expr =
       Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1274,7 +1274,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 5u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -1297,9 +1297,9 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
 
 TEST_F(IntrinsicBuilderTest, Call_Determinant) {
   auto* var = Var("var", ast::StorageClass::kPrivate, ty.mat3x3<f32>());
-  auto expr = Call("determinant", "var");
+  auto* expr = Call("determinant", "var");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1309,7 +1309,7 @@ TEST_F(IntrinsicBuilderTest, Call_Determinant) {
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 11u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 11u) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(%12 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
@@ -1342,10 +1342,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
 
-  auto expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
-                                      Source{}, Expr("b"), Expr("a")));
+  auto* expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
+                                       Source{}, Expr("b"), Expr("a")));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1354,7 +1354,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(expr), 11u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()),
             R"(%2 = OpTypeVoid
@@ -1384,10 +1384,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
-  auto expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
-                                      Source{}, Expr("b"), Expr("a")));
+  auto* expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
+                                       Source{}, Expr("b"), Expr("a")));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1396,7 +1396,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(expr), 11u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()),
             R"(%2 = OpTypeVoid
@@ -1434,8 +1434,8 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
       create<ast::MemberAccessorExpression>(Source{}, Expr("b"), Expr("a")),
       {});
 
-  auto expr = Call("arrayLength", "ptr_var");
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Call("arrayLength", "ptr_var");
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ast::Function func(
       Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, ty.void_,
@@ -1444,7 +1444,7 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
 
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(&expr), 11u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(expr), 11u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"( ... )");
 

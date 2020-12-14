@@ -206,39 +206,37 @@ class Builder {
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const std::string& name) {
-    return create<IdentifierExpression>(Source{}, mod->RegisterSymbol(name),
-                                        name);
+    return create<IdentifierExpression>(mod->RegisterSymbol(name), name);
   }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const char* name) {
-    return create<IdentifierExpression>(Source{}, mod->RegisterSymbol(name),
-                                        name);
+    return create<IdentifierExpression>(mod->RegisterSymbol(name), name);
   }
 
   /// @param value the boolean value
   /// @return a Scalar constructor for the given value
   ScalarConstructorExpression* Expr(bool value) {
-    return create<ScalarConstructorExpression>(Source{}, Literal(value));
+    return create<ScalarConstructorExpression>(Literal(value));
   }
 
   /// @param value the float value
   /// @return a Scalar constructor for the given value
   ScalarConstructorExpression* Expr(f32 value) {
-    return create<ScalarConstructorExpression>(Source{}, Literal(value));
+    return create<ScalarConstructorExpression>(Literal(value));
   }
 
   /// @param value the integer value
   /// @return a Scalar constructor for the given value
   ScalarConstructorExpression* Expr(i32 value) {
-    return create<ScalarConstructorExpression>(Source{}, Literal(value));
+    return create<ScalarConstructorExpression>(Literal(value));
   }
 
   /// @param value the unsigned int value
   /// @return a Scalar constructor for the given value
   ScalarConstructorExpression* Expr(u32 value) {
-    return create<ScalarConstructorExpression>(Source{}, Literal(value));
+    return create<ScalarConstructorExpression>(Literal(value));
   }
 
   /// Converts `arg` to an `Expression` using `Expr()`, then appends it to
@@ -277,27 +275,19 @@ class Builder {
 
   /// @param val the boolan value
   /// @return a boolean literal with the given value
-  BoolLiteral* Literal(bool val) {
-    return create<BoolLiteral>(Source{}, ty.bool_, val);
-  }
+  BoolLiteral* Literal(bool val) { return create<BoolLiteral>(ty.bool_, val); }
 
   /// @param val the float value
   /// @return a float literal with the given value
-  FloatLiteral* Literal(f32 val) {
-    return create<FloatLiteral>(Source{}, ty.f32, val);
-  }
+  FloatLiteral* Literal(f32 val) { return create<FloatLiteral>(ty.f32, val); }
 
   /// @param val the unsigned int value
   /// @return a UintLiteral with the given value
-  UintLiteral* Literal(u32 val) {
-    return create<UintLiteral>(Source{}, ty.u32, val);
-  }
+  UintLiteral* Literal(u32 val) { return create<UintLiteral>(ty.u32, val); }
 
   /// @param val the integer value
   /// @return the SintLiteral with the given value
-  SintLiteral* Literal(i32 val) {
-    return create<SintLiteral>(Source{}, ty.i32, val);
-  }
+  SintLiteral* Literal(i32 val) { return create<SintLiteral>(ty.i32, val); }
 
   /// @param args the arguments for the type constructor
   /// @return an `TypeConstructorExpression` of type `ty`, with the values
@@ -482,9 +472,9 @@ class Builder {
   /// @returns a `CallExpression` to the function `func`, with the
   /// arguments of `args` converted to `Expression`s using `Expr()`.
   template <typename... ARGS>
-  CallExpression Call(const std::string& func, ARGS&&... args) {
-    return CallExpression(Source{}, Expr(func),
-                          ExprList(std::forward<ARGS>(args)...));
+  CallExpression* Call(const std::string& func, ARGS&&... args) {
+    return create<CallExpression>(Expr(func),
+                                  ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param lhs the left hand argument to the addition operation
@@ -492,7 +482,7 @@ class Builder {
   /// @returns a `BinaryExpression` summing the arguments `lhs` and `rhs`
   template <typename LHS, typename RHS>
   Expression* Add(LHS&& lhs, RHS&& rhs) {
-    return create<BinaryExpression>(Source{}, ast::BinaryOp::kAdd,
+    return create<BinaryExpression>(ast::BinaryOp::kAdd,
                                     Expr(std::forward<LHS>(lhs)),
                                     Expr(std::forward<RHS>(rhs)));
   }
@@ -502,7 +492,7 @@ class Builder {
   /// @returns a `BinaryExpression` subtracting `rhs` from `lhs`
   template <typename LHS, typename RHS>
   Expression* Sub(LHS&& lhs, RHS&& rhs) {
-    return create<BinaryExpression>(Source{}, ast::BinaryOp::kSubtract,
+    return create<BinaryExpression>(ast::BinaryOp::kSubtract,
                                     Expr(std::forward<LHS>(lhs)),
                                     Expr(std::forward<RHS>(rhs)));
   }
@@ -516,12 +506,53 @@ class Builder {
         Source{}, Expr(std::forward<ARR>(arr)), Expr(std::forward<IDX>(idx)));
   }
 
-  /// Creates a new `Node` owned by the Module. When the Module is
-  /// destructed, the `Node` will also be destructed.
+  /// Creates a new ast::Node owned by the Module, with the explicit Source.
+  /// When the Module is destructed, the `Node` will also be destructed.
+  /// @param source the source to apply to the Node
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
+  ast::traits::EnableIfIsType<T, ast::Node>* create(const Source& source,
+                                                    ARGS&&... args) {
+    return mod->create<T>(source, std::forward<ARGS>(args)...);
+  }
+
+  /// Creates a new ast::Node owned by the Module, with the explicit Source.
+  /// When the Module is destructed, the `Node` will also be destructed.
+  /// @param source the source to apply to the Node
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
+  template <typename T, typename... ARGS>
+  ast::traits::EnableIfIsType<T, ast::Node>* create(Source&& source,
+                                                    ARGS&&... args) {
+    return mod->create<T>(std::move(source), std::forward<ARGS>(args)...);
+  }
+
+  /// Creates a new ast::type::Type owned by the Module, using the Builder's
+  /// current Source. When the Module is destructed, the `Node` will also be
+  /// destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
+  template <typename T, typename... ARGS>
+  ast::traits::EnableIfIsType<T, ast::Node>* create(ARGS&&... args) {
+    return mod->create<T>(source_, std::forward<ARGS>(args)...);
+  }
+
+  /// Creates a new type::Type owned by the Module.
+  /// When the Module is destructed, owned Module and the returned `Type` will
+  /// also be destructed. Types are unique (de-aliased), and so calling create()
+  /// for the same `T` and arguments will return the same pointer.
+  /// @warning Use this method to acquire a type only if all of its type
+  /// information is provided in the constructor arguments `args`.<br>
+  /// If the type requires additional configuration after construction that
+  /// affect its fundamental type, build the type with `std::make_unique`, make
+  /// any necessary alterations and then call unique_type() instead.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the de-aliased type pointer
+  template <typename T, typename... ARGS>
+  traits::EnableIfIsType<T, ast::type::Type>* create(ARGS&&... args) {
+    static_assert(std::is_base_of<type::Type, T>::value,
+                  "T does not derive from type::Type");
     return mod->create<T>(std::forward<ARGS>(args)...);
   }
 
@@ -533,6 +564,9 @@ class Builder {
  protected:
   /// Called whenever a new variable is built with `Var()`.
   virtual void OnVariableBuilt(Variable*) {}
+
+  /// The source to use when creating AST nodes.
+  Source source_;
 };
 
 /// BuilderWithModule is a `Builder` that constructs and owns its `Module`.
