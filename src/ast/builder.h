@@ -300,7 +300,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* Construct(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.Of<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.Of<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param type the type to construct
@@ -310,7 +310,7 @@ class Builder {
   template <typename... ARGS>
   TypeConstructorExpression* Construct(type::Type* type, ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, type, ExprList(std::forward<ARGS>(args)...));
+        type, ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the vector constructor
@@ -319,7 +319,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* vec2(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.vec2<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.vec2<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the vector constructor
@@ -328,7 +328,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* vec3(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.vec3<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.vec3<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the vector constructor
@@ -337,7 +337,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* vec4(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.vec4<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.vec4<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -346,7 +346,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat2x2(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat2x2<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat2x2<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -355,7 +355,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat2x3(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat2x3<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat2x3<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -364,7 +364,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat2x4(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat2x4<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat2x4<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -373,7 +373,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat3x2(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat3x2<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat3x2<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -382,7 +382,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat3x3(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat3x3<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat3x3<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -391,7 +391,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat3x4(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat3x4<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat3x4<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -400,7 +400,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat4x2(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat4x2<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat4x2<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -409,7 +409,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat4x3(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat4x3<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat4x3<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the matrix constructor
@@ -418,7 +418,7 @@ class Builder {
   template <typename T, typename... ARGS>
   TypeConstructorExpression* mat4x4(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.mat4x4<T>(), ExprList(std::forward<ARGS>(args)...));
+        ty.mat4x4<T>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the array constructor
@@ -427,7 +427,7 @@ class Builder {
   template <typename T, int N = 0, typename... ARGS>
   TypeConstructorExpression* array(ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.array<T, N>(), ExprList(std::forward<ARGS>(args)...));
+        ty.array<T, N>(), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param subtype the array element type
@@ -440,7 +440,7 @@ class Builder {
                                    uint32_t n,
                                    ARGS&&... args) {
     return create<TypeConstructorExpression>(
-        Source{}, ty.array(subtype, n), ExprList(std::forward<ARGS>(args)...));
+        ty.array(subtype, n), ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param name the variable name
@@ -544,8 +544,8 @@ class Builder {
   /// @returns a `ArrayAccessorExpression` that indexes `arr` with `idx`
   template <typename ARR, typename IDX>
   Expression* Index(ARR&& arr, IDX&& idx) {
-    return create<ArrayAccessorExpression>(
-        Source{}, Expr(std::forward<ARR>(arr)), Expr(std::forward<IDX>(idx)));
+    return create<ArrayAccessorExpression>(Expr(std::forward<ARR>(arr)),
+                                           Expr(std::forward<IDX>(idx)));
   }
 
   /// @param obj the object for the member accessor expression
@@ -553,8 +553,8 @@ class Builder {
   /// @returns a `MemberAccessorExpression` that indexes `obj` with `idx`
   template <typename OBJ, typename IDX>
   Expression* Member(OBJ&& obj, IDX&& idx) {
-    return create<MemberAccessorExpression>(
-        Source{}, Expr(std::forward<OBJ>(obj)), Expr(std::forward<IDX>(idx)));
+    return create<MemberAccessorExpression>(Expr(std::forward<OBJ>(obj)),
+                                            Expr(std::forward<IDX>(idx)));
   }
 
   /// Creates a new Node owned by the Module, with the explicit Source.
