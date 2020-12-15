@@ -44,147 +44,105 @@ namespace {
 using HlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
-  ast::type::F32 f32;
-  ast::type::Alias alias(mod.RegisterSymbol("alias"), "alias", &f32);
+  ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", ty.f32);
 
   ASSERT_TRUE(gen.EmitType(out, &alias, "")) << gen.error();
   EXPECT_EQ(result(), "alias");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias_NameCollision) {
-  ast::type::F32 f32;
-  ast::type::Alias alias(mod.RegisterSymbol("bool"), "bool", &f32);
+  ast::type::Alias alias(mod->RegisterSymbol("bool"), "bool", ty.f32);
 
   ASSERT_TRUE(gen.EmitType(out, &alias, "")) << gen.error();
   EXPECT_EQ(result(), "bool_tint_0");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &a, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.array<bool, 4>(), "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &c, "ary")) << gen.error();
+  auto* arr = ty.array(ty.array<bool, 4>(), 5);
+  ASSERT_TRUE(gen.EmitType(out, arr, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4]");
 }
 
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(HlslGeneratorImplTest_Type,
        DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
-  ast::type::Array d(&c, 0, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &c, "ary")) << gen.error();
+  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
+  ASSERT_TRUE(gen.EmitType(out, arr, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4][1]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
-  ast::type::Array d(&c, 6, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &d, "ary")) << gen.error();
+  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
+  ASSERT_TRUE(gen.EmitType(out, arr, "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[6][5][4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_NameCollision) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &a, "bool")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.array<bool, 4>(), "bool")) << gen.error();
   EXPECT_EQ(result(), "bool bool_tint_0[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &a, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.array<bool, 4>(), "")) << gen.error();
   EXPECT_EQ(result(), "bool[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &a, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.array<bool>(), "ary")) << gen.error();
   EXPECT_EQ(result(), "bool ary[]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type,
        DISABLED_EmitType_RuntimeArray_NameCollision) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(out, &a, "double")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.array<bool>(), "double")) << gen.error();
   EXPECT_EQ(result(), "bool double_tint_0[]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
-  ast::type::Bool b;
-
-  ASSERT_TRUE(gen.EmitType(out, &b, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.bool_, "")) << gen.error();
   EXPECT_EQ(result(), "bool");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
-  ast::type::F32 f32;
-
-  ASSERT_TRUE(gen.EmitType(out, &f32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.f32, "")) << gen.error();
   EXPECT_EQ(result(), "float");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
-  ast::type::I32 i32;
-
-  ASSERT_TRUE(gen.EmitType(out, &i32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.i32, "")) << gen.error();
   EXPECT_EQ(result(), "int");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
-  ast::type::F32 f32;
-  ast::type::Matrix m(&f32, 3, 2);
-
-  ASSERT_TRUE(gen.EmitType(out, &m, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.mat2x3<f32>(), "")) << gen.error();
   EXPECT_EQ(result(), "float3x2");
 }
 
 // TODO(dsinclair): How to annotate as workgroup?
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
-  ast::type::F32 f32;
-  ast::type::Pointer p(&f32, ast::StorageClass::kWorkgroup);
+  ast::type::Pointer p(ty.f32, ast::StorageClass::kWorkgroup);
 
   ASSERT_TRUE(gen.EmitType(out, &p, "")) << gen.error();
   EXPECT_EQ(result(), "float*");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(
-      Source{}, "a", &i32, ast::StructMemberDecorationList{}));
+      "a", ty.i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
@@ -195,46 +153,38 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(
-      Source{}, "a", &i32, ast::StructMemberDecorationList{}));
+      "a", ty.i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), "S");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   ast::StructMemberDecorationList decos;
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(4));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
+  members.push_back(create<ast::StructMember>("a", ty.i32, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 32));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(32));
+  members.push_back(create<ast::StructMember>("b", ty.f32, decos));
 
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 128));
-  members.push_back(create<ast::StructMember>(Source{}, "c", &f32, decos));
+  decos.push_back(create<ast::StructMemberOffsetDecoration>(128));
+  members.push_back(create<ast::StructMember>("c", ty.f32, decos));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), R"(struct {
@@ -248,20 +198,16 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(
-      Source{}, "double", &i32, ast::StructMemberDecorationList{}));
+      "double", ty.i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  members.push_back(create<ast::StructMember>(Source{}, "float", &f32, b_deco));
+  members.push_back(create<ast::StructMember>("float", ty.f32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
@@ -273,23 +219,20 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   ast::StructMemberList members;
   members.push_back(create<ast::StructMember>(
-      Source{}, "a", &i32, ast::StructMemberDecorationList{}));
+      "a", ty.i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
 
   ast::StructDecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
+  decos.push_back(create<ast::StructBlockDecoration>());
 
-  auto* str = create<ast::Struct>(Source{}, members, decos);
+  auto* str = create<ast::Struct>(members, decos);
 
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(out, &s, "B")) << gen.error();
   EXPECT_EQ(result(), R"(struct B {
@@ -299,24 +242,17 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
-  ast::type::U32 u32;
-
-  ASSERT_TRUE(gen.EmitType(out, &u32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.u32, "")) << gen.error();
   EXPECT_EQ(result(), "uint");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
-  ast::type::F32 f32;
-  ast::type::Vector v(&f32, 3);
-
-  ASSERT_TRUE(gen.EmitType(out, &v, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.vec3<f32>(), "")) << gen.error();
   EXPECT_EQ(result(), "float3");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
-  ast::type::Void v;
-
-  ASSERT_TRUE(gen.EmitType(out, &v, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.void_, "")) << gen.error();
   EXPECT_EQ(result(), "void");
 }
 
@@ -374,8 +310,7 @@ using HlslSampledtexturesTest = TestParamHelper<HlslTextureData>;
 TEST_P(HlslSampledtexturesTest, Emit) {
   auto params = GetParam();
 
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(params.dim, &f32);
+  ast::type::SampledTexture s(params.dim, ty.f32);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
@@ -396,8 +331,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "TextureCubeArray"}));
 
 TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
-  ast::type::F32 f32;
-  ast::type::MultisampledTexture s(ast::type::TextureDimension::k2d, &f32);
+  ast::type::MultisampledTexture s(ast::type::TextureDimension::k2d, ty.f32);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), "Texture2D");

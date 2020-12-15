@@ -28,15 +28,13 @@ namespace {
 using HlslGeneratorImplTest_Assign = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("lhs"), "lhs");
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("rhs"), "rhs");
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
+  auto* lhs = Expr("lhs");
+  auto* rhs = Expr("rhs");
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), "  lhs = rhs;\n");
 }
 

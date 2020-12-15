@@ -71,50 +71,22 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_Select) {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
-  ast::type::F32 f32;
-  ast::type::Vector vec2(&f32, 2);
-  ast::type::Vector vec3(&f32, 3);
+  auto* a = Var("a", ast::StorageClass::kNone, ty.vec2<f32>());
+  auto* b = Var("b", ast::StorageClass::kNone, ty.vec3<f32>());
 
-  auto* a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &vec2,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* b =
-      create<ast::Variable>(Source{},                        // source
-                            "b",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &vec3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("a"), "a"));
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("b"), "b"));
-
-  ast::CallExpression call(
-      Source{},
-      create<ast::IdentifierExpression>(
-          Source{}, mod.RegisterSymbol("outer_product"), "outer_product"),
-      params);
+  auto* call = Call("outer_product", "a", "b");
 
   td.RegisterVariableForTesting(a);
   td.RegisterVariableForTesting(b);
 
-  mod.AddGlobalVariable(a);
-  mod.AddGlobalVariable(b);
+  mod->AddGlobalVariable(a);
+  mod->AddGlobalVariable(b);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_EQ(result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
 }
 
@@ -123,32 +95,18 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Bad_Name) {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
+  auto* call = Call("dot", "param1", "param2");
 
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
+  auto* v1 = Var("param1", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* v2 = Var("param2", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::CallExpression call(Source{},
-                           create<ast::IdentifierExpression>(
-                               Source{}, mod.RegisterSymbol("dot"), "dot"),
-                           params);
+  td.RegisterVariableForTesting(v1);
+  td.RegisterVariableForTesting(v2);
 
-  ast::Variable v1(Source{}, "param1", ast::StorageClass::kFunction, &vec,
-                   false, nullptr, ast::VariableDecorationList{});
-  ast::Variable v2(Source{}, "param2", ast::StorageClass::kFunction, &vec,
-                   false, nullptr, ast::VariableDecorationList{});
-
-  td.RegisterVariableForTesting(&v1);
-  td.RegisterVariableForTesting(&v2);
-
-  ASSERT_TRUE(td.DetermineResultType(&call)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_EQ(result(), "  dot(param1, param2)");
 }
 

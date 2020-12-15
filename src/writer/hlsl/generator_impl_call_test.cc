@@ -30,64 +30,41 @@ namespace {
 using HlslGeneratorImplTest_Call = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
-  ast::type::Void void_type;
-
-  auto* id = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func");
-  ast::CallExpression call(Source{}, id, {});
+  auto* call = Call("my_func");
 
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
+      create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_EQ(result(), "my_func()");
 }
 
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
-  ast::type::Void void_type;
-
-  auto* id = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func");
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
-  ast::CallExpression call(Source{}, id, params);
+  auto* call = Call("my_func", "param1", "param2");
 
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
+      create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &call)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_EQ(result(), "my_func(param1, param2)");
 }
 
 TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
-  ast::type::Void void_type;
-
-  auto* id = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func");
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
-  ast::CallStatement call(Source{},
-                          create<ast::CallExpression>(Source{}, id, params));
+  auto* call = create<ast::CallStatement>(Call("my_func", "param1", "param2"));
 
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
+      create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitStatement(out, &call)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, call)) << gen.error();
   EXPECT_EQ(result(), "  my_func(param1, param2);\n");
 }
 

@@ -29,8 +29,7 @@ namespace {
 using HlslGeneratorImplTest_Alias = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
-  ast::type::F32 f32;
-  ast::type::Alias alias(mod.RegisterSymbol("a"), "a", &f32);
+  ast::type::Alias alias(mod->RegisterSymbol("a"), "a", ty.f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float a;
@@ -38,8 +37,7 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
-  ast::type::F32 f32;
-  ast::type::Alias alias(mod.RegisterSymbol("float"), "float", &f32);
+  ast::type::Alias alias(mod->RegisterSymbol("float"), "float", ty.f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float float_tint_0;
@@ -47,23 +45,20 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   auto* str = create<ast::Struct>(
-      Source{},
+
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, "a", &f32,
+          create<ast::StructMember>("a", ty.f32,
                                     ast::StructMemberDecorationList{}),
           create<ast::StructMember>(
-              Source{}, "b", &i32,
+              "b", ty.i32,
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 4)}),
+                  create<ast::StructMemberOffsetDecoration>(4)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("A"), "A", str);
-  ast::type::Alias alias(mod.RegisterSymbol("B"), "B", &s);
+  ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
+  ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
   EXPECT_EQ(result(), R"(struct B {

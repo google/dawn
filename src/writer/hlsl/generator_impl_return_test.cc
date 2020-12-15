@@ -28,20 +28,18 @@ namespace {
 using HlslGeneratorImplTest_Return = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
-  ast::ReturnStatement r(Source{});
+  auto* r = create<ast::ReturnStatement>();
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &r)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, r)) << gen.error();
   EXPECT_EQ(result(), "  return;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
-  auto* expr = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("expr"), "expr");
-  ast::ReturnStatement r(Source{}, expr);
+  auto* r = create<ast::ReturnStatement>(Expr("expr"));
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &r)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, r)) << gen.error();
   EXPECT_EQ(result(), "  return expr;\n");
 }
 

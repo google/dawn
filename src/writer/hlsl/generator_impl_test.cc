@@ -30,10 +30,10 @@ using HlslGeneratorImplTest = TestHelper;
 TEST_F(HlslGeneratorImplTest, Generate) {
   ast::type::Void void_type;
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      &void_type, create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(void my_func() {
@@ -57,9 +57,7 @@ TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
 TEST_F(HlslGeneratorImplTest, NameConflictWith_InputStructName) {
   ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
 
-  ast::IdentifierExpression ident(Source{}, mod.RegisterSymbol("func_main_in"),
-                                  "func_main_in");
-  ASSERT_TRUE(gen.EmitIdentifier(pre, out, &ident));
+  ASSERT_TRUE(gen.EmitIdentifier(pre, out, Expr("func_main_in")));
   EXPECT_EQ(result(), "func_main_in_0");
 }
 

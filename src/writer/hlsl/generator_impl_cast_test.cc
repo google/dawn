@@ -29,29 +29,14 @@ namespace {
 using HlslGeneratorImplTest_Cast = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
-  ast::type::F32 f32;
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("id"), "id"));
-
-  ast::TypeConstructorExpression cast(Source{}, &f32, params);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &cast)) << gen.error();
+  auto* cast = Construct<f32>("id");
+  ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
   EXPECT_EQ(result(), "float(id)");
 }
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
-  ast::ExpressionList params;
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("id"), "id"));
-
-  ast::TypeConstructorExpression cast(Source{}, &vec3, params);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &cast)) << gen.error();
+  auto* cast = vec3<f32>("id");
+  ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
   EXPECT_EQ(result(), "float3(id)");
 }
 

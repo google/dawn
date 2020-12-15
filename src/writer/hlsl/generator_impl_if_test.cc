@@ -27,16 +27,14 @@ namespace {
 using HlslGeneratorImplTest_If = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_If, Emit_If) {
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  ast::IfStatement i(Source{}, cond, body, ast::ElseStatementList{});
+  auto* cond = Expr("cond");
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
+  auto* i = create<ast::IfStatement>(cond, body, ast::ElseStatementList{});
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   }
@@ -44,26 +42,22 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
-  auto* else_cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
-  auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* else_cond = Expr("else_cond");
+  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  ast::IfStatement i(
-      Source{}, cond, body,
-      {create<ast::ElseStatement>(Source{}, else_cond, else_body)});
+  auto* cond = Expr("cond");
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
+  auto* i = create<ast::IfStatement>(
+      cond, body,
+      ast::ElseStatementList{create<ast::ElseStatement>(else_cond, else_body)});
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else {
@@ -75,24 +69,21 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
-  auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  ast::IfStatement i(
-      Source{}, cond, body,
-      {create<ast::ElseStatement>(Source{}, nullptr, else_body)});
+  auto* cond = Expr("cond");
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
+  auto* i = create<ast::IfStatement>(
+      cond, body,
+      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else {
@@ -102,35 +93,30 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
-  auto* else_cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
+  auto* else_cond = Expr("else_cond");
 
-  auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
 
-  auto* else_body_2 = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* else_body_2 = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  ast::IfStatement i(
-      Source{}, cond, body,
-      {
-          create<ast::ElseStatement>(Source{}, else_cond, else_body),
-          create<ast::ElseStatement>(Source{}, nullptr, else_body_2),
+  auto* cond = Expr("cond");
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
+  auto* i = create<ast::IfStatement>(
+      cond, body,
+      ast::ElseStatementList{
+          create<ast::ElseStatement>(else_cond, else_body),
+          create<ast::ElseStatement>(nullptr, else_body_2),
       });
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
   } else {

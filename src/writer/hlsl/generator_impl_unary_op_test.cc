@@ -37,11 +37,10 @@ using HlslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(HlslUnaryOpTest, Emit) {
   auto params = GetParam();
 
-  auto* expr = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("expr"), "expr");
-  ast::UnaryOpExpression op(Source{}, params.op, expr);
+  auto* expr = Expr("expr");
+  auto* op = create<ast::UnaryOpExpression>(params.op, expr);
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &op)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
   EXPECT_EQ(result(), std::string(params.name) + "(expr)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_UnaryOp,

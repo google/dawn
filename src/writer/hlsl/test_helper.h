@@ -21,7 +21,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/ast/module.h"
+#include "src/ast/builder.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
 
@@ -31,9 +31,9 @@ namespace hlsl {
 
 /// Helper class for testing
 template <typename BODY>
-class TestHelperBase : public BODY {
+class TestHelperBase : public BODY, public ast::BuilderWithModule {
  public:
-  TestHelperBase() : td(&mod), gen(&mod) {}
+  TestHelperBase() : td(mod), gen(mod) {}
   ~TestHelperBase() = default;
 
   /// @returns the result string
@@ -42,17 +42,6 @@ class TestHelperBase : public BODY {
   /// @returns the pre result string
   std::string pre_result() const { return pre.str(); }
 
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
-  /// @param args the arguments to pass to the type constructor
-  /// @returns the node pointer  template <typename T, typename... ARGS>
-  template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
-    return mod.create<T>(std::forward<ARGS>(args)...);
-  }
-
-  /// The module
-  ast::Module mod;
   /// The type determiner
   TypeDeterminer td;
   /// The generator

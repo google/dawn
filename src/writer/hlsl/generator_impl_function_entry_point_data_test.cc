@@ -23,10 +23,6 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
@@ -48,62 +44,34 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
+  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(0),
+                      });
 
-  auto* foo_var =
-      create<ast::Variable>(Source{},                   // source
-                            "foo",                      // name
-                            ast::StorageClass::kInput,  // storage_class
-                            &f32,                       // type
-                            false,                      // is_const
-                            nullptr,                    // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 0),
-                            });
-
-  auto* bar_var =
-      create<ast::Variable>(Source{},                   // source
-                            "bar",                      // name
-                            ast::StorageClass::kInput,  // storage_class
-                            &i32,                       // type
-                            false,                      // is_const
-                            nullptr,                    // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 1),
-                            });
+  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(1),
+                      });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(foo_var);
-  mod.AddGlobalVariable(bar_var);
+  mod->AddGlobalVariable(foo_var);
+  mod->AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo")),
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar")),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
+      mod->RegisterSymbol("vtx_main"), "vtx_main", params, ty.f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
 
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   std::unordered_set<std::string> globals;
 
@@ -127,63 +95,35 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
+  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(0),
+                      });
 
-  auto* foo_var =
-      create<ast::Variable>(Source{},                    // source
-                            "foo",                       // name
-                            ast::StorageClass::kOutput,  // storage_class
-                            &f32,                        // type
-                            false,                       // is_const
-                            nullptr,                     // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 0),
-                            });
-
-  auto* bar_var =
-      create<ast::Variable>(Source{},                    // source
-                            "bar",                       // name
-                            ast::StorageClass::kOutput,  // storage_class
-                            &i32,                        // type
-                            false,                       // is_const
-                            nullptr,                     // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 1),
-                            });
+  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(1),
+                      });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(foo_var);
-  mod.AddGlobalVariable(bar_var);
+  mod->AddGlobalVariable(foo_var);
+  mod->AddGlobalVariable(bar_var);
 
   ast::VariableList params;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo")),
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar")),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("vtx_main"), "vtx_main", params, &f32, body,
+      mod->RegisterSymbol("vtx_main"), "vtx_main", params, ty.f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
 
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   std::unordered_set<std::string> globals;
 
@@ -207,63 +147,35 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
+  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(0),
+                      });
 
-  auto* foo_var =
-      create<ast::Variable>(Source{},                   // source
-                            "foo",                      // name
-                            ast::StorageClass::kInput,  // storage_class
-                            &f32,                       // type
-                            false,                      // is_const
-                            nullptr,                    // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 0),
-                            });
-
-  auto* bar_var =
-      create<ast::Variable>(Source{},                   // source
-                            "bar",                      // name
-                            ast::StorageClass::kInput,  // storage_class
-                            &i32,                       // type
-                            false,                      // is_const
-                            nullptr,                    // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 1),
-                            });
+  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(1),
+                      });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(foo_var);
-  mod.AddGlobalVariable(bar_var);
+  mod->AddGlobalVariable(foo_var);
+  mod->AddGlobalVariable(bar_var);
 
   ast::VariableList params;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo")),
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar")),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
+      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
 
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   std::unordered_set<std::string> globals;
 
@@ -287,62 +199,34 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : SV_Target1;
   // };
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
+  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(0),
+                      });
 
-  auto* foo_var =
-      create<ast::Variable>(Source{},                    // source
-                            "foo",                       // name
-                            ast::StorageClass::kOutput,  // storage_class
-                            &f32,                        // type
-                            false,                       // is_const
-                            nullptr,                     // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 0),
-                            });
-
-  auto* bar_var =
-      create<ast::Variable>(Source{},                    // source
-                            "bar",                       // name
-                            ast::StorageClass::kOutput,  // storage_class
-                            &i32,                        // type
-                            false,                       // is_const
-                            nullptr,                     // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 1),
-                            });
+  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(1),
+                      });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(foo_var);
-  mod.AddGlobalVariable(bar_var);
+  mod->AddGlobalVariable(foo_var);
+  mod->AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo")),
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar")),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
+      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
 
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   std::unordered_set<std::string> globals;
 
@@ -363,62 +247,34 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //
   // -> Error, not allowed
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
+  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(0),
+                      });
 
-  auto* foo_var =
-      create<ast::Variable>(Source{},                   // source
-                            "foo",                      // name
-                            ast::StorageClass::kInput,  // storage_class
-                            &f32,                       // type
-                            false,                      // is_const
-                            nullptr,                    // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 0),
-                            });
-
-  auto* bar_var =
-      create<ast::Variable>(Source{},                   // source
-                            "bar",                      // name
-                            ast::StorageClass::kInput,  // storage_class
-                            &i32,                       // type
-                            false,                      // is_const
-                            nullptr,                    // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 1),
-                            });
+  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(1),
+                      });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(foo_var);
-  mod.AddGlobalVariable(bar_var);
+  mod->AddGlobalVariable(foo_var);
+  mod->AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo")),
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar")),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
+      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
+          create<ast::StageDecoration>(ast::PipelineStage::kCompute),
       });
 
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   std::unordered_set<std::string> globals;
 
@@ -434,62 +290,34 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //
   // -> Error not allowed
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
+  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(0),
+                      });
 
-  auto* foo_var =
-      create<ast::Variable>(Source{},                    // source
-                            "foo",                       // name
-                            ast::StorageClass::kOutput,  // storage_class
-                            &f32,                        // type
-                            false,                       // is_const
-                            nullptr,                     // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 0),
-                            });
-
-  auto* bar_var =
-      create<ast::Variable>(Source{},                    // source
-                            "bar",                       // name
-                            ast::StorageClass::kOutput,  // storage_class
-                            &i32,                        // type
-                            false,                       // is_const
-                            nullptr,                     // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::LocationDecoration>(Source{}, 1),
-                            });
+  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32, nullptr,
+                      ast::VariableDecorationList{
+                          create<ast::LocationDecoration>(1),
+                      });
 
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod.AddGlobalVariable(foo_var);
-  mod.AddGlobalVariable(bar_var);
+  mod->AddGlobalVariable(foo_var);
+  mod->AddGlobalVariable(bar_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("foo"), "foo")),
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("bar"), "bar")),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("main"), "main", params, &f32, body,
+      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
+          create<ast::StageDecoration>(ast::PipelineStage::kCompute),
       });
 
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   std::unordered_set<std::string> globals;
 
@@ -511,61 +339,35 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   float depth : SV_Depth;
   // };
 
-  ast::type::F32 f32;
-  ast::type::Void void_type;
-  ast::type::Vector vec4(&f32, 4);
+  auto* coord_var =
+      Var("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+          ast::VariableDecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
+          });
 
-  auto* coord_var = create<ast::Variable>(
-      Source{},                   // source
-      "coord",                    // name
-      ast::StorageClass::kInput,  // storage_class
-      &vec4,                      // type
-      false,                      // is_const
-      nullptr,                    // constructor
-      ast::VariableDecorationList{
-          // decorations
-          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragCoord),
-      });
-
-  auto* depth_var = create<ast::Variable>(
-      Source{},                    // source
-      "depth",                     // name
-      ast::StorageClass::kOutput,  // storage_class
-      &f32,                        // type
-      false,                       // is_const
-      nullptr,                     // constructor
-      ast::VariableDecorationList{
-          // decorations
-          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kFragDepth),
-      });
+  auto* depth_var =
+      Var("depth", ast::StorageClass::kOutput, ty.f32, nullptr,
+          ast::VariableDecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
+          });
 
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod.AddGlobalVariable(coord_var);
-  mod.AddGlobalVariable(depth_var);
+  mod->AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(depth_var);
 
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod.RegisterSymbol("depth"), "depth"),
-                        create<ast::MemberAccessorExpression>(
-                            Source{},
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod.RegisterSymbol("coord"), "coord"),
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod.RegisterSymbol("x"), "x"))),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("depth"), Member("coord", "x")),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("main"), "main", params, &void_type, body,
+      mod->RegisterSymbol("main"), "main", params, ty.void_, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
 
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   std::unordered_set<std::string> globals;
 

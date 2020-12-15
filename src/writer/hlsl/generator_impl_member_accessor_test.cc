@@ -16,8 +16,6 @@
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
-#include "src/ast/binary_expression.h"
-#include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
@@ -27,10 +25,6 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -46,40 +40,25 @@ namespace {
 using HlslGeneratorImplTest_MemberAccessor = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
-  ast::type::F32 f32;
-
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "mem", &f32, deco));
+  deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("mem", ty.f32, deco));
 
-  auto* strct =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* strct = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Str"), "Str", strct);
+  ast::type::Struct s(mod->RegisterSymbol("Str"), "Str", strct);
 
-  auto* str_var =
-      create<ast::Variable>(Source{},                        // source
-                            "str",                           // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &s,                              // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* str_var = Var("str", ast::StorageClass::kPrivate, &s);
 
-  auto* str = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("str"), "str");
-  auto* mem = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mem"), "mem");
-
-  ast::MemberAccessorExpression expr(Source{}, str, mem);
+  auto* expr = Member("str", "mem");
 
   td.RegisterVariableForTesting(str_var);
   gen.register_global(str_var);
-  mod.AddGlobalVariable(str_var);
+  mod->AddGlobalVariable(str_var);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "str.mem");
 }
 
@@ -93,47 +72,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.b;
   //
   // -> asfloat(data.Load(4));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                        "b"));
+  auto* expr = Member("data", "b");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
+  ASSERT_TRUE(td.DetermineResultType(expr));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load(4))");
 }
 
@@ -147,47 +111,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a;
   //
   // -> asint(data.Load(0));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                        "a"));
+  auto* expr = Member("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
+  ASSERT_TRUE(td.DetermineResultType(expr));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asint(data.Load(0))");
 }
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -203,66 +152,42 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> float3x2 _tint_tmp = b;
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]));
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 3, 2);
 
   auto* str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "z", &i32,
+              "z", ty.i32,
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              Source{}, "a", &mat,
+              "a", ty.mat2x3<f32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 4)}),
+                  create<ast::StructMemberOffsetDecoration>(4)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* b_var =
-      create<ast::Variable>(Source{},                        // source
-                            "b",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &mat,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* b_var = Var("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                        "a"));
-  auto* rhs =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
+  auto* lhs = Member("data", "a");
+  auto* rhs = Expr("b");
 
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(b_var);
   gen.register_global(coord_var);
   gen.register_global(b_var);
-  mod.AddGlobalVariable(coord_var);
-  mod.AddGlobalVariable(b_var);
+  mod->AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(b_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&assign));
+  ASSERT_TRUE(td.DetermineResultType(assign));
 
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(float3x2 _tint_tmp = b;
 data.Store3(4 + 0, asuint(_tint_tmp[0]));
 data.Store3(4 + 16, asuint(_tint_tmp[1]));
@@ -282,52 +207,35 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // 0.0f, 0.0f, 0.0f);
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]);
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 3, 2);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("a", ty.mat2x3<f32>(), b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                        "a"));
-  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &mat,
-                                                     ast::ExpressionList{});
+  auto* lhs = Member("data", "a");
+  auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
 
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&assign));
+  ASSERT_TRUE(td.DetermineResultType(assign));
 
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(
       result(),
       R"(float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -347,48 +255,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8),
   // data.Load2(4 + 16)));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 2, 3);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("a", ty.mat3x2<f32>(), b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                        "a"));
+  auto* expr = Member("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
+  ASSERT_TRUE(td.DetermineResultType(expr));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             "asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8), "
             "data.Load2(4 + 16)))");
@@ -408,48 +300,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.b.a;
   //
   // -> asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 3, 2);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("a", ty.mat2x3<f32>(), b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                        "a"));
+  auto* expr = Member("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
+  ASSERT_TRUE(td.DetermineResultType(expr));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             "asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)))");
 }
@@ -465,44 +341,28 @@ TEST_F(
   //
   // -> asfloat(uint3x3(data.Load3(0), data.Load3(16),
   // data.Load3(32)));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 3, 3);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
-  deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, deco));
+  deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", ty.mat3x3<f32>(), deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                        "a"));
+  auto* expr = Member("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
+  ASSERT_TRUE(td.DetermineResultType(expr));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             "asfloat(uint3x3(data.Load3(0 + 0), data.Load3(0 + 16), "
             "data.Load3(0 + 32)))");
@@ -518,56 +378,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[2][1];
   //
   // -> asfloat(data.Load((2 * 16) + (1 * 4) + 16)))
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Matrix mat(&f32, 3, 4);
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "z", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &mat, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16));
+  members.push_back(create<ast::StructMember>("a", ty.mat4x3<f32>(), b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::ArrayAccessorExpression>(
-          Source{},
-          create<ast::MemberAccessorExpression>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod.RegisterSymbol("data"), "data"),
-              create<ast::IdentifierExpression>(Source{},
-                                                mod.RegisterSymbol("a"), "a")),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
+  auto* expr = Index(Index(Member("data", "a"), Expr(2)), Expr(1));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr));
+  ASSERT_TRUE(td.DetermineResultType(expr));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + (16 * 2) + 16))");
 }
 
@@ -580,51 +416,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[2];
   //
   // -> asint(data.Load((2 * 4));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Array ary(&i32, 5,
+  ast::type::Array ary(ty.i32, 5,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 4),
+                           create<ast::StrideDecoration>(4),
                        });
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &ary, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("data"), "data"),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                            "a")),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
+  auto* expr = Index(Member("data", "a"), Expr(2));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asint(data.Load((4 * 2) + 0))");
 }
 
@@ -637,59 +454,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[(2 + 4) - 3];
   //
   // -> asint(data.Load((4 * ((2 + 4) - 3)));
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Array ary(&i32, 5,
+  ast::type::Array ary(ty.i32, 5,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 4),
+                           create<ast::StrideDecoration>(4),
                        });
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &ary, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("data"), "data"),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                            "a")),
-      create<ast::BinaryExpression>(
-          Source{}, ast::BinaryOp::kSubtract,
-          create<ast::BinaryExpression>(
-              Source{}, ast::BinaryOp::kAdd,
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 4))),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))));
+  auto* expr = Index(Member("data", "a"), Sub(Add(Expr(2), Expr(4)), Expr(3)));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asint(data.Load((4 * ((2 + 4) - 3)) + 0))");
 }
 
@@ -704,50 +494,33 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store(0, asuint(2.0f));
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                        "b"));
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f));
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
+  auto* lhs = Member("data", "b");
+  auto* rhs = Expr(2.0f);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(assign));
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(data.Store(4, asuint(2.0f));
 )");
 }
@@ -762,54 +535,34 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store((2 * 4), asuint(2.3f));
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Array ary(&i32, 5,
+  ast::type::Array ary(ty.i32, 5,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 4),
+                           create<ast::StrideDecoration>(4),
                        });
 
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &ary, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = create<ast::ArrayAccessorExpression>(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::IdentifierExpression>(Source{},
-                                            mod.RegisterSymbol("data"), "data"),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                            "a")),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)));
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
+  auto* lhs = Index(Member("data", "a"), Expr(2));
+  auto* rhs = Expr(2);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(data.Store((4 * 2) + 0, asuint(2));
 )");
 }
@@ -825,50 +578,33 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store(0, asuint(2));
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
+  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                        "a"));
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
+  auto* lhs = Member("data", "a");
+  auto* rhs = Expr(2);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(assign));
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(data.Store(0, asuint(2));
 )");
 }
@@ -884,49 +620,31 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load(16));
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &ivec3, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", ty.vec3<i32>(), a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &fvec3, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16));
+  members.push_back(create<ast::StructMember>("b", ty.vec3<f32>(), b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                        "b"));
+  auto* expr = Member("data", "b");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16))");
 }
 
@@ -941,60 +659,34 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store(16, asuint(float3(2.3f, 1.2f, 0.2f)));
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "a", &ivec3, a_deco));
+  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
+  members.push_back(create<ast::StructMember>("a", ty.vec3<i32>(), a_deco));
 
   ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &fvec3, b_deco));
+  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16));
+  members.push_back(create<ast::StructMember>("b", ty.vec3<f32>(), b_deco));
 
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("Data"), "Data", str);
+  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &s,                                 // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lit1 = create<ast::FloatLiteral>(Source{}, &f32, 1.f);
-  auto* lit2 = create<ast::FloatLiteral>(Source{}, &f32, 2.f);
-  auto* lit3 = create<ast::FloatLiteral>(Source{}, &f32, 3.f);
-  ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit1));
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit2));
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit3));
+  auto* lhs = Member("data", "b");
+  auto* rhs = vec3<f32>(1.f, 2.f, 3.f);
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("data"),
-                                        "data"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                        "b"));
-  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &fvec3, values);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(assign));
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(),
             R"(data.Store3(16, asuint(float3(1.0f, 2.0f, 3.0f)));
 )");
@@ -1015,76 +707,49 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load3(16 + (2 * 32)))
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   auto* data_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "a", &ivec3,
+              "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              Source{}, "b", &fvec3,
+              "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 16)}),
+                  create<ast::StructMemberOffsetDecoration>(16)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
+  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 32),
+                           create<ast::StrideDecoration>(32),
                        });
 
   auto* pre_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "c", &ary,
+              "c", &ary,
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
+  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &pre_struct,                        // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::ArrayAccessorExpression>(
-          Source{},
-          create<ast::MemberAccessorExpression>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod.RegisterSymbol("data"), "data"),
-              create<ast::IdentifierExpression>(Source{},
-                                                mod.RegisterSymbol("c"), "c")),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                        "b"));
+  auto* expr = Member(Index(Member("data", "c"), Expr(2)), "b");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0))");
 }
 
@@ -1103,80 +768,48 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load3(16 + (2 * 32))).xy
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
 
   auto* data_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "a", &ivec3,
+              "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              Source{}, "b", &fvec3,
+              "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 16)}),
+                  create<ast::StructMemberOffsetDecoration>(16)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
+  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(
-      &data, 4,
-      ast::ArrayDecorationList{create<ast::StrideDecoration>(Source{}, 32)});
+      &data, 4, ast::ArrayDecorationList{create<ast::StrideDecoration>(32)});
 
   auto* pre_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{create<ast::StructMember>(
-          Source{}, "c", &ary,
+          "c", &ary,
           ast::StructMemberDecorationList{
-              create<ast::StructMemberOffsetDecoration>(Source{}, 0)})},
+              create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
+  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &pre_struct,                        // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::ArrayAccessorExpression>(
-              Source{},
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("data"), "data"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("c"), "c")),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                            "b")),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("xy"),
-                                        "xy"));
+  auto* expr = Member(Member(Index(Member("data", "c"), Expr(2)), "b"), "xy");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0)).xy");
 }
 
@@ -1196,78 +829,47 @@ TEST_F(
   //
   // -> asfloat(data.Load((4 * 1) + 16 + (2 * 32) + 0))
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   auto* data_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "a", &ivec3,
+              "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              Source{}, "b", &fvec3,
+              "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 16)}),
+                  create<ast::StructMemberOffsetDecoration>(16)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
+  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 32),
+                           create<ast::StrideDecoration>(32),
                        });
 
   auto* pre_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{create<ast::StructMember>(
-          Source{}, "c", &ary,
+          "c", &ary,
           ast::StructMemberDecorationList{
-              create<ast::StructMemberOffsetDecoration>(Source{}, 0)})},
+              create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
+  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &pre_struct,                        // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ast::MemberAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::ArrayAccessorExpression>(
-              Source{},
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("data"), "data"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("c"), "c")),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                            "b")),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("g"),
-                                        "g"));
+  auto* expr = Member(Member(Index(Member("data", "c"), Expr(2)), "b"), "g");
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
 
@@ -1286,78 +888,47 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load(4 + 16 + (2 * 32)))
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   auto* data_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "a", &ivec3,
+              "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              Source{}, "b", &fvec3,
+              "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 16)}),
+                  create<ast::StructMemberOffsetDecoration>(16)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
+  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 32),
+                           create<ast::StrideDecoration>(32),
                        });
 
   auto* pre_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{create<ast::StructMember>(
-          Source{}, "c", &ary,
+          "c", &ary,
           ast::StructMemberDecorationList{
-              create<ast::StructMemberOffsetDecoration>(Source{}, 0)})},
+              create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
+  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &pre_struct,                        // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ast::ArrayAccessorExpression expr(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::ArrayAccessorExpression>(
-              Source{},
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("data"), "data"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("c"), "c")),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                            "b")),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
+  auto* expr = Index(Member(Index(Member("data", "c"), Expr(2)), "b"), Expr(1));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
 
@@ -1376,86 +947,50 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store3(16 + (2 * 32), asuint(float3(1.0f, 2.0f, 3.0f)));
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   auto* data_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "a", &ivec3,
+              "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              Source{}, "b", &fvec3,
+              "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 16)}),
+                  create<ast::StructMemberOffsetDecoration>(16)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
+  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 32),
+                           create<ast::StrideDecoration>(32),
                        });
 
   auto* pre_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{create<ast::StructMember>(
-          Source{}, "c", &ary,
+          "c", &ary,
           ast::StructMemberDecorationList{
-              create<ast::StructMemberOffsetDecoration>(Source{}, 0)})},
+              create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
+  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &pre_struct,                        // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::ArrayAccessorExpression>(
-          Source{},
-          create<ast::MemberAccessorExpression>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod.RegisterSymbol("data"), "data"),
-              create<ast::IdentifierExpression>(Source{},
-                                                mod.RegisterSymbol("c"), "c")),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                        "b"));
+  auto* lhs = Member(Index(Member("data", "c"), Expr(2)), "b");
 
-  auto* lit1 = create<ast::FloatLiteral>(Source{}, &f32, 1.f);
-  auto* lit2 = create<ast::FloatLiteral>(Source{}, &f32, 2.f);
-  auto* lit3 = create<ast::FloatLiteral>(Source{}, &f32, 3.f);
-  ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit1));
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit2));
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit3));
+  auto* assign =
+      create<ast::AssignmentStatement>(lhs, vec3<f32>(1.f, 2.f, 3.f));
 
-  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &fvec3, values);
-
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(assign));
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(),
             R"(data.Store3(16 + (32 * 2) + 0, asuint(float3(1.0f, 2.0f, 3.0f)));
 )");
@@ -1476,83 +1011,50 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store((4 * 1) + 16 + (2 * 32) + 0, asuint(1.0f));
 
-  ast::type::F32 f32;
-  ast::type::I32 i32;
-  ast::type::Vector ivec3(&i32, 3);
-  ast::type::Vector fvec3(&f32, 3);
-
   auto* data_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "a", &ivec3,
+              "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 0)}),
+                  create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              Source{}, "b", &fvec3,
+              "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 16)}),
+                  create<ast::StructMemberOffsetDecoration>(16)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod.RegisterSymbol("Data"), "Data", data_str);
+  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
 
   ast::type::Array ary(&data, 4,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 32),
+                           create<ast::StrideDecoration>(32),
                        });
 
   auto* pre_str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{create<ast::StructMember>(
-          Source{}, "c", &ary,
+          "c", &ary,
           ast::StructMemberDecorationList{
-              create<ast::StructMemberOffsetDecoration>(Source{}, 0)})},
+              create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod.RegisterSymbol("Pre"), "Pre", pre_str);
+  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
 
-  auto* coord_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &pre_struct,                        // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{});     // decorations
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
-  mod.AddGlobalVariable(coord_var);
+  mod->AddGlobalVariable(coord_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::MemberAccessorExpression>(
-          Source{},
-          create<ast::ArrayAccessorExpression>(
-              Source{},
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("data"), "data"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod.RegisterSymbol("c"), "c")),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                            "b")),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("y"),
-                                        "y"));
+  auto* lhs = Member(Member(Index(Member("data", "c"), Expr(2)), "b"), "y");
+  auto* rhs = Expr(1.f);
 
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &i32, 1.f));
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ast::AssignmentStatement assign(Source{}, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(&assign));
-  ASSERT_TRUE(gen.EmitStatement(out, &assign)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(assign));
+  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(),
             R"(data.Store((4 * 1) + 16 + (32 * 2) + 0, asuint(1.0f));
 )");

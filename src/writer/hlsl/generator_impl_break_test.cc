@@ -27,11 +27,11 @@ namespace {
 using HlslGeneratorImplTest_Break = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Break, Emit_Break) {
-  ast::BreakStatement b(Source{});
+  auto* b = create<ast::BreakStatement>();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &b)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, b)) << gen.error();
   EXPECT_EQ(result(), "  break;\n");
 }
 

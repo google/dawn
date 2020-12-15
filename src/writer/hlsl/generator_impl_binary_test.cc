@@ -58,111 +58,57 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
 
 using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit_f32) {
-  ast::type::F32 f32;
-
   auto params = GetParam();
 
-  auto* left_var =
-      create<ast::Variable>(Source{},                        // source
-                            "left",                          // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* right_var =
-      create<ast::Variable>(Source{},                        // source
-                            "right",                         // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.f32);
+  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.f32);
 
-  auto* left = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("left"), "left");
-  auto* right = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("right"), "right");
+  auto* left = Expr("left");
+  auto* right = Expr("right");
 
   td.RegisterVariableForTesting(left_var);
   td.RegisterVariableForTesting(right_var);
 
-  ast::BinaryExpression expr(Source{}, params.op, left, right);
+  auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 TEST_P(HlslBinaryTest, Emit_u32) {
-  ast::type::U32 u32;
-
   auto params = GetParam();
 
-  auto* left_var =
-      create<ast::Variable>(Source{},                        // source
-                            "left",                          // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &u32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* right_var =
-      create<ast::Variable>(Source{},                        // source
-                            "right",                         // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &u32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.u32);
+  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.u32);
 
-  auto* left = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("left"), "left");
-  auto* right = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("right"), "right");
+  auto* left = Expr("left");
+  auto* right = Expr("right");
 
   td.RegisterVariableForTesting(left_var);
   td.RegisterVariableForTesting(right_var);
 
-  ast::BinaryExpression expr(Source{}, params.op, left, right);
+  auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 TEST_P(HlslBinaryTest, Emit_i32) {
-  ast::type::I32 i32;
-
   auto params = GetParam();
 
-  auto* left_var =
-      create<ast::Variable>(Source{},                        // source
-                            "left",                          // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* right_var =
-      create<ast::Variable>(Source{},                        // source
-                            "right",                         // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.i32);
+  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.i32);
 
-  auto* left = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("left"), "left");
-  auto* right = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("right"), "right");
+  auto* left = Expr("left");
+  auto* right = Expr("right");
 
   td.RegisterVariableForTesting(left_var);
   td.RegisterVariableForTesting(right_var);
 
-  ast::BinaryExpression expr(Source{}, params.op, left, right);
+  auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -187,214 +133,116 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
+  auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
+  auto* rhs = Expr(1.f);
 
-  auto* lhs = create<ast::TypeConstructorExpression>(
-      Source{}, &vec3,
-      ast::ExpressionList{
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)),
-      });
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
-
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             "(float3(1.0f, 1.0f, 1.0f) * "
             "1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
+  auto* lhs = Expr(1.f);
+  auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
-  auto* lhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
-
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             "(1.0f * float3(1.0f, 1.0f, "
             "1.0f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mat"), "mat");
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* lhs = Expr("mat");
+  auto* rhs = Expr(1.f);
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(mat * 1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mat"), "mat");
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* lhs = Expr(1.f);
+  auto* rhs = Expr("mat");
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(1.0f * mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mat"), "mat");
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* lhs = Expr("mat");
+  auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "mul(mat, float3(1.0f, 1.0f, 1.0f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* lhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
-
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mat"), "mat");
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
+  auto* rhs = Expr("mat");
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "mul(float3(1.0f, 1.0f, 1.0f), mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mat"), "mat");
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mat"), "mat");
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* lhs = Expr("mat");
+  auto* rhs = Expr("mat");
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-  EXPECT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "mul(mat, mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
-  auto* left = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("left"), "left");
-  auto* right = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("right"), "right");
+  auto* left = Expr("left");
+  auto* right = Expr("right");
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalAnd, left, right);
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, left, right);
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
 if (_tint_tmp) {
@@ -405,21 +253,17 @@ if (_tint_tmp) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
   // (a && b) || (c || d)
-  auto* a =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"), "a");
-  auto* b =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
-  auto* c =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"), "c");
-  auto* d =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("d"), "d");
+  auto* a = Expr("a");
+  auto* b = Expr("b");
+  auto* c = Expr("c");
+  auto* d = Expr("d");
 
-  ast::BinaryExpression expr(
-      Source{}, ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kLogicalAnd, a, b),
-      create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kLogicalOr, c, d));
+  auto* expr = create<ast::BinaryExpression>(
+      ast::BinaryOp::kLogicalOr,
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b),
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, c, d));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp_0)");
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
@@ -437,14 +281,13 @@ if (!_tint_tmp_0) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
-  auto* left = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("left"), "left");
-  auto* right = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("right"), "right");
+  auto* left = Expr("left");
+  auto* right = Expr("right");
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalOr, left, right);
+  auto* expr =
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, left, right);
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
 if (!_tint_tmp) {
@@ -462,56 +305,33 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   //   return 3;
   // }
 
-  ast::type::I32 i32;
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(Expr(3)),
+  });
+  auto* else_stmt = create<ast::ElseStatement>(nullptr, body);
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(
-                        Source{}, create<ast::ScalarConstructorExpression>(
-                                      Source{}, create<ast::SintLiteral>(
-                                                    Source{}, &i32, 3))),
-                });
-  auto* else_stmt = create<ast::ElseStatement>(Source{}, nullptr, body);
-
-  body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(
-                        Source{}, create<ast::ScalarConstructorExpression>(
-                                      Source{}, create<ast::SintLiteral>(
-                                                    Source{}, &i32, 2))),
-                });
+  body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(Expr(2)),
+  });
   auto* else_if_stmt = create<ast::ElseStatement>(
-      Source{},
-      create<ast::BinaryExpression>(
-          Source{}, ast::BinaryOp::kLogicalOr,
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                            "b"),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"),
-                                            "c")),
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"),
+                                    Expr("c")),
       body);
 
-  body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(
-                        Source{}, create<ast::ScalarConstructorExpression>(
-                                      Source{}, create<ast::SintLiteral>(
-                                                    Source{}, &i32, 1))),
-                });
+  body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(Expr(1)),
+  });
 
-  ast::IfStatement expr(Source{},
-                        create<ast::BinaryExpression>(
-                            Source{}, ast::BinaryOp::kLogicalAnd,
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod.RegisterSymbol("a"), "a"),
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod.RegisterSymbol("b"), "b")),
-                        body,
-                        {
-                            else_if_stmt,
-                            else_stmt,
-                        });
+  auto* expr = create<ast::IfStatement>(
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"),
+                                    Expr("b")),
+      body,
+      ast::ElseStatementList{
+          else_if_stmt,
+          else_stmt,
+      });
 
-  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   _tint_tmp = b;
@@ -534,21 +354,15 @@ if ((_tint_tmp)) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
   // return (a && b) || c;
-  auto* a =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"), "a");
-  auto* b =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
-  auto* c =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"), "c");
+  auto* a = Expr("a");
+  auto* b = Expr("b");
+  auto* c = Expr("c");
 
-  ast::ReturnStatement expr(Source{},
-                            create<ast::BinaryExpression>(
-                                Source{}, ast::BinaryOp::kLogicalOr,
-                                create<ast::BinaryExpression>(
-                                    Source{}, ast::BinaryOp::kLogicalAnd, a, b),
-                                c));
+  auto* expr = create<ast::ReturnStatement>(create<ast::BinaryExpression>(
+      ast::BinaryOp::kLogicalOr,
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b), c));
 
-  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   _tint_tmp = b;
@@ -563,24 +377,18 @@ return (_tint_tmp_0);
 
 TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
   // a = (b || c) && d;
-  auto* a =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"), "a");
-  auto* b =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
-  auto* c =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"), "c");
-  auto* d =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("d"), "d");
+  auto* a = Expr("a");
+  auto* b = Expr("b");
+  auto* c = Expr("c");
+  auto* d = Expr("d");
 
-  ast::AssignmentStatement expr(
-      Source{}, a,
+  auto* expr = create<ast::AssignmentStatement>(
+      a,
       create<ast::BinaryExpression>(
-          Source{}, ast::BinaryOp::kLogicalAnd,
-          create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kLogicalOr, b,
-                                        c),
-          d));
+          ast::BinaryOp::kLogicalAnd,
+          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c), d));
 
-  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (!_tint_tmp) {
   _tint_tmp = c;
@@ -595,31 +403,21 @@ a = (_tint_tmp_0);
 
 TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   // var a : bool = (b && c) || d;
-  ast::type::Bool bool_type;
 
-  auto* b =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
-  auto* c =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"), "c");
-  auto* d =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("d"), "d");
+  auto* b = Expr("b");
+  auto* c = Expr("c");
+  auto* d = Expr("d");
 
-  auto* var =
-      create<ast::Variable>(Source{},                      // source
-                            "a",                           // name
-                            ast::StorageClass::kFunction,  // storage_class
-                            &bool_type,                    // type
-                            false,                         // is_const
-                            create<ast::BinaryExpression>(
-                                Source{}, ast::BinaryOp::kLogicalOr,
-                                create<ast::BinaryExpression>(
-                                    Source{}, ast::BinaryOp::kLogicalAnd, b, c),
-                                d),                          // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var(
+      "a", ast::StorageClass::kFunction, ty.bool_,
+      create<ast::BinaryExpression>(
+          ast::BinaryOp::kLogicalOr,
+          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d),
+      ast::VariableDecorationList{});
 
-  ast::VariableDeclStatement expr(Source{}, var);
+  auto* expr = create<ast::VariableDeclStatement>(var);
 
-  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (_tint_tmp) {
   _tint_tmp = c;
@@ -634,23 +432,18 @@ bool a = (_tint_tmp_0);
 
 TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   // as<i32>(a && (b || c))
-  ast::type::I32 i32;
 
-  auto* a =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"), "a");
-  auto* b =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"), "b");
-  auto* c =
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"), "c");
+  auto* a = Expr("a");
+  auto* b = Expr("b");
+  auto* c = Expr("c");
 
-  ast::BitcastExpression expr(
-      Source{}, &i32,
+  auto* expr = create<ast::BitcastExpression>(
+      ty.i32,
       create<ast::BinaryExpression>(
-          Source{}, ast::BinaryOp::kLogicalAnd, a,
-          create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kLogicalOr, b,
-                                        c)));
+          ast::BinaryOp::kLogicalAnd, a,
+          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c)));
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   bool _tint_tmp_0 = b;
@@ -666,48 +459,27 @@ if (_tint_tmp) {
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 
-  ast::type::Void void_type;
-
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("foo"), "foo", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      mod->RegisterSymbol("foo"), "foo", ast::VariableList{}, ty.void_,
+      create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   ast::ExpressionList params;
+  params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
+                                                 Expr("a"), Expr("b")));
+  params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
+                                                 Expr("c"), Expr("d")));
   params.push_back(create<ast::BinaryExpression>(
-      Source{}, ast::BinaryOp::kLogicalAnd,
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"), "a"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                        "b")));
-  params.push_back(create<ast::BinaryExpression>(
-      Source{}, ast::BinaryOp::kLogicalOr,
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"), "c"),
-      create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("d"),
-                                        "d")));
-  params.push_back(create<ast::BinaryExpression>(
-      Source{}, ast::BinaryOp::kLogicalAnd,
-      create<ast::BinaryExpression>(
-          Source{}, ast::BinaryOp::kLogicalOr,
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("a"),
-                                            "a"),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("c"),
-                                            "c")),
-      create<ast::BinaryExpression>(
-          Source{}, ast::BinaryOp::kLogicalOr,
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("b"),
-                                            "b"),
-          create<ast::IdentifierExpression>(Source{}, mod.RegisterSymbol("d"),
-                                            "d"))));
+      ast::BinaryOp::kLogicalAnd,
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"),
+                                    Expr("c")),
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"),
+                                    Expr("d"))));
 
-  ast::CallStatement expr(Source{},
-                          create<ast::CallExpression>(
-                              Source{},
-                              create<ast::IdentifierExpression>(
-                                  Source{}, mod.RegisterSymbol("foo"), "foo"),
-                              params));
+  auto* expr = create<ast::CallStatement>(Call("foo", params));
 
-  ASSERT_TRUE(gen.EmitStatement(out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
   _tint_tmp = b;

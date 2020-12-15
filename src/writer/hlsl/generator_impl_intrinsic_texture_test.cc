@@ -272,8 +272,7 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   param.buildTextureVariable(this);
   param.buildSamplerVariable(this);
 
-  auto* call =
-      create<ast::CallExpression>(Expr(param.function), param.args(this));
+  auto* call = Call(param.function, param.args(this));
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(call)) << td.error();

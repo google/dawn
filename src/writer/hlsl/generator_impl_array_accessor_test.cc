@@ -30,27 +30,16 @@ namespace {
 using HlslGeneratorImplTest_Expression = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
-  ast::type::I32 i32;
-  auto* lit = create<ast::SintLiteral>(Source{}, &i32, 5);
-  auto* idx = create<ast::ScalarConstructorExpression>(Source{}, lit);
-  auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ary"), "ary");
+  auto* expr = Index("ary", 5);
 
-  ast::ArrayAccessorExpression expr(Source{}, ary, idx);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "ary[5]");
 }
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitArrayAccessor) {
-  auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ary"), "ary");
-  auto* idx = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("idx"), "idx");
+  auto* expr = Index("ary", "idx");
 
-  ast::ArrayAccessorExpression expr(Source{}, ary, idx);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, &expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "ary[idx]");
 }
 

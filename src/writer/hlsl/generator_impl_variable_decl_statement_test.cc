@@ -33,163 +33,85 @@ namespace {
 using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32);
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &f32,                            // type
-                            true,                            // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Const("a", ast::StorageClass::kNone, ty.f32);
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), "  const float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
-  ast::type::F32 f32;
-  ast::type::Array ary(&f32, 5, ast::ArrayDecorationList{});
+  auto* var = Var("a", ast::StorageClass::kNone, ty.array<f32, 5>());
 
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &ary,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a[5];\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Function) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kFunction, ty.f32);
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), "  float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_Private) {
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("initializer"), "initializer");
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
+                  ast::VariableDecorationList{});
 
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            ident,                           // constructor
-                            ast::VariableDecorationList{});  // decorations
-
-  ast::VariableDeclStatement stmt(Source{}, var);
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  auto* stmt = create<ast::VariableDeclStatement>(var);
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float a = initializer;
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroVec) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
+  auto* var = Var("a", ast::StorageClass::kNone, ty.vec3<f32>(), vec3<f32>(),
+                  ast::VariableDecorationList{});
 
-  ast::ExpressionList values;
-  auto* zero_vec =
-      create<ast::TypeConstructorExpression>(Source{}, &vec, values);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &vec,                            // type
-                            false,                           // is_const
-                            zero_vec,                        // constructor
-                            ast::VariableDecorationList{});  // decorations
-
-  ast::VariableDeclStatement stmt(Source{}, var);
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  auto* stmt = create<ast::VariableDeclStatement>(var);
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float3 a = float3(0.0f);
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroMat) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat(&f32, 3, 2);
+  auto* var = Var("a", ast::StorageClass::kNone, ty.mat2x3<f32>(),
+                  mat2x3<f32>(), ast::VariableDecorationList{});
 
-  ast::ExpressionList values;
-  auto* zero_mat =
-      create<ast::TypeConstructorExpression>(Source{}, &mat, values);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &mat,                            // type
-                            false,                           // is_const
-                            zero_mat,                        // constructor
-                            ast::VariableDecorationList{});  // decorations
-
-  ast::VariableDeclStatement stmt(Source{}, var);
-  ASSERT_TRUE(gen.EmitStatement(out, &stmt)) << gen.error();
+  auto* stmt = create<ast::VariableDeclStatement>(var);
+  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(),
             R"(float3x2 a = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 )");
