@@ -711,7 +711,7 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       function_(function),
       i32_(ast_module_.create<ast::type::I32>()),
       ep_info_(ep_info) {
-  PushNewStatementBlock(nullptr, 0, nullptr, nullptr);
+  PushNewStatementBlock(nullptr, 0, nullptr);
 }
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
@@ -721,14 +721,12 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
 FunctionEmitter::~FunctionEmitter() = default;
 
 FunctionEmitter::StatementBlock::StatementBlock(
-    const spirv::Construct* construct,
+    const Construct* construct,
     uint32_t end_id,
-    FunctionEmitter::CompletionAction completion_action,
-    ast::CaseStatementList* cases)
+    FunctionEmitter::CompletionAction completion_action)
     : construct_(construct),
       end_id_(end_id),
-      completion_action_(completion_action),
-      cases_(cases) {}
+      completion_action_(completion_action) {}
 
 FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&& other) =
     default;
@@ -758,10 +756,8 @@ void FunctionEmitter::StatementBlock::Add(ast::Statement* statement) {
 
 void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
                                             uint32_t end_id,
-                                            ast::CaseStatementList* cases,
                                             CompletionAction action) {
-  statements_stack_.emplace_back(
-      StatementBlock{construct, end_id, action, cases});
+  statements_stack_.emplace_back(StatementBlock{construct, end_id, action});
 }
 
 void FunctionEmitter::PushGuard(const std::string& guard_name,
@@ -778,7 +774,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
   auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
   PushNewStatementBlock(
-      top.Construct(), end_id, nullptr, [=](const ast::StatementList& stmts) {
+      top.GetConstruct(), end_id, [=](const ast::StatementList& stmts) {
         builder->body = create<ast::BlockStatement>(Source{}, stmts);
       });
 }
@@ -791,7 +787,7 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
   auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
   PushNewStatementBlock(
-      top.Construct(), end_id, nullptr, [=](const ast::StatementList& stmts) {
+      top.GetConstruct(), end_id, [=](const ast::StatementList& stmts) {
         builder->body = create<ast::BlockStatement>(Source{}, stmts);
       });
 }
@@ -800,7 +796,7 @@ const ast::StatementList FunctionEmitter::ast_body() {
   assert(!statements_stack_.empty());
   auto& entry = statements_stack_[0];
   entry.Finalize(&ast_module_);
-  return entry.Statements();
+  return entry.GetStatements();
 }
 
 ast::Statement* FunctionEmitter::AddStatement(ast::Statement* statement) {
@@ -813,7 +809,7 @@ ast::Statement* FunctionEmitter::AddStatement(ast::Statement* statement) {
 
 ast::Statement* FunctionEmitter::LastStatement() {
   assert(!statements_stack_.empty());
-  auto& statement_list = statements_stack_.back().Statements();
+  auto& statement_list = statements_stack_.back().GetStatements();
   assert(!statement_list.empty());
   return statement_list.back();
 }
@@ -845,7 +841,7 @@ bool FunctionEmitter::Emit() {
 
   statements_stack_[0].Finalize(&ast_module_);
 
-  auto& statements = statements_stack_[0].Statements();
+  auto& statements = statements_stack_[0].GetStatements();
   auto* body = create<ast::BlockStatement>(Source{}, statements);
   ast_module_.AddFunction(
       create<ast::Function>(decl.source, ast_module_.RegisterSymbol(decl.name),
@@ -854,7 +850,7 @@ bool FunctionEmitter::Emit() {
 
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();
-  PushNewStatementBlock(constructs_[0].get(), 0, nullptr, nullptr);
+  PushNewStatementBlock(constructs_[0].get(), 0, nullptr);
 
   return success();
 }
@@ -2046,7 +2042,7 @@ bool FunctionEmitter::EmitFunctionBodyStatements() {
 bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   // Close off previous constructs.
   while (!statements_stack_.empty() &&
-         (statements_stack_.back().EndId() == block_info.id)) {
+         (statements_stack_.back().GetEndId() == block_info.id)) {
     statements_stack_.back().Finalize(&ast_module_);
     statements_stack_.pop_back();
   }
@@ -2060,7 +2056,7 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   std::vector<const Construct*> entering_constructs;  // inner most comes first
   {
     auto* here = block_info.construct;
-    auto* const top_construct = statements_stack_.back().Construct();
+    auto* const top_construct = statements_stack_.back().GetConstruct();
     while (here != top_construct) {
       // Only enter a construct at its header block.
       if (here->begin_id == block_info.id) {
@@ -2290,7 +2286,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   auto push_else = [this, builder, else_end, construct]() {
     // Push the else clause onto the stack first.
     PushNewStatementBlock(
-        construct, else_end, nullptr, [=](const ast::StatementList& stmts) {
+        construct, else_end, [=](const ast::StatementList& stmts) {
           // Only set the else-clause if there are statements to fill it.
           if (!stmts.empty()) {
             // The "else" consists of the statement list from the top of
@@ -2337,7 +2333,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 
     // Push the then clause onto the stack.
     PushNewStatementBlock(
-        construct, then_end, nullptr, [=](const ast::StatementList& stmts) {
+        construct, then_end, [=](const ast::StatementList& stmts) {
           builder->body = create<ast::BlockStatement>(Source{}, stmts);
         });
   }
@@ -2361,7 +2357,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 
   // Grab a pointer to the case list.  It will get buried in the statement block
   // stack.
-  PushNewStatementBlock(construct, construct->end_id, &swch->cases, nullptr);
+  PushNewStatementBlock(construct, construct->end_id, nullptr);
 
   // We will push statement-blocks onto the stack to gather the statements in
   // the default clause and cases clauses. Determine the list of blocks
@@ -2433,7 +2429,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     auto case_idx = swch->cases.size();
     swch->cases.emplace_back(nullptr);
     PushNewStatementBlock(
-        construct, end_id, nullptr, [=](const ast::StatementList& stmts) {
+        construct, end_id, [=](const ast::StatementList& stmts) {
           auto* body = create<ast::BlockStatement>(Source{}, stmts);
           swch->cases[case_idx] =
               create<ast::CaseStatement>(Source{}, selectors, body);
@@ -2461,11 +2457,10 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
   auto* builder = AddStatementBuilder<LoopStatementBuilder>();
-  PushNewStatementBlock(construct, construct->end_id, nullptr,
-                        [=](const ast::StatementList& stmts) {
-                          builder->body =
-                              create<ast::BlockStatement>(Source{}, stmts);
-                        });
+  PushNewStatementBlock(
+      construct, construct->end_id, [=](const ast::StatementList& stmts) {
+        builder->body = create<ast::BlockStatement>(Source{}, stmts);
+      });
   return success();
 }
 
@@ -2478,11 +2473,10 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
     return Fail() << "internal error: starting continue construct, "
                      "expected loop on top of stack";
   }
-  PushNewStatementBlock(construct, construct->end_id, nullptr,
-                        [=](const ast::StatementList& stmts) {
-                          loop->continuing =
-                              create<ast::BlockStatement>(Source{}, stmts);
-                        });
+  PushNewStatementBlock(
+      construct, construct->end_id, [=](const ast::StatementList& stmts) {
+        loop->continuing = create<ast::BlockStatement>(Source{}, stmts);
+      });
 
   return success();
 }
@@ -2570,7 +2564,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
 
       AddStatement(MakeSimpleIf(cond, true_branch, false_branch));
       if (!flow_guard.empty()) {
-        PushGuard(flow_guard, statements_stack_.back().EndId());
+        PushGuard(flow_guard, statements_stack_.back().GetEndId());
       }
       return true;
     }

@@ -861,8 +861,7 @@ class FunctionEmitter {
    public:
     StatementBlock(const Construct* construct,
                    uint32_t end_id,
-                   CompletionAction completion_action,
-                   ast::CaseStatementList* cases);
+                   CompletionAction completion_action);
     StatementBlock(StatementBlock&&);
     ~StatementBlock();
 
@@ -897,40 +896,28 @@ class FunctionEmitter {
     void SetConstruct(const Construct* construct) { construct_ = construct; }
 
     /// @return the construct to which this construct constributes
-    const Construct* Construct() const { return construct_; }
+    const Construct* GetConstruct() const { return construct_; }
 
     /// @return the ID of the block at which the completion action should be
     /// triggered and this statement block discarded. This is often the `end_id`
     /// of `construct` itself.
-    uint32_t EndId() const { return end_id_; }
-
-    /// @return the completion action finishes processing this statement block
-    CompletionAction CompletionAction() const { return completion_action_; }
+    uint32_t GetEndId() const { return end_id_; }
 
     /// @return the list of statements being built, if this construct is not a
     /// switch.
-    const ast::StatementList& Statements() const { return statements_; }
-
-    /// @return the list of switch cases being built, if this construct is a
-    /// switch
-    ast::CaseStatementList* Cases() const { return cases_; }
+    const ast::StatementList& GetStatements() const { return statements_; }
 
    private:
     /// The construct to which this construct constributes.
-    const spirv::Construct* construct_;
+    const Construct* construct_;
     /// The ID of the block at which the completion action should be triggered
     /// and this statement block discarded. This is often the `end_id` of
     /// `construct` itself.
     uint32_t const end_id_;
     /// The completion action finishes processing this statement block.
     FunctionEmitter::CompletionAction const completion_action_;
-
-    // Only one of `statements` or `cases` is active.
-
     /// The list of statements being built, if this construct is not a switch.
     ast::StatementList statements_;
-    /// The list of switch cases being built, if this construct is a switch.
-    ast::CaseStatementList* cases_ = nullptr;
 
     /// Owned statement builders
     std::vector<std::unique_ptr<StatementBuilder>> builders_;
@@ -939,11 +926,9 @@ class FunctionEmitter {
   };
 
   /// Pushes an empty statement block onto the statements stack.
-  /// @param cases the case list to push into
   /// @param action the completion action for this block
   void PushNewStatementBlock(const Construct* construct,
                              uint32_t end_id,
-                             ast::CaseStatementList* cases,
                              CompletionAction action);
 
   /// Emits an if-statement whose condition is the given flow guard
