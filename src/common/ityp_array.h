@@ -19,6 +19,7 @@
 #include "common/UnderlyingType.h"
 
 #include <array>
+#include <cstddef>
 #include <type_traits>
 
 namespace ityp {
