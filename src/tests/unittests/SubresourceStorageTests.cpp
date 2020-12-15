@@ -49,6 +49,19 @@ struct FakeStorage {
         }
     }
 
+    template <typename U, typename F>
+    void Merge(const SubresourceStorage<U>& other, F&& mergeFunc) {
+        for (Aspect aspect : IterateEnumMask(mAspects)) {
+            for (uint32_t layer = 0; layer < mArrayLayerCount; layer++) {
+                for (uint32_t level = 0; level < mMipLevelCount; level++) {
+                    SubresourceRange range = SubresourceRange::MakeSingle(aspect, layer, level);
+                    mergeFunc(range, &mData[GetDataIndex(aspect, layer, level)],
+                              other.Get(aspect, layer, level));
+                }
+            }
+        }
+    }
+
     const T& Get(Aspect aspect, uint32_t arrayLayer, uint32_t mipLevel) const {
         return mData[GetDataIndex(aspect, arrayLayer, mipLevel)];
     }
@@ -352,15 +365,15 @@ TEST(SubresourceStorageTest, UpdateTwoBand) {
     CheckLayerCompressed(s, Aspect::Stencil, 3, true);
 
     {
-        SubresourceRange range(Aspect::Depth | Aspect::Stencil, {0, kLayers}, {5, 2});
+        SubresourceRange range(Aspect::Depth, {0, kLayers}, {5, 2});
         CallUpdateOnBoth(&s, &f, range, [](const SubresourceRange&, int* data) { *data *= 3; });
     }
 
-    // The layers had to be decompressed.
+    // The layers had to be decompressed in depth
     CheckLayerCompressed(s, Aspect::Depth, 2, false);
     CheckLayerCompressed(s, Aspect::Depth, 3, false);
-    CheckLayerCompressed(s, Aspect::Stencil, 2, false);
-    CheckLayerCompressed(s, Aspect::Stencil, 3, false);
+    CheckLayerCompressed(s, Aspect::Stencil, 2, true);
+    CheckLayerCompressed(s, Aspect::Stencil, 3, true);
 
     // Update completely. Without a single value recompression shouldn't happen.
     {
@@ -443,6 +456,172 @@ TEST(SubresourceStorageTest, UpdateLevel0sHappenToMatch) {
     CheckAspectCompressed(s, Aspect::Color, false);
     CheckLayerCompressed(s, Aspect::Color, 0, false);
     CheckLayerCompressed(s, Aspect::Color, 1, false);
+}
+
+// The tests for Merge() all follow the same as the Update() tests except that they use Update()
+// to set up the test storages.
+
+// Similar to CallUpdateOnBoth but for Merge
+template <typename T, typename U, typename F>
+void CallMergeOnBoth(SubresourceStorage<T>* s,
+                     FakeStorage<T>* f,
+                     const SubresourceStorage<U>& other,
+                     F&& mergeFunc) {
+    RangeTracker tracker(*s);
+
+    s->Merge(other, [&](const SubresourceRange& range, T* data, const U& otherData) {
+        tracker.Track(range);
+        mergeFunc(range, data, otherData);
+    });
+    f->Merge(other, mergeFunc);
+
+    tracker.CheckTrackedExactly(
+        SubresourceRange::MakeFull(f->mAspects, f->mArrayLayerCount, f->mMipLevelCount));
+    f->CheckSameAs(*s);
+}
+
+// Test merging two fully compressed single-aspect resources.
+TEST(SubresourceStorageTest, MergeFullWithFullSingleAspect) {
+    SubresourceStorage<int> s(Aspect::Color, 4, 6);
+    FakeStorage<int> f(Aspect::Color, 4, 6);
+
+    // Merge the whole resource in a single call.
+    SubresourceStorage<bool> other(Aspect::Color, 4, 6, true);
+    CallMergeOnBoth(&s, &f, other, [](const SubresourceRange&, int* data, bool other) {
+        if (other) {
+            *data = 13;
+        }
+    });
+
+    CheckAspectCompressed(s, Aspect::Color, true);
+}
+
+// Test merging two fully compressed multi-aspect resources.
+TEST(SubresourceStorageTest, MergeFullWithFullMultiAspect) {
+    SubresourceStorage<int> s(Aspect::Depth | Aspect::Stencil, 6, 7);
+    FakeStorage<int> f(Aspect::Depth | Aspect::Stencil, 6, 7);
+
+    // Merge the whole resource in a single call.
+    SubresourceStorage<bool> other(Aspect::Depth | Aspect::Stencil, 6, 7, true);
+    CallMergeOnBoth(&s, &f, other, [](const SubresourceRange&, int* data, bool other) {
+        if (other) {
+            *data = 13;
+        }
+    });
+
+    CheckAspectCompressed(s, Aspect::Depth, true);
+    CheckAspectCompressed(s, Aspect::Stencil, true);
+}
+
+// Test merging a fully compressed resource in a resource with the "cross band" pattern.
+//  - The first band is full layers [2, 3] on both aspects
+//  - The second band is full mips [5, 6] on one aspect.
+// This provides coverage of using a single piece of data from `other` to update all of `s`
+TEST(SubresourceStorageTest, MergeFullInTwoBand) {
+    const uint32_t kLayers = 5;
+    const uint32_t kLevels = 9;
+    SubresourceStorage<int> s(Aspect::Depth | Aspect::Stencil, kLayers, kLevels);
+    FakeStorage<int> f(Aspect::Depth | Aspect::Stencil, kLayers, kLevels);
+
+    // Update the two bands
+    {
+        SubresourceRange range(Aspect::Depth | Aspect::Stencil, {2, 2}, {0, kLevels});
+        CallUpdateOnBoth(&s, &f, range, [](const SubresourceRange&, int* data) { *data += 3; });
+    }
+    {
+        SubresourceRange range(Aspect::Depth, {0, kLayers}, {5, 2});
+        CallUpdateOnBoth(&s, &f, range, [](const SubresourceRange&, int* data) { *data += 5; });
+    }
+
+    // Merge the fully compressed resource.
+    SubresourceStorage<int> other(Aspect::Depth | Aspect::Stencil, kLayers, kLevels, 17);
+    CallMergeOnBoth(&s, &f, other,
+                    [](const SubresourceRange&, int* data, int other) { *data += other; });
+
+    // The layers traversed by the mip band are still uncompressed.
+    CheckLayerCompressed(s, Aspect::Depth, 1, false);
+    CheckLayerCompressed(s, Aspect::Depth, 2, false);
+    CheckLayerCompressed(s, Aspect::Depth, 3, false);
+    CheckLayerCompressed(s, Aspect::Depth, 4, false);
+
+    // Stencil is decompressed but all its layers are still compressed because there wasn't the mip
+    // band.
+    CheckAspectCompressed(s, Aspect::Stencil, false);
+    CheckLayerCompressed(s, Aspect::Stencil, 1, true);
+    CheckLayerCompressed(s, Aspect::Stencil, 2, true);
+    CheckLayerCompressed(s, Aspect::Stencil, 3, true);
+    CheckLayerCompressed(s, Aspect::Stencil, 4, true);
+}
+// Test the reverse, mergign two-bands in a full resource. This provides coverage for decompressing
+// aspects / and partilly layers to match the compression of `other`
+TEST(SubresourceStorageTest, MergeTwoBandInFull) {
+    const uint32_t kLayers = 5;
+    const uint32_t kLevels = 9;
+    SubresourceStorage<int> s(Aspect::Depth | Aspect::Stencil, kLayers, kLevels, 75);
+    FakeStorage<int> f(Aspect::Depth | Aspect::Stencil, kLayers, kLevels, 75);
+
+    // Update the two bands
+    SubresourceStorage<int> other(Aspect::Depth | Aspect::Stencil, kLayers, kLevels);
+    {
+        SubresourceRange range(Aspect::Depth | Aspect::Stencil, {2, 2}, {0, kLevels});
+        other.Update(range, [](const SubresourceRange&, int* data) { *data += 3; });
+    }
+    {
+        SubresourceRange range(Aspect::Depth, {0, kLayers}, {5, 2});
+        other.Update(range, [](const SubresourceRange&, int* data) { *data += 5; });
+    }
+
+    // Merge the fully compressed resource.
+    CallMergeOnBoth(&s, &f, other,
+                    [](const SubresourceRange&, int* data, int other) { *data += other; });
+
+    // The layers traversed by the mip band are still uncompressed.
+    CheckLayerCompressed(s, Aspect::Depth, 1, false);
+    CheckLayerCompressed(s, Aspect::Depth, 2, false);
+    CheckLayerCompressed(s, Aspect::Depth, 3, false);
+    CheckLayerCompressed(s, Aspect::Depth, 4, false);
+
+    // Stencil is decompressed but all its layers are still compressed because there wasn't the mip
+    // band.
+    CheckAspectCompressed(s, Aspect::Stencil, false);
+    CheckLayerCompressed(s, Aspect::Stencil, 1, true);
+    CheckLayerCompressed(s, Aspect::Stencil, 2, true);
+    CheckLayerCompressed(s, Aspect::Stencil, 3, true);
+    CheckLayerCompressed(s, Aspect::Stencil, 4, true);
+}
+
+// Test merging storage with a layer band in a stipple patterned storage. This provide coverage
+// for the code path that uses the same layer data for other multiple times.
+TEST(SubresourceStorageTest, MergeLayerBandInStipple) {
+    const uint32_t kLayers = 3;
+    const uint32_t kLevels = 5;
+
+    SubresourceStorage<int> s(Aspect::Color, kLayers, kLevels);
+    FakeStorage<int> f(Aspect::Color, kLayers, kLevels);
+    SubresourceStorage<int> other(Aspect::Color, kLayers, kLevels);
+
+    for (uint32_t layer = 0; layer < kLayers; layer++) {
+        for (uint32_t level = 0; level < kLevels; level++) {
+            if ((layer + level) % 2 == 0) {
+                SubresourceRange range = SubresourceRange::MakeSingle(Aspect::Color, layer, level);
+                CallUpdateOnBoth(&s, &f, range,
+                                 [](const SubresourceRange&, int* data) { *data += 17; });
+            }
+        }
+        if (layer % 2 == 0) {
+            other.Update({Aspect::Color, {layer, 1}, {0, kLevels}},
+                         [](const SubresourceRange&, int* data) { *data += 8; });
+        }
+    }
+
+    // Merge the band in the stipple.
+    CallMergeOnBoth(&s, &f, other,
+                    [](const SubresourceRange&, int* data, int other) { *data += other; });
+
+    // None of the resulting layers are compressed.
+    CheckLayerCompressed(s, Aspect::Color, 0, false);
+    CheckLayerCompressed(s, Aspect::Color, 1, false);
+    CheckLayerCompressed(s, Aspect::Color, 2, false);
 }
 
 // Bugs found while testing:

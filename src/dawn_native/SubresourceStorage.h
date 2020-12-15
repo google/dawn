@@ -81,9 +81,23 @@ namespace dawn_native {
     //
     // T must be a copyable type that supports equality comparison with ==.
     //
-    // TODO(cwallez@chromium.org): Add the Merge() operation.
+    // The implementation of functions in this file can have a lot of control flow and corner cases
+    // so each modification should come with extensive tests and ensure 100% code coverage of the
+    // modified functions. See instructions at
+    // https://chromium.googlesource.com/chromium/src/+/master/docs/testing/code_coverage.md#local-coverage-script
+    // to run the test with code coverage. A command line that worked in the past (with the right
+    // GN args for the out/coverage directory in a Chromium checkout) is:
+    //
+    /*
+       python tools/code_coverage/coverage.py dawn_unittests -b out/coverage -o out/report -c \
+           "out/coverage/dawn_unittests --gtest_filter=SubresourceStorage\*" -f \
+           third_party/dawn/src/dawn_native
+    */
+    //
     // TODO(cwallez@chromium.org): Inline the storage for aspects to avoid allocating when
     // possible.
+    // TODO(cwallez@chromium.org): Make the recompression optional, the calling code should know
+    // if recompression can happen or not in Update() and Merge()
     template <typename T>
     class SubresourceStorage {
       public:
@@ -98,7 +112,7 @@ namespace dawn_native {
         // same for multiple subresources.
         const T& Get(Aspect aspect, uint32_t arrayLayer, uint32_t mipLevel) const;
 
-        // Given an iterateFunc that's a function or function-like objet that call be called with
+        // Given an iterateFunc that's a function or function-like objet that can be called with
         // arguments of type (const SubresourceRange& range, const T& data) and returns void,
         // calls it with aggregate ranges if possible, such that each subresource is part of
         // exactly one of the ranges iterateFunc is called with (and obviously data is the value
@@ -110,7 +124,7 @@ namespace dawn_native {
         template <typename F>
         void Iterate(F&& iterateFunc) const;
 
-        // Given an updateFunc that's a function or function-like objet that call be called with
+        // Given an updateFunc that's a function or function-like objet that can be called with
         // arguments of type (const SubresourceRange& range, T* data) and returns void,
         // calls it with ranges that in aggregate form `range` and pass for each of the
         // sub-ranges a pointer to modify the value for that sub-range. For example:
@@ -125,10 +139,25 @@ namespace dawn_native {
         template <typename F>
         void Update(const SubresourceRange& range, F&& updateFunc);
 
+        // Given a mergeFunc that's a function or a function-like object that can be called with
+        // arguments of type (const SubresourceRange& range, T* data, const U& otherData) and
+        // returns void, calls it with ranges that in aggregate form the full resources and pass
+        // for each of the sub-ranges a pointer to modify the value for that sub-range and the
+        // corresponding value from other for that sub-range. For example:
+        //
+        //   subresources.Merge(otherUsages,
+        //       [](const SubresourceRange&, T* data, const T& otherData) {
+        //          *data |= otherData;
+        //       });
+        //
+        // /!\ WARNING: mergeFunc should never use range to compute the update to data otherwise
+        // your code is likely to break when compression happens. Range should only be used for
+        // side effects like using it to compute a Vulkan pipeline barrier.
+        template <typename U, typename F>
+        void Merge(const SubresourceStorage<U>& other, F&& mergeFunc);
+
         // Other operations to consider:
         //
-        //  - Merge(Range, SubresourceStorage<U>, mergeFunc) that takes the values from the other
-        //    storage and modifies the value of the current storage with it.
         //  - UpdateTo(Range, T) that updates the range to a constant value.
 
         // Methods to query the internal state of SubresourceStorage for testing.
@@ -139,6 +168,9 @@ namespace dawn_native {
         bool IsLayerCompressedForTesting(Aspect aspect, uint32_t layer) const;
 
       private:
+        template <typename U>
+        friend class SubresourceStorage;
+
         void DecompressAspect(uint32_t aspectIndex);
         void RecompressAspect(uint32_t aspectIndex);
 
@@ -251,6 +283,63 @@ namespace dawn_native {
             if (fullAspects) {
                 RecompressAspect(aspectIndex);
             }
+        }
+    }
+
+    template <typename T>
+    template <typename U, typename F>
+    void SubresourceStorage<T>::Merge(const SubresourceStorage<U>& other, F&& mergeFunc) {
+        ASSERT(mAspects == other.mAspects);
+        ASSERT(mArrayLayerCount == other.mArrayLayerCount);
+        ASSERT(mMipLevelCount == other.mMipLevelCount);
+
+        for (Aspect aspect : IterateEnumMask(mAspects)) {
+            uint32_t aspectIndex = GetAspectIndex(aspect);
+
+            // If the other storage's aspect is compressed we don't need to decompress anything
+            // in `this` and can just iterate through it, merging with `other`'s constant value for
+            // the aspect. For code simplicity this can be done with a call to Update().
+            if (other.mAspectCompressed[aspectIndex]) {
+                const U& otherData = other.Data(aspectIndex);
+                Update(SubresourceRange::MakeFull(aspect, mArrayLayerCount, mMipLevelCount),
+                       [&](const SubresourceRange& subrange, T* data) {
+                           mergeFunc(subrange, data, otherData);
+                       });
+                continue;
+            }
+
+            // Other doesn't have the aspect compressed so we must do at least per-layer merging.
+            if (mAspectCompressed[aspectIndex]) {
+                DecompressAspect(aspectIndex);
+            }
+
+            for (uint32_t layer = 0; layer < mArrayLayerCount; layer++) {
+                // Similarly to above, use a fast path if other's layer is compressed.
+                if (other.LayerCompressed(aspectIndex, layer)) {
+                    const U& otherData = other.Data(aspectIndex, layer);
+                    Update(GetFullLayerRange(aspect, layer),
+                           [&](const SubresourceRange& subrange, T* data) {
+                               mergeFunc(subrange, data, otherData);
+                           });
+                    continue;
+                }
+
+                // Sad case, other is decompressed for this layer, do per-level merging.
+                if (LayerCompressed(aspectIndex, layer)) {
+                    DecompressLayer(aspectIndex, layer);
+                }
+
+                for (uint32_t level = 0; level < mMipLevelCount; level++) {
+                    SubresourceRange updateRange =
+                        SubresourceRange::MakeSingle(aspect, layer, level);
+                    mergeFunc(updateRange, &Data(aspectIndex, layer, level),
+                              other.Data(aspectIndex, layer, level));
+                }
+
+                RecompressLayer(aspectIndex, layer);
+            }
+
+            RecompressAspect(aspectIndex);
         }
     }
 
