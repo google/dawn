@@ -405,6 +405,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
 
 struct HlslStorageTextureData {
   ast::type::TextureDimension dim;
+  ast::type::ImageFormat imgfmt;
   bool ro;
   std::string result;
 };
@@ -420,7 +421,7 @@ TEST_P(HlslStoragetexturesTest, Emit) {
   ast::type::StorageTexture s(params.dim,
                               params.ro ? ast::AccessControl::kReadOnly
                                         : ast::AccessControl::kWriteOnly,
-                              ast::type::ImageFormat::kR16Float);
+                              params.imgfmt);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
@@ -429,26 +430,54 @@ INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
     HlslStoragetexturesTest,
     testing::Values(
-        HlslStorageTextureData{ast::type::TextureDimension::k1d, true,
-                               "RWTexture1D"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1dArray, true,
-                               "RWTexture1DArray"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2d, true,
-                               "RWTexture2D"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2dArray, true,
-                               "RWTexture2DArray"},
-        HlslStorageTextureData{ast::type::TextureDimension::k3d, true,
-                               "RWTexture3D"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1d, false,
-                               "RWTexture1D"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1dArray, false,
-                               "RWTexture1DArray"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2d, false,
-                               "RWTexture2D"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2dArray, false,
-                               "RWTexture2DArray"},
-        HlslStorageTextureData{ast::type::TextureDimension::k3d, false,
-                               "RWTexture3D"}));
+        HlslStorageTextureData{ast::type::TextureDimension::k1d,
+                               ast::type::ImageFormat::kRgba8Unorm, true,
+                               "RWTexture1D<float4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k1dArray,
+                               ast::type::ImageFormat::kRgba8Snorm, true,
+                               "RWTexture1DArray<float4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k2d,
+                               ast::type::ImageFormat::kRgba16Float, true,
+                               "RWTexture2D<float4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k2dArray,
+                               ast::type::ImageFormat::kR32Float, true,
+                               "RWTexture2DArray<float4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k3d,
+                               ast::type::ImageFormat::kRg32Float, true,
+                               "RWTexture3D<float4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k1d,
+                               ast::type::ImageFormat::kRgba32Float, false,
+                               "RWTexture1D<float4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k1dArray,
+                               ast::type::ImageFormat::kRgba8Uint, false,
+                               "RWTexture1DArray<uint4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k2d,
+                               ast::type::ImageFormat::kRgba16Uint, false,
+                               "RWTexture2D<uint4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k2dArray,
+                               ast::type::ImageFormat::kR32Uint, false,
+                               "RWTexture2DArray<uint4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k3d,
+                               ast::type::ImageFormat::kRg32Uint, false,
+                               "RWTexture3D<uint4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k1d,
+                               ast::type::ImageFormat::kRgba32Uint, true,
+                               "RWTexture1D<uint4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k1dArray,
+                               ast::type::ImageFormat::kRgba8Sint, true,
+                               "RWTexture1DArray<int4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k2d,
+                               ast::type::ImageFormat::kRgba16Sint, true,
+                               "RWTexture2D<int4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k2dArray,
+                               ast::type::ImageFormat::kR32Sint, true,
+                               "RWTexture2DArray<int4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k3d,
+                               ast::type::ImageFormat::kRg32Sint, true,
+                               "RWTexture3D<int4>"},
+        HlslStorageTextureData{ast::type::TextureDimension::k1d,
+                               ast::type::ImageFormat::kRgba32Sint, false,
+                               "RWTexture1D<int4>"}));
 
 }  // namespace
 }  // namespace hlsl

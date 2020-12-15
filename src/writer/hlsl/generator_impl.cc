@@ -112,6 +112,33 @@ uint32_t convert_swizzle_to_index(const std::string& swizzle) {
   return 0;
 }
 
+const char* image_format_to_rwtexture_type(
+    ast::type::ImageFormat image_format) {
+  switch (image_format) {
+    case ast::type::ImageFormat::kRgba8Unorm:
+    case ast::type::ImageFormat::kRgba8Snorm:
+    case ast::type::ImageFormat::kRgba16Float:
+    case ast::type::ImageFormat::kR32Float:
+    case ast::type::ImageFormat::kRg32Float:
+    case ast::type::ImageFormat::kRgba32Float:
+      return "float4";
+    case ast::type::ImageFormat::kRgba8Uint:
+    case ast::type::ImageFormat::kRgba16Uint:
+    case ast::type::ImageFormat::kR32Uint:
+    case ast::type::ImageFormat::kRg32Uint:
+    case ast::type::ImageFormat::kRgba32Uint:
+      return "uint4";
+    case ast::type::ImageFormat::kRgba8Sint:
+    case ast::type::ImageFormat::kRgba16Sint:
+    case ast::type::ImageFormat::kR32Sint:
+    case ast::type::ImageFormat::kRg32Sint:
+    case ast::type::ImageFormat::kRgba32Sint:
+      return "int4";
+    default:
+      return nullptr;
+  }
+}
+
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(ast::Module* module) : module_(module) {}
@@ -2157,6 +2184,15 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
     }
 
+    if (auto* st = tex->As<ast::type::StorageTexture>()) {
+      auto* component = image_format_to_rwtexture_type(st->image_format());
+      if (component == nullptr) {
+        error_ = "Unsupported StorageTexture ImageFormat: " +
+                 std::to_string(static_cast<int>(st->image_format()));
+        return false;
+      }
+      out << "<" << component << ">";
+    }
   } else if (type->Is<ast::type::U32>()) {
     out << "uint";
   } else if (auto* vec = type->As<ast::type::Vector>()) {
