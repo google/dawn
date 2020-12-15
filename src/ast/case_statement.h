@@ -73,8 +73,8 @@ class CaseStatement : public Castable<CaseStatement, Statement> {
  private:
   CaseStatement(const CaseStatement&) = delete;
 
-  CaseSelectorList selectors_;
-  BlockStatement* body_ = nullptr;
+  CaseSelectorList const selectors_;
+  BlockStatement* const body_;
 };
 
 /// A list of case statements

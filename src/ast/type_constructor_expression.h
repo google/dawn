@@ -63,8 +63,8 @@ class TypeConstructorExpression
  private:
   TypeConstructorExpression(const TypeConstructorExpression&) = delete;
 
-  type::Type* type_ = nullptr;
-  ExpressionList values_;
+  type::Type* const type_;
+  ExpressionList const values_;
 };
 
 }  // namespace ast

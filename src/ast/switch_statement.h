@@ -46,8 +46,6 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
   bool IsDefault() const { return condition_ == nullptr; }
 
   /// @returns the Switch body
-  CaseStatementList& body() { return body_; }
-  /// @returns the Switch body
   const CaseStatementList& body() const { return body_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
@@ -69,8 +67,8 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
  private:
   SwitchStatement(const SwitchStatement&) = delete;
 
-  Expression* condition_ = nullptr;
-  CaseStatementList body_;
+  Expression* const condition_;
+  CaseStatementList const body_;
 };
 
 }  // namespace ast

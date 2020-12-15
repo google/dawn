@@ -63,9 +63,9 @@ class Alias : public Castable<Alias, Type> {
   Alias* Clone(CloneContext* ctx) const override;
 
  private:
-  Symbol symbol_;
-  std::string name_;
-  Type* subtype_ = nullptr;
+  Symbol const symbol_;
+  std::string const name_;
+  Type* const subtype_;
 };
 
 }  // namespace type

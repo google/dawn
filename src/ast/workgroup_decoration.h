@@ -64,9 +64,9 @@ class WorkgroupDecoration
   WorkgroupDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t x_ = 1;
-  uint32_t y_ = 1;
-  uint32_t z_ = 1;
+  uint32_t const x_;
+  uint32_t const y_;
+  uint32_t const z_;
 };
 
 }  // namespace ast

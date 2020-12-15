@@ -60,8 +60,8 @@ class CallExpression : public Castable<CallExpression, Expression> {
  private:
   CallExpression(const CallExpression&) = delete;
 
-  Expression* func_ = nullptr;
-  ExpressionList params_;
+  Expression* const func_;
+  ExpressionList const params_;
 };
 
 }  // namespace ast

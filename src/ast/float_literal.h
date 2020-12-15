@@ -50,7 +50,7 @@ class FloatLiteral : public Castable<FloatLiteral, Literal> {
   FloatLiteral* Clone(CloneContext* ctx) const override;
 
  private:
-  float value_;
+  float const value_;
 };
 
 }  // namespace ast

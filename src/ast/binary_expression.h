@@ -127,9 +127,9 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
  private:
   BinaryExpression(const BinaryExpression&) = delete;
 
-  BinaryOp op_ = BinaryOp::kNone;
-  Expression* lhs_ = nullptr;
-  Expression* rhs_ = nullptr;
+  BinaryOp const op_;
+  Expression* const lhs_;
+  Expression* const rhs_;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {

@@ -64,8 +64,8 @@ class MemberAccessorExpression
  private:
   MemberAccessorExpression(const MemberAccessorExpression&) = delete;
 
-  Expression* struct_ = nullptr;
-  IdentifierExpression* member_ = nullptr;
+  Expression* const struct_;
+  IdentifierExpression* const member_;
 };
 
 }  // namespace ast

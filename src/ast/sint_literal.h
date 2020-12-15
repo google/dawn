@@ -50,7 +50,7 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   SintLiteral* Clone(CloneContext* ctx) const override;
 
  private:
-  int32_t value_;
+  int32_t const value_;
 };
 
 }  // namespace ast

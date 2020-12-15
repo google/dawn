@@ -46,7 +46,7 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   MultisampledTexture* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* type_ = nullptr;
+  Type* const type_;
 };
 
 }  // namespace type

@@ -71,8 +71,8 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
  private:
   LoopStatement(const LoopStatement&) = delete;
 
-  BlockStatement* body_ = nullptr;
-  BlockStatement* continuing_ = nullptr;
+  BlockStatement* const body_;
+  BlockStatement* const continuing_;
 };
 
 }  // namespace ast

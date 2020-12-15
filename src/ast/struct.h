@@ -74,8 +74,8 @@ class Struct : public Castable<Struct, Node> {
  private:
   Struct(const Struct&) = delete;
 
-  StructMemberList members_;
-  StructDecorationList decorations_;
+  StructMemberList const members_;
+  StructDecorationList const decorations_;
 };
 
 }  // namespace ast

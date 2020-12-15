@@ -62,7 +62,7 @@ class ReturnStatement : public Castable<ReturnStatement, Statement> {
  private:
   ReturnStatement(const ReturnStatement&) = delete;
 
-  Expression* value_ = nullptr;
+  Expression* const value_;
 };
 
 }  // namespace ast

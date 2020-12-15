@@ -162,13 +162,14 @@ class Variable : public Castable<Variable, Node> {
  private:
   Variable(const Variable&) = delete;
 
-  std::string name_;
-  StorageClass storage_class_ = StorageClass::kNone;
+  std::string const name_;
   // The value type if a const or formal paramter, and the store type if a var
-  type::Type* type_ = nullptr;
-  bool is_const_ = false;
-  Expression* constructor_ = nullptr;
-  VariableDecorationList decorations_;
+  type::Type* const type_;
+  bool const is_const_;
+  Expression* const constructor_;
+  VariableDecorationList const decorations_;
+
+  StorageClass storage_class_ = StorageClass::kNone;  // Semantic info
 };
 
 /// A list of variables

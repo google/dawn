@@ -58,7 +58,7 @@ class ScalarConstructorExpression
  private:
   ScalarConstructorExpression(const ScalarConstructorExpression&) = delete;
 
-  Literal* literal_ = nullptr;
+  Literal* const literal_;
 };
 
 }  // namespace ast

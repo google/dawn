@@ -69,8 +69,8 @@ class ElseStatement : public Castable<ElseStatement, Statement> {
  private:
   ElseStatement(const ElseStatement&) = delete;
 
-  Expression* condition_ = nullptr;
-  BlockStatement* body_ = nullptr;
+  Expression* const condition_;
+  BlockStatement* const body_;
 };
 
 /// A list of else statements

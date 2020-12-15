@@ -61,9 +61,9 @@ class Matrix : public Castable<Matrix, Type> {
   Matrix* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* subtype_ = nullptr;
-  uint32_t rows_ = 2;
-  uint32_t columns_ = 2;
+  Type* const subtype_;
+  uint32_t const rows_;
+  uint32_t const columns_;
 };
 
 }  // namespace type

@@ -64,8 +64,8 @@ class ArrayAccessorExpression
  private:
   ArrayAccessorExpression(const ArrayAccessorExpression&) = delete;
 
-  Expression* array_ = nullptr;
-  Expression* idx_expr_ = nullptr;
+  Expression* const array_;
+  Expression* const idx_expr_;
 };
 
 }  // namespace ast

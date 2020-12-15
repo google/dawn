@@ -52,7 +52,7 @@ class Expression : public Castable<Expression, Node> {
  private:
   Expression(const Expression&) = delete;
 
-  type::Type* result_type_ = nullptr;
+  type::Type* result_type_ = nullptr;  // Semantic info
 };
 
 /// A list of expressions

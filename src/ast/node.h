@@ -75,7 +75,7 @@ class Node : public Castable<Node> {
  private:
   Node(const Node&) = delete;
 
-  Source source_;
+  Source const source_;
 };
 
 }  // namespace ast

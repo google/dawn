@@ -52,7 +52,7 @@ class Literal : public Castable<Literal, Node> {
   explicit Literal(const Source& source, type::Type* type);
 
  private:
-  type::Type* type_ = nullptr;
+  type::Type* const type_;
 };
 
 }  // namespace ast

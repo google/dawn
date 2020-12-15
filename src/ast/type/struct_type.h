@@ -68,9 +68,9 @@ class Struct : public Castable<Struct, Type> {
   Struct* Clone(CloneContext* ctx) const override;
 
  private:
-  Symbol symbol_;
-  std::string name_;
-  ast::Struct* struct_ = nullptr;
+  Symbol const symbol_;
+  std::string const name_;
+  ast::Struct* const struct_;
 
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
 };

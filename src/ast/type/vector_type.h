@@ -58,8 +58,8 @@ class Vector : public Castable<Vector, Type> {
   Vector* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* subtype_ = nullptr;
-  uint32_t size_ = 2;
+  Type* const subtype_;
+  uint32_t const size_;
 };
 
 }  // namespace type

@@ -46,7 +46,7 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   SampledTexture* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* type_ = nullptr;
+  Type* const type_;
 };
 
 }  // namespace type

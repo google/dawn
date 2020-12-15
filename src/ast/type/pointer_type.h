@@ -50,8 +50,8 @@ class Pointer : public Castable<Pointer, Type> {
   Pointer* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* subtype_;
-  StorageClass storage_class_;
+  Type* const subtype_;
+  StorageClass const storage_class_;
 };
 
 }  // namespace type

@@ -77,9 +77,9 @@ class StructMember : public Castable<StructMember, Node> {
  private:
   StructMember(const StructMember&) = delete;
 
-  std::string name_;
-  type::Type* type_ = nullptr;
-  StructMemberDecorationList decorations_;
+  std::string const name_;
+  type::Type* const type_;
+  StructMemberDecorationList const decorations_;
 };
 
 /// A list of struct members

@@ -56,7 +56,7 @@ class Texture : public Castable<Texture, Type> {
   TextureDimension dim() const { return dim_; }
 
  private:
-  TextureDimension dim_ = TextureDimension::k1d;
+  TextureDimension const dim_;
 };
 
 }  // namespace type

@@ -61,8 +61,8 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
  private:
   BitcastExpression(const BitcastExpression&) = delete;
 
-  type::Type* type_ = nullptr;
-  Expression* expr_ = nullptr;
+  type::Type* const type_;
+  Expression* const expr_;
 };
 
 }  // namespace ast

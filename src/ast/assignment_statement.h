@@ -61,8 +61,8 @@ class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
  private:
   AssignmentStatement(const AssignmentStatement&) = delete;
 
-  Expression* lhs_ = nullptr;
-  Expression* rhs_ = nullptr;
+  Expression* const lhs_;
+  Expression* const rhs_;
 };
 
 }  // namespace ast

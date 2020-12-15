@@ -34,11 +34,11 @@ Variable::Variable(const Source& source,
                    VariableDecorationList decorations)
     : Base(source),
       name_(name),
-      storage_class_(sc),
       type_(type),
       is_const_(is_const),
       constructor_(constructor),
-      decorations_(std::move(decorations)) {}
+      decorations_(std::move(decorations)),
+      storage_class_(sc) {}
 
 Variable::Variable(Variable&&) = default;
 

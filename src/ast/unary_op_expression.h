@@ -61,8 +61,8 @@ class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
  private:
   UnaryOpExpression(const UnaryOpExpression&) = delete;
 
-  UnaryOp op_ = UnaryOp::kNegation;
-  Expression* expr_ = nullptr;
+  UnaryOp const op_;
+  Expression* const expr_;
 };
 
 }  // namespace ast

@@ -52,7 +52,7 @@ class BoolLiteral : public Castable<BoolLiteral, Literal> {
   BoolLiteral* Clone(CloneContext* ctx) const override;
 
  private:
-  bool value_;
+  bool const value_;
 };
 
 }  // namespace ast

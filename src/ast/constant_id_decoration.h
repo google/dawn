@@ -48,7 +48,7 @@ class ConstantIdDecoration
   ConstantIdDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t value_ = 0;
+  uint32_t const value_;
 };
 
 }  // namespace ast

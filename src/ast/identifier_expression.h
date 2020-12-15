@@ -83,10 +83,11 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
  private:
   IdentifierExpression(const IdentifierExpression&) = delete;
 
-  Intrinsic intrinsic_ = Intrinsic::kNone;
-  std::unique_ptr<intrinsic::Signature> intrinsic_sig_;
-  Symbol sym_;
-  std::string name_;
+  Symbol const sym_;
+  std::string const name_;
+
+  Intrinsic intrinsic_ = Intrinsic::kNone;               // Semantic info
+  std::unique_ptr<intrinsic::Signature> intrinsic_sig_;  // Semantic info
 };
 
 }  // namespace ast

@@ -57,7 +57,7 @@ class CallStatement : public Castable<CallStatement, Statement> {
  private:
   CallStatement(const CallStatement&) = delete;
 
-  CallExpression* call_ = nullptr;
+  CallExpression* const call_;
 };
 
 }  // namespace ast

@@ -48,7 +48,7 @@ class BuiltinDecoration
   BuiltinDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  Builtin builtin_ = Builtin::kNone;
+  Builtin const builtin_;
 };
 
 }  // namespace ast

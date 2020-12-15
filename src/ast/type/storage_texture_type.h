@@ -101,9 +101,10 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   StorageTexture* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* type_ = nullptr;
-  ast::AccessControl access_ = ast::AccessControl::kReadOnly;
-  ImageFormat image_format_ = ImageFormat::kRgba32Float;
+  ast::AccessControl const access_;
+  ImageFormat const image_format_;
+
+  Type* type_ = nullptr;  // Semantic info
 };
 
 }  // namespace type

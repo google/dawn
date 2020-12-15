@@ -59,7 +59,7 @@ class VariableDeclStatement
  private:
   VariableDeclStatement(const VariableDeclStatement&) = delete;
 
-  Variable* variable_ = nullptr;
+  Variable* const variable_;
 };
 
 }  // namespace ast

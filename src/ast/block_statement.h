@@ -83,7 +83,7 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
  private:
   BlockStatement(const BlockStatement&) = delete;
 
-  StatementList statements_;
+  StatementList const statements_;
 };
 
 }  // namespace ast

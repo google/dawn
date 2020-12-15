@@ -23,12 +23,12 @@ namespace tint {
 namespace ast {
 
 WorkgroupDecoration::WorkgroupDecoration(const Source& source, uint32_t x)
-    : Base(source), x_(x) {}
+    : WorkgroupDecoration(source, x, 1, 1) {}
 
 WorkgroupDecoration::WorkgroupDecoration(const Source& source,
                                          uint32_t x,
                                          uint32_t y)
-    : Base(source), x_(x), y_(y) {}
+    : WorkgroupDecoration(source, x, y, 1) {}
 
 WorkgroupDecoration::WorkgroupDecoration(const Source& source,
                                          uint32_t x,

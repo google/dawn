@@ -66,8 +66,8 @@ class AccessControl : public Castable<AccessControl, Type> {
   AccessControl* Clone(CloneContext* ctx) const override;
 
  private:
-  ast::AccessControl access_ = ast::AccessControl::kReadOnly;
-  Type* subtype_ = nullptr;
+  ast::AccessControl const access_;
+  Type* const subtype_;
 };
 
 }  // namespace type

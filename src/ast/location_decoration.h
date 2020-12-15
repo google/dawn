@@ -49,7 +49,7 @@ class LocationDecoration
   LocationDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t value_;
+  uint32_t const value_;
 };
 
 }  // namespace ast

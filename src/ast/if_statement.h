@@ -51,8 +51,6 @@ class IfStatement : public Castable<IfStatement, Statement> {
 
   /// @returns the else statements
   const ElseStatementList& else_statements() const { return else_statements_; }
-  /// @returns the else statements
-  ElseStatementList& else_statements() { return else_statements_; }
 
   /// @returns true if there are else statements
   bool has_else_statements() const { return !else_statements_.empty(); }
@@ -76,9 +74,9 @@ class IfStatement : public Castable<IfStatement, Statement> {
  private:
   IfStatement(const IfStatement&) = delete;
 
-  Expression* condition_ = nullptr;
-  BlockStatement* body_ = nullptr;
-  ElseStatementList else_statements_;
+  Expression* const condition_;
+  BlockStatement* const body_;
+  ElseStatementList const else_statements_;
 };
 
 }  // namespace ast

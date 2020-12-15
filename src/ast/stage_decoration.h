@@ -47,7 +47,7 @@ class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
   StageDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  PipelineStage stage_ = PipelineStage::kNone;
+  PipelineStage const stage_;
 };
 
 }  // namespace ast

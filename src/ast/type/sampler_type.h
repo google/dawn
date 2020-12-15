@@ -58,7 +58,7 @@ class Sampler : public Castable<Sampler, Type> {
   Sampler* Clone(CloneContext* ctx) const override;
 
  private:
-  SamplerKind kind_ = SamplerKind::kSampler;
+  SamplerKind const kind_;
 };
 
 }  // namespace type

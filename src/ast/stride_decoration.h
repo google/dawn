@@ -48,7 +48,7 @@ class StrideDecoration : public Castable<StrideDecoration, ArrayDecoration> {
   StrideDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t stride_;
+  uint32_t const stride_;
 };
 
 }  // namespace ast

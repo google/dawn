@@ -48,7 +48,7 @@ class SetDecoration : public Castable<SetDecoration, VariableDecoration> {
   SetDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t value_;
+  uint32_t const value_;
 };
 
 }  // namespace ast

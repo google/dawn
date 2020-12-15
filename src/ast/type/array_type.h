@@ -76,9 +76,9 @@ class Array : public Castable<Array, Type> {
   Array* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* subtype_ = nullptr;
-  uint32_t size_ = 0;
-  ArrayDecorationList decos_;
+  Type* const subtype_;
+  uint32_t const size_;
+  ArrayDecorationList const decos_;
 };
 
 }  // namespace type

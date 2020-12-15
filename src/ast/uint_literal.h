@@ -50,7 +50,7 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   UintLiteral* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t value_;
+  uint32_t const value_;
 };
 
 }  // namespace ast

@@ -202,15 +202,16 @@ class Function : public Castable<Function, Node> {
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   ReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
-  Symbol symbol_;
-  std::string name_;
-  VariableList params_;
-  type::Type* return_type_ = nullptr;
-  BlockStatement* body_ = nullptr;
-  std::vector<Variable*> referenced_module_vars_;
-  std::vector<Variable*> local_referenced_module_vars_;
-  std::vector<Symbol> ancestor_entry_points_;
-  FunctionDecorationList decorations_;
+  Symbol const symbol_;
+  std::string const name_;
+  VariableList const params_;
+  type::Type* const return_type_;
+  BlockStatement* const body_;
+
+  std::vector<Variable*> referenced_module_vars_;        // Semantic info
+  std::vector<Variable*> local_referenced_module_vars_;  // Semantic info
+  std::vector<Symbol> ancestor_entry_points_;            // Semantic info
+  FunctionDecorationList decorations_;                   // Semantic info
 };
 
 /// A list of functions

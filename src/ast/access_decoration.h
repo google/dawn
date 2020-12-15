@@ -49,7 +49,7 @@ class AccessDecoration : public Castable<AccessDecoration, TypeDecoration> {
   AccessDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  AccessControl value_ = ast::AccessControl::kReadWrite;
+  AccessControl const value_;
 };
 
 }  // namespace ast

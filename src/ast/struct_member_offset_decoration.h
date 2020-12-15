@@ -49,7 +49,7 @@ class StructMemberOffsetDecoration
   StructMemberOffsetDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t offset_;
+  uint32_t const offset_;
 };
 
 }  // namespace ast
