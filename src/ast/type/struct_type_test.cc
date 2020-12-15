@@ -81,12 +81,14 @@ TEST_F(StructTest, MinBufferBindingSize) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   StructDecorationList decos;
 
@@ -105,17 +107,20 @@ TEST_F(StructTest, MinBufferBindingSizeArray) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(8));
-    members.push_back(create<StructMember>("bar", &arr, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &arr, deco));
   }
   StructDecorationList decos;
 
@@ -135,17 +140,20 @@ TEST_F(StructTest, MinBufferBindingSizeRuntimeArray) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(8));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   StructDecorationList decos;
 
@@ -163,7 +171,8 @@ TEST_F(StructTest, MinBufferBindingSizeVec2) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &vec2, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &vec2, deco));
   }
   StructDecorationList decos;
 
@@ -182,7 +191,8 @@ TEST_F(StructTest, MinBufferBindingSizeVec3) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &vec3, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &vec3, deco));
   }
   StructDecorationList decos;
 
@@ -202,7 +212,8 @@ TEST_F(StructTest, MinBufferBindingSizeVec4) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &vec4, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &vec4, deco));
   }
   StructDecorationList decos;
 
@@ -221,12 +232,14 @@ TEST_F(StructTest, BaseAlignment) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   StructDecorationList decos;
 
@@ -244,17 +257,20 @@ TEST_F(StructTest, BaseAlignmentArray) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(8));
-    members.push_back(create<StructMember>("bar", &arr, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &arr, deco));
   }
   StructDecorationList decos;
 
@@ -272,17 +288,20 @@ TEST_F(StructTest, BaseAlignmentRuntimeArray) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(4));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(8));
-    members.push_back(create<StructMember>("bar", &u32, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("bar"), "bar", &u32, deco));
   }
   StructDecorationList decos;
 
@@ -299,7 +318,8 @@ TEST_F(StructTest, BaseAlignmentVec2) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &vec2, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &vec2, deco));
   }
   StructDecorationList decos;
 
@@ -317,7 +337,8 @@ TEST_F(StructTest, BaseAlignmentVec3) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &vec3, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &vec3, deco));
   }
   StructDecorationList decos;
 
@@ -335,7 +356,8 @@ TEST_F(StructTest, BaseAlignmentVec4) {
   {
     StructMemberDecorationList deco;
     deco.push_back(create<StructMemberOffsetDecoration>(0));
-    members.push_back(create<StructMember>("foo", &vec4, deco));
+    members.push_back(
+        create<StructMember>(mod->RegisterSymbol("foo"), "foo", &vec4, deco));
   }
   StructDecorationList decos;
 

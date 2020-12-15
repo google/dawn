@@ -43,7 +43,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("mem", ty.f32, deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("mem"), "mem",
+                                              ty.f32, deco));
 
   auto* strct = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -76,18 +77,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-
   auto* expr = Member("data", "b");
 
   td.RegisterVariableForTesting(coord_var);
@@ -115,18 +115,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-
   auto* expr = Member("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -156,11 +155,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "z", ty.i32,
+              mod->RegisterSymbol("z"), "z", ty.i32,
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              "a", ty.mat2x3<f32>(),
+              mod->RegisterSymbol("z"), "a", ty.mat2x3<f32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(4)}),
       },
@@ -211,11 +210,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("a", ty.mat2x3<f32>(), b_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.mat2x3<f32>(), b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -259,11 +260,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("a", ty.mat3x2<f32>(), b_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.mat3x2<f32>(), b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -304,18 +307,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("a", ty.mat2x3<f32>(), b_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.mat2x3<f32>(), b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-
   auto* expr = Member("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -345,14 +347,12 @@ TEST_F(
   ast::StructMemberList members;
   ast::StructMemberDecorationList deco;
   deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", ty.mat3x3<f32>(), deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.mat3x3<f32>(), deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-
   auto* expr = Member("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -382,18 +382,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("z", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16));
-  members.push_back(create<ast::StructMember>("a", ty.mat4x3<f32>(), b_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.mat4x3<f32>(), b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-
   auto* expr = Index(Index(Member("data", "a"), Expr(2)), Expr(1));
 
   td.RegisterVariableForTesting(coord_var);
@@ -424,14 +423,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", &ary, a_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-
   auto* expr = Index(Member("data", "a"), Expr(2));
 
   td.RegisterVariableForTesting(coord_var);
@@ -462,14 +459,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", &ary, a_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-
   auto* expr = Index(Member("data", "a"), Sub(Add(Expr(2), Expr(4)), Expr(3)));
 
   td.RegisterVariableForTesting(coord_var);
@@ -497,16 +492,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
@@ -543,7 +538,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", &ary, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", &ary, a_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -581,16 +577,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", ty.i32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
@@ -623,16 +619,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", ty.vec3<i32>(), a_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.vec3<i32>(), a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16));
-  members.push_back(create<ast::StructMember>("b", ty.vec3<f32>(), b_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("b"), "b",
+                                              ty.vec3<f32>(), b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
-
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
   td.RegisterVariableForTesting(coord_var);
@@ -662,11 +658,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("a", ty.vec3<i32>(), a_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.vec3<i32>(), a_deco));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(16));
-  members.push_back(create<ast::StructMember>("b", ty.vec3<f32>(), b_deco));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("b"), "b",
+                                              ty.vec3<f32>(), b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -710,11 +708,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* data_str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "a", ty.vec3<i32>(),
+              mod->RegisterSymbol("a"), "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              "b", ty.vec3<f32>(),
+              mod->RegisterSymbol("b"), "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(16)}),
       },
@@ -730,7 +728,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "c", &ary,
+              mod->RegisterSymbol("c"), "c", &ary,
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
       },
@@ -774,11 +772,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* data_str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "a", ty.vec3<i32>(),
+              mod->RegisterSymbol("a"), "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              "b", ty.vec3<f32>(),
+              mod->RegisterSymbol("b"), "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(16)}),
       },
@@ -791,7 +789,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          mod->RegisterSymbol("c"), "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
@@ -832,11 +830,11 @@ TEST_F(
   auto* data_str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "a", ty.vec3<i32>(),
+              mod->RegisterSymbol("a"), "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              "b", ty.vec3<f32>(),
+              mod->RegisterSymbol("b"), "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(16)}),
       },
@@ -851,7 +849,7 @@ TEST_F(
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          mod->RegisterSymbol("c"), "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
@@ -891,11 +889,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* data_str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "a", ty.vec3<i32>(),
+              mod->RegisterSymbol("a"), "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              "b", ty.vec3<f32>(),
+              mod->RegisterSymbol("b"), "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(16)}),
       },
@@ -910,7 +908,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          mod->RegisterSymbol("c"), "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
@@ -950,11 +948,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* data_str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "a", ty.vec3<i32>(),
+              mod->RegisterSymbol("a"), "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              "b", ty.vec3<f32>(),
+              mod->RegisterSymbol("b"), "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(16)}),
       },
@@ -969,7 +967,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          mod->RegisterSymbol("c"), "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});
@@ -1014,11 +1012,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* data_str = create<ast::Struct>(
       ast::StructMemberList{
           create<ast::StructMember>(
-              "a", ty.vec3<i32>(),
+              mod->RegisterSymbol("a"), "a", ty.vec3<i32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(0)}),
           create<ast::StructMember>(
-              "b", ty.vec3<f32>(),
+              mod->RegisterSymbol("b"), "b", ty.vec3<f32>(),
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(16)}),
       },
@@ -1033,7 +1031,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{create<ast::StructMember>(
-          "c", &ary,
+          mod->RegisterSymbol("c"), "c", &ary,
           ast::StructMemberDecorationList{
               create<ast::StructMemberOffsetDecoration>(0)})},
       ast::StructDecorationList{});

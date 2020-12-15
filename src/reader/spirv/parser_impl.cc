@@ -940,9 +940,9 @@ ast::type::Type* ParserImpl::ConvertType(
       ++num_non_writable_members;
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);
-    auto* ast_struct_member =
-        create<ast::StructMember>(Source{}, member_name, ast_member_ty,
-                                  std::move(ast_member_decorations));
+    auto* ast_struct_member = create<ast::StructMember>(
+        Source{}, ast_module_.RegisterSymbol(member_name), member_name,
+        ast_member_ty, std::move(ast_member_decorations));
     ast_members.push_back(ast_struct_member);
   }
 

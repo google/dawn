@@ -298,7 +298,8 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &f32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &f32, decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -320,7 +321,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &f32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &f32, decos));
 
   ast::StructDecorationList struct_decos;
   struct_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
@@ -351,8 +353,10 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   b_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 8));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &f32, a_decos));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &f32, a_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("b"), "b", &f32, b_decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
@@ -384,12 +388,12 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
   ast::StructMemberDecorationList empty_b;
   ast::StructMemberDecorationList empty_c;
   ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, "a", &glsl_mat2x2, empty_a));
-  members.push_back(
-      create<ast::StructMember>(Source{}, "b", &glsl_mat2x3, empty_b));
-  members.push_back(
-      create<ast::StructMember>(Source{}, "c", &glsl_mat4x4, empty_c));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &glsl_mat2x2, empty_a));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("b"), "b", &glsl_mat2x3, empty_b));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("c"), "c", &glsl_mat4x4, empty_c));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
@@ -430,12 +434,12 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
   c_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 48));
 
   ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, "a", &glsl_mat2x2, a_decos));
-  members.push_back(
-      create<ast::StructMember>(Source{}, "b", &glsl_mat2x3, b_decos));
-  members.push_back(
-      create<ast::StructMember>(Source{}, "c", &glsl_mat4x4, c_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &glsl_mat2x2, a_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("b"), "b", &glsl_mat2x3, b_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("c"), "c", &glsl_mat4x4, c_decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
@@ -497,12 +501,12 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   c_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 48));
 
   ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, "a", &glsl_mat2x2, a_decos));
-  members.push_back(
-      create<ast::StructMember>(Source{}, "b", &glsl_mat2x3, b_decos));
-  members.push_back(
-      create<ast::StructMember>(Source{}, "c", &glsl_mat4x4, c_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &glsl_mat2x2, a_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("b"), "b", &glsl_mat2x3, b_decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("c"), "c", &glsl_mat4x4, c_decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);

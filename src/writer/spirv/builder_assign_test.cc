@@ -231,8 +231,10 @@ TEST_F(BuilderTest, Assign_StructMember) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &f32, decos));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &f32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("b"), "b", &f32, decos));
 
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);

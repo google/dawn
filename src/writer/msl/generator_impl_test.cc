@@ -163,13 +163,16 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"),
+                                              "a", &i32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 32));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
+                                              "b", &f32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 128));
-  members.push_back(create<ast::StructMember>(Source{}, "c", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("c"),
+                                              "c", &f32, decos));
 
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
@@ -188,13 +191,16 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"),
+                                              "a", &i32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &fvec, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
+                                              "b", &fvec, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 32));
-  members.push_back(create<ast::StructMember>(Source{}, "c", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("c"),
+                                              "c", &f32, decos));
 
   auto* inner_str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
@@ -202,13 +208,16 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
   ast::type::Struct inner_s(mod.RegisterSymbol("Inner"), "Inner", inner_str);
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(Source{}, "d", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("d"),
+                                              "d", &f32, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 32));
-  members.push_back(create<ast::StructMember>(Source{}, "e", &inner_s, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("e"),
+                                              "e", &inner_s, decos));
 
   decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 64));
-  members.push_back(create<ast::StructMember>(Source{}, "f", &f32, decos));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("f"),
+                                              "f", &f32, decos));
 
   auto* outer_str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});

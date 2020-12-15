@@ -22,6 +22,7 @@
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/demangler.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
@@ -59,7 +60,8 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
     %s2 = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_THAT(p->module().to_str(), HasSubstr(R"(S Struct{
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+              HasSubstr(R"(S Struct{
     StructMember{field0: __u32}
     StructMember{field1: __u32}
   }

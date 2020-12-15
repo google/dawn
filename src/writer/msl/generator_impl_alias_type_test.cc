@@ -54,12 +54,14 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
   ast::type::F32 f32;
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, "a", &f32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &f32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
+                                              "b", &i32, b_deco));
 
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
@@ -79,12 +81,14 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   ast::type::F32 f32;
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, "a", &f32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &f32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &i32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
+                                              "b", &i32, b_deco));
 
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});

@@ -60,8 +60,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
-  auto* mem =
-      create<ast::StructMember>("a", ty.i32, ast::StructMemberDecorationList{});
+  auto* mem = create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
+                                        ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
@@ -79,8 +79,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
-  auto* mem =
-      create<ast::StructMember>("a", ty.i32, ast::StructMemberDecorationList{});
+  auto* mem = create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
+                                        ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
@@ -154,12 +154,14 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      "a", ty.i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -171,12 +173,14 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      "a", ty.i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -193,12 +197,14 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      "a", ty.i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.f32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());

@@ -305,8 +305,10 @@ class InspectorHelper {
       deco.push_back(
           create<ast::StructMemberOffsetDecoration>(Source{}, offset));
 
+      auto member_name = StructMemberName(members.size(), type);
       members.push_back(create<ast::StructMember>(
-          Source{}, StructMemberName(members.size(), type), type, deco));
+          Source{}, mod()->RegisterSymbol(member_name), member_name, type,
+          deco));
     }
 
     ast::StructDecorationList decos;
@@ -1460,9 +1462,9 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   ast::StructMemberDecorationList deco;
   deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
 
+  auto name = StructMemberName(members.size(), i32_type());
   members.push_back(create<ast::StructMember>(
-      Source{}, StructMemberName(members.size(), i32_type()), i32_type(),
-      deco));
+      Source{}, mod()->RegisterSymbol(name), name, i32_type(), deco));
 
   ast::StructDecorationList decos;
 

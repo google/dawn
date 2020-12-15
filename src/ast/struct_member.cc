@@ -24,10 +24,12 @@ namespace tint {
 namespace ast {
 
 StructMember::StructMember(const Source& source,
+                           const Symbol& sym,
                            const std::string& name,
                            type::Type* type,
                            StructMemberDecorationList decorations)
     : Base(source),
+      symbol_(sym),
       name_(name),
       type_(type),
       decorations_(std::move(decorations)) {}
@@ -56,11 +58,12 @@ uint32_t StructMember::offset() const {
 
 StructMember* StructMember::Clone(CloneContext* ctx) const {
   return ctx->mod->create<StructMember>(
-      ctx->Clone(source()), name_, ctx->Clone(type_), ctx->Clone(decorations_));
+      ctx->Clone(source()), ctx->Clone(symbol_), name_, ctx->Clone(type_),
+      ctx->Clone(decorations_));
 }
 
 bool StructMember::IsValid() const {
-  if (name_.empty() || type_ == nullptr) {
+  if (name_.empty() || type_ == nullptr || !symbol_.IsValid()) {
     return false;
   }
   for (auto* deco : decorations_) {
@@ -81,7 +84,7 @@ void StructMember::to_str(std::ostream& out, size_t indent) const {
     out << "]] ";
   }
 
-  out << name_ << ": " << type_->type_name() << "}" << std::endl;
+  out << symbol_.to_str() << ": " << type_->type_name() << "}" << std::endl;
 }
 
 }  // namespace ast

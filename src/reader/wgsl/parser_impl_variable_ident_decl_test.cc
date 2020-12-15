@@ -87,7 +87,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
 
   auto p = parser("my_var : [[access(read)]] S");
 
-  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
+                        &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -114,7 +115,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
 
   auto p = parser("my_var : [[access(read_write)]] S");
 
-  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
+                        &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -141,7 +143,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
 
   auto p = parser("my_var : [[access(read), access(read_write)]] S");
 
-  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
+                        &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -165,7 +168,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
 
   auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
 
-  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
+                        &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 
@@ -205,7 +209,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
 
   auto p = parser("my_var : [[stride(1)]] S");
 
-  ast::StructMember mem(Source{}, "a", &i32, ast::StructMemberDecorationList{});
+  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
+                        &i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
   members.push_back(&mem);
 

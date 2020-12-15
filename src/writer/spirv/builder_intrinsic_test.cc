@@ -1334,7 +1334,8 @@ OpFunctionEnd
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1375,8 +1376,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("z", ty.f32, decos));
-  members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.f32, decos));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1419,8 +1422,10 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>("z", ty.f32, decos));
-  members.push_back(create<ast::StructMember>("a", ty.array<f32>(), decos));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.f32, decos));
+  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
+                                              ty.array<f32>(), decos));
 
   auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);

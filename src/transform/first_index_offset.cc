@@ -201,7 +201,8 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
     member_dec.push_back(
         mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(mod->create<ast::StructMember>(
-        Source{}, kFirstVertexName, u32_type, std::move(member_dec)));
+        Source{}, mod->RegisterSymbol(kFirstVertexName), kFirstVertexName,
+        u32_type, std::move(member_dec)));
     vertex_index_offset_ = offset;
     offset += 4;
   }
@@ -211,7 +212,8 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
     member_dec.push_back(
         mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(mod->create<ast::StructMember>(
-        Source{}, kFirstInstanceName, u32_type, std::move(member_dec)));
+        Source{}, mod->RegisterSymbol(kFirstInstanceName), kFirstInstanceName,
+        u32_type, std::move(member_dec)));
     instance_index_offset_ = offset;
     offset += 4;
   }

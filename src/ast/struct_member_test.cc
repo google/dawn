@@ -31,7 +31,9 @@ TEST_F(StructMemberTest, Creation) {
   StructMemberDecorationList decorations;
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4));
 
-  auto* st = create<StructMember>("a", ty.i32, decorations);
+  auto* st =
+      create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, decorations);
+  EXPECT_EQ(st->symbol(), Symbol(1));
   EXPECT_EQ(st->name(), "a");
   EXPECT_EQ(st->type(), ty.i32);
   EXPECT_EQ(st->decorations().size(), 1u);
@@ -45,7 +47,8 @@ TEST_F(StructMemberTest, Creation) {
 TEST_F(StructMemberTest, CreationWithSource) {
   auto* st = create<StructMember>(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-      "a", ty.i32, StructMemberDecorationList{});
+      mod->RegisterSymbol("a"), "a", ty.i32, StructMemberDecorationList{});
+  EXPECT_EQ(st->symbol(), Symbol(1));
   EXPECT_EQ(st->name(), "a");
   EXPECT_EQ(st->type(), ty.i32);
   EXPECT_EQ(st->decorations().size(), 0u);
@@ -56,17 +59,20 @@ TEST_F(StructMemberTest, CreationWithSource) {
 }
 
 TEST_F(StructMemberTest, IsValid) {
-  auto* st = create<StructMember>("a", ty.i32, StructMemberDecorationList{});
+  auto* st = create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
+                                  StructMemberDecorationList{});
   EXPECT_TRUE(st->IsValid());
 }
 
-TEST_F(StructMemberTest, IsValid_EmptyName) {
-  auto* st = create<StructMember>("", ty.i32, StructMemberDecorationList{});
+TEST_F(StructMemberTest, IsValid_EmptySymbol) {
+  auto* st = create<StructMember>(mod->RegisterSymbol(""), "", ty.i32,
+                                  StructMemberDecorationList{});
   EXPECT_FALSE(st->IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_NullType) {
-  auto* st = create<StructMember>("a", nullptr, StructMemberDecorationList{});
+  auto* st = create<StructMember>(mod->RegisterSymbol("a"), "a", nullptr,
+                                  StructMemberDecorationList{});
   EXPECT_FALSE(st->IsValid());
 }
 
@@ -75,7 +81,8 @@ TEST_F(StructMemberTest, IsValid_Null_Decoration) {
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4));
   decorations.push_back(nullptr);
 
-  auto* st = create<StructMember>("a", ty.i32, decorations);
+  auto* st =
+      create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, decorations);
   EXPECT_FALSE(st->IsValid());
 }
 
@@ -83,17 +90,19 @@ TEST_F(StructMemberTest, ToStr) {
   StructMemberDecorationList decorations;
   decorations.emplace_back(create<StructMemberOffsetDecoration>(4));
 
-  auto* st = create<StructMember>("a", ty.i32, decorations);
+  auto* st =
+      create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, decorations);
   std::ostringstream out;
   st->to_str(out, 2);
-  EXPECT_EQ(out.str(), "  StructMember{[[ offset 4 ]] a: __i32}\n");
+  EXPECT_EQ(demangle(out.str()), "  StructMember{[[ offset 4 ]] a: __i32}\n");
 }
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {
-  auto* st = create<StructMember>("a", ty.i32, StructMemberDecorationList{});
+  auto* st = create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
+                                  StructMemberDecorationList{});
   std::ostringstream out;
   st->to_str(out, 2);
-  EXPECT_EQ(out.str(), "  StructMember{a: __i32}\n");
+  EXPECT_EQ(demangle(out.str()), "  StructMember{a: __i32}\n");
 }
 
 }  // namespace

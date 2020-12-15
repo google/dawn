@@ -48,10 +48,10 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   auto* str = create<ast::Struct>(
 
       ast::StructMemberList{
-          create<ast::StructMember>("a", ty.f32,
+          create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32,
                                     ast::StructMemberDecorationList{}),
           create<ast::StructMember>(
-              "b", ty.i32,
+              mod->RegisterSymbol("b"), "b", ty.i32,
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(4)}),
       },

@@ -175,12 +175,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   ast::type::F32 f32;
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, "a", &i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &i32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
+                                              "b", &f32, b_deco));
 
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
@@ -196,12 +198,14 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
   ast::type::F32 f32;
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, "a", &i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &i32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
+                                              "b", &f32, b_deco));
 
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
@@ -224,15 +228,15 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
       Source{},
       ast::StructMemberList{
           create<ast::StructMember>(
-              Source{}, "a", &i32,
+              Source{}, mod.RegisterSymbol("a"), "a", &i32,
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(Source{}, 4)}),
           create<ast::StructMember>(
-              Source{}, "b", &f32,
+              Source{}, mod.RegisterSymbol("b"), "b", &f32,
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(Source{}, 32)}),
           create<ast::StructMember>(
-              Source{}, "c", &f32,
+              Source{}, mod.RegisterSymbol("c"), "c", &f32,
               ast::StructMemberDecorationList{
                   create<ast::StructMemberOffsetDecoration>(Source{}, 128)}),
       },
@@ -257,11 +261,13 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
   ast::type::F32 f32;
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, "main", &i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(Source{}, mod.RegisterSymbol("main"), "main",
+                                &i32, ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
-  members.push_back(create<ast::StructMember>(Source{}, "float", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod.RegisterSymbol("float"), "float", &f32, b_deco));
 
   auto* str =
       create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
@@ -282,12 +288,14 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
   ast::type::F32 f32;
 
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, "a", &i32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &i32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &f32, b_deco));
+  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
+                                              "b", &f32, b_deco));
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));

@@ -945,8 +945,10 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
   auto* s = create<ast::Struct>(
       Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
-          create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
+          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
+                                    ty.f32, decos),
+          create<ast::StructMember>(Source{}, mod->RegisterSymbol("b"), "b",
+                                    ty.vec3<f32>(), decos),
       },
       ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1085,7 +1087,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   auto* s = create<ast::Struct>(
       Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
+          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
+                                    ty.f32, decos),
       },
       ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1500,8 +1503,10 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
   auto* s = create<ast::Struct>(
       Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
-          create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
+          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
+                                    ty.f32, decos),
+          create<ast::StructMember>(Source{}, mod->RegisterSymbol("b"), "b",
+                                    ty.vec3<f32>(), decos),
       },
       ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1520,8 +1525,10 @@ TEST_F(SpvBuilderConstructorTest,
   auto* s = create<ast::Struct>(
       Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, "a", ty.f32, decos),
-          create<ast::StructMember>(Source{}, "b", ty.vec3<f32>(), decos),
+          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
+                                    ty.f32, decos),
+          create<ast::StructMember>(Source{}, mod->RegisterSymbol("b"), "b",
+                                    ty.vec3<f32>(), decos),
       },
       ast::StructDecorationList{});
 

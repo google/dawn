@@ -1246,8 +1246,9 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
   if (!expect("struct member", Token::Type::kSemicolon))
     return Failure::kErrored;
 
-  return create<ast::StructMember>(decl->source, decl->name, decl->type,
-                                   std::move(member_decos.value));
+  return create<ast::StructMember>(
+      decl->source, module_.RegisterSymbol(decl->name), decl->name, decl->type,
+      std::move(member_decos.value));
 }
 
 // function_decl

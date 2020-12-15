@@ -24,6 +24,7 @@
 #include "src/ast/node.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/type/type.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace ast {
@@ -33,10 +34,12 @@ class StructMember : public Castable<StructMember, Node> {
  public:
   /// Create a new struct member statement
   /// @param source The input source for the struct member statement
+  /// @param sym The struct member symbol
   /// @param name The struct member name
   /// @param type The struct member type
   /// @param decorations The struct member decorations
   StructMember(const Source& source,
+               const Symbol& sym,
                const std::string& name,
                type::Type* type,
                StructMemberDecorationList decorations);
@@ -45,6 +48,8 @@ class StructMember : public Castable<StructMember, Node> {
 
   ~StructMember() override;
 
+  /// @returns the symbol
+  const Symbol& symbol() const { return symbol_; }
   /// @returns the name
   const std::string& name() const { return name_; }
   /// @returns the type
@@ -77,6 +82,7 @@ class StructMember : public Castable<StructMember, Node> {
  private:
   StructMember(const StructMember&) = delete;
 
+  Symbol const symbol_;
   std::string const name_;
   type::Type* const type_;
   StructMemberDecorationList const decorations_;

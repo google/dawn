@@ -45,12 +45,14 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>("vf", ty.f32, deco));
+    members.push_back(create<ast::StructMember>(mod->RegisterSymbol("vf"), "vf",
+                                                ty.f32, deco));
   }
   {
     ast::StructMemberDecorationList deco;
     members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "rt", ty.array<f32>(), deco));
+        Source{Source::Location{12, 34}}, mod->RegisterSymbol("rt"), "rt",
+        ty.array<f32>(), deco));
   }
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
@@ -70,12 +72,14 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>("vf", ty.f32, deco));
+    members.push_back(create<ast::StructMember>(mod->RegisterSymbol("vf"), "vf",
+                                                ty.f32, deco));
   }
   {
     ast::StructMemberDecorationList deco;
     members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "rt", ty.array<f32>(), deco));
+        Source{Source::Location{12, 34}}, mod->RegisterSymbol("rt"), "rt",
+        ty.array<f32>(), deco));
   }
   ast::StructDecorationList decos;
   auto* st = create<ast::Struct>(members, decos);
@@ -99,11 +103,13 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   {
     ast::StructMemberDecorationList deco;
     members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "rt", ty.array<f32>(), deco));
+        Source{Source::Location{12, 34}}, mod->RegisterSymbol("rt"), "rt",
+        ty.array<f32>(), deco));
   }
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>("vf", ty.f32, deco));
+    members.push_back(create<ast::StructMember>(mod->RegisterSymbol("vf"), "vf",
+                                                ty.f32, deco));
   }
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
@@ -131,12 +137,14 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "b", &alias, deco));
+    members.push_back(
+        create<ast::StructMember>(Source{Source::Location{12, 34}},
+                                  mod->RegisterSymbol("b"), "b", &alias, deco));
   }
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>("a", ty.u32, deco));
+    members.push_back(
+        create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.u32, deco));
   }
 
   ast::StructDecorationList decos;
@@ -164,12 +172,14 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>("a", ty.u32, deco));
+    members.push_back(
+        create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.u32, deco));
   }
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "b", &alias, deco));
+    members.push_back(
+        create<ast::StructMember>(Source{Source::Location{12, 34}},
+                                  mod->RegisterSymbol("b"), "b", &alias, deco));
   }
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());

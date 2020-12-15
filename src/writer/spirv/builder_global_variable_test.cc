@@ -530,8 +530,10 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
-  members.push_back(create<ast::StructMember>(Source{}, "b", &i32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &i32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("b"), "b", &i32, decos));
 
   ast::type::Struct A(
       mod->RegisterSymbol("A"), "A",
@@ -569,7 +571,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &i32, decos));
 
   ast::type::Struct A(
       mod->RegisterSymbol("A"), "A",
@@ -606,7 +609,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &i32, decos));
 
   ast::type::Struct A(
       mod->RegisterSymbol("A"), "A",
@@ -643,7 +647,8 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(Source{}, "a", &i32, decos));
+  members.push_back(create<ast::StructMember>(
+      Source{}, mod->RegisterSymbol("a"), "a", &i32, decos));
 
   ast::type::Struct A(
       mod->RegisterSymbol("A"), "A",

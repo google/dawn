@@ -179,7 +179,8 @@ TEST_F(WgslGeneratorImplTest,
   ast::StructMemberList members;
   ast::StructMemberDecorationList a_deco;
   a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(create<ast::StructMember>("d", ty.f32, a_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("d"), "d", ty.f32, a_deco));
 
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>());

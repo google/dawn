@@ -40,12 +40,14 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
 
 TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      "a", ty.f32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.i32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.i32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
@@ -65,12 +67,14 @@ type B = A;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
   ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      "a", ty.f32, ast::StructMemberDecorationList{}));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32,
+                                ast::StructMemberDecorationList{}));
 
   ast::StructMemberDecorationList b_deco;
   b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(create<ast::StructMember>("b", ty.i32, b_deco));
+  members.push_back(
+      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.i32, b_deco));
 
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
 
