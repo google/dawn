@@ -499,6 +499,20 @@ class Builder {
                   Expression* constructor,
                   VariableDecorationList decorations);
 
+  /// @param source the variable source
+  /// @param name the variable name
+  /// @param storage the variable storage class
+  /// @param type the variable type
+  /// @param constructor optional constructor expression
+  /// @param decorations optional variable decorations
+  /// @returns a constant `Variable` with the given name, storage and type
+  Variable* Const(const Source& source,
+                  const std::string& name,
+                  StorageClass storage,
+                  type::Type* type,
+                  Expression* constructor,
+                  VariableDecorationList decorations);
+
   /// @param func the function name
   /// @param args the function call arguments
   /// @returns a `CallExpression` to the function `func`, with the

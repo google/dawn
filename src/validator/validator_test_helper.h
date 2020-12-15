@@ -18,6 +18,7 @@
 #include <memory>
 #include <utility>
 
+#include "src/ast/builder.h"
 #include "src/ast/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/validator/validator_impl.h"
@@ -25,11 +26,11 @@
 namespace tint {
 
 /// A helper for testing validation
-class ValidatorTestHelper {
+class ValidatorTestHelper : public ast::BuilderWithModule {
  public:
   /// Constructor
   ValidatorTestHelper();
-  ~ValidatorTestHelper();
+  ~ValidatorTestHelper() override;
 
   /// A handle to validator
   /// @returns a pointer to the validator
@@ -37,24 +38,10 @@ class ValidatorTestHelper {
   /// A handle to type_determiner
   /// @returns a pointer to the type_determiner object
   TypeDeterminer* td() const { return td_.get(); }
-  /// A handle to the created module
-  /// @return a pointer to the test module
-  ast::Module* mod() { return &mod_; }
-
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
-  /// @param args the arguments to pass to the type constructor
-  /// @returns the node pointer
-  template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
-    return mod_.create<T>(std::forward<ARGS>(args)...);
-  }
 
  private:
   std::unique_ptr<ValidatorImpl> v_;
-  ast::Module mod_;
   std::unique_ptr<TypeDeterminer> td_;
-  ast::type::Void void_type_;
 };
 
 }  // namespace tint

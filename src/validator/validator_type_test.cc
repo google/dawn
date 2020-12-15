@@ -42,25 +42,23 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   //   rt: array<f32>;
   // };
 
-  ast::type::F32 f32;
-  ast::type::Array arr(&f32, 0, ast::ArrayDecorationList{});
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>(Source{}, "vf", &f32, deco));
+    members.push_back(create<ast::StructMember>("vf", ty.f32, deco));
   }
   {
     ast::StructMemberDecorationList deco;
     members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "rt", &arr, deco));
+        Source{Source::Location{12, 34}}, "rt", ty.array<f32>(), deco));
   }
   ast::StructDecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type(mod()->RegisterSymbol("Foo"), "Foo", st);
+  decos.push_back(create<ast::StructBlockDecoration>());
+  auto* st = create<ast::Struct>(members, decos);
+  ast::type::Struct struct_type(mod->RegisterSymbol("Foo"), "Foo", st);
 
-  mod()->AddConstructedType(&struct_type);
-  EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  mod->AddConstructedType(&struct_type);
+  EXPECT_TRUE(v()->ValidateConstructedTypes(mod->constructed_types()));
 }
 
 TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
@@ -69,24 +67,22 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   //   rt: array<f32>;
   // };
 
-  ast::type::F32 f32;
-  ast::type::Array arr(&f32, 0, ast::ArrayDecorationList{});
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>(Source{}, "vf", &f32, deco));
+    members.push_back(create<ast::StructMember>("vf", ty.f32, deco));
   }
   {
     ast::StructMemberDecorationList deco;
     members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "rt", &arr, deco));
+        Source{Source::Location{12, 34}}, "rt", ty.array<f32>(), deco));
   }
   ast::StructDecorationList decos;
-  auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type(mod()->RegisterSymbol("Foo"), "Foo", st);
+  auto* st = create<ast::Struct>(members, decos);
+  ast::type::Struct struct_type(mod->RegisterSymbol("Foo"), "Foo", st);
 
-  mod()->AddConstructedType(&struct_type);
-  EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  mod->AddConstructedType(&struct_type);
+  EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
             "12:34 v-0031: a struct containing a runtime-sized array must be "
             "in the 'storage' storage class: 'Foo'");
@@ -99,25 +95,23 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   //   vf: f32;
   // };
 
-  ast::type::F32 f32;
-  ast::type::Array arr(&f32, 0, ast::ArrayDecorationList{});
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
     members.push_back(create<ast::StructMember>(
-        Source{Source::Location{12, 34}}, "rt", &arr, deco));
+        Source{Source::Location{12, 34}}, "rt", ty.array<f32>(), deco));
   }
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>(Source{}, "vf", &f32, deco));
+    members.push_back(create<ast::StructMember>("vf", ty.f32, deco));
   }
   ast::StructDecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type(mod()->RegisterSymbol("Foo"), "Foo", st);
+  decos.push_back(create<ast::StructBlockDecoration>());
+  auto* st = create<ast::Struct>(members, decos);
+  ast::type::Struct struct_type(mod->RegisterSymbol("Foo"), "Foo", st);
 
-  mod()->AddConstructedType(&struct_type);
-  EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  mod->AddConstructedType(&struct_type);
+  EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
             "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct: 'rt'");
@@ -131,9 +125,8 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   //  a: u32;
   //}
 
-  ast::type::F32 u32;
-  ast::type::Array array(&u32, 0, ast::ArrayDecorationList{});
-  ast::type::Alias alias{mod()->RegisterSymbol("RTArr"), "RTArr", &array};
+  ast::type::Alias alias{mod->RegisterSymbol("RTArr"), "RTArr",
+                         ty.array<u32>()};
 
   ast::StructMemberList members;
   {
@@ -143,15 +136,15 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   }
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>(Source{}, "a", &u32, deco));
+    members.push_back(create<ast::StructMember>("a", ty.u32, deco));
   }
 
   ast::StructDecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type(mod()->RegisterSymbol("s"), "s", st);
-  mod()->AddConstructedType(&struct_type);
-  EXPECT_FALSE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  decos.push_back(create<ast::StructBlockDecoration>());
+  auto* st = create<ast::Struct>(members, decos);
+  ast::type::Struct struct_type(mod->RegisterSymbol("s"), "s", st);
+  mod->AddConstructedType(&struct_type);
+  EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
             "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct: 'b'");
@@ -165,14 +158,13 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   //  b: RTArr;
   //}
 
-  ast::type::F32 u32;
-  ast::type::Array array(&u32, 0, ast::ArrayDecorationList{});
-  ast::type::Alias alias{mod()->RegisterSymbol("RTArr"), "RTArr", &array};
+  ast::type::Alias alias{mod->RegisterSymbol("RTArr"), "RTArr",
+                         ty.array<u32>()};
 
   ast::StructMemberList members;
   {
     ast::StructMemberDecorationList deco;
-    members.push_back(create<ast::StructMember>(Source{}, "a", &u32, deco));
+    members.push_back(create<ast::StructMember>("a", ty.u32, deco));
   }
   {
     ast::StructMemberDecorationList deco;
@@ -180,43 +172,31 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
         Source{Source::Location{12, 34}}, "b", &alias, deco));
   }
   ast::StructDecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* st = create<ast::Struct>(Source{}, members, decos);
-  ast::type::Struct struct_type(mod()->RegisterSymbol("s"), "s", st);
-  mod()->AddConstructedType(&struct_type);
-  EXPECT_TRUE(v()->ValidateConstructedTypes(mod()->constructed_types()));
+  decos.push_back(create<ast::StructBlockDecoration>());
+  auto* st = create<ast::Struct>(members, decos);
+  ast::type::Struct struct_type(mod->RegisterSymbol("s"), "s", st);
+  mod->AddConstructedType(&struct_type);
+  EXPECT_TRUE(v()->ValidateConstructedTypes(mod->constructed_types()));
 }
 
 TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   /// [[stage(vertex)]]
   // fn func -> void { var a : array<i32>; }
-  ast::type::I32 i32;
-  ast::type::Array array(&i32, 0, ast::ArrayDecorationList{});
 
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &array,                          // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.array<i32>());
   ast::VariableList params;
-  ast::type::Void void_type;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(
-                        Source{Source::Location{12, 34}}, var),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}}, var),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod()->RegisterSymbol("func"), "func", params, &void_type, body,
+      mod->RegisterSymbol("func"), "func", params, ty.void_, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(),
             "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct: 'a'");

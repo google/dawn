@@ -42,32 +42,20 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   // switch (a) {
   //   default: {}
   // }
-  ast::type::F32 f32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &f32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &f32, 3.14f)),  // constructor
-      ast::VariableDecorationList{});                        // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(3.14f),
+                  ast::VariableDecorationList{});
 
   auto* cond = create<ast::IdentifierExpression>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("a"), "a");
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("a"), "a");
   ast::CaseSelectorList default_csl;
-  auto* block_default =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
   ast::CaseStatementList body;
-  body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl, block_default));
+  body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, body),
+  });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -81,33 +69,21 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   // switch (a) {
   //   case 1: {}
   // }
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
   ast::CaseSelectorList csl;
-  csl.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
+  csl.push_back(Literal(1));
   ast::CaseStatementList body;
   body.push_back(create<ast::CaseStatement>(
-      Source{}, csl,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{})));
+      csl, create<ast::BlockStatement>(ast::StatementList{})));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(
-                        Source{Source::Location{12, 34}}, cond, body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, cond,
+                                   body),
+  });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -123,47 +99,32 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   //   case 1: {}
   //   default: {}
   // }
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
 
   ast::CaseSelectorList default_csl_1;
-  auto* block_default_1 =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
+  auto* block_default_1 = create<ast::BlockStatement>(ast::StatementList{});
   switch_body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl_1, block_default_1));
+      create<ast::CaseStatement>(default_csl_1, block_default_1));
 
   ast::CaseSelectorList csl_case_1;
-  csl_case_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
-  auto* block_case_1 =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
-  switch_body.push_back(
-      create<ast::CaseStatement>(Source{}, csl_case_1, block_case_1));
+  csl_case_1.push_back(Literal(1));
+  auto* block_case_1 = create<ast::BlockStatement>(ast::StatementList{});
+  switch_body.push_back(create<ast::CaseStatement>(csl_case_1, block_case_1));
 
   ast::CaseSelectorList default_csl_2;
-  auto* block_default_2 =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
+  auto* block_default_2 = create<ast::BlockStatement>(ast::StatementList{});
   switch_body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl_2, block_default_2));
+      create<ast::CaseStatement>(default_csl_2, block_default_2));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(
-                        Source{Source::Location{12, 34}}, cond, switch_body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, cond,
+                                   switch_body),
+  });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -179,40 +140,26 @@ TEST_F(ValidateControlBlockTest,
   //   case 1: {}
   //   default: {}
   // }
-  ast::type::U32 u32;
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
 
   ast::CaseSelectorList csl;
-  csl.push_back(create<ast::UintLiteral>(Source{}, &u32, 1));
+  csl.push_back(create<ast::UintLiteral>(ty.u32, 1));
   switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, csl,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{})));
+      create<ast::BlockStatement>(ast::StatementList{})));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
-  switch_body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl, block_default));
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, switch_body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, switch_body),
+  });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
   EXPECT_EQ(v()->error(),
@@ -227,40 +174,28 @@ TEST_F(ValidateControlBlockTest,
   //   case -1: {}
   //   default: {}
   // }
-  ast::type::U32 u32;
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &u32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::UintLiteral>(Source{}, &u32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.u32,
+                  create<ast::ScalarConstructorExpression>(
+                      create<ast::UintLiteral>(ty.u32, 2)),
+                  ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
 
   ast::CaseSelectorList csl;
-  csl.push_back(create<ast::SintLiteral>(Source{}, &i32, -1));
+  csl.push_back(Literal(-1));
   switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, csl,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{})));
+      create<ast::BlockStatement>(ast::StatementList{})));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
-  switch_body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl, block_default));
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, switch_body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, switch_body),
+  });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
   EXPECT_EQ(v()->error(),
@@ -275,46 +210,34 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   //   case 2, 2: {}
   //   default: {}
   // }
-  ast::type::U32 u32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &u32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::UintLiteral>(Source{}, &u32, 3)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.u32,
+                  create<ast::ScalarConstructorExpression>(
+                      create<ast::UintLiteral>(ty.u32, 3)),
+                  ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
 
   ast::CaseSelectorList csl_1;
-  csl_1.push_back(create<ast::UintLiteral>(Source{}, &u32, 0));
+  csl_1.push_back(create<ast::UintLiteral>(ty.u32, 0));
   switch_body.push_back(create<ast::CaseStatement>(
-      Source{}, csl_1,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{})));
+      csl_1, create<ast::BlockStatement>(ast::StatementList{})));
 
   ast::CaseSelectorList csl_2;
-  csl_2.push_back(create<ast::UintLiteral>(Source{}, &u32, 2));
-  csl_2.push_back(create<ast::UintLiteral>(Source{}, &u32, 2));
+  csl_2.push_back(create<ast::UintLiteral>(ty.u32, 2));
+  csl_2.push_back(create<ast::UintLiteral>(ty.u32, 2));
   switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, csl_2,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{})));
+      create<ast::BlockStatement>(ast::StatementList{})));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
-  switch_body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl, block_default));
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, switch_body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, switch_body),
+  });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
   EXPECT_EQ(v()->error(),
@@ -329,48 +252,34 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   //   case 0,1,2,10: {}
   //   default: {}
   // }
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
 
   ast::CaseSelectorList csl_1;
-  csl_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 10));
+  csl_1.push_back(Literal(10));
   switch_body.push_back(create<ast::CaseStatement>(
-      Source{}, csl_1,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{})));
+      csl_1, create<ast::BlockStatement>(ast::StatementList{})));
 
   ast::CaseSelectorList csl_2;
-  csl_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 0));
-  csl_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
-  csl_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 2));
-  csl_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 10));
+  csl_2.push_back(Literal(0));
+  csl_2.push_back(Literal(1));
+  csl_2.push_back(Literal(2));
+  csl_2.push_back(Literal(10));
   switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, csl_2,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{})));
+      create<ast::BlockStatement>(ast::StatementList{})));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
-  switch_body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl, block_default));
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, switch_body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, switch_body),
+  });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
   EXPECT_EQ(v()->error(),
@@ -383,35 +292,23 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   // switch (a) {
   //   default: { fallthrough; }
   // }
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>(
-      Source{},
+
       ast::StatementList{
           create<ast::FallthroughStatement>(Source{Source::Location{12, 34}}),
       });
   ast::CaseStatementList body;
-  body.push_back(
-      create<ast::CaseStatement>(Source{}, default_csl, block_default));
+  body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, body),
+  });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
   EXPECT_EQ(v()->error(),
@@ -425,37 +322,24 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   //   default: {}
   //   case 5: {}
   // }
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
   ast::CaseSelectorList default_csl;
-  auto* block_default =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
   ast::CaseStatementList body;
   body.push_back(create<ast::CaseStatement>(Source{Source::Location{12, 34}},
                                             default_csl, block_default));
   ast::CaseSelectorList case_csl;
-  case_csl.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
-  auto* block_case =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
-  body.push_back(create<ast::CaseStatement>(Source{}, case_csl, block_case));
+  case_csl.push_back(Literal(5));
+  auto* block_case = create<ast::BlockStatement>(ast::StatementList{});
+  body.push_back(create<ast::CaseStatement>(case_csl, block_case));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, body),
-                });
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, body),
+  });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(block)) << v()->error();
 }
@@ -467,35 +351,23 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   //   default: {}
   // }
 
-  ast::type::U32 u32;
-  ast::type::Alias my_int{mod()->RegisterSymbol("MyInt"), "MyInt", &u32};
+  ast::type::Alias my_int{mod->RegisterSymbol("MyInt"), "MyInt", ty.u32};
 
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &my_int,                   // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &u32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, &my_int, Expr(2u),
+                  ast::VariableDecorationList{});
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod()->RegisterSymbol("a"), "a");
+  auto* cond = Expr("a");
   ast::CaseSelectorList default_csl;
-  auto* block_default =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{});
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
   ast::CaseStatementList body;
   body.push_back(create<ast::CaseStatement>(Source{Source::Location{12, 34}},
                                             default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::SwitchStatement>(Source{}, cond, body),
-                });
-  mod()->AddConstructedType(&my_int);
+  auto* block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::SwitchStatement>(cond, body),
+  });
+  mod->AddConstructedType(&my_int);
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(block)) << v()->error();

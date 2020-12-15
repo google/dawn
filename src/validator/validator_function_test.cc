@@ -38,100 +38,74 @@ class ValidateFunctionTest : public ValidatorTestHelper,
 TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { var a:i32 = 2; }
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
   ast::VariableList params;
-  ast::type::Void void_type;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+  });
   auto* func = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("func"), "func",
-      params, &void_type, body,
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("func"), "func",
+      params, ty.void_, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod()));
+  EXPECT_TRUE(v()->Validate(mod));
 }
 
 TEST_F(ValidateFunctionTest,
        VoidFunctionEndWithoutReturnStatementEmptyBody_Pass) {
   // [[stage(vertex)]]
   // fn func -> void {}
-  ast::type::Void void_type;
   ast::VariableList params;
   auto* func = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("func"), "func",
-      params, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("func"), "func",
+      params, ty.void_, create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod()));
+  EXPECT_TRUE(v()->Validate(mod));
 }
 
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
-  ast::type::I32 i32;
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "a",                       // name
-      ast::StorageClass::kNone,  // storage_class
-      &i32,                      // type
-      false,                     // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::SintLiteral>(Source{}, &i32, 2)),  // constructor
-      ast::VariableDecorationList{});                    // decorations
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
   ast::VariableList params;
-  ast::type::Void void_type;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+  });
   auto* func = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("func"), "func",
-      params, &i32, body, ast::FunctionDecorationList{});
-  mod()->AddFunction(func);
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("func"), "func",
+      params, ty.i32, body, ast::FunctionDecorationList{});
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(),
             "12:34 v-0002: non-void function must end with a return statement");
 }
 
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   // fn func -> int {}
-  ast::type::Void void_type;
-  ast::type::I32 i32;
   ast::VariableList params;
   auto* func = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("func"), "func",
-      params, &i32, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("func"), "func",
+      params, ty.i32, create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(),
             "12:34 v-0002: non-void function must end with a return statement");
 }
@@ -139,45 +113,39 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { return; }
-  ast::type::Void void_type;
   ast::VariableList params;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod()->RegisterSymbol("func"), "func", params, &void_type, body,
+      mod->RegisterSymbol("func"), "func", params, ty.void_, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
-  EXPECT_TRUE(td()->DetermineFunctions(mod()->functions())) << td()->error();
-  EXPECT_TRUE(v()->ValidateFunctions(mod()->functions())) << v()->error();
+  EXPECT_TRUE(td()->DetermineFunctions(mod->functions())) << td()->error();
+  EXPECT_TRUE(v()->ValidateFunctions(mod->functions())) << v()->error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   // fn func -> void { return 2; }
-  ast::type::Void void_type;
-  ast::type::I32 i32;
   ast::VariableList params;
-  auto* return_expr = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
+  auto* return_expr = Expr(2);
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(
-                        Source{Source::Location{12, 34}}, return_expr),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                   return_expr),
+  });
 
-  auto* func = create<ast::Function>(Source{}, mod()->RegisterSymbol("func"),
-                                     "func", params, &void_type, body,
-                                     ast::FunctionDecorationList{});
-  mod()->AddFunction(func);
+  auto* func =
+      create<ast::Function>(mod->RegisterSymbol("func"), "func", params,
+                            ty.void_, body, ast::FunctionDecorationList{});
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   // TODO(sarahM0): replace 000y with a rule number
   EXPECT_EQ(v()->error(),
             "12:34 v-000y: return statement type must match its function "
@@ -186,25 +154,21 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   // fn func -> f32 { return 2; }
-  ast::type::I32 i32;
-  ast::type::F32 f32;
   ast::VariableList params;
-  auto* return_expr = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
+  auto* return_expr = Expr(2);
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(
-                        Source{Source::Location{12, 34}}, return_expr),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                   return_expr),
+  });
 
   auto* func =
-      create<ast::Function>(Source{}, mod()->RegisterSymbol("func"), "func",
-                            params, &f32, body, ast::FunctionDecorationList{});
-  mod()->AddFunction(func);
+      create<ast::Function>(mod->RegisterSymbol("func"), "func", params, ty.f32,
+                            body, ast::FunctionDecorationList{});
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   // TODO(sarahM0): replace 000y with a rule number
   EXPECT_EQ(v()->error(),
             "12:34 v-000y: return statement type must match its function "
@@ -214,127 +178,100 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
 TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   // fn func -> i32 { return 2; }
   // fn func -> i32 { return 2; }
-  ast::type::Void void_type;
-  ast::type::I32 i32;
 
   ast::VariableList params;
-  auto* return_expr = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
+  auto* return_expr = Expr(2);
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}, return_expr),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(return_expr),
+  });
   auto* func =
-      create<ast::Function>(Source{}, mod()->RegisterSymbol("func"), "func",
-                            params, &i32, body, ast::FunctionDecorationList{});
+      create<ast::Function>(mod->RegisterSymbol("func"), "func", params, ty.i32,
+                            body, ast::FunctionDecorationList{});
 
   ast::VariableList params_copy;
-  auto* return_expr_copy = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
-  auto* body_copy = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}, return_expr_copy),
-                });
+  auto* return_expr_copy = Expr(2);
+  auto* body_copy = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(return_expr_copy),
+  });
 
   auto* func_copy = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("func"), "func",
-      params_copy, &i32, body_copy, ast::FunctionDecorationList{});
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("func"), "func",
+      params_copy, ty.i32, body_copy, ast::FunctionDecorationList{});
 
-  mod()->AddFunction(func);
-  mod()->AddFunction(func_copy);
+  mod->AddFunction(func);
+  mod->AddFunction(func_copy);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(), "12:34 v-0016: function names must be unique 'func'");
 }
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   // fn func() -> void {func(); return; }
-  ast::type::F32 f32;
-  ast::type::Void void_type;
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
-      Source{Source::Location{12, 34}},
-      create<ast::IdentifierExpression>(Source{}, mod()->RegisterSymbol("func"),
-                                        "func"),
-      call_params);
+      Source{Source::Location{12, 34}}, Expr("func"), call_params);
   ast::VariableList params0;
-  auto* body0 = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::CallStatement>(Source{}, call_expr),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  auto* func0 = create<ast::Function>(Source{}, mod()->RegisterSymbol("func"),
-                                      "func", params0, &f32, body0,
-                                      ast::FunctionDecorationList{});
-  mod()->AddFunction(func0);
+  auto* body0 = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::CallStatement>(call_expr),
+      create<ast::ReturnStatement>(),
+  });
+  auto* func0 =
+      create<ast::Function>(mod->RegisterSymbol("func"), "func", params0,
+                            ty.f32, body0, ast::FunctionDecorationList{});
+  mod->AddFunction(func0);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod())) << v()->error();
+  EXPECT_FALSE(v()->Validate(mod)) << v()->error();
   EXPECT_EQ(v()->error(), "12:34 v-0004: recursion is not allowed: 'func'");
 }
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   // fn func() -> i32 {var a: i32 = func(); return 2; }
-  ast::type::I32 i32;
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
-      Source{Source::Location{12, 34}},
-      create<ast::IdentifierExpression>(Source{}, mod()->RegisterSymbol("func"),
-                                        "func"),
-      call_params);
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            call_expr,                       // constructor
-                            ast::VariableDecorationList{});  // decorations
+      Source{Source::Location{12, 34}}, Expr("func"), call_params);
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, call_expr,
+                  ast::VariableDecorationList{});
 
   ast::VariableList params0;
-  auto* return_expr = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 2));
+  auto* return_expr = Expr(2);
 
-  auto* body0 = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::ReturnStatement>(Source{}, return_expr),
-                });
+  auto* body0 = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::ReturnStatement>(return_expr),
+  });
 
-  auto* func0 = create<ast::Function>(Source{}, mod()->RegisterSymbol("func"),
-                                      "func", params0, &i32, body0,
-                                      ast::FunctionDecorationList{});
-  mod()->AddFunction(func0);
+  auto* func0 =
+      create<ast::Function>(mod->RegisterSymbol("func"), "func", params0,
+                            ty.i32, body0, ast::FunctionDecorationList{});
+  mod->AddFunction(func0);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod())) << v()->error();
+  EXPECT_FALSE(v()->Validate(mod)) << v()->error();
   EXPECT_EQ(v()->error(), "12:34 v-0004: recursion is not allowed: 'func'");
 }
 
 TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   // [[stage(vertex)]]
   // fn vtx_main() -> i32 { return 0; }
-  ast::type::I32 i32;
   ast::VariableList params;
-  auto* return_expr = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 0));
+  auto* return_expr = Expr(0);
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}, return_expr),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(return_expr),
+  });
   auto* func = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("vtx_main"),
-      "vtx_main", params, &i32, body,
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("vtx_main"),
+      "vtx_main", params, ty.i32, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(),
             "12:34 v-0024: Entry point function must return void: 'vtx_main'");
 }
@@ -342,31 +279,22 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
 TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   // [[stage(vertex)]]
   // fn vtx_func(a : i32) -> void { return; }
-  ast::type::I32 i32;
-  ast::type::Void void_type;
   ast::VariableList params;
-  params.push_back(
-      create<ast::Variable>(Source{},                         // source
-                            "a",                              // name
-                            ast::StorageClass::kNone,         // storage_class
-                            &i32,                             // type
-                            false,                            // is_const
-                            nullptr,                          // constructor
-                            ast::VariableDecorationList{}));  // decorations
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  params.push_back(Var("a", ast::StorageClass::kNone, ty.i32, nullptr,
+                       ast::VariableDecorationList{}));
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
   auto* func = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("vtx_func"),
-      "vtx_func", params, &void_type, body,
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("vtx_func"),
+      "vtx_func", params, ty.void_, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(),
             "12:34 v-0023: Entry point function must accept no parameters: "
             "'vtx_func'");
@@ -376,23 +304,21 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(fragment)]]
   // [[stage(vertex)]]
   // fn main() -> void { return; }
-  ast::type::Void void_type;
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
   auto* func = create<ast::Function>(
-      Source{Source::Location{12, 34}}, mod()->RegisterSymbol("main"), "main",
-      params, &void_type, body,
+      Source{Source::Location{12, 34}}, mod->RegisterSymbol("main"), "main",
+      params, ty.void_, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
 
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(
       v()->error(),
       "12:34 v-0020: only one stage decoration permitted per entry point");
@@ -401,39 +327,34 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
 TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
   // [[stage(vertex)]]
   // fn vtx_func() -> void { return; }
-  ast::type::Void void_type;
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
   auto* func = create<ast::Function>(
-      Source{}, mod()->RegisterSymbol("vtx_func"), "vtx_func", params,
-      &void_type, body,
+      mod->RegisterSymbol("vtx_func"), "vtx_func", params, ty.void_, body,
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod())) << v()->error();
+  EXPECT_TRUE(v()->Validate(mod)) << v()->error();
 }
 
 TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   // fn vtx_func() -> void { return; }
-  ast::type::Void void_type;
   ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  auto* func = create<ast::Function>(
-      Source{}, mod()->RegisterSymbol("vtx_func"), "vtx_func", params,
-      &void_type, body, ast::FunctionDecorationList{});
-  mod()->AddFunction(func);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
+  auto* func =
+      create<ast::Function>(mod->RegisterSymbol("vtx_func"), "vtx_func", params,
+                            ty.void_, body, ast::FunctionDecorationList{});
+  mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod()));
+  EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(),
             "v-0003: At least one of vertex, fragment or compute shader must "
             "be present");

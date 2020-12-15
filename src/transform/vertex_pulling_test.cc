@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/ast/builder.h"
 #include "src/ast/function.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
@@ -34,10 +35,9 @@ namespace tint {
 namespace transform {
 namespace {
 
-class VertexPullingHelper {
+class VertexPullingHelper : public ast::BuilderWithModule {
  public:
   VertexPullingHelper() {
-    mod_ = std::make_unique<ast::Module>();
     manager_ = std::make_unique<Manager>();
     auto transform = std::make_unique<VertexPulling>();
     transform_ = transform.get();
@@ -47,19 +47,19 @@ class VertexPullingHelper {
   // Create basic module with an entry point and vertex function
   void InitBasicModule() {
     auto* func = create<ast::Function>(
-        Source{}, mod()->RegisterSymbol("main"), "main", ast::VariableList{},
-        mod_->create<ast::type::Void>(),
-        create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-        ast::FunctionDecorationList{create<ast::StageDecoration>(
-            Source{}, ast::PipelineStage::kVertex)});
-    mod()->AddFunction(func);
+        mod->RegisterSymbol("main"), "main", ast::VariableList{},
+        mod->create<ast::type::Void>(),
+        create<ast::BlockStatement>(ast::StatementList{}),
+        ast::FunctionDecorationList{
+            create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+    mod->AddFunction(func);
   }
 
   // Set up the transformation, after building the module
   void InitTransform(VertexStateDescriptor vertex_state) {
-    EXPECT_TRUE(mod_->IsValid());
+    EXPECT_TRUE(mod->IsValid());
 
-    TypeDeterminer td(mod_.get());
+    TypeDeterminer td(mod);
     EXPECT_TRUE(td.Determine());
 
     transform_->SetVertexState(vertex_state);
@@ -70,37 +70,18 @@ class VertexPullingHelper {
   void AddVertexInputVariable(uint32_t location,
                               std::string name,
                               ast::type::Type* type) {
-    auto* var = create<ast::Variable>(
-        Source{},                   // source
-        name,                       // name
-        ast::StorageClass::kInput,  // storage_class
-        type,                       // type
-        false,                      // is_const
-        nullptr,                    // constructor
-        ast::VariableDecorationList{
-            // decorations
-            create<ast::LocationDecoration>(Source{}, location),
-        });
+    auto* var = Var(name, ast::StorageClass::kInput, type, nullptr,
+                    ast::VariableDecorationList{
+                        create<ast::LocationDecoration>(location),
+                    });
 
-    mod_->AddGlobalVariable(var);
+    mod->AddGlobalVariable(var);
   }
-
-  ast::Module* mod() { return mod_.get(); }
 
   Manager* manager() { return manager_.get(); }
   VertexPulling* transform() { return transform_; }
 
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
-  /// destructed, the `ast::Node` will also be destructed.
-  /// @param args the arguments to pass to the type constructor
-  /// @returns the node pointer
-  template <typename T, typename... ARGS>
-  T* create(ARGS&&... args) {
-    return mod_->create<T>(std::forward<ARGS>(args)...);
-  }
-
  private:
-  std::unique_ptr<ast::Module> mod_;
   std::unique_ptr<Manager> manager_;
   VertexPulling* transform_;
 };
@@ -108,7 +89,7 @@ class VertexPullingHelper {
 class VertexPullingTest : public VertexPullingHelper, public testing::Test {};
 
 TEST_F(VertexPullingTest, Error_NoVertexState) {
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   EXPECT_TRUE(result.diagnostics.contains_errors());
   EXPECT_EQ(diag::Formatter().format(result.diagnostics),
             "error: SetVertexState not called");
@@ -116,7 +97,7 @@ TEST_F(VertexPullingTest, Error_NoVertexState) {
 
 TEST_F(VertexPullingTest, Error_NoEntryPoint) {
   transform()->SetVertexState({});
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   EXPECT_TRUE(result.diagnostics.contains_errors());
   EXPECT_EQ(diag::Formatter().format(result.diagnostics),
             "error: Vertex stage entry point not found");
@@ -127,7 +108,7 @@ TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
   InitTransform({});
   transform()->SetEntryPoint("_");
 
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   EXPECT_TRUE(result.diagnostics.contains_errors());
   EXPECT_EQ(diag::Formatter().format(result.diagnostics),
             "error: Vertex stage entry point not found");
@@ -135,16 +116,16 @@ TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
 
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
   auto* func = create<ast::Function>(
-      Source{}, mod()->RegisterSymbol("main"), "main", ast::VariableList{},
-      mod()->create<ast::type::Void>(),
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+      mod->RegisterSymbol("main"), "main", ast::VariableList{},
+      mod->create<ast::type::Void>(),
+      create<ast::BlockStatement>(ast::StatementList{}),
       ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
-  mod()->AddFunction(func);
+  mod->AddFunction(func);
 
   InitTransform({});
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   EXPECT_TRUE(result.diagnostics.contains_errors());
   EXPECT_EQ(diag::Formatter().format(result.diagnostics),
             "error: Vertex stage entry point not found");
@@ -153,7 +134,7 @@ TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
 TEST_F(VertexPullingTest, BasicModule) {
   InitBasicModule();
   InitTransform({});
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 }
@@ -166,7 +147,7 @@ TEST_F(VertexPullingTest, OneAttribute) {
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
 
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
@@ -253,7 +234,7 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
   InitTransform(
       {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
 
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
@@ -340,7 +321,7 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
   transform()->SetPullingBufferBindingSet(5);
 
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
@@ -428,35 +409,23 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
 
   ast::type::I32 i32;
 
-  mod()->AddGlobalVariable(create<ast::Variable>(
-      Source{},                   // source
-      "custom_vertex_index",      // name
-      ast::StorageClass::kInput,  // storage_class
-      &i32,                       // type
-      false,                      // is_const
-      nullptr,                    // constructor
-      ast::VariableDecorationList{
-          // decorations
-          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kVertexIdx),
-      }));
+  mod->AddGlobalVariable(
+      Var("custom_vertex_index", ast::StorageClass::kInput, &i32, nullptr,
+          ast::VariableDecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx),
+          }));
 
-  mod()->AddGlobalVariable(create<ast::Variable>(
-      Source{},                   // source
-      "custom_instance_index",    // name
-      ast::StorageClass::kInput,  // storage_class
-      &i32,                       // type
-      false,                      // is_const
-      nullptr,                    // constructor
-      ast::VariableDecorationList{
-          // decorations
-          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kInstanceIdx),
-      }));
+  mod->AddGlobalVariable(
+      Var("custom_instance_index", ast::StorageClass::kInput, &i32, nullptr,
+          ast::VariableDecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx),
+          }));
 
   InitTransform(
       {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}},
         {4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 1}}}}});
 
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
@@ -598,7 +567,7 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
          InputStepMode::kVertex,
          {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}});
 
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
@@ -785,7 +754,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
         {12, InputStepMode::kVertex, {{VertexFormat::kVec3F32, 0, 1}}},
         {16, InputStepMode::kVertex, {{VertexFormat::kVec4F32, 0, 2}}}}});
 
-  auto result = manager()->Run(mod());
+  auto result = manager()->Run(mod);
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 

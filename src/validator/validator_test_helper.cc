@@ -19,7 +19,7 @@
 namespace tint {
 
 ValidatorTestHelper::ValidatorTestHelper() {
-  td_ = std::make_unique<TypeDeterminer>(&mod_);
+  td_ = std::make_unique<TypeDeterminer>(mod);
   v_ = std::make_unique<ValidatorImpl>();
 }
 
