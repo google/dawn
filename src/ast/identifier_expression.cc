@@ -32,8 +32,8 @@ IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 IdentifierExpression::~IdentifierExpression() = default;
 
 IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<IdentifierExpression>(ctx->Clone(source()), sym_,
-                                                name_);
+  return ctx->mod->create<IdentifierExpression>(ctx->Clone(source()),
+                                                ctx->Clone(symbol()), name_);
 }
 
 bool IdentifierExpression::IsValid() const {

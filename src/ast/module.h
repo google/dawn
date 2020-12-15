@@ -51,13 +51,15 @@ class Module {
   ~Module();
 
   /// @return a deep copy of this module
-  Module Clone();
+  Module Clone() const;
 
-  /// @param init a callback function to configure the CloneContex before
-  /// cloning any of the module's state
-  /// @return a deep copy of this module, calling `init` to first initialize the
-  /// context.
-  Module Clone(const std::function<void(CloneContext* ctx)>& init);
+  /// Clone this module into `ctx->mod` using the provided CloneContext
+  /// The module will be cloned in this order:
+  /// * Constructed types
+  /// * Global variables
+  /// * Functions
+  /// @param ctx the clone context
+  void Clone(CloneContext* ctx) const;
 
   /// Add a global variable to the module
   /// @param var the variable to add
@@ -176,14 +178,6 @@ class Module {
 
  private:
   Module(const Module&) = delete;
-
-  /// Clone this module into `ctx->mod` using the provided CloneContext
-  /// The module will be cloned in this order:
-  /// * Constructed types
-  /// * Global variables
-  /// * Functions
-  /// @param ctx the clone context
-  void CloneUsing(CloneContext* ctx);
 
   SymbolTable symbol_table_;
   VariableList global_variables_;

@@ -53,13 +53,14 @@ namespace transform {
 BoundArrayAccessors::BoundArrayAccessors() = default;
 BoundArrayAccessors::~BoundArrayAccessors() = default;
 
-Transform::Output BoundArrayAccessors::Run(ast::Module* mod) {
+Transform::Output BoundArrayAccessors::Run(ast::Module* in) {
   Output out;
-  out.module = mod->Clone([&](ast::CloneContext* ctx) {
-    ctx->ReplaceAll([&, ctx](ast::ArrayAccessorExpression* expr) {
-      return Transform(expr, ctx, &out.diagnostics);
-    });
-  });
+  ast::CloneContext(&out.module, in)
+      .ReplaceAll(
+          [&](ast::CloneContext* ctx, ast::ArrayAccessorExpression* expr) {
+            return Transform(expr, ctx, &out.diagnostics);
+          })
+      .Clone();
   return out;
 }
 

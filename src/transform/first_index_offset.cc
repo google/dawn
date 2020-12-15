@@ -126,48 +126,50 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // these builtins.
 
   Output out;
-  out.module = in->Clone([&](ast::CloneContext* ctx) {
-    ctx->ReplaceAll([&, ctx](ast::Variable* var) -> ast::Variable* {
-      for (ast::VariableDecoration* dec : var->decorations()) {
-        if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
-          ast::Builtin blt_type = blt_dec->value();
-          if (blt_type == ast::Builtin::kVertexIdx) {
-            vertex_index_name = var->name();
-            has_vertex_index_ = true;
-            return clone_variable_with_new_name(
-                ctx, var, kIndexOffsetPrefix + var->name());
-          } else if (blt_type == ast::Builtin::kInstanceIdx) {
-            instance_index_name = var->name();
-            has_instance_index_ = true;
-            return clone_variable_with_new_name(
-                ctx, var, kIndexOffsetPrefix + var->name());
-          }
-        }
-      }
-      return nullptr;  // Just clone var
-    });
-    ctx->ReplaceAll(  // Note: This happens in the same pass as the rename above
-                      // which determines the original builtin variable names,
-                      // but this should be fine, as variables are cloned first.
-        [&, ctx](ast::Function* func) -> ast::Function* {
-          maybe_create_buffer_var(ctx->mod);
-          if (buffer_var == nullptr) {
-            return nullptr;  // no transform need, just clone func
-          }
-          ast::StatementList statements;
-          for (const auto& data : func->local_referenced_builtin_variables()) {
-            if (data.second->value() == ast::Builtin::kVertexIdx) {
-              statements.emplace_back(CreateFirstIndexOffset(
-                  vertex_index_name, kFirstVertexName, buffer_var, ctx->mod));
-            } else if (data.second->value() == ast::Builtin::kInstanceIdx) {
-              statements.emplace_back(CreateFirstIndexOffset(
-                  instance_index_name, kFirstInstanceName, buffer_var,
-                  ctx->mod));
+  ast::CloneContext(&out.module, in)
+      .ReplaceAll(
+          [&](ast::CloneContext* ctx, ast::Variable* var) -> ast::Variable* {
+            for (ast::VariableDecoration* dec : var->decorations()) {
+              if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
+                ast::Builtin blt_type = blt_dec->value();
+                if (blt_type == ast::Builtin::kVertexIdx) {
+                  vertex_index_name = var->name();
+                  has_vertex_index_ = true;
+                  return clone_variable_with_new_name(
+                      ctx, var, kIndexOffsetPrefix + var->name());
+                } else if (blt_type == ast::Builtin::kInstanceIdx) {
+                  instance_index_name = var->name();
+                  has_instance_index_ = true;
+                  return clone_variable_with_new_name(
+                      ctx, var, kIndexOffsetPrefix + var->name());
+                }
+              }
             }
-          }
-          return CloneWithStatementsAtStart(ctx, func, statements);
-        });
-  });
+            return nullptr;  // Just clone var
+          })
+      .ReplaceAll(  // Note: This happens in the same pass as the rename above
+                    // which determines the original builtin variable names,
+                    // but this should be fine, as variables are cloned first.
+          [&](ast::CloneContext* ctx, ast::Function* func) -> ast::Function* {
+            maybe_create_buffer_var(ctx->mod);
+            if (buffer_var == nullptr) {
+              return nullptr;  // no transform need, just clone func
+            }
+            ast::StatementList statements;
+            for (const auto& data :
+                 func->local_referenced_builtin_variables()) {
+              if (data.second->value() == ast::Builtin::kVertexIdx) {
+                statements.emplace_back(CreateFirstIndexOffset(
+                    vertex_index_name, kFirstVertexName, buffer_var, ctx->mod));
+              } else if (data.second->value() == ast::Builtin::kInstanceIdx) {
+                statements.emplace_back(CreateFirstIndexOffset(
+                    instance_index_name, kFirstInstanceName, buffer_var,
+                    ctx->mod));
+              }
+            }
+            return CloneWithStatementsAtStart(ctx, func, statements);
+          })
+      .Clone();
 
   return out;
 }

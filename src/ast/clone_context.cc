@@ -14,11 +14,22 @@
 
 #include "src/ast/clone_context.h"
 
+#include "src/ast/module.h"
+
 namespace tint {
 namespace ast {
 
-CloneContext::CloneContext(Module* m) : mod(m) {}
+CloneContext::CloneContext(Module* to, Module const* from)
+    : mod(to), src(from) {}
 CloneContext::~CloneContext() = default;
+
+Symbol CloneContext::Clone(const Symbol& s) const {
+  return mod->RegisterSymbol(src->SymbolToName(s));
+}
+
+void CloneContext::Clone() {
+  src->Clone(this);
+}
 
 }  // namespace ast
 }  // namespace tint

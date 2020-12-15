@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/case_statement.h"
+#include "src/demangler.h"
 #include "src/reader/wgsl/parser.h"
 #include "src/writer/wgsl/generator.h"
 
@@ -116,7 +117,9 @@ fn main() -> void {
   auto dst = src.Clone();
 
   // Expect the AST printed with to_str() to match
-  EXPECT_EQ(src.to_str(), dst.to_str());
+  Demangler demanger;
+  EXPECT_EQ(demanger.Demangle(src, src.to_str()),
+            demanger.Demangle(dst, dst.to_str()));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<ast::Node*> src_nodes;

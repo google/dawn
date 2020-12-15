@@ -65,8 +65,7 @@ TEST(CloneContext, Clone) {
   // C: Clonable
 
   ast::Module cloned;
-  CloneContext ctx(&cloned);
-  auto* cloned_root = original_root->Clone(&ctx);
+  auto* cloned_root = CloneContext(&cloned, &original).Clone(original_root);
 
   EXPECT_NE(cloned_root->a, nullptr);
   EXPECT_EQ(cloned_root->a->a, nullptr);
@@ -110,14 +109,14 @@ TEST(CloneContext, CloneWithReplacements) {
   // R: Replaceable
 
   ast::Module cloned;
-  CloneContext ctx(&cloned);
-  ctx.ReplaceAll([&](Replaceable* in) {
-    auto* out = cloned.create<Replacement>();
-    out->b = cloned.create<Cloneable>();
-    out->c = ctx.Clone(in->a);
-    return out;
-  });
-  auto* cloned_root = original_root->Clone(&ctx);
+  auto* cloned_root = CloneContext(&cloned, &original)
+                          .ReplaceAll([&](CloneContext* ctx, Replaceable* in) {
+                            auto* out = cloned.create<Replacement>();
+                            out->b = cloned.create<Cloneable>();
+                            out->c = ctx->Clone(in->a);
+                            return out;
+                          })
+                          .Clone(original_root);
 
   //                         root
   //        ╭─────────────────┼──────────────────╮

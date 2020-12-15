@@ -22,6 +22,7 @@
 #include "src/ast/traits.h"
 #include "src/castable.h"
 #include "src/source.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace ast {
@@ -32,18 +33,21 @@ class Module;
 class CloneContext {
  public:
   /// Constructor
-  /// @param m the target module to clone into
-  explicit CloneContext(Module* m);
+  /// @param to the target module to clone into
+  /// @param from the source module to clone from
+  CloneContext(Module* to, Module const* from);
 
   /// Destructor
   ~CloneContext();
 
-  /// Clones the `Node` or `type::Type` `a` into the module #mod if `a` is not
+  /// Clones the Node or type::Type `a` into the module #mod if `a` is not
   /// null. If `a` is null, then Clone() returns null. If `a` has been cloned
   /// already by this CloneContext then the same cloned pointer is returned.
   ///
   /// Clone() may use a function registered with ReplaceAll() to create a
   /// transformed version of the object. See ReplaceAll() for more information.
+  ///
+  /// The Node or type::Type `a` must be owned by the module #src.
   ///
   /// @note Semantic information such as resolved expression type and intrinsic
   /// information is not cloned.
@@ -70,15 +74,26 @@ class CloneContext {
     return static_cast<T*>(c);
   }
 
-  /// Clones the `Source` `s` into `mod`
+  /// Clones the Source `s` into `mod`
   /// TODO(bclayton) - Currently this 'clone' is a shallow copy. If/when
   /// `Source.File`s are owned by the `Module` this should make a copy of the
   /// file.
   /// @param s the `Source` to clone
   /// @return the cloned source
-  Source Clone(const Source& s) { return s; }
+  Source Clone(const Source& s) const { return s; }
+
+  /// Clones the Symbol `s` into `mod`
+  ///
+  /// The Symbol `s` must be owned by the module #src.
+  ///
+  /// @param s the Symbol to clone
+  /// @return the cloned source
+  Symbol Clone(const Symbol& s) const;
 
   /// Clones each of the elements of the vector `v` into the module #mod->
+  ///
+  /// All the elements of the vector `v` must be owned by the module #src.
+  ///
   /// @param v the vector to clone
   /// @return the cloned vector
   template <typename T>
@@ -92,11 +107,12 @@ class CloneContext {
   }
 
   /// ReplaceAll() registers `replacer` to be called whenever the Clone() method
-  /// is called with a type that matches (or derives from) the type of the first
-  /// parameter of `replacer`.
+  /// is called with a type that matches (or derives from) the type of the
+  /// second parameter of `replacer`.
   ///
-  /// `replacer` must be function-like with the signature: `T* (T*)`, where `T`
-  /// is a type deriving from CastableBase.
+  /// `replacer` must be function-like with the signature:
+  ///   `T* (CloneContext*, T*)`
+  ///  where `T` is a type deriving from CastableBase.
   ///
   /// If `replacer` returns a nullptr then Clone() will attempt the next
   /// registered replacer function that matches the object type. If no replacers
@@ -107,31 +123,42 @@ class CloneContext {
   ///
   /// ```
   ///   // Replace all ast::UintLiterals with the number 42
-  ///   CloneCtx ctx(mod);
-  ///   ctx.ReplaceAll([&] (ast::UintLiteral* in) {
-  ///     return ctx.mod->create<ast::UintLiteral>(ctx.Clone(in->source()),
-  ///                                              ctx.Clone(in->type()), 42);
-  ///   });
-  ///   auto* out = ctx.Clone(tree);
+  ///   CloneCtx ctx(&out, in)
+  ///     .ReplaceAll([&] (CloneContext* ctx, ast::UintLiteral* l) {
+  ///       return ctx->mod->create<ast::UintLiteral>(ctx->Clone(l->source()),
+  ///                                                 ctx->Clone(l->type()),
+  ///                                                 42);
+  ///     }).Clone();
   /// ```
   ///
   /// @param replacer a function or function-like object with the signature
-  ///        `T* (T*)`, where `T` derives from CastableBase
+  ///        `T* (CloneContext*, T*)`, where `T` derives from CastableBase
+  /// @returns this CloneContext so calls can be chained
   template <typename F>
-  void ReplaceAll(F replacer) {
-    using TPtr = traits::ParamTypeT<F, 0>;
+  CloneContext& ReplaceAll(F replacer) {
+    using TPtr = traits::ParamTypeT<F, 1>;
     using T = typename std::remove_pointer<TPtr>::type;
     transforms_.emplace_back([=](CastableBase* in) {
       auto* in_as_t = in->As<T>();
-      return in_as_t != nullptr ? replacer(in_as_t) : nullptr;
+      return in_as_t != nullptr ? replacer(this, in_as_t) : nullptr;
     });
+    return *this;
   }
+
+  /// Clone performs the clone of the entire module #src to #mod.
+  void Clone();
 
   /// The target module to clone into.
   Module* const mod;
 
+  /// The source module to clone from.
+  Module const* const src;
+
  private:
   using Transform = std::function<CastableBase*(CastableBase*)>;
+
+  CloneContext(const CloneContext&) = delete;
+  CloneContext& operator=(const CloneContext&) = delete;
 
   /// LookupOrTransform is the template-independent logic of Clone().
   /// This is outside of Clone() to reduce the amount of template-instantiated

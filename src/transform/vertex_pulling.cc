@@ -98,21 +98,23 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
   // TODO(idanr): Make sure we covered all error cases, to guarantee the
   // following stages will pass
   Output out;
-  out.module = in->Clone([&](ast::CloneContext* ctx) {
-    State state{in, ctx->mod, cfg};
-    state.FindOrInsertVertexIndexIfUsed();
-    state.FindOrInsertInstanceIndexIfUsed();
-    state.ConvertVertexInputVariablesToPrivate();
-    state.AddVertexStorageBuffers();
 
-    ctx->ReplaceAll([func, ctx, state](ast::Function* f) -> ast::Function* {
-      if (f == func) {
-        return CloneWithStatementsAtStart(
-            ctx, f, {state.CreateVertexPullingPreamble()});
-      }
-      return nullptr;  // Just clone func
-    });
-  });
+  State state{in, &out.module, cfg};
+  state.FindOrInsertVertexIndexIfUsed();
+  state.FindOrInsertInstanceIndexIfUsed();
+  state.ConvertVertexInputVariablesToPrivate();
+  state.AddVertexStorageBuffers();
+
+  ast::CloneContext(&out.module, in)
+      .ReplaceAll(
+          [&](ast::CloneContext* ctx, ast::Function* f) -> ast::Function* {
+            if (f == func) {
+              return CloneWithStatementsAtStart(
+                  ctx, f, {state.CreateVertexPullingPreamble()});
+            }
+            return nullptr;  // Just clone func
+          })
+      .Clone();
 
   return out;
 }

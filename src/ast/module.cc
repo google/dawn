@@ -30,33 +30,13 @@ Module& Module::operator=(Module&& rhs) = default;
 
 Module::~Module() = default;
 
-Module Module::Clone() {
+Module Module::Clone() const {
   Module out;
-  CloneContext ctx(&out);
-
-  // Symbol table must be cloned first so that the resulting module has the
-  // symbols before we start the tree mutations.
-  ctx.mod->symbol_table_ = symbol_table_;
-
-  CloneUsing(&ctx);
+  CloneContext(&out, this).Clone();
   return out;
 }
 
-Module Module::Clone(const std::function<void(CloneContext* ctx)>& init) {
-  Module out;
-  CloneContext ctx(&out);
-
-  // Symbol table must be cloned first so that the resulting module has the
-  // symbols before we start the tree mutations.
-  ctx.mod->symbol_table_ = symbol_table_;
-
-  init(&ctx);
-
-  CloneUsing(&ctx);
-  return out;
-}
-
-void Module::CloneUsing(CloneContext* ctx) {
+void Module::Clone(CloneContext* ctx) const {
   for (auto* ty : constructed_types_) {
     ctx->mod->constructed_types_.emplace_back(ctx->Clone(ty));
   }

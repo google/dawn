@@ -228,7 +228,7 @@ const Statement* Function::get_last_statement() const {
 
 Function* Function::Clone(CloneContext* ctx) const {
   return ctx->mod->create<Function>(
-      ctx->Clone(source()), symbol_, name_, ctx->Clone(params_),
+      ctx->Clone(source()), ctx->Clone(symbol()), name_, ctx->Clone(params_),
       ctx->Clone(return_type_), ctx->Clone(body_), ctx->Clone(decorations_));
 }
 
