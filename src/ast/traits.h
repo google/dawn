@@ -15,45 +15,55 @@
 #ifndef SRC_AST_TRAITS_H_
 #define SRC_AST_TRAITS_H_
 
+#include <tuple>
 #include <type_traits>
 
 namespace tint {
 namespace ast {
 namespace traits {
 
-/// FirstParamType is a traits helper that infers the type of the first
-/// parameter of the function, method, static method, lambda, or function-like
-/// object `F`.
-template <typename F>
-struct FirstParamType {
-  /// The type of the first parameter of the function-like object `F`
-  using type = typename FirstParamType<decltype(&F::operator())>::type;
+/// NthTypeOf returns the `N`th type in `Types`
+template <int N, typename... Types>
+using NthTypeOf = typename std::tuple_element<N, std::tuple<Types...>>::type;
+
+/// ParamType is a traits helper that infers the type of the `N`th parameter
+/// of the function, method, static method, lambda, or function-like object `F`.
+template <typename F, int N>
+struct ParamType {
+  /// The type of the `N`th parameter of the function-like object `F`
+  using type = typename ParamType<decltype(&F::operator()), N>::type;
 };
 
-/// FirstParamType specialization for a regular function or static method.
-template <typename R, typename Arg>
-struct FirstParamType<R (*)(Arg)> {
-  /// The type of the first parameter of the function
+/// ParamType specialization for a regular function or static method.
+template <typename R, int N, typename... Args>
+struct ParamType<R (*)(Args...), N> {
+  /// Arg is the raw type of the `N`th parameter of the function
+  using Arg = NthTypeOf<N, Args...>;
+  /// The type of the `N`th parameter of the function
   using type = typename std::decay<Arg>::type;
 };
 
-/// FirstParamType specialization for a non-static method.
-template <typename R, typename C, typename Arg>
-struct FirstParamType<R (C::*)(Arg)> {
-  /// The type of the first parameter of the function
+/// ParamType specialization for a non-static method.
+template <typename R, typename C, int N, typename... Args>
+struct ParamType<R (C::*)(Args...), N> {
+  /// Arg is the raw type of the `N`th parameter of the function
+  using Arg = NthTypeOf<N, Args...>;
+  /// The type of the `N`th parameter of the function
   using type = typename std::decay<Arg>::type;
 };
 
-/// FirstParamType specialization for a non-static, const method.
-template <typename R, typename C, typename Arg>
-struct FirstParamType<R (C::*)(Arg) const> {
-  /// The type of the first parameter of the function
+/// ParamType specialization for a non-static, const method.
+template <typename R, typename C, int N, typename... Args>
+struct ParamType<R (C::*)(Args...) const, N> {
+  /// Arg is the raw type of the `N`th parameter of the function
+  using Arg = NthTypeOf<N, Args...>;
+  /// The type of the `N`th parameter of the function
   using type = typename std::decay<Arg>::type;
 };
 
-/// FirstParamTypeT is an alias to `typename FirstParamType<F>::type`.
-template <typename F>
-using FirstParamTypeT = typename FirstParamType<F>::type;
+/// ParamTypeT is an alias to `typename ParamType<F, N>::type`.
+template <typename F, int N>
+using ParamTypeT = typename ParamType<F, N>::type;
 
 /// If T is a base of BASE then EnableIfIsType resolves to type T, otherwise an
 /// invalid type.

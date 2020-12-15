@@ -119,7 +119,7 @@ class CloneContext {
   ///        `T* (T*)`, where `T` derives from CastableBase
   template <typename F>
   void ReplaceAll(F replacer) {
-    using TPtr = traits::FirstParamTypeT<F>;
+    using TPtr = traits::ParamTypeT<F, 0>;
     using T = typename std::remove_pointer<TPtr>::type;
     transforms_.emplace_back([=](CastableBase* in) {
       auto* in_as_t = in->As<T>();

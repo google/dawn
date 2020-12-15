@@ -24,49 +24,80 @@ namespace traits {
 
 namespace {
 struct S {};
-void F(S) {}
+void F1(S) {}
+void F3(int, S, float) {}
 }  // namespace
 
-TEST(FirstParamType, Function) {
-  F({});  // Avoid unused method warning
-  static_assert(std::is_same<FirstParamTypeT<decltype(&F)>, S>::value, "");
+TEST(ParamType, Function) {
+  F1({});        // Avoid unused method warning
+  F3(0, {}, 0);  // Avoid unused method warning
+  static_assert(std::is_same<ParamTypeT<decltype(&F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&F3), 0>, int>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&F3), 2>, float>::value, "");
 }
 
-TEST(FirstParamType, Method) {
+TEST(ParamType, Method) {
   class C {
    public:
-    void f(S) {}
+    void F1(S) {}
+    void F3(int, S, float) {}
   };
-  C().f({});  // Avoid unused method warning
-  static_assert(std::is_same<FirstParamTypeT<decltype(&C::f)>, S>::value, "");
-}
-
-TEST(FirstParamType, ConstMethod) {
-  class C {
-   public:
-    void f(S) const {}
-  };
-  C().f({});  // Avoid unused method warning
-  static_assert(std::is_same<FirstParamTypeT<decltype(&C::f)>, S>::value, "");
-}
-
-TEST(FirstParamType, StaticMethod) {
-  class C {
-   public:
-    static void f(S) {}
-  };
-  C().f({});  // Avoid unused method warning
-  static_assert(std::is_same<FirstParamTypeT<decltype(&C::f)>, S>::value, "");
-}
-
-TEST(FirstParamType, FunctionLike) {
-  static_assert(std::is_same<FirstParamTypeT<std::function<void(S)>>, S>::value,
+  C().F1({});        // Avoid unused method warning
+  C().F3(0, {}, 0);  // Avoid unused method warning
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 0>, int>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 2>, float>::value,
                 "");
 }
 
-TEST(FirstParamType, Lambda) {
-  auto l = [](S) {};
-  static_assert(std::is_same<FirstParamTypeT<decltype(l)>, S>::value, "");
+TEST(ParamType, ConstMethod) {
+  class C {
+   public:
+    void F1(S) const {}
+    void F3(int, S, float) const {}
+  };
+  C().F1({});        // Avoid unused method warning
+  C().F3(0, {}, 0);  // Avoid unused method warning
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 0>, int>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 2>, float>::value,
+                "");
+}
+
+TEST(ParamType, StaticMethod) {
+  class C {
+   public:
+    static void F1(S) {}
+    static void F3(int, S, float) {}
+  };
+  C::F1({});        // Avoid unused method warning
+  C::F3(0, {}, 0);  // Avoid unused method warning
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F1), 0>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 0>, int>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 1>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(&C::F3), 2>, float>::value,
+                "");
+}
+
+TEST(ParamType, FunctionLike) {
+  using F1 = std::function<void(S)>;
+  using F3 = std::function<void(int, S, float)>;
+  static_assert(std::is_same<ParamTypeT<F1, 0>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<F3, 0>, int>::value, "");
+  static_assert(std::is_same<ParamTypeT<F3, 1>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<F3, 2>, float>::value, "");
+}
+
+TEST(ParamType, Lambda) {
+  auto l1 = [](S) {};
+  auto l3 = [](int, S, float) {};
+  static_assert(std::is_same<ParamTypeT<decltype(l1), 0>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(l3), 0>, int>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(l3), 1>, S>::value, "");
+  static_assert(std::is_same<ParamTypeT<decltype(l3), 2>, float>::value, "");
 }
 
 }  // namespace traits
