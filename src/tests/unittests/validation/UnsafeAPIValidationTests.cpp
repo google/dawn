@@ -168,14 +168,14 @@ TEST_F(UnsafeAPIValidationTest, DynamicStorageBuffer) {
         device.CreateBindGroupLayout(&desc);
     }
 
-    // Control case: storage buffer with a dynamic offset is disallowed.
+    // Storage buffer with a dynamic offset is disallowed.
     {
         entry.type = wgpu::BindingType::StorageBuffer;
         entry.hasDynamicOffset = true;
         ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
     }
 
-    // Control case: readonly storage buffer with a dynamic offset is disallowed.
+    // Readonly storage buffer with a dynamic offset is disallowed.
     {
         entry.type = wgpu::BindingType::ReadonlyStorageBuffer;
         entry.hasDynamicOffset = true;
