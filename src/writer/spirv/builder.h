@@ -192,13 +192,12 @@ class Builder {
   }
   /// @returns the functions
   const std::vector<Function>& functions() const { return functions_; }
-  /// Pushes an instruction to the current function
+  /// Pushes an instruction to the current function. If we're outside
+  /// a function then issue an internal error and return false.
   /// @param op the operation
   /// @param operands the operands
-  void push_function_inst(spv::Op op, const OperandList& operands) {
-    assert(!functions_.empty());
-    functions_.back().push_inst(op, operands);
-  }
+  /// @returns true if we succeeded
+  bool push_function_inst(spv::Op op, const OperandList& operands);
   /// Pushes a variable to the current function
   /// @param operands the variable operands
   void push_function_var(const OperandList& operands) {
@@ -215,9 +214,11 @@ class Builder {
   /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
   SpvBuiltIn ConvertBuiltin(ast::Builtin builtin) const;
 
-  /// Generates a label for the given id
+  /// Generates a label for the given id. Emits an error and returns false if
+  /// we're currently outside a function.
   /// @param id the id to use for the label
-  void GenerateLabel(uint32_t id);
+  /// @returns true on success.
+  bool GenerateLabel(uint32_t id);
   /// Generates a uint32_t literal.
   /// @param val the value to generate
   /// @returns the ID of the generated literal
@@ -355,13 +356,15 @@ class Builder {
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateIntrinsic(ast::IdentifierExpression* ident,
                              ast::CallExpression* call);
-  /// Generates a texture intrinsic call
+  /// Generates a texture intrinsic call. Emits an error and returns false if
+  /// we're currently outside a function.
   /// @param ident the texture intrinsic
   /// @param call the call expression
   /// @param result_type result type operand of the texture instruction
   /// @param result_id result identifier operand of the texture instruction
   /// parameters
-  void GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
+  /// @returns true on success
+  bool GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                 ast::CallExpression* call,
                                 spirv::Operand result_type,
                                 spirv::Operand result_id);
@@ -412,10 +415,12 @@ class Builder {
   /// @param id the variable id to load
   /// @returns the ID of the loaded value or `id` if type is not a pointer
   uint32_t GenerateLoadIfNeeded(ast::type::Type* type, uint32_t id);
-  /// Geneates an OpStore
+  /// Generates an OpStore. Emits an error and returns false if we're
+  /// currently outside a function.
   /// @param to the ID to store too
   /// @param from the ID to store from
-  void GenerateStore(uint32_t to, uint32_t from);
+  /// @returns true on success
+  bool GenerateStore(uint32_t to, uint32_t from);
   /// Generates a type if not already created
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.

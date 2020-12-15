@@ -14,7 +14,7 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/float_literal.h"
@@ -74,6 +74,33 @@ TEST_F(BuilderTest, Assign_Var) {
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %5
 )");
+}
+
+TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
+  ast::type::F32 f32;
+
+  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
+                  nullptr, ast::VariableDecorationList{});
+
+  auto* ident =
+      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
+  auto* val = create<ast::ScalarConstructorExpression>(
+      create<ast::FloatLiteral>(&f32, 1.0f));
+
+  ast::AssignmentStatement assign(Source{}, ident, val);
+
+  td.RegisterVariableForTesting(&v);
+
+  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_FALSE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.has_error());
+  EXPECT_EQ(
+      b.error(),
+      "Internal error: trying to add SPIR-V instruction 62 outside a function");
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {

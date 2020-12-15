@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
 #include "src/ast/binary_expression.h"
@@ -58,6 +58,18 @@ TEST_F(SpvBuilderConstructorTest, Const) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 42.2000008
 )");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_WithCasts_OutsideFunction_IsError) {
+  auto* t = Construct<f32>(Construct<u32>(1));
+
+  EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  EXPECT_EQ(b.GenerateExpression(t), 0u);
+  EXPECT_TRUE(b.has_error()) << b.error();
+  EXPECT_EQ(b.error(),
+            "Internal error: trying to add SPIR-V instruction 124 outside a "
+            "function");
 }
 
 TEST_F(SpvBuilderConstructorTest, Type) {

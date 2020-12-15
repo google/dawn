@@ -14,12 +14,13 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "src/ast/builder.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
+#include "src/ast/type/storage_texture_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -2738,6 +2739,68 @@ TEST_P(IntrinsicTextureTest, Call) {
   EXPECT_EQ(expected.types, "\n" + DumpInstructions(b.types()));
   EXPECT_EQ(expected.instructions,
             "\n" + DumpInstructions(b.functions()[0].instructions()));
+}
+
+TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
+  auto param = GetParam();
+
+  // The point of this test is to try to generate the texture
+  // intrinsic call outside a function.
+
+  ast::type::Type* datatype = nullptr;
+  switch (param.texture_data_type) {
+    case ast::intrinsic::test::TextureDataType::kF32:
+      datatype = ty.f32;
+      break;
+    case ast::intrinsic::test::TextureDataType::kU32:
+      datatype = ty.u32;
+      break;
+    case ast::intrinsic::test::TextureDataType::kI32:
+      datatype = ty.i32;
+      break;
+  }
+
+  ast::type::Sampler sampler_type{param.sampler_kind};
+  ast::Variable* tex = nullptr;
+  switch (param.texture_kind) {
+    case ast::intrinsic::test::TextureKind::kRegular:
+      tex = Var("texture", ast::StorageClass::kNone,
+                mod->create<ast::type::SampledTexture>(param.texture_dimension,
+                                                       datatype));
+      break;
+
+    case ast::intrinsic::test::TextureKind::kDepth:
+      tex = Var("texture", ast::StorageClass::kNone,
+                mod->create<ast::type::DepthTexture>(param.texture_dimension));
+      break;
+
+    case ast::intrinsic::test::TextureKind::kMultisampled:
+      tex = Var("texture", ast::StorageClass::kNone,
+                mod->create<ast::type::MultisampledTexture>(
+                    param.texture_dimension, datatype));
+      break;
+
+    case ast::intrinsic::test::TextureKind::kStorage: {
+      auto* st = mod->create<ast::type::StorageTexture>(
+          param.texture_dimension, param.access_control, param.image_format);
+      st->set_type(datatype);
+      tex = Var("texture", ast::StorageClass::kNone, st);
+    } break;
+  }
+
+  auto* sampler = Var("sampler", ast::StorageClass::kNone, &sampler_type);
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
+
+  ast::CallExpression call{Source{}, Expr(param.function), param.args(this)};
+
+  EXPECT_TRUE(td.DetermineResultType(&call)) << td.error();
+  EXPECT_EQ(b.GenerateExpression(&call), 0u);
+  EXPECT_THAT(b.error(),
+              ::testing::StartsWith(
+                  "Internal error: trying to add SPIR-V instruction "));
+  EXPECT_THAT(b.error(), ::testing::EndsWith(" outside a function"));
 }
 
 }  // namespace

@@ -14,7 +14,7 @@
 
 #include <memory>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -68,6 +68,28 @@ OpBranchConditional %2 %4 %3
 OpBranch %3
 %3 = OpLabel
 )");
+}
+
+TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
+  ast::type::Bool bool_type;
+
+  // Outside a function.
+  // if (true) {
+  // }
+  auto* cond = create<ast::ScalarConstructorExpression>(
+      create<ast::BoolLiteral>(&bool_type, true));
+
+  ast::ElseStatementList elses;
+  auto* block = create<ast::BlockStatement>(Source{}, ast::StatementList{});
+  ast::IfStatement expr(Source{}, cond, block, elses);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  EXPECT_FALSE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.has_error());
+  EXPECT_EQ(b.error(),
+            "Internal error: trying to add SPIR-V instruction 247 outside a "
+            "function");
 }
 
 TEST_F(BuilderTest, If_WithStatements) {

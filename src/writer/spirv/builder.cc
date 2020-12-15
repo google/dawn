@@ -369,9 +369,12 @@ void Builder::push_capability(uint32_t cap) {
   }
 }
 
-void Builder::GenerateLabel(uint32_t id) {
-  push_function_inst(spv::Op::OpLabel, {Operand::Int(id)});
+bool Builder::GenerateLabel(uint32_t id) {
+  if (!push_function_inst(spv::Op::OpLabel, {Operand::Int(id)})) {
+    return false;
+  }
   current_label_id_ = id;
+  return true;
 }
 
 uint32_t Builder::GenerateU32Literal(uint32_t val) {
@@ -393,8 +396,7 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
   // If the thing we're assigning is a pointer then we must load it first.
   rhs_id = GenerateLoadIfNeeded(assign->rhs()->result_type(), rhs_id);
 
-  GenerateStore(lhs_id, rhs_id);
-  return true;
+  return GenerateStore(lhs_id, rhs_id);
 }
 
 bool Builder::GenerateBreakStatement(ast::BreakStatement*) {
@@ -402,7 +404,10 @@ bool Builder::GenerateBreakStatement(ast::BreakStatement*) {
     error_ = "Attempted to break without a merge block";
     return false;
   }
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_stack_.back())});
+  if (!push_function_inst(spv::Op::OpBranch,
+                          {Operand::Int(merge_stack_.back())})) {
+    return false;
+  }
   return true;
 }
 
@@ -411,7 +416,10 @@ bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
     error_ = "Attempted to continue without a continue block";
     return false;
   }
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_stack_.back())});
+  if (!push_function_inst(spv::Op::OpBranch,
+                          {Operand::Int(continue_stack_.back())})) {
+    return false;
+  }
   return true;
 }
 
@@ -419,7 +427,9 @@ bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
 // haven't been defined for WGSL yet. So, this may need to change.
 // https://github.com/gpuweb/gpuweb/issues/676
 bool Builder::GenerateDiscardStatement(ast::DiscardStatement*) {
-  push_function_inst(spv::Op::OpKill, {});
+  if (!push_function_inst(spv::Op::OpKill, {})) {
+    return false;
+  }
   return true;
 }
 
@@ -658,7 +668,9 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
                      Operand::Int(null_id)});
 
   if (var->has_constructor()) {
-    GenerateStore(var_id, init_id);
+    if (!GenerateStore(var_id, init_id)) {
+      return false;
+    }
   }
 
   scope_stack_.set(var->name(), var_id);
@@ -667,8 +679,9 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
   return true;
 }
 
-void Builder::GenerateStore(uint32_t to, uint32_t from) {
-  push_function_inst(spv::Op::OpStore, {Operand::Int(to), Operand::Int(from)});
+bool Builder::GenerateStore(uint32_t to, uint32_t from) {
+  return push_function_inst(spv::Op::OpStore,
+                            {Operand::Int(to), Operand::Int(from)});
 }
 
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
@@ -839,9 +852,12 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   auto extract = result_op();
   auto extract_id = extract.to_i();
 
-  push_function_inst(spv::Op::OpVectorExtractDynamic,
-                     {Operand::Int(result_type_id), extract,
-                      Operand::Int(info->source_id), Operand::Int(idx_id)});
+  if (!push_function_inst(
+          spv::Op::OpVectorExtractDynamic,
+          {Operand::Int(result_type_id), extract, Operand::Int(info->source_id),
+           Operand::Int(idx_id)})) {
+    return false;
+  }
 
   info->source_id = extract_id;
   info->source_type = expr->result_type();
@@ -912,9 +928,12 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 
       auto extract = result_op();
       auto extract_id = extract.to_i();
-      push_function_inst(spv::Op::OpCompositeExtract,
-                         {Operand::Int(result_type_id), extract,
-                          Operand::Int(info->source_id), Operand::Int(val)});
+      if (!push_function_inst(
+              spv::Op::OpCompositeExtract,
+              {Operand::Int(result_type_id), extract,
+               Operand::Int(info->source_id), Operand::Int(val)})) {
+        return false;
+      }
 
       info->source_id = extract_id;
       info->source_type = expr->result_type();
@@ -941,7 +960,9 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       ops.push_back(Operand::Int(id));
     }
 
-    push_function_inst(spv::Op::OpAccessChain, ops);
+    if (!push_function_inst(spv::Op::OpAccessChain, ops)) {
+      return false;
+    }
 
     info->source_id = GenerateLoadIfNeeded(expr->result_type(), extract_id);
     info->source_type = expr->result_type()->UnwrapPtrIfNeeded();
@@ -971,7 +992,9 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     ops.push_back(Operand::Int(val));
   }
 
-  push_function_inst(spv::Op::OpVectorShuffle, ops);
+  if (!push_function_inst(spv::Op::OpVectorShuffle, ops)) {
+    return false;
+  }
   info->source_id = result_id;
   info->source_type = expr->result_type();
 
@@ -1032,8 +1055,10 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
            Operand::Int(ConvertStorageClass(ast::StorageClass::kFunction)),
            Operand::Int(init)});
 
-      push_function_inst(spv::Op::OpStore,
-                         {ary_result, Operand::Int(info.source_id)});
+      if (!push_function_inst(spv::Op::OpStore,
+                              {ary_result, Operand::Int(info.source_id)})) {
+        return false;
+      }
 
       info.source_id = ary_result.to_i();
     }
@@ -1071,7 +1096,9 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       ops.push_back(Operand::Int(id));
     }
 
-    push_function_inst(spv::Op::OpAccessChain, ops);
+    if (!push_function_inst(spv::Op::OpAccessChain, ops)) {
+      return false;
+    }
     info.source_id = result_id;
   }
 
@@ -1097,8 +1124,10 @@ uint32_t Builder::GenerateLoadIfNeeded(ast::type::Type* type, uint32_t id) {
   auto type_id = GenerateTypeIfNeeded(type->UnwrapPtrIfNeeded());
   auto result = result_op();
   auto result_id = result.to_i();
-  push_function_inst(spv::Op::OpLoad,
-                     {Operand::Int(type_id), result, Operand::Int(id)});
+  if (!push_function_inst(spv::Op::OpLoad,
+                          {Operand::Int(type_id), result, Operand::Int(id)})) {
+    return false;
+  }
   return result_id;
 }
 
@@ -1132,7 +1161,10 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
     return 0;
   }
 
-  push_function_inst(op, {Operand::Int(type_id), result, Operand::Int(val_id)});
+  if (!push_function_inst(
+          op, {Operand::Int(type_id), result, Operand::Int(val_id)})) {
+    return false;
+  }
 
   return result_id;
 }
@@ -1329,9 +1361,11 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
         if (!is_global_init) {
           // A non-global initializer. Case 2.
-          push_function_inst(spv::Op::OpCompositeExtract,
-                             {Operand::Int(value_type_id), extract,
-                              Operand::Int(id), Operand::Int(i)});
+          if (!push_function_inst(spv::Op::OpCompositeExtract,
+                                  {Operand::Int(value_type_id), extract,
+                                   Operand::Int(id), Operand::Int(i)})) {
+            return false;
+          }
 
           // We no longer have a constant composite, but have to do a
           // composite construction as these calls are inside a function.
@@ -1376,7 +1410,9 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   } else if (result_is_constant_composite) {
     push_type(spv::Op::OpConstantComposite, ops);
   } else {
-    push_function_inst(spv::Op::OpCompositeConstruct, ops);
+    if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
+      return 0;
+    }
   }
 
   return result.to_i();
@@ -1445,8 +1481,10 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(ast::type::Type* to_type,
     return 0;
   }
 
-  push_function_inst(
-      op, {Operand::Int(result_type_id), result, Operand::Int(val_id)});
+  if (!push_function_inst(
+          op, {Operand::Int(result_type_id), result, Operand::Int(val_id)})) {
+    return 0;
+  }
 
   return result_id;
 }
@@ -1540,15 +1578,21 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
     std::swap(true_block_id, false_block_id);
   }
 
-  push_function_inst(spv::Op::OpSelectionMerge,
-                     {Operand::Int(merge_block_id),
-                      Operand::Int(SpvSelectionControlMaskNone)});
-  push_function_inst(spv::Op::OpBranchConditional,
-                     {Operand::Int(lhs_id), Operand::Int(true_block_id),
-                      Operand::Int(false_block_id)});
+  if (!push_function_inst(spv::Op::OpSelectionMerge,
+                          {Operand::Int(merge_block_id),
+                           Operand::Int(SpvSelectionControlMaskNone)})) {
+    return 0;
+  }
+  if (!push_function_inst(spv::Op::OpBranchConditional,
+                          {Operand::Int(lhs_id), Operand::Int(true_block_id),
+                           Operand::Int(false_block_id)})) {
+    return 0;
+  }
 
   // Output block to check the RHS
-  GenerateLabel(block_id);
+  if (!GenerateLabel(block_id)) {
+    return 0;
+  }
   auto rhs_id = GenerateExpression(expr->rhs());
   if (rhs_id == 0) {
     return 0;
@@ -1558,18 +1602,24 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
   // Get the block ID of the last basic block generated for the right-hand-side
   // expression. That block will be an immediate predecessor to the merge block.
   auto rhs_block_id = current_label_id_;
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+  if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)})) {
+    return 0;
+  }
 
   // Output the merge block
-  GenerateLabel(merge_block_id);
+  if (!GenerateLabel(merge_block_id)) {
+    return 0;
+  }
 
   auto result = result_op();
   auto result_id = result.to_i();
 
-  push_function_inst(spv::Op::OpPhi,
-                     {Operand::Int(type_id), result, Operand::Int(lhs_id),
-                      Operand::Int(original_label_id), Operand::Int(rhs_id),
-                      Operand::Int(rhs_block_id)});
+  if (!push_function_inst(spv::Op::OpPhi,
+                          {Operand::Int(type_id), result, Operand::Int(lhs_id),
+                           Operand::Int(original_label_id),
+                           Operand::Int(rhs_id), Operand::Int(rhs_block_id)})) {
+    return 0;
+  }
 
   return result_id;
 }
@@ -1721,8 +1771,10 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
     return 0;
   }
 
-  push_function_inst(op, {Operand::Int(type_id), result, Operand::Int(lhs_id),
-                          Operand::Int(rhs_id)});
+  if (!push_function_inst(op, {Operand::Int(type_id), result,
+                               Operand::Int(lhs_id), Operand::Int(rhs_id)})) {
+    return 0;
+  }
   return result_id;
 }
 
@@ -1776,7 +1828,9 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     ops.push_back(Operand::Int(id));
   }
 
-  push_function_inst(spv::Op::OpFunctionCall, std::move(ops));
+  if (!push_function_inst(spv::Op::OpFunctionCall, std::move(ops))) {
+    return 0;
+  }
 
   return result_id;
 }
@@ -1794,7 +1848,10 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   auto intrinsic = ident->intrinsic();
 
   if (ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
-    GenerateTextureIntrinsic(ident, call, Operand::Int(result_type_id), result);
+    if (!GenerateTextureIntrinsic(ident, call, Operand::Int(result_type_id),
+                                  result)) {
+      return 0;
+    }
     return result_id;
   }
 
@@ -1839,7 +1896,9 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     params.push_back(Operand::Int(
         uint32_t(type->As<ast::type::Struct>()->impl()->members().size() - 1)));
 
-    push_function_inst(spv::Op::OpArrayLength, params);
+    if (!push_function_inst(spv::Op::OpArrayLength, params)) {
+      return 0;
+    }
     return result_id;
   } else if (intrinsic == ast::Intrinsic::kCountOneBits) {
     op = spv::Op::OpBitCount;
@@ -1910,12 +1969,14 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     params.emplace_back(Operand::Int(val_id));
   }
 
-  push_function_inst(op, params);
+  if (!push_function_inst(op, params)) {
+    return 0;
+  }
 
   return result_id;
 }
 
-void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
+bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                        ast::CallExpression* call,
                                        spirv::Operand result_type,
                                        spirv::Operand result_id) {
@@ -1959,7 +2020,7 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   std::vector<ImageOperand> image_operands;
   image_operands.reserve(4);  // Enough to fit most parameter lists
 
-  auto append_coords_to_spirv_params = [&] {
+  auto append_coords_to_spirv_params = [&]() -> bool {
     if (pidx.array_index != kNotUsed) {
       // Array index needs to be appended to the coordinates.
       auto* param_coords = call->params()[pidx.coords];
@@ -1975,14 +2036,15 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                           spirv_params.emplace_back(Operand::Int(param));
                           return true;
                         })) {
-        return;
+        return false;
       }
     } else {
       spirv_params.emplace_back(gen_param(pidx.coords));  // coordinates
     }
+    return true;
   };
 
-  auto append_image_and_coords_to_spirv_params = [&] {
+  auto append_image_and_coords_to_spirv_params = [&]() -> bool {
     assert(pidx.sampler != kNotUsed);
     assert(pidx.texture != kNotUsed);
     auto sampler_param = gen_param(pidx.sampler);
@@ -1992,7 +2054,7 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
 
     // Populate the spirv_params with the common parameters
     spirv_params.emplace_back(Operand::Int(sampled_image));  // sampled image
-    append_coords_to_spirv_params();
+    return append_coords_to_spirv_params();
   };
 
   switch (ident->intrinsic()) {
@@ -2001,7 +2063,9 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                ? spv::Op::OpImageRead
                : spv::Op::OpImageFetch;
       spirv_params.emplace_back(gen_param(pidx.texture));
-      append_coords_to_spirv_params();
+      if (!append_coords_to_spirv_params()) {
+        return false;
+      }
 
       if (pidx.level != kNotUsed) {
         image_operands.emplace_back(
@@ -2018,18 +2082,24 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     case ast::Intrinsic::kTextureStore: {
       op = spv::Op::OpImageWrite;
       spirv_params.emplace_back(gen_param(pidx.texture));
-      append_coords_to_spirv_params();
+      if (!append_coords_to_spirv_params()) {
+        return false;
+      }
       spirv_params.emplace_back(gen_param(pidx.value));
       break;
     }
     case ast::Intrinsic::kTextureSample: {
       op = spv::Op::OpImageSampleImplicitLod;
-      append_image_and_coords_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
       break;
     }
     case ast::Intrinsic::kTextureSampleBias: {
       op = spv::Op::OpImageSampleImplicitLod;
-      append_image_and_coords_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
       assert(pidx.bias != kNotUsed);
       image_operands.emplace_back(
           ImageOperand{SpvImageOperandsBiasMask, gen_param(pidx.bias)});
@@ -2037,7 +2107,9 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleLevel: {
       op = spv::Op::OpImageSampleExplicitLod;
-      append_image_and_coords_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
       assert(pidx.level != kNotUsed);
       image_operands.emplace_back(
           ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
@@ -2045,7 +2117,9 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleGrad: {
       op = spv::Op::OpImageSampleExplicitLod;
-      append_image_and_coords_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
       assert(pidx.ddx != kNotUsed);
       assert(pidx.ddy != kNotUsed);
       image_operands.emplace_back(
@@ -2056,7 +2130,9 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleCompare: {
       op = spv::Op::OpImageSampleDrefExplicitLod;
-      append_image_and_coords_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
       assert(pidx.depth_ref != kNotUsed);
       spirv_params.emplace_back(gen_param(pidx.depth_ref));
 
@@ -2091,10 +2167,10 @@ void Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
 
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " + ident->name();
-    return;
+    return false;
   }
 
-  push_function_inst(op, spirv_params);
+  return push_function_inst(op, spirv_params);
 }
 
 uint32_t Builder::GenerateSampledImage(ast::type::Type* texture_type,
@@ -2118,9 +2194,11 @@ uint32_t Builder::GenerateSampledImage(ast::type::Type* texture_type,
   }
 
   auto sampled_image = result_op();
-  push_function_inst(spv::Op::OpSampledImage,
-                     {Operand::Int(sampled_image_type_id), sampled_image,
-                      texture_operand, sampler_operand});
+  if (!push_function_inst(spv::Op::OpSampledImage,
+                          {Operand::Int(sampled_image_type_id), sampled_image,
+                           texture_operand, sampler_operand})) {
+    return 0;
+  }
 
   return sampled_image.to_i();
 }
@@ -2144,13 +2222,18 @@ uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
   auto* to_type = expr->result_type()->UnwrapPtrIfNeeded();
   auto* from_type = expr->expr()->result_type()->UnwrapPtrIfNeeded();
   if (to_type->type_name() == from_type->type_name()) {
-    push_function_inst(spv::Op::OpCopyObject, {Operand::Int(result_type_id),
-                                               result, Operand::Int(val_id)});
+    if (!push_function_inst(
+            spv::Op::OpCopyObject,
+            {Operand::Int(result_type_id), result, Operand::Int(val_id)})) {
+      return 0;
+    }
     return result_id;
   }
 
-  push_function_inst(spv::Op::OpBitcast, {Operand::Int(result_type_id), result,
-                                          Operand::Int(val_id)});
+  if (!push_function_inst(spv::Op::OpBitcast, {Operand::Int(result_type_id),
+                                               result, Operand::Int(val_id)})) {
+    return 0;
+  }
 
   return result_id;
 }
@@ -2169,9 +2252,11 @@ bool Builder::GenerateConditionalBlock(
   auto merge_block = result_op();
   auto merge_block_id = merge_block.to_i();
 
-  push_function_inst(spv::Op::OpSelectionMerge,
-                     {Operand::Int(merge_block_id),
-                      Operand::Int(SpvSelectionControlMaskNone)});
+  if (!push_function_inst(spv::Op::OpSelectionMerge,
+                          {Operand::Int(merge_block_id),
+                           Operand::Int(SpvSelectionControlMaskNone)})) {
+    return false;
+  }
 
   auto true_block = result_op();
   auto true_block_id = true_block.to_i();
@@ -2181,23 +2266,32 @@ bool Builder::GenerateConditionalBlock(
   auto false_block_id =
       cur_else_idx < else_stmts.size() ? next_id() : merge_block_id;
 
-  push_function_inst(spv::Op::OpBranchConditional,
-                     {Operand::Int(cond_id), Operand::Int(true_block_id),
-                      Operand::Int(false_block_id)});
+  if (!push_function_inst(spv::Op::OpBranchConditional,
+                          {Operand::Int(cond_id), Operand::Int(true_block_id),
+                           Operand::Int(false_block_id)})) {
+    return false;
+  }
 
   // Output true block
-  GenerateLabel(true_block_id);
+  if (!GenerateLabel(true_block_id)) {
+    return false;
+  }
   if (!GenerateBlockStatement(true_body)) {
     return false;
   }
   // We only branch if the last element of the body didn't already branch.
   if (!LastIsTerminator(true_body)) {
-    push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+    if (!push_function_inst(spv::Op::OpBranch,
+                            {Operand::Int(merge_block_id)})) {
+      return false;
+    }
   }
 
   // Start the false block if needed
   if (false_block_id != merge_block_id) {
-    GenerateLabel(false_block_id);
+    if (!GenerateLabel(false_block_id)) {
+      return false;
+    }
 
     auto* else_stmt = else_stmts[cur_else_idx];
     // Handle the else case by just outputting the statements.
@@ -2212,14 +2306,15 @@ bool Builder::GenerateConditionalBlock(
       }
     }
     if (!LastIsTerminator(else_stmt->body())) {
-      push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+      if (!push_function_inst(spv::Op::OpBranch,
+                              {Operand::Int(merge_block_id)})) {
+        return false;
+      }
     }
   }
 
   // Output the merge block
-  GenerateLabel(merge_block_id);
-
-  return true;
+  return GenerateLabel(merge_block_id);
 }
 
 bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
@@ -2269,10 +2364,14 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
     }
   }
 
-  push_function_inst(spv::Op::OpSelectionMerge,
-                     {Operand::Int(merge_block_id),
-                      Operand::Int(SpvSelectionControlMaskNone)});
-  push_function_inst(spv::Op::OpSwitch, params);
+  if (!push_function_inst(spv::Op::OpSelectionMerge,
+                          {Operand::Int(merge_block_id),
+                           Operand::Int(SpvSelectionControlMaskNone)})) {
+    return false;
+  }
+  if (!push_function_inst(spv::Op::OpSwitch, params)) {
+    return false;
+  }
 
   bool generated_default = false;
   auto& body = stmt->body();
@@ -2287,7 +2386,9 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
       generated_default = true;
     }
 
-    GenerateLabel(case_ids[i]);
+    if (!GenerateLabel(case_ids[i])) {
+      return false;
+    }
     if (!GenerateBlockStatement(item->body())) {
       return false;
     }
@@ -2297,21 +2398,31 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
         error_ = "fallthrough of last case statement is disallowed";
         return false;
       }
-      push_function_inst(spv::Op::OpBranch, {Operand::Int(case_ids[i + 1])});
+      if (!push_function_inst(spv::Op::OpBranch,
+                              {Operand::Int(case_ids[i + 1])})) {
+        return false;
+      }
     } else if (!LastIsTerminator(item->body())) {
-      push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+      if (!push_function_inst(spv::Op::OpBranch,
+                              {Operand::Int(merge_block_id)})) {
+        return false;
+      }
     }
   }
 
   if (!generated_default) {
-    GenerateLabel(default_block_id);
-    push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+    if (!GenerateLabel(default_block_id)) {
+      return false;
+    }
+    if (!push_function_inst(spv::Op::OpBranch,
+                            {Operand::Int(merge_block_id)})) {
+      return false;
+    }
   }
 
   merge_stack_.pop_back();
 
-  GenerateLabel(merge_block_id);
-  return true;
+  return GenerateLabel(merge_block_id);
 }
 
 bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
@@ -2321,9 +2432,13 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
       return false;
     }
     val_id = GenerateLoadIfNeeded(stmt->value()->result_type(), val_id);
-    push_function_inst(spv::Op::OpReturnValue, {Operand::Int(val_id)});
+    if (!push_function_inst(spv::Op::OpReturnValue, {Operand::Int(val_id)})) {
+      return false;
+    }
   } else {
-    push_function_inst(spv::Op::OpReturn, {});
+    if (!push_function_inst(spv::Op::OpReturn, {})) {
+      return false;
+    }
   }
 
   return true;
@@ -2332,8 +2447,12 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
 bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   auto loop_header = result_op();
   auto loop_header_id = loop_header.to_i();
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)});
-  GenerateLabel(loop_header_id);
+  if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)})) {
+    return false;
+  }
+  if (!GenerateLabel(loop_header_id)) {
+    return false;
+  }
 
   auto merge_block = result_op();
   auto merge_block_id = merge_block.to_i();
@@ -2343,37 +2462,48 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   auto body_block = result_op();
   auto body_block_id = body_block.to_i();
 
-  push_function_inst(
-      spv::Op::OpLoopMerge,
-      {Operand::Int(merge_block_id), Operand::Int(continue_block_id),
-       Operand::Int(SpvLoopControlMaskNone)});
+  if (!push_function_inst(
+          spv::Op::OpLoopMerge,
+          {Operand::Int(merge_block_id), Operand::Int(continue_block_id),
+           Operand::Int(SpvLoopControlMaskNone)})) {
+    return false;
+  }
 
   continue_stack_.push_back(continue_block_id);
   merge_stack_.push_back(merge_block_id);
 
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(body_block_id)});
-  GenerateLabel(body_block_id);
+  if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(body_block_id)})) {
+    return false;
+  }
+  if (!GenerateLabel(body_block_id)) {
+    return false;
+  }
   if (!GenerateBlockStatement(stmt->body())) {
     return false;
   }
 
   // We only branch if the last element of the body didn't already branch.
   if (!LastIsTerminator(stmt->body())) {
-    push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_block_id)});
+    if (!push_function_inst(spv::Op::OpBranch,
+                            {Operand::Int(continue_block_id)})) {
+      return false;
+    }
   }
 
-  GenerateLabel(continue_block_id);
+  if (!GenerateLabel(continue_block_id)) {
+    return false;
+  }
   if (!GenerateBlockStatement(stmt->continuing())) {
     return false;
   }
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)});
+  if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)})) {
+    return false;
+  }
 
   merge_stack_.pop_back();
   continue_stack_.pop_back();
 
-  GenerateLabel(merge_block_id);
-
-  return true;
+  return GenerateLabel(merge_block_id);
 }
 
 bool Builder::GenerateStatement(ast::Statement* stmt) {
@@ -2901,6 +3031,18 @@ SpvImageFormat Builder::convert_image_format_to_spv(
       return SpvImageFormatUnknown;
   }
   return SpvImageFormatUnknown;
+}
+
+bool Builder::push_function_inst(spv::Op op, const OperandList& operands) {
+  if (functions_.empty()) {
+    std::ostringstream ss;
+    ss << "Internal error: trying to add SPIR-V instruction " << int(op)
+       << " outside a function";
+    error_ = ss.str();
+    return false;
+  }
+  functions_.back().push_inst(op, operands);
+  return true;
 }
 
 }  // namespace spirv
