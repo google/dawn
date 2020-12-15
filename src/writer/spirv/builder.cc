@@ -477,6 +477,14 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
          Operand::Int(x), Operand::Int(y), Operand::Int(z)});
   }
 
+  for (auto builtin : func->referenced_builtin_variables()) {
+    if (builtin.second->value() == ast::Builtin::kFragDepth) {
+      push_execution_mode(
+          spv::Op::OpExecutionMode,
+          {Operand::Int(id), Operand::Int(SpvExecutionModeDepthReplacing)});
+    }
+  }
+
   return true;
 }
 

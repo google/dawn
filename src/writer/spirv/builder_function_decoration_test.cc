@@ -271,7 +271,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
+TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize_Default) {
   ast::type::Void void_type;
 
   ast::Function func(
@@ -287,7 +287,7 @@ TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize_Default) {
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_WorkgroupSize) {
+TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize) {
   ast::type::Void void_type;
 
   ast::Function func(
@@ -340,6 +340,31 @@ OpFunctionEnd
 %6 = OpLabel
 OpReturn
 OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
+  auto* fragdepth =
+      Var("fragdepth", ast::StorageClass::kOutput, create<ast::type::F32>(),
+          nullptr,
+          ast::VariableDecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
+          });
+  mod->AddGlobalVariable(fragdepth);
+
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
+  });
+
+  auto* func = create<ast::Function>(
+      Source{}, mod->RegisterSymbol("main"), "main", ast::VariableList{},
+      create<ast::type::Void>(), body, ast::FunctionDecorationList{});
+
+  func->add_referenced_module_variable(fragdepth);
+
+  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.execution_modes()),
+            R"(OpExecutionMode %3 DepthReplacing
 )");
 }
 
