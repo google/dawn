@@ -48,6 +48,63 @@ TEST_P(DeprecationTests, SetIndexBufferWithFormat) {
     pass.EndPass();
 }
 
+// Test that BindGroupLayoutEntry cannot have a type if buffer, sampler, texture, or storageTexture
+// are defined.
+TEST_P(DeprecationTests, BindGroupLayoutEntryTypeConflict) {
+    wgpu::BindGroupLayoutEntry binding;
+    binding.binding = 0;
+    binding.visibility = wgpu::ShaderStage::Vertex;
+
+    wgpu::BindGroupLayoutDescriptor descriptor;
+    descriptor.entryCount = 1;
+    descriptor.entries = &binding;
+
+    // Succeeds with only a type.
+    // Will soon emit a deprecation warning.
+    binding.type = wgpu::BindingType::UniformBuffer;
+    device.CreateBindGroupLayout(&descriptor);
+
+    binding.type = wgpu::BindingType::Undefined;
+
+    // Succeeds with only a buffer.type.
+    binding.buffer.type = wgpu::BufferBindingType::Uniform;
+    device.CreateBindGroupLayout(&descriptor);
+    // Fails when both type and a buffer.type are specified.
+    binding.type = wgpu::BindingType::UniformBuffer;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+
+    binding.buffer.type = wgpu::BufferBindingType::Undefined;
+    binding.type = wgpu::BindingType::Undefined;
+
+    // Succeeds with only a sampler.type.
+    binding.sampler.type = wgpu::SamplerBindingType::Filtering;
+    device.CreateBindGroupLayout(&descriptor);
+    // Fails when both type and a sampler.type are specified.
+    binding.type = wgpu::BindingType::Sampler;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+
+    binding.sampler.type = wgpu::SamplerBindingType::Undefined;
+    binding.type = wgpu::BindingType::Undefined;
+
+    // Succeeds with only a texture.sampleType.
+    binding.texture.sampleType = wgpu::TextureSampleType::Float;
+    device.CreateBindGroupLayout(&descriptor);
+    // Fails when both type and a texture.sampleType are specified.
+    binding.type = wgpu::BindingType::SampledTexture;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+
+    binding.texture.sampleType = wgpu::TextureSampleType::Undefined;
+    binding.type = wgpu::BindingType::Undefined;
+
+    // Succeeds with only a storageTexture.access.
+    binding.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
+    binding.storageTexture.format = wgpu::TextureFormat::RGBA8Unorm;
+    device.CreateBindGroupLayout(&descriptor);
+    // Fails when both type and a storageTexture.access are specified.
+    binding.type = wgpu::BindingType::ReadonlyStorageTexture;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

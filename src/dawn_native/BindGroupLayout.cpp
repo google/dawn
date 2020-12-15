@@ -85,19 +85,19 @@ namespace dawn_native {
                 const BufferBindingLayout& buffer = entry.buffer;
                 DAWN_TRY(ValidateBufferBindingType(buffer.type));
 
-                // TODO(dawn:527): ReadOnlyStorage should have the same limits as Storage
-                // regarding use with Vertex shaders.
                 if (buffer.type == wgpu::BufferBindingType::Storage) {
                     allowedStages &= ~wgpu::ShaderStage::Vertex;
+                }
 
-                    // Dynamic storage buffers aren't bounds checked properly in D3D12. Disallow
-                    // them as unsafe until the bounds checks are implemented.
-                    if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
-                        buffer.hasDynamicOffset) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Dynamic storage buffers are disallowed because they aren't secure "
-                            "yet. See https://crbug.com/dawn/429");
-                    }
+                // Dynamic storage buffers aren't bounds checked properly in D3D12. Disallow them as
+                // unsafe until the bounds checks are implemented.
+                if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
+                    buffer.hasDynamicOffset &&
+                    (buffer.type == wgpu::BufferBindingType::Storage ||
+                     buffer.type == wgpu::BufferBindingType::ReadOnlyStorage)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Dynamic storage buffers are disallowed because they aren't secure yet. "
+                        "See https://crbug.com/dawn/429");
                 }
             }
             if (entry.sampler.type != wgpu::SamplerBindingType::Undefined) {
@@ -151,7 +151,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(
                     "Only one of buffer, sampler, texture, or storageTexture may be set for each "
                     "BindGroupLayoutEntry");
-            } else if (bindingMemberCount > 1) {
+            } else if (bindingMemberCount == 1) {
                 if (entry.type != wgpu::BindingType::Undefined) {
                     return DAWN_VALIDATION_ERROR(
                         "BindGroupLayoutEntry type must be undefined if any of buffer, sampler, "

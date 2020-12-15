@@ -168,7 +168,7 @@
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage"},
 
-            {"name": "type", "type": "binding type"},
+            {"name": "type", "type": "binding type", "default": "undefined"},
             {"name": "has dynamic offset", "type": "bool", "default": "false"},
             {"name": "min buffer binding size", "type": "uint64_t", "default": "0"},
             {"name": "view dimension", "type": "texture view dimension", "default": "undefined"},
