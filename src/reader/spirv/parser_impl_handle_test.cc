@@ -3134,6 +3134,35 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
+    })"},
+        // OpImageFetch with explicit level
+        {"%float 2D 0 0 0 1 Unknown",
+         "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
+         R"(Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          Call[not set]{
+            Identifier[not set]{textureLoad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{vi12}
+              ScalarConstructor[not set]{3}
+            )
+          }
+        }
+      }
     })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
