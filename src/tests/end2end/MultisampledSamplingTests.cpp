@@ -50,9 +50,6 @@ class MultisampledSamplingTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
-        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                          (IsVulkan() || IsOpenGL() || IsOpenGLES()));
         {
             utils::ComboRenderPipelineDescriptor desc(device);
 

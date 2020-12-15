@@ -27,10 +27,6 @@ class DepthStencilCopyTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
-        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                          (IsVulkan() || IsOpenGL() || IsOpenGLES()));
-
         // Draw a square in the bottom left quarter of the screen.
         mVertexModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(vertex_idx)]] var<in> VertexIndex : u32;

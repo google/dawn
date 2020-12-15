@@ -315,10 +315,6 @@ TEST_P(MultisampledRenderingTest, ResolveFromSingleLayerArrayInto2DTexture) {
 
 // Test multisampled rendering with depth test works correctly.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTest) {
-    // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
-
     constexpr bool kTestDepth = true;
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
@@ -674,10 +670,6 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMas
     // TODO(dawn:491): Find out why this test doesn't work on Windows Intel Vulkan.
     DAWN_SKIP_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
 
-    // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
-
     constexpr bool kTestDepth = true;
     // The second sample is included in the first render pass and it's covered by the triangle.
     constexpr uint32_t kSampleMaskGreen = kSecondSampleMaskBit;
@@ -939,10 +931,6 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCo
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
     DAWN_SKIP_TEST_IF(IsSwiftshader());
-
-    // TODO(crbug.com/tint/329): SPIR-V output missing DepthReplacing execution mode.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
 
     constexpr bool kTestDepth = true;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
