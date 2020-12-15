@@ -31,7 +31,7 @@ namespace {
 
 class EmitVertexPointSizeTest : public testing::Test {
  public:
-  Transform::Output Transform(ast::Module in) {
+  Transform::Output GetTransform(ast::Module in) {
     Manager manager;
     manager.append(std::make_unique<EmitVertexPointSize>());
     return manager.Run(&in);
@@ -81,7 +81,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
     }
   };
 
-  auto result = Transform(Builder{}.Module());
+  auto result = GetTransform(Builder{}.Module());
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
@@ -149,7 +149,7 @@ TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
     }
   };
 
-  auto result = Transform(Builder{}.Module());
+  auto result = GetTransform(Builder{}.Module());
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
@@ -208,7 +208,7 @@ TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
     }
   };
 
-  auto result = Transform(Builder{}.Module());
+  auto result = GetTransform(Builder{}.Module());
   ASSERT_FALSE(result.diagnostics.contains_errors())
       << diag::Formatter().format(result.diagnostics);
 
