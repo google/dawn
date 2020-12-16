@@ -844,11 +844,6 @@ TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
 
 // This tests the clearing of sampled textures in render pass
 TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
-    // TODO(crbug.com/tint/399)
-    // Tint SPIRV reader failure:
-    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Create needed resources
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::Sampled, kColorFormat);
@@ -896,11 +891,6 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 
 // This tests the clearing of sampled textures during compute pass
 TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
-    // TODO(crbug.com/tint/399)
-    // Tint SPIRV reader failure:
-    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Create needed resources
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::Sampled, kColorFormat);
@@ -1059,11 +1049,6 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
 // Then expect the render texture to not store the data from sample texture
 // because it will be lazy cleared by the EXPECT_TEXTURE_RGBA8_EQ call.
 TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
-    // TODO(crbug.com/tint/399)
-    // Tint SPIRV reader failure:
-    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Create needed resources
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst, kColorFormat);
@@ -1210,11 +1195,6 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
 // Test that if one mip of a texture is initialized and another is uninitialized, lazy clearing the
 // uninitialized mip does not clear the initialized mip.
 TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
-    // TODO(crbug.com/tint/399)
-    // Tint SPIRV reader failure:
-    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         2, 1,
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled,
@@ -1294,11 +1274,6 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // Test that if one layer of a texture is initialized and another is uninitialized, lazy clearing
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
-    // TODO(crbug.com/tint/399)
-    // Tint SPIRV reader failure:
-    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         1, 2,
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled,
@@ -1676,11 +1651,6 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-
-        // TODO(crbug.com/tint/399)
-        // Tint SPIRV reader failure:
-        // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
-        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
 
         DAWN_SKIP_TEST_IF(UsesWire());
         DAWN_SKIP_TEST_IF(!IsBCFormatSupported());

@@ -1114,11 +1114,6 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.
 TEST_P(BindGroupTests, ReallyLargeBindGroup) {
-    // TODO(crbug.com/tint/399)
-    // Tint SPIRV reader failure:
-    // Type Determination: v-0006: identifier must be declared before use: textureLoadLevel
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     std::string interface = "#version 450\n";
     std::string body;
