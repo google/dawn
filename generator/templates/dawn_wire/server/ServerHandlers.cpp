@@ -90,8 +90,6 @@ namespace dawn_wire { namespace server {
     {% endfor %}
 
     const volatile char* Server::HandleCommandsImpl(const volatile char* commands, size_t size) {
-        mProcs.deviceTick(DeviceObjects().Get(1)->handle);
-
         while (size >= sizeof(CmdHeader) + sizeof(WireCmd)) {
             // Start by chunked command handling, if it is done, then it means the whole buffer
             // was consumed by it, so we return a pointer to the end of the commands.
