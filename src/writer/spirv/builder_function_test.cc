@@ -299,7 +299,6 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   mod->AddGlobalVariable(data_var);
 
   {
-    ast::VariableList params;
     auto* var = create<ast::Variable>(
         Source{},                      // source
         "v",                           // name
@@ -315,23 +314,20 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(
-        Source{}, ast::StatementList{
-                      create<ast::VariableDeclStatement>(Source{}, var),
-                      create<ast::ReturnStatement>(Source{}),
-                  });
-    auto* func = create<ast::Function>(
-        Source{}, mod->RegisterSymbol("a"), "a", params, &void_type, body,
-        ast::FunctionDecorationList{
-            create<ast::StageDecoration>(Source{},
-                                         ast::PipelineStage::kCompute),
-        });
+    auto* func = Func("a", ast::VariableList{}, &void_type,
+                      ast::StatementList{
+                          create<ast::VariableDeclStatement>(Source{}, var),
+                          create<ast::ReturnStatement>(Source{}),
+                      },
+                      ast::FunctionDecorationList{
+                          create<ast::StageDecoration>(
+                              Source{}, ast::PipelineStage::kCompute),
+                      });
 
     mod->AddFunction(func);
   }
 
   {
-    ast::VariableList params;
     auto* var = create<ast::Variable>(
         Source{},                      // source
         "v",                           // name
@@ -347,17 +343,15 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(
-        Source{}, ast::StatementList{
-                      create<ast::VariableDeclStatement>(Source{}, var),
-                      create<ast::ReturnStatement>(Source{}),
-                  });
-    auto* func = create<ast::Function>(
-        Source{}, mod->RegisterSymbol("b"), "b", params, &void_type, body,
-        ast::FunctionDecorationList{
-            create<ast::StageDecoration>(Source{},
-                                         ast::PipelineStage::kCompute),
-        });
+    auto* func = Func("b", ast::VariableList{}, &void_type,
+                      ast::StatementList{
+                          create<ast::VariableDeclStatement>(Source{}, var),
+                          create<ast::ReturnStatement>(Source{}),
+                      },
+                      ast::FunctionDecorationList{
+                          create<ast::StageDecoration>(
+                              Source{}, ast::PipelineStage::kCompute),
+                      });
 
     mod->AddFunction(func);
   }

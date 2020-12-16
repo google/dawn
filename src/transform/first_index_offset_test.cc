@@ -58,9 +58,8 @@ struct ModuleBuilder : public ast::BuilderWithModule {
 
   ast::Function* AddFunction(const std::string& name,
                              ast::StatementList stmts) {
-    auto* func = create<ast::Function>(
-        mod->RegisterSymbol(name), name, ast::VariableList{}, ty.u32,
-        create<ast::BlockStatement>(stmts), ast::FunctionDecorationList{});
+    auto* func = Func(name, ast::VariableList{}, ty.u32, stmts,
+                      ast::FunctionDecorationList{});
     mod->AddFunction(func);
     return func;
   }

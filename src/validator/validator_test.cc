@@ -255,15 +255,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   auto* lhs = Expr("not_global_var");
   auto* rhs = Expr(3.14f);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
-                                       rhs),
-  });
-
-  auto* func =
-      create<ast::Function>(mod->RegisterSymbol("my_func"), "my_func", params,
-                            ty.f32, body, ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, ty.f32,
+                    ast::StatementList{
+                        create<ast::AssignmentStatement>(
+                            Source{Source::Location{12, 34}}, lhs, rhs),
+                    },
+                    ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   EXPECT_FALSE(v()->Validate(mod));
@@ -284,19 +281,16 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       mod->RegisterSymbol("global_var"), "global_var");
   auto* rhs = Expr(3.14f);
 
-  ast::VariableList params;
-
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
-                                       rhs),
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("my_func"), "my_func", params, ty.void_, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func("my_func", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(
+                   Source{Source::Location{12, 34}}, lhs, rhs),
+               create<ast::ReturnStatement>(),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -435,14 +429,13 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
                   ast::VariableDecorationList{});
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}}, var),
-  });
 
-  auto* func =
-      create<ast::Function>(mod->RegisterSymbol("my_func"), "my_func", params,
-                            ty.void_, body, ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+                    ast::StatementList{
+                        create<ast::VariableDeclStatement>(
+                            Source{Source::Location{12, 34}}, var),
+                    },
+                    ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -463,16 +456,13 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32, Expr(0.1f),
                           ast::VariableDecorationList{});
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                         var_a_float),
-  });
-
-  auto* func =
-      create<ast::Function>(mod->RegisterSymbol("my_func"), "my_func", params,
-                            ty.void_, body, ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+                    ast::StatementList{
+                        create<ast::VariableDeclStatement>(var),
+                        create<ast::VariableDeclStatement>(
+                            Source{Source::Location{12, 34}}, var_a_float),
+                    },
+                    ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -547,28 +537,24 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   auto* var1 = Var("a", ast::StorageClass::kNone, ty.void_, Expr(1.0f),
                    ast::VariableDecorationList{});
 
-  ast::VariableList params0;
-  auto* body0 = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                         var0),
-      create<ast::ReturnStatement>(),
-  });
+  auto* func0 = Func("func0", ast::VariableList{}, ty.void_,
+                     ast::StatementList{
+                         create<ast::VariableDeclStatement>(
+                             Source{Source::Location{12, 34}}, var0),
+                         create<ast::ReturnStatement>(),
+                     },
+                     ast::FunctionDecorationList{});
 
-  auto* func0 =
-      create<ast::Function>(mod->RegisterSymbol("func0"), "func0", params0,
-                            ty.void_, body0, ast::FunctionDecorationList{});
-
-  ast::VariableList params1;
-  auto* body1 = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{Source::Location{13, 34}},
-                                         var1),
-      create<ast::ReturnStatement>(),
-  });
-  auto* func1 = create<ast::Function>(
-      mod->RegisterSymbol("func1"), "func1", params1, ty.void_, body1,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* func1 =
+      Func("func1", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::VariableDeclStatement>(
+                   Source{Source::Location{13, 34}}, var1),
+               create<ast::ReturnStatement>(),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
 
   mod->AddFunction(func0);
   mod->AddFunction(func1);

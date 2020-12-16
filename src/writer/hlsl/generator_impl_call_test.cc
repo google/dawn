@@ -32,10 +32,8 @@ using HlslGeneratorImplTest_Call = TestHelper;
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
   auto* call = Call("my_func");
 
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
-      create<ast::BlockStatement>(ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+                    ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
@@ -45,10 +43,8 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
   auto* call = Call("my_func", "param1", "param2");
 
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
-      create<ast::BlockStatement>(ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+                    ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
@@ -58,10 +54,8 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
 TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   auto* call = create<ast::CallStatement>(Call("my_func", "param1", "param2"));
 
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
-      create<ast::BlockStatement>(ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+                    ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(out, call)) << gen.error();

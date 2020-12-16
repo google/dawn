@@ -58,14 +58,11 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Emit_Function) {
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-
-  auto* func = create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"),
-                                     "my_func", ast::VariableList{}, &void_type,
-                                     body, ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, &void_type,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(Source{}),
+                    },
+                    ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
   gen.increment_indent();
@@ -83,14 +80,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-
-  auto* func = create<ast::Function>(Source{}, mod->RegisterSymbol("main"),
-                                     "main", ast::VariableList{}, &void_type,
-                                     body, ast::FunctionDecorationList{});
+  auto* func = Func("main", ast::VariableList{}, &void_type,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(Source{}),
+                    },
+                    ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
   gen.increment_indent();
@@ -129,14 +123,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-
-  auto* func = create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"),
-                                     "my_func", params, &void_type, body,
-                                     ast::FunctionDecorationList{});
+  auto* func = Func("my_func", params, &void_type,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(Source{}),
+                    },
+                    ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
   gen.increment_indent();
@@ -185,22 +176,18 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   mod->AddGlobalVariable(foo_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("bar"), "bar"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("foo"), "foo")),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
-      ast::FunctionDecorationList{create<ast::StageDecoration>(
-          Source{}, ast::PipelineStage::kFragment)});
+  auto body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod->RegisterSymbol("bar"), "bar"),
+          create<ast::IdentifierExpression>(Source{},
+                                            mod->RegisterSymbol("foo"), "foo")),
+      create<ast::ReturnStatement>(Source{}),
+  };
+  auto* func = Func("frag_main", ast::VariableList{}, &void_type, body,
+                    ast::FunctionDecorationList{create<ast::StageDecoration>(
+                        Source{}, ast::PipelineStage::kFragment)});
 
   mod->AddFunction(func);
 
@@ -262,25 +249,21 @@ TEST_F(MslGeneratorImplTest,
   mod->AddGlobalVariable(coord_var);
   mod->AddGlobalVariable(depth_var);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
+  auto body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(
+              Source{}, mod->RegisterSymbol("depth"), "depth"),
+          create<ast::MemberAccessorExpression>(
               Source{},
               create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("depth"), "depth"),
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("coord"), "coord"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("x"), "x"))),
-          create<ast::ReturnStatement>(Source{}),
-      });
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
+                  Source{}, mod->RegisterSymbol("coord"), "coord"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("x"), "x"))),
+      create<ast::ReturnStatement>(Source{}),
+  };
+  auto* func = Func(
+      "frag_main", ast::VariableList{}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -327,7 +310,6 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
 
   mod->AddGlobalVariable(coord_var);
 
-  ast::VariableList params;
   auto* var = create<ast::Variable>(
       Source{},                      // source
       "v",                           // name
@@ -342,14 +324,12 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
                                             "x")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
+  auto* func = Func(
+      "frag_main", ast::VariableList{}, &void_type,
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -400,7 +380,6 @@ TEST_F(MslGeneratorImplTest,
 
   mod->AddGlobalVariable(coord_var);
 
-  ast::VariableList params;
   auto* var = create<ast::Variable>(
       Source{},                      // source
       "v",                           // name
@@ -415,14 +394,12 @@ TEST_F(MslGeneratorImplTest,
                                             "b")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
+  auto* func = Func(
+      "frag_main", ast::VariableList{}, &void_type,
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -474,10 +451,7 @@ TEST_F(MslGeneratorImplTest,
                             });
 
   td.RegisterVariableForTesting(coord_var);
-
   mod->AddGlobalVariable(coord_var);
-
-  ast::VariableList params;
 
   auto* var = create<ast::Variable>(
       Source{},                      // source
@@ -493,14 +467,12 @@ TEST_F(MslGeneratorImplTest,
                                             "b")),  // constructor
       ast::VariableDecorationList{});               // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
+  auto* func = Func(
+      "frag_main", ast::VariableList{}, &void_type,
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -585,28 +557,25 @@ TEST_F(
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("bar"), "bar"),
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("foo"), "foo")),
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("val"), "val"),
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("param"), "param")),
-          create<ast::ReturnStatement>(
-              Source{}, create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("foo"), "foo")),
-      });
-  auto* sub_func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
-      ast::FunctionDecorationList{});
+  auto body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod->RegisterSymbol("bar"), "bar"),
+          create<ast::IdentifierExpression>(Source{},
+                                            mod->RegisterSymbol("foo"), "foo")),
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod->RegisterSymbol("val"), "val"),
+          create<ast::IdentifierExpression>(
+              Source{}, mod->RegisterSymbol("param"), "param")),
+      create<ast::ReturnStatement>(
+          Source{}, create<ast::IdentifierExpression>(
+                        Source{}, mod->RegisterSymbol("foo"), "foo")),
+  };
+  auto* sub_func =
+      Func("sub_func", params, &f32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(sub_func);
 
@@ -614,22 +583,20 @@ TEST_F(
   expr.push_back(create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
-  body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
+  body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod->RegisterSymbol("bar"), "bar"),
+          create<ast::CallExpression>(
               Source{},
               create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("bar"), "bar"),
-              create<ast::CallExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("sub_func"), "sub_func"),
-                  expr)),
-          create<ast::ReturnStatement>(Source{}),
-      });
-  auto* func_1 = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
+                  Source{}, mod->RegisterSymbol("sub_func"), "sub_func"),
+              expr)),
+      create<ast::ReturnStatement>(Source{}),
+  };
+  auto* func_1 = Func(
+      "ep_1", ast::VariableList{}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -697,15 +664,13 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
+  auto* sub_func = Func(
+      "sub_func", params, &f32,
       ast::StatementList{
           create<ast::ReturnStatement>(
               Source{}, create<ast::IdentifierExpression>(
                             Source{}, mod->RegisterSymbol("param"), "param")),
-      });
-  auto* sub_func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
+      },
       ast::FunctionDecorationList{});
 
   mod->AddFunction(sub_func);
@@ -714,23 +679,21 @@ TEST_F(MslGeneratorImplTest,
   expr.push_back(create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
-  body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
+  auto body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(
+              Source{}, mod->RegisterSymbol("depth"), "depth"),
+          create<ast::CallExpression>(
               Source{},
               create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("depth"), "depth"),
-              create<ast::CallExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("sub_func"), "sub_func"),
-                  expr)),
-          create<ast::ReturnStatement>(Source{}),
-      });
+                  Source{}, mod->RegisterSymbol("sub_func"), "sub_func"),
+              expr)),
+      create<ast::ReturnStatement>(Source{}),
+  };
 
-  auto* func_1 = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
+  auto* func_1 = Func(
+      "ep_1", ast::VariableList{}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -806,26 +769,23 @@ TEST_F(
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
+  auto body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(
+              Source{}, mod->RegisterSymbol("depth"), "depth"),
+          create<ast::MemberAccessorExpression>(
               Source{},
               create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("depth"), "depth"),
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("coord"), "coord"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("x"), "x"))),
-          create<ast::ReturnStatement>(
-              Source{}, create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("param"), "param")),
-      });
-  auto* sub_func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
-      ast::FunctionDecorationList{});
+                  Source{}, mod->RegisterSymbol("coord"), "coord"),
+              create<ast::IdentifierExpression>(
+                  Source{}, mod->RegisterSymbol("x"), "x"))),
+      create<ast::ReturnStatement>(
+          Source{}, create<ast::IdentifierExpression>(
+                        Source{}, mod->RegisterSymbol("param"), "param")),
+  };
+  auto* sub_func =
+      Func("sub_func", params, &f32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(sub_func);
 
@@ -833,22 +793,20 @@ TEST_F(
   expr.push_back(create<ast::ScalarConstructorExpression>(
       Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
 
-  body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
+  body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(
+              Source{}, mod->RegisterSymbol("depth"), "depth"),
+          create<ast::CallExpression>(
               Source{},
               create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("depth"), "depth"),
-              create<ast::CallExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("sub_func"), "sub_func"),
-                  expr)),
-          create<ast::ReturnStatement>(Source{}),
-      });
-  auto* func_1 = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
+                  Source{}, mod->RegisterSymbol("sub_func"), "sub_func"),
+              expr)),
+      create<ast::ReturnStatement>(Source{}),
+  };
+  auto* func_1 = Func(
+      "ep_1", ast::VariableList{}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -910,21 +868,17 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::ReturnStatement>(
-              Source{},
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("coord"), "coord"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("x"), "x"))),
-      });
-  auto* sub_func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("sub_func"), "sub_func", params, &f32, body,
-      ast::FunctionDecorationList{});
+  auto body = ast::StatementList{
+      create<ast::ReturnStatement>(
+          Source{}, create<ast::MemberAccessorExpression>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("coord"), "coord"),
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("x"), "x"))),
+  };
+  auto* sub_func =
+      Func("sub_func", params, &f32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(sub_func);
 
@@ -945,15 +899,12 @@ TEST_F(MslGeneratorImplTest,
           expr),                       // constructor
       ast::VariableDecorationList{});  // decorations
 
-  body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
+  auto* func = Func(
+      "frag_main", ast::VariableList{}, &void_type,
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -1016,21 +967,17 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::ReturnStatement>(
-              Source{},
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("coord"), "coord"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("b"), "b"))),
-      });
-  auto* sub_func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("sub_func"), "sub_func", params, ty.f32,
-      body, ast::FunctionDecorationList{});
+  auto body = ast::StatementList{
+      create<ast::ReturnStatement>(
+          Source{}, create<ast::MemberAccessorExpression>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("coord"), "coord"),
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("b"), "b"))),
+  };
+  auto* sub_func =
+      Func("sub_func", params, ty.f32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(sub_func);
 
@@ -1051,15 +998,12 @@ TEST_F(MslGeneratorImplTest,
           expr),                       // constructor
       ast::VariableDecorationList{});  // decorations
 
-  body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
+  auto* func = Func(
+      "frag_main", ast::VariableList{}, &void_type,
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -1128,21 +1072,17 @@ TEST_F(MslGeneratorImplTest,
                             nullptr,                          // constructor
                             ast::VariableDecorationList{}));  // decorations
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::ReturnStatement>(
-              Source{},
-              create<ast::MemberAccessorExpression>(
-                  Source{},
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("coord"), "coord"),
-                  create<ast::IdentifierExpression>(
-                      Source{}, mod->RegisterSymbol("b"), "b"))),
-      });
-  auto* sub_func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("sub_func"), "sub_func", params, ty.f32,
-      body, ast::FunctionDecorationList{});
+  auto body = ast::StatementList{
+      create<ast::ReturnStatement>(
+          Source{}, create<ast::MemberAccessorExpression>(
+                        Source{},
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("coord"), "coord"),
+                        create<ast::IdentifierExpression>(
+                            Source{}, mod->RegisterSymbol("b"), "b"))),
+  };
+  auto* sub_func =
+      Func("sub_func", params, ty.f32, body, ast::FunctionDecorationList{});
 
   mod->AddFunction(sub_func);
 
@@ -1163,15 +1103,12 @@ TEST_F(MslGeneratorImplTest,
           expr),                       // constructor
       ast::VariableDecorationList{});  // decorations
 
-  body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::VariableDeclStatement>(Source{}, var),
-                    create<ast::ReturnStatement>(Source{}),
-                });
-
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("frag_main"), "frag_main", params,
-      &void_type, body,
+  auto* func = Func(
+      "frag_main", ast::VariableList{}, &void_type,
+      ast::StatementList{
+          create<ast::VariableDeclStatement>(Source{}, var),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -1221,35 +1158,32 @@ TEST_F(MslGeneratorImplTest,
   td.RegisterVariableForTesting(bar_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
   auto* list = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ReturnStatement>(Source{}),
                 });
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("bar"), "bar"),
+  auto body = ast::StatementList{
+      create<ast::AssignmentStatement>(
+          Source{},
+          create<ast::IdentifierExpression>(Source{},
+                                            mod->RegisterSymbol("bar"), "bar"),
+          create<ast::ScalarConstructorExpression>(
+              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f))),
+      create<ast::IfStatement>(
+          Source{},
+          create<ast::BinaryExpression>(
+              Source{}, ast::BinaryOp::kEqual,
               create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f))),
-          create<ast::IfStatement>(
-              Source{},
-              create<ast::BinaryExpression>(
-                  Source{}, ast::BinaryOp::kEqual,
-                  create<ast::ScalarConstructorExpression>(
-                      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
-                  create<ast::ScalarConstructorExpression>(
-                      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
-              list, ast::ElseStatementList{}),
-          create<ast::ReturnStatement>(Source{}),
-      });
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)),
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+          list, ast::ElseStatementList{}),
+      create<ast::ReturnStatement>(Source{}),
+  };
 
-  auto* func_1 = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("ep_1"), "ep_1", params, &void_type, body,
+  auto* func_1 = Func(
+      "ep_1", ast::VariableList{}, &void_type, body,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
@@ -1280,9 +1214,8 @@ TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
   ast::type::Void void_type;
 
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("main"), "main", ast::VariableList{},
-      &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func = Func(
+      "main", ast::VariableList{}, &void_type, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
@@ -1314,14 +1247,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
 
   ast::type::Void void_type;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-
-  auto* func = create<ast::Function>(Source{}, mod->RegisterSymbol("my_func"),
-                                     "my_func", params, &void_type, body,
-                                     ast::FunctionDecorationList{});
+  auto* func = Func("my_func", params, &void_type,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(),
+                    },
+                    ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
 
@@ -1385,7 +1315,6 @@ TEST_F(MslGeneratorImplTest,
   mod->AddGlobalVariable(data_var);
 
   {
-    ast::VariableList params;
     auto* var = create<ast::Variable>(
         Source{},                      // source
         "v",                           // name
@@ -1401,23 +1330,20 @@ TEST_F(MslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(
-        Source{}, ast::StatementList{
-                      create<ast::VariableDeclStatement>(Source{}, var),
-                      create<ast::ReturnStatement>(Source{}),
-                  });
-    auto* func = create<ast::Function>(
-        Source{}, mod->RegisterSymbol("a"), "a", params, &void_type, body,
-        ast::FunctionDecorationList{
-            create<ast::StageDecoration>(Source{},
-                                         ast::PipelineStage::kCompute),
-        });
+    auto* func = Func("a", ast::VariableList{}, &void_type,
+                      ast::StatementList{
+                          create<ast::VariableDeclStatement>(Source{}, var),
+                          create<ast::ReturnStatement>(Source{}),
+                      },
+                      ast::FunctionDecorationList{
+                          create<ast::StageDecoration>(
+                              Source{}, ast::PipelineStage::kCompute),
+                      });
 
     mod->AddFunction(func);
   }
 
   {
-    ast::VariableList params;
     auto* var = create<ast::Variable>(
         Source{},                      // source
         "v",                           // name
@@ -1433,17 +1359,15 @@ TEST_F(MslGeneratorImplTest,
                                               "d")),  // constructor
         ast::VariableDecorationList{});               // decorations
 
-    auto* body = create<ast::BlockStatement>(
-        Source{}, ast::StatementList{
-                      create<ast::VariableDeclStatement>(Source{}, var),
-                      create<ast::ReturnStatement>(Source{}),
-                  });
-    auto* func = create<ast::Function>(
-        Source{}, mod->RegisterSymbol("b"), "b", params, &void_type, body,
-        ast::FunctionDecorationList{
-            create<ast::StageDecoration>(Source{},
-                                         ast::PipelineStage::kCompute),
-        });
+    auto* func = Func("b", ast::VariableList{}, &void_type,
+                      ast::StatementList{
+                          create<ast::VariableDeclStatement>(Source{}, var),
+                          create<ast::ReturnStatement>(Source{}),
+                      },
+                      ast::FunctionDecorationList{
+                          create<ast::StageDecoration>(
+                              Source{}, ast::PipelineStage::kCompute),
+                      });
 
     mod->AddFunction(func);
   }

@@ -149,15 +149,15 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   // fn func -> void { var a : array<i32>; }
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.array<i32>());
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}}, var),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("func"), "func", params, ty.void_, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func("func", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::VariableDeclStatement>(
+                   Source{Source::Location{12, 34}}, var),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();

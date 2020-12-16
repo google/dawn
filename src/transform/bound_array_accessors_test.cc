@@ -93,10 +93,8 @@ class BoundArrayAccessorsTest : public testing::Test {
 struct ModuleBuilder : public ast::BuilderWithModule {
   ast::Module Module() {
     Build();
-    auto* body = create<ast::BlockStatement>(statements);
-    mod->AddFunction(create<ast::Function>(mod->RegisterSymbol("func"), "func",
-                                           ast::VariableList{}, ty.void_, body,
-                                           ast::FunctionDecorationList{}));
+    mod->AddFunction(Func("func", ast::VariableList{}, ty.void_, statements,
+                          ast::FunctionDecorationList{}));
     return std::move(*mod);
   }
 

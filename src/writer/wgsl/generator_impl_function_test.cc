@@ -41,14 +41,12 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* func = create<ast::Function>(mod->RegisterSymbol("my_func"), "my_func",
-                                     ast::VariableList{}, ty.void_, body,
-                                     ast::FunctionDecorationList{});
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+                    ast::StatementList{
+                        create<ast::DiscardStatement>(),
+                        create<ast::ReturnStatement>(),
+                    },
+                    ast::FunctionDecorationList{});
 
   gen.increment_indent();
 
@@ -61,18 +59,16 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-      create<ast::ReturnStatement>(),
-  });
-
-  ast::VariableList params;
-  params.push_back(Var("a", ast::StorageClass::kNone, ty.f32));
-  params.push_back(Var("b", ast::StorageClass::kNone, ty.i32));
-
   auto* func =
-      create<ast::Function>(mod->RegisterSymbol("my_func"), "my_func", params,
-                            ty.void_, body, ast::FunctionDecorationList{});
+      Func("my_func",
+           ast::VariableList{Var("a", ast::StorageClass::kNone, ty.f32),
+                             Var("b", ast::StorageClass::kNone, ty.i32)},
+           ty.void_,
+           ast::StatementList{
+               create<ast::DiscardStatement>(),
+               create<ast::ReturnStatement>(),
+           },
+           ast::FunctionDecorationList{});
 
   gen.increment_indent();
 
@@ -85,17 +81,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* func =
-      create<ast::Function>(mod->RegisterSymbol("my_func"), "my_func",
-                            ast::VariableList{}, ty.void_, body,
-                            ast::FunctionDecorationList{
-                                create<ast::WorkgroupDecoration>(2u, 4u, 6u),
-                            });
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+                    ast::StatementList{
+                        create<ast::DiscardStatement>(),
+                        create<ast::ReturnStatement>(),
+                    },
+                    ast::FunctionDecorationList{
+                        create<ast::WorkgroupDecoration>(2u, 4u, 6u),
+                    });
 
   gen.increment_indent();
 
@@ -109,17 +102,15 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
-      body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  auto* func =
+      Func("my_func", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::DiscardStatement>(),
+               create<ast::ReturnStatement>(),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           });
 
   gen.increment_indent();
 
@@ -133,18 +124,16 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{}, ty.void_,
-      body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-          create<ast::WorkgroupDecoration>(2u, 4u, 6u),
-      });
+  auto* func =
+      Func("my_func", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::DiscardStatement>(),
+               create<ast::ReturnStatement>(),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+               create<ast::WorkgroupDecoration>(2u, 4u, 6u),
+           });
 
   gen.increment_indent();
 
@@ -198,41 +187,39 @@ TEST_F(WgslGeneratorImplTest,
   mod->AddGlobalVariable(data_var);
 
   {
-    ast::VariableList params;
     auto* var =
         Var("v", ast::StorageClass::kFunction, ty.f32,
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 
-    auto* body = create<ast::BlockStatement>(ast::StatementList{
-        create<ast::VariableDeclStatement>(var),
-        create<ast::ReturnStatement>(),
-    });
-    auto* func = create<ast::Function>(
-        mod->RegisterSymbol("a"), "a", params, ty.void_, body,
-        ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-        });
+    auto* func =
+        Func("a", ast::VariableList{}, ty.void_,
+             ast::StatementList{
+                 create<ast::VariableDeclStatement>(var),
+                 create<ast::ReturnStatement>(),
+             },
+             ast::FunctionDecorationList{
+                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             });
 
     mod->AddFunction(func);
   }
 
   {
-    ast::VariableList params;
     auto* var =
         Var("v", ast::StorageClass::kFunction, ty.f32,
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 
-    auto* body = create<ast::BlockStatement>(ast::StatementList{
-        create<ast::VariableDeclStatement>(var),
-        create<ast::ReturnStatement>(),
-    });
-    auto* func = create<ast::Function>(
-        mod->RegisterSymbol("b"), "b", params, ty.void_, body,
-        ast::FunctionDecorationList{
-            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-        });
+    auto* func =
+        Func("b", ast::VariableList{}, ty.void_,
+             ast::StatementList{
+                 create<ast::VariableDeclStatement>(var),
+                 create<ast::ReturnStatement>(),
+             },
+             ast::FunctionDecorationList{
+                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             });
 
     mod->AddFunction(func);
   }

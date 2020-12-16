@@ -459,10 +459,8 @@ if (_tint_tmp) {
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("foo"), "foo", ast::VariableList{}, ty.void_,
-      create<ast::BlockStatement>(ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("foo", ast::VariableList{}, ty.void_, ast::StatementList{},
+                    ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
   ast::ExpressionList params;

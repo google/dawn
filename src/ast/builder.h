@@ -581,6 +581,42 @@ class Builder {
     return mod->create<StructMemberOffsetDecoration>(source_, val);
   }
 
+  /// Creates a Function
+  /// @param source the source information
+  /// @param name the function name
+  /// @param params the function parameters
+  /// @param type the function return type
+  /// @param body the function body
+  /// @param decorations the function decorations
+  /// @returns the function pointer
+  Function* Func(Source source,
+                 std::string name,
+                 ast::VariableList params,
+                 type::Type* type,
+                 ast::StatementList body,
+                 ast::FunctionDecorationList decorations) {
+    return mod->create<ast::Function>(
+        source, mod->RegisterSymbol(name), name, params, type,
+        create<ast::BlockStatement>(body), decorations);
+  }
+
+  /// Creates a Function
+  /// @param name the function name
+  /// @param params the function parameters
+  /// @param type the function return type
+  /// @param body the function body
+  /// @param decorations the function decorations
+  /// @returns the function pointer
+  Function* Func(std::string name,
+                 ast::VariableList params,
+                 type::Type* type,
+                 ast::StatementList body,
+                 ast::FunctionDecorationList decorations) {
+    return create<ast::Function>(mod->RegisterSymbol(name), name, params, type,
+                                 create<ast::BlockStatement>(body),
+                                 decorations);
+  }
+
   /// Creates a StructMember
   /// @param name the struct member name
   /// @param type the struct member type

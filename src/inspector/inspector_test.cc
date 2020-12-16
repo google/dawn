@@ -81,14 +81,10 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @returns a function object
   ast::Function* MakeEmptyBodyFunction(
       std::string name,
-      ast::FunctionDecorationList decorations = {}) {
-    auto* body = create<ast::BlockStatement>(
-        Source{}, ast::StatementList{
-                      create<ast::ReturnStatement>(Source{}),
-                  });
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(name), name,
-                                 ast::VariableList(), ty.void_, body,
-                                 decorations);
+      ast::FunctionDecorationList decorations) {
+    return Func(name, ast::VariableList(), ty.void_,
+                ast::StatementList{create<ast::ReturnStatement>(Source{})},
+                decorations);
   }
 
   /// Generates a function that calls another
@@ -99,19 +95,18 @@ class InspectorHelper : public ast::BuilderWithModule {
   ast::Function* MakeCallerBodyFunction(
       std::string caller,
       std::string callee,
-      ast::FunctionDecorationList decorations = {}) {
+      ast::FunctionDecorationList decorations) {
     auto* ident_expr = create<ast::IdentifierExpression>(
         Source{}, mod->RegisterSymbol(callee), callee);
     auto* call_expr = create<ast::CallExpression>(Source{}, ident_expr,
                                                   ast::ExpressionList());
-    auto* body = create<ast::BlockStatement>(
-        Source{}, ast::StatementList{
-                      create<ast::CallStatement>(Source{}, call_expr),
-                      create<ast::ReturnStatement>(Source{}),
-                  });
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(caller), caller,
-                                 ast::VariableList(), ty.void_, body,
-                                 decorations);
+
+    return Func(caller, ast::VariableList(), ty.void_,
+                ast::StatementList{
+                    create<ast::CallStatement>(Source{}, call_expr),
+                    create<ast::ReturnStatement>(Source{}),
+                },
+                decorations);
   }
 
   /// Add In/Out variables to the global variables
@@ -152,7 +147,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   ast::Function* MakeInOutVariableBodyFunction(
       std::string name,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
-      ast::FunctionDecorationList decorations = {}) {
+      ast::FunctionDecorationList decorations) {
     ast::StatementList stmts;
     for (auto inout : inout_vars) {
       std::string in, out;
@@ -165,10 +160,7 @@ class InspectorHelper : public ast::BuilderWithModule {
                                             in)));
     }
     stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
-    auto* body = create<ast::BlockStatement>(Source{}, stmts);
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(name), name,
-                                 ast::VariableList(), ty.void_, body,
-                                 decorations);
+    return Func(name, ast::VariableList(), ty.void_, stmts, decorations);
   }
 
   /// Generates a function that references in/out variables and calls another
@@ -183,7 +175,7 @@ class InspectorHelper : public ast::BuilderWithModule {
       std::string caller,
       std::string callee,
       std::vector<std::tuple<std::string, std::string>> inout_vars,
-      ast::FunctionDecorationList decorations = {}) {
+      ast::FunctionDecorationList decorations) {
     ast::StatementList stmts;
     for (auto inout : inout_vars) {
       std::string in, out;
@@ -201,10 +193,8 @@ class InspectorHelper : public ast::BuilderWithModule {
                                                   ast::ExpressionList());
     stmts.emplace_back(create<ast::CallStatement>(Source{}, call_expr));
     stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
-    auto* body = create<ast::BlockStatement>(Source{}, stmts);
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(caller), caller,
-                                 ast::VariableList(), ty.void_, body,
-                                 decorations);
+
+    return Func(caller, ast::VariableList(), ty.void_, stmts, decorations);
   }
 
   /// Add a Constant ID to the global variables.
@@ -467,10 +457,9 @@ class InspectorHelper : public ast::BuilderWithModule {
     }
 
     stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
-    auto* body = create<ast::BlockStatement>(Source{}, stmts);
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(func_name),
-                                 func_name, ast::VariableList(), ty.void_, body,
-                                 ast::FunctionDecorationList{});
+
+    return Func(func_name, ast::VariableList(), ty.void_, stmts,
+                ast::FunctionDecorationList{});
   }
 
   /// Adds a regular sampler variable to the module
@@ -584,7 +573,7 @@ class InspectorHelper : public ast::BuilderWithModule {
       const std::string& sampler_name,
       const std::string& coords_name,
       ast::type::Type* base_type,
-      ast::FunctionDecorationList decorations = {}) {
+      ast::FunctionDecorationList decorations) {
     std::string result_name = "sampler_result";
 
     ast::StatementList stmts;
@@ -619,10 +608,7 @@ class InspectorHelper : public ast::BuilderWithModule {
         call_expr));
     stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
 
-    auto* body = create<ast::BlockStatement>(Source{}, stmts);
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(func_name),
-                                 func_name, ast::VariableList(), ty.void_, body,
-                                 decorations);
+    return Func(func_name, ast::VariableList(), ty.void_, stmts, decorations);
   }
 
   /// Generates a function that references a specific sampler variable
@@ -641,7 +627,7 @@ class InspectorHelper : public ast::BuilderWithModule {
       const std::string& coords_name,
       const std::string& array_index,
       ast::type::Type* base_type,
-      ast::FunctionDecorationList decorations = {}) {
+      ast::FunctionDecorationList decorations) {
     std::string result_name = "sampler_result";
 
     ast::StatementList stmts;
@@ -679,10 +665,7 @@ class InspectorHelper : public ast::BuilderWithModule {
         call_expr));
     stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
 
-    auto* body = create<ast::BlockStatement>(Source{}, stmts);
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(func_name),
-                                 func_name, ast::VariableList(), ty.void_, body,
-                                 decorations);
+    return Func(func_name, ast::VariableList(), ty.void_, stmts, decorations);
   }
 
   /// Generates a function that references a specific comparison sampler
@@ -702,7 +685,7 @@ class InspectorHelper : public ast::BuilderWithModule {
       const std::string& coords_name,
       const std::string& depth_name,
       ast::type::Type* base_type,
-      ast::FunctionDecorationList decorations = {}) {
+      ast::FunctionDecorationList decorations) {
     std::string result_name = "sampler_result";
 
     ast::StatementList stmts;
@@ -741,10 +724,7 @@ class InspectorHelper : public ast::BuilderWithModule {
         call_expr));
     stmts.emplace_back(create<ast::ReturnStatement>(Source{}));
 
-    auto* body = create<ast::BlockStatement>(Source{}, stmts);
-    return create<ast::Function>(Source{}, mod->RegisterSymbol(func_name),
-                                 func_name, ast::VariableList(), ty.void_, body,
-                                 decorations);
+    return Func(func_name, ast::VariableList(), ty.void_, stmts, decorations);
   }
 
   /// Gets an appropriate type for the data in a given texture type.
@@ -876,7 +856,7 @@ TEST_F(InspectorGetEntryPointTest, NoFunctions) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
-  mod->AddFunction(MakeEmptyBodyFunction("foo"));
+  mod->AddFunction(MakeEmptyBodyFunction("foo", {}));
 
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
@@ -933,7 +913,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
-  auto* func = MakeEmptyBodyFunction("func");
+  auto* func = MakeEmptyBodyFunction("func", {});
   mod->AddFunction(func);
 
   auto* foo = MakeCallerBodyFunction(
@@ -1004,7 +984,7 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
-  auto* func = MakeEmptyBodyFunction("func");
+  auto* func = MakeEmptyBodyFunction("func", {});
   mod->AddFunction(func);
 
   auto* foo = MakeCallerBodyFunction(
@@ -1048,7 +1028,8 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
 TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}});
 
-  auto* func = MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}});
+  auto* func =
+      MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
   mod->AddFunction(func);
 
   auto* foo = MakeCallerBodyFunction(
@@ -1074,7 +1055,8 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
 TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}});
 
-  auto* func = MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}});
+  auto* func =
+      MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
   mod->AddFunction(func);
 
   auto* foo = MakeInOutVariableCallerBodyFunction(
@@ -1126,7 +1108,7 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
   auto* func = MakeInOutVariableBodyFunction(
-      "func", {{"in_var", "out_var"}, {"in2_var", "out2_var"}});
+      "func", {{"in_var", "out_var"}, {"in2_var", "out2_var"}}, {});
   mod->AddFunction(func);
 
   auto* foo = MakeCallerBodyFunction(
@@ -1195,7 +1177,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
-  auto* func = MakeInOutVariableBodyFunction("func", {{"in2_var", "out2_var"}});
+  auto* func =
+      MakeInOutVariableBodyFunction("func", {{"in2_var", "out2_var"}}, {});
   mod->AddFunction(func);
 
   auto* foo = MakeInOutVariableCallerBodyFunction(
@@ -1250,7 +1233,7 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
-  mod->AddFunction(MakeEmptyBodyFunction("foo"));
+  mod->AddFunction(MakeEmptyBodyFunction("foo", {}));
 
   auto result = inspector()->GetRemappedNameForEntryPoint("foo");
   ASSERT_TRUE(inspector()->has_error());
@@ -1542,20 +1525,15 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
                                                   ast::ExpressionList());
     return create<ast::CallStatement>(Source{}, call_expr);
   };
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    FuncCall("ub_foo_func"),
-                    FuncCall("ub_bar_func"),
-                    FuncCall("ub_baz_func"),
-                    create<ast::ReturnStatement>(Source{}),
-                });
 
-  ast::Function* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("ep_func"), "ep_func", ast::VariableList(),
-      ty.void_, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
-      });
+  ast::Function* func =
+      Func("ep_func", ast::VariableList(), ty.void_,
+           ast::StatementList{FuncCall("ub_foo_func"), FuncCall("ub_bar_func"),
+                              FuncCall("ub_baz_func"),
+                              create<ast::ReturnStatement>()},
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
   mod->AddFunction(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
@@ -1690,17 +1668,15 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
                                                   ast::ExpressionList());
     return create<ast::CallStatement>(Source{}, call_expr);
   };
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    FuncCall("sb_foo_func"),
-                    FuncCall("sb_bar_func"),
-                    FuncCall("sb_baz_func"),
-                    create<ast::ReturnStatement>(Source{}),
-                });
 
-  ast::Function* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("ep_func"), "ep_func", ast::VariableList(),
-      ty.void_, body,
+  ast::Function* func = Func(
+      "ep_func", ast::VariableList(), ty.void_,
+      ast::StatementList{
+          FuncCall("sb_foo_func"),
+          FuncCall("sb_bar_func"),
+          FuncCall("sb_baz_func"),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
@@ -1865,17 +1841,15 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
                                                   ast::ExpressionList());
     return create<ast::CallStatement>(Source{}, call_expr);
   };
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    FuncCall("sb_foo_func"),
-                    FuncCall("sb_bar_func"),
-                    FuncCall("sb_baz_func"),
-                    create<ast::ReturnStatement>(Source{}),
-                });
 
-  ast::Function* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("ep_func"), "ep_func", ast::VariableList(),
-      ty.void_, body,
+  ast::Function* func = Func(
+      "ep_func", ast::VariableList(), ty.void_,
+      ast::StatementList{
+          FuncCall("sb_foo_func"),
+          FuncCall("sb_bar_func"),
+          FuncCall("sb_baz_func"),
+          create<ast::ReturnStatement>(Source{}),
+      },
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
@@ -2036,7 +2010,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
   AddGlobalVariable("foo_coords", ty.f32);
 
   auto* foo_func = MakeSamplerReferenceBodyFunction(
-      "foo_func", "foo_texture", "foo_sampler", "foo_coords", ty.f32);
+      "foo_func", "foo_texture", "foo_sampler", "foo_coords", ty.f32, {});
   mod->AddFunction(foo_func);
 
   auto* ep_func = MakeCallerBodyFunction(
@@ -2150,7 +2124,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
 
   auto* foo_func = MakeComparisonSamplerReferenceBodyFunction(
       "foo_func", "foo_texture", "foo_sampler", "foo_coords", "foo_depth",
-      ty.f32);
+      ty.f32, {});
   mod->AddFunction(foo_func);
 
   auto* ep_func = MakeCallerBodyFunction(

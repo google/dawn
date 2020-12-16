@@ -60,16 +60,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AddGlobalVariable(foo_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("vtx_main"), "vtx_main", params, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func("vtx_main", ast::VariableList{}, ty.f32,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
 
   mod->AddFunction(func);
 
@@ -111,17 +110,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AddGlobalVariable(foo_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
-
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("vtx_main"), "vtx_main", params, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func("vtx_main", ast::VariableList{}, ty.f32,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
 
   mod->AddFunction(func);
 
@@ -163,17 +160,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AddGlobalVariable(foo_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
-
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
 
   mod->AddFunction(func);
 
@@ -215,16 +210,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AddGlobalVariable(foo_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           });
 
   mod->AddFunction(func);
 
@@ -263,16 +257,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AddGlobalVariable(foo_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           });
 
   mod->AddFunction(func);
 
@@ -306,16 +299,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AddGlobalVariable(foo_var);
   mod->AddGlobalVariable(bar_var);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("main"), "main", params, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           });
 
   mod->AddFunction(func);
 
@@ -357,16 +349,15 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AddGlobalVariable(coord_var);
   mod->AddGlobalVariable(depth_var);
 
-  ast::VariableList params;
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"),
-                                       MemberAccessor("coord", "x")),
-  });
-  auto* func = create<ast::Function>(
-      mod->RegisterSymbol("main"), "main", params, ty.void_, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("depth"),
+                                                MemberAccessor("coord", "x")),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           });
 
   mod->AddFunction(func);
 

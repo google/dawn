@@ -352,13 +352,12 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
           });
   mod->AddGlobalVariable(fragdepth);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
-  });
-
-  auto* func = create<ast::Function>(
-      Source{}, mod->RegisterSymbol("main"), "main", ast::VariableList{},
-      create<ast::type::Void>(), body, ast::FunctionDecorationList{});
+  auto* func =
+      Func("main", ast::VariableList{}, create<ast::type::Void>(),
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
+           },
+           ast::FunctionDecorationList{});
 
   func->add_referenced_module_variable(fragdepth);
 
