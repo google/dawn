@@ -195,6 +195,31 @@ inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
   return o;
 }
 
+/// Reasons for avoiding generating an intermediate value.
+enum class SkipReason {
+  /// `kDontSkip`: The value should be generated. Used for most values.
+  kDontSkip,
+
+  /// For remaining cases, the value is not generated.
+
+  /// `kOpaqueObject`: used for any intermediate value which is an sampler,
+  /// image,
+  /// or sampled image, or any pointer to such object. Code is generated
+  /// for those objects only when emitting the image instructions that access
+  /// the image (read, write, sample, gather, fetch, or query). For example,
+  /// when encountering an OpImageSampleExplicitLod, a call to the
+  /// textureSampleLevel builtin function will be emitted, and the call will
+  /// directly reference the underlying texture and sampler (variable or
+  /// function parameter).
+  kOpaqueObject,
+
+  /// `kPointSizeBuiltin`: the value is a pointer to the Position builtin
+  /// variable.  Don't generate its address.  Avoid generating stores to
+  /// this pointer.  When loading from the pointer, yield the value 1,
+  /// the only supported value for PointSize.
+  kPointSizeBuiltin
+};
+
 /// Bookkeeping info for a SPIR-V ID defined in the function.
 /// This will be valid for result IDs for:
 /// - instructions that are not OpLabel, and not OpFunctionParameter
@@ -262,16 +287,7 @@ struct DefInfo {
   /// This is kNone for non-pointers.
   ast::StorageClass storage_class = ast::StorageClass::kNone;
 
-  /// Should this instruction be skipped when generating code?
-  /// This is true for any intermediate value which is an sampler, image,
-  /// or sampled image, or any pointer to such object. Code is generated
-  /// for those objects only when emitting the image instructions that access
-  /// the image (read, write, sample, gather, fetch, or query). For example,
-  /// when encountering an OpImageSampleExplicitLod, a call to the
-  /// textureSampleLevel builtin function will be emitted, and the call will
-  /// directly reference the underlying texture and sampler (variable or
-  /// function parameter).
-  bool skip_generation = false;
+  SkipReason skip = SkipReason::kDontSkip;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
@@ -284,6 +300,16 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     << " phi_var: '" << di.phi_var << "'";
   if (di.storage_class != ast::StorageClass::kNone) {
     o << " sc:" << int(di.storage_class);
+  }
+  switch (di.skip) {
+    case SkipReason::kDontSkip:
+      break;
+    case SkipReason::kOpaqueObject:
+      o << " skip:opaque";
+      break;
+    case SkipReason::kPointSizeBuiltin:
+      o << " skip:pointsize";
+      break;
   }
   o << "}";
   return o;

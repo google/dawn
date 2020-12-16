@@ -2859,7 +2859,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   // Handle combinatorial instructions.
   const auto* def_info = GetDefInfo(result_id);
   if (def_info) {
-    if (def_info->skip_generation) {
+    if (def_info->skip != SkipReason::kDontSkip) {
       return true;
     }
     auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
@@ -3532,13 +3532,13 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
                      << inst.PrettyPrint();
           }
           if (info->storage_class == ast::StorageClass::kUniformConstant) {
-            info->skip_generation = true;
+            info->skip = SkipReason::kOpaqueObject;
           }
         }
         if (type->AsSampler() || type->AsImage() || type->AsSampledImage()) {
           // Defer code generation until the instruction that actually acts on
           // the image.
-          info->skip_generation = true;
+          info->skip = SkipReason::kOpaqueObject;
         }
       }
     }
