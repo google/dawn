@@ -30,28 +30,21 @@ namespace {
 using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
-  StructMemberList members;
-  members.push_back(create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                         StructMemberDecorationList{}));
-
-  auto* s = create<Struct>(members, ast::StructDecorationList{});
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32)},
+                           StructDecorationList{});
   EXPECT_EQ(s->members().size(), 1u);
   EXPECT_TRUE(s->decorations().empty());
   EXPECT_EQ(s->source().range.begin.line, 0u);
   EXPECT_EQ(s->source().range.begin.column, 0u);
   EXPECT_EQ(s->source().range.end.line, 0u);
   EXPECT_EQ(s->source().range.end.column, 0u);
-}  // namespace
+}
 
 TEST_F(StructTest, Creation_WithDecorations) {
-  StructMemberList members;
-  members.push_back(create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                         StructMemberDecorationList{}));
-
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
 
-  auto* s = create<Struct>(members, decos);
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32)}, decos);
   EXPECT_EQ(s->members().size(), 1u);
   ASSERT_EQ(s->decorations().size(), 1u);
   EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
@@ -62,16 +55,12 @@ TEST_F(StructTest, Creation_WithDecorations) {
 }
 
 TEST_F(StructTest, CreationWithSourceAndDecorations) {
-  StructMemberList members;
-  members.emplace_back(create<StructMember>(
-      mod->RegisterSymbol("a"), "a", ty.i32, StructMemberDecorationList{}));
-
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
 
   auto* s = create<Struct>(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-      members, decos);
+      StructMemberList{Member("a", ty.i32)}, decos);
   EXPECT_EQ(s->members().size(), 1u);
   ASSERT_EQ(s->decorations().size(), 1u);
   EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
@@ -87,33 +76,21 @@ TEST_F(StructTest, IsValid) {
 }
 
 TEST_F(StructTest, IsValid_Null_StructMember) {
-  StructMemberList members;
-  members.push_back(create<StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                         StructMemberDecorationList{}));
-  members.push_back(nullptr);
-
-  auto* s = create<Struct>(members, ast::StructDecorationList{});
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32), nullptr},
+                           StructDecorationList{});
   EXPECT_FALSE(s->IsValid());
-}  // namespace ast
+}
 
 TEST_F(StructTest, IsValid_Invalid_StructMember) {
-  StructMemberList members;
-  members.push_back(create<StructMember>(mod->RegisterSymbol(""), "", ty.i32,
-                                         StructMemberDecorationList{}));
-
-  auto* s = create<Struct>(members, ast::StructDecorationList{});
+  auto* s = create<Struct>(StructMemberList{Member("", ty.i32)},
+                           ast::StructDecorationList{});
   EXPECT_FALSE(s->IsValid());
-}  // namespace tint
+}
 
 TEST_F(StructTest, ToStr) {
-  StructMemberList members;
-  members.emplace_back(create<StructMember>(
-      mod->RegisterSymbol("a"), "a", ty.i32, StructMemberDecorationList{}));
-
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
-
-  auto* s = create<Struct>(members, decos);
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32)}, decos);
 
   std::ostringstream out;
   s->to_str(out, 2);

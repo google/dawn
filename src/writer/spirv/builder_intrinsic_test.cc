@@ -1283,10 +1283,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   auto* s =
       create<ast::Struct>(ast::StructMemberList{Member("a", ty.array<f32>())},
                           ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
-
-  auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
-
+  auto* s_type = ty.struct_("my_struct", s);
+  auto* var = Var("b", ast::StorageClass::kPrivate, s_type);
   auto* expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
                                        Expr("b"), Expr("a")));
 
@@ -1321,9 +1319,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
       ast::StructMemberList{Member("z", ty.f32), Member("a", ty.array<f32>())},
       ast::StructDecorationList{});
 
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
-
-  auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
+  auto* s_type = ty.struct_("my_struct", s);
+  auto* var = Var("b", ast::StorageClass::kPrivate, s_type);
   auto* expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
                                        Expr("b"), Expr("a")));
 
@@ -1358,13 +1355,10 @@ TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   ast::type::Pointer ptr(ty.array<f32>(), ast::StorageClass::kStorageBuffer);
 
   auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.f32), Member("a", ty.array<f32>())
-
-      },
+      ast::StructMemberList{Member("z", ty.f32), Member("a", ty.array<f32>())},
       ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
-
-  auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
+  auto* s_type = ty.struct_("my_struct", s);
+  auto* var = Var("b", ast::StorageClass::kPrivate, s_type);
 
   Var("ptr_var", ast::StorageClass::kPrivate, &ptr,
       create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")), {});

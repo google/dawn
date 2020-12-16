@@ -33,12 +33,14 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
@@ -159,11 +161,26 @@ class TypesBuilder {
     return array(Of<T>(), N);
   }
 
+  /// Creates an alias type
+  /// @param name the alias name
+  /// @param type the alias type
+  /// @returns the alias pointer
+  type::Alias* alias(const std::string& name, type::Type* type) const {
+    return mod_->create<type::Alias>(mod_->RegisterSymbol(name), name, type);
+  }
+
   /// @return the tint AST pointer to type `T` with the given StorageClass.
   /// @param storage_class the storage class of the pointer
   template <typename T>
   type::Pointer* pointer(StorageClass storage_class) const {
     return mod_->create<type::Pointer>(Of<T>(), storage_class);
+  }
+
+  /// @param name the struct name
+  /// @param impl the struct implementation
+  /// @returns a struct pointer
+  type::Struct* struct_(const std::string& name, ast::Struct* impl) const {
+    return mod_->create<type::Struct>(mod_->RegisterSymbol(name), name, impl);
   }
 
  private:
@@ -211,6 +228,14 @@ class Builder {
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const std::string& name) {
     return create<IdentifierExpression>(mod->RegisterSymbol(name), name);
+  }
+
+  /// @param source the source information
+  /// @param name the identifier name
+  /// @return an IdentifierExpression with the given name
+  IdentifierExpression* Expr(const Source& source, const std::string& name) {
+    return create<IdentifierExpression>(source, mod->RegisterSymbol(name),
+                                        name);
   }
 
   /// @param name the identifier name
@@ -615,6 +640,18 @@ class Builder {
     return create<ast::Function>(mod->RegisterSymbol(name), name, params, type,
                                  create<ast::BlockStatement>(body),
                                  decorations);
+  }
+
+  /// Creates a StructMember
+  /// @param source the source information
+  /// @param name the struct member name
+  /// @param type the struct member type
+  /// @returns the struct member pointer
+  StructMember* Member(const Source& source,
+                       const std::string& name,
+                       type::Type* type) {
+    return mod->create<StructMember>(source, mod->RegisterSymbol(name), name,
+                                     type, StructMemberDecorationList{});
   }
 
   /// Creates a StructMember

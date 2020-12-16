@@ -39,16 +39,13 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionDecoration_Stage) {
-  ast::type::Void void_type;
-
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func = Func(
+      "main", {}, ty.void_, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.entry_points()),
             R"(OpEntryPoint Vertex %3 "main"
 )");
@@ -66,16 +63,12 @@ using FunctionDecoration_StageTest = TestParamHelper<FunctionStageData>;
 TEST_P(FunctionDecoration_StageTest, Emit) {
   auto params = GetParam();
 
-  ast::type::Void void_type;
+  auto* func = Func("main", {}, ty.void_, ast::StatementList{},
+                    ast::FunctionDecorationList{
+                        create<ast::StageDecoration>(Source{}, params.stage),
+                    });
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, params.stage),
-      });
-
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   auto preamble = b.entry_points();
   ASSERT_GE(preamble.size(), 1u);
@@ -98,37 +91,15 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   ast::type::F32 f32;
   ast::type::Void void_type;
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func = Func(
+      "main", {}, ty.void_, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
-  auto* v_in =
-      create<ast::Variable>(Source{},                        // source
-                            "my_in",                         // name
-                            ast::StorageClass::kInput,       // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* v_out =
-      create<ast::Variable>(Source{},                        // source
-                            "my_out",                        // name
-                            ast::StorageClass::kOutput,      // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* v_wg =
-      create<ast::Variable>(Source{},                        // source
-                            "my_wg",                         // name
-                            ast::StorageClass::kWorkgroup,   // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32);
+  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32);
+  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32);
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
@@ -138,7 +109,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   mod->AddGlobalVariable(v_out);
   mod->AddGlobalVariable(v_wg);
 
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
 OpName %4 "my_out"
 OpName %7 "my_wg"
@@ -161,69 +132,29 @@ OpName %11 "main"
 }
 
 TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
-  ast::type::F32 f32;
-  ast::type::Void void_type;
-
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("my_out"), "my_out"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("my_in"), "my_in")),
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("my_wg"), "my_wg"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("my_wg"), "my_wg")),
-                    // Add duplicate usages so we show they don't get output
-                    // multiple times.
-                    create<ast::AssignmentStatement>(
-                        Source{},
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("my_out"), "my_out"),
-                        create<ast::IdentifierExpression>(
-                            Source{}, mod->RegisterSymbol("my_in"), "my_in")),
-                });
-
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type, body,
+  auto* func = Func(
+      "main", {}, ty.void_,
+      ast::StatementList{create<ast::AssignmentStatement>(
+                             Source{}, Expr("my_out"), Expr("my_in")),
+                         create<ast::AssignmentStatement>(
+                             Source{}, Expr("my_wg"), Expr("my_wg")),
+                         // Add duplicate usages so we show they don't get
+                         // output multiple times.
+                         create<ast::AssignmentStatement>(
+                             Source{}, Expr("my_out"), Expr("my_in"))},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
       });
 
-  auto* v_in =
-      create<ast::Variable>(Source{},                        // source
-                            "my_in",                         // name
-                            ast::StorageClass::kInput,       // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* v_out =
-      create<ast::Variable>(Source{},                        // source
-                            "my_out",                        // name
-                            ast::StorageClass::kOutput,      // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* v_wg =
-      create<ast::Variable>(Source{},                        // source
-                            "my_wg",                         // name
-                            ast::StorageClass::kWorkgroup,   // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32);
+  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32);
+  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32);
 
   td.RegisterVariableForTesting(v_in);
   td.RegisterVariableForTesting(v_out);
   td.RegisterVariableForTesting(v_wg);
 
-  ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
+  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
@@ -233,7 +164,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   mod->AddGlobalVariable(v_out);
   mod->AddGlobalVariable(v_wg);
 
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
 OpName %4 "my_out"
 OpName %7 "my_wg"
@@ -256,73 +187,60 @@ OpName %11 "main"
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
-  ast::type::Void void_type;
-
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func = Func(
+      "main", {}, ty.void_, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
-  ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
+  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 OriginUpperLeft
 )");
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize_Default) {
-  ast::type::Void void_type;
-
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func = Func(
+      "main", {}, ty.void_, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
 
-  ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
+  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 LocalSize 1 1 1
 )");
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize) {
-  ast::type::Void void_type;
-
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func = Func(
+      "main", {}, ty.void_, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::WorkgroupDecoration>(Source{}, 2u, 4u, 6u),
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
       });
 
-  ASSERT_TRUE(b.GenerateExecutionModes(&func, 3)) << b.error();
+  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 LocalSize 2 4 6
 )");
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
-  ast::type::Void void_type;
-
-  ast::Function func1(
-      Source{}, mod->RegisterSymbol("main1"), "main1", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func1 = Func(
+      "main1", {}, ty.void_, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
-  ast::Function func2(
-      Source{}, mod->RegisterSymbol("main2"), "main2", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* func2 = Func(
+      "main2", {}, ty.void_, ast::StatementList{},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
       });
 
-  ASSERT_TRUE(b.GenerateFunction(&func1)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func2)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func1)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func2)) << b.error();
   EXPECT_EQ(DumpBuilder(b),
             R"(OpEntryPoint Fragment %3 "main1"
 OpEntryPoint Fragment %5 "main2"
@@ -345,15 +263,14 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
   auto* fragdepth =
-      Var("fragdepth", ast::StorageClass::kOutput, create<ast::type::F32>(),
-          nullptr,
+      Var("fragdepth", ast::StorageClass::kOutput, ty.f32, nullptr,
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
           });
   mod->AddGlobalVariable(fragdepth);
 
   auto* func =
-      Func("main", ast::VariableList{}, create<ast::type::Void>(),
+      Func("main", ast::VariableList{}, ty.void_,
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
            },

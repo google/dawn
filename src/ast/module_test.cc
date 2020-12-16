@@ -32,122 +32,91 @@ namespace {
 using ModuleTest = TestHelper;
 
 TEST_F(ModuleTest, Creation) {
-  Module m;
-
-  EXPECT_EQ(m.functions().size(), 0u);
+  EXPECT_EQ(mod->functions().size(), 0u);
 }
 
 TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
-  Module m;
-  const auto str = m.to_str();
+  const auto str = mod->to_str();
   auto* const expected = "Module{\n}\n";
   EXPECT_EQ(str, expected);
 }
 
 TEST_F(ModuleTest, LookupFunction) {
-  Module m;
-
-  auto func_sym = m.RegisterSymbol("main");
-  auto* func = create<Function>(func_sym, "main", VariableList{}, ty.f32,
-                                create<BlockStatement>(StatementList{}),
-                                ast::FunctionDecorationList{});
-  m.AddFunction(func);
-  EXPECT_EQ(func, m.FindFunctionBySymbol(func_sym));
+  auto* func = Func("main", VariableList{}, ty.f32, StatementList{},
+                    ast::FunctionDecorationList{});
+  mod->AddFunction(func);
+  EXPECT_EQ(func, mod->FindFunctionBySymbol(mod->RegisterSymbol("main")));
 }
 
 TEST_F(ModuleTest, LookupFunctionMissing) {
-  Module m;
-  EXPECT_EQ(nullptr, m.FindFunctionBySymbol(m.RegisterSymbol("Missing")));
+  EXPECT_EQ(nullptr, mod->FindFunctionBySymbol(mod->RegisterSymbol("Missing")));
 }
 
 TEST_F(ModuleTest, IsValid_Empty) {
-  Module m;
-  EXPECT_TRUE(m.IsValid());
+  EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_GlobalVariable) {
-  auto* var = create<Variable>("var", StorageClass::kInput, ty.f32, false,
-                               nullptr, ast::VariableDecorationList{});
-
-  Module m;
-  m.AddGlobalVariable(var);
-  EXPECT_TRUE(m.IsValid());
+  auto* var = Var("var", StorageClass::kInput, ty.f32);
+  mod->AddGlobalVariable(var);
+  EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Null_GlobalVariable) {
-  Module m;
-  m.AddGlobalVariable(nullptr);
-  EXPECT_FALSE(m.IsValid());
+  mod->AddGlobalVariable(nullptr);
+  EXPECT_FALSE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
-  auto* var = create<Variable>("var", StorageClass::kInput, nullptr, false,
-                               nullptr, ast::VariableDecorationList{});
-
-  Module m;
-  m.AddGlobalVariable(var);
-  EXPECT_FALSE(m.IsValid());
+  auto* var = Var("var", StorageClass::kInput, nullptr);
+  mod->AddGlobalVariable(var);
+  EXPECT_FALSE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Alias) {
-  type::Alias alias(mod->RegisterSymbol("alias"), "alias", ty.f32);
-
-  Module m;
-  m.AddConstructedType(&alias);
-  EXPECT_TRUE(m.IsValid());
+  auto* alias = ty.alias("alias", ty.f32);
+  mod->AddConstructedType(alias);
+  EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Null_Alias) {
-  Module m;
-  m.AddConstructedType(nullptr);
-  EXPECT_FALSE(m.IsValid());
+  mod->AddConstructedType(nullptr);
+  EXPECT_FALSE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Struct) {
-  type::Struct st(mod->RegisterSymbol("name"), "name", {});
-  type::Alias alias(mod->RegisterSymbol("name"), "name", &st);
-
-  Module m;
-  m.AddConstructedType(&alias);
-  EXPECT_TRUE(m.IsValid());
+  auto* st = ty.struct_("name", {});
+  auto* alias = ty.alias("name", st);
+  mod->AddConstructedType(alias);
+  EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
-  type::Struct st(mod->RegisterSymbol(""), "", {});
-  type::Alias alias(mod->RegisterSymbol("name"), "name", &st);
-
-  Module m;
-  m.AddConstructedType(&alias);
-  EXPECT_FALSE(m.IsValid());
+  auto* st = ty.struct_("", {});
+  auto* alias = ty.alias("name", st);
+  mod->AddConstructedType(alias);
+  EXPECT_FALSE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Function) {
-  Module m;
+  auto* func = Func("main", VariableList(), ty.f32, StatementList{},
+                    ast::FunctionDecorationList{});
 
-  auto* func = create<Function>(
-      m.RegisterSymbol("main"), "main", VariableList(), ty.f32,
-      create<BlockStatement>(StatementList{}), ast::FunctionDecorationList{});
-
-  m.AddFunction(func);
-  EXPECT_TRUE(m.IsValid());
+  mod->AddFunction(func);
+  EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Null_Function) {
-  Module m;
-  m.AddFunction(nullptr);
-  EXPECT_FALSE(m.IsValid());
+  mod->AddFunction(nullptr);
+  EXPECT_FALSE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_Function) {
-  VariableList p;
+  auto* func = Func("main", VariableList{}, nullptr, StatementList{},
+                    ast::FunctionDecorationList{});
 
-  Module m;
-
-  auto* func = create<Function>(m.RegisterSymbol("main"), "main", p, nullptr,
-                                nullptr, ast::FunctionDecorationList{});
-
-  m.AddFunction(func);
-  EXPECT_FALSE(m.IsValid());
+  mod->AddFunction(func);
+  EXPECT_FALSE(mod->IsValid());
 }
 
 }  // namespace

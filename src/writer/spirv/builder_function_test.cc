@@ -46,13 +46,10 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-  ast::type::Void void_type;
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.void_, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
-  ASSERT_TRUE(b.GenerateFunction(&func));
+  ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -64,16 +61,13 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Return) {
-  ast::type::Void void_type;
+  auto* func = Func("a_func", {}, ty.void_,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(Source{}),
+                    },
+                    ast::FunctionDecorationList{});
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &void_type, body, ast::FunctionDecorationList{});
-
-  ASSERT_TRUE(b.GenerateFunction(&func));
+  ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -85,32 +79,16 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-  ast::type::Void void_type;
-  ast::type::F32 f32;
-
-  auto* var_a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var_a = Var("a", ast::StorageClass::kPrivate, ty.f32);
   td.RegisterVariableForTesting(var_a);
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(
-                        Source{}, create<ast::IdentifierExpression>(
-                                      Source{}, mod->RegisterSymbol("a"), "a")),
-                });
-  ASSERT_TRUE(td.DetermineResultType(body)) << td.error();
+  auto* func = Func("a_func", {}, ty.void_,
+                    ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
+                    ast::FunctionDecorationList{});
 
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &void_type, body, ast::FunctionDecorationList{});
-
+  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
 OpName %7 "a_func"
 %3 = OpTypeFloat 32
@@ -128,16 +106,13 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Discard) {
-  ast::type::Void void_type;
+  auto* func = Func("a_func", {}, ty.void_,
+                    ast::StatementList{
+                        create<ast::DiscardStatement>(Source{}),
+                    },
+                    ast::FunctionDecorationList{});
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::DiscardStatement>(Source{}),
-                });
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &void_type, body, ast::FunctionDecorationList{});
-
-  ASSERT_TRUE(b.GenerateFunction(&func));
+  ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -149,42 +124,18 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithParams) {
-  ast::type::Void void_type;
-  ast::type::F32 f32;
-  ast::type::I32 i32;
+  ast::VariableList params = {Var("a", ast::StorageClass::kFunction, ty.f32),
+                              Var("b", ast::StorageClass::kFunction, ty.i32)};
 
-  ast::VariableList params = {
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &f32,                            // type
-                            true,                            // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{}),  // decorations
+  auto* func = Func("a_func", params, ty.f32,
+                    ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
+                    ast::FunctionDecorationList{});
 
-      create<ast::Variable>(Source{},                        // source
-                            "b",                             // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &i32,                            // type
-                            true,                            // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{}),  // decorations
-  };
+  td.RegisterVariableForTesting(func->params()[0]);
+  td.RegisterVariableForTesting(func->params()[1]);
+  EXPECT_TRUE(td.DetermineFunction(func));
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(
-                        Source{}, create<ast::IdentifierExpression>(
-                                      Source{}, mod->RegisterSymbol("a"), "a")),
-                });
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", params,
-                     &f32, body, ast::FunctionDecorationList{});
-
-  td.RegisterVariableForTesting(func.params()[0]);
-  td.RegisterVariableForTesting(func.params()[1]);
-  EXPECT_TRUE(td.DetermineFunction(&func));
-
-  ASSERT_TRUE(b.GenerateFunction(&func));
+  ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
 OpName %5 "a"
 OpName %6 "b"
@@ -195,22 +146,20 @@ OpName %6 "b"
 %5 = OpFunctionParameter %2
 %6 = OpFunctionParameter %3
 %7 = OpLabel
-OpReturnValue %5
+%8 = OpLoad %2 %5
+OpReturnValue %8
 OpFunctionEnd
 )") << DumpBuilder(b);
 }
 
 TEST_F(BuilderTest, Function_WithBody) {
-  ast::type::Void void_type;
+  auto* func = Func("a_func", {}, ty.void_,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(Source{}),
+                    },
+                    ast::FunctionDecorationList{});
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
-  ast::Function func(Source{}, mod->RegisterSymbol("a_func"), "a_func", {},
-                     &void_type, body, ast::FunctionDecorationList{});
-
-  ASSERT_TRUE(b.GenerateFunction(&func));
+  ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -222,31 +171,23 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-  ast::type::Void void_type;
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.void_, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
-  ASSERT_TRUE(b.GenerateFunction(&func));
+  ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 )");
 }
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
-  ast::type::Void void_type;
-  ast::Function func1(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
-  ast::Function func2(
-      Source{}, mod->RegisterSymbol("b_func"), "b_func", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func1 = Func("a_func", {}, ty.void_, ast::StatementList{},
+                     ast::FunctionDecorationList{});
+  auto* func2 = Func("b_func", {}, ty.void_, ast::StatementList{},
+                     ast::FunctionDecorationList{});
 
-  ASSERT_TRUE(b.GenerateFunction(&func1));
-  ASSERT_TRUE(b.GenerateFunction(&func2));
+  ASSERT_TRUE(b.GenerateFunction(func1));
+  ASSERT_TRUE(b.GenerateFunction(func2));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 )");
@@ -269,52 +210,31 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   //   return;
   // }
 
-  ast::type::Void void_type;
-
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
+  auto* s = ty.struct_("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  auto* data_var =
-      create<ast::Variable>(Source{},                           // source
-                            "data",                             // name
-                            ast::StorageClass::kStorageBuffer,  // storage_class
-                            &ac,                                // type
-                            false,                              // is_const
-                            nullptr,                            // constructor
-                            ast::VariableDecorationList{
-                                // decorations
-                                create<ast::BindingDecoration>(Source{}, 0),
-                                create<ast::SetDecoration>(Source{}, 0),
-                            });
+  auto* data_var = Var("data", ast::StorageClass::kStorageBuffer, &ac, nullptr,
+                       ast::VariableDecorationList{
+                           create<ast::BindingDecoration>(Source{}, 0),
+                           create<ast::SetDecoration>(Source{}, 0),
+                       });
 
-  mod->AddConstructedType(&s);
+  mod->AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
   mod->AddGlobalVariable(data_var);
 
   {
-    auto* var = create<ast::Variable>(
-        Source{},                      // source
-        "v",                           // name
-        ast::StorageClass::kFunction,  // storage_class
-        ty.f32,                        // type
-        false,                         // is_const
-        create<ast::MemberAccessorExpression>(
-            Source{},
-            create<ast::IdentifierExpression>(
-                Source{}, mod->RegisterSymbol("data"), "data"),
-            create<ast::IdentifierExpression>(Source{},
-                                              mod->RegisterSymbol("d"),
-                                              "d")),  // constructor
-        ast::VariableDecorationList{});               // decorations
+    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
+                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func = Func("a", ast::VariableList{}, &void_type,
+    auto* func = Func("a", ast::VariableList{}, ty.void_,
                       ast::StatementList{
                           create<ast::VariableDeclStatement>(Source{}, var),
                           create<ast::ReturnStatement>(Source{}),
@@ -328,22 +248,10 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   }
 
   {
-    auto* var = create<ast::Variable>(
-        Source{},                      // source
-        "v",                           // name
-        ast::StorageClass::kFunction,  // storage_class
-        ty.f32,                        // type
-        false,                         // is_const
-        create<ast::MemberAccessorExpression>(
-            Source{},
-            create<ast::IdentifierExpression>(
-                Source{}, mod->RegisterSymbol("data"), "data"),
-            create<ast::IdentifierExpression>(Source{},
-                                              mod->RegisterSymbol("d"),
-                                              "d")),  // constructor
-        ast::VariableDecorationList{});               // decorations
+    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
+                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func = Func("b", ast::VariableList{}, &void_type,
+    auto* func = Func("b", ast::VariableList{}, ty.void_,
                       ast::StatementList{
                           create<ast::VariableDeclStatement>(Source{}, var),
                           create<ast::ReturnStatement>(Source{}),

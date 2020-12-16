@@ -38,27 +38,16 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-
-  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
-
+  auto* init = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, true, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
                   ast::VariableDecorationList{});
+  td.RegisterVariableForTesting(v);
 
-  td.RegisterVariableForTesting(&v);
-
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -68,21 +57,17 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
-                  nullptr, ast::VariableDecorationList{});
-
-  td.RegisterVariableForTesting(&v);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
+  td.RegisterVariableForTesting(v);
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -91,32 +76,22 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 %1 = OpVariable %2 Output %4
 )");
 
-  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-
-  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
-
+  auto* init = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, true, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
                   ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(&v);
+  td.RegisterVariableForTesting(v);
 
-  EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -126,20 +101,17 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "var", ast::StorageClass::kNone, &f32, false,
-                  nullptr, ast::VariableDecorationList{});
-
-  td.RegisterVariableForTesting(&v);
+  auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
+  td.RegisterVariableForTesting(v);
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -152,32 +124,23 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
             R"(%1 = OpVariable %2 Function %4
 )");
 
-  ast::IdentifierExpression expr(Source{}, mod->RegisterSymbol("var"), "var");
-  ASSERT_TRUE(td.DetermineResultType(&expr));
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-  ast::type::I32 i32;
+  auto* var = Var("var", ast::StorageClass::kPrivate, ty.i32);
+  td.RegisterVariableForTesting(var);
 
-  ast::Variable var(Source{}, "var", ast::StorageClass::kPrivate, &i32, false,
-                    nullptr, ast::VariableDecorationList{});
-
-  td.RegisterVariableForTesting(&var);
-
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("var"), "var");
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("var"), "var");
-
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kAdd, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Add("var", "var");
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 7u) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 7u)
+      << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -191,28 +154,18 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-  ast::type::I32 i32;
-
-  ast::Variable var(Source{}, "var", ast::StorageClass::kNone, &i32, true,
-                    create<ast::ScalarConstructorExpression>(
-                        Source{}, create<ast::SintLiteral>(Source{}, &i32, 2)),
+  auto* var = Const("var", ast::StorageClass::kNone, ty.i32, Expr(2),
                     ast::VariableDecorationList{});
+  td.RegisterVariableForTesting(var);
 
-  td.RegisterVariableForTesting(&var);
-
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("var"), "var");
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("var"), "var");
-
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kAdd, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = Add("var", "var");
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 3u) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 3u)
+      << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 2
 )");

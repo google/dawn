@@ -44,10 +44,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
       ast::StructMemberList{Member("mem", ty.f32, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Str"), "Str", strct);
-
-  auto* str_var = Var("str", ast::StorageClass::kPrivate, &s);
-
+  auto* s = ty.struct_("Str", strct);
+  auto* str_var = Var("str", ast::StorageClass::kPrivate, s);
   auto* expr = MemberAccessor("str", "mem");
 
   td.RegisterVariableForTesting(str_var);
@@ -75,8 +73,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
   auto* expr = MemberAccessor("data", "b");
 
   td.RegisterVariableForTesting(coord_var);
@@ -105,8 +103,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
   auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -138,11 +136,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("a", ty.mat2x3<f32>(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
+  auto* s = ty.struct_("Data", str);
   auto* b_var = Var("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr("b");
@@ -185,9 +181,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("a", ty.mat2x3<f32>(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
@@ -227,9 +222,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("a", ty.mat3x2<f32>(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   auto* expr = MemberAccessor("data", "a");
 
@@ -268,8 +262,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
   auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -300,8 +294,8 @@ TEST_F(
       ast::StructMemberList{Member("a", ty.mat3x3<f32>(), {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
   auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -333,8 +327,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("a", ty.mat4x3<f32>(), {MemberOffset(16)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
   auto* expr = IndexAccessor(
       IndexAccessor(MemberAccessor("data", "a"), Expr(2)), Expr(1));
 
@@ -366,8 +360,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
   auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
 
   td.RegisterVariableForTesting(coord_var);
@@ -398,8 +392,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
   auto* expr = IndexAccessor(MemberAccessor("data", "a"),
                              Sub(Add(Expr(2), Expr(4)), Expr(3)));
 
@@ -430,8 +424,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -468,9 +462,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -504,8 +497,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -539,8 +532,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.vec3<f32>(), {MemberOffset(16)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -571,9 +564,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.vec3<f32>(), {MemberOffset(16)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
+  auto* s = ty.struct_("Data", str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -615,9 +607,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
-
-  ast::type::Array ary(&data, 4,
+  auto* data = ty.struct_("Data", data_str);
+  ast::type::Array ary(data, 4,
                        ast::ArrayDecorationList{
                            create<ast::StrideDecoration>(32),
                        });
@@ -626,9 +617,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
+  auto* pre_struct = ty.struct_("Pre", pre_str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -666,18 +656,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
-
+  auto* data = ty.struct_("Data", data_str);
   ast::type::Array ary(
-      &data, 4, ast::ArrayDecorationList{create<ast::StrideDecoration>(32)});
+      data, 4, ast::ArrayDecorationList{create<ast::StrideDecoration>(32)});
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
+  auto* pre_struct = ty.struct_("Pre", pre_str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -717,9 +705,8 @@ TEST_F(
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
-
-  ast::type::Array ary(&data, 4,
+  auto* data = ty.struct_("Data", data_str);
+  ast::type::Array ary(data, 4,
                        ast::ArrayDecorationList{
                            create<ast::StrideDecoration>(32),
                        });
@@ -728,9 +715,8 @@ TEST_F(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
+  auto* pre_struct = ty.struct_("Pre", pre_str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -769,9 +755,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
-
-  ast::type::Array ary(&data, 4,
+  auto* data = ty.struct_("Data", data_str);
+  ast::type::Array ary(data, 4,
                        ast::ArrayDecorationList{
                            create<ast::StrideDecoration>(32),
                        });
@@ -780,9 +765,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
+  auto* pre_struct = ty.struct_("Pre", pre_str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -821,9 +805,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
-
-  ast::type::Array ary(&data, 4,
+  auto* data = ty.struct_("Data", data_str);
+  ast::type::Array ary(data, 4,
                        ast::ArrayDecorationList{
                            create<ast::StrideDecoration>(32),
                        });
@@ -832,9 +815,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
+  auto* pre_struct = ty.struct_("Pre", pre_str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -877,9 +859,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct data(mod->RegisterSymbol("Data"), "Data", data_str);
-
-  ast::type::Array ary(&data, 4,
+  auto* data = ty.struct_("Data", data_str);
+  ast::type::Array ary(data, 4,
                        ast::ArrayDecorationList{
                            create<ast::StrideDecoration>(32),
                        });
@@ -888,9 +869,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct pre_struct(mod->RegisterSymbol("Pre"), "Pre", pre_str);
-
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &pre_struct);
+  auto* pre_struct = ty.struct_("Pre", pre_str);
+  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);

@@ -61,30 +61,15 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, Loop_WithoutContinuing) {
-  ast::type::I32 i32;
-
   // loop {
   //   v = 2;
   // }
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
 
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
+
   ast::LoopStatement loop(
       Source{}, body,
       create<ast::BlockStatement>(Source{}, ast::StatementList{}));
@@ -125,35 +110,14 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   //   }
   // }
 
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
   auto* continuing = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(3))});
+
   ast::LoopStatement loop(Source{}, body, continuing);
 
   td.RegisterVariableForTesting(var);

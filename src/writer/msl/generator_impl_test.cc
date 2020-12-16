@@ -48,13 +48,11 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Generate) {
-  ast::type::Void void_type;
-
-  auto* func = Func(
-      "my_func", ast::VariableList{}, &void_type, ast::StatementList{},
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
-      });
+  auto* func =
+      Func("my_func", ast::VariableList{}, ty.void_, ast::StatementList{},
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           });
   mod->AddFunction(func);
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
@@ -77,10 +75,7 @@ TEST_F(MslGeneratorImplTest, InputStructName_ConflictWithExisting) {
 
 TEST_F(MslGeneratorImplTest, NameConflictWith_InputStructName) {
   ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
-
-  ast::IdentifierExpression ident(Source{}, mod->RegisterSymbol("func_main_in"),
-                                  "func_main_in");
-  ASSERT_TRUE(gen.EmitIdentifier(&ident));
+  ASSERT_TRUE(gen.EmitIdentifier(Expr("func_main_in")));
   EXPECT_EQ(gen.result(), "func_main_in_0");
 }
 
@@ -116,9 +111,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    "thread_position_in_grid"}));
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_alias) {
-  ast::type::F32 f32;
-  ast::type::Alias alias(mod->RegisterSymbol("a"), "a", &f32);
-  EXPECT_EQ(4u, gen.calculate_alignment_size(&alias));
+  auto* alias = ty.alias("a", ty.f32);
+  EXPECT_EQ(4u, gen.calculate_alignment_size(alias));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_array) {
@@ -161,9 +155,8 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
                             Member("c", ty.f32, {MemberOffset(128)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  EXPECT_EQ(132u, gen.calculate_alignment_size(&s));
+  auto* s = ty.struct_("S", str);
+  EXPECT_EQ(132u, gen.calculate_alignment_size(s));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
@@ -173,17 +166,16 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
                             Member("c", ty.f32, {MemberOffset(32)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct inner_s(mod->RegisterSymbol("Inner"), "Inner", inner_str);
+  auto* inner_s = ty.struct_("Inner", inner_str);
 
   auto* outer_str = create<ast::Struct>(
       ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)}),
-                            Member("e", &inner_s, {MemberOffset(32)}),
+                            Member("e", inner_s, {MemberOffset(32)}),
                             Member("f", ty.f32, {MemberOffset(64)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct outer_s(mod->RegisterSymbol("Outer"), "Outer", outer_str);
-
-  EXPECT_EQ(80u, gen.calculate_alignment_size(&outer_s));
+  auto* outer_s = ty.struct_("Outer", outer_str);
+  EXPECT_EQ(80u, gen.calculate_alignment_size(outer_s));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_u32) {

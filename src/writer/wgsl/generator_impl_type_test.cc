@@ -48,9 +48,9 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
-  ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", ty.f32);
+  auto* alias = ty.alias("alias", ty.f32);
 
-  ASSERT_TRUE(gen.EmitType(&alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), "alias");
 }
 
@@ -66,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
 
   auto* str =
       create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)}, decos);
-  auto* s = create<ast::type::Struct>(mod->RegisterSymbol("S"), "S", str);
+  auto* s = ty.struct_("S", str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadOnly, s);
 
@@ -81,7 +81,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
 
   auto* str =
       create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)}, decos);
-  auto* s = create<ast::type::Struct>(mod->RegisterSymbol("S"), "S", str);
+  auto* s = ty.struct_("S", str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadWrite, s);
 
@@ -150,9 +150,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitType(&s)) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitType(s)) << gen.error();
   EXPECT_EQ(gen.result(), "S");
 }
 
@@ -162,9 +161,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   a : i32;
   [[offset(4)]]
@@ -182,9 +180,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
                             Member("b", ty.f32, {MemberOffset(4)})},
       decos);
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]
 struct S {
   a : i32;

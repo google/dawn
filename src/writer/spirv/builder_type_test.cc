@@ -52,10 +52,8 @@ namespace {
 using BuilderTest_Type = TestHelper;
 
 TEST_F(BuilderTest_Type, GenerateAlias) {
-  ast::type::F32 f32;
-  ast::type::Alias alias_type(mod->RegisterSymbol("my_type"), "my_type", &f32);
-
-  auto id = b.GenerateTypeIfNeeded(&alias_type);
+  auto* alias_type = ty.alias("my_type", ty.f32);
+  auto id = b.GenerateTypeIfNeeded(alias_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -65,24 +63,20 @@ TEST_F(BuilderTest_Type, GenerateAlias) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Alias alias_type(mod->RegisterSymbol("my_type"), "my_type", &f32);
+  auto* alias_type = ty.alias("my_type", ty.f32);
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
-  ast::type::I32 i32;
-  ast::type::Array ary(&i32, 0, ast::ArrayDecorationList{});
-
+  ast::type::Array ary(ty.i32, 0, ast::ArrayDecorationList{});
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -93,8 +87,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
-  ast::type::I32 i32;
-  ast::type::Array ary(&i32, 0, ast::ArrayDecorationList{});
+  ast::type::Array ary(ty.i32, 0, ast::ArrayDecorationList{});
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
@@ -106,9 +99,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray) {
-  ast::type::I32 i32;
-  ast::type::Array ary(&i32, 4, ast::ArrayDecorationList{});
-
+  ast::type::Array ary(ty.i32, 4, ast::ArrayDecorationList{});
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -121,9 +112,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
-  ast::type::I32 i32;
-
-  ast::type::Array ary(&i32, 4,
+  ast::type::Array ary(ty.i32, 4,
                        ast::ArrayDecorationList{
                            create<ast::StrideDecoration>(Source{}, 16u),
                        });
@@ -143,8 +132,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
-  ast::type::I32 i32;
-  ast::type::Array ary(&i32, 4, ast::ArrayDecorationList{});
+  ast::type::Array ary(ty.i32, 4, ast::ArrayDecorationList{});
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
@@ -158,9 +146,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateBool) {
-  ast::type::Bool bool_type;
-
-  auto id = b.GenerateTypeIfNeeded(&bool_type);
+  auto id = b.GenerateTypeIfNeeded(ty.bool_);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -170,21 +156,16 @@ TEST_F(BuilderTest_Type, GenerateBool) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
-  ast::type::I32 i32;
-  ast::type::Bool bool_type;
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&bool_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.bool_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&bool_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.bool_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateF32) {
-  ast::type::F32 f32;
-
-  auto id = b.GenerateTypeIfNeeded(&f32);
+  auto id = b.GenerateTypeIfNeeded(ty.f32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -194,21 +175,16 @@ TEST_F(BuilderTest_Type, GenerateF32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateI32) {
-  ast::type::I32 i32;
-
-  auto id = b.GenerateTypeIfNeeded(&i32);
+  auto id = b.GenerateTypeIfNeeded(ty.i32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -218,22 +194,16 @@ TEST_F(BuilderTest_Type, GenerateI32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateMatrix) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat_type(&f32, 3, 2);
-
-  auto id = b.GenerateTypeIfNeeded(&mat_type);
+  auto id = b.GenerateTypeIfNeeded(ty.mat2x3<f32>());
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -245,21 +215,17 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
-  ast::type::I32 i32;
-  ast::type::Matrix mat_type(&i32, 3, 4);
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1u);
+  auto* mat = ty.mat4x3<i32>();
+  EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 3u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 3u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GeneratePtr) {
-  ast::type::I32 i32;
-  ast::type::Pointer ptr(&i32, ast::StorageClass::kOutput);
-
+  ast::type::Pointer ptr(ty.i32, ast::StorageClass::kOutput);
   auto id = b.GenerateTypeIfNeeded(&ptr);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -270,9 +236,7 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
-  ast::type::I32 i32;
-  ast::type::Pointer ptr(&i32, ast::StorageClass::kOutput);
-
+  ast::type::Pointer ptr(ty.i32, ast::StorageClass::kOutput);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
 }
@@ -280,9 +244,9 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   auto* s = create<ast::Struct>(Source{}, ast::StructMemberList{},
                                 ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
+  auto* s_type = ty.struct_("S", s);
 
-  auto id = b.GenerateTypeIfNeeded(&s_type);
+  auto id = b.GenerateTypeIfNeeded(s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -296,9 +260,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
 TEST_F(BuilderTest_Type, GenerateStruct) {
   auto* s = create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32)},
                                 ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
+  auto* s_type = ty.struct_("my_struct", s);
 
-  auto id = b.GenerateTypeIfNeeded(&s_type);
+  auto id = b.GenerateTypeIfNeeded(s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -316,9 +280,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
 
   auto* s = create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32)},
                                 struct_decos);
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
+  auto* s_type = ty.struct_("my_struct", s);
 
-  auto id = b.GenerateTypeIfNeeded(&s_type);
+  auto id = b.GenerateTypeIfNeeded(s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -337,9 +301,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
       ast::StructMemberList{Member("a", ty.f32, {MemberOffset(0)}),
                             Member("b", ty.f32, {MemberOffset(8)})},
       ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
+  auto* s_type = ty.struct_("S", s);
 
-  auto id = b.GenerateTypeIfNeeded(&s_type);
+  auto id = b.GenerateTypeIfNeeded(s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -361,9 +325,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
                                                 Member("b", ty.mat2x3<f32>()),
                                                 Member("c", ty.mat4x4<f32>())},
                           ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
+  auto* s_type = ty.struct_("S", s);
 
-  auto id = b.GenerateTypeIfNeeded(&s_type);
+  auto id = b.GenerateTypeIfNeeded(s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -391,9 +355,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
                             Member("b", ty.mat2x3<f32>(), {MemberOffset(16)}),
                             Member("c", ty.mat4x4<f32>(), {MemberOffset(48)})},
       ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
+  auto* s_type = ty.struct_("S", s);
 
-  auto id = b.GenerateTypeIfNeeded(&s_type);
+  auto id = b.GenerateTypeIfNeeded(s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -442,9 +406,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
                             Member("b", &arr_arr_mat2x3, {MemberOffset(16)}),
                             Member("c", &rtarr_mat4x4, {MemberOffset(48)})},
       ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
+  auto* s_type = ty.struct_("S", s);
 
-  auto id = b.GenerateTypeIfNeeded(&s_type);
+  auto id = b.GenerateTypeIfNeeded(s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -480,9 +444,7 @@ OpMemberDecorate %1 2 MatrixStride 16
 }
 
 TEST_F(BuilderTest_Type, GenerateU32) {
-  ast::type::U32 u32;
-
-  auto id = b.GenerateTypeIfNeeded(&u32);
+  auto id = b.GenerateTypeIfNeeded(ty.u32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -492,22 +454,16 @@ TEST_F(BuilderTest_Type, GenerateU32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
-  ast::type::U32 u32;
-  ast::type::F32 f32;
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&u32), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.u32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&u32), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.u32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateVector) {
-  ast::type::F32 f32;
-  ast::type::Vector vec_type(&f32, 3);
-
-  auto id = b.GenerateTypeIfNeeded(&vec_type);
+  auto id = b.GenerateTypeIfNeeded(ty.vec3<f32>());
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -518,21 +474,17 @@ TEST_F(BuilderTest_Type, GenerateVector) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
-  ast::type::I32 i32;
-  ast::type::Vector vec_type(&i32, 3);
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&vec_type), 1u);
+  auto* vec_type = ty.vec3<i32>();
+  EXPECT_EQ(b.GenerateTypeIfNeeded(vec_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&vec_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(vec_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateVoid) {
-  ast::type::Void void_type;
-
-  auto id = b.GenerateTypeIfNeeded(&void_type);
+  auto id = b.GenerateTypeIfNeeded(ty.void_);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -542,14 +494,11 @@ TEST_F(BuilderTest_Type, GenerateVoid) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
-  ast::type::I32 i32;
-  ast::type::Void void_type;
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.void_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.void_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -637,8 +586,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_i32) {
-  ast::type::I32 i32;
-  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, &i32);
+  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, ty.i32);
 
   EXPECT_EQ(1u, b.GenerateTypeIfNeeded(&ms));
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -648,8 +596,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_i32) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_u32) {
-  ast::type::U32 u32;
-  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, &u32);
+  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, ty.u32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ms), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -660,8 +607,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_u32) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
-  ast::type::F32 f32;
-  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, &f32);
+  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ms), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -672,8 +618,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
-  ast::type::I32 i32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, &i32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, ty.i32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -688,8 +633,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
-  ast::type::U32 u32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, &u32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, ty.u32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -704,8 +648,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, &f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -720,8 +663,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1dArray) {
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1dArray, &f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k1dArray, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -736,8 +678,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1dArray) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::k2d, &f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k2d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -748,8 +689,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::k2dArray, &f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k2dArray, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -760,8 +700,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::k3d, &f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::k3d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -772,8 +711,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::kCube, &f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::kCube, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -785,8 +723,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(ast::type::TextureDimension::kCubeArray, &f32);
+  ast::type::SampledTexture s(ast::type::TextureDimension::kCubeArray, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();

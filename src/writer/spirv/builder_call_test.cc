@@ -44,62 +44,26 @@ TEST_F(BuilderTest, Expression_Call) {
   ast::type::Void void_type;
 
   ast::VariableList func_params;
-  func_params.push_back(
-      create<ast::Variable>(Source{},                         // source
-                            "a",                              // name
-                            ast::StorageClass::kFunction,     // storage_class
-                            &f32,                             // type
-                            false,                            // is_const
-                            nullptr,                          // constructor
-                            ast::VariableDecorationList{}));  // decorations
-  func_params.push_back(
-      create<ast::Variable>(Source{},                         // source
-                            "b",                              // name
-                            ast::StorageClass::kFunction,     // storage_class
-                            &f32,                             // type
-                            false,                            // is_const
-                            nullptr,                          // constructor
-                            ast::VariableDecorationList{}));  // decorations
+  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32));
+  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32));
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::ReturnStatement>(
-              Source{}, create<ast::BinaryExpression>(
-                            Source{}, ast::BinaryOp::kAdd,
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("b"), "b"))),
-      });
-  ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
-                       func_params, &f32, body, ast::FunctionDecorationList{});
-
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* a_func = Func(
+      "a_func", func_params, ty.f32,
+      ast::StatementList{create<ast::ReturnStatement>(Source{}, Add("a", "b"))},
       ast::FunctionDecorationList{});
 
-  ast::ExpressionList call_params;
-  call_params.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  call_params.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+  auto* func = Func("main", {}, ty.void_, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
-  ast::CallExpression expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a_func"),
-                                        "a_func"),
-      call_params);
+  auto* expr = Call("a_func", 1.f, 1.f);
+  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
+  ASSERT_TRUE(td.DetermineFunction(a_func)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
-  ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  ASSERT_TRUE(b.GenerateFunction(&a_func)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
-
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 14u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 14u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 OpName %4 "a"
 OpName %5 "b"
@@ -127,66 +91,26 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Statement_Call) {
-  ast::type::F32 f32;
-  ast::type::Void void_type;
-
   ast::VariableList func_params;
-  func_params.push_back(
-      create<ast::Variable>(Source{},                         // source
-                            "a",                              // name
-                            ast::StorageClass::kFunction,     // storage_class
-                            &f32,                             // type
-                            false,                            // is_const
-                            nullptr,                          // constructor
-                            ast::VariableDecorationList{}));  // decorations
-  func_params.push_back(
-      create<ast::Variable>(Source{},                         // source
-                            "b",                              // name
-                            ast::StorageClass::kFunction,     // storage_class
-                            &f32,                             // type
-                            false,                            // is_const
-                            nullptr,                          // constructor
-                            ast::VariableDecorationList{}));  // decorations
+  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32));
+  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32));
 
-  auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::ReturnStatement>(
-              Source{}, create<ast::BinaryExpression>(
-                            Source{}, ast::BinaryOp::kAdd,
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("b"), "b"))),
-      });
-  ast::Function a_func(Source{}, mod->RegisterSymbol("a_func"), "a_func",
-                       func_params, &void_type, body,
-                       ast::FunctionDecorationList{});
-
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("main"), "main", {}, &void_type,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* a_func = Func(
+      "a_func", func_params, ty.void_,
+      ast::StatementList{create<ast::ReturnStatement>(Source{}, Add("a", "b"))},
       ast::FunctionDecorationList{});
 
-  ast::ExpressionList call_params;
-  call_params.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  call_params.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
+  auto* func = Func("main", {}, ty.void_, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
-  ast::CallStatement expr(
-      Source{}, create<ast::CallExpression>(
-                    Source{},
-                    create<ast::IdentifierExpression>(
-                        Source{}, mod->RegisterSymbol("a_func"), "a_func"),
-                    call_params));
+  ast::CallStatement expr(Source{}, Call("a_func", 1.f, 1.f));
 
-  ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
-  ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();
+  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
+  ASSERT_TRUE(td.DetermineFunction(a_func)) << td.error();
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ASSERT_TRUE(b.GenerateFunction(&a_func)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_TRUE(b.GenerateStatement(&expr)) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"

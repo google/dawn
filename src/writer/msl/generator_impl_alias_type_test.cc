@@ -28,17 +28,17 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
-  ast::type::Alias alias(mod->RegisterSymbol("a"), "a", ty.f32);
+  auto* alias = ty.alias("a", ty.f32);
 
-  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float a;
 )");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
-  ast::type::Alias alias(mod->RegisterSymbol("float"), "float", ty.f32);
+  auto* alias = ty.alias("float", ty.f32);
 
-  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float float_tint_0;
 )");
 }
@@ -49,9 +49,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
                             Member("b", ty.i32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("a"), "a", str);
-
-  ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
+  auto* s = ty.struct_("a", str);
+  ASSERT_TRUE(gen.EmitConstructedType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct a {
   float a;
   int b;
@@ -65,10 +64,10 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
                             Member("b", ty.i32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("b"), "b", str);
-  ast::type::Alias alias(mod->RegisterSymbol("a"), "a", &s);
+  auto* s = ty.struct_("b", str);
+  auto* alias = ty.alias("a", s);
 
-  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef b a;
 )");
 }

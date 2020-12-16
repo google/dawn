@@ -28,9 +28,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
-  ast::type::Alias alias(mod->RegisterSymbol("a"), "a", ty.f32);
-
-  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  auto* alias = ty.alias("a", ty.f32);
+  ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type a = f32;
 )");
 }
@@ -41,11 +40,11 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
                             Member("b", ty.i32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
-  ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);
+  auto* s = ty.struct_("A", str);
+  auto* alias = ty.alias("B", s);
 
-  ASSERT_TRUE(gen.EmitConstructedType(&s)) << gen.error();
-  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(s)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct A {
   a : f32;
   [[offset(4)]]
@@ -61,10 +60,10 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
                             Member("b", ty.i32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
-  ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);
+  auto* s = ty.struct_("A", str);
+  auto* alias = ty.alias("B", s);
 
-  ASSERT_TRUE(gen.EmitConstructedType(&alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(type B = A;
 )");
 }

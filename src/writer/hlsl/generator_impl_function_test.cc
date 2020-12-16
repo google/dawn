@@ -258,15 +258,15 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::StructMemberList{Member("coord", ty.vec4<f32>())},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Uniforms"), "Uniforms", str);
+  auto* s = ty.struct_("Uniforms", str);
 
-  auto* coord_var = Var("uniforms", ast::StorageClass::kUniform, &s, nullptr,
+  auto* coord_var = Var("uniforms", ast::StorageClass::kUniform, s, nullptr,
                         ast::VariableDecorationList{
                             create<ast::BindingDecoration>(0),
                             create<ast::SetDecoration>(1),
                         });
 
-  mod->AddConstructedType(&s);
+  mod->AddConstructedType(s);
 
   td.RegisterVariableForTesting(coord_var);
   mod->AddGlobalVariable(coord_var);
@@ -311,8 +311,8 @@ TEST_F(HlslGeneratorImplTest_Function,
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
+  auto* s = ty.struct_("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
@@ -358,8 +358,8 @@ TEST_F(HlslGeneratorImplTest_Function,
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
+  auto* s = ty.struct_("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
@@ -406,8 +406,8 @@ TEST_F(HlslGeneratorImplTest_Function,
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
+  auto* s = ty.struct_("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
@@ -917,8 +917,8 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})},
       ast::StructDecorationList{create<ast::StructBlockDecoration>()});
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
+  auto* s = ty.struct_("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* data_var = Var("data", ast::StorageClass::kStorageBuffer, &ac, nullptr,
                        ast::VariableDecorationList{
@@ -926,7 +926,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                            create<ast::SetDecoration>(0),
                        });
 
-  mod->AddConstructedType(&s);
+  mod->AddConstructedType(s);
   td.RegisterVariableForTesting(data_var);
   mod->AddGlobalVariable(data_var);
 

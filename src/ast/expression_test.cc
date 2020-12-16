@@ -41,11 +41,11 @@ TEST_F(ExpressionTest, set_result_type) {
 }
 
 TEST_F(ExpressionTest, set_result_type_alias) {
-  type::Alias a(mod->RegisterSymbol("a"), "a", ty.i32);
-  type::Alias b(mod->RegisterSymbol("b"), "b", &a);
+  auto* a = ty.alias("a", ty.i32);
+  auto* b = ty.alias("b", a);
 
   FakeExpr e;
-  e.set_result_type(&b);
+  e.set_result_type(b);
   ASSERT_NE(e.result_type(), nullptr);
   EXPECT_TRUE(e.result_type()->Is<type::I32>());
 }

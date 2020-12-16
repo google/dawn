@@ -29,14 +29,9 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  auto* str = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("str"), "str");
-  auto* mem = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("mem"), "mem");
+  auto* expr = MemberAccessor("str", "mem");
 
-  ast::MemberAccessorExpression expr(Source{}, str, mem);
-
-  ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "str.mem");
 }
 

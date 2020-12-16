@@ -27,17 +27,17 @@ namespace {
 using HlslGeneratorImplTest_Alias = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
-  ast::type::Alias alias(mod->RegisterSymbol("a"), "a", ty.f32);
+  auto* alias = ty.alias("a", ty.f32);
 
-  ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float a;
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
-  ast::type::Alias alias(mod->RegisterSymbol("float"), "float", ty.f32);
+  auto* alias = ty.alias("float", ty.f32);
 
-  ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float float_tint_0;
 )");
 }
@@ -48,10 +48,10 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
                             Member("b", ty.i32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
-  ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);
+  auto* s = ty.struct_("A", str);
+  auto* alias = ty.alias("B", s);
 
-  ASSERT_TRUE(gen.EmitConstructedType(out, &alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
   EXPECT_EQ(result(), R"(struct B {
   float a;
   int b;

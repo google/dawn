@@ -41,16 +41,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32);
   ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
@@ -60,16 +51,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &f32,                            // type
-                            true,                            // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Const("a", ast::StorageClass::kNone, ty.f32);
   ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
@@ -79,18 +61,9 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
-  ast::type::F32 f32;
-  ast::type::Array ary(&f32, 5, ast::ArrayDecorationList{});
+  ast::type::Array ary(ty.f32, 5, ast::ArrayDecorationList{});
 
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &ary,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Var("a", ast::StorageClass::kNone, &ary);
   ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
@@ -105,17 +78,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &s,                              // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* s = ty.struct_("S", str);
+  auto* var = Var("a", ast::StorageClass::kNone, s);
   ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
@@ -126,18 +90,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 2);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &vec,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Var("a", ast::StorageClass::kFunction, ty.vec2<f32>());
   ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
@@ -147,16 +100,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat(&f32, 2, 3);
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
 
   ast::VariableDeclStatement stmt(Source{}, var);
 
@@ -167,16 +111,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
   ast::VariableDeclStatement stmt(Source{}, var);
 
   gen.increment_indent();
@@ -186,19 +121,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("initializer"), "initializer");
-
-  ast::type::F32 f32;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &f32,                            // type
-                            false,                           // is_const
-                            ident,                           // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
+                  ast::VariableDecorationList{});
   ast::VariableDeclStatement stmt(Source{}, var);
 
   ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
@@ -207,22 +131,12 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
-
   ast::ExpressionList values;
   auto* zero_vec =
-      create<ast::TypeConstructorExpression>(Source{}, &vec, values);
+      create<ast::TypeConstructorExpression>(Source{}, ty.vec3<f32>(), values);
 
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kNone,        // storage_class
-                            &vec,                            // type
-                            false,                           // is_const
-                            zero_vec,                        // constructor
-                            ast::VariableDecorationList{});  // decorations
-
+  auto* var = Var("a", ast::StorageClass::kNone, ty.vec3<f32>(), zero_vec,
+                  ast::VariableDecorationList{});
   ast::VariableDeclStatement stmt(Source{}, var);
 
   ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();

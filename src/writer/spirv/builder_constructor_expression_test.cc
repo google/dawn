@@ -114,9 +114,8 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // type Int = i32
   // cast<Int>(2.3f)
 
-  ast::type::Alias alias(mod->RegisterSymbol("Int"), "Int", ty.i32);
-
-  ast::TypeConstructorExpression cast(Source{}, &alias, ExprList(2.3f));
+  auto* alias = ty.alias("Int", ty.i32);
+  ast::TypeConstructorExpression cast(Source{}, alias, ExprList(2.3f));
 
   ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
 
@@ -959,10 +958,9 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
           Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
+  auto* s_type = ty.struct_("my_struct", s);
 
-  auto* t = Construct(&s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
-
+  auto* t = Construct(s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
@@ -1096,10 +1094,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
           Member("a", ty.f32),
       },
       ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
-
-  auto* t = Construct(&s_type);
-
+  auto* s_type = ty.struct_("my_struct", s);
+  auto* t = Construct(s_type);
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
   b.push_function(Function{});
@@ -1510,10 +1506,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
           Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
-
-  auto* t = Construct(&s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
-
+  auto* s_type = ty.struct_("my_struct", s);
+  auto* t = Construct(s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
   EXPECT_TRUE(b.is_constructor_const(t, false));
@@ -1529,9 +1523,8 @@ TEST_F(SpvBuilderConstructorTest,
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
-
-  auto* t = Construct(&s_type, 2.f, "a", 2.f);
+  auto* s_type = ty.struct_("my_struct", s);
+  auto* t = Construct(s_type, 2.f, "a", 2.f);
 
   Var("a", ast::StorageClass::kPrivate, ty.f32);
   Var("b", ast::StorageClass::kPrivate, ty.f32);

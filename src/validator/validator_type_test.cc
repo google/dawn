@@ -49,9 +49,9 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
                                                 Member("rt", ty.array<f32>())},
                           decos);
 
-  ast::type::Struct struct_type(mod->RegisterSymbol("Foo"), "Foo", st);
+  auto* struct_type = ty.struct_("Foo", st);
 
-  mod->AddConstructedType(&struct_type);
+  mod->AddConstructedType(struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod->constructed_types()));
 }
 
@@ -67,9 +67,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
                                                 Member("rt", ty.array<f32>())},
                           decos);
 
-  ast::type::Struct struct_type(mod->RegisterSymbol("Foo"), "Foo", st);
-
-  mod->AddConstructedType(&struct_type);
+  auto* struct_type = ty.struct_("Foo", st);
+  mod->AddConstructedType(struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
             "v-0031: a struct containing a runtime-sized array must be "
@@ -90,9 +89,9 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
                                                 Member("vf", ty.f32)},
                           decos);
 
-  ast::type::Struct struct_type(mod->RegisterSymbol("Foo"), "Foo", st);
+  auto* struct_type = ty.struct_("Foo", st);
 
-  mod->AddConstructedType(&struct_type);
+  mod->AddConstructedType(struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
             "v-0015: runtime arrays may only appear as the last member "
@@ -107,16 +106,15 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   //  a: u32;
   //}
 
-  ast::type::Alias alias{mod->RegisterSymbol("RTArr"), "RTArr",
-                         ty.array<u32>()};
+  auto* alias = ty.alias("RTArr", ty.array<u32>());
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
-      ast::StructMemberList{Member("b", &alias), Member("a", ty.u32)}, decos);
+      ast::StructMemberList{Member("b", alias), Member("a", ty.u32)}, decos);
 
-  ast::type::Struct struct_type(mod->RegisterSymbol("s"), "s", st);
-  mod->AddConstructedType(&struct_type);
+  auto* struct_type = ty.struct_("s", st);
+  mod->AddConstructedType(struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
             "v-0015: runtime arrays may only appear as the last member "
@@ -131,16 +129,15 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   //  b: RTArr;
   //}
 
-  ast::type::Alias alias{mod->RegisterSymbol("RTArr"), "RTArr",
-                         ty.array<u32>()};
+  auto* alias = ty.alias("RTArr", ty.array<u32>());
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.u32), Member("b", &alias)}, decos);
+      ast::StructMemberList{Member("a", ty.u32), Member("b", alias)}, decos);
 
-  ast::type::Struct struct_type(mod->RegisterSymbol("s"), "s", st);
-  mod->AddConstructedType(&struct_type);
+  auto* struct_type = ty.struct_("s", st);
+  mod->AddConstructedType(struct_type);
   EXPECT_TRUE(v()->ValidateConstructedTypes(mod->constructed_types()));
 }
 

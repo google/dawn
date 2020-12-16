@@ -26,17 +26,14 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
-  ast::IdentifierExpression i(Source{}, mod->RegisterSymbol("foo"), "foo");
-
-  ASSERT_TRUE(gen.EmitExpression(&i)) << gen.error();
+  auto* i = Expr("foo");
+  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
   EXPECT_EQ(gen.result(), "foo");
 }
 
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
-  ast::IdentifierExpression i(Source{}, mod->RegisterSymbol("virtual"),
-                              "virtual");
-
-  ASSERT_TRUE(gen.EmitExpression(&i)) << gen.error();
+  auto* i = Expr("virtual");
+  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
   EXPECT_EQ(gen.result(), "virtual_tint_0");
 }
 

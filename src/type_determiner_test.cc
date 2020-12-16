@@ -384,10 +384,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   ast::type::Array ary(ty.f32, 3, ast::ArrayDecorationList{});
-  ast::type::Alias aary(mod->RegisterSymbol("myarrty"), "myarrty", &ary);
+  auto* aary = ty.alias("myarrty", &ary);
 
-  auto* var = Var("my_var", ast::StorageClass::kFunction, &aary);
-  mod->AddGlobalVariable(var);
+  mod->AddGlobalVariable(Var("my_var", ast::StorageClass::kFunction, aary));
 
   EXPECT_TRUE(td()->Determine());
 
@@ -770,9 +769,8 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
                             Member("second_member", ty.f32)},
       ast::StructDecorationList{});
 
-  ast::type::Struct st(mod->RegisterSymbol("S"), "S", strct);
-
-  auto* var = Var("my_struct", ast::StorageClass::kNone, &st);
+  auto* st = ty.struct_("S", strct);
+  auto* var = Var("my_struct", ast::StorageClass::kNone, st);
 
   mod->AddGlobalVariable(var);
 
@@ -793,11 +791,9 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
                             Member("second_member", ty.f32)},
       ast::StructDecorationList{});
 
-  auto st = std::make_unique<ast::type::Struct>(mod->RegisterSymbol("alias"),
-                                                "alias", strct);
-  ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", st.get());
-
-  auto* var = Var("my_struct", ast::StorageClass::kNone, &alias);
+  auto* st = ty.struct_("alias", strct);
+  auto* alias = ty.alias("alias", st);
+  auto* var = Var("my_struct", ast::StorageClass::kNone, alias);
 
   mod->AddGlobalVariable(var);
 
@@ -873,18 +869,15 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   auto* strctB =
       create<ast::Struct>(ast::StructMemberList{Member("foo", ty.vec4<f32>())},
                           ast::StructDecorationList{});
-  ast::type::Struct stB(mod->RegisterSymbol("B"), "B", strctB);
+  auto* stB = ty.struct_("B", strctB);
 
-  ast::type::Vector vecB(&stB, 3);
+  ast::type::Vector vecB(stB, 3);
   auto* strctA = create<ast::Struct>(
       ast::StructMemberList{Member("mem", &vecB)}, ast::StructDecorationList{});
 
-  ast::type::Struct stA(mod->RegisterSymbol("A"), "A", strctA);
-
-  auto* var = Var("c", ast::StorageClass::kNone, &stA);
-
+  auto* stA = ty.struct_("A", strctA);
+  auto* var = Var("c", ast::StorageClass::kNone, stA);
   mod->AddGlobalVariable(var);
-
   EXPECT_TRUE(td()->Determine());
 
   auto* mem = MemberAccessor(

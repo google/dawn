@@ -38,11 +38,7 @@ inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
 using MslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(MslUnaryOpTest, Emit) {
   auto params = GetParam();
-
-  auto* expr = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("expr"), "expr");
-  ast::UnaryOpExpression op(Source{}, params.op, expr);
-
+  ast::UnaryOpExpression op(Source{}, params.op, Expr("expr"));
   ASSERT_TRUE(gen.EmitExpression(&op)) << gen.error();
   EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");
 }

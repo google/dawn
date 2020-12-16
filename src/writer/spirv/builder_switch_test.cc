@@ -40,15 +40,10 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Switch_Empty) {
-  ast::type::I32 i32;
-
   // switch (1) {
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::SintLiteral>(Source{}, &i32, 1));
 
-  ast::SwitchStatement expr(Source{}, cond, ast::CaseStatementList{});
-
+  ast::SwitchStatement expr(Source{}, Expr(1), ast::CaseStatementList{});
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
@@ -67,8 +62,6 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, Switch_WithCase) {
-  ast::type::I32 i32;
-
   // switch(a) {
   //   case 1:
   //     v = 1;
@@ -76,50 +69,22 @@ TEST_F(BuilderTest, Switch_WithCase) {
   //     v = 2;
   // }
 
-  auto* v =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(1))});
 
   auto* case_2_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
+  selector_1.push_back(Literal(1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 2));
+  selector_2.push_back(Literal(2));
 
   ast::CaseStatementList cases;
   cases.push_back(
@@ -127,23 +92,18 @@ TEST_F(BuilderTest, Switch_WithCase) {
   cases.push_back(
       create<ast::CaseStatement>(Source{}, selector_2, case_2_body));
 
-  ast::SwitchStatement expr(Source{},
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            cases);
+  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
@@ -178,62 +138,34 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_WithDefault) {
-  ast::type::I32 i32;
-
   // switch(true) {
   //   default:
   //     v = 1;
   //  }
 
-  auto* v =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* default_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(1))});
 
   ast::CaseStatementList cases;
   cases.push_back(create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{},
                                              default_body));
 
-  ast::SwitchStatement expr(Source{},
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            cases);
+  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
@@ -262,8 +194,6 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
-  ast::type::I32 i32;
-
   // switch(a) {
   //   case 1:
   //      v = 1;
@@ -273,62 +203,27 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //      v = 3;
   //  }
 
-  auto* v =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(1))});
 
   auto* case_2_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
 
   auto* default_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(3))});
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
+  selector_1.push_back(Literal(1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 2));
-  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 3));
+  selector_2.push_back(Literal(2));
+  selector_2.push_back(Literal(3));
 
   ast::CaseStatementList cases;
   cases.push_back(
@@ -338,23 +233,18 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   cases.push_back(create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{},
                                              default_body));
 
-  ast::SwitchStatement expr(Source{},
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            cases);
+  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
@@ -391,8 +281,6 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
-  ast::type::I32 i32;
-
   // switch(a) {
   //   case 1:
   //      v = 1;
@@ -403,61 +291,28 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //      v = 3;
   //  }
 
-  auto* v =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
       Source{},
       ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+          create<ast::AssignmentStatement>(Source{}, Expr("v"), Expr(1)),
           create<ast::FallthroughStatement>(Source{})});
 
   auto* case_2_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
 
   auto* default_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(3))});
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
+  selector_1.push_back(Literal(1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(create<ast::SintLiteral>(Source{}, &i32, 2));
+  selector_2.push_back(Literal(2));
 
   ast::CaseStatementList cases;
   cases.push_back(
@@ -467,23 +322,18 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   cases.push_back(create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{},
                                              default_body));
 
-  ast::SwitchStatement expr(Source{},
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            cases);
+  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 
@@ -520,75 +370,46 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
-  ast::type::I32 i32;
-
   // switch(a) {
   //   case 1:
   //      v = 1;
   //      fallthrough;
   //  }
 
-  auto* v =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
       Source{},
       ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1))),
+          create<ast::AssignmentStatement>(Source{}, Expr("v"), Expr(1)),
           create<ast::FallthroughStatement>(Source{})});
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
+  selector_1.push_back(Literal(1));
 
   ast::CaseStatementList cases;
   cases.push_back(
       create<ast::CaseStatement>(Source{}, selector_1, case_1_body));
 
-  ast::SwitchStatement expr(Source{},
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            cases);
+  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_FALSE(b.GenerateSwitchStatement(&expr)) << b.error();
   EXPECT_EQ(b.error(), "fallthrough of last case statement is disallowed");
 }
 
 TEST_F(BuilderTest, Switch_WithNestedBreak) {
-  ast::type::I32 i32;
-  ast::type::Bool bool_type;
-
   // switch (a) {
   //   case 1:
   //     if (true) {
@@ -597,22 +418,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //     v = 1;
   //  }
 
-  auto* v =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* a =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* if_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
@@ -622,43 +429,29 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   auto* case_1_body = create<ast::BlockStatement>(
       Source{},
       ast::StatementList{
-          create<ast::IfStatement>(
-              Source{},
-              create<ast::ScalarConstructorExpression>(
-                  Source{},
-                  create<ast::BoolLiteral>(Source{}, &bool_type, true)),
-              if_body, ast::ElseStatementList{}),
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)))});
+          create<ast::IfStatement>(Source{}, Expr(true), if_body,
+                                   ast::ElseStatementList{}),
+          create<ast::AssignmentStatement>(Source{}, Expr("v"), Expr(1))});
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(create<ast::SintLiteral>(Source{}, &i32, 1));
+  selector_1.push_back(Literal(1));
 
   ast::CaseStatementList cases;
   cases.push_back(
       create<ast::CaseStatement>(Source{}, selector_1, case_1_body));
 
-  ast::SwitchStatement expr(Source{},
-                            create<ast::IdentifierExpression>(
-                                Source{}, mod->RegisterSymbol("a"), "a"),
-                            cases);
+  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Function func(
-      Source{}, mod->RegisterSymbol("a_func"), "a_func", {}, &i32,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::FunctionDecorationList{});
+  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+                    ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
 

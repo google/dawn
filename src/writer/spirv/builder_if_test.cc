@@ -93,35 +93,15 @@ TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
 }
 
 TEST_F(BuilderTest, If_WithStatements) {
-  ast::type::Bool bool_type;
-  ast::type::I32 i32;
-
   // if (true) {
   //   v = 2;
   // }
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
 
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-
-  ast::IfStatement expr(Source{}, cond, body, ast::ElseStatementList{});
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
+  ast::IfStatement expr(Source{}, Expr(true), body, ast::ElseStatementList{});
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
@@ -149,49 +129,22 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithElse) {
-  ast::type::Bool bool_type;
-  ast::type::I32 i32;
-
   // if (true) {
   //   v = 2;
   // } else {
   //   v = 3;
   // }
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
 
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
-      });
-
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(3))});
 
   ast::IfStatement expr(
-      Source{}, cond, body,
+      Source{}, Expr(true), body,
       {create<ast::ElseStatement>(Source{}, nullptr, else_body)});
 
   td.RegisterVariableForTesting(var);
@@ -225,53 +178,23 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithElseIf) {
-  ast::type::Bool bool_type;
-  ast::type::I32 i32;
-
   // if (true) {
   //   v = 2;
   // } elseif (true) {
   //   v = 3;
   // }
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
 
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
-      });
-
-  auto* else_cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(3))});
 
   ast::IfStatement expr(
-      Source{}, cond, body,
-      {create<ast::ElseStatement>(Source{}, else_cond, else_body)});
+      Source{}, Expr(true), body,
+      {create<ast::ElseStatement>(Source{}, Expr(true), else_body)});
 
   td.RegisterVariableForTesting(var);
 
@@ -309,9 +232,6 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithMultiple) {
-  ast::type::Bool bool_type;
-  ast::type::I32 i32;
-
   // if (true) {
   //   v = 2;
   // } elseif (true) {
@@ -321,69 +241,26 @@ TEST_F(BuilderTest, If_WithMultiple) {
   // } else {
   //   v = 5;
   // }
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "v",                             // name
-                            ast::StorageClass::kPrivate,     // storage_class
-                            &i32,                            // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
 
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 2))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(2))});
   auto* elseif_1_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 3))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(3))});
   auto* elseif_2_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 4))),
-      });
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(4))});
   auto* else_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("v"), "v"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::SintLiteral>(Source{}, &i32, 5))),
-      });
-
-  auto* elseif_1_cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-  auto* elseif_2_cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, false));
-
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
+                    Source{}, Expr("v"), Expr(5))});
 
   ast::IfStatement expr(
-      Source{}, cond, body,
+      Source{}, Expr(true), body,
       {
-          create<ast::ElseStatement>(Source{}, elseif_1_cond, elseif_1_body),
-          create<ast::ElseStatement>(Source{}, elseif_2_cond, elseif_2_body),
+          create<ast::ElseStatement>(Source{}, Expr(true), elseif_1_body),
+          create<ast::ElseStatement>(Source{}, Expr(false), elseif_2_body),
           create<ast::ElseStatement>(Source{}, nullptr, else_body),
       });
 
@@ -437,21 +314,18 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithBreak) {
-  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //     break;
   //   }
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
 
   auto* if_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::BreakStatement>(Source{}),
                 });
 
-  auto* if_stmt = create<ast::IfStatement>(Source{}, cond, if_body,
+  auto* if_stmt = create<ast::IfStatement>(Source{}, Expr(true), if_body,
                                            ast::ElseStatementList{});
 
   auto* loop_body = create<ast::BlockStatement>(Source{}, ast::StatementList{
@@ -489,23 +363,19 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithElseBreak) {
-  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //   } else {
   //     break;
   //   }
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-
   auto* else_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::BreakStatement>(Source{}),
                 });
 
   auto* if_stmt = create<ast::IfStatement>(
-      Source{}, cond,
+      Source{}, Expr(true),
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::ElseStatementList{
           create<ast::ElseStatement>(Source{}, nullptr, else_body)});
@@ -547,21 +417,17 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithContinue) {
-  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //     continue;
   //   }
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-
   auto* if_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ContinueStatement>(Source{}),
                 });
 
-  auto* if_stmt = create<ast::IfStatement>(Source{}, cond, if_body,
+  auto* if_stmt = create<ast::IfStatement>(Source{}, Expr(true), if_body,
                                            ast::ElseStatementList{});
 
   auto* loop_body = create<ast::BlockStatement>(Source{}, ast::StatementList{
@@ -599,23 +465,19 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithElseContinue) {
-  ast::type::Bool bool_type;
   // loop {
   //   if (true) {
   //   } else {
   //     continue;
   //   }
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-
   auto* else_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ContinueStatement>(Source{}),
                 });
 
   auto* if_stmt = create<ast::IfStatement>(
-      Source{}, cond,
+      Source{}, Expr(true),
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::ElseStatementList{
           create<ast::ElseStatement>(Source{}, nullptr, else_body)});
@@ -657,20 +519,16 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithReturn) {
-  ast::type::Bool bool_type;
   // if (true) {
   //   return;
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-
   auto* if_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ReturnStatement>(Source{}),
                 });
 
-  ast::IfStatement expr(Source{}, cond, if_body, ast::ElseStatementList{});
-
+  ast::IfStatement expr(Source{}, Expr(true), if_body,
+                        ast::ElseStatementList{});
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
@@ -689,22 +547,16 @@ OpReturn
 }
 
 TEST_F(BuilderTest, If_WithReturnValue) {
-  ast::type::Bool bool_type;
   // if (true) {
   //   return false;
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
-  auto* cond2 = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, false));
-
   auto* if_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}, cond2),
+                    create<ast::ReturnStatement>(Source{}, Expr(false)),
                 });
 
-  ast::IfStatement expr(Source{}, cond, if_body, ast::ElseStatementList{});
-
+  ast::IfStatement expr(Source{}, Expr(true), if_body,
+                        ast::ElseStatementList{});
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
@@ -728,21 +580,11 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // if (a) {
   // }
 
-  ast::type::Bool bool_type;
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "a",                             // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &bool_type,                      // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
+  auto* var = Var("a", ast::StorageClass::kFunction, ty.bool_);
   td.RegisterVariableForTesting(var);
 
   ast::IfStatement expr(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("a"),
-                                        "a"),
+      Source{}, Expr("a"),
       create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::ElseStatementList{});
 

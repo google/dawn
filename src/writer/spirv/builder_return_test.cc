@@ -46,18 +46,9 @@ TEST_F(BuilderTest, Return) {
 }
 
 TEST_F(BuilderTest, Return_WithValue) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-
-  auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
+  auto* val = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
 
   ast::ReturnStatement ret(Source{}, val);
 
@@ -79,20 +70,15 @@ TEST_F(BuilderTest, Return_WithValue) {
 }
 
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
-  ast::type::F32 f32;
+  auto* var = Var("param", ast::StorageClass::kFunction, ty.f32);
 
-  ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &f32,
-                    false, nullptr, ast::VariableDecorationList{});
+  ast::ReturnStatement ret(Source{}, Expr("param"));
 
-  ast::ReturnStatement ret(
-      Source{}, create<ast::IdentifierExpression>(
-                    Source{}, mod->RegisterSymbol("param"), "param"));
-
-  td.RegisterVariableForTesting(&var);
+  td.RegisterVariableForTesting(var);
   EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
   EXPECT_TRUE(b.GenerateReturnStatement(&ret)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 

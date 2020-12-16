@@ -56,8 +56,7 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   auto* stmt = create<IfStatement>(
       cond, body,
       ElseStatementList{
-          create<ElseStatement>(create<IdentifierExpression>(
-                                    mod->RegisterSymbol("Ident"), "Ident"),
+          create<ElseStatement>(Expr("Ident"),
                                 create<BlockStatement>(StatementList{})),
           create<ElseStatement>(nullptr,
                                 create<BlockStatement>(StatementList{})),
@@ -110,8 +109,7 @@ TEST_F(IfStatementTest, IsValid_NullElseStatement) {
   auto* stmt = create<IfStatement>(
       cond, body,
       ElseStatementList{
-          create<ElseStatement>(create<IdentifierExpression>(
-                                    mod->RegisterSymbol("Ident"), "Ident"),
+          create<ElseStatement>(Expr("Ident"),
                                 create<BlockStatement>(StatementList{})),
           create<ElseStatement>(nullptr,
                                 create<BlockStatement>(StatementList{})),
@@ -157,8 +155,7 @@ TEST_F(IfStatementTest, IsValid_ElseNotLast) {
       ElseStatementList{
           create<ElseStatement>(nullptr,
                                 create<BlockStatement>(StatementList{})),
-          create<ElseStatement>(create<IdentifierExpression>(
-                                    mod->RegisterSymbol("Ident"), "Ident"),
+          create<ElseStatement>(Expr("Ident"),
                                 create<BlockStatement>(StatementList{})),
       });
   EXPECT_FALSE(stmt->IsValid());
@@ -194,9 +191,7 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   auto* stmt = create<IfStatement>(
       cond, body,
       ElseStatementList{
-          create<ElseStatement>(create<IdentifierExpression>(
-                                    mod->RegisterSymbol("ident"), "ident"),
-                                else_if_body),
+          create<ElseStatement>(Expr("ident"), else_if_body),
           create<ElseStatement>(nullptr, else_body),
       });
 

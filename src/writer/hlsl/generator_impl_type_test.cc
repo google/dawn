@@ -44,16 +44,16 @@ namespace {
 using HlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
-  ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", ty.f32);
+  auto* alias = ty.alias("alias", ty.f32);
 
-  ASSERT_TRUE(gen.EmitType(out, &alias, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, alias, "")) << gen.error();
   EXPECT_EQ(result(), "alias");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias_NameCollision) {
-  ast::type::Alias alias(mod->RegisterSymbol("bool"), "bool", ty.f32);
+  auto* alias = ty.alias("bool", ty.f32);
 
-  ASSERT_TRUE(gen.EmitType(out, &alias, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, alias, "")) << gen.error();
   EXPECT_EQ(result(), "bool_tint_0");
 }
 
@@ -137,9 +137,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
   int a;
   float b;
@@ -153,9 +152,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitType(out, s, "")) << gen.error();
   EXPECT_EQ(result(), "S");
 }
 
@@ -166,9 +164,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
                             Member("c", ty.f32, {MemberOffset(128)})},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitType(out, s, "")) << gen.error();
   EXPECT_EQ(result(), R"(struct {
   int8_t pad_0[4];
   int a;
@@ -184,9 +181,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
       ast::StructMemberList{Member("double", ty.i32), Member("float", ty.f32)},
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitStructType(out, &s, "S")) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
   int double_tint_0;
   float float_tint_0;
@@ -204,9 +200,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
                             Member("b", ty.f32, {MemberOffset(4)})},
       decos);
 
-  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
-
-  ASSERT_TRUE(gen.EmitStructType(out, &s, "B")) << gen.error();
+  auto* s = ty.struct_("S", str);
+  ASSERT_TRUE(gen.EmitStructType(out, s, "B")) << gen.error();
   EXPECT_EQ(result(), R"(struct B {
   int a;
   float b;

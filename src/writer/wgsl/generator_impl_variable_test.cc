@@ -78,10 +78,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
-  auto* ident = create<ast::IdentifierExpression>(
-      mod->RegisterSymbol("initializer"), "initializer");
-
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, ident,
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
                 ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
@@ -90,10 +87,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
-  auto* ident = create<ast::IdentifierExpression>(
-      mod->RegisterSymbol("initializer"), "initializer");
-
-  auto* v = Const("a", ast::StorageClass::kNone, ty.f32, ident,
+  auto* v = Const("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
                   ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();

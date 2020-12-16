@@ -171,8 +171,8 @@ TEST_F(WgslGeneratorImplTest,
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
 
-  ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
+  auto* s = ty.struct_("Data", str);
+  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* data_var = Var("data", ast::StorageClass::kStorageBuffer, &ac, nullptr,
                        ast::VariableDecorationList{
@@ -181,7 +181,7 @@ TEST_F(WgslGeneratorImplTest,
                            create<ast::SetDecoration>(0),
                        });
 
-  mod->AddConstructedType(&s);
+  mod->AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
   mod->AddGlobalVariable(data_var);

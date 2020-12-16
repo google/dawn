@@ -29,8 +29,7 @@ TEST_F(IdentifierExpressionTest, Creation) {
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
-  auto* i = create<IdentifierExpression>(Source{Source::Location{20, 2}},
-                                         mod->RegisterSymbol("ident"), "ident");
+  auto* i = Expr(Source{Source::Location{20, 2}}, "ident");
   EXPECT_EQ(i->symbol(), Symbol(1));
   EXPECT_EQ(i->name(), "ident");
 

@@ -38,13 +38,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
-  ast::type::I32 i32;
-
-  ast::UnaryOpExpression expr(
-      Source{}, ast::UnaryOp::kNegation,
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
-
+  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNegation, Expr(1));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
@@ -58,13 +52,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Negation_Float) {
-  ast::type::F32 f32;
-
-  ast::UnaryOpExpression expr(
-      Source{}, ast::UnaryOp::kNegation,
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1)));
-
+  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNegation, Expr(1.f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
@@ -78,13 +66,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Not) {
-  ast::type::Bool bool_type;
-
-  ast::UnaryOpExpression expr(
-      Source{}, ast::UnaryOp::kNot,
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, false)));
-
+  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNot, Expr(false));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
@@ -98,22 +80,15 @@ TEST_F(BuilderTest, UnaryOp_Not) {
 }
 
 TEST_F(BuilderTest, UnaryOp_LoadRequired) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
+  auto* var = Var("param", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &vec,
-                    false, nullptr, ast::VariableDecorationList{});
+  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNegation, Expr("param"));
 
-  ast::UnaryOpExpression expr(
-      Source{}, ast::UnaryOp::kNegation,
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("param"),
-                                        "param"));
-
-  td.RegisterVariableForTesting(&var);
+  td.RegisterVariableForTesting(var);
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateUnaryOpExpression(&expr), 6u) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 

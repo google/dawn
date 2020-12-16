@@ -43,47 +43,16 @@ TEST_F(BuilderTest, Block) {
       Source{},
       ast::StatementList{
           create<ast::VariableDeclStatement>(
-              Source{}, create<ast::Variable>(
-                            Source{},                      // source
-                            "var",                         // name
-                            ast::StorageClass::kFunction,  // storage_class
-                            &f32,                          // type
-                            false,                         // is_const
-                            nullptr,                       // constructor
-                            ast::VariableDecorationList{})),
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("var"), "var"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f))),
-      });  // decorations
+              Source{}, Var("var", ast::StorageClass::kFunction, ty.f32)),
+          create<ast::AssignmentStatement>(Source{}, Expr("var"), Expr(2.f))});
   ast::BlockStatement outer(
       Source{},
       ast::StatementList{
           create<ast::VariableDeclStatement>(
-              Source{}, create<ast::Variable>(
-                            Source{},                         // source
-                            "var",                            // name
-                            ast::StorageClass::kFunction,     // storage_class
-                            &f32,                             // type
-                            false,                            // is_const
-                            nullptr,                          // constructor
-                            ast::VariableDecorationList{})),  // decorations
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("var"), "var"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f))),
+              Source{}, Var("var", ast::StorageClass::kFunction, ty.f32)),
+          create<ast::AssignmentStatement>(Source{}, Expr("var"), Expr(1.f)),
           inner,
-          create<ast::AssignmentStatement>(
-              Source{},
-              create<ast::IdentifierExpression>(
-                  Source{}, mod->RegisterSymbol("var"), "var"),
-              create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f))),
-      });
+          create<ast::AssignmentStatement>(Source{}, Expr("var"), Expr(3.f))});
 
   ASSERT_TRUE(td.DetermineResultType(&outer)) << td.error();
 

@@ -277,20 +277,16 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   mod->AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate, ty.f32,
                              Expr(2.1f), ast::VariableDecorationList{}));
 
-  auto* lhs = create<ast::IdentifierExpression>(
-      mod->RegisterSymbol("global_var"), "global_var");
-  auto* rhs = Expr(3.14f);
-
-  auto* func =
-      Func("my_func", ast::VariableList{}, ty.void_,
-           ast::StatementList{
-               create<ast::AssignmentStatement>(
-                   Source{Source::Location{12, 34}}, lhs, rhs),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
+  auto* func = Func(
+      "my_func", ast::VariableList{}, ty.void_,
+      ast::StatementList{
+          create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
+                                           Expr("global_var"), Expr(3.14f)),
+          create<ast::ReturnStatement>(),
+      },
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+      });
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();

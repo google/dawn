@@ -44,19 +44,17 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
-  auto* else_cond = create<ast::IdentifierExpression>(
-      mod->RegisterSymbol("else_cond"), "else_cond");
   auto* else_body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
 
-  auto* cond = Expr("cond");
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
   auto* i = create<ast::IfStatement>(
-      cond, body,
-      ast::ElseStatementList{create<ast::ElseStatement>(else_cond, else_body)});
+      Expr("cond"), body,
+      ast::ElseStatementList{
+          create<ast::ElseStatement>(Expr("else_cond"), else_body)});
 
   gen.increment_indent();
 
@@ -94,9 +92,6 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
-  auto* else_cond = create<ast::IdentifierExpression>(
-      mod->RegisterSymbol("else_cond"), "else_cond");
-
   auto* else_body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
@@ -105,14 +100,13 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
       create<ast::DiscardStatement>(),
   });
 
-  auto* cond = Expr("cond");
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
   auto* i = create<ast::IfStatement>(
-      cond, body,
+      Expr("cond"), body,
       ast::ElseStatementList{
-          create<ast::ElseStatement>(else_cond, else_body),
+          create<ast::ElseStatement>(Expr("else_cond"), else_body),
           create<ast::ElseStatement>(nullptr, else_body_2),
       });
 

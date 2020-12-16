@@ -121,23 +121,14 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   auto param = GetParam();
 
-  ast::type::I32 i32;
+  auto* var = Var("param", ast::StorageClass::kFunction, ty.i32);
+  ast::BinaryExpression expr(Source{}, param.op, Expr("param"), Expr("param"));
 
-  ast::Variable var(Source{}, "param", ast::StorageClass::kFunction, &i32,
-                    false, nullptr, ast::VariableDecorationList{});
-
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("param"), "param");
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("param"), "param");
-
-  ast::BinaryExpression expr(Source{}, param.op, lhs, rhs);
-
-  td.RegisterVariableForTesting(&var);
+  td.RegisterVariableForTesting(var);
   EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 7u) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -646,26 +637,11 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("mat"), "mat");
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
-
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
-
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, Expr("mat"),
+                             Expr(1.f));
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   b.push_function(Function{});
@@ -686,25 +662,11 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f));
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("mat"), "mat");
-
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, Expr(1.f),
+                             Expr("mat"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -726,33 +688,15 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("mat"), "mat");
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* rhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* rhs = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(1.f)});
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, Expr("mat"),
+                             rhs);
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -775,34 +719,15 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.f)));
-  auto* lhs = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
-
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("mat"), "mat");
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* lhs = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(1.f)});
 
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs,
+                             Expr("mat"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -825,26 +750,11 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Matrix mat3(&f32, 3, 3);
-
-  auto* var =
-      create<ast::Variable>(Source{},                        // source
-                            "mat",                           // name
-                            ast::StorageClass::kFunction,    // storage_class
-                            &mat3,                           // type
-                            false,                           // is_const
-                            nullptr,                         // constructor
-                            ast::VariableDecorationList{});  // decorations
-  auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("mat"), "mat");
-  auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("mat"), "mat");
-
+  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   td.RegisterVariableForTesting(var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kMultiply, Expr("mat"),
+                             Expr("mat"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -913,36 +823,16 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
   ast::type::Bool bool_type;
 
-  auto* a_var = create<ast::Variable>(
-      Source{},                      // source
-      "a",                           // name
-      ast::StorageClass::kFunction,  // storage_class
-      &bool_type,                    // type
-      false,                         // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::BoolLiteral>(Source{}, &bool_type, true)),  // constructor
-      ast::VariableDecorationList{});                             // decorations
-  auto* b_var = create<ast::Variable>(
-      Source{},                      // source
-      "b",                           // name
-      ast::StorageClass::kFunction,  // storage_class
-      &bool_type,                    // type
-      false,                         // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::BoolLiteral>(Source{}, &bool_type,
-                                             false)),  // constructor
-      ast::VariableDecorationList{});                  // decorations
-
-  auto* lhs = create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("a"), "a");
-  auto* rhs = create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("b"), "b");
+  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_, Expr(true),
+                    ast::VariableDecorationList{});
+  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_, Expr(false),
+                    ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(a_var);
   td.RegisterVariableForTesting(b_var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalAnd, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalAnd, Expr("a"),
+                             Expr("b"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -1115,36 +1005,16 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
   ast::type::Bool bool_type;
 
-  auto* a_var = create<ast::Variable>(
-      Source{},                      // source
-      "a",                           // name
-      ast::StorageClass::kFunction,  // storage_class
-      &bool_type,                    // type
-      false,                         // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::BoolLiteral>(Source{}, &bool_type, true)),  // constructor
-      ast::VariableDecorationList{});                             // decorations
-  auto* b_var = create<ast::Variable>(
-      Source{},                      // source
-      "b",                           // name
-      ast::StorageClass::kFunction,  // storage_class
-      &bool_type,                    // type
-      false,                         // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::BoolLiteral>(Source{}, &bool_type,
-                                             false)),  // constructor
-      ast::VariableDecorationList{});                  // decorations
-
-  auto* lhs = create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("a"), "a");
-  auto* rhs = create<ast::IdentifierExpression>(Source{},
-                                                mod->RegisterSymbol("b"), "b");
+  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_, Expr(true),
+                    ast::VariableDecorationList{});
+  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_, Expr(false),
+                    ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(a_var);
   td.RegisterVariableForTesting(b_var);
 
-  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalOr, lhs, rhs);
+  ast::BinaryExpression expr(Source{}, ast::BinaryOp::kLogicalOr, Expr("a"),
+                             Expr("b"));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

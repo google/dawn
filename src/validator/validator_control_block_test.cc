@@ -45,16 +45,15 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(3.14f),
                   ast::VariableDecorationList{});
 
-  auto* cond = create<ast::IdentifierExpression>(
-      Source{Source::Location{12, 34}}, mod->RegisterSymbol("a"), "a");
-  ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
   ast::CaseStatementList body;
-  body.push_back(create<ast::CaseStatement>(default_csl, block_default));
+  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  body.push_back(
+      create<ast::CaseStatement>(ast::CaseSelectorList{}, block_default));
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, body),
+      create<ast::SwitchStatement>(Expr(Source{Source::Location{12, 34}}, "a"),
+                                   body),
   });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
@@ -72,16 +71,16 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
                   ast::VariableDecorationList{});
 
-  auto* cond = Expr("a");
   ast::CaseSelectorList csl;
   csl.push_back(Literal(1));
+
   ast::CaseStatementList body;
   body.push_back(create<ast::CaseStatement>(
       csl, create<ast::BlockStatement>(ast::StatementList{})));
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, cond,
+      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, Expr("a"),
                                    body),
   });
 
@@ -103,8 +102,6 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
                   ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = Expr("a");
-
   ast::CaseSelectorList default_csl_1;
   auto* block_default_1 = create<ast::BlockStatement>(ast::StatementList{});
   switch_body.push_back(
@@ -122,7 +119,7 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, cond,
+      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, Expr("a"),
                                    switch_body),
   });
 
@@ -144,8 +141,6 @@ TEST_F(ValidateControlBlockTest,
                   ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = Expr("a");
-
   ast::CaseSelectorList csl;
   csl.push_back(create<ast::UintLiteral>(ty.u32, 1));
   switch_body.push_back(create<ast::CaseStatement>(
@@ -158,7 +153,7 @@ TEST_F(ValidateControlBlockTest,
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, switch_body),
+      create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -180,8 +175,6 @@ TEST_F(ValidateControlBlockTest,
                   ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = Expr("a");
-
   ast::CaseSelectorList csl;
   csl.push_back(Literal(-1));
   switch_body.push_back(create<ast::CaseStatement>(
@@ -194,7 +187,7 @@ TEST_F(ValidateControlBlockTest,
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, switch_body),
+      create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -216,8 +209,6 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
                   ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = Expr("a");
-
   ast::CaseSelectorList csl_1;
   csl_1.push_back(create<ast::UintLiteral>(ty.u32, 0));
   switch_body.push_back(create<ast::CaseStatement>(
@@ -236,7 +227,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, switch_body),
+      create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -256,8 +247,6 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
                   ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
-  auto* cond = Expr("a");
-
   ast::CaseSelectorList csl_1;
   csl_1.push_back(Literal(10));
   switch_body.push_back(create<ast::CaseStatement>(
@@ -278,7 +267,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, switch_body),
+      create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -295,7 +284,6 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
                   ast::VariableDecorationList{});
 
-  auto* cond = Expr("a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>(
 
@@ -307,7 +295,7 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, body),
+      create<ast::SwitchStatement>(Expr("a"), body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_FALSE(v()->ValidateStatements(block));
@@ -325,7 +313,6 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
                   ast::VariableDecorationList{});
 
-  auto* cond = Expr("a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
   ast::CaseStatementList body;
@@ -338,7 +325,7 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, body),
+      create<ast::SwitchStatement>(Expr("a"), body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(block)) << v()->error();
@@ -351,12 +338,10 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   //   default: {}
   // }
 
-  ast::type::Alias my_int{mod->RegisterSymbol("MyInt"), "MyInt", ty.u32};
-
-  auto* var = Var("a", ast::StorageClass::kNone, &my_int, Expr(2u),
+  auto* my_int = ty.alias("MyInt", ty.u32);
+  auto* var = Var("a", ast::StorageClass::kNone, my_int, Expr(2u),
                   ast::VariableDecorationList{});
 
-  auto* cond = Expr("a");
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
   ast::CaseStatementList body;
@@ -365,9 +350,9 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(cond, body),
+      create<ast::SwitchStatement>(Expr("a"), body),
   });
-  mod->AddConstructedType(&my_int);
+  mod->AddConstructedType(my_int);
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
   EXPECT_TRUE(v()->ValidateStatements(block)) << v()->error();

@@ -42,24 +42,15 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Assign_Var) {
-  ast::type::F32 f32;
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
-                  nullptr, ast::VariableDecorationList{});
-
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("var"), "var");
-  auto* val = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
-
-  ast::AssignmentStatement assign(Source{}, ident, val);
-
-  td.RegisterVariableForTesting(&v);
+  ast::AssignmentStatement assign(Source{}, Expr("var"), Expr(1.f));
+  td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -77,23 +68,14 @@ TEST_F(BuilderTest, Assign_Var) {
 }
 
 TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
-  ast::type::F32 f32;
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
-                  nullptr, ast::VariableDecorationList{});
-
-  auto* ident =
-      create<ast::IdentifierExpression>(mod->RegisterSymbol("var"), "var");
-  auto* val = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 1.0f));
-
-  ast::AssignmentStatement assign(Source{}, ident, val);
-
-  td.RegisterVariableForTesting(&v);
+  ast::AssignmentStatement assign(Source{}, Expr("var"), Expr(1.f));
+  td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_FALSE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -104,25 +86,18 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec, false,
-                  nullptr, ast::VariableDecorationList{});
+  auto* val = create<ast::TypeConstructorExpression>(Source{}, ty.vec3<f32>(),
+                                                     ast::ExpressionList{});
+  ast::AssignmentStatement assign(Source{}, Expr("var"), val);
 
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("var"), "var");
-  ast::ExpressionList vals;
-  auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
-
-  ast::AssignmentStatement assign(Source{}, ident, val);
-
-  td.RegisterVariableForTesting(&v);
+  td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -140,41 +115,20 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-  ast::type::Vector vec2(&f32, 2);
-
   auto* first = create<ast::TypeConstructorExpression>(
-      Source{}, &vec2,
-      ast::ExpressionList{
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)),
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)),
-      });
+      Source{}, ty.vec2<f32>(), ast::ExpressionList{Expr(1.f), Expr(2.f)});
 
   auto* init = create<ast::TypeConstructorExpression>(
-      Source{}, &vec3,
-      ast::ExpressionList{
-          first,
-          create<ast::ScalarConstructorExpression>(
-              Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
-      });
+      Source{}, ty.vec3<f32>(), ast::ExpressionList{first, Expr(3.f)});
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
-                  nullptr, ast::VariableDecorationList{});
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
+  ast::AssignmentStatement assign(Source{}, Expr("var"), init);
 
-  ast::AssignmentStatement assign(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      init);
-
-  td.RegisterVariableForTesting(&v);
+  td.RegisterVariableForTesting(v);
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -200,33 +154,18 @@ OpStore %1 %13
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
+  auto* init = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)});
 
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
+  ast::AssignmentStatement assign(Source{}, Expr("var"), init);
 
-  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
-
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
-                  nullptr, ast::VariableDecorationList{});
-
-  ast::AssignmentStatement assign(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      init);
-
-  td.RegisterVariableForTesting(&v);
+  td.RegisterVariableForTesting(v);
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -258,29 +197,17 @@ TEST_F(BuilderTest, Assign_StructMember) {
       ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
       ast::StructDecorationList{});
 
-  ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
+  auto* s_type = ty.struct_("my_struct", s);
+  auto* v = Var("ident", ast::StorageClass::kFunction, s_type);
 
-  ast::Variable v(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
-                  false, nullptr, ast::VariableDecorationList{});
-
-  auto* ident = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("ident"),
-                                        "ident"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("b"),
-                                        "b"));
-
-  auto* val = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, ty.f32, 4.0f));
-
-  ast::AssignmentStatement assign(Source{}, ident, val);
-
-  td.RegisterVariableForTesting(&v);
+  ast::AssignmentStatement assign(Source{}, MemberAccessor("ident", "b"),
+                                  Expr(4.f));
+  td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -303,33 +230,19 @@ OpStore %8 %9
 }
 
 TEST_F(BuilderTest, Assign_Vector) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
-                  nullptr, ast::VariableDecorationList{});
+  auto* val = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
 
-  auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol("var"), "var");
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-
-  auto* val = create<ast::TypeConstructorExpression>(Source{}, &vec3, vals);
-
-  ast::AssignmentStatement assign(Source{}, ident, val);
-
-  td.RegisterVariableForTesting(&v);
+  ast::AssignmentStatement assign(Source{}, Expr("var"), val);
+  td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -350,31 +263,18 @@ TEST_F(BuilderTest, Assign_Vector) {
 }
 
 TEST_F(BuilderTest, Assign_Vector_MemberByName) {
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // var.y = 1
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
-                  nullptr, ast::VariableDecorationList{});
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  auto* ident = create<ast::MemberAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("y"),
-                                        "y"));
-  auto* val = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
-
-  ast::AssignmentStatement assign(Source{}, ident, val);
-
-  td.RegisterVariableForTesting(&v);
+  ast::AssignmentStatement assign(Source{}, MemberAccessor("var", "y"),
+                                  Expr(1.f));
+  td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
@@ -398,32 +298,17 @@ OpStore %9 %10
 }
 
 TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-  ast::type::Vector vec3(&f32, 3);
-
   // var[1] = 1
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &vec3, false,
-                  nullptr, ast::VariableDecorationList{});
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  auto* ident = create<ast::ArrayAccessorExpression>(
-      Source{},
-      create<ast::IdentifierExpression>(Source{}, mod->RegisterSymbol("var"),
-                                        "var"),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::SintLiteral>(Source{}, &i32, 1)));
-  auto* val = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f));
-
-  ast::AssignmentStatement assign(Source{}, ident, val);
-
-  td.RegisterVariableForTesting(&v);
+  ast::AssignmentStatement assign(Source{}, IndexAccessor("var", 1), Expr(1.f));
+  td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
