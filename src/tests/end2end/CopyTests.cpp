@@ -61,7 +61,7 @@ class CopyTests : public DawnTest {
 
     static BufferSpec MinimumBufferSpec(uint32_t width, uint32_t height, uint32_t depth = 1) {
         return MinimumBufferSpec({width, height, depth}, kStrideComputeDefault,
-                                 depth == 1 ? wgpu::kStrideUndefined : kStrideComputeDefault);
+                                 depth == 1 ? wgpu::kCopyStrideUndefined : kStrideComputeDefault);
     }
 
     static BufferSpec MinimumBufferSpec(wgpu::Extent3D copyExtent,
@@ -722,7 +722,7 @@ TEST_P(CopyTests_T2B, BytesPerRowWithOneRowCopy) {
         EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, bufferSpec, {5, 1, 1}));
 
         // bytesPerRow undefined
-        bufferSpec.bytesPerRow = wgpu::kStrideUndefined;
+        bufferSpec.bytesPerRow = wgpu::kCopyStrideUndefined;
         DoTest(textureSpec, bufferSpec, {5, 1, 1});
     }
 
@@ -750,7 +750,8 @@ TEST_P(CopyTests_T2B, StrideSpecialCases) {
     // bytesPerRow undefined
     for (const wgpu::Extent3D copyExtent :
          {wgpu::Extent3D{2, 1, 1}, {2, 0, 1}, {2, 1, 0}, {2, 0, 0}}) {
-        DoTest(textureSpec, MinimumBufferSpec(copyExtent, wgpu::kStrideUndefined, 2), copyExtent);
+        DoTest(textureSpec, MinimumBufferSpec(copyExtent, wgpu::kCopyStrideUndefined, 2),
+               copyExtent);
     }
 
     // rowsPerImage 0
@@ -761,7 +762,8 @@ TEST_P(CopyTests_T2B, StrideSpecialCases) {
 
     // rowsPerImage undefined
     for (const wgpu::Extent3D copyExtent : {wgpu::Extent3D{2, 2, 1}, {2, 2, 0}}) {
-        DoTest(textureSpec, MinimumBufferSpec(copyExtent, 256, wgpu::kStrideUndefined), copyExtent);
+        DoTest(textureSpec, MinimumBufferSpec(copyExtent, 256, wgpu::kCopyStrideUndefined),
+               copyExtent);
     }
 }
 
@@ -1209,7 +1211,7 @@ TEST_P(CopyTests_B2T, BytesPerRowWithOneRowCopy) {
         EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, bufferSpec, {5, 1, 1}));
 
         // bytesPerRow undefined
-        bufferSpec.bytesPerRow = wgpu::kStrideUndefined;
+        bufferSpec.bytesPerRow = wgpu::kCopyStrideUndefined;
         DoTest(textureSpec, bufferSpec, {5, 1, 1});
     }
 
@@ -1237,7 +1239,8 @@ TEST_P(CopyTests_B2T, StrideSpecialCases) {
     // bytesPerRow undefined
     for (const wgpu::Extent3D copyExtent :
          {wgpu::Extent3D{2, 1, 1}, {2, 0, 1}, {2, 1, 0}, {2, 0, 0}}) {
-        DoTest(textureSpec, MinimumBufferSpec(copyExtent, wgpu::kStrideUndefined, 2), copyExtent);
+        DoTest(textureSpec, MinimumBufferSpec(copyExtent, wgpu::kCopyStrideUndefined, 2),
+               copyExtent);
     }
 
     // rowsPerImage 0
@@ -1248,7 +1251,8 @@ TEST_P(CopyTests_B2T, StrideSpecialCases) {
 
     // rowsPerImage undefined
     for (const wgpu::Extent3D copyExtent : {wgpu::Extent3D{2, 2, 1}, {2, 2, 0}}) {
-        DoTest(textureSpec, MinimumBufferSpec(copyExtent, 256, wgpu::kStrideUndefined), copyExtent);
+        DoTest(textureSpec, MinimumBufferSpec(copyExtent, 256, wgpu::kCopyStrideUndefined),
+               copyExtent);
     }
 }
 

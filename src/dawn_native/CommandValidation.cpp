@@ -416,8 +416,8 @@ namespace dawn_native {
         //
         // This means that if the computation of depth * bytesPerImage doesn't overflow, none of the
         // computations for requiredBytesInCopy will. (and it's not a very pessimizing check)
-        ASSERT(copySize.depth <= 1 ||
-               (bytesPerRow != wgpu::kStrideUndefined && rowsPerImage != wgpu::kStrideUndefined));
+        ASSERT(copySize.depth <= 1 || (bytesPerRow != wgpu::kCopyStrideUndefined &&
+                                       rowsPerImage != wgpu::kCopyStrideUndefined));
         uint64_t bytesPerImage = Safe32x32(bytesPerRow, rowsPerImage);
         if (bytesPerImage > std::numeric_limits<uint64_t>::max() / copySize.depth) {
             return DAWN_VALIDATION_ERROR("requiredBytesInCopy is too large.");
@@ -425,7 +425,7 @@ namespace dawn_native {
 
         uint64_t requiredBytesInCopy = bytesPerImage * (copySize.depth - 1);
         if (heightInBlocks > 0) {
-            ASSERT(heightInBlocks <= 1 || bytesPerRow != wgpu::kStrideUndefined);
+            ASSERT(heightInBlocks <= 1 || bytesPerRow != wgpu::kCopyStrideUndefined);
             uint64_t bytesInLastImage = Safe32x32(bytesPerRow, heightInBlocks - 1) + bytesInLastRow;
             requiredBytesInCopy += bytesInLastImage;
         }
@@ -464,7 +464,7 @@ namespace dawn_native {
                 device->EmitDeprecationWarning(
                     "rowsPerImage soon must be non-zero or unspecified if copy depth == 1 (it will "
                     "no longer default to the copy height).");
-                layout.rowsPerImage = wgpu::kStrideUndefined;
+                layout.rowsPerImage = wgpu::kCopyStrideUndefined;
             }
         }
 
@@ -478,12 +478,13 @@ namespace dawn_native {
             device->EmitDeprecationWarning(
                 "Soon, even if copy height == 1, bytesPerRow must be >= the byte size of each row "
                 "or left unspecified.");
-            layout.bytesPerRow = wgpu::kStrideUndefined;
+            layout.bytesPerRow = wgpu::kCopyStrideUndefined;
         }
         return layout;
     }
 
-    // Replace wgpu::kStrideUndefined with real values, so backends don't have to think about it.
+    // Replace wgpu::kCopyStrideUndefined with real values, so backends don't have to think about
+    // it.
     void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
                                               const TexelBlockInfo& blockInfo,
                                               const Extent3D& copyExtent) {
@@ -491,7 +492,7 @@ namespace dawn_native {
         ASSERT(copyExtent.height % blockInfo.height == 0);
         uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
 
-        if (layout->bytesPerRow == wgpu::kStrideUndefined) {
+        if (layout->bytesPerRow == wgpu::kCopyStrideUndefined) {
             ASSERT(copyExtent.width % blockInfo.width == 0);
             uint32_t widthInBlocks = copyExtent.width / blockInfo.width;
             uint32_t bytesInLastRow = widthInBlocks * blockInfo.byteSize;
@@ -499,7 +500,7 @@ namespace dawn_native {
             ASSERT(heightInBlocks <= 1 && copyExtent.depth <= 1);
             layout->bytesPerRow = Align(bytesInLastRow, kTextureBytesPerRowAlignment);
         }
-        if (layout->rowsPerImage == wgpu::kStrideUndefined) {
+        if (layout->rowsPerImage == wgpu::kCopyStrideUndefined) {
             ASSERT(copyExtent.depth <= 1);
             layout->rowsPerImage = heightInBlocks;
         }
@@ -512,12 +513,12 @@ namespace dawn_native {
         ASSERT(copyExtent.height % blockInfo.height == 0);
         uint32_t heightInBlocks = copyExtent.height / blockInfo.height;
 
-        if (copyExtent.depth > 1 && (layout.bytesPerRow == wgpu::kStrideUndefined ||
-                                     layout.rowsPerImage == wgpu::kStrideUndefined)) {
+        if (copyExtent.depth > 1 && (layout.bytesPerRow == wgpu::kCopyStrideUndefined ||
+                                     layout.rowsPerImage == wgpu::kCopyStrideUndefined)) {
             return DAWN_VALIDATION_ERROR(
                 "If copy depth > 1, bytesPerRow and rowsPerImage must be specified.");
         }
-        if (heightInBlocks > 1 && layout.bytesPerRow == wgpu::kStrideUndefined) {
+        if (heightInBlocks > 1 && layout.bytesPerRow == wgpu::kCopyStrideUndefined) {
             return DAWN_VALIDATION_ERROR("If heightInBlocks > 1, bytesPerRow must be specified.");
         }
 
@@ -528,12 +529,14 @@ namespace dawn_native {
                std::numeric_limits<uint32_t>::max());
         uint32_t bytesInLastRow = widthInBlocks * blockInfo.byteSize;
 
-        // These != wgpu::kStrideUndefined checks are technically redundant with the > checks, but
-        // they should get optimized out.
-        if (layout.bytesPerRow != wgpu::kStrideUndefined && bytesInLastRow > layout.bytesPerRow) {
+        // These != wgpu::kCopyStrideUndefined checks are technically redundant with the > checks,
+        // but they should get optimized out.
+        if (layout.bytesPerRow != wgpu::kCopyStrideUndefined &&
+            bytesInLastRow > layout.bytesPerRow) {
             return DAWN_VALIDATION_ERROR("The byte size of each row must be <= bytesPerRow.");
         }
-        if (layout.rowsPerImage != wgpu::kStrideUndefined && heightInBlocks > layout.rowsPerImage) {
+        if (layout.rowsPerImage != wgpu::kCopyStrideUndefined &&
+            heightInBlocks > layout.rowsPerImage) {
             return DAWN_VALIDATION_ERROR(
                 "The height of each image, in blocks, must be <= rowsPerImage.");
         }
@@ -559,7 +562,7 @@ namespace dawn_native {
     MaybeError ValidateBufferCopyView(DeviceBase const* device,
                                       const BufferCopyView& bufferCopyView) {
         DAWN_TRY(device->ValidateObject(bufferCopyView.buffer));
-        if (bufferCopyView.layout.bytesPerRow != wgpu::kStrideUndefined) {
+        if (bufferCopyView.layout.bytesPerRow != wgpu::kCopyStrideUndefined) {
             if (bufferCopyView.layout.bytesPerRow % kTextureBytesPerRowAlignment != 0) {
                 return DAWN_VALIDATION_ERROR("bytesPerRow must be a multiple of 256");
             }

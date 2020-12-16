@@ -292,7 +292,7 @@ class QueueWriteTextureTests : public DawnTest {
                                   textureSpec.textureSize.height >> textureSpec.level,
                                   textureSpec.textureSize.depth};
         uint32_t bytesPerRow = dataSpec.bytesPerRow;
-        if (bytesPerRow == wgpu::kStrideUndefined) {
+        if (bytesPerRow == wgpu::kCopyStrideUndefined) {
             bytesPerRow = mipSize.width * bytesPerTexel;
         }
         uint32_t alignedBytesPerRow = Align(bytesPerRow, bytesPerTexel);
@@ -526,7 +526,7 @@ TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
         EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, dataSpec, copyExtent));
 
         // bytesPerRow undefined
-        dataSpec.bytesPerRow = wgpu::kStrideUndefined;
+        dataSpec.bytesPerRow = wgpu::kCopyStrideUndefined;
         DoTest(textureSpec, dataSpec, copyExtent);
     }
 
@@ -586,7 +586,7 @@ TEST_P(QueueWriteTextureTests, StrideSpecialCases) {
     // bytesPerRow undefined
     for (const wgpu::Extent3D copyExtent :
          {wgpu::Extent3D{2, 1, 1}, {2, 0, 1}, {2, 1, 0}, {2, 0, 0}}) {
-        DoTest(textureSpec, MinimumDataSpec(copyExtent, wgpu::kStrideUndefined, 2), copyExtent);
+        DoTest(textureSpec, MinimumDataSpec(copyExtent, wgpu::kCopyStrideUndefined, 2), copyExtent);
     }
 
     // rowsPerImage 0
@@ -597,7 +597,8 @@ TEST_P(QueueWriteTextureTests, StrideSpecialCases) {
 
     // rowsPerImage undefined
     for (const wgpu::Extent3D copyExtent : {wgpu::Extent3D{2, 2, 1}, {2, 2, 0}}) {
-        DoTest(textureSpec, MinimumDataSpec(copyExtent, 256, wgpu::kStrideUndefined), copyExtent);
+        DoTest(textureSpec, MinimumDataSpec(copyExtent, 256, wgpu::kCopyStrideUndefined),
+               copyExtent);
     }
 }
 

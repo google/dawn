@@ -30,7 +30,7 @@ struct CopyConfig {
     uint32_t viewMipmapLevel = 0;
     uint32_t bufferOffset = 0;
     uint32_t bytesPerRowAlignment = kTextureBytesPerRowAlignment;
-    uint32_t rowsPerImage = wgpu::kStrideUndefined;
+    uint32_t rowsPerImage = wgpu::kCopyStrideUndefined;
 };
 
 class CompressedTextureBCFormatTest : public DawnTest {
@@ -60,7 +60,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
                               utils::GetTexelBlockSizeInBytes(copyConfig.textureDescriptor.format);
         }
         uint32_t copyRowsPerImage = copyConfig.rowsPerImage;
-        if (copyRowsPerImage == wgpu::kStrideUndefined) {
+        if (copyRowsPerImage == wgpu::kCopyStrideUndefined) {
             copyRowsPerImage = copyHeightInBlock;
         }
         uint32_t copyBytesPerImage = copyBytesPerRow * copyRowsPerImage;

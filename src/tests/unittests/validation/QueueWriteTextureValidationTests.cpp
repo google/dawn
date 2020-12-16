@@ -106,8 +106,8 @@ namespace {
             TestWriteTexture(dataSize, 0, 256, 4, destination, 2, {0, 0, 0}, {4, 4, 1});
             // Copy with a data offset
             TestWriteTexture(dataSize, dataSize - 4, 256, 1, destination, 0, {0, 0, 0}, {1, 1, 1});
-            TestWriteTexture(dataSize, dataSize - 4, 256, wgpu::kStrideUndefined, destination, 0,
-                             {0, 0, 0}, {1, 1, 1});
+            TestWriteTexture(dataSize, dataSize - 4, 256, wgpu::kCopyStrideUndefined, destination,
+                             0, {0, 0, 0}, {1, 1, 1});
         }
 
         // Copies with a 256-byte aligned bytes per row but unaligned texture region
@@ -124,27 +124,27 @@ namespace {
         {
             // An empty copy
             TestWriteTexture(dataSize, 0, 0, 0, destination, 0, {0, 0, 0}, {0, 0, 1});
-            TestWriteTexture(dataSize, 0, 0, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+            TestWriteTexture(dataSize, 0, 0, wgpu::kCopyStrideUndefined, destination, 0, {0, 0, 0},
                              {0, 0, 1});
             // An empty copy with depth = 0
             TestWriteTexture(dataSize, 0, 0, 0, destination, 0, {0, 0, 0}, {0, 0, 0});
-            TestWriteTexture(dataSize, 0, 0, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+            TestWriteTexture(dataSize, 0, 0, wgpu::kCopyStrideUndefined, destination, 0, {0, 0, 0},
                              {0, 0, 0});
             // An empty copy touching the end of the data
             TestWriteTexture(dataSize, dataSize, 0, 0, destination, 0, {0, 0, 0}, {0, 0, 1});
-            TestWriteTexture(dataSize, dataSize, 0, wgpu::kStrideUndefined, destination, 0,
+            TestWriteTexture(dataSize, dataSize, 0, wgpu::kCopyStrideUndefined, destination, 0,
                              {0, 0, 0}, {0, 0, 1});
             // An empty copy touching the side of the texture
             TestWriteTexture(dataSize, 0, 0, 0, destination, 0, {16, 16, 0}, {0, 0, 1});
-            TestWriteTexture(dataSize, 0, 0, wgpu::kStrideUndefined, destination, 0, {16, 16, 0},
-                             {0, 0, 1});
+            TestWriteTexture(dataSize, 0, 0, wgpu::kCopyStrideUndefined, destination, 0,
+                             {16, 16, 0}, {0, 0, 1});
             // An empty copy with depth = 1 and bytesPerRow > 0
             TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {0, 0, 1});
-            TestWriteTexture(dataSize, 0, 256, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
-                             {0, 0, 1});
+            TestWriteTexture(dataSize, 0, 256, wgpu::kCopyStrideUndefined, destination, 0,
+                             {0, 0, 0}, {0, 0, 1});
             // An empty copy with height > 0, depth = 0, bytesPerRow > 0 and rowsPerImage > 0
-            TestWriteTexture(dataSize, 0, 256, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
-                             {0, 1, 0});
+            TestWriteTexture(dataSize, 0, 256, wgpu::kCopyStrideUndefined, destination, 0,
+                             {0, 0, 0}, {0, 1, 0});
             TestWriteTexture(dataSize, 0, 256, 1, destination, 0, {0, 0, 0}, {0, 1, 0});
             TestWriteTexture(dataSize, 0, 256, 16, destination, 0, {0, 0, 0}, {0, 1, 0});
         }
@@ -237,27 +237,27 @@ namespace {
         wgpu::Texture destination = Create2DTexture({3, 7, 2}, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
 
-        // bytesPerRow = 0 or wgpu::kStrideUndefined
+        // bytesPerRow = 0 or wgpu::kCopyStrideUndefined
         {
             // copyHeight > 1
             ASSERT_DEVICE_ERROR(
                 TestWriteTexture(128, 0, 0, 7, destination, 0, {0, 0, 0}, {3, 7, 1}));
             TestWriteTexture(128, 0, 0, 7, destination, 0, {0, 0, 0}, {0, 7, 1});
-            ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, wgpu::kStrideUndefined, 7, destination, 0,
-                                                 {0, 0, 0}, {0, 7, 1}));
+            ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, wgpu::kCopyStrideUndefined, 7, destination,
+                                                 0, {0, 0, 0}, {0, 7, 1}));
 
             // copyDepth > 1
             ASSERT_DEVICE_ERROR(
                 TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {3, 1, 2}));
             TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {0, 1, 2});
-            ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, wgpu::kStrideUndefined, 1, destination, 0,
-                                                 {0, 0, 0}, {0, 1, 2}));
+            ASSERT_DEVICE_ERROR(TestWriteTexture(128, 0, wgpu::kCopyStrideUndefined, 1, destination,
+                                                 0, {0, 0, 0}, {0, 1, 2}));
 
             // copyHeight = 1 and copyDepth = 1
             // TODO(crbug.com/dawn/520): Change to ASSERT_DEVICE_ERROR.
             EXPECT_DEPRECATION_WARNING(
                 TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {3, 1, 1}));
-            TestWriteTexture(128, 0, wgpu::kStrideUndefined, 1, destination, 0, {0, 0, 0},
+            TestWriteTexture(128, 0, wgpu::kCopyStrideUndefined, 1, destination, 0, {0, 0, 0},
                              {3, 1, 1});
         }
 
@@ -298,8 +298,8 @@ namespace {
         wgpu::Texture destination = Create2DTexture({16, 16, 2}, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                     wgpu::TextureUsage::CopyDst);
 
-        // rowsPerImage is wgpu::kStrideUndefined
-        TestWriteTexture(dataSize, 0, 256, wgpu::kStrideUndefined, destination, 0, {0, 0, 0},
+        // rowsPerImage is wgpu::kCopyStrideUndefined
+        TestWriteTexture(dataSize, 0, 256, wgpu::kCopyStrideUndefined, destination, 0, {0, 0, 0},
                          {4, 4, 1});
 
         // rowsPerImage is equal to copy height (Valid)
@@ -532,7 +532,7 @@ namespace {
                 {4, 4, 1}, 1, wgpu::TextureFormat::Depth24PlusStencil8,
                 wgpu::TextureUsage::CopyDst);
 
-            TestWriteTexture(dataSize, 0, bytesPerRow, wgpu::kStrideUndefined, destination, 0,
+            TestWriteTexture(dataSize, 0, bytesPerRow, wgpu::kCopyStrideUndefined, destination, 0,
                              {0, 0, 0}, {4, 4, 1}, wgpu::TextureAspect::StencilOnly);
 
             // And that it fails if the buffer is one byte too small

@@ -44,7 +44,7 @@ namespace utils {
 
         layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);
 
-        if (rowsPerImage == wgpu::kStrideUndefined) {
+        if (rowsPerImage == wgpu::kCopyStrideUndefined) {
             rowsPerImage = layout.mipSize.height;
         }
         layout.rowsPerImage = rowsPerImage;
@@ -125,7 +125,7 @@ namespace utils {
 
         wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
         wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(0, wgpu::kStrideUndefined);
+            utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
         wgpu::Extent3D copyExtent = {1, 1, 1};
 
         // WriteTexture with exactly 1 byte of data.

@@ -35,7 +35,7 @@ namespace utils {
         wgpu::TextureFormat format,
         wgpu::Extent3D textureSizeAtLevel0,
         uint32_t mipmapLevel,
-        uint32_t rowsPerImage = wgpu::kStrideUndefined);
+        uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
 
     uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
                                  uint64_t rowsPerImage,
