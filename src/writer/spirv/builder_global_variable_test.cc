@@ -693,7 +693,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonReadable
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeVoid
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 R32ui
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant

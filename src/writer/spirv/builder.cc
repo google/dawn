@@ -2696,12 +2696,7 @@ bool Builder::GenerateTextureType(ast::type::Texture* texture,
   } else if (auto* ms = texture->As<ast::type::MultisampledTexture>()) {
     type_id = GenerateTypeIfNeeded(ms->type());
   } else if (auto* st = texture->As<ast::type::StorageTexture>()) {
-    if (st->access() == ast::AccessControl::kWriteOnly) {
-      ast::type::Void void_type;
-      type_id = GenerateTypeIfNeeded(&void_type);
-    } else {
-      type_id = GenerateTypeIfNeeded(st->type());
-    }
+    type_id = GenerateTypeIfNeeded(st->type());
   }
   if (type_id == 0u) {
     return false;
