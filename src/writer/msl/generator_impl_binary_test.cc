@@ -39,9 +39,9 @@ TEST_P(MslBinaryTest, Emit) {
   auto params = GetParam();
 
   auto* left = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("left"), "left");
+      Source{}, mod->RegisterSymbol("left"), "left");
   auto* right = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("right"), "right");
+      Source{}, mod->RegisterSymbol("right"), "right");
 
   ast::BinaryExpression expr(Source{}, params.op, left, right);
 

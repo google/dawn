@@ -97,9 +97,9 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
                                                });
 
   auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("lhs"), "lhs");
+      Source{}, mod->RegisterSymbol("lhs"), "lhs");
   auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("rhs"), "rhs");
+      Source{}, mod->RegisterSymbol("rhs"), "rhs");
 
   continuing = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
@@ -186,9 +186,9 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
       });
 
   auto* lhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("lhs"), "lhs");
+      Source{}, mod->RegisterSymbol("lhs"), "lhs");
   auto* rhs = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("rhs"), "rhs");
+      Source{}, mod->RegisterSymbol("rhs"), "rhs");
 
   auto* continuing = create<ast::BlockStatement>(
       Source{}, ast::StatementList{

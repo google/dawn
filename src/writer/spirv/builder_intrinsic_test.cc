@@ -1332,12 +1332,9 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
-                                              ty.array<f32>(), decos));
-
-  auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* s =
+      create<ast::Struct>(ast::StructMemberList{Member("a", ty.array<f32>())},
+                          ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
@@ -1374,14 +1371,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.f32, decos));
-  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
-                                              ty.array<f32>(), decos));
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member("z", ty.f32), Member("a", ty.array<f32>())},
+      ast::StructDecorationList{});
 
-  auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);
@@ -1420,14 +1413,11 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
   ast::type::Pointer ptr(ty.array<f32>(), ast::StorageClass::kStorageBuffer);
 
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("z"), "z", ty.f32, decos));
-  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("a"), "a",
-                                              ty.array<f32>(), decos));
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member("z", ty.f32), Member("a", ty.array<f32>())
 
-  auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
+      },
+      ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto* var = Var("b", ast::StorageClass::kPrivate, &s_type);

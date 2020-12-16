@@ -294,14 +294,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct) {
-  ast::type::F32 f32;
-
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("a"), "a", &f32, decos));
-
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32)},
+                                ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -317,17 +311,11 @@ OpMemberName %1 0 "a"
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
-  ast::type::F32 f32;
-
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("a"), "a", &f32, decos));
-
   ast::StructDecorationList struct_decos;
   struct_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* s = create<ast::Struct>(Source{}, members, struct_decos);
+  auto* s = create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32)},
+                                struct_decos);
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -345,20 +333,10 @@ OpMemberName %1 0 "a"
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
-  ast::type::F32 f32;
-
-  ast::StructMemberDecorationList a_decos;
-  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  ast::StructMemberDecorationList b_decos;
-  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 8));
-
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("a"), "a", &f32, a_decos));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("b"), "b", &f32, b_decos));
-
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.f32, {MemberOffset(0)}),
+                            Member("b", ty.f32, {MemberOffset(8)})},
+      ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -378,24 +356,11 @@ OpMemberDecorate %1 1 Offset 8
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
-  // Don't infer layout for matrix when there is no offset.
-  ast::type::F32 f32;
-  ast::type::Matrix glsl_mat2x2(&f32, 2, 2);
-  ast::type::Matrix glsl_mat2x3(&f32, 3, 2);  // 2 columns, 3 rows
-  ast::type::Matrix glsl_mat4x4(&f32, 4, 4);
-
-  ast::StructMemberDecorationList empty_a;
-  ast::StructMemberDecorationList empty_b;
-  ast::StructMemberDecorationList empty_c;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("a"), "a", &glsl_mat2x2, empty_a));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("b"), "b", &glsl_mat2x3, empty_b));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("c"), "c", &glsl_mat4x4, empty_c));
-
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s =
+      create<ast::Struct>(ast::StructMemberList{Member("a", ty.mat2x2<f32>()),
+                                                Member("b", ty.mat2x3<f32>()),
+                                                Member("c", ty.mat4x4<f32>())},
+                          ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -421,27 +386,11 @@ OpMemberName %1 2 "c"
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
   // We have to infer layout for matrix when it also has an offset.
-  ast::type::F32 f32;
-  ast::type::Matrix glsl_mat2x2(&f32, 2, 2);
-  ast::type::Matrix glsl_mat2x3(&f32, 3, 2);  // 2 columns, 3 rows
-  ast::type::Matrix glsl_mat4x4(&f32, 4, 4);
-
-  ast::StructMemberDecorationList a_decos;
-  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  ast::StructMemberDecorationList b_decos;
-  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
-  ast::StructMemberDecorationList c_decos;
-  c_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 48));
-
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("a"), "a", &glsl_mat2x2, a_decos));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("b"), "b", &glsl_mat2x3, b_decos));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("c"), "c", &glsl_mat4x4, c_decos));
-
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.mat2x2<f32>(), {MemberOffset(0)}),
+                            Member("b", ty.mat2x3<f32>(), {MemberOffset(16)}),
+                            Member("c", ty.mat4x4<f32>(), {MemberOffset(48)})},
+      ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -478,51 +427,40 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   // We have to infer layout for matrix when it also has an offset.
   // The decoration goes on the struct member, even if the matrix is buried
   // in levels of arrays.
-  ast::type::F32 f32;
-
-  ast::type::Matrix glsl_mat2x2(&f32, 2, 2);
   ast::type::Array arr_mat2x2(
-      &glsl_mat2x2, 1, ast::ArrayDecorationList{});  // Singly nested array
+      ty.mat2x2<f32>(), 1, ast::ArrayDecorationList{});  // Singly nested array
 
-  ast::type::Matrix glsl_mat2x3(&f32, 3, 2);  // 2 columns, 3 rows
-  ast::type::Array arr_mat2x3(&glsl_mat2x3, 1, ast::ArrayDecorationList{});
-  ast::type::Array arr_arr_mat2x2(
-      &arr_mat2x3, 1, ast::ArrayDecorationList{});  // Doubly nested array
+  ast::type::Array arr_mat2x3(ty.mat2x3<f32>(), 1, ast::ArrayDecorationList{});
+  ast::type::Array arr_arr_mat2x3(
+      ty.mat2x3<f32>(), 1, ast::ArrayDecorationList{});  // Doubly nested array
 
-  ast::type::Matrix glsl_mat4x4(&f32, 4, 4);
-  ast::type::Array rtarr_mat4x4(&glsl_mat4x4, 0,
+  ast::type::Array rtarr_mat4x4(ty.mat4x4<f32>(), 0,
                                 ast::ArrayDecorationList{});  // Runtime array
 
-  ast::StructMemberDecorationList a_decos;
-  a_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  ast::StructMemberDecorationList b_decos;
-  b_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 16));
-  ast::StructMemberDecorationList c_decos;
-  c_decos.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 48));
-
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("a"), "a", &glsl_mat2x2, a_decos));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("b"), "b", &glsl_mat2x3, b_decos));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("c"), "c", &glsl_mat4x4, c_decos));
-
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member("a", &arr_mat2x2, {MemberOffset(0)}),
+                            Member("b", &arr_arr_mat2x3, {MemberOffset(16)}),
+                            Member("c", &rtarr_mat4x4, {MemberOffset(48)})},
+      ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("S"), "S", s);
 
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
-%3 = OpTypeVector %4 2
-%2 = OpTypeMatrix %3 2
-%6 = OpTypeVector %4 3
-%5 = OpTypeMatrix %6 2
-%8 = OpTypeVector %4 4
-%7 = OpTypeMatrix %8 4
-%1 = OpTypeStruct %2 %5 %7
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+%4 = OpTypeVector %5 2
+%3 = OpTypeMatrix %4 2
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+%2 = OpTypeArray %3 %7
+%10 = OpTypeVector %5 3
+%9 = OpTypeMatrix %10 2
+%8 = OpTypeArray %9 %7
+%13 = OpTypeVector %5 4
+%12 = OpTypeMatrix %13 4
+%11 = OpTypeRuntimeArray %12
+%1 = OpTypeStruct %2 %8 %11
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
 OpMemberName %1 0 "a"

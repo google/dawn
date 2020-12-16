@@ -132,17 +132,10 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
@@ -155,17 +148,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
@@ -174,22 +160,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
-  ast::StructMemberDecorationList decos;
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(4));
-
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, decos));
-
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(32));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, decos));
-
-  decos.push_back(create<ast::StructMemberOffsetDecoration>(128));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("c"), "c", ty.f32, decos));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(4)}),
+                            Member("b", ty.f32, {MemberOffset(32)}),
+                            Member("c", ty.f32, {MemberOffset(128)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
@@ -205,16 +180,9 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("double"), "double", ty.i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  members.push_back(create<ast::StructMember>(mod->RegisterSymbol("float"),
-                                              "float", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("double", ty.i32), Member("float", ty.f32)},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
@@ -228,20 +196,13 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
 
-  auto* str = create<ast::Struct>(members, decos);
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      decos);
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 

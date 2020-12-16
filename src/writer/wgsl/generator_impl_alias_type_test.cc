@@ -16,9 +16,6 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
-#include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"
@@ -39,17 +36,10 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.i32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.f32),
+                            Member("b", ty.i32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
   ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);
@@ -66,17 +56,10 @@ type B = A;
 }
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.i32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.f32),
+                            Member("b", ty.i32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);
   ast::type::Alias alias(mod->RegisterSymbol("B"), "B", &s);

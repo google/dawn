@@ -35,14 +35,14 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   ast::type::Void void_type;
 
   auto* id = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func");
+      Source{}, mod->RegisterSymbol("my_func"), "my_func");
   ast::CallExpression call(Source{}, id, {});
 
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      Source{}, mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{},
       &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func()");
@@ -52,19 +52,19 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   ast::type::Void void_type;
 
   auto* id = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func");
+      Source{}, mod->RegisterSymbol("my_func"), "my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
+      Source{}, mod->RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
+      Source{}, mod->RegisterSymbol("param2"), "param2"));
   ast::CallExpression call(Source{}, id, params);
 
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      Source{}, mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{},
       &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(&call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func(param1, param2)");
@@ -74,20 +74,20 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
   ast::type::Void void_type;
 
   auto* id = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func");
+      Source{}, mod->RegisterSymbol("my_func"), "my_func");
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param1"), "param1"));
+      Source{}, mod->RegisterSymbol("param1"), "param1"));
   params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("param2"), "param2"));
+      Source{}, mod->RegisterSymbol("param2"), "param2"));
   ast::CallStatement call(Source{},
                           create<ast::CallExpression>(Source{}, id, params));
 
   auto* func = create<ast::Function>(
-      Source{}, mod.RegisterSymbol("my_func"), "my_func", ast::VariableList{},
+      Source{}, mod->RegisterSymbol("my_func"), "my_func", ast::VariableList{},
       &void_type, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
       ast::FunctionDecorationList{});
-  mod.AddFunction(func);
+  mod->AddFunction(func);
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(&call)) << gen.error();

@@ -270,18 +270,12 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // }
 
   ast::type::Void void_type;
-  ast::type::F32 f32;
-
-  ast::StructMemberList members;
-  ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 0));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("d"), "d", &f32, a_deco));
 
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
 
-  auto* str = create<ast::Struct>(Source{}, members, s_decos);
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
 
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
@@ -310,7 +304,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
         Source{},                      // source
         "v",                           // name
         ast::StorageClass::kFunction,  // storage_class
-        &f32,                          // type
+        ty.f32,                        // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
             Source{},
@@ -342,7 +336,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
         Source{},                      // source
         "v",                           // name
         ast::StorageClass::kFunction,  // storage_class
-        &f32,                          // type
+        ty.f32,                        // type
         false,                         // is_const
         create<ast::MemberAccessorExpression>(
             Source{},

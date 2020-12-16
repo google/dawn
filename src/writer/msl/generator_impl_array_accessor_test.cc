@@ -36,7 +36,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
   auto* lit = create<ast::SintLiteral>(Source{}, &i32, 5);
   auto* idx = create<ast::ScalarConstructorExpression>(Source{}, lit);
   auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ary"), "ary");
+      Source{}, mod->RegisterSymbol("ary"), "ary");
 
   ast::ArrayAccessorExpression expr(Source{}, ary, idx);
 
@@ -46,9 +46,9 @@ TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
 
 TEST_F(MslGeneratorImplTest, EmitArrayAccessor) {
   auto* ary = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("ary"), "ary");
+      Source{}, mod->RegisterSymbol("ary"), "ary");
   auto* idx = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("idx"), "idx");
+      Source{}, mod->RegisterSymbol("idx"), "idx");
 
   ast::ArrayAccessorExpression expr(Source{}, ary, idx);
 

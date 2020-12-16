@@ -56,7 +56,7 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
   body.push_back(def);
 
   auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
+      Source{}, mod->RegisterSymbol("cond"), "cond");
   ast::SwitchStatement s(Source{}, cond, body);
 
   gen.increment_indent();

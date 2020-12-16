@@ -32,7 +32,7 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
   ast::type::F32 f32;
   auto* id = create<ast::IdentifierExpression>(Source{},
-                                               mod.RegisterSymbol("id"), "id");
+                                               mod->RegisterSymbol("id"), "id");
   ast::BitcastExpression bitcast(Source{}, &f32, id);
 
   ASSERT_TRUE(gen.EmitExpression(&bitcast)) << gen.error();

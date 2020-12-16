@@ -16,8 +16,6 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
@@ -46,15 +44,8 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   auto* str = create<ast::Struct>(
-
-      ast::StructMemberList{
-          create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32,
-                                    ast::StructMemberDecorationList{}),
-          create<ast::StructMember>(
-              mod->RegisterSymbol("b"), "b", ty.i32,
-              ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(4)}),
-      },
+      ast::StructMemberList{Member("a", ty.f32),
+                            Member("b", ty.i32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("A"), "A", str);

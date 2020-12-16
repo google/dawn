@@ -30,9 +30,9 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
   auto* str = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("str"), "str");
+      Source{}, mod->RegisterSymbol("str"), "str");
   auto* mem = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("mem"), "mem");
+      Source{}, mod->RegisterSymbol("mem"), "mem");
 
   ast::MemberAccessorExpression expr(Source{}, str, mem);
 

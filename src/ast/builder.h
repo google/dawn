@@ -30,6 +30,9 @@
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/struct.h"
+#include "src/ast/struct_member.h"
+#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
@@ -569,6 +572,34 @@ class Builder {
   Expression* MemberAccessor(OBJ&& obj, IDX&& idx) {
     return create<MemberAccessorExpression>(Expr(std::forward<OBJ>(obj)),
                                             Expr(std::forward<IDX>(idx)));
+  }
+
+  /// Creates a StructMemberOffsetDecoration
+  /// @param val the offset value
+  /// @returns the offset decoration pointer
+  StructMemberOffsetDecoration* MemberOffset(uint32_t val) {
+    return mod->create<StructMemberOffsetDecoration>(source_, val);
+  }
+
+  /// Creates a StructMember
+  /// @param name the struct member name
+  /// @param type the struct member type
+  /// @returns the struct member pointer
+  StructMember* Member(const std::string& name, type::Type* type) {
+    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), name,
+                                     type, StructMemberDecorationList{});
+  }
+
+  /// Creates a StructMember
+  /// @param name the struct member name
+  /// @param type the struct member type
+  /// @param decos the struct member decorations
+  /// @returns the struct member pointer
+  StructMember* Member(const std::string& name,
+                       type::Type* type,
+                       StructMemberDecorationList decos) {
+    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), name,
+                                     type, decos);
   }
 
   /// Creates a new Node owned by the Module, with the explicit Source.

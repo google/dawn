@@ -260,12 +260,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_UniformStruct) {
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("coord"), "coord", ty.vec4<f32>(),
-      ast::StructMemberDecorationList{}));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("coord", ty.vec4<f32>())},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("Uniforms"), "Uniforms", str);
 
@@ -316,18 +313,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_RW_StorageBuffer_Read) {
-  ast::StructMemberList members;
-  ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, a_deco));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
@@ -372,18 +361,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_RO_StorageBuffer_Read) {
-  ast::StructMemberList members;
-  ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, a_deco));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &s);
@@ -429,18 +410,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_StorageBuffer_Store) {
-  ast::StructMemberList members;
-  ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32, a_deco));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);
@@ -969,16 +942,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   //   return;
   // }
 
-  ast::StructMemberList members;
-  ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("d"), "d", ty.f32, a_deco));
-
-  ast::StructDecorationList s_decos;
-  s_decos.push_back(create<ast::StructBlockDecoration>());
-
-  auto* str = create<ast::Struct>(members, s_decos);
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})},
+      ast::StructDecorationList{create<ast::StructBlockDecoration>()});
 
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);

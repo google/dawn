@@ -785,14 +785,10 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("first_member"), "first_member", ty.i32, decos));
-  members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("second_member"), "second_member", ty.f32, decos));
-
-  auto* strct = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* strct = create<ast::Struct>(
+      ast::StructMemberList{Member("first_member", ty.i32),
+                            Member("second_member", ty.f32)},
+      ast::StructDecorationList{});
 
   ast::type::Struct st(mod->RegisterSymbol("S"), "S", strct);
 
@@ -812,14 +808,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("first_member"), "first_member", ty.i32, decos));
-  members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("second_member"), "second_member", ty.f32, decos));
-
-  auto* strct = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* strct = create<ast::Struct>(
+      ast::StructMemberList{Member("first_member", ty.i32),
+                            Member("second_member", ty.f32)},
+      ast::StructDecorationList{});
 
   auto st = std::make_unique<ast::type::Struct>(mod->RegisterSymbol("alias"),
                                                 "alias", strct);
@@ -898,21 +890,14 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   // }
   //
 
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList b_members;
-  b_members.push_back(create<ast::StructMember>(mod->RegisterSymbol("foo"),
-                                                "foo", ty.vec4<f32>(), decos));
-
-  auto* strctB = create<ast::Struct>(b_members, ast::StructDecorationList{});
+  auto* strctB =
+      create<ast::Struct>(ast::StructMemberList{Member("foo", ty.vec4<f32>())},
+                          ast::StructDecorationList{});
   ast::type::Struct stB(mod->RegisterSymbol("B"), "B", strctB);
 
   ast::type::Vector vecB(&stB, 3);
-
-  ast::StructMemberList a_members;
-  a_members.push_back(create<ast::StructMember>(mod->RegisterSymbol("mem"),
-                                                "mem", &vecB, decos));
-
-  auto* strctA = create<ast::Struct>(a_members, ast::StructDecorationList{});
+  auto* strctA = create<ast::Struct>(
+      ast::StructMemberList{Member("mem", &vecB)}, ast::StructDecorationList{});
 
   ast::type::Struct stA(mod->RegisterSymbol("A"), "A", strctA);
 

@@ -247,8 +247,6 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 }
 
 TEST_F(BuilderTest, Assign_StructMember) {
-  ast::type::F32 f32;
-
   // my_struct {
   //   a : f32
   //   b : f32
@@ -256,14 +254,10 @@ TEST_F(BuilderTest, Assign_StructMember) {
   // var ident : my_struct
   // ident.b = 4.0;
 
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("a"), "a", &f32, decos));
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod->RegisterSymbol("b"), "b", &f32, decos));
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+      ast::StructDecorationList{});
 
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   ast::Variable v(Source{}, "ident", ast::StorageClass::kFunction, &s_type,
@@ -277,7 +271,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
                                         "b"));
 
   auto* val = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 4.0f));
+      Source{}, create<ast::FloatLiteral>(Source{}, ty.f32, 4.0f));
 
   ast::AssignmentStatement assign(Source{}, ident, val);
 

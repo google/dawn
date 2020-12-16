@@ -243,14 +243,10 @@ TEST_F(BuilderTest, MemberAccessor) {
   // var ident : my_struct
   // ident.b
 
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32, decos));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, decos));
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+      ast::StructDecorationList{});
 
-  auto* s = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
@@ -291,24 +287,16 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   //
   // var ident : my_struct
   // ident.inner.a
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, decos));
-
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
-
-  ast::StructMemberList outer_members;
-  outer_members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("inner"), "inner", &inner_struct, decos));
+      create<ast::Struct>(
+          ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+          ast::StructDecorationList{}));
 
   ast::type::Struct s_type(
       mod->RegisterSymbol("my_struct"), "my_struct",
-      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
+      create<ast::Struct>(ast::StructMemberList{Member("inner", &inner_struct)},
+                          ast::StructDecorationList{}));
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -350,26 +338,18 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   //
   // var ident : my_struct
   // ident.inner.a
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, decos));
-
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
+      create<ast::Struct>(
+          ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+          ast::StructDecorationList{}));
 
   ast::type::Alias alias(mod->RegisterSymbol("Inner"), "Inner", &inner_struct);
 
-  ast::StructMemberList outer_members;
-  outer_members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("inner"), "inner", &alias, decos));
-
   ast::type::Struct s_type(
       mod->RegisterSymbol("Outer"), "Outer",
-      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
+      create<ast::Struct>(ast::StructMemberList{Member("inner", &alias)},
+                          ast::StructDecorationList{}));
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -410,25 +390,16 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   //
   // var ident : my_struct
   // ident.inner.a = 2.0f;
-
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, decos));
-
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
-
-  ast::StructMemberList outer_members;
-  outer_members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("inner"), "inner", &inner_struct, decos));
+      create<ast::Struct>(
+          ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+          ast::StructDecorationList{}));
 
   ast::type::Struct s_type(
       mod->RegisterSymbol("my_struct"), "my_struct",
-      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
+      create<ast::Struct>(ast::StructMemberList{Member("inner", &inner_struct)},
+                          ast::StructDecorationList{}));
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
@@ -476,24 +447,16 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   // var ident : my_struct
   // var store : f32 = ident.inner.a
 
-  ast::StructMemberDecorationList decos;
-  ast::StructMemberList inner_members;
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.f32, decos));
-  inner_members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, decos));
-
   ast::type::Struct inner_struct(
       mod->RegisterSymbol("Inner"), "Inner",
-      create<ast::Struct>(inner_members, ast::StructDecorationList{}));
-
-  ast::StructMemberList outer_members;
-  outer_members.push_back(create<ast::StructMember>(
-      mod->RegisterSymbol("inner"), "inner", &inner_struct, decos));
+      create<ast::Struct>(
+          ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+          ast::StructDecorationList{}));
 
   ast::type::Struct s_type(
       mod->RegisterSymbol("my_struct"), "my_struct",
-      create<ast::Struct>(outer_members, ast::StructDecorationList{}));
+      create<ast::Struct>(ast::StructMemberList{Member("inner", &inner_struct)},
+                          ast::StructDecorationList{}));
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
   auto* store = Var("store", ast::StorageClass::kFunction, ty.f32);
@@ -701,26 +664,19 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   // var index : array<A, 2>
   // index[0].foo[2].bar.baz.yx
 
-  ast::StructMemberDecorationList decos;
-
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{create<ast::StructMember>(
-          mod->RegisterSymbol("baz"), "baz", ty.vec3<f32>(), decos)},
-      ast::StructDecorationList{});
+  auto* s =
+      create<ast::Struct>(ast::StructMemberList{Member("baz", ty.vec3<f32>())},
+                          ast::StructDecorationList{});
   ast::type::Struct c_type(mod->RegisterSymbol("C"), "C", s);
 
-  s = create<ast::Struct>(
-      ast::StructMemberList{create<ast::StructMember>(
-          mod->RegisterSymbol("bar"), "bar", &c_type, decos)},
-      ast::StructDecorationList{});
+  s = create<ast::Struct>(ast::StructMemberList{Member("bar", &c_type)},
+                          ast::StructDecorationList{});
   ast::type::Struct b_type(mod->RegisterSymbol("B"), "B", s);
 
   ast::type::Array b_ary_type(&b_type, 3, ast::ArrayDecorationList{});
 
-  s = create<ast::Struct>(
-      ast::StructMemberList{create<ast::StructMember>(
-          mod->RegisterSymbol("foo"), "foo", &b_ary_type, decos)},
-      ast::StructDecorationList{});
+  s = create<ast::Struct>(ast::StructMemberList{Member("foo", &b_ary_type)},
+                          ast::StructDecorationList{});
   ast::type::Struct a_type(mod->RegisterSymbol("A"), "A", s);
 
   ast::type::Array a_ary_type(&a_type, 2, ast::ArrayDecorationList{});

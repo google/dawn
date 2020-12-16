@@ -30,7 +30,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_If) {
   auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
+      Source{}, mod->RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ReturnStatement>(Source{}),
@@ -48,14 +48,14 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
   auto* else_cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
+      Source{}, mod->RegisterSymbol("else_cond"), "else_cond");
   auto* else_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ReturnStatement>(Source{}),
                 });
 
   auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
+      Source{}, mod->RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ReturnStatement>(Source{}),
@@ -82,7 +82,7 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
                 });
 
   auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
+      Source{}, mod->RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ReturnStatement>(Source{}),
@@ -104,7 +104,7 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
   auto* else_cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("else_cond"), "else_cond");
+      Source{}, mod->RegisterSymbol("else_cond"), "else_cond");
 
   auto* else_body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
@@ -117,7 +117,7 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
                 });
 
   auto* cond = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("cond"), "cond");
+      Source{}, mod->RegisterSymbol("cond"), "cond");
   auto* body = create<ast::BlockStatement>(
       Source{}, ast::StatementList{
                     create<ast::ReturnStatement>(Source{}),

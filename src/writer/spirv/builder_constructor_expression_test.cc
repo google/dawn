@@ -953,14 +953,10 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
-  ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
-                                    ty.f32, decos),
-          create<ast::StructMember>(Source{}, mod->RegisterSymbol("b"), "b",
-                                    ty.vec3<f32>(), decos),
+          Member("a", ty.f32),
+          Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1095,12 +1091,9 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
-  ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
-                                    ty.f32, decos),
+          Member("a", ty.f32),
       },
       ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1511,14 +1504,10 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 }
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
-  ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
-                                    ty.f32, decos),
-          create<ast::StructMember>(Source{}, mod->RegisterSymbol("b"), "b",
-                                    ty.vec3<f32>(), decos),
+          Member("a", ty.f32),
+          Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
   ast::type::Struct s_type(mod->RegisterSymbol("my_struct"), "my_struct", s);
@@ -1533,14 +1522,10 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 
 TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_Struct_WithIdentSubExpression) {
-  ast::StructMemberDecorationList decos;
   auto* s = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(Source{}, mod->RegisterSymbol("a"), "a",
-                                    ty.f32, decos),
-          create<ast::StructMember>(Source{}, mod->RegisterSymbol("b"), "b",
-                                    ty.vec3<f32>(), decos),
+          Member("a", ty.f32),
+          Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
 

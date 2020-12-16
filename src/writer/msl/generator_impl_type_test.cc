@@ -48,7 +48,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitType_Alias) {
   ast::type::F32 f32;
-  ast::type::Alias alias(mod.RegisterSymbol("alias"), "alias", &f32);
+  ast::type::Alias alias(mod->RegisterSymbol("alias"), "alias", &f32);
 
   ASSERT_TRUE(gen.EmitType(&alias, "")) << gen.error();
   EXPECT_EQ(gen.result(), "alias");
@@ -56,7 +56,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
   ast::type::F32 f32;
-  ast::type::Alias alias(mod.RegisterSymbol("bool"), "bool", &f32);
+  ast::type::Alias alias(mod->RegisterSymbol("bool"), "bool", &f32);
 
   ASSERT_TRUE(gen.EmitType(&alias, "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool_tint_0");
@@ -171,46 +171,24 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
-                                              "b", &f32, b_deco));
-
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), "S");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
-                                              "b", &f32, b_deco));
-
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -221,28 +199,15 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
   auto* str = create<ast::Struct>(
-      Source{},
       ast::StructMemberList{
-          create<ast::StructMember>(
-              Source{}, mod.RegisterSymbol("a"), "a", &i32,
-              ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 4)}),
-          create<ast::StructMember>(
-              Source{}, mod.RegisterSymbol("b"), "b", &f32,
-              ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 32)}),
-          create<ast::StructMember>(
-              Source{}, mod.RegisterSymbol("c"), "c", &f32,
-              ast::StructMemberDecorationList{
-                  create<ast::StructMemberOffsetDecoration>(Source{}, 128)}),
+          Member("a", ty.i32, {MemberOffset(4)}),
+          Member("b", ty.f32, {MemberOffset(32)}),
+          Member("c", ty.f32, {MemberOffset(128)}),
       },
       ast::StructDecorationList{});
 
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -257,22 +222,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("main", ty.i32), Member("float", ty.f32)},
+      ast::StructDecorationList{});
 
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, mod.RegisterSymbol("main"), "main",
-                                &i32, ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  members.push_back(create<ast::StructMember>(
-      Source{}, mod.RegisterSymbol("float"), "float", &f32, b_deco));
-
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitStructType(&s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
@@ -284,24 +238,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
-  ast::type::I32 i32;
-  ast::type::F32 f32;
-
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
-                                              "b", &f32, b_deco));
-
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>(Source{}));
-  auto* str = create<ast::Struct>(Source{}, members, decos);
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      decos);
 
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct {

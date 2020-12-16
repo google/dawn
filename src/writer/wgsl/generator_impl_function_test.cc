@@ -176,16 +176,11 @@ TEST_F(WgslGeneratorImplTest,
   //   return;
   // }
 
-  ast::StructMemberList members;
-  ast::StructMemberDecorationList a_deco;
-  a_deco.push_back(create<ast::StructMemberOffsetDecoration>(0));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("d"), "d", ty.f32, a_deco));
-
   ast::StructDecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>());
 
-  auto* str = create<ast::Struct>(members, s_decos);
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
 
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, &s);

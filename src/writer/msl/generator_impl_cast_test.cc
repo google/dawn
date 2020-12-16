@@ -35,7 +35,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("id"), "id"));
+      Source{}, mod->RegisterSymbol("id"), "id"));
 
   ast::TypeConstructorExpression cast(Source{}, &f32, params);
 
@@ -49,7 +49,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
 
   ast::ExpressionList params;
   params.push_back(create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("id"), "id"));
+      Source{}, mod->RegisterSymbol("id"), "id"));
 
   ast::TypeConstructorExpression cast(Source{}, &vec3, params);
 

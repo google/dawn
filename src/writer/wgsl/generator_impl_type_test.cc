@@ -60,16 +60,12 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
-  auto* mem = create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                        ast::StructMemberDecorationList{});
-  ast::StructMemberList members;
-  members.push_back(mem);
-
   auto* block_deco = create<ast::StructBlockDecoration>();
   ast::StructDecorationList decos;
   decos.push_back(block_deco);
 
-  auto* str = create<ast::Struct>(members, decos);
+  auto* str =
+      create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)}, decos);
   auto* s = create<ast::type::Struct>(mod->RegisterSymbol("S"), "S", str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadOnly, s);
@@ -79,16 +75,12 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
-  auto* mem = create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                        ast::StructMemberDecorationList{});
-  ast::StructMemberList members;
-  members.push_back(mem);
-
   auto* block_deco = create<ast::StructBlockDecoration>();
   ast::StructDecorationList decos;
   decos.push_back(block_deco);
 
-  auto* str = create<ast::Struct>(members, decos);
+  auto* str =
+      create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)}, decos);
   auto* s = create<ast::type::Struct>(mod->RegisterSymbol("S"), "S", str);
 
   ast::type::AccessControl a(ast::AccessControl::kReadWrite, s);
@@ -153,17 +145,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
@@ -172,17 +157,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
-  auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
@@ -196,20 +174,13 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("a"), "a", ty.i32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(4));
-  members.push_back(
-      create<ast::StructMember>(mod->RegisterSymbol("b"), "b", ty.f32, b_deco));
-
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
 
-  auto* str = create<ast::Struct>(members, decos);
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      decos);
 
   ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 

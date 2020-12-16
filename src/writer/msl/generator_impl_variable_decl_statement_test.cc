@@ -100,22 +100,12 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
-  ast::type::F32 f32;
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.f32),
+                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructDecorationList{});
 
-  ast::StructMemberList members;
-  members.push_back(
-      create<ast::StructMember>(Source{}, mod.RegisterSymbol("a"), "a", &f32,
-                                ast::StructMemberDecorationList{}));
-
-  ast::StructMemberDecorationList b_deco;
-  b_deco.push_back(create<ast::StructMemberOffsetDecoration>(Source{}, 4));
-  members.push_back(create<ast::StructMember>(Source{}, mod.RegisterSymbol("b"),
-                                              "b", &f32, b_deco));
-
-  auto* str =
-      create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
-
-  ast::type::Struct s(mod.RegisterSymbol("S"), "S", str);
+  ast::type::Struct s(mod->RegisterSymbol("S"), "S", str);
 
   auto* var =
       create<ast::Variable>(Source{},                        // source
@@ -197,7 +187,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
   auto* ident = create<ast::IdentifierExpression>(
-      Source{}, mod.RegisterSymbol("initializer"), "initializer");
+      Source{}, mod->RegisterSymbol("initializer"), "initializer");
 
   ast::type::F32 f32;
   auto* var =
