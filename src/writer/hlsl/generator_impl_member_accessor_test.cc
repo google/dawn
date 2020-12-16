@@ -52,7 +52,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
   auto* str_var = Var("str", ast::StorageClass::kPrivate, &s);
 
-  auto* expr = Member("str", "mem");
+  auto* expr = MemberAccessor("str", "mem");
 
   td.RegisterVariableForTesting(str_var);
   gen.register_global(str_var);
@@ -88,7 +88,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-  auto* expr = Member("data", "b");
+  auto* expr = MemberAccessor("data", "b");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -126,7 +126,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-  auto* expr = Member("data", "a");
+  auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -171,7 +171,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  auto* lhs = Member("data", "a");
+  auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr("b");
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
@@ -224,7 +224,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  auto* lhs = Member("data", "a");
+  auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
@@ -274,7 +274,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
 
-  auto* expr = Member("data", "a");
+  auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -318,7 +318,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-  auto* expr = Member("data", "a");
+  auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -353,7 +353,7 @@ TEST_F(
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-  auto* expr = Member("data", "a");
+  auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -393,7 +393,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-  auto* expr = Index(Index(Member("data", "a"), Expr(2)), Expr(1));
+  auto* expr = IndexAccessor(
+      IndexAccessor(MemberAccessor("data", "a"), Expr(2)), Expr(1));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -429,7 +430,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-  auto* expr = Index(Member("data", "a"), Expr(2));
+  auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -465,7 +466,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* str = create<ast::Struct>(members, ast::StructDecorationList{});
   ast::type::Struct s(mod->RegisterSymbol("Data"), "Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, &s);
-  auto* expr = Index(Member("data", "a"), Sub(Add(Expr(2), Expr(4)), Expr(3)));
+  auto* expr = IndexAccessor(MemberAccessor("data", "a"),
+                             Sub(Add(Expr(2), Expr(4)), Expr(3)));
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -510,7 +512,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = Member("data", "b");
+  auto* lhs = MemberAccessor("data", "b");
   auto* rhs = Expr(2.0f);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
@@ -553,7 +555,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = Index(Member("data", "a"), Expr(2));
+  auto* lhs = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
@@ -595,7 +597,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = Member("data", "a");
+  auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
@@ -637,7 +639,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* expr = Member("data", "b");
+  auto* expr = MemberAccessor("data", "b");
 
   ASSERT_TRUE(td.DetermineResultType(expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
@@ -678,7 +680,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = Member("data", "b");
+  auto* lhs = MemberAccessor("data", "b");
   auto* rhs = vec3<f32>(1.f, 2.f, 3.f);
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
@@ -744,7 +746,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* expr = Member(Index(Member("data", "c"), Expr(2)), "b");
+  auto* expr =
+      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
 
   ASSERT_TRUE(td.DetermineResultType(expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
@@ -804,7 +807,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* expr = Member(Member(Index(Member("data", "c"), Expr(2)), "b"), "xy");
+  auto* expr = MemberAccessor(
+      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
+      "xy");
 
   ASSERT_TRUE(td.DetermineResultType(expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
@@ -864,7 +869,9 @@ TEST_F(
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* expr = Member(Member(Index(Member("data", "c"), Expr(2)), "b"), "g");
+  auto* expr = MemberAccessor(
+      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
+      "g");
 
   ASSERT_TRUE(td.DetermineResultType(expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
@@ -923,7 +930,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* expr = Index(Member(Index(Member("data", "c"), Expr(2)), "b"), Expr(1));
+  auto* expr = IndexAccessor(
+      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
+      Expr(1));
 
   ASSERT_TRUE(td.DetermineResultType(expr));
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
@@ -982,7 +991,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = Member(Index(Member("data", "c"), Expr(2)), "b");
+  auto* lhs =
+      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
 
   auto* assign =
       create<ast::AssignmentStatement>(lhs, vec3<f32>(1.f, 2.f, 3.f));
@@ -1046,7 +1056,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  auto* lhs = Member(Member(Index(Member("data", "c"), Expr(2)), "b"), "y");
+  auto* lhs = MemberAccessor(
+      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
+      "y");
   auto* rhs = Expr(1.f);
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);

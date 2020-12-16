@@ -30,14 +30,14 @@ namespace {
 using HlslGeneratorImplTest_Expression = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
-  auto* expr = Index("ary", 5);
+  auto* expr = IndexAccessor("ary", 5);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "ary[5]");
 }
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitArrayAccessor) {
-  auto* expr = Index("ary", "idx");
+  auto* expr = IndexAccessor("ary", "idx");
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "ary[idx]");

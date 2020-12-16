@@ -359,7 +359,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"), Member("coord", "x")),
+      create<ast::AssignmentStatement>(Expr("depth"),
+                                       MemberAccessor("coord", "x")),
   });
   auto* func = create<ast::Function>(
       mod->RegisterSymbol("main"), "main", params, ty.void_, body,

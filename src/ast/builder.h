@@ -557,7 +557,7 @@ class Builder {
   /// @param idx the index argument for the array accessor expression
   /// @returns a `ArrayAccessorExpression` that indexes `arr` with `idx`
   template <typename ARR, typename IDX>
-  Expression* Index(ARR&& arr, IDX&& idx) {
+  Expression* IndexAccessor(ARR&& arr, IDX&& idx) {
     return create<ArrayAccessorExpression>(Expr(std::forward<ARR>(arr)),
                                            Expr(std::forward<IDX>(idx)));
   }
@@ -566,7 +566,7 @@ class Builder {
   /// @param idx the index argument for the array accessor expression
   /// @returns a `MemberAccessorExpression` that indexes `obj` with `idx`
   template <typename OBJ, typename IDX>
-  Expression* Member(OBJ&& obj, IDX&& idx) {
+  Expression* MemberAccessor(OBJ&& obj, IDX&& idx) {
     return create<MemberAccessorExpression>(Expr(std::forward<OBJ>(obj)),
                                             Expr(std::forward<IDX>(idx)));
   }

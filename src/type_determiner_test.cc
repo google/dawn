@@ -377,7 +377,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* acc = Index("my_var", idx);
+  auto* acc = IndexAccessor("my_var", idx);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
   ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
@@ -395,7 +395,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* acc = Index("my_var", 2);
+  auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
   ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
@@ -412,7 +412,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* acc = Index("my_var", 2);
+  auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
   EXPECT_TRUE(acc->result_type()->Is<ast::type::F32>())
@@ -427,7 +427,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* acc = Index("my_var", 2);
+  auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
   ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
@@ -443,7 +443,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* acc = Index(Index("my_var", 2), 1);
+  auto* acc = IndexAccessor(IndexAccessor("my_var", 2), 1);
 
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
@@ -459,7 +459,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* acc = Index("my_var", 2);
+  auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
   ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
@@ -802,7 +802,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* mem = Member("my_struct", "second_member");
+  auto* mem = MemberAccessor("my_struct", "second_member");
   EXPECT_TRUE(td()->DetermineResultType(mem));
   ASSERT_NE(mem->result_type(), nullptr);
   ASSERT_TRUE(mem->result_type()->Is<ast::type::Pointer>());
@@ -831,7 +831,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* mem = Member("my_struct", "second_member");
+  auto* mem = MemberAccessor("my_struct", "second_member");
   EXPECT_TRUE(td()->DetermineResultType(mem));
   ASSERT_NE(mem->result_type(), nullptr);
   ASSERT_TRUE(mem->result_type()->Is<ast::type::Pointer>());
@@ -846,7 +846,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* mem = Member("my_vec", "xy");
+  auto* mem = MemberAccessor("my_vec", "xy");
   EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
   ASSERT_NE(mem->result_type(), nullptr);
   ASSERT_TRUE(mem->result_type()->Is<ast::type::Vector>());
@@ -863,7 +863,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* mem = Member("my_vec", "x");
+  auto* mem = MemberAccessor("my_vec", "x");
   EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
   ASSERT_NE(mem->result_type(), nullptr);
   ASSERT_TRUE(mem->result_type()->Is<ast::type::Pointer>());
@@ -922,7 +922,9 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
 
   EXPECT_TRUE(td()->Determine());
 
-  auto* mem = Member(Member(Index(Member("c", "mem"), 0), "foo"), "yx");
+  auto* mem = MemberAccessor(
+      MemberAccessor(IndexAccessor(MemberAccessor("c", "mem"), 0), "foo"),
+      "yx");
   EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
 
   ASSERT_NE(mem->result_type(), nullptr);

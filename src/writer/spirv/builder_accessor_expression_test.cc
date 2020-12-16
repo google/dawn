@@ -54,7 +54,7 @@ TEST_F(BuilderTest, ArrayAccessor) {
   auto* ary = Expr("ary");
   auto* idx_expr = Expr(1);
 
-  auto* expr = Index(ary, idx_expr);
+  auto* expr = IndexAccessor(ary, idx_expr);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -91,7 +91,7 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   auto* ary = Expr("ary");
   auto* idx_expr = Expr("idx");
 
-  auto* expr = Index(ary, idx_expr);
+  auto* expr = IndexAccessor(ary, idx_expr);
 
   td.RegisterVariableForTesting(var);
   td.RegisterVariableForTesting(idx);
@@ -130,7 +130,7 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 
   auto* ary = Expr("ary");
 
-  auto* expr = Index(ary, Add(1, 2));
+  auto* expr = IndexAccessor(ary, Add(1, 2));
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -166,7 +166,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 
   auto* var = Var("ary", ast::StorageClass::kFunction, &ary4);
 
-  auto* expr = Index(Index("ary", 3), 2);
+  auto* expr = IndexAccessor(IndexAccessor("ary", 3), 2);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -204,7 +204,7 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
 
   auto* var = Var("ary", ast::StorageClass::kFunction, &ary4);
 
-  auto* expr = Member(Index("ary", 2), "xy");
+  auto* expr = MemberAccessor(IndexAccessor("ary", 2), "xy");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -255,7 +255,7 @@ TEST_F(BuilderTest, MemberAccessor) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto* expr = Member("ident", "b");
+  auto* expr = MemberAccessor("ident", "b");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -312,7 +312,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto* expr = Member(Member("ident", "inner"), "a");
+  auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -373,7 +373,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto* expr = Member(Member("ident", "inner"), "a");
+  auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -432,7 +432,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, &s_type);
 
-  auto* lhs = Member(Member("ident", "inner"), "a");
+  auto* lhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
 
   auto* rhs = Expr(2.0f);
 
@@ -499,7 +499,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   auto* store = Var("store", ast::StorageClass::kFunction, ty.f32);
 
   auto* lhs = Expr("store");
-  auto* rhs = Member(Member("ident", "inner"), "a");
+  auto* rhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
 
   auto* expr = create<ast::AssignmentStatement>(lhs, rhs);
 
@@ -539,7 +539,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  auto* expr = Member("ident", "y");
+  auto* expr = MemberAccessor("ident", "y");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -570,7 +570,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  auto* expr = Member("ident", "yx");
+  auto* expr = MemberAccessor("ident", "yx");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -600,7 +600,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  auto* expr = Member(Member("ident", "yxz"), "xz");
+  auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "xz");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -631,7 +631,7 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  auto* expr = Member(Member("ident", "yxz"), "x");
+  auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "x");
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -661,7 +661,7 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 
   auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  auto* expr = Index(Member("ident", "yxz"), 1);
+  auto* expr = IndexAccessor(MemberAccessor("ident", "yxz"), 1);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -727,8 +727,13 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 
   auto* var = Var("index", ast::StorageClass::kFunction, &a_ary_type);
 
-  auto* expr = Member(
-      Member(Member(Index(Member(Index("index", 0), "foo"), 2), "bar"), "baz"),
+  auto* expr = MemberAccessor(
+      MemberAccessor(
+          MemberAccessor(
+              IndexAccessor(MemberAccessor(IndexAccessor("index", 0), "foo"),
+                            2),
+              "bar"),
+          "baz"),
       "yx");
 
   td.RegisterVariableForTesting(var);
@@ -783,7 +788,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
                               vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)),
                     {});
 
-  auto* expr = Index("pos", 1u);
+  auto* expr = IndexAccessor("pos", 1u);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();
@@ -826,7 +831,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   auto* var = Const("pos", ast::StorageClass::kPrivate, ty.vec2<f32>(),
                     vec2<f32>(0.0f, 0.5f), {});
 
-  auto* expr = Index("pos", 1u);
+  auto* expr = IndexAccessor("pos", 1u);
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();

@@ -185,7 +185,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::VariableList params;
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"), Member("coord", "x")),
+      create<ast::AssignmentStatement>(Expr("depth"),
+                                       MemberAccessor("coord", "x")),
       create<ast::ReturnStatement>(),
   });
   auto* func = create<ast::Function>(
@@ -229,7 +230,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::VariableList params;
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
-                  Member("coord", "x"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "x"), ast::VariableDecorationList{});
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
@@ -282,7 +283,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ast::VariableList params;
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   create<ast::MemberAccessorExpression>(
-                      Member("uniforms", "coord"), Expr("x")),
+                      MemberAccessor("uniforms", "coord"), Expr("x")),
                   ast::VariableDecorationList{});
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
@@ -343,7 +344,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::VariableList params;
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
-                  Member("coord", "b"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "b"), ast::VariableDecorationList{});
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
@@ -400,7 +401,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ast::VariableList params;
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
-                  Member("coord", "b"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "b"), ast::VariableDecorationList{});
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
@@ -456,7 +457,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddGlobalVariable(coord_var);
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Member("coord", "b"), Expr(2.0f)),
+      create<ast::AssignmentStatement>(MemberAccessor("coord", "b"),
+                                       Expr(2.0f)),
       create<ast::ReturnStatement>(),
   });
 
@@ -641,7 +643,8 @@ TEST_F(
   params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32));
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"), Member("coord", "x")),
+      create<ast::AssignmentStatement>(Expr("depth"),
+                                       MemberAccessor("coord", "x")),
       create<ast::ReturnStatement>(Expr("param")),
   });
   auto* sub_func =
@@ -703,7 +706,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32));
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(Member("coord", "x")),
+      create<ast::ReturnStatement>(MemberAccessor("coord", "x")),
   });
 
   auto* sub_func =
@@ -764,7 +767,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32));
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(Member("coord", "x")),
+      create<ast::ReturnStatement>(MemberAccessor("coord", "x")),
   });
 
   auto* sub_func =
@@ -993,7 +996,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   {
     ast::VariableList params;
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
-                    Member("data", "d"), ast::VariableDecorationList{});
+                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     auto* body = create<ast::BlockStatement>(ast::StatementList{
         create<ast::VariableDeclStatement>(var),
@@ -1012,7 +1015,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   {
     ast::VariableList params;
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
-                    Member("data", "d"), ast::VariableDecorationList{});
+                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     auto* body = create<ast::BlockStatement>(ast::StatementList{
         create<ast::VariableDeclStatement>(var),
