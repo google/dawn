@@ -26,6 +26,7 @@
 #include "src/ast/storage_class.h"
 #include "src/ast/type/type.h"
 #include "src/ast/variable_decoration.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace ast {
@@ -81,6 +82,7 @@ class Variable : public Castable<Variable, Node> {
  public:
   /// Create a variable
   /// @param source the variable source
+  /// @param sym the variable symbol
   /// @param name the variables name
   /// @param sc the variable storage class
   /// @param type the value type
@@ -88,6 +90,7 @@ class Variable : public Castable<Variable, Node> {
   /// @param constructor the constructor expression
   /// @param decorations the variable decorations
   Variable(const Source& source,
+           const Symbol& sym,
            const std::string& name,
            StorageClass sc,
            type::Type* type,
@@ -99,6 +102,8 @@ class Variable : public Castable<Variable, Node> {
 
   ~Variable() override;
 
+  /// @returns the variable symbol
+  const Symbol& symbol() const { return symbol_; }
   /// @returns the variable name
   const std::string& name() const { return name_; }
 
@@ -141,7 +146,7 @@ class Variable : public Castable<Variable, Node> {
   /// @return the newly cloned node
   Variable* Clone(CloneContext* ctx) const override;
 
-  /// @returns true if the name and path are both present
+  /// @returns true if the variable is valid
   bool IsValid() const override;
 
   /// Writes a representation of the node to the output stream
@@ -162,6 +167,7 @@ class Variable : public Castable<Variable, Node> {
  private:
   Variable(const Variable&) = delete;
 
+  Symbol const symbol_;
   std::string const name_;
   // The value type if a const or formal paramter, and the store type if a var
   type::Type* const type_;

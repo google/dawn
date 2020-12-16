@@ -431,8 +431,9 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
     constructor = expr.value;
   }
 
-  return create<ast::Variable>(decl->source,                 // source
-                               decl->name,                   // name
+  return create<ast::Variable>(decl->source,                        // source
+                               module_.RegisterSymbol(decl->name),  // symbol
+                               decl->name,                          // name
                                decl->storage_class,          // storage_class
                                decl->type,                   // type
                                false,                        // is_const
@@ -459,8 +460,9 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
   if (init.errored)
     return Failure::kErrored;
 
-  return create<ast::Variable>(decl->source,                    // source
-                               decl->name,                      // name
+  return create<ast::Variable>(decl->source,                        // source
+                               module_.RegisterSymbol(decl->name),  // symbol
+                               decl->name,                          // name
                                ast::StorageClass::kNone,        // storage_class
                                decl->type,                      // type
                                true,                            // is_const
@@ -1353,8 +1355,9 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
   ast::VariableList ret;
   for (;;) {
     auto* var =
-        create<ast::Variable>(decl->source,                    // source
-                              decl->name,                      // name
+        create<ast::Variable>(decl->source,                        // source
+                              module_.RegisterSymbol(decl->name),  // symbol
+                              decl->name,                          // name
                               ast::StorageClass::kNone,        // storage_class
                               decl->type,                      // type
                               true,                            // is_const
@@ -1624,8 +1627,9 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
       return add_error(peek(), "missing constructor for const declaration");
 
     auto* var =
-        create<ast::Variable>(decl->source,                    // source
-                              decl->name,                      // name
+        create<ast::Variable>(decl->source,                        // source
+                              module_.RegisterSymbol(decl->name),  // symbol
+                              decl->name,                          // name
                               ast::StorageClass::kNone,        // storage_class
                               decl->type,                      // type
                               true,                            // is_const
@@ -1653,8 +1657,9 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   }
 
   auto* var =
-      create<ast::Variable>(decl->source,                    // source
-                            decl->name,                      // name
+      create<ast::Variable>(decl->source,                        // source
+                            module_.RegisterSymbol(decl->name),  // symbol
+                            decl->name,                          // name
                             decl->storage_class,             // storage_class
                             decl->type,                      // type
                             false,                           // is_const

@@ -59,10 +59,9 @@ TEST_F(SpvParserTest, Emit_VoidFunctionWithoutParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.Emit());
-  auto got = p->get_module().to_str();
-  auto expect = R"(Module{
-  Function )" + p->get_module().GetSymbol("x_100").to_str() +
-                R"( -> __void
+  auto got = Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  std::string expect = R"(Module{
+  Function x_100 -> __void
   ()
   {
     Return{}
@@ -84,10 +83,9 @@ TEST_F(SpvParserTest, Emit_NonVoidResultType) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.Emit());
 
-  auto got = p->get_module().to_str();
-  auto expect = R"(Module{
-  Function )" + p->get_module().GetSymbol("x_100").to_str() +
-                R"( -> __f32
+  auto got = Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  std::string expect = R"(Module{
+  Function x_100 -> __f32
   ()
   {
     Return{
@@ -117,10 +115,9 @@ TEST_F(SpvParserTest, Emit_MixedParamTypes) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.Emit());
 
-  auto got = p->get_module().to_str();
-  auto expect = R"(Module{
-  Function )" + p->get_module().GetSymbol("x_100").to_str() +
-                R"( -> __void
+  auto got = Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  std::string expect = R"(Module{
+  Function x_100 -> __void
   (
     VariableConst{
       a
@@ -162,10 +159,9 @@ TEST_F(SpvParserTest, Emit_GenerateParamNames) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.Emit());
 
-  auto got = p->get_module().to_str();
-  auto expect = R"(Module{
-  Function )" + p->get_module().GetSymbol("x_100").to_str() +
-                R"( -> __void
+  auto got = Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  std::string expect = R"(Module{
+  Function x_100 -> __void
   (
     VariableConst{
       x_14

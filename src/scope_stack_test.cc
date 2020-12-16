@@ -14,13 +14,14 @@
 #include "src/scope_stack.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/builder.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 
 namespace tint {
 namespace {
 
-using ScopeStackTest = testing::Test;
+class ScopeStackTest : public ast::BuilderWithModule, public testing::Test {};
 
 TEST_F(ScopeStackTest, Global) {
   ScopeStack<uint32_t> s;
@@ -32,12 +33,9 @@ TEST_F(ScopeStackTest, Global) {
 }
 
 TEST_F(ScopeStackTest, Global_SetWithPointer) {
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "my_var", ast::StorageClass::kNone, &f32, false,
-                  nullptr, ast::VariableDecorationList{});
-
+  auto* v = Var("my_var", ast::StorageClass::kNone, ty.f32);
   ScopeStack<ast::Variable*> s;
-  s.set_global("var", &v);
+  s.set_global("var", v);
 
   ast::Variable* v2 = nullptr;
   EXPECT_TRUE(s.get("var", &v2));

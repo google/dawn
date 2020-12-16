@@ -45,12 +45,10 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
-  ast::type::F32 f32;
-  ast::Variable v(Source{}, "var", ast::StorageClass::kNone, &f32, false,
-                  nullptr, ast::VariableDecorationList{});
+  auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -65,28 +63,17 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-
-  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
-
+  auto* init = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec3<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kOutput, &f32, false,
-                  init, ast::VariableDecorationList{});
-
-  td.RegisterVariableForTesting(&v);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, init,
+                ast::VariableDecorationList{});
+  td.RegisterVariableForTesting(v);
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "var"
@@ -107,31 +94,16 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 2);
-
-  auto* rel = create<ast::BinaryExpression>(
-      Source{}, ast::BinaryOp::kAdd,
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-
-  ast::ExpressionList vals;
-  vals.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  vals.push_back(rel);
-
-  auto* init = create<ast::TypeConstructorExpression>(Source{}, &vec, vals);
-
+  auto* init = create<ast::TypeConstructorExpression>(
+      Source{}, ty.vec2<f32>(), ast::ExpressionList{Expr(1.f), Add(3.f, 3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  ast::Variable v(Source{}, "var", ast::StorageClass::kFunction, &vec, false,
-                  init, ast::VariableDecorationList{});
+  auto* v = Var("var", ast::StorageClass::kFunction, ty.vec2<f32>(), init,
+                ast::VariableDecorationList{});
 
-  td.RegisterVariableForTesting(&v);
+  td.RegisterVariableForTesting(v);
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
+  EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %7 "var"

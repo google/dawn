@@ -216,9 +216,10 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast_str = p->get_module().to_str();
+  const auto module_ast_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_ast_str, HasSubstr(R"(Module{
-  Function tint_symbol_3 -> __u32
+  Function x_50 -> __u32
   (
     VariableConst{
       x_51
@@ -235,15 +236,14 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
     Return{
       {
         Binary[not set]{
-          Identifier[not set]{tint_symbol_1}
+          Identifier[not set]{x_51}
           add
-          Identifier[not set]{tint_symbol_2}
+          Identifier[not set]{x_52}
         }
       }
     }
   }
-  Function )" + p->get_module().GetSymbol("x_100").to_str() +
-                                        R"( -> __void
+  Function x_100 -> __void
   ()
   {
     VariableDeclStatement{
@@ -253,7 +253,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
         __u32
         {
           Call[not set]{
-            Identifier[not set]{tint_symbol_3}
+            Identifier[not set]{x_50}
             (
               ScalarConstructor[not set]{42}
               ScalarConstructor[not set]{84}

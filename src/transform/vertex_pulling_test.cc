@@ -50,6 +50,7 @@ class VertexPullingHelper : public ast::BuilderWithModule {
         Func("main", ast::VariableList{}, ty.void_, ast::StatementList{},
              ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
     mod->AddFunction(func);
   }
 
@@ -399,20 +400,17 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
   InitBasicModule();
 
-  ast::type::F32 f32;
-  AddVertexInputVariable(0, "var_a", &f32);
-  AddVertexInputVariable(1, "var_b", &f32);
-
-  ast::type::I32 i32;
+  AddVertexInputVariable(0, "var_a", ty.f32);
+  AddVertexInputVariable(1, "var_b", ty.f32);
 
   mod->AddGlobalVariable(
-      Var("custom_vertex_index", ast::StorageClass::kInput, &i32, nullptr,
+      Var("custom_vertex_index", ast::StorageClass::kInput, ty.i32, nullptr,
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx),
           }));
 
   mod->AddGlobalVariable(
-      Var("custom_instance_index", ast::StorageClass::kInput, &i32, nullptr,
+      Var("custom_instance_index", ast::StorageClass::kInput, ty.i32, nullptr,
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx),
           }));

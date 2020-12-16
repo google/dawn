@@ -29,6 +29,7 @@ using VariableTest = TestHelper;
 TEST_F(VariableTest, Creation) {
   auto* v = Var("my_var", StorageClass::kFunction, ty.i32);
 
+  EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->name(), "my_var");
   EXPECT_EQ(v->storage_class(), StorageClass::kFunction);
   EXPECT_EQ(v->type(), ty.i32);
@@ -43,6 +44,7 @@ TEST_F(VariableTest, CreationWithSource) {
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}},
       "i", StorageClass::kPrivate, ty.f32, nullptr, VariableDecorationList{});
 
+  EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->name(), "i");
   EXPECT_EQ(v->storage_class(), StorageClass::kPrivate);
   EXPECT_EQ(v->type(), ty.f32);
@@ -58,6 +60,7 @@ TEST_F(VariableTest, CreationEmpty) {
       "a_var", StorageClass::kWorkgroup, ty.i32, nullptr,
       VariableDecorationList{});
 
+  EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->name(), "a_var");
   EXPECT_EQ(v->storage_class(), StorageClass::kWorkgroup);
   EXPECT_EQ(v->type(), ty.i32);
@@ -78,7 +81,7 @@ TEST_F(VariableTest, IsValid_WithConstructor) {
   EXPECT_TRUE(v->IsValid());
 }
 
-TEST_F(VariableTest, IsValid_MissinName) {
+TEST_F(VariableTest, IsValid_MissingSymbol) {
   auto* v = Var("", StorageClass::kNone, ty.i32);
   EXPECT_FALSE(v->IsValid());
 }
@@ -104,7 +107,7 @@ TEST_F(VariableTest, to_str) {
                 ast::VariableDecorationList{});
   std::ostringstream out;
   v->to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Variable{
+  EXPECT_EQ(demangle(out.str()), R"(  Variable{
     my_var
     function
     __f32

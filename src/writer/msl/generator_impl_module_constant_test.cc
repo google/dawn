@@ -35,47 +35,22 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
-  ast::type::F32 f32;
-  ast::type::Array ary(&f32, 3, ast::ArrayDecorationList{});
-
-  ast::ExpressionList exprs;
-  exprs.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 1.0f)));
-  exprs.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.0f)));
-  exprs.push_back(create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::FloatLiteral>(Source{}, &f32, 3.0f)));
-
-  auto* var =
-      create<ast::Variable>(Source{},                  // source
-                            "pos",                     // name
-                            ast::StorageClass::kNone,  // storage_class
-                            &ary,                      // type
-                            true,                      // is_const
-                            create<ast::TypeConstructorExpression>(
-                                Source{}, &ary, exprs),      // constructor
-                            ast::VariableDecorationList{});  // decorations
+  ast::type::Array ary(ty.f32, 3, ast::ArrayDecorationList{});
+  auto* var = Const(
+      "pos", ast::StorageClass::kNone, &ary,
+      create<ast::TypeConstructorExpression>(
+          Source{}, &ary, ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)}),
+      ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
-  ast::type::F32 f32;
-
-  auto* var = create<ast::Variable>(
-      Source{},                  // source
-      "pos",                     // name
-      ast::StorageClass::kNone,  // storage_class
-      &f32,                      // type
-      true,                      // is_const
-      create<ast::ScalarConstructorExpression>(
-          Source{},
-          create<ast::FloatLiteral>(Source{}, &f32, 3.0f)),  // constructor
-      ast::VariableDecorationList{
-          // decorations
-          create<ast::ConstantIdDecoration>(Source{}, 23),
-      });
+  auto* var = Const("pos", ast::StorageClass::kNone, ty.f32, Expr(3.f),
+                    ast::VariableDecorationList{
+                        create<ast::ConstantIdDecoration>(Source{}, 23),
+                    });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");

@@ -2248,8 +2248,9 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   if (!guard_name.empty()) {
     // Declare the guard variable just before the "if", initialized to true.
     auto* guard_var =
-        create<ast::Variable>(Source{},                        // source
-                              guard_name,                      // name
+        create<ast::Variable>(Source{},                                // source
+                              ast_module_.RegisterSymbol(guard_name),  // symbol
+                              guard_name,                              // name
                               ast::StorageClass::kFunction,    // storage_class
                               parser_impl_.Bool(),             // type
                               false,                           // is_const
@@ -2777,6 +2778,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     assert(!phi_var_name.empty());
     auto* var = create<ast::Variable>(
         Source{},                                       // source
+        ast_module_.RegisterSymbol(phi_var_name),       // symbol
         phi_var_name,                                   // name
         ast::StorageClass::kFunction,                   // storage_class
         parser_impl_.ConvertType(def_inst->type_id()),  // type

@@ -65,13 +65,14 @@ ast::Variable* clone_variable_with_new_name(ast::CloneContext* ctx,
                                             ast::Variable* in,
                                             std::string new_name) {
   return ctx->mod->create<ast::Variable>(
-      ctx->Clone(in->source()),        // source
-      new_name,                        // name
-      in->storage_class(),             // storage_class
-      ctx->Clone(in->type()),          // type
-      in->is_const(),                  // is_const
-      ctx->Clone(in->constructor()),   // constructor
-      ctx->Clone(in->decorations()));  // decorations
+      ctx->Clone(in->source()),            // source
+      ctx->mod->RegisterSymbol(new_name),  // symbol
+      new_name,                            // name
+      in->storage_class(),                 // storage_class
+      ctx->Clone(in->type()),              // type
+      in->is_const(),                      // is_const
+      ctx->Clone(in->constructor()),       // constructor
+      ctx->Clone(in->decorations()));      // decorations
 }
 
 }  // namespace
@@ -226,12 +227,13 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
       mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   auto* idx_var = mod->create<ast::Variable>(
-      Source{},                     // source
-      kBufferName,                  // name
-      ast::StorageClass::kUniform,  // storage_class
-      struct_type,                  // type
-      false,                        // is_const
-      nullptr,                      // constructor
+      Source{},                          // source
+      mod->RegisterSymbol(kBufferName),  // symbol
+      kBufferName,                       // name
+      ast::StorageClass::kUniform,       // storage_class
+      struct_type,                       // type
+      false,                             // is_const
+      nullptr,                           // constructor
       ast::VariableDecorationList{
           mod->create<ast::BindingDecoration>(Source{}, binding_),
           mod->create<ast::SetDecoration>(Source{}, set_),
@@ -261,8 +263,9 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
           mod->create<ast::IdentifierExpression>(
               Source{}, mod->RegisterSymbol(field_name), field_name)));
   auto* var =
-      mod->create<ast::Variable>(Source{},                  // source
-                                 original_name,             // name
+      mod->create<ast::Variable>(Source{},                            // source
+                                 mod->RegisterSymbol(original_name),  // symbol
+                                 original_name,                       // name
                                  ast::StorageClass::kNone,  // storage_class
                                  mod->create<ast::type::U32>(),   // type
                                  true,                            // is_const

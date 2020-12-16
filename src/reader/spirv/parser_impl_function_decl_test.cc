@@ -267,10 +267,10 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->get_module().to_str();
+  const auto module_ast =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function )" + p->get_module().GetSymbol("ret_float").to_str() +
-                                    R"( -> __f32
+  Function ret_float -> __f32
   ()
   {
     Return{
@@ -297,10 +297,10 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->get_module().to_str();
+  const auto module_ast =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function )" + p->get_module().GetSymbol("mixed_params").to_str() +
-                                    R"( -> __void
+  Function mixed_params -> __void
   (
     VariableConst{
       a
@@ -337,10 +337,10 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->get_module().to_str();
+  const auto module_ast =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function )" + p->get_module().GetSymbol("mixed_params").to_str() +
-                                    R"( -> __void
+  Function mixed_params -> __void
   (
     VariableConst{
       x_14

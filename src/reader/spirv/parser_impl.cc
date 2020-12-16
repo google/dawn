@@ -1297,13 +1297,15 @@ ast::Variable* ParserImpl::MakeVariable(
     }
   }
 
-  return create<ast::Variable>(Source{},         // source
-                               namer_.Name(id),  // name
-                               sc,               // storage_class
-                               type,             // type
-                               is_const,         // is_const
-                               constructor,      // constructor
-                               decorations);     // decorations
+  std::string name = namer_.Name(id);
+  return create<ast::Variable>(Source{},                          // source
+                               ast_module_.RegisterSymbol(name),  // symbol
+                               name,                              // name
+                               sc,            // storage_class
+                               type,          // type
+                               is_const,      // is_const
+                               constructor,   // constructor
+                               decorations);  // decorations
 }
 
 TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {

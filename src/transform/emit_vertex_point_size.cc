@@ -51,12 +51,13 @@ Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
 
   // Declare the pointsize builtin output variable.
   auto* pointsize_var = out.module.create<ast::Variable>(
-      Source{},                    // source
-      kPointSizeVar,               // name
-      ast::StorageClass::kOutput,  // storage_class
-      f32,                         // type
-      false,                       // is_const
-      nullptr,                     // constructor
+      Source{},                                  // source
+      out.module.RegisterSymbol(kPointSizeVar),  // symbol
+      kPointSizeVar,                             // name
+      ast::StorageClass::kOutput,                // storage_class
+      f32,                                       // type
+      false,                                     // is_const
+      nullptr,                                   // constructor
       ast::VariableDecorationList{
           // decorations
           out.module.create<ast::BuiltinDecoration>(Source{},

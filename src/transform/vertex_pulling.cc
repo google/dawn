@@ -165,18 +165,19 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   // We didn't find a vertex index builtin, so create one
   vertex_index_name = kDefaultVertexIndexName;
 
-  auto* var =
-      out->create<ast::Variable>(Source{},                   // source
-                                 vertex_index_name,          // name
-                                 ast::StorageClass::kInput,  // storage_class
-                                 GetI32Type(),               // type
-                                 false,                      // is_const
-                                 nullptr,                    // constructor
-                                 ast::VariableDecorationList{
-                                     // decorations
-                                     out->create<ast::BuiltinDecoration>(
-                                         Source{}, ast::Builtin::kVertexIdx),
-                                 });
+  auto* var = out->create<ast::Variable>(
+      Source{},                                // source
+      out->RegisterSymbol(vertex_index_name),  // symbol
+      vertex_index_name,                       // name
+      ast::StorageClass::kInput,               // storage_class
+      GetI32Type(),                            // type
+      false,                                   // is_const
+      nullptr,                                 // constructor
+      ast::VariableDecorationList{
+          // decorations
+          out->create<ast::BuiltinDecoration>(Source{},
+                                              ast::Builtin::kVertexIdx),
+      });
 
   out->AddGlobalVariable(var);
 }
@@ -212,18 +213,19 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   // We didn't find an instance index builtin, so create one
   instance_index_name = kDefaultInstanceIndexName;
 
-  auto* var =
-      out->create<ast::Variable>(Source{},                   // source
-                                 instance_index_name,        // name
-                                 ast::StorageClass::kInput,  // storage_class
-                                 GetI32Type(),               // type
-                                 false,                      // is_const
-                                 nullptr,                    // constructor
-                                 ast::VariableDecorationList{
-                                     // decorations
-                                     out->create<ast::BuiltinDecoration>(
-                                         Source{}, ast::Builtin::kInstanceIdx),
-                                 });
+  auto* var = out->create<ast::Variable>(
+      Source{},                                  // source
+      out->RegisterSymbol(instance_index_name),  // symbol
+      instance_index_name,                       // name
+      ast::StorageClass::kInput,                 // storage_class
+      GetI32Type(),                              // type
+      false,                                     // is_const
+      nullptr,                                   // constructor
+      ast::VariableDecorationList{
+          // decorations
+          out->create<ast::BuiltinDecoration>(Source{},
+                                              ast::Builtin::kInstanceIdx),
+      });
   out->AddGlobalVariable(var);
 }
 
@@ -241,6 +243,7 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
         // place in the AST.
         v = out->create<ast::Variable>(
             Source{},                        // source
+            v->symbol(),                     // symbol
             v->name(),                       // name
             ast::StorageClass::kPrivate,     // storage_class
             v->type(),                       // type
@@ -282,9 +285,11 @@ void VertexPulling::State::AddVertexStorageBuffers() {
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
     // The decorated variable with struct type
+    std::string name = GetVertexBufferName(i);
     auto* var = out->create<ast::Variable>(
         Source{},                           // source
-        GetVertexBufferName(i),             // name
+        out->RegisterSymbol(name),          // symbol
+        name,                               // name
         ast::StorageClass::kStorageBuffer,  // storage_class
         struct_type,                        // type
         false,                              // is_const
@@ -308,13 +313,14 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
   // Declare the |kPullingPosVarName| variable in the shader
   auto* pos_declaration = out->create<ast::VariableDeclStatement>(
       Source{}, out->create<ast::Variable>(
-                    Source{},                         // source
-                    kPullingPosVarName,               // name
-                    ast::StorageClass::kFunction,     // storage_class
-                    GetI32Type(),                     // type
-                    false,                            // is_const
-                    nullptr,                          // constructor
-                    ast::VariableDecorationList{}));  // decorations
+                    Source{},                                 // source
+                    out->RegisterSymbol(kPullingPosVarName),  // symbol
+                    kPullingPosVarName,                       // name
+                    ast::StorageClass::kFunction,             // storage_class
+                    GetI32Type(),                             // type
+                    false,                                    // is_const
+                    nullptr,                                  // constructor
+                    ast::VariableDecorationList{}));          // decorations
 
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression

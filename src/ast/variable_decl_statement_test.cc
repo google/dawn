@@ -72,7 +72,7 @@ TEST_F(VariableDeclStatementTest, ToStr) {
       create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
   std::ostringstream out;
   stmt->to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  VariableDeclStatement{
+  EXPECT_EQ(demangle(out.str()), R"(  VariableDeclStatement{
     Variable{
       a
       none
