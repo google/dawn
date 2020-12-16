@@ -373,16 +373,18 @@ class ParserImpl : Reader {
     /// The ID for the gl_PerVertex struct containing the Position builtin.
     uint32_t struct_type_id = 0;
     /// The member index for the Position builtin within the struct.
-    uint32_t member_index = 0;
+    uint32_t position_member_index = 0;
+    /// The member index for the PointSize builtin within the struct.
+    uint32_t pointsize_member_index = 0;
     /// The ID for the member type, which should map to vec4<f32>.
-    uint32_t member_type_id = 0;
+    uint32_t position_member_type_id = 0;
     /// The ID of the type of a pointer to the struct in the Output storage
     /// class class.
     uint32_t pointer_type_id = 0;
     /// The SPIR-V storage class.
     SpvStorageClass storage_class = SpvStorageClassOutput;
     /// The ID of the type of a pointer to the Position member.
-    uint32_t member_pointer_type_id = 0;
+    uint32_t position_member_pointer_type_id = 0;
     /// The ID of the gl_PerVertex variable, if it was declared.
     /// We'll use this for the gl_Position variable instead.
     uint32_t per_vertex_var_id = 0;

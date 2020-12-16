@@ -213,11 +213,14 @@ enum class SkipReason {
   /// function parameter).
   kOpaqueObject,
 
-  /// `kPointSizeBuiltin`: the value is a pointer to the Position builtin
-  /// variable.  Don't generate its address.  Avoid generating stores to
-  /// this pointer.  When loading from the pointer, yield the value 1,
-  /// the only supported value for PointSize.
-  kPointSizeBuiltin
+  /// `kPointSizeBuiltinPointer`: the value is a pointer to the Position builtin
+  /// variable.  Don't generate its address.  Avoid generating stores to this
+  /// pointer.
+  kPointSizeBuiltinPointer,
+  /// `kPointSizeBuiltinValue`: the value is the value loaded from the
+  /// PointSize builtin. Use 1.0f instead, because that's the only value
+  /// supported by WebGPU.
+  kPointSizeBuiltinValue,
 };
 
 /// Bookkeeping info for a SPIR-V ID defined in the function.
@@ -287,6 +290,10 @@ struct DefInfo {
   /// This is kNone for non-pointers.
   ast::StorageClass storage_class = ast::StorageClass::kNone;
 
+  /// The reason, if any, that this value should not be generated.
+  /// Normally all values are generated.  This field can be updated while
+  /// generating code because sometimes we only discover necessary facts
+  /// in the middle of generating code.
   SkipReason skip = SkipReason::kDontSkip;
 };
 
@@ -307,8 +314,11 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     case SkipReason::kOpaqueObject:
       o << " skip:opaque";
       break;
-    case SkipReason::kPointSizeBuiltin:
-      o << " skip:pointsize";
+    case SkipReason::kPointSizeBuiltinPointer:
+      o << " skip:pointsize_pointer";
+      break;
+    case SkipReason::kPointSizeBuiltinValue:
+      o << " skip:pointsize_value";
       break;
   }
   o << "}";
@@ -695,6 +705,15 @@ class FunctionEmitter {
       return nullptr;
     }
     return where->second.get();
+  }
+  /// Returns the skip reason for a result ID.
+  /// @param id SPIR-V result ID
+  /// @returns the skip reason for the given ID, or SkipReason::kDontSkip
+  SkipReason GetSkipReason(uint32_t id) const {
+    if (auto* def_info = GetDefInfo(id)) {
+      return def_info->skip;
+    }
+    return SkipReason::kDontSkip;
   }
 
   /// Returns the most deeply nested structured construct which encloses the

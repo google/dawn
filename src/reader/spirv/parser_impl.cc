@@ -886,6 +886,7 @@ ast::type::Type* ParserImpl::ConvertType(
   ast::StructMemberList ast_members;
   const auto members = struct_ty->element_types();
   unsigned num_non_writable_members = 0;
+  bool is_per_vertex_struct = false;
   for (uint32_t member_index = 0; member_index < members.size();
        ++member_index) {
     const auto member_type_id = type_mgr_->GetId(members[member_index]);
@@ -906,18 +907,24 @@ ast::type::Type* ParserImpl::ConvertType(
           case SpvBuiltInPosition:
             // Record this built-in variable specially.
             builtin_position_.struct_type_id = type_id;
-            builtin_position_.member_index = member_index;
-            builtin_position_.member_type_id = member_type_id;
+            builtin_position_.position_member_index = member_index;
+            builtin_position_.position_member_type_id = member_type_id;
             // Don't map the struct type.  But this is not an error either.
-            return nullptr;
-          case SpvBuiltInPointSize:     // not supported in WGSL
-          case SpvBuiltInCullDistance:  // not supported in WGSL
-          case SpvBuiltInClipDistance:  // not supported in WGSL
-          default:
+            is_per_vertex_struct = true;
             break;
+          case SpvBuiltInPointSize:  // not supported in WGSL, but ignore
+            builtin_position_.pointsize_member_index = member_index;
+            is_per_vertex_struct = true;
+            break;
+          case SpvBuiltInClipDistance:  // not supported in WGSL
+          case SpvBuiltInCullDistance:  // not supported in WGSL
+            // Silently ignore, so we can detect Position and PointSize
+            is_per_vertex_struct = true;
+            break;
+          default:
+            Fail() << "unrecognized builtin " << decoration[1];
+            return nullptr;
         }
-        Fail() << "unrecognized builtin " << decoration[1];
-        return nullptr;
       } else if (decoration[0] == SpvDecorationNonWritable) {
         // WGSL doesn't represent individual members as non-writable. Instead,
         // apply the ReadOnly access control to the containing struct if all
@@ -944,6 +951,10 @@ ast::type::Type* ParserImpl::ConvertType(
         Source{}, ast_module_.RegisterSymbol(member_name), member_name,
         ast_member_ty, std::move(ast_member_decorations));
     ast_members.push_back(ast_struct_member);
+  }
+  if (is_per_vertex_struct) {
+    // We're replacing it by the Position builtin alone.
+    return nullptr;
   }
 
   // Now make the struct.
@@ -1010,10 +1021,11 @@ bool ParserImpl::RegisterTypes() {
   }
   // Manufacture a type for the gl_Position varible if we have to.
   if ((builtin_position_.struct_type_id != 0) &&
-      (builtin_position_.member_pointer_type_id == 0)) {
-    builtin_position_.member_pointer_type_id = type_mgr_->FindPointerToType(
-        builtin_position_.member_type_id, builtin_position_.storage_class);
-    ConvertType(builtin_position_.member_pointer_type_id);
+      (builtin_position_.position_member_pointer_type_id == 0)) {
+    builtin_position_.position_member_pointer_type_id =
+        type_mgr_->FindPointerToType(builtin_position_.position_member_type_id,
+                                     builtin_position_.storage_class);
+    ConvertType(builtin_position_.position_member_pointer_type_id);
   }
   return success_;
 }
@@ -1208,7 +1220,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     auto* var = MakeVariable(
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
-        ConvertType(builtin_position_.member_type_id), false, nullptr,
+        ConvertType(builtin_position_.position_member_type_id), false, nullptr,
         ast::VariableDecorationList{
             create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
         });

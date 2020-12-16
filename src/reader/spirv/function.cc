@@ -41,6 +41,7 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/intrinsic.h"
@@ -1971,6 +1972,24 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
   if (failed()) {
     return {};
   }
+  switch (GetSkipReason(id)) {
+    case SkipReason::kDontSkip:
+      break;
+    case SkipReason::kOpaqueObject:
+      Fail() << "internal error: unhandled use of opaque object with ID: "
+             << id;
+      return {};
+    case SkipReason::kPointSizeBuiltinValue: {
+      auto* f32 = create<ast::type::F32>();
+      return {f32,
+              create<ast::ScalarConstructorExpression>(
+                  Source{}, create<ast::FloatLiteral>(Source{}, f32, 1.0f))};
+    }
+    case SkipReason::kPointSizeBuiltinPointer:
+      Fail() << "unhandled use of a pointer to the PointSize builtin, with ID: "
+             << id;
+      return {};
+  }
   if (identifier_values_.count(id) || parser_impl_.IsScalarSpecConstant(id)) {
     auto name = namer_.Name(id);
     return TypedExpression{
@@ -2848,9 +2867,14 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
 
   if (type_id != 0) {
     const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
-    if ((type_id == builtin_position_info.struct_type_id) ||
-        (type_id == builtin_position_info.pointer_type_id)) {
+    if (type_id == builtin_position_info.struct_type_id) {
       return Fail() << "operations producing a per-vertex structure are not "
+                       "supported: "
+                    << inst.PrettyPrint();
+    }
+    if (type_id == builtin_position_info.pointer_type_id) {
+      return Fail() << "operations producing a pointer to a per-vertex "
+                       "structure are not "
                        "supported: "
                     << inst.PrettyPrint();
     }
@@ -2859,10 +2883,15 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   // Handle combinatorial instructions.
   const auto* def_info = GetDefInfo(result_id);
   if (def_info) {
+    TypedExpression combinatorial_expr;
+    if (def_info->skip == SkipReason::kDontSkip) {
+      combinatorial_expr = MaybeEmitCombinatorialValue(inst);
+    }
+    // An access chain or OpCopyObject can generate a skip.
     if (def_info->skip != SkipReason::kDontSkip) {
       return true;
     }
-    auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
+
     if (combinatorial_expr.expr != nullptr) {
       if (def_info->requires_hoisted_def ||
           def_info->requires_named_const_def || def_info->num_uses != 1) {
@@ -2892,6 +2921,23 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     case SpvOpStore: {
       const auto ptr_id = inst.GetSingleWordInOperand(0);
       const auto value_id = inst.GetSingleWordInOperand(1);
+
+      // Handle exceptional cases
+      if (GetSkipReason(ptr_id) == SkipReason::kPointSizeBuiltinPointer) {
+        if (const auto* c = constant_mgr_->FindDeclaredConstant(value_id)) {
+          // If we're writing a constant 1.0, then skip the write.  That's all
+          // that WebGPU handles.
+          auto* ct = c->type();
+          if (ct->AsFloat() && (ct->AsFloat()->width() == 32) &&
+              (c->GetFloat() == 1.0f)) {
+            // Don't store to PointSize
+            return true;
+          }
+        }
+        return Fail() << "cannot store a value other than constant 1.0 to "
+                         "PointSize builtin: "
+                      << inst.PrettyPrint();
+      }
       const auto ptr_type_id = def_use_mgr_->GetDef(ptr_id)->type_id();
       const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
       if (ptr_type_id == builtin_position_info.pointer_type_id) {
@@ -2900,6 +2946,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
                << inst.PrettyPrint();
       }
 
+      // Handle an ordinary store as an assignment.
       // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(ptr_id);
       auto rhs = MakeExpression(value_id);
@@ -2907,23 +2954,42 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
           create<ast::AssignmentStatement>(Source{}, lhs.expr, rhs.expr));
       return success();
     }
+
     case SpvOpLoad: {
       // Memory accesses must be issued in SPIR-V program order.
       // So represent a load by a new const definition.
-      auto expr = MakeExpression(inst.GetSingleWordInOperand(0));
+      const auto ptr_id = inst.GetSingleWordInOperand(0);
+      if (GetSkipReason(ptr_id) == SkipReason::kPointSizeBuiltinPointer) {
+        GetDefInfo(inst.result_id())->skip = SkipReason::kPointSizeBuiltinValue;
+        return true;
+      }
+      auto expr = MakeExpression(ptr_id);
       // The load result type is the pointee type of its operand.
       assert(expr.type->Is<ast::type::Pointer>());
       expr.type = expr.type->As<ast::type::Pointer>()->type();
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
+
     case SpvOpCopyObject: {
       // Arguably, OpCopyObject is purely combinatorial. On the other hand,
       // it exists to make a new name for something. So we choose to make
       // a new named constant definition.
-      auto expr = MakeExpression(inst.GetSingleWordInOperand(0));
+      auto value_id = inst.GetSingleWordInOperand(0);
+      const auto skip = GetSkipReason(value_id);
+      switch (skip) {
+        case SkipReason::kDontSkip:
+          break;
+        case SkipReason::kOpaqueObject:
+        case SkipReason::kPointSizeBuiltinPointer:
+        case SkipReason::kPointSizeBuiltinValue:
+          GetDefInfo(inst.result_id())->skip = skip;
+          return true;
+      }
+      auto expr = MakeExpression(value_id);
       expr.type = RemapStorageClass(expr.type, result_id);
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
+
     case SpvOpPhi: {
       // Emit a read from the associated state variable.
       TypedExpression expr{
@@ -2933,8 +2999,10 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
               def_info->phi_var)};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
+
     case SpvOpFunctionCall:
       return EmitFunctionCall(inst);
+
     default:
       break;
   }
@@ -3159,6 +3227,12 @@ TypedExpression FunctionEmitter::MakeAccessChain(
 
   // If the variable was originally gl_PerVertex, then in the AST we
   // have instead emitted a gl_Position variable.
+  // If computing the pointer to the Position builtin, then emit the
+  // pointer to the generated gl_Position variable.
+  // If computing the pointer to the PointSize builtin, then mark the
+  // result as skippable due to being the point-size pointer.
+  // If computing the pointer to the ClipDistance or CullDistance builtins,
+  // then error out.
   {
     const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
     if (base_id == builtin_position_info.per_vertex_var_id) {
@@ -3188,16 +3262,26 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       }
       const auto member_index_value =
           member_index_const_int->GetZeroExtendedValue();
-      if (member_index_value != builtin_position_info.member_index) {
-        Fail() << "accessing per-vertex member " << member_index_value
-               << " is not supported. Only Position is supported";
-        return {};
+      if (member_index_value != builtin_position_info.position_member_index) {
+        if (member_index_value ==
+            builtin_position_info.pointsize_member_index) {
+          if (auto* def_info = GetDefInfo(inst.result_id())) {
+            def_info->skip = SkipReason::kPointSizeBuiltinPointer;
+            return {};
+          }
+        } else {
+          // TODO(dneto): Handle ClipDistance and CullDistance
+          Fail() << "accessing per-vertex member " << member_index_value
+                 << " is not supported. Only Position is supported, and "
+                    "PointSize is ignored";
+          return {};
+        }
       }
 
       // Skip past the member index that gets us to Position.
       first_index = first_index + 1;
       // Replace the gl_PerVertex reference with the gl_Position reference
-      ptr_ty_id = builtin_position_info.member_pointer_type_id;
+      ptr_ty_id = builtin_position_info.position_member_pointer_type_id;
 
       auto name = namer_.Name(base_id);
       current_expr.expr = create<ast::IdentifierExpression>(

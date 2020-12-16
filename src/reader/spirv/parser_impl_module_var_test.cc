@@ -243,8 +243,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_MapsToModuleScopeVec4Var) {
   EXPECT_TRUE(p->error().empty()) << p->error();
   const auto& position_info = p->GetBuiltInPositionInfo();
   EXPECT_EQ(position_info.struct_type_id, 10u);
-  EXPECT_EQ(position_info.member_index, 0u);
-  EXPECT_EQ(position_info.member_type_id, 12u);
+  EXPECT_EQ(position_info.position_member_index, 0u);
+  EXPECT_EQ(position_info.position_member_type_id, 12u);
   EXPECT_EQ(position_info.pointer_type_id, 11u);
   EXPECT_EQ(position_info.storage_class, SpvStorageClassOutput);
   EXPECT_EQ(position_info.per_vertex_var_id, 1u);
@@ -307,8 +307,9 @@ TEST_F(SpvParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(), Eq("operations producing a per-vertex structure are "
-                             "not supported: %1000 = OpUndef %11"))
+  EXPECT_THAT(p->error(),
+              Eq("operations producing a pointer to a per-vertex structure are "
+                 "not supported: %1000 = OpUndef %11"))
       << p->error();
 }
 
@@ -320,6 +321,61 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_StorePosition) {
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
   %100 = OpAccessChain %ptr_v4float %1 %uint_0 ; address of the Position member
+  OpStore %100 %nil
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    Assignment{
+      Identifier[not set]{gl_Position}
+      TypeConstructor[not set]{
+        __vec_4__f32
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
+      }
+    })"))
+      << module_str;
+}
+
+TEST_F(
+    SpvParserTest,
+    ModuleScopeVar_BuiltinPosition_StorePosition_PerVertexStructOutOfOrderDecl) {
+  const std::string assembly = R"(
+  OpCapability Shader
+  OpCapability Linkage ; so we don't have to declare an entry point
+  OpMemoryModel Logical Simple
+
+ ;  scramble the member indices
+  OpMemberDecorate %10 0 BuiltIn ClipDistance
+  OpMemberDecorate %10 1 BuiltIn CullDistance
+  OpMemberDecorate %10 2 BuiltIn Position
+  OpMemberDecorate %10 3 BuiltIn PointSize
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %float = OpTypeFloat 32
+  %12 = OpTypeVector %float 4
+  %uint = OpTypeInt 32 0
+  %uint_0 = OpConstant %uint 0
+  %uint_1 = OpConstant %uint 1
+  %uint_2 = OpConstant %uint 2
+  %arr = OpTypeArray %float %uint_1
+  %10 = OpTypeStruct %arr %arr %12 %float
+  %11 = OpTypePointer Output %10
+  %1 = OpVariable %11 Output
+
+  %ptr_v4float = OpTypePointer Output %12
+  %nil = OpConstantNull %12
+
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %100 = OpAccessChain %ptr_v4float %1 %uint_2 ; address of the Position member
   OpStore %100 %nil
   OpReturn
   OpFunctionEnd
@@ -376,13 +432,13 @@ TEST_F(SpvParserTest,
        ModuleScopeVar_BuiltinPosition_StorePositionMember_TwoAccessChain) {
   // The algorithm is smart enough to collapse it down.
   const std::string assembly = PerVertexPreamble() + R"(
-  %ptr_v4float = OpTypePointer Output %12
+  %ptr = OpTypePointer Output %12
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
 
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
-  %100 = OpAccessChain %ptr_v4float %1 %uint_0 ; address of the Position member
+  %100 = OpAccessChain %ptr %1 %uint_0 ; address of the Position member
   %101 = OpAccessChain %ptr_float %100 %uint_1 ; address of the Position.y member
   OpStore %101 %nil
   OpReturn
@@ -407,22 +463,166 @@ TEST_F(SpvParserTest,
       << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_NotSupported) {
+TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_Write1_IsErased) {
   const std::string assembly = PerVertexPreamble() + R"(
-  %ptr_v4float = OpTypePointer Output %12
-  %nil = OpConstantNull %12
+  %ptr = OpTypePointer Output %float
+  %one = OpConstant %float 1.0
 
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
-  %100 = OpAccessChain %ptr_v4float %1 %uint_1 ; address of the PointSize member
-  OpStore %100 %nil
+  %100 = OpAccessChain %ptr %1 %uint_1 ; address of the PointSize member
+  OpStore %100 %one
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_EQ(module_str, R"(Module{
+  Variable{
+    Decorations{
+      BuiltinDecoration{position}
+    }
+    gl_Position
+    out
+    __vec_4__f32
+  }
+  Function x_14 -> __void
+  ()
+  {
+    Return{}
+  }
+}
+)") << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_WriteNon1_IsError) {
+  const std::string assembly = PerVertexPreamble() + R"(
+  %ptr = OpTypePointer Output %float
+  %999 = OpConstant %float 2.0
+
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %100 = OpAccessChain %ptr %1 %uint_1 ; address of the PointSize member
+  OpStore %100 %999
   OpReturn
   OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(), Eq("accessing per-vertex member 1 is not supported. "
-                             "Only Position is supported"));
+  EXPECT_THAT(p->error(),
+              HasSubstr("cannot store a value other than constant 1.0 to "
+                        "PointSize builtin: OpStore %100 %999"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_ReadReplaced) {
+  const std::string assembly = PerVertexPreamble() + R"(
+  %ptr = OpTypePointer Output %float
+  %nil = OpConstantNull %12
+  %private_ptr = OpTypePointer Private %float
+  %900 = OpVariable %private_ptr Private
+
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %100 = OpAccessChain %ptr %1 %uint_1 ; address of the PointSize member
+  %99 = OpLoad %float %100
+  OpStore %900 %99
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_EQ(module_str, R"(Module{
+  Variable{
+    x_900
+    private
+    __f32
+  }
+  Variable{
+    Decorations{
+      BuiltinDecoration{position}
+    }
+    gl_Position
+    out
+    __vec_4__f32
+  }
+  Function x_15 -> __void
+  ()
+  {
+    Assignment{
+      Identifier[not set]{x_900}
+      ScalarConstructor[not set]{1.000000}
+    }
+    Return{}
+  }
+}
+)") << module_str;
+}
+
+TEST_F(
+    SpvParserTest,
+    ModuleScopeVar_BuiltinPointSize_WriteViaCopyObjectPriorAccess_Unsupported) {
+  const std::string assembly = PerVertexPreamble() + R"(
+  %ptr = OpTypePointer Output %float
+  %nil = OpConstantNull %12
+
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %20 = OpCopyObject %11 %1
+  %100 = OpAccessChain %20 %1 %uint_1 ; address of the PointSize member
+  OpStore %100 %nil
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule()) << p->error();
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("operations producing a pointer to a per-vertex structure are "
+                "not supported: %20 = OpCopyObject %11 %1"));
+}
+
+TEST_F(
+    SpvParserTest,
+    ModuleScopeVar_BuiltinPointSize_WriteViaCopyObjectPostAccessChainErased) {
+  const std::string assembly = PerVertexPreamble() + R"(
+  %ptr = OpTypePointer Output %12
+  %one = OpConstant %float 1.0
+
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %100 = OpAccessChain %ptr %1 %uint_1 ; address of the PointSize member
+  %101 = OpCopyObject %ptr %100
+  OpStore %101 %one
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_EQ(module_str, R"(Module{
+  Variable{
+    Decorations{
+      BuiltinDecoration{position}
+    }
+    gl_Position
+    out
+    __vec_4__f32
+  }
+  Function x_14 -> __void
+  ()
+  {
+    Return{}
+  }
+}
+)") << module_str;
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BuiltinClipDistance_NotSupported) {
@@ -441,8 +641,9 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinClipDistance_NotSupported) {
   )";
   auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(), Eq("accessing per-vertex member 2 is not supported. "
-                             "Only Position is supported"));
+  EXPECT_EQ(p->error(),
+            "accessing per-vertex member 2 is not supported. Only Position is "
+            "supported, and PointSize is ignored");
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BuiltinCullDistance_NotSupported) {
@@ -461,8 +662,9 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinCullDistance_NotSupported) {
   )";
   auto p = parser(test::Assemble(assembly));
   EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(), Eq("accessing per-vertex member 3 is not supported. "
-                             "Only Position is supported"));
+  EXPECT_EQ(p->error(),
+            "accessing per-vertex member 3 is not supported. Only Position is "
+            "supported, and PointSize is ignored");
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPerVertex_MemberIndex_NotConstant) {
