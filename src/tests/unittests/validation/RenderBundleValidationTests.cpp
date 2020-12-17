@@ -54,11 +54,11 @@ namespace {
 
             wgpu::BindGroupLayout bgls[] = {
                 utils::MakeBindGroupLayout(
-                    device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}}),
+                    device, {{0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}}),
                 utils::MakeBindGroupLayout(
                     device, {
-                                {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                                {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer},
+                                {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+                                {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage},
                             })};
 
             wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};

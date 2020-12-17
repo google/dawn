@@ -393,10 +393,10 @@ TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndSampleCount) {
 TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
     constexpr uint32_t kNumTextureComponentType = 3u;
     std::array<const char*, kNumTextureComponentType> kScalarTypes = {{"f32", "i32", "u32"}};
-    std::array<wgpu::TextureComponentType, kNumTextureComponentType> kTextureComponentTypes = {{
-        wgpu::TextureComponentType::Float,
-        wgpu::TextureComponentType::Sint,
-        wgpu::TextureComponentType::Uint,
+    std::array<wgpu::TextureSampleType, kNumTextureComponentType> kTextureComponentTypes = {{
+        wgpu::TextureSampleType::Float,
+        wgpu::TextureSampleType::Sint,
+        wgpu::TextureSampleType::Uint,
     }};
 
     for (size_t i = 0; i < kNumTextureComponentType; ++i) {
@@ -415,8 +415,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
                 utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
-                          0, wgpu::TextureViewDimension::e2D, kTextureComponentTypes[j]}});
+                device, {{0, wgpu::ShaderStage::Fragment, kTextureComponentTypes[j]}});
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
             if (i == j) {
@@ -464,8 +463,8 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
                 utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
-                          0, kTextureViewDimensions[j], wgpu::TextureComponentType::Float}});
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float,
+                          kTextureViewDimensions[j]}});
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
             if (i == j) {
@@ -753,11 +752,11 @@ TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
     )");
 
     wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}});
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}});
     wgpu::PipelineLayout layout0 = utils::MakeBasicPipelineLayout(device, &bgl0);
 
     wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
-        device, {{1, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}});
+        device, {{1, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}});
     wgpu::PipelineLayout layout1 = utils::MakeBasicPipelineLayout(device, &bgl1);
 
     utils::ComboRenderPipelineDescriptor descriptor(device);

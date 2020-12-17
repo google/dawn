@@ -42,9 +42,9 @@ class OpArrayLengthTest : public DawnTest {
         wgpu::ShaderStage kAllStages =
             wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Compute;
         mBindGroupLayout = utils::MakeBindGroupLayout(
-            device, {{0, kAllStages, wgpu::BindingType::ReadonlyStorageBuffer},
-                     {1, kAllStages, wgpu::BindingType::ReadonlyStorageBuffer},
-                     {2, kAllStages, wgpu::BindingType::ReadonlyStorageBuffer}});
+            device, {{0, kAllStages, wgpu::BufferBindingType::ReadOnlyStorage},
+                     {1, kAllStages, wgpu::BufferBindingType::ReadOnlyStorage},
+                     {2, kAllStages, wgpu::BufferBindingType::ReadOnlyStorage}});
 
         mBindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
                                           {
@@ -103,7 +103,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDesc);
 
     wgpu::BindGroupLayout resultLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
 
     wgpu::BindGroup resultBindGroup =
         utils::MakeBindGroup(device, resultLayout, {{0, resultBuffer, 0, wgpu::kWholeSize}});

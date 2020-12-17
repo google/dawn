@@ -330,7 +330,7 @@ void DrawCallPerf::SetUp() {
             mUniformBindGroupLayout = utils::MakeBindGroupLayout(
                 device,
                 {
-                    {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer, false},
+                    {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, false},
                 });
             break;
 
@@ -338,7 +338,7 @@ void DrawCallPerf::SetUp() {
             mUniformBindGroupLayout = utils::MakeBindGroupLayout(
                 device,
                 {
-                    {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer, true},
+                    {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, true},
                 });
             break;
 
@@ -381,7 +381,7 @@ void DrawCallPerf::SetUp() {
         // all draws.
         mConstantBindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer, false},
+                        {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, false},
                     });
 
         // Create the pipeline layout.

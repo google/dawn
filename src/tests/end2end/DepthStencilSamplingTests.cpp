@@ -211,10 +211,9 @@ class DepthStencilSamplingTest : public DawnTest {
         // TODO(dawn:367): Cannot use GetBindGroupLayout for comparison samplers without shader
         // reflection data.
         wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler},
-                     {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
-                      wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::DepthComparison},
-                     {2, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer}});
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
+                     {2, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.vertexStage.module = vsModule;
@@ -246,11 +245,10 @@ class DepthStencilSamplingTest : public DawnTest {
 
         // TODO(dawn:367): Cannot use GetBindGroupLayout without shader reflection data.
         wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ComparisonSampler},
-                     {1, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
-                      wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::DepthComparison},
-                     {2, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer},
-                     {3, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::SamplerBindingType::Comparison},
+                     {1, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Depth},
+                     {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+                     {3, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);

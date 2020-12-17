@@ -56,13 +56,13 @@ class DynamicBufferOffsetTests : public DawnTest {
         // Default bind group layout
         mBindGroupLayouts[0] = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
-                      wgpu::BindingType::UniformBuffer},
+                      wgpu::BufferBindingType::Uniform},
                      {1, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
-                      wgpu::BindingType::StorageBuffer},
+                      wgpu::BufferBindingType::Storage},
                      {3, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
-                      wgpu::BindingType::UniformBuffer, true},
+                      wgpu::BufferBindingType::Uniform, true},
                      {4, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
-                      wgpu::BindingType::StorageBuffer, true}});
+                      wgpu::BufferBindingType::Storage, true}});
 
         // Default bind group
         mBindGroups[0] = utils::MakeBindGroup(device, mBindGroupLayouts[0],
@@ -78,7 +78,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         // Bind group layout for inheriting test
         mBindGroupLayouts[1] = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
-                      wgpu::BindingType::UniformBuffer}});
+                      wgpu::BufferBindingType::Uniform}});
 
         // Bind group for inheriting test
         mBindGroups[1] = utils::MakeBindGroup(device, mBindGroupLayouts[1],

@@ -266,7 +266,7 @@ TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
     // Check that view doesn't have extra formats like Sampled.
     // TODO(cwallez@chromium.org): also check for [Readonly]Storage once that's implemented.
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, view}}));
 }
 

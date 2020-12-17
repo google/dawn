@@ -53,7 +53,7 @@ namespace {
                             const wgpu::TextureView& samplerView) {
             // Create bind group
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::SampledTexture}});
+                device, {{0, wgpu::ShaderStage::Vertex, wgpu::TextureSampleType::Float}});
 
             utils::ComboRenderPassDescriptor renderPassDesc({renderView});
 
@@ -73,10 +73,8 @@ namespace {
                 wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, samplerView}});
 
                 wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
-                    device,
-                    {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture,
-                      false, 0, wgpu::TextureViewDimension::Undefined,
-                      wgpu::TextureComponentType::Float, kFormat}});
+                    device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat}});
 
                 wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
 
@@ -104,10 +102,8 @@ namespace {
                 wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, samplerView}});
 
                 wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
-                    device,
-                    {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture,
-                      false, 0, wgpu::TextureViewDimension::Undefined,
-                      wgpu::TextureComponentType::Float, kFormat}});
+                    device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::WriteOnly,
+                              kFormat}});
                 wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
 
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

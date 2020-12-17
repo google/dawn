@@ -26,7 +26,7 @@ namespace {
         uint32_t binding;
         std::string text;
         uint64_t size;
-        wgpu::BindingType type = wgpu::BindingType::StorageBuffer;
+        wgpu::BufferBindingType type = wgpu::BufferBindingType::Storage;
         wgpu::ShaderStage visibility = wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment;
     };
 
@@ -67,13 +67,13 @@ namespace {
     }
 
     // Convert binding type to a glsl string
-    std::string BindingTypeToStr(wgpu::BindingType type) {
+    std::string BufferBindingTypeToStr(wgpu::BufferBindingType type) {
         switch (type) {
-            case wgpu::BindingType::UniformBuffer:
+            case wgpu::BufferBindingType::Uniform:
                 return "uniform";
-            case wgpu::BindingType::StorageBuffer:
+            case wgpu::BufferBindingType::Storage:
                 return "buffer";
-            case wgpu::BindingType::ReadonlyStorageBuffer:
+            case wgpu::BufferBindingType::ReadOnlyStorage:
                 return "readonly buffer";
             default:
                 UNREACHABLE();
@@ -88,7 +88,7 @@ namespace {
         size_t ctr = 0;
         for (const BindingDescriptor& b : bindings) {
             ostream << "layout(" << layout << ", set = " << b.set << ", binding = " << b.binding
-                    << ") " << BindingTypeToStr(b.type) << " b" << ctr++ << "{\n"
+                    << ") " << BufferBindingTypeToStr(b.type) << " b" << ctr++ << "{\n"
                     << b.text << ";\n};\n";
         }
         return ostream.str();
@@ -214,9 +214,9 @@ class MinBufferSizeTestsBase : public ValidationTest {
             const BindingDescriptor& b = bindings[i];
             wgpu::BindGroupLayoutEntry e = {};
             e.binding = b.binding;
-            e.type = b.type;
             e.visibility = b.visibility;
-            e.minBufferBindingSize = minimumSizes[i];
+            e.buffer.type = b.type;
+            e.buffer.minBindingSize = minimumSizes[i];
             entries.push_back(e);
         }
 
@@ -393,9 +393,8 @@ TEST_F(MinBufferSizeBindGroupCreationTests, BindingTooSmall) {
 TEST_F(MinBufferSizeBindGroupCreationTests, LayoutEquality) {
     auto MakeLayout = [&](uint64_t size) {
         return utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, false, size,
-                      wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
-                      wgpu::TextureFormat::Undefined}});
+            device,
+            {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, false, size}});
     };
 
     EXPECT_EQ(MakeLayout(0).Get(), MakeLayout(0).Get());
@@ -540,16 +539,16 @@ TEST_F(MinBufferSizeDefaultLayoutTests, std430Inferred) {
 // Sizes are inferred for all binding types with std140 layout
 TEST_F(MinBufferSizeDefaultLayoutTests, std140BindingTypes) {
     CheckShaderBindingSizeReflection(
-        "std140", {{{0, 0, "int d; float e[]", 32, wgpu::BindingType::UniformBuffer},
-                    {0, 1, "ThreeFloats f", 12, wgpu::BindingType::StorageBuffer},
-                    {0, 2, "ThreeFloats g[]", 16, wgpu::BindingType::ReadonlyStorageBuffer}}});
+        "std140", {{{0, 0, "int d; float e[]", 32, wgpu::BufferBindingType::Uniform},
+                    {0, 1, "ThreeFloats f", 12, wgpu::BufferBindingType::Storage},
+                    {0, 2, "ThreeFloats g[]", 16, wgpu::BufferBindingType::ReadOnlyStorage}}});
 }
 
 // Sizes are inferred for all binding types with std430 layout
 TEST_F(MinBufferSizeDefaultLayoutTests, std430BindingTypes) {
     CheckShaderBindingSizeReflection(
-        "std430", {{{0, 0, "float a", 4, wgpu::BindingType::StorageBuffer},
-                    {0, 1, "ThreeFloats b[]", 12, wgpu::BindingType::ReadonlyStorageBuffer}}});
+        "std430", {{{0, 0, "float a", 4, wgpu::BufferBindingType::Storage},
+                    {0, 1, "ThreeFloats b[]", 12, wgpu::BufferBindingType::ReadOnlyStorage}}});
 }
 
 // Various bindings have correct size across multiple groups
@@ -575,11 +574,11 @@ TEST_F(MinBufferSizeDefaultLayoutTests, std430MultipleBindGroups) {
 // Minimum size should be the max requirement of both vertex and fragment stages
 TEST_F(MinBufferSizeDefaultLayoutTests, RenderPassConsidersBothStages) {
     std::string vertexShader = CreateVertexShaderWithBindings(
-        "std140", {{0, 0, "float a", 4, wgpu::BindingType::UniformBuffer},
-                   {0, 1, "float b[]", 16, wgpu::BindingType::UniformBuffer}});
+        "std140", {{0, 0, "float a", 4, wgpu::BufferBindingType::Uniform},
+                   {0, 1, "float b[]", 16, wgpu::BufferBindingType::Uniform}});
     std::string fragShader = CreateFragmentShaderWithBindings(
-        "std140", {{0, 0, "float a; float b", 8, wgpu::BindingType::UniformBuffer},
-                   {0, 1, "float c; float d", 8, wgpu::BindingType::UniformBuffer}});
+        "std140", {{0, 0, "float a; float b", 8, wgpu::BufferBindingType::Uniform},
+                   {0, 1, "float c; float d", 8, wgpu::BufferBindingType::Uniform}});
 
     wgpu::BindGroupLayout renderLayout = GetBGLFromRenderShaders(vertexShader, fragShader, 0);
 

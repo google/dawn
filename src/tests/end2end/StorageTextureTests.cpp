@@ -684,7 +684,7 @@ class StorageTextureTests : public DawnTest {
 // valid on all backends. This test is a regression test for chromium:1061156 and passes by not
 // asserting or crashing.
 TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
-    // wgpu::BindingType::ReadonlyStorageTexture is a valid binding type to create a bind group
+    // ReadOnly is a valid storage texture binding type to create a bind group
     // layout.
     {
         wgpu::BindGroupLayoutEntry entry;
@@ -698,7 +698,7 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
         device.CreateBindGroupLayout(&descriptor);
     }
 
-    // wgpu::BindingType::WriteonlyStorageTexture is a valid binding type to create a bind group
+    // WriteOnly is a valid storage texture binding type to create a bind group
     // layout.
     {
         wgpu::BindGroupLayoutEntry entry;
