@@ -143,8 +143,8 @@ void FakeStorage<T>::CheckSameAs(const SubresourceStorage<T>& real) {
                  layer < range.baseArrayLayer + range.layerCount; layer++) {
                 for (uint32_t level = range.baseMipLevel;
                      level < range.baseMipLevel + range.levelCount; level++) {
-                    ASSERT_EQ(data, Get(aspect, layer, level));
-                    ASSERT_EQ(data, real.Get(aspect, layer, level));
+                    EXPECT_EQ(data, Get(aspect, layer, level));
+                    EXPECT_EQ(data, real.Get(aspect, layer, level));
                 }
             }
         }
@@ -624,9 +624,54 @@ TEST(SubresourceStorageTest, MergeLayerBandInStipple) {
     CheckLayerCompressed(s, Aspect::Color, 2, false);
 }
 
+// Regression test for a missing check that layer 0 is compressed when recompressing.
+TEST(SubresourceStorageTest, Layer0NotCompressedBlocksAspectRecompression) {
+    const uint32_t kLayers = 2;
+    const uint32_t kLevels = 2;
+    SubresourceStorage<int> s(Aspect::Color, kLayers, kLevels);
+    FakeStorage<int> f(Aspect::Color, kLayers, kLevels);
+
+    // Set up s with zeros except (0, 1) which is garbage.
+    {
+        SubresourceRange range = SubresourceRange::MakeSingle(Aspect::Color, 0, 1);
+        CallUpdateOnBoth(&s, &f, range, [](const SubresourceRange&, int* data) { *data += 0xABC; });
+    }
+
+    // Other is 2x2 of zeroes
+    SubresourceStorage<int> other(Aspect::Color, kLayers, kLevels);
+
+    // Fake updating F with other which is fully compressed and will trigger recompression.
+    CallMergeOnBoth(&s, &f, other, [](const SubresourceRange&, int*, int) {});
+
+    // The Color aspect should not have been recompressed.
+    CheckAspectCompressed(s, Aspect::Color, false);
+    CheckLayerCompressed(s, Aspect::Color, 0, false);
+}
+
+// Regression test for aspect decompression not copying to layer 0
+TEST(SubresourceStorageTest, AspectDecompressionUpdatesLayer0) {
+    const uint32_t kLayers = 2;
+    const uint32_t kLevels = 2;
+    SubresourceStorage<int> s(Aspect::Color, kLayers, kLevels, 3);
+    FakeStorage<int> f(Aspect::Color, kLayers, kLevels, 3);
+
+    // Cause decompression by writing to a single subresource.
+    {
+        SubresourceRange range = SubresourceRange::MakeSingle(Aspect::Color, 1, 1);
+        CallUpdateOnBoth(&s, &f, range, [](const SubresourceRange&, int* data) { *data += 0xABC; });
+    }
+
+    // Check that the aspect's value of 3 was correctly decompressed in layer 0.
+    CheckLayerCompressed(s, Aspect::Color, 0, true);
+    EXPECT_EQ(3, s.Get(Aspect::Color, 0, 0));
+    EXPECT_EQ(3, s.Get(Aspect::Color, 0, 1));
+}
+
 // Bugs found while testing:
 //  - mLayersCompressed not initialized to true.
 //  - DecompressLayer setting Compressed to true instead of false.
 //  - Get() checking for !compressed instead of compressed for the early exit.
 //  - ASSERT in RecompressLayers was inverted.
 //  - Two != being converted to == during a rework.
+//  - (with ASSERT) that RecompressAspect didn't check that aspect 0 was compressed.
+//  - Missing decompression of layer 0 after introducing mInlineAspectData.
