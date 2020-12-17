@@ -501,6 +501,22 @@ bool IsSampledImageAccess(SpvOp opcode) {
 }
 
 // @param opcode a SPIR-V opcode
+// @returns true if the given instruction is an image sampling operation.
+bool IsImageSampling(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpImageSampleImplicitLod:
+    case SpvOpImageSampleExplicitLod:
+    case SpvOpImageSampleDrefImplicitLod:
+    case SpvOpImageSampleDrefExplicitLod:
+      return true;
+    default:
+      // WGSL doesn't have *Proj* texturing.
+      break;
+  }
+  return false;
+}
+
+// @param opcode a SPIR-V opcode
 // @returns true if the given instruction is an image access instruction
 // whose first input operand is an OpImage value.
 bool IsRawImageAccess(SpvOp opcode) {
@@ -3989,7 +4005,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   params.push_back(create<ast::IdentifierExpression>(
       Source{}, ast_module_.RegisterSymbol(name), name));
 
-  if (IsSampledImageAccess(inst.opcode())) {
+  const auto opcode = inst.opcode();
+  if (IsSampledImageAccess(opcode)) {
     // Form the sampler operand.
     const auto* sampler = parser_impl_.GetMemoryObjectDeclarationForHandle(
         image_or_sampled_image_operand_id, false);
@@ -4029,7 +4046,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
 
   std::string builtin_name;
   bool use_load_suffix = true;
-  switch (inst.opcode()) {
+  switch (opcode) {
     case SpvOpImageSampleImplicitLod:
     case SpvOpImageSampleExplicitLod:
       builtin_name = "textureSample";
@@ -4121,12 +4138,28 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsConstOffsetMask)) {
+    if (!IsImageSampling(opcode)) {
+      return Fail() << "ConstOffset is only permitted for sampling operations: "
+                    << inst.PrettyPrint();
+    }
+    switch (texture_type->dim()) {
+      case ast::type::TextureDimension::k2d:
+      case ast::type::TextureDimension::k2dArray:
+      case ast::type::TextureDimension::k3d:
+        break;
+      default:
+        return Fail() << "ConstOffset is only permitted for 2D, 2D Arrayed, "
+                         "and 3D textures: "
+                      << inst.PrettyPrint();
+    }
+
     params.push_back(ToSignedIfUnsigned(MakeOperand(inst, arg_index)).expr);
     image_operands_mask ^= SpvImageOperandsConstOffsetMask;
     arg_index++;
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsSampleMask)) {
+    // TODO(dneto): only permitted with ImageFetch
     params.push_back(ToI32(MakeOperand(inst, arg_index)).expr);
     image_operands_mask ^= SpvImageOperandsSampleMask;
     arg_index++;
@@ -4184,7 +4217,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       value = create<ast::BitcastExpression>(Source{}, result_type, call_expr);
     }
     if (!expected_component_type->Is<ast::type::F32>() &&
-        IsSampledImageAccess(inst.opcode())) {
+        IsSampledImageAccess(opcode)) {
       // WGSL permits sampled image access only on float textures.
       // Reject this case in the SPIR-V reader, at least until SPIR-V validation
       // catches up with this rule and can reject it earlier in the workflow.

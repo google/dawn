@@ -30,6 +30,7 @@ namespace {
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;
+using ::testing::StartsWith;
 
 std::string Preamble() {
   return R"(
@@ -2617,28 +2618,6 @@ INSTANTIATE_TEST_SUITE_P(
         Identifier[not set]{vi12}
         Identifier[not set]{vf1234}
       )
-    })"},
-        // OpImageWrite with ConstOffset
-        {"%float 2D 0 0 0 2 Rgba32f",
-         "OpImageWrite %im %vi12 %vf1234 ConstOffset %offsets2d",
-         R"(
-  Variable{
-    Decorations{
-      SetDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __storage_texture_write_only_2d_rgba32float
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        Identifier[not set]{vf1234}
-        Identifier[not set]{offsets2d}
-      )
     })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3085,35 +3064,6 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"},
-        // OpImageRead with ConstOffset
-        {"%float 2D 0 0 0 2 Rgba32f",
-         "%99 = OpImageRead %v4float %im %vi12 ConstOffset %offsets2d",
-         R"(Variable{
-    Decorations{
-      SetDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __storage_texture_read_only_2d_rgba32float
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              Identifier[not set]{offsets2d}
-            )
-          }
-        }
-      }
     })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3142,36 +3092,6 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{vi12}
-            )
-          }
-        }
-      }
-    })"},
-        // OpImageFetch with ConstOffset
-        // TODO(dneto): Seems this is not valid in WGSL.
-        {"%float 2D 0 0 0 1 Unknown",
-         "%99 = OpImageFetch %v4float %im %vi12 ConstOffset %offsets2d",
-         R"(Variable{
-    Decorations{
-      SetDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              Identifier[not set]{offsets2d}
             )
           }
         }
@@ -3760,7 +3680,7 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
   )";
   auto p = parser(test::Assemble(assembly));
   if (!p->BuildAndParseInternalModule()) {
-    EXPECT_THAT(p->error(), Eq(GetParam().expected_error)) << assembly;
+    EXPECT_THAT(p->error(), StartsWith(GetParam().expected_error)) << assembly;
   } else {
     EXPECT_TRUE(p->error().empty()) << p->error();
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
@@ -4454,6 +4374,59 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleDrefExplicitLod %v4int %sampled_image %vf12 "
          "%f1 Lod %f1",
          "sampled image must have float component type",
+         {}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ConstOffset_BadInstruction_Errors,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // ImageFetch
+        {"%uint 2D 0 0 0 1 Unknown",
+         "%result = OpImageFetch %v4uint %sampled_image %vf12 ConstOffset "
+         "%the_vu12",
+         "ConstOffset is only permitted for sampling operations: ",
+         {}},
+        // ImageRead
+        {"%uint 2D 0 0 0 2 Rgba32ui",
+         "%result = OpImageRead %v4uint %im %vu12 ConstOffset %the_vu12",
+         "ConstOffset is only permitted for sampling operations: ",
+         {}},
+        // ImageWrite
+        {"%uint 2D 0 0 0 2 Rgba32ui",
+         "OpImageWrite %im %vu12 %vu1234 ConstOffset %the_vu12",
+         "ConstOffset is only permitted for sampling operations: ",
+         {}}
+        // TODO(dneto): Gather
+        // TODO(dneto): DrefGather
+    }));
+
+INSTANTIATE_TEST_SUITE_P(
+    ConstOffset_BadDim_Errors,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // 1D
+        {"%uint 1D 0 0 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf1234 "
+         "ConstOffset %the_vu12",
+         "ConstOffset is only permitted for 2D, 2D Arrayed, and 3D textures: ",
+         {}},
+        // 1D Array
+        {"%uint 1D 0 1 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf1234 "
+         "ConstOffset %the_vu12",
+         "ConstOffset is only permitted for 2D, 2D Arrayed, and 3D textures: ",
+         {}},
+        // Cube
+        {"%uint Cube 0 0 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf1234 "
+         "ConstOffset %the_vu12",
+         "ConstOffset is only permitted for 2D, 2D Arrayed, and 3D textures: ",
+         {}},
+        // Cube Array
+        {"%uint Cube 0 1 0 1 Unknown",
+         "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf1234 "
+         "ConstOffset %the_vu12",
+         "ConstOffset is only permitted for 2D, 2D Arrayed, and 3D textures: ",
          {}}}));
 
 }  // namespace
