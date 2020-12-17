@@ -74,13 +74,12 @@ class DepthStencilCopyTests : public DawnTest {
         desc->vertexStage.module = mVertexModule;
 
         std::string fsSource = R"(
-    #version 450
-    void main() {
-        gl_FragDepth = )" + std::to_string(regionDepth) +
+        [[builtin(frag_depth)]] var<out> FragDepth : f32;
+        [[stage(fragment)]] fn main() -> void {
+            FragDepth = )" + std::to_string(regionDepth) +
                                ";\n}";
 
-        desc->cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fsSource.c_str());
+        desc->cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, fsSource.c_str());
         desc->cDepthStencilState.format = format;
         desc->cDepthStencilState.depthWriteEnabled = true;
         desc->depthStencilState = &desc->cDepthStencilState;
@@ -253,17 +252,17 @@ class DepthStencilCopyTests : public DawnTest {
 
         // Sample the input texture and write out depth. |result| will only be set to 1 if we
         // pass the depth test.
-        pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform sampler sampler0;
-        layout(set = 0, binding = 1) uniform texture2D texture0;
+        pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[set(0), binding(0)]] var<uniform_constant> texture0 : texture_2d<f32>;
+            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
-        layout(location = 0) out uint result;
-        void main() {
-            result = 1u;
-            gl_FragDepth = texelFetch(sampler2D(texture0, sampler0), ivec2(gl_FragCoord), 0)[0];
-        })");
+            [[location(0)]] var<out> result : u32;
+            [[builtin(frag_depth)]] var<out> FragDepth : f32;
+
+            [[stage(fragment)]] fn main() -> void {
+                result = 1u;
+                FragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
+            })");
 
         // Pass the depth test only if the depth is equal.
         pipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
@@ -288,11 +287,9 @@ class DepthStencilCopyTests : public DawnTest {
 
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
-        // Bind a sampler and the depth data texture.
-        wgpu::SamplerDescriptor samplerDesc = {};
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-            device, pipeline.GetBindGroupLayout(0),
-            {{0, device.CreateSampler(&samplerDesc)}, {1, depthDataTexture.CreateView()}});
+        // Bind the depth data texture.
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, depthDataTexture.CreateView()}});
 
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
         pass.SetPipeline(pipeline);
