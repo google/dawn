@@ -1751,13 +1751,19 @@ INSTANTIATE_TEST_SUITE_P(
         none
         __vec_4__f32
         {
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-            )
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSample}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
+                Identifier[not set]{coords12}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           }
         }
       }
@@ -1768,14 +1774,20 @@ INSTANTIATE_TEST_SUITE_P(
         none
         __vec_4__f32
         {
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_30}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-            )
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSampleCompare}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_30}
+                Identifier[not set]{coords12}
+                ScalarConstructor[not set]{0.200000}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           }
         }
       }
@@ -1809,14 +1821,20 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d
   })",
                         R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-            )
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSampleCompare}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
+                Identifier[not set]{coords12}
+                ScalarConstructor[not set]{0.200000}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           })"},
         // ImageSampleDrefImplicitLod - arrayed
         ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
@@ -1842,24 +1860,30 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d_array
   })",
                         R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSampleCompare}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
-                  Identifier[not set]{z}
+                  Identifier[not set]{xy}
                 }
-              }
-              ScalarConstructor[not set]{0.200000}
-            )
+                TypeConstructor[not set]{
+                  __i32
+                  MemberAccessor[not set]{
+                    Identifier[not set]{coords123}
+                    Identifier[not set]{z}
+                  }
+                }
+                ScalarConstructor[not set]{0.200000}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           })"},
         // ImageSampleDrefImplicitLod with ConstOffset
         ImageAccessCase{
@@ -1886,15 +1910,21 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d
   })",
             R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-              Identifier[not set]{offsets2d}
-            )
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSampleCompare}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
+                Identifier[not set]{coords12}
+                ScalarConstructor[not set]{0.200000}
+                Identifier[not set]{offsets2d}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           })"},
         // ImageSampleDrefImplicitLod arrayed with ConstOffset
         ImageAccessCase{
@@ -1921,25 +1951,31 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d_array
   })",
             R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSampleCompare}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
-                  Identifier[not set]{z}
+                  Identifier[not set]{xy}
                 }
-              }
-              ScalarConstructor[not set]{0.200000}
-              Identifier[not set]{offsets2d}
-            )
+                TypeConstructor[not set]{
+                  __i32
+                  MemberAccessor[not set]{
+                    Identifier[not set]{coords123}
+                    Identifier[not set]{z}
+                  }
+                }
+                ScalarConstructor[not set]{0.200000}
+                Identifier[not set]{offsets2d}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           })"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2471,17 +2507,23 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d
   })",
          R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{vf12}
-              TypeConstructor[not set]{
-                __i32
-                Identifier[not set]{f1}
-              }
-            )
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSampleLevel}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
+                Identifier[not set]{vf12}
+                TypeConstructor[not set]{
+                  __i32
+                  Identifier[not set]{f1}
+                }
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           })"}}));
 
 using SpvParserTest_ImageAccessTest =

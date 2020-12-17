@@ -4145,14 +4145,31 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     // It returns a value.
     ast::Expression* value = call_expr;
 
-    // If necessary, convert the result to the signedness of the instruction
-    // result type. Compare the SPIR-V image's sampled component type with the
-    // component of the result type of the SPIR-V instruction.
+    // The result type, derived from the SPIR-V instruction.
     auto* result_type = parser_impl_.ConvertType(inst.type_id());
     auto* result_component_type = result_type;
     if (auto* result_vector_type = result_type->As<ast::type::Vector>()) {
       result_component_type = result_vector_type->type();
     }
+
+    // Convert the arity of the result when operating on depth textures.
+    // SPIR-V operations on depth textures always result in 4-element vectors.
+    // But WGSL operations on depth textures always result in a f32 scalar.
+    // Construct a 4-element vector with the result from the builtin in the
+    // first component.
+    if (texture_type->Is<ast::type::DepthTexture>()) {
+      value = create<ast::TypeConstructorExpression>(
+          Source{},
+          result_type,  // a vec4
+          ast::ExpressionList{
+              value, parser_impl_.MakeNullValue(result_component_type),
+              parser_impl_.MakeNullValue(result_component_type),
+              parser_impl_.MakeNullValue(result_component_type)});
+    }
+
+    // If necessary, convert the result to the signedness of the instruction
+    // result type. Compare the SPIR-V image's sampled component type with the
+    // component of the result type of the SPIR-V instruction.
     auto* spirv_image_type =
         parser_impl_.GetSpirvTypeForHandleMemoryObjectDeclaration(*image);
     if (!spirv_image_type || (spirv_image_type->opcode() != SpvOpTypeImage)) {
