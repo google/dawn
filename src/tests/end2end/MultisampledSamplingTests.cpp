@@ -53,21 +53,19 @@ class MultisampledSamplingTest : public DawnTest {
         {
             utils::ComboRenderPipelineDescriptor desc(device);
 
-            desc.vertexStage.module =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex,
-                                          R"(#version 450
-                layout(location=0) in vec2 pos;
-                void main() {
-                    gl_Position = vec4(pos, 0.0, 1.0);
+            desc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[location(0)]] var<in> pos : vec2<f32>;
+                [[builtin(position)]] var<out> Position : vec4<f32>;
+                [[stage(vertex)]] fn main() -> void {
+                    Position = vec4<f32>(pos, 0.0, 1.0);
                 })");
 
-            desc.cFragmentStage.module =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
-                                          R"(#version 450
-                layout(location = 0) out float fragColor;
-                void main() {
+            desc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[location(0)]] var<out> fragColor : f32;
+                [[builtin(frag_depth)]] var<out> FragDepth : f32;
+                [[stage(fragment)]] fn main() -> void {
                     fragColor = 1.0;
-                    gl_FragDepth = 0.7;
+                    FragDepth = 0.7;
                 })");
 
             desc.cVertexState.indexFormat = wgpu::IndexFormat::Uint32;
@@ -91,25 +89,20 @@ class MultisampledSamplingTest : public DawnTest {
         {
             wgpu::ComputePipelineDescriptor desc = {};
             desc.computeStage.entryPoint = "main";
-            desc.computeStage.module =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Compute,
-                                          R"(#version 450
-                layout(set = 0, binding = 0) uniform sampler sampler0;
-                layout(set = 0, binding = 1) uniform texture2DMS texture0;
-                layout(set = 0, binding = 2) uniform texture2DMS texture1;
+            desc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[set(0), binding(0)]] var<uniform_constant> texture0 : texture_multisampled_2d<f32>;
+                [[set(0), binding(1)]] var<uniform_constant> texture1 : texture_multisampled_2d<f32>;
 
-                layout(set = 0, binding = 3, std430) buffer Results {
-                    float colorSamples[4];
-                    float depthSamples[4];
+                [[block]] struct Results {
+                    [[offset(0)]] colorSamples : [[stride(4)]] array<f32, 4>;
+                    [[offset(16)]] depthSamples : [[stride(4)]] array<f32, 4>;
                 };
+                [[set(0), binding(2)]] var<storage_buffer> results : [[access(read_write)]] Results;
 
-                void main() {
-                    for (int i = 0; i < 4; ++i) {
-                        colorSamples[i] =
-                            texelFetch(sampler2DMS(texture0, sampler0), ivec2(0, 0), i).x;
-
-                        depthSamples[i] =
-                            texelFetch(sampler2DMS(texture1, sampler0), ivec2(0, 0), i).x;
+                [[stage(compute)]] fn main() -> void {
+                    for (var i : i32 = 0; i < 4; i = i + 1) {
+                        results.colorSamples[i] = textureLoad(texture0, vec2<i32>(0, 0), i).x;
+                        results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i).x;
                     }
                 })");
 
@@ -182,8 +175,6 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 
     static constexpr uint32_t kQuadNumBytes = 8 * sizeof(float);
 
-    wgpu::SamplerDescriptor samplerDesc = {};
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
     wgpu::TextureView colorView = colorTexture.CreateView();
     wgpu::TextureView depthView = depthTexture.CreateView();
 
@@ -215,10 +206,9 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
             computePassEncoder.SetBindGroup(
                 0, utils::MakeBindGroup(
                        device, checkSamplePipeline.GetBindGroupLayout(0),
-                       {{0, sampler},
-                        {1, colorView},
-                        {2, depthView},
-                        {3, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
+                       {{0, colorView},
+                        {1, depthView},
+                        {2, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
             computePassEncoder.Dispatch(1);
             computePassEncoder.EndPass();
         }
