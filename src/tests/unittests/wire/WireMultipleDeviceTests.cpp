@@ -129,7 +129,7 @@ class WireMultipleDeviceTests : public testing::Test {
             .WillOnce(Invoke([&](WGPUDevice device, WGPUErrorType type, const char* message) {
                 errorMessage = message;
                 // Mock the call to the error callback.
-                wire->Api()->CallDeviceErrorCallback(device, type, message);
+                wire->Api()->CallDeviceSetUncapturedErrorCallbackCallback(device, type, message);
             }));
         wire->FlushClient();
 

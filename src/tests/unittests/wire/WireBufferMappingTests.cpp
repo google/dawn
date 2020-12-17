@@ -91,9 +91,10 @@ TEST_F(WireBufferMappingTests, MappingForReadSuccessBuffer) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -117,9 +118,9 @@ TEST_F(WireBufferMappingTests, MappingForReadSuccessBuffer) {
 TEST_F(WireBufferMappingTests, ErrorWhileMappingForRead) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     FlushClient();
 
@@ -137,9 +138,10 @@ TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
 
     // Return success
     uint32_t bufferContent = 0;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -160,9 +162,10 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -186,9 +189,9 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
 TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForReadButServerSideError) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     // Oh no! We are calling Unmap too early! However the callback gets fired only after we get
     // an answer from the server that the mapAsync call was an error.
@@ -210,9 +213,10 @@ TEST_F(WireBufferMappingTests, DestroyCalledTooEarlyForRead) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -236,9 +240,9 @@ TEST_F(WireBufferMappingTests, DestroyCalledTooEarlyForRead) {
 TEST_F(WireBufferMappingTests, DestroyCalledTooEarlyForReadButServerSideError) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     // Oh no! We are calling Destroy too early! However the callback gets fired only after we get
     // an answer from the server that the mapAsync call was an error.
@@ -260,9 +264,10 @@ TEST_F(WireBufferMappingTests, MappingForReadingErrorWhileAlreadyMappedGetsNullp
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -274,9 +279,9 @@ TEST_F(WireBufferMappingTests, MappingForReadingErrorWhileAlreadyMappedGetsNullp
 
     // Map failure while the buffer is already mapped
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     FlushClient();
 
@@ -292,9 +297,10 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -316,9 +322,10 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -343,9 +350,10 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
     uint32_t serverBufferContent = 31337;
     uint32_t updatedContent = 4242;
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&serverBufferContent));
 
@@ -377,9 +385,9 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
 TEST_F(WireBufferMappingTests, ErrorWhileMappingForWrite) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     FlushClient();
 
@@ -397,9 +405,10 @@ TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
 
     // Return success
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -420,9 +429,10 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -443,9 +453,10 @@ TEST_F(WireBufferMappingTests, MappingForWritingErrorWhileAlreadyMappedGetsNullp
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -457,9 +468,9 @@ TEST_F(WireBufferMappingTests, MappingForWritingErrorWhileAlreadyMappedGetsNullp
 
     // Map failure while the buffer is already mapped
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     FlushClient();
 
@@ -475,9 +486,10 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapWriteCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -499,9 +511,10 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&bufferContent));
 
@@ -584,9 +597,10 @@ TEST_F(WireBufferMappingTests, MappedAtCreationThenMapSuccess) {
 
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&apiBufferData));
 
@@ -615,9 +629,9 @@ TEST_F(WireBufferMappingTests, MappedAtCreationThenMapFailure) {
 
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     FlushClient();
 
@@ -682,9 +696,10 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
 TEST_F(WireBufferMappingTests, MapThenDisconnect) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, this);
 
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize)).Times(1);
 
     FlushClient();

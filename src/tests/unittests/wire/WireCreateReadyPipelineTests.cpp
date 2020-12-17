@@ -106,7 +106,7 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineSuccess) {
     wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
                                          ToMockCreateReadyComputePipelineCallback, this);
 
-    EXPECT_CALL(api, OnDeviceCreateReadyComputePipelineCallback(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateReadyComputePipeline(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateReadyComputePipelineCallback(
                 apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
@@ -135,7 +135,7 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineError) {
     wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
                                          ToMockCreateReadyComputePipelineCallback, this);
 
-    EXPECT_CALL(api, OnDeviceCreateReadyComputePipelineCallback(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateReadyComputePipeline(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateReadyComputePipelineCallback(
                 apiDevice, WGPUCreateReadyPipelineStatus_Error, nullptr, "Some error message");
@@ -168,7 +168,7 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineSuccess) {
 
     wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
                                         ToMockCreateReadyRenderPipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipelineCallback(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateReadyRenderPipelineCallback(
                 apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
@@ -201,7 +201,7 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineError) {
 
     wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
                                         ToMockCreateReadyRenderPipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipelineCallback(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateReadyRenderPipelineCallback(
                 apiDevice, WGPUCreateReadyPipelineStatus_Error, nullptr, "Some error message");
@@ -235,7 +235,7 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineThenDisconnect) {
 
     wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
                                         ToMockCreateReadyRenderPipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipelineCallback(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateReadyRenderPipelineCallback(
                 apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
@@ -263,7 +263,7 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineThenDisconnect) {
 
     wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
                                          ToMockCreateReadyComputePipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyComputePipelineCallback(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateReadyComputePipeline(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallDeviceCreateReadyComputePipelineCallback(
                 apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");

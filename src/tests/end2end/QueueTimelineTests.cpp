@@ -34,7 +34,7 @@ class MockFenceOnCompletionCallback {
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-static void ToMockFenceOnCompletionCallback(WGPUFenceCompletionStatus status, void* userdata) {
+static void ToMockFenceOnCompletion(WGPUFenceCompletionStatus status, void* userdata) {
     EXPECT_EQ(status, WGPUFenceCompletionStatus_Success);
     mockFenceOnCompletionCallback->Call(status, userdata);
 }
@@ -76,7 +76,7 @@ TEST_P(QueueTimelineTests, MapReadSignalOnComplete) {
     wgpu::Fence fence = queue.CreateFence();
 
     queue.Signal(fence, 1);
-    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, this);
+    fence.OnCompletion(1u, ToMockFenceOnCompletion, this);
 
     WaitForAllOperations();
     mMapReadBuffer.Unmap();
@@ -96,7 +96,7 @@ TEST_P(QueueTimelineTests, SignalMapReadOnComplete) {
 
     mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, 0, ToMockMapCallback, this);
 
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, this);
+    fence.OnCompletion(2u, ToMockFenceOnCompletion, this);
     WaitForAllOperations();
     mMapReadBuffer.Unmap();
 }
@@ -113,7 +113,7 @@ TEST_P(QueueTimelineTests, SignalOnCompleteMapRead) {
     wgpu::Fence fence = queue.CreateFence();
     queue.Signal(fence, 2);
 
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, this);
+    fence.OnCompletion(2u, ToMockFenceOnCompletion, this);
 
     mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, 0, ToMockMapCallback, this);
 
@@ -141,17 +141,17 @@ TEST_P(QueueTimelineTests, SurroundWithFenceSignals) {
     queue.Signal(fence, 2);
     queue.Signal(fence, 4);
 
-    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, this + 0);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallback, this + 2);
+    fence.OnCompletion(1u, ToMockFenceOnCompletion, this + 0);
+    fence.OnCompletion(2u, ToMockFenceOnCompletion, this + 2);
 
     mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, 0, ToMockMapCallback, this);
     queue.Signal(fence, 6);
-    fence.OnCompletion(3u, ToMockFenceOnCompletionCallback, this + 3);
-    fence.OnCompletion(5u, ToMockFenceOnCompletionCallback, this + 5);
-    fence.OnCompletion(6u, ToMockFenceOnCompletionCallback, this + 6);
+    fence.OnCompletion(3u, ToMockFenceOnCompletion, this + 3);
+    fence.OnCompletion(5u, ToMockFenceOnCompletion, this + 5);
+    fence.OnCompletion(6u, ToMockFenceOnCompletion, this + 6);
 
     queue.Signal(fence, 8);
-    fence.OnCompletion(8u, ToMockFenceOnCompletionCallback, this + 8);
+    fence.OnCompletion(8u, ToMockFenceOnCompletion, this + 8);
 
     WaitForAllOperations();
     mMapReadBuffer.Unmap();

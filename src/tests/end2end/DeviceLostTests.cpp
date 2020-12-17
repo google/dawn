@@ -40,13 +40,12 @@ class MockFenceOnCompletionCallback {
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-static void ToMockFenceOnCompletionCallbackFails(WGPUFenceCompletionStatus status, void* userdata) {
+static void ToMockFenceOnCompletionFails(WGPUFenceCompletionStatus status, void* userdata) {
     EXPECT_EQ(WGPUFenceCompletionStatus_DeviceLost, status);
     mockFenceOnCompletionCallback->Call(status, userdata);
     mockFenceOnCompletionCallback = nullptr;
 }
-static void ToMockFenceOnCompletionCallbackSucceeds(WGPUFenceCompletionStatus status,
-                                                    void* userdata) {
+static void ToMockFenceOnCompletionSucceeds(WGPUFenceCompletionStatus status, void* userdata) {
     EXPECT_EQ(WGPUFenceCompletionStatus_Success, status);
     mockFenceOnCompletionCallback->Call(status, userdata);
     mockFenceOnCompletionCallback = nullptr;
@@ -429,7 +428,7 @@ TEST_P(DeviceLostTest, QueueSignalFenceFails) {
     // callback should have device lost status
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
         .Times(1);
-    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackFails, nullptr));
+    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionFails, nullptr));
 
     // completed value should not have changed from initial value
     EXPECT_EQ(fence.GetCompletedValue(), descriptor.initialValue);
@@ -447,7 +446,7 @@ TEST_P(DeviceLostTest, FenceOnCompletionFails) {
     // callback should have device lost status
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
         .Times(1);
-    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackFails, nullptr));
+    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionFails, nullptr));
     ASSERT_DEVICE_ERROR(device.Tick());
 
     // completed value should not have changed from initial value
@@ -466,7 +465,7 @@ TEST_P(DeviceLostTest, FenceOnCompletionBeforeLossFails) {
     // callback should have device lost status
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
         .Times(1);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackFails, nullptr);
+    fence.OnCompletion(2u, ToMockFenceOnCompletionFails, nullptr);
     SetCallbackAndLoseForTesting();
     ASSERT_DEVICE_ERROR(device.Tick());
 
@@ -499,7 +498,7 @@ TEST_P(DeviceLostTest, FenceSignalTickOnCompletion) {
     // callback should have device lost status
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, nullptr))
         .Times(1);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackSucceeds, nullptr);
+    fence.OnCompletion(2u, ToMockFenceOnCompletionSucceeds, nullptr);
     SetCallbackAndLoseForTesting();
 
     EXPECT_EQ(fence.GetCompletedValue(), 2u);

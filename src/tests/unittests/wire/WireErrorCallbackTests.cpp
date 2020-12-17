@@ -96,7 +96,8 @@ TEST_F(WireErrorCallbackTests, DeviceErrorCallback) {
 
     // Calling the callback on the server side will result in the callback being called on the
     // client side
-    api.CallDeviceErrorCallback(apiDevice, WGPUErrorType_Validation, "Some error message");
+    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_Validation,
+                                                     "Some error message");
 
     EXPECT_CALL(*mockDeviceErrorCallback,
                 Call(WGPUErrorType_Validation, StrEq("Some error message"), this))
@@ -116,7 +117,7 @@ TEST_F(WireErrorCallbackTests, PushPopErrorScopeCallback) {
 
     WGPUErrorCallback callback;
     void* userdata;
-    EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _))
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
         .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata), Return(true)));
 
     FlushClient();
@@ -146,7 +147,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeCallbackOrdering) {
         WGPUErrorCallback callback2;
         void* userdata1;
         void* userdata2;
-        EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _))
+        EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
             .WillOnce(DoAll(SaveArg<1>(&callback1), SaveArg<2>(&userdata1), Return(true)))
             .WillOnce(DoAll(SaveArg<1>(&callback2), SaveArg<2>(&userdata2), Return(true)));
 
@@ -180,7 +181,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeCallbackOrdering) {
         WGPUErrorCallback callback2;
         void* userdata1;
         void* userdata2;
-        EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _))
+        EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
             .WillOnce(DoAll(SaveArg<1>(&callback1), SaveArg<2>(&userdata1), Return(true)))
             .WillOnce(DoAll(SaveArg<1>(&callback2), SaveArg<2>(&userdata2), Return(true)));
 
@@ -209,7 +210,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeDeviceDestroyed) {
 
     EXPECT_TRUE(wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this));
 
-    EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _)).WillOnce(Return(true));
     FlushClient();
 
     // Incomplete callback called in Device destructor.
@@ -225,7 +226,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeThenDisconnect) {
     EXPECT_CALL(api, DevicePushErrorScope(apiDevice, WGPUErrorFilter_Validation)).Times(1);
 
     EXPECT_TRUE(wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this));
-    EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _)).WillOnce(Return(true));
 
     FlushClient();
 
@@ -266,7 +267,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeEmptyStack) {
 
         WGPUErrorCallback callback;
         void* userdata;
-        EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _))
+        EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
             .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata), Return(true)));
 
         FlushClient();
@@ -289,7 +290,7 @@ TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
 
     // Calling the callback on the server side will result in the callback being called on the
     // client side
-    api.CallDeviceLostCallback(apiDevice, "Some error message");
+    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, "Some error message");
 
     EXPECT_CALL(*mockDeviceLostCallback, Call(StrEq("Some error message"), this)).Times(1);
 

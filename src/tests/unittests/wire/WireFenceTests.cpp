@@ -27,7 +27,7 @@ namespace {
     };
 
     std::unique_ptr<StrictMock<MockFenceOnCompletionCallback>> mockFenceOnCompletionCallback;
-    void ToMockFenceOnCompletionCallback(WGPUFenceCompletionStatus status, void* userdata) {
+    void ToMockFenceOnCompletion(WGPUFenceCompletionStatus status, void* userdata) {
         mockFenceOnCompletionCallback->Call(status, userdata);
     }
 
@@ -77,7 +77,7 @@ class WireFenceTests : public WireTest {
 
         // This callback is generated to update the completedValue of the fence
         // on the client
-        EXPECT_CALL(api, OnFenceOnCompletionCallback(apiFence, signalValue, _, _))
+        EXPECT_CALL(api, OnFenceOnCompletion(apiFence, signalValue, _, _))
             .WillOnce(
                 InvokeWithoutArgs([=]() { api.CallFenceOnCompletionCallback(apiFence, status); }))
             .RetiresOnSaturation();
@@ -120,11 +120,10 @@ TEST_F(WireFenceTests, QueueSignalValidationError) {
 
 // Check that a success in the on completion callback is forwarded to the client.
 TEST_F(WireFenceTests, OnCompletionSuccess) {
-    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletionCallback, nullptr);
-    EXPECT_CALL(api, OnFenceOnCompletionCallback(apiFence, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallFenceOnCompletionCallback(apiFence, WGPUFenceCompletionStatus_Success);
-        }));
+    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletion, nullptr);
+    EXPECT_CALL(api, OnFenceOnCompletion(apiFence, 0u, _, _)).WillOnce(InvokeWithoutArgs([&]() {
+        api.CallFenceOnCompletionCallback(apiFence, WGPUFenceCompletionStatus_Success);
+    }));
     FlushClient();
 
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, _))
@@ -134,11 +133,10 @@ TEST_F(WireFenceTests, OnCompletionSuccess) {
 
 // Check that an error in the on completion callback is forwarded to the client.
 TEST_F(WireFenceTests, OnCompletionError) {
-    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletionCallback, nullptr);
-    EXPECT_CALL(api, OnFenceOnCompletionCallback(apiFence, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallFenceOnCompletionCallback(apiFence, WGPUFenceCompletionStatus_Error);
-        }));
+    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletion, nullptr);
+    EXPECT_CALL(api, OnFenceOnCompletion(apiFence, 0u, _, _)).WillOnce(InvokeWithoutArgs([&]() {
+        api.CallFenceOnCompletionCallback(apiFence, WGPUFenceCompletionStatus_Error);
+    }));
     FlushClient();
 
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Error, _)).Times(1);
@@ -148,11 +146,10 @@ TEST_F(WireFenceTests, OnCompletionError) {
 // Test that registering a callback then wire disconnect calls the callback with
 // DeviceLost.
 TEST_F(WireFenceTests, OnCompletionThenDisconnect) {
-    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletionCallback, this);
-    EXPECT_CALL(api, OnFenceOnCompletionCallback(apiFence, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallFenceOnCompletionCallback(apiFence, WGPUFenceCompletionStatus_Success);
-        }));
+    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletion, this);
+    EXPECT_CALL(api, OnFenceOnCompletion(apiFence, 0u, _, _)).WillOnce(InvokeWithoutArgs([&]() {
+        api.CallFenceOnCompletionCallback(apiFence, WGPUFenceCompletionStatus_Success);
+    }));
     FlushClient();
 
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, this))
@@ -167,16 +164,16 @@ TEST_F(WireFenceTests, OnCompletionAfterDisconnect) {
 
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, this))
         .Times(1);
-    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletionCallback, this);
+    wgpuFenceOnCompletion(fence, 0, ToMockFenceOnCompletion, this);
 }
 
 // Without any flushes, it is valid to wait on a value less than or equal to
 // the last signaled value
 TEST_F(WireFenceTests, OnCompletionSynchronousValidationSuccess) {
     wgpuQueueSignal(queue, fence, 4u);
-    wgpuFenceOnCompletion(fence, 2u, ToMockFenceOnCompletionCallback, 0);
-    wgpuFenceOnCompletion(fence, 3u, ToMockFenceOnCompletionCallback, 0);
-    wgpuFenceOnCompletion(fence, 4u, ToMockFenceOnCompletionCallback, 0);
+    wgpuFenceOnCompletion(fence, 2u, ToMockFenceOnCompletion, 0);
+    wgpuFenceOnCompletion(fence, 3u, ToMockFenceOnCompletion, 0);
+    wgpuFenceOnCompletion(fence, 4u, ToMockFenceOnCompletion, 0);
 
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Unknown, _))
         .Times(3);
@@ -202,8 +199,8 @@ TEST_F(WireFenceTests, GetCompletedValueUpdateInCallback) {
     DoQueueSignal(3u);
 
     // Register the callback
-    wgpuFenceOnCompletion(fence, 3u, ToMockFenceOnCompletionCallback, this);
-    EXPECT_CALL(api, OnFenceOnCompletionCallback(apiFence, 3u, _, _))
+    wgpuFenceOnCompletion(fence, 3u, ToMockFenceOnCompletion, this);
+    EXPECT_CALL(api, OnFenceOnCompletion(apiFence, 3u, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
             api.CallFenceOnCompletionCallback(apiFence, WGPUFenceCompletionStatus_Success);
         }))
@@ -226,7 +223,7 @@ TEST_F(WireFenceTests, GetCompletedValueNoUpdate) {
 // before the completed value is updated
 TEST_F(WireFenceTests, DestroyBeforeOnCompletionEnd) {
     wgpuQueueSignal(queue, fence, 3u);
-    wgpuFenceOnCompletion(fence, 2u, ToMockFenceOnCompletionCallback, nullptr);
+    wgpuFenceOnCompletion(fence, 2u, ToMockFenceOnCompletion, nullptr);
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Unknown, _))
         .Times(1);
 }

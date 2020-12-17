@@ -346,9 +346,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
     ExpectServerReadHandleInitialize(serverHandle);
 
     // Mock a successful callback
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mBufferContent));
 
@@ -389,9 +390,9 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
     ServerReadHandle* serverHandle = ExpectServerReadHandleDeserialize();
 
     // Mock a failed callback.
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     // Since the mapping failed, the handle is immediately destroyed.
     EXPECT_CALL(serverMemoryTransferService, OnReadHandleDestroy(serverHandle)).Times(1);
@@ -475,9 +476,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailur
     ExpectServerReadHandleInitialize(serverHandle);
 
     // Mock a successful callback
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mBufferContent));
 
@@ -518,9 +520,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDestroyBeforeUnmap) {
     ExpectServerReadHandleInitialize(serverHandle);
 
     // Mock a successful callback
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mBufferContent));
 
@@ -568,9 +571,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
     // Mock a successful callback.
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mMappedBufferContent));
 
@@ -620,9 +624,9 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
     // Mock an error callback.
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs(
+            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
 
     // Since the mapping fails, the handle is immediately destroyed because it won't be written.
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
@@ -703,9 +707,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleOpenFailure) {
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
     // Mock a successful callback.
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mMappedBufferContent));
 
@@ -742,9 +747,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeFlushFailure) {
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
     // Mock a successful callback.
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mMappedBufferContent));
 
@@ -791,9 +797,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroyBeforeUnmap) {
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
     // Mock a successful callback.
-    EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
-        api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-    }));
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mMappedBufferContent));
 
