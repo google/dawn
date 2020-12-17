@@ -2053,6 +2053,13 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
   EXPECT_EQ(GetParam().sampled_kind, result[0].sampled_kind);
+
+  // Prove that sampled and multi-sampled bindings are accounted
+  // for separately.
+  auto multisampled_result =
+      inspector()->GetMultisampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  ASSERT_TRUE(multisampled_result.empty());
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2208,6 +2215,13 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
   EXPECT_EQ(GetParam().sampled_kind, result[0].sampled_kind);
+
+  // Prove that sampled and multi-sampled bindings are accounted
+  // for separately.
+  auto single_sampled_result =
+      inspector()->GetSampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  ASSERT_TRUE(single_sampled_result.empty());
 }
 
 INSTANTIATE_TEST_SUITE_P(
