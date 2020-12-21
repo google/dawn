@@ -485,6 +485,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
+    // This test uses glTextureView() which is not supported in OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
     config.textureDescriptor.size = {8, 8, 1};
@@ -510,6 +513,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
+    // This test uses glTextureView() which is not supported in OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -550,6 +556,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
+    // This test uses glTextureView() which is not supported in OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     // TODO(cwallez@chromium.org): This consistently fails on with the 12th pixel being opaque black
     // instead of opaque red on Win10 FYI Release (NVIDIA GeForce GTX 1660). See
@@ -604,7 +613,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqua
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
     // bots.
@@ -668,7 +677,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqua
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
     // bots.
@@ -728,7 +737,7 @@ TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVi
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
     // bots.
@@ -974,6 +983,9 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
+    // This test uses glTextureView() which is not supported in OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
     config.textureDescriptor.size = {56, 56, 1};
@@ -1017,6 +1029,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
+    // This test uses glTextureView() which is not supported in OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     constexpr uint32_t kArrayLayerCount = 3;
 
     CopyConfig config;
@@ -1043,6 +1058,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
+    // This test uses glTextureView() which is not supported in OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kArrayLayerCount = 3;
 
