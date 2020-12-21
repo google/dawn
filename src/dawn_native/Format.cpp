@@ -31,6 +31,7 @@ namespace dawn_native {
 
     // Format
 
+    // TODO(dawn:527): Remove when unused.
     ComponentTypeBit ToComponentTypeBit(wgpu::TextureComponentType type) {
         switch (type) {
             case wgpu::TextureComponentType::Float:
@@ -62,6 +63,24 @@ namespace dawn_native {
                     1 << static_cast<uint32_t>(wgpu::TextureComponentType::DepthComparison)),
             "");
         return static_cast<ComponentTypeBit>(1 << static_cast<uint32_t>(type));
+    }
+
+    ComponentTypeBit SampleTypeToComponentTypeBit(wgpu::TextureSampleType sampleType) {
+        switch (sampleType) {
+            case wgpu::TextureSampleType::Float:
+            case wgpu::TextureSampleType::UnfilterableFloat:
+                return ComponentTypeBit::Float;
+            case wgpu::TextureSampleType::Sint:
+                return ComponentTypeBit::Sint;
+            case wgpu::TextureSampleType::Uint:
+                return ComponentTypeBit::Uint;
+            case wgpu::TextureSampleType::Depth:
+                return ComponentTypeBit::DepthComparison;
+            case wgpu::TextureSampleType::Undefined:
+                UNREACHABLE();
+        }
+
+        // TODO(dawn:527): Ideally we can get this path to use that static_cast method as well.
     }
 
     bool Format::IsColor() const {

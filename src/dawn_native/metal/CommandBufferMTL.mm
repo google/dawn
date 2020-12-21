@@ -379,10 +379,8 @@ namespace dawn_native { namespace metal {
                             SingleShaderStage::Compute)[index][bindingIndex];
                     }
 
-                    switch (bindingInfo.type) {
-                        case wgpu::BindingType::UniformBuffer:
-                        case wgpu::BindingType::StorageBuffer:
-                        case wgpu::BindingType::ReadonlyStorageBuffer: {
+                    switch (bindingInfo.bindingType) {
+                        case BindingInfoType::Buffer: {
                             const BufferBinding& binding =
                                 group->GetBindingAsBufferBinding(bindingIndex);
                             const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
@@ -390,7 +388,7 @@ namespace dawn_native { namespace metal {
 
                             // TODO(shaobo.yan@intel.com): Record bound buffer status to use
                             // setBufferOffset to achieve better performance.
-                            if (bindingInfo.hasDynamicOffset) {
+                            if (bindingInfo.buffer.hasDynamicOffset) {
                                 offset += dynamicOffsets[currentDynamicBufferIndex];
                                 currentDynamicBufferIndex++;
                             }
@@ -423,8 +421,7 @@ namespace dawn_native { namespace metal {
                             break;
                         }
 
-                        case wgpu::BindingType::Sampler:
-                        case wgpu::BindingType::ComparisonSampler: {
+                        case BindingInfoType::Sampler: {
                             auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                             if (hasVertStage) {
                                 [render setVertexSamplerState:sampler->GetMTLSamplerState()
@@ -441,10 +438,8 @@ namespace dawn_native { namespace metal {
                             break;
                         }
 
-                        case wgpu::BindingType::SampledTexture:
-                        case wgpu::BindingType::MultisampledTexture:
-                        case wgpu::BindingType::ReadonlyStorageTexture:
-                        case wgpu::BindingType::WriteonlyStorageTexture: {
+                        case BindingInfoType::Texture:
+                        case BindingInfoType::StorageTexture: {
                             auto textureView =
                                 ToBackend(group->GetBindingAsTextureView(bindingIndex));
                             if (hasVertStage) {
@@ -461,9 +456,6 @@ namespace dawn_native { namespace metal {
                             }
                             break;
                         }
-
-                        case wgpu::BindingType::Undefined:
-                            UNREACHABLE();
                     }
                 }
             }

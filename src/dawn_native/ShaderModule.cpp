@@ -261,7 +261,7 @@ namespace dawn_native {
             for (BindingIndex bindingIndex{0}; bindingIndex < layout->GetBufferCount();
                  ++bindingIndex) {
                 const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
-                if (bindingInfo.minBufferBindingSize != 0) {
+                if (bindingInfo.buffer.minBindingSize != 0) {
                     // Skip bindings that have minimum buffer size set in the layout
                     continue;
                 }
@@ -269,7 +269,7 @@ namespace dawn_native {
                 ASSERT(packedIdx < requiredBufferSizes.size());
                 const auto& shaderInfo = shaderBindings.find(bindingInfo.binding);
                 if (shaderInfo != shaderBindings.end()) {
-                    requiredBufferSizes[packedIdx] = shaderInfo->second.minBufferBindingSize;
+                    requiredBufferSizes[packedIdx] = shaderInfo->second.buffer.minBindingSize;
                 } else {
                     // We have to include buffers if they are included in the bind group's
                     // packed vector. We don't actually need to check these at draw time, so
@@ -340,30 +340,10 @@ namespace dawn_native {
                 BindingIndex bindingIndex(bindingIt->second);
                 const BindingInfo& layoutInfo = layout->GetBindingInfo(bindingIndex);
 
-                if (layoutInfo.type != shaderInfo.type) {
-                    // Binding mismatch between shader and bind group is invalid. For example, a
-                    // writable binding in the shader with a readonly storage buffer in the bind
-                    // group layout is invalid. However, a readonly binding in the shader with a
-                    // writable storage buffer in the bind group layout is valid.
-                    bool validBindingConversion =
-                        layoutInfo.type == wgpu::BindingType::StorageBuffer &&
-                        shaderInfo.type == wgpu::BindingType::ReadonlyStorageBuffer;
-
-                    // TODO(crbug.com/dawn/367): Temporarily allow using either a sampler or a
-                    // comparison sampler until we can perform the proper shader analysis of what
-                    // type is used in the shader module.
-                    validBindingConversion |=
-                        (layoutInfo.type == wgpu::BindingType::Sampler &&
-                         shaderInfo.type == wgpu::BindingType::ComparisonSampler);
-                    validBindingConversion |=
-                        (layoutInfo.type == wgpu::BindingType::ComparisonSampler &&
-                         shaderInfo.type == wgpu::BindingType::Sampler);
-
-                    if (!validBindingConversion) {
-                        return DAWN_VALIDATION_ERROR(
-                            "The binding type of the bind group layout entry conflicts " +
-                            GetShaderDeclarationString(group, bindingNumber));
-                    }
+                if (layoutInfo.bindingType != shaderInfo.bindingType) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The binding type of the bind group layout entry conflicts " +
+                        GetShaderDeclarationString(group, bindingNumber));
                 }
 
                 if ((layoutInfo.visibility & StageBit(entryPoint.stage)) == 0) {
@@ -372,49 +352,77 @@ namespace dawn_native {
                                                  " is not visible for the shader stage");
                 }
 
-                switch (layoutInfo.type) {
-                    case wgpu::BindingType::SampledTexture:
-                    case wgpu::BindingType::MultisampledTexture: {
-                        if (layoutInfo.textureComponentType != shaderInfo.textureComponentType) {
+                switch (layoutInfo.bindingType) {
+                    case BindingInfoType::Texture: {
+                        if (layoutInfo.texture.multisampled != shaderInfo.texture.multisampled) {
                             return DAWN_VALIDATION_ERROR(
-                                "The textureComponentType of the bind group layout entry is "
+                                "The texture multisampled flag of the bind group layout entry is "
                                 "different from " +
                                 GetShaderDeclarationString(group, bindingNumber));
                         }
 
-                        if (layoutInfo.viewDimension != shaderInfo.viewDimension) {
+                        if (layoutInfo.texture.sampleType != shaderInfo.texture.sampleType) {
                             return DAWN_VALIDATION_ERROR(
-                                "The viewDimension of the bind group layout entry is different "
+                                "The texture sampleType of the bind group layout entry is "
+                                "different from " +
+                                GetShaderDeclarationString(group, bindingNumber));
+                        }
+
+                        if (layoutInfo.texture.viewDimension != shaderInfo.texture.viewDimension) {
+                            return DAWN_VALIDATION_ERROR(
+                                "The texture viewDimension of the bind group layout entry is "
+                                "different "
                                 "from " +
                                 GetShaderDeclarationString(group, bindingNumber));
                         }
                         break;
                     }
 
-                    case wgpu::BindingType::ReadonlyStorageTexture:
-                    case wgpu::BindingType::WriteonlyStorageTexture: {
-                        ASSERT(layoutInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
-                        ASSERT(shaderInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
-                        if (layoutInfo.storageTextureFormat != shaderInfo.storageTextureFormat) {
+                    case BindingInfoType::StorageTexture: {
+                        ASSERT(layoutInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
+                        ASSERT(shaderInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
+
+                        if (layoutInfo.storageTexture.access != shaderInfo.storageTexture.access) {
                             return DAWN_VALIDATION_ERROR(
-                                "The storageTextureFormat of the bind group layout entry is "
+                                "The storageTexture access mode of the bind group layout entry is "
                                 "different from " +
                                 GetShaderDeclarationString(group, bindingNumber));
                         }
-                        if (layoutInfo.viewDimension != shaderInfo.viewDimension) {
+
+                        if (layoutInfo.storageTexture.format != shaderInfo.storageTexture.format) {
                             return DAWN_VALIDATION_ERROR(
-                                "The viewDimension of the bind group layout entry is different "
-                                "from " +
+                                "The storageTexture format of the bind group layout entry is "
+                                "different from " +
+                                GetShaderDeclarationString(group, bindingNumber));
+                        }
+                        if (layoutInfo.storageTexture.viewDimension !=
+                            shaderInfo.storageTexture.viewDimension) {
+                            return DAWN_VALIDATION_ERROR(
+                                "The storageTexture viewDimension of the bind group layout entry "
+                                "is different from " +
                                 GetShaderDeclarationString(group, bindingNumber));
                         }
                         break;
                     }
 
-                    case wgpu::BindingType::UniformBuffer:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
-                    case wgpu::BindingType::StorageBuffer: {
-                        if (layoutInfo.minBufferBindingSize != 0 &&
-                            shaderInfo.minBufferBindingSize > layoutInfo.minBufferBindingSize) {
+                    case BindingInfoType::Buffer: {
+                        // Binding mismatch between shader and bind group is invalid. For example, a
+                        // writable binding in the shader with a readonly storage buffer in the bind
+                        // group layout is invalid. However, a readonly binding in the shader with a
+                        // writable storage buffer in the bind group layout is valid.
+                        bool validBindingConversion =
+                            layoutInfo.buffer.type == wgpu::BufferBindingType::Storage &&
+                            shaderInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage;
+
+                        if (layoutInfo.buffer.type != shaderInfo.buffer.type &&
+                            !validBindingConversion) {
+                            return DAWN_VALIDATION_ERROR(
+                                "The buffer type of the bind group layout entry conflicts " +
+                                GetShaderDeclarationString(group, bindingNumber));
+                        }
+
+                        if (layoutInfo.buffer.minBindingSize != 0 &&
+                            shaderInfo.buffer.minBindingSize > layoutInfo.buffer.minBindingSize) {
                             return DAWN_VALIDATION_ERROR(
                                 "The minimum buffer size of the bind group layout entry is smaller "
                                 "than " +
@@ -422,12 +430,12 @@ namespace dawn_native {
                         }
                         break;
                     }
-                    case wgpu::BindingType::Sampler:
-                    case wgpu::BindingType::ComparisonSampler:
-                        break;
 
-                    case wgpu::BindingType::Undefined:
-                        UNREACHABLE();
+                    case BindingInfoType::Sampler:
+                        // TODO(crbug.com/dawn/367): Temporarily allow using either a sampler or a
+                        // comparison sampler until we can perform the proper shader analysis of
+                        // what type is used in the shader module.
+                        break;
                 }
             }
 
@@ -458,8 +466,9 @@ namespace dawn_native {
             auto ExtractResourcesBinding =
                 [](const DeviceBase* device,
                    const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
-                   const spirv_cross::Compiler& compiler, wgpu::BindingType bindingType,
-                   EntryPointMetadata::BindingInfo* metadataBindings) -> MaybeError {
+                   const spirv_cross::Compiler& compiler, BindingInfoType bindingType,
+                   EntryPointMetadata::BindingInfo* metadataBindings,
+                   bool isStorageBuffer = false) -> MaybeError {
                 for (const auto& resource : resources) {
                     if (!compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding)) {
                         return DAWN_VALIDATION_ERROR("No Binding decoration set for resource");
@@ -488,67 +497,64 @@ namespace dawn_native {
                     EntryPointMetadata::ShaderBindingInfo* info = &it.first->second;
                     info->id = resource.id;
                     info->base_type_id = resource.base_type_id;
-
-                    if (bindingType == wgpu::BindingType::UniformBuffer ||
-                        bindingType == wgpu::BindingType::StorageBuffer ||
-                        bindingType == wgpu::BindingType::ReadonlyStorageBuffer) {
-                        // Determine buffer size, with a minimum of 1 element in the runtime array
-                        spirv_cross::SPIRType type = compiler.get_type(info->base_type_id);
-                        info->minBufferBindingSize =
-                            compiler.get_declared_struct_size_runtime_array(type, 1);
-                    }
+                    info->bindingType = bindingType;
 
                     switch (bindingType) {
-                        case wgpu::BindingType::SampledTexture: {
+                        case BindingInfoType::Texture: {
                             spirv_cross::SPIRType::ImageType imageType =
                                 compiler.get_type(info->base_type_id).image;
                             spirv_cross::SPIRType::BaseType textureComponentType =
                                 compiler.get_type(imageType.type).basetype;
 
-                            info->viewDimension =
+                            info->texture.viewDimension =
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
-                            info->textureComponentType =
-                                SpirvBaseTypeToTextureComponentType(textureComponentType);
-
-                            if (imageType.ms) {
-                                info->type = wgpu::BindingType::MultisampledTexture;
-                            } else {
-                                info->type = wgpu::BindingType::SampledTexture;
-                            }
+                            info->texture.sampleType =
+                                SpirvBaseTypeToTextureSampleType(textureComponentType);
+                            info->texture.multisampled = imageType.ms;
 
                             if (imageType.depth) {
                                 if (imageType.ms) {
                                     return DAWN_VALIDATION_ERROR(
                                         "Multisampled depth textures aren't supported");
                                 }
-                                if (info->textureComponentType !=
-                                    wgpu::TextureComponentType::Float) {
+                                if (info->texture.sampleType != wgpu::TextureSampleType::Float) {
                                     return DAWN_VALIDATION_ERROR(
                                         "Depth textures must have a float type");
                                 }
-                                info->textureComponentType =
-                                    wgpu::TextureComponentType::DepthComparison;
+                                info->texture.sampleType = wgpu::TextureSampleType::Depth;
                             }
                             break;
                         }
-                        case wgpu::BindingType::StorageBuffer: {
+                        case BindingInfoType::Buffer: {
+                            // Determine buffer size, with a minimum of 1 element in the runtime
+                            // array
+                            spirv_cross::SPIRType type = compiler.get_type(info->base_type_id);
+                            info->buffer.minBindingSize =
+                                compiler.get_declared_struct_size_runtime_array(type, 1);
+
                             // Differentiate between readonly storage bindings and writable ones
-                            // based on the NonWritable decoration
-                            spirv_cross::Bitset flags =
-                                compiler.get_buffer_block_flags(resource.id);
-                            if (flags.get(spv::DecorationNonWritable)) {
-                                info->type = wgpu::BindingType::ReadonlyStorageBuffer;
+                            // based on the NonWritable decoration.
+                            // TODO(dawn:527): Could isStorageBuffer be determined by calling
+                            // compiler.get_storage_class(resource.id)?
+                            if (isStorageBuffer) {
+                                spirv_cross::Bitset flags =
+                                    compiler.get_buffer_block_flags(resource.id);
+                                if (flags.get(spv::DecorationNonWritable)) {
+                                    info->buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+                                } else {
+                                    info->buffer.type = wgpu::BufferBindingType::Storage;
+                                }
                             } else {
-                                info->type = wgpu::BindingType::StorageBuffer;
+                                info->buffer.type = wgpu::BufferBindingType::Uniform;
                             }
                             break;
                         }
-                        case wgpu::BindingType::ReadonlyStorageTexture: {
+                        case BindingInfoType::StorageTexture: {
                             spirv_cross::Bitset flags = compiler.get_decoration_bitset(resource.id);
                             if (flags.get(spv::DecorationNonReadable)) {
-                                info->type = wgpu::BindingType::WriteonlyStorageTexture;
+                                info->storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
                             } else if (flags.get(spv::DecorationNonWritable)) {
-                                info->type = wgpu::BindingType::ReadonlyStorageTexture;
+                                info->storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
                             } else {
                                 return DAWN_VALIDATION_ERROR(
                                     "Read-write storage textures are not supported");
@@ -576,33 +582,30 @@ namespace dawn_native {
                                 return DAWN_VALIDATION_ERROR(
                                     "Depth storage textures aren't supported");
                             }
-                            info->storageTextureFormat = storageTextureFormat;
-                            info->viewDimension =
+                            info->storageTexture.format = storageTextureFormat;
+                            info->storageTexture.viewDimension =
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
                             break;
                         }
-                        default:
-                            info->type = bindingType;
+                        case BindingInfoType::Sampler: {
+                            info->sampler.type = wgpu::SamplerBindingType::Filtering;
+                        }
                     }
                 }
                 return {};
             };
 
             DAWN_TRY(ExtractResourcesBinding(device, resources.uniform_buffers, compiler,
-                                             wgpu::BindingType::UniformBuffer,
-                                             &metadata->bindings));
+                                             BindingInfoType::Buffer, &metadata->bindings));
             DAWN_TRY(ExtractResourcesBinding(device, resources.separate_images, compiler,
-                                             wgpu::BindingType::SampledTexture,
-                                             &metadata->bindings));
+                                             BindingInfoType::Texture, &metadata->bindings));
             DAWN_TRY(ExtractResourcesBinding(device, resources.separate_samplers, compiler,
-                                             wgpu::BindingType::Sampler, &metadata->bindings));
+                                             BindingInfoType::Sampler, &metadata->bindings));
             DAWN_TRY(ExtractResourcesBinding(device, resources.storage_buffers, compiler,
-                                             wgpu::BindingType::StorageBuffer,
-                                             &metadata->bindings));
+                                             BindingInfoType::Buffer, &metadata->bindings, true));
             // ReadonlyStorageTexture is used as a tag to do general storage texture handling.
             DAWN_TRY(ExtractResourcesBinding(device, resources.storage_images, compiler,
-                                             wgpu::BindingType::ReadonlyStorageTexture,
-                                             &metadata->bindings));
+                                             BindingInfoType::StorageTexture, &metadata->bindings));
 
             // Extract the vertex attributes
             if (stage == SingleShaderStage::Vertex) {

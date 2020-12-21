@@ -29,7 +29,7 @@ namespace dawn_native { namespace vulkan {
     class DescriptorSetAllocator;
     class Device;
 
-    VkDescriptorType VulkanDescriptorType(wgpu::BindingType type, bool isDynamic);
+    VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo);
 
     // In Vulkan descriptor pools have to be sized to an exact number of descriptors. This means
     // it's hard to have something where we can mix different types of descriptor sets because

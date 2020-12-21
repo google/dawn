@@ -22,24 +22,36 @@
 
 namespace dawn_native { namespace d3d12 {
     namespace {
-        BindGroupLayout::DescriptorType WGPUBindingTypeToDescriptorType(
-            wgpu::BindingType bindingType) {
-            switch (bindingType) {
-                case wgpu::BindingType::UniformBuffer:
-                    return BindGroupLayout::DescriptorType::CBV;
-                case wgpu::BindingType::StorageBuffer:
-                case wgpu::BindingType::WriteonlyStorageTexture:
-                    return BindGroupLayout::DescriptorType::UAV;
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::MultisampledTexture:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                    return BindGroupLayout::DescriptorType::SRV;
-                case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler:
+        BindGroupLayout::DescriptorType WGPUBindingInfoToDescriptorType(
+            const BindingInfo& bindingInfo) {
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer:
+                    switch (bindingInfo.buffer.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            return BindGroupLayout::DescriptorType::CBV;
+                        case wgpu::BufferBindingType::Storage:
+                            return BindGroupLayout::DescriptorType::UAV;
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                            return BindGroupLayout::DescriptorType::SRV;
+                        case wgpu::BufferBindingType::Undefined:
+                            UNREACHABLE();
+                    }
+
+                case BindingInfoType::Sampler:
                     return BindGroupLayout::DescriptorType::Sampler;
-                case wgpu::BindingType::Undefined:
-                    UNREACHABLE();
+
+                case BindingInfoType::Texture:
+                    return BindGroupLayout::DescriptorType::SRV;
+
+                case BindingInfoType::StorageTexture:
+                    switch (bindingInfo.storageTexture.access) {
+                        case wgpu::StorageTextureAccess::ReadOnly:
+                            return BindGroupLayout::DescriptorType::SRV;
+                        case wgpu::StorageTextureAccess::WriteOnly:
+                            return BindGroupLayout::DescriptorType::UAV;
+                        case wgpu::StorageTextureAccess::Undefined:
+                            UNREACHABLE();
+                    }
             }
         }
     }  // anonymous namespace
@@ -57,9 +69,9 @@ namespace dawn_native { namespace d3d12 {
             // So there is no need to allocate the descriptor from descriptor heap.
             // This loop starts after the dynamic buffer indices to skip counting
             // dynamic resources in calculating the size of the descriptor heap.
-            ASSERT(!bindingInfo.hasDynamicOffset);
+            ASSERT(!bindingInfo.buffer.hasDynamicOffset);
 
-            DescriptorType descriptorType = WGPUBindingTypeToDescriptorType(bindingInfo.type);
+            DescriptorType descriptorType = WGPUBindingInfoToDescriptorType(bindingInfo);
             mBindingOffsets[bindingIndex] = mDescriptorCounts[descriptorType]++;
         }
 
@@ -107,31 +119,17 @@ namespace dawn_native { namespace d3d12 {
         for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
-            if (bindingInfo.hasDynamicOffset) {
+            if (bindingInfo.bindingType == BindingInfoType::Buffer &&
+                bindingInfo.buffer.hasDynamicOffset) {
                 // Dawn is using values in mBindingOffsets to decide register number in HLSL.
                 // Root descriptor needs to set this value to set correct register number in
                 // generated HLSL shader.
-                switch (bindingInfo.type) {
-                    case wgpu::BindingType::UniformBuffer:
-                    case wgpu::BindingType::StorageBuffer:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
-                        mBindingOffsets[bindingIndex] = baseRegister++;
-                        break;
-                    case wgpu::BindingType::SampledTexture:
-                    case wgpu::BindingType::MultisampledTexture:
-                    case wgpu::BindingType::Sampler:
-                    case wgpu::BindingType::ComparisonSampler:
-                    case wgpu::BindingType::ReadonlyStorageTexture:
-                    case wgpu::BindingType::WriteonlyStorageTexture:
-                    case wgpu::BindingType::Undefined:
-                        UNREACHABLE();
-                        break;
-                }
+                mBindingOffsets[bindingIndex] = baseRegister++;
                 continue;
             }
 
             // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
-            DescriptorType descriptorType = WGPUBindingTypeToDescriptorType(bindingInfo.type);
+            DescriptorType descriptorType = WGPUBindingInfoToDescriptorType(bindingInfo);
             mBindingOffsets[bindingIndex] += descriptorOffsets[descriptorType];
         }
 

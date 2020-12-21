@@ -39,27 +39,22 @@ namespace dawn_native { namespace metal {
                         continue;
                     }
 
-                    switch (bindingInfo.type) {
-                        case wgpu::BindingType::UniformBuffer:
-                        case wgpu::BindingType::StorageBuffer:
-                        case wgpu::BindingType::ReadonlyStorageBuffer:
+                    switch (bindingInfo.bindingType) {
+                        case BindingInfoType::Buffer:
                             mIndexInfo[stage][group][bindingIndex] = bufferIndex;
                             bufferIndex++;
                             break;
-                        case wgpu::BindingType::Sampler:
-                        case wgpu::BindingType::ComparisonSampler:
+
+                        case BindingInfoType::Sampler:
                             mIndexInfo[stage][group][bindingIndex] = samplerIndex;
                             samplerIndex++;
                             break;
-                        case wgpu::BindingType::SampledTexture:
-                        case wgpu::BindingType::MultisampledTexture:
-                        case wgpu::BindingType::ReadonlyStorageTexture:
-                        case wgpu::BindingType::WriteonlyStorageTexture:
+
+                        case BindingInfoType::Texture:
+                        case BindingInfoType::StorageTexture:
                             mIndexInfo[stage][group][bindingIndex] = textureIndex;
                             textureIndex++;
                             break;
-                        case wgpu::BindingType::Undefined:
-                            UNREACHABLE();
                     }
                 }
             }

@@ -60,13 +60,10 @@ namespace dawn_native { namespace vulkan {
             write.dstBinding = static_cast<uint32_t>(bindingNumber);
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
-            write.descriptorType =
-                VulkanDescriptorType(bindingInfo.type, bindingInfo.hasDynamicOffset);
+            write.descriptorType = VulkanDescriptorType(bindingInfo);
 
-            switch (bindingInfo.type) {
-                case wgpu::BindingType::UniformBuffer:
-                case wgpu::BindingType::StorageBuffer:
-                case wgpu::BindingType::ReadonlyStorageBuffer: {
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                     writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();
@@ -76,16 +73,14 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
-                case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler: {
+                case BindingInfoType::Sampler: {
                     Sampler* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     writeImageInfo[numWrites].sampler = sampler->GetHandle();
                     write.pImageInfo = &writeImageInfo[numWrites];
                     break;
                 }
 
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::MultisampledTexture: {
+                case BindingInfoType::Texture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();
@@ -98,8 +93,7 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                case wgpu::BindingType::WriteonlyStorageTexture: {
+                case BindingInfoType::StorageTexture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();
@@ -108,9 +102,6 @@ namespace dawn_native { namespace vulkan {
                     write.pImageInfo = &writeImageInfo[numWrites];
                     break;
                 }
-
-                case wgpu::BindingType::Undefined:
-                    UNREACHABLE();
             }
 
             numWrites++;

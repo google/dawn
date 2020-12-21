@@ -30,31 +30,15 @@ namespace dawn_native { namespace opengl {
             ASSERT(bindingIndex < descriptor->layout->GetBindingCount());
 
             const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
-            switch (bindingInfo.type) {
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                case wgpu::BindingType::WriteonlyStorageTexture: {
-                    ASSERT(entry.textureView != nullptr);
-                    const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
-                    if (textureViewLayerCount != 1 &&
-                        textureViewLayerCount !=
-                            entry.textureView->GetTexture()->GetArrayLayers()) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Currently the OpenGL backend only supports either binding a layer or "
-                            "the entire texture as storage texture.");
-                    }
-                } break;
-
-                case wgpu::BindingType::UniformBuffer:
-                case wgpu::BindingType::StorageBuffer:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::MultisampledTexture:
-                case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler:
-                    break;
-
-                case wgpu::BindingType::Undefined:
-                    UNREACHABLE();
+            if (bindingInfo.bindingType == BindingInfoType::StorageTexture) {
+                ASSERT(entry.textureView != nullptr);
+                const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
+                if (textureViewLayerCount != 1 &&
+                    textureViewLayerCount != entry.textureView->GetTexture()->GetArrayLayers()) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Currently the OpenGL backend only supports either binding a layer or "
+                        "the entire texture as storage texture.");
+                }
             }
         }
 

@@ -277,8 +277,9 @@ namespace dawn_native { namespace d3d12 {
                 // the BGL produces the wrong output. Force read-only storage buffer bindings to
                 // be treated as UAV instead of SRV.
                 const bool forceStorageBufferAsUAV =
-                    (bindingInfo.type == wgpu::BindingType::ReadonlyStorageBuffer &&
-                     bgl->GetBindingInfo(bindingIndex).type == wgpu::BindingType::StorageBuffer);
+                    (bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage &&
+                     bgl->GetBindingInfo(bindingIndex).buffer.type ==
+                         wgpu::BufferBindingType::Storage);
 
                 uint32_t bindingOffset = bindingOffsets[bindingIndex];
                 compiler.set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);

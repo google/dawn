@@ -180,12 +180,10 @@ namespace dawn_native { namespace opengl {
                 const auto& info = it.second;
 
                 uint32_t resourceId;
-                switch (info.type) {
+                switch (info.bindingType) {
                     // When the resource is a uniform or shader storage block, we should change the
                     // block name instead of the instance name.
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
-                    case wgpu::BindingType::StorageBuffer:
-                    case wgpu::BindingType::UniformBuffer:
+                    case BindingInfoType::Buffer:
                         resourceId = info.base_type_id;
                         break;
                     default:
@@ -197,8 +195,9 @@ namespace dawn_native { namespace opengl {
                 compiler.unset_decoration(info.id, spv::DecorationDescriptorSet);
                 // OpenGL ES has no glShaderStorageBlockBinding call, so we adjust the SSBO binding
                 // decoration here instead.
-                if (version.IsES() && (info.type == wgpu::BindingType::StorageBuffer ||
-                                       info.type == wgpu::BindingType::ReadonlyStorageBuffer)) {
+                if (version.IsES() && info.bindingType == BindingInfoType::Buffer &&
+                    (info.buffer.type == wgpu::BufferBindingType::Storage ||
+                     info.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage)) {
                     const auto& indices = layout->GetBindingIndexInfo();
                     BindingIndex bindingIndex =
                         layout->GetBindGroupLayout(group)->GetBindingIndex(bindingNumber);

@@ -46,30 +46,30 @@ namespace dawn_native { namespace vulkan {
 
     }  // anonymous namespace
 
-    VkDescriptorType VulkanDescriptorType(wgpu::BindingType type, bool isDynamic) {
-        switch (type) {
-            case wgpu::BindingType::UniformBuffer:
-                if (isDynamic) {
-                    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
+        switch (bindingInfo.bindingType) {
+            case BindingInfoType::Buffer:
+                switch (bindingInfo.buffer.type) {
+                    case wgpu::BufferBindingType::Uniform:
+                        if (bindingInfo.buffer.hasDynamicOffset) {
+                            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                        }
+                        return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    case wgpu::BufferBindingType::Storage:
+                    case wgpu::BufferBindingType::ReadOnlyStorage:
+                        if (bindingInfo.buffer.hasDynamicOffset) {
+                            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+                        }
+                        return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                    case wgpu::BufferBindingType::Undefined:
+                        UNREACHABLE();
                 }
-                return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            case wgpu::BindingType::Sampler:
-            case wgpu::BindingType::ComparisonSampler:
+            case BindingInfoType::Sampler:
                 return VK_DESCRIPTOR_TYPE_SAMPLER;
-            case wgpu::BindingType::SampledTexture:
-            case wgpu::BindingType::MultisampledTexture:
+            case BindingInfoType::Texture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-            case wgpu::BindingType::StorageBuffer:
-            case wgpu::BindingType::ReadonlyStorageBuffer:
-                if (isDynamic) {
-                    return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-                }
-                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            case wgpu::BindingType::ReadonlyStorageTexture:
-            case wgpu::BindingType::WriteonlyStorageTexture:
+            case BindingInfoType::StorageTexture:
                 return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-            case wgpu::BindingType::Undefined:
-                UNREACHABLE();
         }
     }
 
@@ -96,8 +96,7 @@ namespace dawn_native { namespace vulkan {
 
             VkDescriptorSetLayoutBinding vkBinding;
             vkBinding.binding = static_cast<uint32_t>(bindingNumber);
-            vkBinding.descriptorType =
-                VulkanDescriptorType(bindingInfo.type, bindingInfo.hasDynamicOffset);
+            vkBinding.descriptorType = VulkanDescriptorType(bindingInfo);
             vkBinding.descriptorCount = 1;
             vkBinding.stageFlags = VulkanShaderStageFlags(bindingInfo.visibility);
             vkBinding.pImmutableSamplers = nullptr;
@@ -121,9 +120,7 @@ namespace dawn_native { namespace vulkan {
         std::map<VkDescriptorType, uint32_t> descriptorCountPerType;
 
         for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
-            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
-            VkDescriptorType vulkanType =
-                VulkanDescriptorType(bindingInfo.type, bindingInfo.hasDynamicOffset);
+            VkDescriptorType vulkanType = VulkanDescriptorType(GetBindingInfo(bindingIndex));
 
             // map::operator[] will return 0 if the key doesn't exist.
             descriptorCountPerType[vulkanType]++;

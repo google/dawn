@@ -414,12 +414,18 @@ TEST_F(StorageTextureValidationTests, UnsupportedTextureViewDimensionInBindGroup
 // render and compute pipeline, the binding type in the bind group layout must match the
 // declaration in the shader.
 TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDeclaration) {
-    constexpr std::array<wgpu::BindingType, 7> kSupportedBindingTypes = {
-        wgpu::BindingType::UniformBuffer,          wgpu::BindingType::StorageBuffer,
-        wgpu::BindingType::ReadonlyStorageBuffer,  wgpu::BindingType::Sampler,
-        wgpu::BindingType::SampledTexture,         wgpu::BindingType::ReadonlyStorageTexture,
-        wgpu::BindingType::WriteonlyStorageTexture};
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
+
+    std::initializer_list<utils::BindingLayoutEntryInitializationHelper> kSupportedBindingTypes = {
+        {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+        {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+        {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage},
+        {0, wgpu::ShaderStage::Compute, wgpu::SamplerBindingType::Filtering},
+        {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float},
+        {0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+         kStorageTextureFormat},
+        {0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+         kStorageTextureFormat}};
 
     for (wgpu::StorageTextureAccess bindingTypeInShader : kSupportedStorageTextureAccess) {
         // Create the compute shader with the given binding type.
@@ -433,30 +439,20 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDecla
         defaultComputePipelineDescriptor.computeStage.module = csModule;
         defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
 
-        // Set common fileds of bind group layout binding.
-        wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry;
-        defaultBindGroupLayoutEntry.binding = 0;
-        defaultBindGroupLayoutEntry.visibility = wgpu::ShaderStage::Compute;
-        defaultBindGroupLayoutEntry.storageTextureFormat = kStorageTextureFormat;
-
-        for (wgpu::BindingType bindingTypeInBindgroupLayout : kSupportedBindingTypes) {
+        for (utils::BindingLayoutEntryInitializationHelper bindingLayoutEntry :
+             kSupportedBindingTypes) {
             wgpu::ComputePipelineDescriptor computePipelineDescriptor =
                 defaultComputePipelineDescriptor;
 
             // Create bind group layout with different binding types.
-            wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
-            bindGroupLayoutBinding.type = bindingTypeInBindgroupLayout;
             wgpu::BindGroupLayout bindGroupLayout =
-                utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
+                utils::MakeBindGroupLayout(device, {bindingLayoutEntry});
             computePipelineDescriptor.layout =
                 utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
 
             // The binding type in the bind group layout must the same as the related image object
             // declared in shader.
-            if ((bindingTypeInBindgroupLayout == wgpu::BindingType::ReadonlyStorageTexture &&
-                 bindingTypeInShader == wgpu::StorageTextureAccess::ReadOnly) ||
-                (bindingTypeInBindgroupLayout == wgpu::BindingType::WriteonlyStorageTexture &&
-                 bindingTypeInShader == wgpu::StorageTextureAccess::WriteOnly)) {
+            if (bindingLayoutEntry.storageTexture.access == bindingTypeInShader) {
                 device.CreateComputePipeline(&computePipelineDescriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));

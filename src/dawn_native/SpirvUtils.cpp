@@ -148,4 +148,18 @@ namespace dawn_native {
         }
     }
 
+    wgpu::TextureSampleType SpirvBaseTypeToTextureSampleType(
+        spirv_cross::SPIRType::BaseType spirvBaseType) {
+        switch (spirvBaseType) {
+            case spirv_cross::SPIRType::Float:
+                return wgpu::TextureSampleType::Float;
+            case spirv_cross::SPIRType::Int:
+                return wgpu::TextureSampleType::Sint;
+            case spirv_cross::SPIRType::UInt:
+                return wgpu::TextureSampleType::Uint;
+            default:
+                UNREACHABLE();
+        }
+    }
+
 }  // namespace dawn_native

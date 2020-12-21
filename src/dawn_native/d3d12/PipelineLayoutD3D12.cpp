@@ -40,21 +40,15 @@ namespace dawn_native { namespace d3d12 {
             return D3D12_SHADER_VISIBILITY_ALL;
         }
 
-        D3D12_ROOT_PARAMETER_TYPE RootParameterType(wgpu::BindingType type) {
+        D3D12_ROOT_PARAMETER_TYPE RootParameterType(wgpu::BufferBindingType type) {
             switch (type) {
-                case wgpu::BindingType::UniformBuffer:
+                case wgpu::BufferBindingType::Uniform:
                     return D3D12_ROOT_PARAMETER_TYPE_CBV;
-                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BufferBindingType::Storage:
                     return D3D12_ROOT_PARAMETER_TYPE_UAV;
-                case wgpu::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BufferBindingType::ReadOnlyStorage:
                     return D3D12_ROOT_PARAMETER_TYPE_SRV;
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::MultisampledTexture:
-                case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler:
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                case wgpu::BindingType::WriteonlyStorageTexture:
-                case wgpu::BindingType::Undefined:
+                case wgpu::BufferBindingType::Undefined:
                     UNREACHABLE();
             }
         }
@@ -148,7 +142,7 @@ namespace dawn_native { namespace d3d12 {
                 mDynamicRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
 
                 // Set parameter types according to bind group layout descriptor.
-                rootParameter.ParameterType = RootParameterType(bindingInfo.type);
+                rootParameter.ParameterType = RootParameterType(bindingInfo.buffer.type);
 
                 // Set visibilities according to bind group layout descriptor.
                 rootParameter.ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
@@ -196,7 +190,7 @@ namespace dawn_native { namespace d3d12 {
                                                           BindingIndex bindingIndex) const {
         ASSERT(group < kMaxBindGroupsTyped);
         ASSERT(bindingIndex < kMaxDynamicBuffersPerPipelineLayoutTyped);
-        ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).hasDynamicOffset);
+        ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).buffer.hasDynamicOffset);
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).visibility !=
                wgpu::ShaderStage::None);
         return mDynamicRootParameterIndices[group][bindingIndex];

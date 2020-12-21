@@ -101,7 +101,6 @@ namespace dawn_native {
 
           private:
             // Disallow access to unused members.
-            using BindingInfo::hasDynamicOffset;
             using BindingInfo::visibility;
         };
 

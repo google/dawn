@@ -103,8 +103,7 @@ namespace dawn_native { namespace d3d12 {
         for (BindingIndex bindingIndex = bgl->GetDynamicBufferCount();
              bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
-            if (bindingInfo.type == wgpu::BindingType::Sampler ||
-                bindingInfo.type == wgpu::BindingType::ComparisonSampler) {
+            if (bindingInfo.bindingType == BindingInfoType::Sampler) {
                 samplers.push_back(ToBackend(group->GetBindingAsSampler(bindingIndex)));
             }
         }

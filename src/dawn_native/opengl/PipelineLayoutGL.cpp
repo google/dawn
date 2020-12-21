@@ -34,36 +34,38 @@ namespace dawn_native { namespace opengl {
 
             for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount();
                  ++bindingIndex) {
-                switch (bgl->GetBindingInfo(bindingIndex).type) {
-                    case wgpu::BindingType::UniformBuffer:
-                        mIndexInfo[group][bindingIndex] = uboIndex;
-                        uboIndex++;
+                const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+                switch (bindingInfo.bindingType) {
+                    case BindingInfoType::Buffer:
+                        switch (bindingInfo.buffer.type) {
+                            case wgpu::BufferBindingType::Uniform:
+                                mIndexInfo[group][bindingIndex] = uboIndex;
+                                uboIndex++;
+                                break;
+                            case wgpu::BufferBindingType::Storage:
+                            case wgpu::BufferBindingType::ReadOnlyStorage:
+                                mIndexInfo[group][bindingIndex] = ssboIndex;
+                                ssboIndex++;
+                                break;
+                            case wgpu::BufferBindingType::Undefined:
+                                UNREACHABLE();
+                        }
                         break;
-                    case wgpu::BindingType::Sampler:
-                    case wgpu::BindingType::ComparisonSampler:
+
+                    case BindingInfoType::Sampler:
                         mIndexInfo[group][bindingIndex] = samplerIndex;
                         samplerIndex++;
                         break;
-                    case wgpu::BindingType::SampledTexture:
-                    case wgpu::BindingType::MultisampledTexture:
+
+                    case BindingInfoType::Texture:
                         mIndexInfo[group][bindingIndex] = sampledTextureIndex;
                         sampledTextureIndex++;
                         break;
 
-                    case wgpu::BindingType::StorageBuffer:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
-                        mIndexInfo[group][bindingIndex] = ssboIndex;
-                        ssboIndex++;
-                        break;
-
-                    case wgpu::BindingType::ReadonlyStorageTexture:
-                    case wgpu::BindingType::WriteonlyStorageTexture:
+                    case BindingInfoType::StorageTexture:
                         mIndexInfo[group][bindingIndex] = storageTextureIndex;
                         storageTextureIndex++;
                         break;
-
-                    case wgpu::BindingType::Undefined:
-                        UNREACHABLE();
                 }
             }
         }

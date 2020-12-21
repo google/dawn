@@ -53,71 +53,74 @@ namespace dawn_native { namespace d3d12 {
 
             // Increment size does not need to be stored and is only used to get a handle
             // local to the allocation with OffsetFrom().
-            switch (bindingInfo.type) {
-                case wgpu::BindingType::UniformBuffer: {
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
-                    D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
-                    // TODO(enga@google.com): investigate if this needs to be a constraint at
-                    // the API level
-                    desc.SizeInBytes = Align(binding.size, 256);
-                    desc.BufferLocation = ToBackend(binding.buffer)->GetVA() + binding.offset;
+                    switch (bindingInfo.buffer.type) {
+                        case wgpu::BufferBindingType::Uniform: {
+                            D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
+                            // TODO(enga@google.com): investigate if this needs to be a constraint
+                            // at the API level
+                            desc.SizeInBytes = Align(binding.size, 256);
+                            desc.BufferLocation =
+                                ToBackend(binding.buffer)->GetVA() + binding.offset;
 
-                    d3d12Device->CreateConstantBufferView(
-                        &desc,
-                        viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
+                            d3d12Device->CreateConstantBufferView(
+                                &desc, viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                                 bindingOffsets[bindingIndex]));
+                            break;
+                        }
+                        case wgpu::BufferBindingType::Storage: {
+                            // Since SPIRV-Cross outputs HLSL shaders with RWByteAddressBuffer,
+                            // we must use D3D12_BUFFER_UAV_FLAG_RAW when making the
+                            // UNORDERED_ACCESS_VIEW_DESC. Using D3D12_BUFFER_UAV_FLAG_RAW requires
+                            // that we use DXGI_FORMAT_R32_TYPELESS as the format of the view.
+                            // DXGI_FORMAT_R32_TYPELESS requires that the element size be 4
+                            // byte aligned. Since binding.size and binding.offset are in bytes,
+                            // we need to divide by 4 to obtain the element size.
+                            D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+                            desc.Buffer.NumElements = binding.size / 4;
+                            desc.Format = DXGI_FORMAT_R32_TYPELESS;
+                            desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+                            desc.Buffer.FirstElement = binding.offset / 4;
+                            desc.Buffer.StructureByteStride = 0;
+                            desc.Buffer.CounterOffsetInBytes = 0;
+                            desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
+
+                            d3d12Device->CreateUnorderedAccessView(
+                                ToBackend(binding.buffer)->GetD3D12Resource(), nullptr, &desc,
+                                viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                          bindingOffsets[bindingIndex]));
+                            break;
+                        }
+                        case wgpu::BufferBindingType::ReadOnlyStorage: {
+                            // Like StorageBuffer, SPIRV-Cross outputs HLSL shaders for readonly
+                            // storage buffer with ByteAddressBuffer. So we must use
+                            // D3D12_BUFFER_SRV_FLAG_RAW when making the SRV descriptor. And it has
+                            // similar requirement for format, element size, etc.
+                            D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+                            desc.Format = DXGI_FORMAT_R32_TYPELESS;
+                            desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+                            desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+                            desc.Buffer.FirstElement = binding.offset / 4;
+                            desc.Buffer.NumElements = binding.size / 4;
+                            desc.Buffer.StructureByteStride = 0;
+                            desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
+                            d3d12Device->CreateShaderResourceView(
+                                ToBackend(binding.buffer)->GetD3D12Resource(), &desc,
+                                viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                          bindingOffsets[bindingIndex]));
+                            break;
+                        }
+                        case wgpu::BufferBindingType::Undefined:
+                            UNREACHABLE();
+                    }
+
                     break;
                 }
-                case wgpu::BindingType::StorageBuffer: {
-                    BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
-                    // Since SPIRV-Cross outputs HLSL shaders with RWByteAddressBuffer,
-                    // we must use D3D12_BUFFER_UAV_FLAG_RAW when making the
-                    // UNORDERED_ACCESS_VIEW_DESC. Using D3D12_BUFFER_UAV_FLAG_RAW requires
-                    // that we use DXGI_FORMAT_R32_TYPELESS as the format of the view.
-                    // DXGI_FORMAT_R32_TYPELESS requires that the element size be 4
-                    // byte aligned. Since binding.size and binding.offset are in bytes,
-                    // we need to divide by 4 to obtain the element size.
-                    D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-                    desc.Buffer.NumElements = binding.size / 4;
-                    desc.Format = DXGI_FORMAT_R32_TYPELESS;
-                    desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-                    desc.Buffer.FirstElement = binding.offset / 4;
-                    desc.Buffer.StructureByteStride = 0;
-                    desc.Buffer.CounterOffsetInBytes = 0;
-                    desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
-
-                    d3d12Device->CreateUnorderedAccessView(
-                        ToBackend(binding.buffer)->GetD3D12Resource(), nullptr, &desc,
-                        viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
-                    break;
-                }
-                case wgpu::BindingType::ReadonlyStorageBuffer: {
-                    BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
-
-                    // Like StorageBuffer, SPIRV-Cross outputs HLSL shaders for readonly storage
-                    // buffer with ByteAddressBuffer. So we must use D3D12_BUFFER_SRV_FLAG_RAW
-                    // when making the SRV descriptor. And it has similar requirement for
-                    // format, element size, etc.
-                    D3D12_SHADER_RESOURCE_VIEW_DESC desc;
-                    desc.Format = DXGI_FORMAT_R32_TYPELESS;
-                    desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-                    desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-                    desc.Buffer.FirstElement = binding.offset / 4;
-                    desc.Buffer.NumElements = binding.size / 4;
-                    desc.Buffer.StructureByteStride = 0;
-                    desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
-                    d3d12Device->CreateShaderResourceView(
-                        ToBackend(binding.buffer)->GetD3D12Resource(), &desc,
-                        viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
-                    break;
-                }
-
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::MultisampledTexture:
-                // Readonly storage is implemented as SRV so it can be used at the same time as a
-                // sampled texture.
-                case wgpu::BindingType::ReadonlyStorageTexture: {
+                case BindingInfoType::Texture: {
                     auto* view = ToBackend(GetBindingAsTextureView(bindingIndex));
                     auto& srv = view->GetSRVDescriptor();
                     d3d12Device->CreateShaderResourceView(
@@ -125,23 +128,42 @@ namespace dawn_native { namespace d3d12 {
                         viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
                     break;
                 }
-                case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler: {
+
+                case BindingInfoType::StorageTexture: {
+                    TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
+
+                    switch (bindingInfo.storageTexture.access) {
+                        case wgpu::StorageTextureAccess::ReadOnly: {
+                            // Readonly storage is implemented as SRV so it can be used at the same
+                            // time as a sampled texture.
+                            auto& srv = view->GetSRVDescriptor();
+                            d3d12Device->CreateShaderResourceView(
+                                ToBackend(view->GetTexture())->GetD3D12Resource(), &srv,
+                                viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                          bindingOffsets[bindingIndex]));
+                            break;
+                        }
+
+                        case wgpu::StorageTextureAccess::WriteOnly: {
+                            D3D12_UNORDERED_ACCESS_VIEW_DESC uav = view->GetUAVDescriptor();
+                            d3d12Device->CreateUnorderedAccessView(
+                                ToBackend(view->GetTexture())->GetD3D12Resource(), nullptr, &uav,
+                                viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                          bindingOffsets[bindingIndex]));
+                            break;
+                        }
+
+                        case wgpu::StorageTextureAccess::Undefined:
+                            UNREACHABLE();
+                    }
+
+                    break;
+                }
+
+                case BindingInfoType::Sampler: {
                     // No-op as samplers will be later initialized by CreateSamplers().
                     break;
                 }
-
-                case wgpu::BindingType::WriteonlyStorageTexture: {
-                    TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
-                    D3D12_UNORDERED_ACCESS_VIEW_DESC uav = view->GetUAVDescriptor();
-                    d3d12Device->CreateUnorderedAccessView(
-                        ToBackend(view->GetTexture())->GetD3D12Resource(), nullptr, &uav,
-                        viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
-                    break;
-                }
-
-                case wgpu::BindingType::Undefined:
-                    UNREACHABLE();
             }
         }
     }

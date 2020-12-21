@@ -223,51 +223,57 @@ namespace dawn_native { namespace d3d12 {
                 for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
                     BindGroupLayoutBase* layout = mBindGroups[index]->GetLayout();
                     for (BindingIndex binding{0}; binding < layout->GetBindingCount(); ++binding) {
-                        switch (layout->GetBindingInfo(binding).type) {
-                            case wgpu::BindingType::StorageBuffer: {
+                        const BindingInfo& bindingInfo = layout->GetBindingInfo(binding);
+                        switch (bindingInfo.bindingType) {
+                            case BindingInfoType::Buffer: {
                                 D3D12_RESOURCE_BARRIER barrier;
+                                wgpu::BufferUsage usage;
+                                switch (bindingInfo.buffer.type) {
+                                    case wgpu::BufferBindingType::Uniform:
+                                        usage = wgpu::BufferUsage::Uniform;
+                                        break;
+                                    case wgpu::BufferBindingType::Storage:
+                                        usage = wgpu::BufferUsage::Storage;
+                                        break;
+                                    case wgpu::BufferBindingType::ReadOnlyStorage:
+                                        usage = kReadOnlyStorageBuffer;
+                                        break;
+                                    case wgpu::BufferBindingType::Undefined:
+                                        UNREACHABLE();
+                                }
                                 if (ToBackend(mBindGroups[index]
                                                   ->GetBindingAsBufferBinding(binding)
                                                   .buffer)
-                                        ->TrackUsageAndGetResourceBarrier(
-                                            commandContext, &barrier, wgpu::BufferUsage::Storage)) {
+                                        ->TrackUsageAndGetResourceBarrier(commandContext, &barrier,
+                                                                          usage)) {
                                     barriers.push_back(barrier);
                                 }
                                 break;
                             }
 
-                            case wgpu::BindingType::ReadonlyStorageTexture: {
+                            case BindingInfoType::StorageTexture: {
                                 TextureViewBase* view =
                                     mBindGroups[index]->GetBindingAsTextureView(binding);
-                                ToBackend(view->GetTexture())
-                                    ->TransitionUsageAndGetResourceBarrier(
-                                        commandContext, &barriers, kReadonlyStorageTexture,
-                                        view->GetSubresourceRange());
-                                break;
-                            }
-                            case wgpu::BindingType::WriteonlyStorageTexture: {
-                                TextureViewBase* view =
-                                    mBindGroups[index]->GetBindingAsTextureView(binding);
-                                ToBackend(view->GetTexture())
-                                    ->TransitionUsageAndGetResourceBarrier(
-                                        commandContext, &barriers, wgpu::TextureUsage::Storage,
-                                        view->GetSubresourceRange());
-                                break;
-                            }
-                            case wgpu::BindingType::ReadonlyStorageBuffer: {
-                                D3D12_RESOURCE_BARRIER barrier;
-                                if (ToBackend(mBindGroups[index]
-                                                  ->GetBindingAsBufferBinding(binding)
-                                                  .buffer)
-                                        ->TrackUsageAndGetResourceBarrier(commandContext, &barrier,
-                                                                          kReadOnlyStorageBuffer)) {
-                                    barriers.push_back(barrier);
+                                wgpu::TextureUsage usage;
+                                switch (bindingInfo.storageTexture.access) {
+                                    case wgpu::StorageTextureAccess::ReadOnly:
+                                        usage = kReadonlyStorageTexture;
+                                        break;
+                                    case wgpu::StorageTextureAccess::WriteOnly:
+                                        usage = wgpu::TextureUsage::Storage;
+                                        break;
+                                    case wgpu::StorageTextureAccess::Undefined:
+                                        UNREACHABLE();
                                 }
+                                ToBackend(view->GetTexture())
+                                    ->TransitionUsageAndGetResourceBarrier(
+                                        commandContext, &barriers, usage,
+                                        view->GetSubresourceRange());
                                 break;
                             }
-                            case wgpu::BindingType::SampledTexture:
-                            case wgpu::BindingType::MultisampledTexture: {
-                                    TextureViewBase* view =
+
+                            case BindingInfoType::Texture: {
+                                TextureViewBase* view =
                                     mBindGroups[index]->GetBindingAsTextureView(binding);
                                 ToBackend(view->GetTexture())
                                     ->TransitionUsageAndGetResourceBarrier(
@@ -275,25 +281,10 @@ namespace dawn_native { namespace d3d12 {
                                         view->GetSubresourceRange());
                                 break;
                             }
-                            case wgpu::BindingType::UniformBuffer: {
-                                D3D12_RESOURCE_BARRIER barrier;
-                                if (ToBackend(mBindGroups[index]
-                                                  ->GetBindingAsBufferBinding(binding)
-                                                  .buffer)
-                                        ->TrackUsageAndGetResourceBarrier(
-                                            commandContext, &barrier, wgpu::BufferUsage::Uniform)) {
-                                    barriers.push_back(barrier);
-                                }
-                                break;
-                            }
 
-                            case wgpu::BindingType::Sampler:
-                            case wgpu::BindingType::ComparisonSampler:
+                            case BindingInfoType::Sampler:
                                 // Don't require barriers.
                                 break;
-
-                            case wgpu::BindingType::Undefined:
-                                UNREACHABLE();
                         }
                     }
                 }
@@ -353,8 +344,9 @@ namespace dawn_native { namespace d3d12 {
                     D3D12_GPU_VIRTUAL_ADDRESS bufferLocation =
                         ToBackend(binding.buffer)->GetVA() + offset;
 
-                    switch (bindingInfo.type) {
-                        case wgpu::BindingType::UniformBuffer:
+                    ASSERT(bindingInfo.bindingType == BindingInfoType::Buffer);
+                    switch (bindingInfo.buffer.type) {
+                        case wgpu::BufferBindingType::Uniform:
                             if (mInCompute) {
                                 commandList->SetComputeRootConstantBufferView(parameterIndex,
                                                                               bufferLocation);
@@ -363,7 +355,7 @@ namespace dawn_native { namespace d3d12 {
                                                                                bufferLocation);
                             }
                             break;
-                        case wgpu::BindingType::StorageBuffer:
+                        case wgpu::BufferBindingType::Storage:
                             if (mInCompute) {
                                 commandList->SetComputeRootUnorderedAccessView(parameterIndex,
                                                                                bufferLocation);
@@ -372,7 +364,7 @@ namespace dawn_native { namespace d3d12 {
                                                                                 bufferLocation);
                             }
                             break;
-                        case wgpu::BindingType::ReadonlyStorageBuffer:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
                             if (mInCompute) {
                                 commandList->SetComputeRootShaderResourceView(parameterIndex,
                                                                               bufferLocation);
@@ -381,13 +373,7 @@ namespace dawn_native { namespace d3d12 {
                                                                                bufferLocation);
                             }
                             break;
-                        case wgpu::BindingType::SampledTexture:
-                        case wgpu::BindingType::MultisampledTexture:
-                        case wgpu::BindingType::Sampler:
-                        case wgpu::BindingType::ComparisonSampler:
-                        case wgpu::BindingType::ReadonlyStorageTexture:
-                        case wgpu::BindingType::WriteonlyStorageTexture:
-                        case wgpu::BindingType::Undefined:
+                        case wgpu::BufferBindingType::Undefined:
                             UNREACHABLE();
                     }
                 }

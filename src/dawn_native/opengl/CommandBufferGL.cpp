@@ -243,49 +243,43 @@ namespace dawn_native { namespace opengl {
                     const BindingInfo& bindingInfo =
                         group->GetLayout()->GetBindingInfo(bindingIndex);
 
-                    switch (bindingInfo.type) {
-                        case wgpu::BindingType::UniformBuffer: {
+                    switch (bindingInfo.bindingType) {
+                        case BindingInfoType::Buffer: {
                             BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                             GLuint buffer = ToBackend(binding.buffer)->GetHandle();
-                            GLuint uboIndex = indices[bindingIndex];
+                            GLuint index = indices[bindingIndex];
                             GLuint offset = binding.offset;
 
-                            if (bindingInfo.hasDynamicOffset) {
+                            if (bindingInfo.buffer.hasDynamicOffset) {
                                 offset += dynamicOffsets[currentDynamicOffsetIndex];
                                 ++currentDynamicOffsetIndex;
                             }
 
-                            gl.BindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, offset,
-                                               binding.size);
-                            break;
-                        }
-
-                        case wgpu::BindingType::StorageBuffer:
-                        case wgpu::BindingType::ReadonlyStorageBuffer: {
-                            BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
-                            GLuint buffer = ToBackend(binding.buffer)->GetHandle();
-                            GLuint ssboIndex = indices[bindingIndex];
-                            GLuint offset = binding.offset;
-
-                            if (bindingInfo.hasDynamicOffset) {
-                                offset += dynamicOffsets[currentDynamicOffsetIndex];
-                                ++currentDynamicOffsetIndex;
+                            GLenum target;
+                            switch (bindingInfo.buffer.type) {
+                                case wgpu::BufferBindingType::Uniform:
+                                    target = GL_UNIFORM_BUFFER;
+                                    break;
+                                case wgpu::BufferBindingType::Storage:
+                                case wgpu::BufferBindingType::ReadOnlyStorage:
+                                    target = GL_SHADER_STORAGE_BUFFER;
+                                    break;
+                                case wgpu::BufferBindingType::Undefined:
+                                    UNREACHABLE();
                             }
 
-                            gl.BindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer, offset,
-                                               binding.size);
+                            gl.BindBufferRange(target, index, buffer, offset, binding.size);
                             break;
                         }
 
-                        case wgpu::BindingType::Sampler:
-                        case wgpu::BindingType::ComparisonSampler: {
+                        case BindingInfoType::Sampler: {
                             Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                             GLuint samplerIndex = indices[bindingIndex];
 
                             for (PipelineGL::SamplerUnit unit :
                                  mPipeline->GetTextureUnitsForSampler(samplerIndex)) {
-                                // Only use filtering for certain texture units, because int and
-                                // uint texture are only complete without filtering
+                                // Only use filtering for certain texture units, because int
+                                // and uint texture are only complete without filtering
                                 if (unit.shouldUseFiltering) {
                                     gl.BindSampler(unit.unit, sampler->GetFilteringHandle());
                                 } else {
@@ -295,8 +289,7 @@ namespace dawn_native { namespace opengl {
                             break;
                         }
 
-                        case wgpu::BindingType::SampledTexture:
-                        case wgpu::BindingType::MultisampledTexture: {
+                        case BindingInfoType::Texture: {
                             TextureView* view =
                                 ToBackend(group->GetBindingAsTextureView(bindingIndex));
                             GLuint handle = view->GetHandle();
@@ -328,8 +321,7 @@ namespace dawn_native { namespace opengl {
                             break;
                         }
 
-                        case wgpu::BindingType::ReadonlyStorageTexture:
-                        case wgpu::BindingType::WriteonlyStorageTexture: {
+                        case BindingInfoType::StorageTexture: {
                             TextureView* view =
                                 ToBackend(group->GetBindingAsTextureView(bindingIndex));
                             Texture* texture = ToBackend(view->GetTexture());
@@ -337,20 +329,19 @@ namespace dawn_native { namespace opengl {
                             GLuint imageIndex = indices[bindingIndex];
 
                             GLenum access;
-                            switch (bindingInfo.type) {
-                                case wgpu::BindingType::ReadonlyStorageTexture:
+                            switch (bindingInfo.storageTexture.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
                                     access = GL_READ_ONLY;
                                     break;
-                                case wgpu::BindingType::WriteonlyStorageTexture:
+                                case wgpu::StorageTextureAccess::WriteOnly:
                                     access = GL_WRITE_ONLY;
                                     break;
-
-                                default:
+                                case wgpu::StorageTextureAccess::Undefined:
                                     UNREACHABLE();
                             }
 
-                            // OpenGL ES only supports either binding a layer or the entire texture
-                            // in glBindImageTexture().
+                            // OpenGL ES only supports either binding a layer or the entire
+                            // texture in glBindImageTexture().
                             GLboolean isLayered;
                             if (view->GetLayerCount() == 1) {
                                 isLayered = GL_FALSE;
@@ -365,9 +356,6 @@ namespace dawn_native { namespace opengl {
                                                 texture->GetGLFormat().internalFormat);
                             break;
                         }
-
-                        case wgpu::BindingType::Undefined:
-                            UNREACHABLE();
                     }
                 }
             }
