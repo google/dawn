@@ -89,6 +89,7 @@ namespace dawn_native { namespace opengl {
 
             tint::transform::Manager transformManager;
             transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
+            transformManager.append(std::make_unique<tint::transform::EmitVertexPointSize>());
 
             DAWN_TRY_ASSIGN(module, RunTransforms(&transformManager, &module));
 

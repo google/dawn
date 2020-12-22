@@ -123,7 +123,7 @@ namespace dawn_native { namespace metal {
         std::vector<uint32_t> pullingSpirv;
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             stage == SingleShaderStage::Vertex) {
-            if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
+            if (mTintModule) {
                 DAWN_TRY_ASSIGN(pullingSpirv,
                                 GeneratePullingSpirv(mTintModule.get(),
                                                      *renderPipeline->GetVertexStateDescriptor(),
