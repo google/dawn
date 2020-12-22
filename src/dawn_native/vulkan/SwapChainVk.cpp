@@ -142,7 +142,7 @@ namespace dawn_native { namespace vulkan {
                         VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
                         DAWN_TRY(CheckVkSuccess(
                             fn.CreateXlibSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
-                            "CreateWin32Surface"));
+                            "CreateXlibSurface"));
                         return vkSurface;
                     }
                     break;
