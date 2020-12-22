@@ -22,26 +22,26 @@ class ViewportTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+        mQuadVS = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        mQuadVS =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(#version 450
-            const vec2 pos[6] = vec2[6](vec2(-1.0f,  1.0f),
-                                        vec2(-1.0f, -1.0f),
-                                        vec2( 1.0f,  1.0f),
-                                        vec2( 1.0f,  1.0f),
-                                        vec2(-1.0f, -1.0f),
-                                        vec2( 1.0f, -1.0f));
-            void main() {
-                gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
+            const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                vec2<f32>(-1.0,  1.0),
+                vec2<f32>(-1.0, -1.0),
+                vec2<f32>( 1.0,  1.0),
+                vec2<f32>( 1.0,  1.0),
+                vec2<f32>(-1.0, -1.0),
+                vec2<f32>( 1.0, -1.0));
+
+            [[stage(vertex)]] fn main() -> void {
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
-        mQuadFS =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(#version 450
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-               fragColor = vec4(1.0);
+        mQuadFS = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
             })");
     }
 
@@ -95,15 +95,18 @@ class ViewportTest : public DawnTest {
     void TestViewportDepth(float minDepth, float maxDepth, bool doViewportCall = true) {
         // Create a pipeline drawing 3 points at depth 1.0, 0.5 and 0.0.
         utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-        pipelineDesc.vertexStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(#version 450
-                const vec3 points[3] = vec3[3](vec3(-0.9f, 0.0f, 1.0f),
-                                               vec3( 0.0f, 0.0f, 0.5f),
-                                               vec3( 0.9f, 0.0f, 0.0f));
-                void main() {
-                    gl_Position = vec4(points[gl_VertexIndex], 1.0);
-                    gl_PointSize = 1.0;
-                })");
+        pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            const points : array<vec3<f32>, 3> = array<vec3<f32>, 3>(
+                vec3<f32>(-0.9, 0.0, 1.0),
+                vec3<f32>( 0.0, 0.0, 0.5),
+                vec3<f32>( 0.9, 0.0, 0.0));
+
+            [[stage(vertex)]] fn main() -> void {
+                Position = vec4<f32>(points[VertexIndex], 1.0);
+            })");
         pipelineDesc.cFragmentStage.module = mQuadFS;
         pipelineDesc.colorStateCount = 0;
         pipelineDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
