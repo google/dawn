@@ -156,20 +156,18 @@ class PrimitiveTopologyTest : public DawnTest {
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                layout(location = 0) in vec4 pos;
-                void main() {
-                    gl_Position = pos;
-                    gl_PointSize = 1.0;
-                })");
+        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<in> pos : vec4<f32>;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                Position = pos;
+            })");
 
-        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-                })");
+        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            })");
 
         vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
                                                    wgpu::BufferUsage::Vertex);
