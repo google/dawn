@@ -33,16 +33,16 @@ class CreateReadyPipelineTest : public DawnTest {
 
 // Verify the basic use of CreateReadyComputePipeline works on all backends.
 TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
-    const char* computeShader = R"(
-        #version 450
-        layout(std140, set = 0, binding = 0) buffer SSBO { uint value; } ssbo;
-        void main() {
-            ssbo.value = 1u;
-        })";
-
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, computeShader);
+    csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct SSBO {
+            [[offset(0)]] value : u32;
+        };
+        [[set(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
+
+        [[stage(compute)]] fn main() -> void {
+            ssbo.value = 1u;
+        })");
     csDesc.computeStage.entryPoint = "main";
 
     device.CreateReadyComputePipeline(
@@ -100,16 +100,16 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
 TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
     DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    const char* computeShader = R"(
-        #version 450
-        layout(std140, set = 0, binding = 0) buffer SSBO { uint value; } ssbo;
-        void main() {
-            ssbo.value = 1u;
-        })";
-
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, computeShader);
+    csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct SSBO {
+            [[offset(0)]] value : u32;
+        };
+        [[set(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
+
+        [[stage(compute)]] fn main() -> void {
+            ssbo.value = 1u;
+        })");
     csDesc.computeStage.entryPoint = "main0";
 
     device.CreateReadyComputePipeline(
@@ -140,24 +140,17 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
 
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-    const char* vertexShader = R"(
-        #version 450
-        void main() {
-            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-            gl_PointSize = 1.0f;
-        })";
-    const char* fragmentShader = R"(
-        #version 450
-        layout(location = 0) out vec4 o_color;
-        void main() {
-            o_color = vec4(0.f, 1.f, 0.f, 1.f);
-        })";
-
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    wgpu::ShaderModule vsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
+    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> o_color : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
     renderPipelineDescriptor.vertexStage.module = vsModule;
     renderPipelineDescriptor.cFragmentStage.module = fsModule;
     renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
@@ -220,24 +213,17 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
 
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
 
-    const char* vertexShader = R"(
-        #version 450
-        void main() {
-            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-            gl_PointSize = 1.0f;
-        })";
-    const char* fragmentShader = R"(
-        #version 450
-        layout(location = 0) out vec4 o_color;
-        void main() {
-            o_color = vec4(0.f, 1.f, 0.f, 1.f);
-        })";
-
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    wgpu::ShaderModule vsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
+    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> o_color : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
     renderPipelineDescriptor.vertexStage.module = vsModule;
     renderPipelineDescriptor.cFragmentStage.module = fsModule;
     renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
@@ -267,14 +253,10 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
 // Verify there is no error when the device is released before the callback of
 // CreateReadyComputePipeline() is called.
 TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyComputePipeline) {
-    const char* computeShader = R"(
-        #version 450
-        void main() {
-        })";
-
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, computeShader);
+    csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[stage(compute)]] fn main() -> void {
+        })");
     csDesc.computeStage.entryPoint = "main";
 
     device.CreateReadyComputePipeline(
@@ -295,27 +277,17 @@ TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyComputeP
 // Verify there is no error when the device is released before the callback of
 // CreateReadyRenderPipeline() is called.
 TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyRenderPipeline) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
-    const char* vertexShader = R"(
-        #version 450
-        void main() {
-            gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-            gl_PointSize = 1.0f;
-        })";
-    const char* fragmentShader = R"(
-        #version 450
-        layout(location = 0) out vec4 o_color;
-        void main() {
-            o_color = vec4(0.f, 1.f, 0.f, 1.f);
-        })";
-
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    wgpu::ShaderModule vsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
+    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> o_color : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
     renderPipelineDescriptor.vertexStage.module = vsModule;
     renderPipelineDescriptor.cFragmentStage.module = fsModule;
     renderPipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
