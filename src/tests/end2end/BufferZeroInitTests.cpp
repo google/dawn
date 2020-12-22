@@ -205,17 +205,15 @@ class BufferZeroInitTest : public DawnTest {
                                                      uint32_t vertexBufferCount = 1u) {
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vertexShader);
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vertexShader);
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) in vec4 i_color;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = i_color;
-                })");
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<in> i_color : vec4<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = i_color;
+            })");
 
         ASSERT(vertexBufferCount <= 1u);
         utils::ComboRenderPipelineDescriptor descriptor(device);
@@ -250,20 +248,20 @@ class BufferZeroInitTest : public DawnTest {
     void TestBufferZeroInitAsVertexBuffer(uint64_t vertexBufferOffset) {
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-        const char* vertexShader = R"(
-            #version 450
-            layout(location = 0) in vec4 pos;
-            layout(location = 0) out vec4 o_color;
-            void main() {
-                if (pos == vec4(0.f, 0.f, 0.f, 0.f)) {
-                    o_color = vec4(0.f, 1.f, 0.f, 1.f);
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(R"(
+            [[location(0)]] var<in> pos : vec4<f32>;
+            [[location(0)]] var<out> o_color : vec4<f32>;
+
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                if (all(pos == vec4<f32>(0.0, 0.0, 0.0, 0.0))) {
+                    o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
                 } else {
-                    o_color = vec4(1.f, 0.f, 0.f, 1.f);
+                    o_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
                 }
-                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-                gl_PointSize = 1.0f;
-            })";
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader);
+                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            })");
 
         constexpr uint64_t kVertexAttributeSize = sizeof(float) * 4;
         const uint64_t vertexBufferSize = kVertexAttributeSize + vertexBufferOffset;
@@ -291,19 +289,22 @@ class BufferZeroInitTest : public DawnTest {
     void TestBufferZeroInitAsIndexBuffer(uint64_t indexBufferOffset) {
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-        const char* vertexShader = R"(
-            #version 450
-            layout(location = 0) out vec4 o_color;
-            void main() {
-                if (gl_VertexIndex == 0u) {
-                    o_color = vec4(0.f, 1.f, 0.f, 1.f);
+        wgpu::RenderPipeline renderPipeline =
+            CreateRenderPipelineForTest(R"(
+            [[location(0)]] var<out> o_color : vec4<f32>;
+
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                if (VertexIndex == 0u) {
+                    o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
                 } else {
-                    o_color = vec4(1.f, 0.f, 0.f, 1.f);
+                    o_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
                 }
-                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-                gl_PointSize = 1.0f;
-            })";
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 0u);
+                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            })",
+                                        0 /* vertexBufferCount */);
 
         // The buffer size cannot be less than 4
         const uint64_t indexBufferSize = sizeof(uint32_t) + indexBufferOffset;
@@ -335,16 +336,17 @@ class BufferZeroInitTest : public DawnTest {
         constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
 
         // As long as the vertex shader is executed once, the output color will be red.
-        const char* vertexShader = R"(
-            #version 450
-            layout(location = 0) out vec4 o_color;
-            void main() {
-                o_color = vec4(1.f, 0.f, 0.f, 1.f);
-                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-                gl_PointSize = 1.f;
-            }
-        )";
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 0);
+        wgpu::RenderPipeline renderPipeline =
+            CreateRenderPipelineForTest(R"(
+            [[location(0)]] var<out> o_color : vec4<f32>;
+
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                o_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            })",
+                                        0 /* vertexBufferCount */);
 
         // Clear the color attachment to green.
         wgpu::Texture colorAttachment =
@@ -372,17 +374,17 @@ class BufferZeroInitTest : public DawnTest {
         constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
 
         // As long as the vertex shader is executed once, the output color will be red.
-        const char* vertexShader = R"(
-            #version 450
-            layout(location = 0) out vec4 o_color;
-            void main() {
-                o_color = vec4(1.f, 0.f, 0.f, 1.f);
-                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
-                gl_PointSize = 1.f;
-            }
-        )";
+        wgpu::RenderPipeline renderPipeline =
+            CreateRenderPipelineForTest(R"(
+            [[location(0)]] var<out> o_color : vec4<f32>;
 
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(vertexShader, 0u);
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                o_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            })",
+                                        0 /* vertexBufferCount */);
         wgpu::Buffer indexBuffer =
             utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0});
 
