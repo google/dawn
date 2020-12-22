@@ -32,7 +32,7 @@ namespace dawn_native {
 
         void EndPass();
 
-        void Dispatch(uint32_t x, uint32_t y, uint32_t z);
+        void Dispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1);
         void DispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
         void SetPipeline(ComputePipelineBase* pipeline);
 

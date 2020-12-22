@@ -12,26 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_INTERNALPIPELINESTORE_H_
-#define DAWNNATIVE_INTERNALPIPELINESTORE_H_
+#ifndef DAWNNATIVE_QUERYHELPER_H_
+#define DAWNNATIVE_QUERYHELPER_H_
 
 #include "dawn_native/ObjectBase.h"
-#include "dawn_native/dawn_platform.h"
-
-#include <unordered_map>
 
 namespace dawn_native {
-    class RenderPipelineBase;
-    class ShaderModuleBase;
 
-    struct InternalPipelineStore {
-        Ref<RenderPipelineBase> copyTextureForBrowserPipeline;
-        Ref<ShaderModuleBase> copyTextureForBrowserVS;
-        Ref<ShaderModuleBase> copyTextureForBrowserFS;
+    class BufferBase;
+    class DeviceBase;
+    class CommandEncoder;
 
-        Ref<ComputePipelineBase> timestampComputePipeline;
-        Ref<ShaderModuleBase> timestampCS;
+    struct TimestampParams {
+        uint32_t inputByteOffset;
+        uint32_t outputByteOffset;
+        uint32_t count;
+        float period;
     };
+
+    void EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
+                                              BufferBase* input,
+                                              BufferBase* availability,
+                                              BufferBase* output,
+                                              BufferBase* params);
+
 }  // namespace dawn_native
 
-#endif  // DAWNNATIVE_INTERNALPIPELINESTORE_H_
+#endif  // DAWNNATIVE_QUERYHELPER_H_

@@ -401,7 +401,10 @@ source_set("dawn_white_box_tests_sources") {
     }
   }
 
-  sources += [ "white_box/InternalResourceUsageTests.cpp" ]
+  sources += [
+    "white_box/InternalResourceUsageTests.cpp",
+    "white_box/QueryInternalShaderTests.cpp",
+  ]
 
   if (dawn_enable_d3d12) {
     sources += [

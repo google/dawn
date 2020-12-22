@@ -235,6 +235,8 @@ source_set("dawn_native_sources") {
     "PooledResourceMemoryAllocator.h",
     "ProgrammablePassEncoder.cpp",
     "ProgrammablePassEncoder.h",
+    "QueryHelper.cpp",
+    "QueryHelper.h",
     "QuerySet.cpp",
     "QuerySet.h",
     "Queue.cpp",

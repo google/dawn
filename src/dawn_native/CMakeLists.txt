@@ -122,6 +122,8 @@ target_sources(dawn_native PRIVATE
     "PooledResourceMemoryAllocator.h"
     "ProgrammablePassEncoder.cpp"
     "ProgrammablePassEncoder.h"
+    "QueryHelper.cpp"
+    "QueryHelper.h"
     "QuerySet.cpp"
     "QuerySet.h"
     "Queue.cpp"
