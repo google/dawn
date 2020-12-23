@@ -667,9 +667,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMas
 
 // Test multisampled rendering with depth test works correctly with a non-default sample mask.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMask) {
-    // TODO(dawn:491): Find out why this test doesn't work on Windows Intel Vulkan.
-    DAWN_SKIP_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
-
     constexpr bool kTestDepth = true;
     // The second sample is included in the first render pass and it's covered by the triangle.
     constexpr uint32_t kSampleMaskGreen = kSecondSampleMaskBit;
