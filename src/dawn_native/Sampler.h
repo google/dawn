@@ -42,6 +42,10 @@ namespace dawn_native {
             bool operator()(const SamplerBase* a, const SamplerBase* b) const;
         };
 
+        uint16_t GetMaxAnisotropy() const {
+            return mMaxAnisotropy;
+        }
+
       private:
         SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
@@ -55,6 +59,7 @@ namespace dawn_native {
         float mLodMinClamp;
         float mLodMaxClamp;
         wgpu::CompareFunction mCompareFunction;
+        uint16_t mMaxAnisotropy;
     };
 
 }  // namespace dawn_native

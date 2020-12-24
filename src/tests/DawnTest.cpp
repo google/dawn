@@ -85,6 +85,21 @@ namespace {
 
     DawnTestEnvironment* gTestEnv = nullptr;
 
+    template <typename T>
+    void printBuffer(testing::AssertionResult& result, const T* buffer, const size_t count) {
+        static constexpr unsigned int kBytes = sizeof(T);
+
+        for (size_t index = 0; index < count; ++index) {
+            auto byteView = reinterpret_cast<const uint8_t*>(buffer + index);
+            for (unsigned int b = 0; b < kBytes; ++b) {
+                char buf[4];
+                sprintf(buf, "%02X ", byteView[b]);
+                result << buf;
+            }
+        }
+        result << std::endl;
+    }
+
 }  // anonymous namespace
 
 const RGBA8 RGBA8::kZero = RGBA8(0, 0, 0, 0);
@@ -1153,6 +1168,14 @@ bool RGBA8::operator!=(const RGBA8& other) const {
     return !(*this == other);
 }
 
+bool RGBA8::operator<=(const RGBA8& other) const {
+    return (r <= other.r && g <= other.g && b <= other.b && a <= other.a);
+}
+
+bool RGBA8::operator>=(const RGBA8& other) const {
+    return (r >= other.r && g >= other.g && b >= other.b && a >= other.a);
+}
+
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
     return stream << "RGBA8(" << static_cast<int>(color.r) << ", " << static_cast<int>(color.g)
                   << ", " << static_cast<int>(color.b) << ", " << static_cast<int>(color.a) << ")";
@@ -1191,26 +1214,12 @@ namespace detail {
                                                   << mExpected[i] << ", actual " << actual[i]
                                                   << std::endl;
 
-                auto printBuffer = [&](const T* buffer) {
-                    static constexpr unsigned int kBytes = sizeof(T);
-
-                    for (size_t index = 0; index < mExpected.size(); ++index) {
-                        auto byteView = reinterpret_cast<const uint8_t*>(buffer + index);
-                        for (unsigned int b = 0; b < kBytes; ++b) {
-                            char buf[4];
-                            sprintf(buf, "%02X ", byteView[b]);
-                            result << buf;
-                        }
-                    }
-                    result << std::endl;
-                };
-
                 if (mExpected.size() <= 1024) {
                     result << "Expected:" << std::endl;
-                    printBuffer(mExpected.data());
+                    printBuffer(result, mExpected.data(), mExpected.size());
 
                     result << "Actual:" << std::endl;
-                    printBuffer(actual);
+                    printBuffer(result, actual, mExpected.size());
                 }
 
                 return result;
@@ -1226,4 +1235,59 @@ namespace detail {
     template class ExpectEq<uint64_t>;
     template class ExpectEq<RGBA8>;
     template class ExpectEq<float>;
+
+    template <typename T>
+    ExpectBetweenColors<T>::ExpectBetweenColors(T value0, T value1) {
+        T l, h;
+        l.r = std::min(value0.r, value1.r);
+        l.g = std::min(value0.g, value1.g);
+        l.b = std::min(value0.b, value1.b);
+        l.a = std::min(value0.a, value1.a);
+
+        h.r = std::max(value0.r, value1.r);
+        h.g = std::max(value0.g, value1.g);
+        h.b = std::max(value0.b, value1.b);
+        h.a = std::max(value0.a, value1.a);
+
+        mLowerColorChannels.push_back(l);
+        mHigherColorChannels.push_back(h);
+
+        mValues0.push_back(value0);
+        mValues1.push_back(value1);
+    }
+
+    template <typename T>
+    testing::AssertionResult ExpectBetweenColors<T>::Check(const void* data, size_t size) {
+        DAWN_ASSERT(size == sizeof(T) * mLowerColorChannels.size());
+        DAWN_ASSERT(mHigherColorChannels.size() == mLowerColorChannels.size());
+        DAWN_ASSERT(mValues0.size() == mValues1.size());
+        DAWN_ASSERT(mValues0.size() == mLowerColorChannels.size());
+
+        const T* actual = static_cast<const T*>(data);
+
+        for (size_t i = 0; i < mLowerColorChannels.size(); ++i) {
+            if (!(actual[i] >= mLowerColorChannels[i] && actual[i] <= mHigherColorChannels[i])) {
+                testing::AssertionResult result = testing::AssertionFailure()
+                                                  << "Expected data[" << i << "] to be between "
+                                                  << mValues0[i] << " and " << mValues1[i]
+                                                  << ", actual " << actual[i] << std::endl;
+
+                if (mLowerColorChannels.size() <= 1024) {
+                    result << "Expected between:" << std::endl;
+                    printBuffer(result, mValues0.data(), mLowerColorChannels.size());
+                    result << "and" << std::endl;
+                    printBuffer(result, mValues1.data(), mLowerColorChannels.size());
+
+                    result << "Actual:" << std::endl;
+                    printBuffer(result, actual, mLowerColorChannels.size());
+                }
+
+                return result;
+            }
+        }
+
+        return testing::AssertionSuccess();
+    }
+
+    template class ExpectBetweenColors<RGBA8>;
 }  // namespace detail

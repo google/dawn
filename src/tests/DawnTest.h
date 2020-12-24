@@ -73,6 +73,9 @@
 #define EXPECT_TEXTURE_FLOAT_EQ(expected, texture, x, y, width, height, level, slice) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, x, y, width, height, level, slice)
 
+#define EXPECT_PIXEL_RGBA8_BETWEEN(color0, color1, texture, x, y) \
+    AddTextureBetweenColorsExpectation(__FILE__, __LINE__, color0, color1, texture, x, y)
+
 // TODO(enga): Migrate other texure expectation helpers to this common one.
 #define EXPECT_TEXTURE_EQ(...) AddTextureExpectation(__FILE__, __LINE__, __VA_ARGS__)
 
@@ -95,6 +98,8 @@ struct RGBA8 {
     }
     bool operator==(const RGBA8& other) const;
     bool operator!=(const RGBA8& other) const;
+    bool operator<=(const RGBA8& other) const;
+    bool operator>=(const RGBA8& other) const;
 
     uint8_t r, g, b, a;
 
@@ -170,6 +175,8 @@ namespace detail {
 
     template <typename T>
     class ExpectEq;
+    template <typename T>
+    class ExpectBetweenColors;
 }  // namespace detail
 
 namespace dawn_wire {
@@ -329,6 +336,24 @@ class DawnTestBase {
                                               uint32_t bytesPerRow = 0) {
         return AddTextureExpectationImpl(file, line, new detail::ExpectEq<T>(expectedData), texture,
                                          x, y, 1, 1, level, slice, aspect, sizeof(T), bytesPerRow);
+    }
+
+    template <typename T>
+    std::ostringstream& AddTextureBetweenColorsExpectation(
+        const char* file,
+        int line,
+        const T& color0,
+        const T& color1,
+        const wgpu::Texture& texture,
+        uint32_t x,
+        uint32_t y,
+        uint32_t level = 0,
+        uint32_t slice = 0,
+        wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
+        uint32_t bytesPerRow = 0) {
+        return AddTextureExpectationImpl(
+            file, line, new detail::ExpectBetweenColors<T>(color0, color1), texture, x, y, 1, 1,
+            level, slice, aspect, sizeof(T), bytesPerRow);
     }
 
     void WaitABit();
@@ -518,6 +543,26 @@ namespace detail {
     extern template class ExpectEq<uint64_t>;
     extern template class ExpectEq<RGBA8>;
     extern template class ExpectEq<float>;
+
+    template <typename T>
+    class ExpectBetweenColors : public Expectation {
+      public:
+        // Inclusive for now
+        ExpectBetweenColors(T value0, T value1);
+        testing::AssertionResult Check(const void* data, size_t size) override;
+
+      private:
+        std::vector<T> mLowerColorChannels;
+        std::vector<T> mHigherColorChannels;
+
+        // used for printing error
+        std::vector<T> mValues0;
+        std::vector<T> mValues1;
+    };
+    // A color is considered between color0 and color1 when all channel values are within range of
+    // each counterparts. It doesn't matter which value is higher or lower. Essentially color =
+    // lerp(color0, color1, t) where t is [0,1]. But I don't want to be too strict here.
+    extern template class ExpectBetweenColors<RGBA8>;
 }  // namespace detail
 
 #endif  // TESTS_DAWNTEST_H_

@@ -75,6 +75,8 @@ namespace dawn_native { namespace metal {
 
         mtlDesc.lodMinClamp = descriptor->lodMinClamp;
         mtlDesc.lodMaxClamp = descriptor->lodMaxClamp;
+        // https://developer.apple.com/documentation/metal/mtlsamplerdescriptor/1516164-maxanisotropy
+        mtlDesc.maxAnisotropy = std::min<uint16_t>(GetMaxAnisotropy(), 16u);
 
         if (descriptor->compare != wgpu::CompareFunction::Undefined) {
             // Sampler compare is unsupported before A9, which we validate in

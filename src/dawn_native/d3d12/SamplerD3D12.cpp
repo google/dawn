@@ -69,13 +69,21 @@ namespace dawn_native { namespace d3d12 {
                 ? D3D12_FILTER_REDUCTION_TYPE_STANDARD
                 : D3D12_FILTER_REDUCTION_TYPE_COMPARISON;
 
-        mSamplerDesc.Filter =
-            D3D12_ENCODE_BASIC_FILTER(minFilter, magFilter, mipmapFilter, reduction);
+        // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_sampler_desc
+        mSamplerDesc.MaxAnisotropy = std::min<uint16_t>(GetMaxAnisotropy(), 16u);
+
+        if (mSamplerDesc.MaxAnisotropy > 1) {
+            mSamplerDesc.Filter = D3D12_ENCODE_ANISOTROPIC_FILTER(reduction);
+        } else {
+            mSamplerDesc.Filter =
+                D3D12_ENCODE_BASIC_FILTER(minFilter, magFilter, mipmapFilter, reduction);
+        }
+
         mSamplerDesc.AddressU = AddressMode(descriptor->addressModeU);
         mSamplerDesc.AddressV = AddressMode(descriptor->addressModeV);
         mSamplerDesc.AddressW = AddressMode(descriptor->addressModeW);
         mSamplerDesc.MipLODBias = 0.f;
-        mSamplerDesc.MaxAnisotropy = 1;
+
         if (descriptor->compare != wgpu::CompareFunction::Undefined) {
             mSamplerDesc.ComparisonFunc = ToD3D12ComparisonFunc(descriptor->compare);
         } else {

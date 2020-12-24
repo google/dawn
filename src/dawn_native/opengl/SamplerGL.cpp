@@ -82,7 +82,8 @@ namespace dawn_native { namespace opengl {
     void Sampler::SetupGLSampler(GLuint sampler,
                                  const SamplerDescriptor* descriptor,
                                  bool forceNearest) {
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+        Device* device = ToBackend(GetDevice());
+        const OpenGLFunctions& gl = device->gl;
 
         if (forceNearest) {
             gl.SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -104,6 +105,11 @@ namespace dawn_native { namespace opengl {
             gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
             gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_FUNC,
                                  ToOpenGLCompareFunction(descriptor->compare));
+        }
+
+        if (gl.IsAtLeastGL(4, 6) ||
+            gl.IsGLExtensionSupported("GL_EXT_texture_filter_anisotropic")) {
+            gl.SamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY, GetMaxAnisotropy());
         }
     }
 

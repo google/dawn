@@ -1530,7 +1530,8 @@
             {"name": "mipmap filter", "type": "filter mode", "default": "nearest"},
             {"name": "lod min clamp", "type": "float", "default": "0.0f"},
             {"name": "lod max clamp", "type": "float", "default": "1000.0f"},
-            {"name": "compare", "type": "compare function", "default": "undefined"}
+            {"name": "compare", "type": "compare function", "default": "undefined"},
+            {"name": "max anisotropy", "type": "uint16_t", "default": "1"}
         ]
     },
     "sampler descriptor dummy anisotropic filtering": {
@@ -1925,13 +1926,16 @@
     "void const *": {
         "category": "native"
     },
-    "uint32_t": {
-        "category": "native"
-    },
     "int32_t": {
         "category": "native"
     },
     "size_t": {
+        "category": "native"
+    },
+    "uint16_t": {
+        "category": "native"
+    },
+    "uint32_t": {
         "category": "native"
     },
     "uint64_t": {
