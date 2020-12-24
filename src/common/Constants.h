@@ -68,4 +68,9 @@ static_assert(1 << (kMaxTexture2DMipLevels - 1) == kMaxTextureSize,
 // on macOS, but we decide to do it on all platforms.
 static constexpr uint64_t kCopyBufferToBufferOffsetAlignment = 4u;
 
+// The maximum size of visibilityResultBuffer is 256KB on Metal, to fit the restriction, limit the
+// maximum size of query set to 64KB. The size of a query is 8-bytes, the maximum query count is 64
+// * 1024 / 8.
+static constexpr uint32_t kMaxQueryCount = 8192u;
+
 #endif  // COMMON_CONSTANTS_H_

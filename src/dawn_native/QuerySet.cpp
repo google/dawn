@@ -43,6 +43,10 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
+        if (descriptor->count > kMaxQueryCount) {
+            return DAWN_VALIDATION_ERROR("Max query count exceeded");
+        }
+
         DAWN_TRY(ValidateQueryType(descriptor->type));
 
         switch (descriptor->type) {

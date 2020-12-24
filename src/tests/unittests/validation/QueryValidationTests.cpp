@@ -47,6 +47,15 @@ TEST_F(QuerySetValidationTest, CreationWithoutExtensions) {
     ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Timestamp, 1));
 }
 
+// Test creating query set with invalid count
+TEST_F(QuerySetValidationTest, InvalidQueryCount) {
+    // Success create a query set with the maximum count
+    CreateQuerySet(device, wgpu::QueryType::Occlusion, kMaxQueryCount);
+
+    // Fail to create a query set with the count which exceeds the maximum
+    ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Occlusion, kMaxQueryCount + 1));
+}
+
 // Test creating query set with invalid type
 TEST_F(QuerySetValidationTest, InvalidQueryType) {
     ASSERT_DEVICE_ERROR(CreateQuerySet(device, static_cast<wgpu::QueryType>(0xFFFFFFFF), 1));
@@ -601,19 +610,4 @@ TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
         destination.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
-}
-
-// Check that in 32bit mode the computation of queryCount * sizeof(uint64_t) doesn't overflow (which
-// would skip validation).
-TEST_F(ResolveQuerySetValidationTest, BufferOverflowOn32Bits) {
-    // If compiling for 32-bits mode, the data size calculated by queryCount * sizeof(uint64_t)
-    // is 8, which is less than the buffer size.
-    constexpr uint32_t kQueryCount = std::numeric_limits<uint32_t>::max() / sizeof(uint64_t) + 2;
-
-    wgpu::QuerySet querySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, kQueryCount);
-    wgpu::Buffer destination = CreateBuffer(device, 1024, wgpu::BufferUsage::QueryResolve);
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
-
-    ASSERT_DEVICE_ERROR(encoder.Finish());
 }
