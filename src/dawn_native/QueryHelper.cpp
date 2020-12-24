@@ -14,6 +14,8 @@
 
 #include "dawn_native/QueryHelper.h"
 
+#include <cmath>
+
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
