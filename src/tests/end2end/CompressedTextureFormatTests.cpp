@@ -431,10 +431,6 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
 // Test copying into the whole BC texture with 2x2 blocks and sampling from it.
 TEST_P(CompressedTextureBCFormatTest, Basic) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -453,10 +449,6 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
 
 // Test copying into a sub-region of a texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -476,10 +468,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
 
 // Test copying into the non-zero layer of a 2D array texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -505,10 +493,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
 
 // Test copying into a non-zero mipmap level of a texture with BC texture formats.
 TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -548,10 +532,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 
 // Test texture-to-texture whole-size copies with BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmapLevel) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -615,10 +595,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqua
     // subresource and does not fit in another one on OpenGL.
     DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     CopyConfig srcConfig;
     srcConfig.textureDescriptor.size = {60, 60, 1};
     srcConfig.viewMipmapLevel = srcConfig.textureDescriptor.mipLevelCount - 1;
@@ -679,10 +655,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqua
     // subresource and does not fit in another one on OpenGL.
     DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     CopyConfig srcConfig;
     srcConfig.textureDescriptor.size = {60, 60, 1};
     constexpr uint32_t kMipmapLevelCount = 3;
@@ -738,10 +710,6 @@ TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVi
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
     DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
-
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
 
     constexpr uint32_t kTotalCopyCount = 2;
     std::array<CopyConfig, kTotalCopyCount> srcConfigs;
@@ -816,10 +784,6 @@ TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVi
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exactly fit the RowPitch.
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -849,10 +813,6 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
 // backend the texelOffset.y will be greater than 0 after calcuting the texelOffset in the function
 // ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -884,10 +844,6 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset and texture
 // extent exceed the RowPitch. On D3D12 backend two copies are required for this case.
 TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -918,10 +874,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
 // bytesPerRow. On D3D12 backend the texelOffset.z will be greater than 0 after calcuting the
 // texelOffset in the function ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -949,10 +901,6 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
 // copyExtent.depth) on Metal backends. As copyExtent.depth can only be 1 for BC formats, on Metal
 // backend we will use two copies to implement such copy.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -974,10 +922,6 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
 // Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
 // copyExtent.depth) and copyExtent needs to be clamped.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -1020,10 +964,6 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 // Test copying a whole 2D array texture with array layer count > 1 in one copy command works with
 // BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -1050,10 +990,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
 
 // Test copying a multiple 2D texture array layers in one copy command works with BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
@@ -1175,10 +1111,6 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
 
 // Test writing to multiple 2D texture array layers with BC formats.
 TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
-    // TODO(dawn:483): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
     config.textureDescriptor.size = {20, 24, 9};
@@ -1198,10 +1130,6 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
 // subresource is different from its virtual size.
 TEST_P(CompressedTextureWriteTextureTest,
        WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
-    // TODO(dawn:483): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // Texture virtual size at mipLevel 2 will be {15, 15, 1} while the physical
     // size will be {16, 16, 1}.
     // Setting copyExtent.width or copyExtent.height to 16 fits in
