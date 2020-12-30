@@ -63,6 +63,11 @@ namespace {
         }
         {
             wgpu::SamplerDescriptor samplerDesc = kValidAnisoSamplerDesc;
+            samplerDesc.maxAnisotropy = 0;
+            ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
+        }
+        {
+            wgpu::SamplerDescriptor samplerDesc = kValidAnisoSamplerDesc;
             samplerDesc.minFilter = wgpu::FilterMode::Nearest;
             samplerDesc.magFilter = wgpu::FilterMode::Nearest;
             samplerDesc.mipmapFilter = wgpu::FilterMode::Nearest;

@@ -20,12 +20,6 @@
 
 #include <cmath>
 
-namespace {
-    uint16_t GetClampedMaxAnisotropy(uint16_t value) {
-        return value >= 1u ? value : 1u;
-    }
-}  // anonymous namespace
-
 namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descriptor) {
@@ -54,6 +48,8 @@ namespace dawn_native {
                     "min, mag, and mipmap filter should be linear when using anisotropic "
                     "filtering");
             }
+        } else if (descriptor->maxAnisotropy == 0u) {
+            return DAWN_VALIDATION_ERROR("max anisotropy cannot be set to 0");
         }
 
         DAWN_TRY(ValidateFilterMode(descriptor->minFilter));
@@ -79,7 +75,7 @@ namespace dawn_native {
           mLodMinClamp(descriptor->lodMinClamp),
           mLodMaxClamp(descriptor->lodMaxClamp),
           mCompareFunction(descriptor->compare),
-          mMaxAnisotropy(GetClampedMaxAnisotropy(descriptor->maxAnisotropy)) {
+          mMaxAnisotropy(descriptor->maxAnisotropy) {
     }
 
     SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag)
