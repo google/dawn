@@ -16,6 +16,7 @@
 #define DAWNNATIVE_SUBRESOURCESTORAGE_H_
 
 #include "common/Assert.h"
+#include "common/TypeTraits.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Subresource.h"
 
@@ -105,6 +106,9 @@ namespace dawn_native {
     template <typename T>
     class SubresourceStorage {
       public:
+        static_assert(std::is_copy_assignable<T>::value, "T must be copyable");
+        static_assert(HasEqualityOperator<T>::value, "T requires bool operator == (T, T)");
+
         // Creates the storage with the given "dimensions" and all subresources starting with the
         // initial value.
         SubresourceStorage(Aspect aspects,

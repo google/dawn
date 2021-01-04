@@ -48,6 +48,7 @@ target_sources(dawn_common PRIVATE
     "SwapChainUtils.h"
     "SystemUtils.cpp"
     "SystemUtils.h"
+    "TypeTraits.h"
     "TypedInteger.h"
     "UnderlyingType.h"
     "ityp_array.h"

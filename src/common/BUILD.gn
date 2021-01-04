@@ -186,6 +186,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "SwapChainUtils.h",
       "SystemUtils.cpp",
       "SystemUtils.h",
+      "TypeTraits.h",
       "TypedInteger.h",
       "UnderlyingType.h",
       "ityp_array.h",
