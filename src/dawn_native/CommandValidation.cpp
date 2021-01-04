@@ -655,7 +655,8 @@ namespace dawn_native {
         switch (view.aspect) {
             case wgpu::TextureAspect::All:
                 if (HasOneBit(format.aspects)) {
-                    return Aspect{format.aspects};
+                    Aspect single = format.aspects;
+                    return single;
                 } else {
                     return DAWN_VALIDATION_ERROR(
                         "A single aspect must be selected for multi-planar formats in "
