@@ -1070,18 +1070,17 @@ INSTANTIATE_TEST_SUITE_P(
         // Image queries
 
         // OpImageQuerySizeLod
-        // Applies to NonReadable, hence write-only storage
         UsageRawImageCase{"f_storage_2d",
                           "%result = OpImageQuerySizeLod "
                           "%v2uint %im %uint_1",
-                          "Usage(Texture( write ))"},
+                          "Usage(Texture( is_sampled ))"},
 
         // OpImageQuerySize
-        // Applies to NonReadable, hence write-only storage
+        // Could be MS=1 or storage image. So it's non-committal.
         UsageRawImageCase{"f_storage_2d",
                           "%result = OpImageQuerySize "
                           "%v2uint %im",
-                          "Usage(Texture( write ))"},
+                          "Usage()"},
 
         // OpImageQueryLevels
         UsageRawImageCase{"f_texture_2d",

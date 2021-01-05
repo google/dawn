@@ -2087,9 +2087,12 @@ bool ParserImpl::RegisterHandleUsage() {
             // Image queries
 
           case SpvOpImageQuerySizeLod:
+            // Vulkan requires Sampled=1 for this. SPIR-V already requires MS=0.
+            handle_usage_[get_image(inst)].AddSampledTexture();
+            break;
           case SpvOpImageQuerySize:
-            // Applies to NonReadable, and hence a write-only storage image
-            handle_usage_[get_image(inst)].AddStorageWriteTexture();
+            // Applies to either MS=1 or Sampled=0 or 2.
+            // So we can't force it to be multisampled, or storage image.
             break;
           case SpvOpImageQueryLod:
             handle_usage_[get_image(inst)].AddSampledTexture();
