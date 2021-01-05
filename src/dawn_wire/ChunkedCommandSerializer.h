@@ -15,6 +15,7 @@
 #ifndef DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_
 #define DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_
 
+#include "common/Alloc.h"
 #include "common/Compiler.h"
 #include "dawn_wire/Wire.h"
 #include "dawn_wire/WireCmd_autogen.h"
@@ -82,7 +83,7 @@ namespace dawn_wire {
                 return;
             }
 
-            auto cmdSpace = std::unique_ptr<char[]>(new (std::nothrow) char[requiredSize]);
+            auto cmdSpace = std::unique_ptr<char[]>(AllocNoThrow<char>(requiredSize));
             if (!cmdSpace) {
                 return;
             }

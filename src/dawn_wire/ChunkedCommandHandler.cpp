@@ -14,6 +14,8 @@
 
 #include "dawn_wire/ChunkedCommandHandler.h"
 
+#include "common/Alloc.h"
+
 #include <algorithm>
 #include <cstring>
 
@@ -60,16 +62,9 @@ namespace dawn_wire {
         size_t initialSize) {
         ASSERT(!mChunkedCommandData);
 
-#if defined(ADDRESS_SANITIZER)
-        if (commandSize >= 0x70000000) {
-            // std::nothrow isn't implemented on ASAN and it has a 2GB allocation limit.
-            // Catch large allocations and error out so fuzzers make progress.
-            return ChunkedCommandsResult::Error;
-        }
-#endif
         // Reserve space for all the command data we're expecting, and copy the initial data
         // to the start of the memory.
-        mChunkedCommandData.reset(new (std::nothrow) char[commandSize]);
+        mChunkedCommandData.reset(AllocNoThrow<char>(commandSize));
         if (!mChunkedCommandData) {
             return ChunkedCommandsResult::Error;
         }

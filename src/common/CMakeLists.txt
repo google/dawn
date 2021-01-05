@@ -14,6 +14,7 @@
 
 add_library(dawn_common STATIC ${DAWN_DUMMY_FILE})
 target_sources(dawn_common PRIVATE
+    "Alloc.h"
     "Assert.cpp"
     "Assert.h"
     "BitSetIterator.h"
