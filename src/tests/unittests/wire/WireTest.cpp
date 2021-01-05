@@ -86,6 +86,13 @@ void WireTest::TearDown() {
     // cannot be null.
     api.IgnoreAllReleaseCalls();
     mWireClient = nullptr;
+
+    if (mWireServer) {
+        // These are called on server destruction to clear the callbacks. They must not be
+        // called after the server is destroyed.
+        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(_, nullptr, nullptr)).Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(_, nullptr, nullptr)).Times(Exactly(1));
+    }
     mWireServer = nullptr;
 }
 
@@ -110,6 +117,13 @@ dawn_wire::WireClient* WireTest::GetWireClient() {
 
 void WireTest::DeleteServer() {
     EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
+
+    if (mWireServer) {
+        // These are called on server destruction to clear the callbacks. They must not be
+        // called after the server is destroyed.
+        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(_, nullptr, nullptr)).Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(_, nullptr, nullptr)).Times(Exactly(1));
+    }
     mWireServer = nullptr;
 }
 

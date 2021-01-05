@@ -28,12 +28,15 @@ namespace dawn_wire { namespace server {
         auto* fence = FenceObjects().Get(fenceId);
         ASSERT(fence != nullptr);
 
-        FenceCompletionUserdata* userdata = new FenceCompletionUserdata;
-        userdata->server = this;
+        auto userdata = MakeUserdata<FenceCompletionUserdata>();
         userdata->fence = ObjectHandle{fenceId, fence->generation};
         userdata->value = signalValue;
 
-        mProcs.fenceOnCompletion(cFence, signalValue, ForwardFenceCompletedValue, userdata);
+        mProcs.fenceOnCompletion(
+            cFence, signalValue,
+            ForwardToServer<decltype(&Server::OnFenceCompletedValueUpdated)>::Func<
+                &Server::OnFenceCompletedValueUpdated>(),
+            userdata.release());
         return true;
     }
 

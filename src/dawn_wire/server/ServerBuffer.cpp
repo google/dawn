@@ -77,8 +77,7 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        std::unique_ptr<MapUserdata> userdata = std::make_unique<MapUserdata>();
-        userdata->server = this;
+        std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
         userdata->buffer = ObjectHandle{bufferId, buffer->generation};
         userdata->bufferObj = buffer->handle;
         userdata->requestSerial = requestSerial;
@@ -112,8 +111,11 @@ namespace dawn_wire { namespace server {
             userdata->readHandle = std::unique_ptr<MemoryTransferService::ReadHandle>(readHandle);
         }
 
-        mProcs.bufferMapAsync(buffer->handle, mode, offset, size, ForwardBufferMapAsync,
-                              userdata.release());
+        mProcs.bufferMapAsync(
+            buffer->handle, mode, offset, size,
+            ForwardToServer<decltype(
+                &Server::OnBufferMapAsyncCallback)>::Func<&Server::OnBufferMapAsyncCallback>(),
+            userdata.release());
 
         return true;
     }
@@ -206,14 +208,7 @@ namespace dawn_wire { namespace server {
                                                      static_cast<size_t>(writeFlushInfoLength));
     }
 
-    void Server::ForwardBufferMapAsync(WGPUBufferMapAsyncStatus status, void* userdata) {
-        auto data = static_cast<MapUserdata*>(userdata);
-        data->server->OnBufferMapAsyncCallback(status, data);
-    }
-
-    void Server::OnBufferMapAsyncCallback(WGPUBufferMapAsyncStatus status, MapUserdata* userdata) {
-        std::unique_ptr<MapUserdata> data(userdata);
-
+    void Server::OnBufferMapAsyncCallback(WGPUBufferMapAsyncStatus status, MapUserdata* data) {
         // Skip sending the callback if the buffer has already been destroyed.
         auto* bufferData = BufferObjects().Get(data->buffer.id);
         if (bufferData == nullptr || bufferData->generation != data->buffer.generation) {

@@ -34,11 +34,31 @@ namespace dawn_wire { namespace server {
         auto* deviceData = DeviceObjects().Allocate(1);
         deviceData->handle = device;
 
-        mProcs.deviceSetUncapturedErrorCallback(device, ForwardUncapturedError, this);
-        mProcs.deviceSetDeviceLostCallback(device, ForwardDeviceLost, this);
+        // Note: these callbacks are manually inlined here since they do not acquire and
+        // free their userdata.
+        mProcs.deviceSetUncapturedErrorCallback(
+            device,
+            [](WGPUErrorType type, const char* message, void* userdata) {
+                Server* server = static_cast<Server*>(userdata);
+                server->OnUncapturedError(type, message);
+            },
+            this);
+        mProcs.deviceSetDeviceLostCallback(
+            device,
+            [](const char* message, void* userdata) {
+                Server* server = static_cast<Server*>(userdata);
+                server->OnDeviceLost(message);
+            },
+            this);
     }
 
     Server::~Server() {
+        // Un-set the error and lost callbacks since we cannot forward them
+        // after the server has been destroyed.
+        WGPUDevice device = DeviceObjects().Get(1)->handle;
+        mProcs.deviceSetUncapturedErrorCallback(device, nullptr, nullptr);
+        mProcs.deviceSetDeviceLostCallback(device, nullptr, nullptr);
+
         DestroyAllObjects(mProcs);
     }
 

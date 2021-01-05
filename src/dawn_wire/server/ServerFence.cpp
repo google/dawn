@@ -18,15 +18,8 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::ForwardFenceCompletedValue(WGPUFenceCompletionStatus status, void* userdata) {
-        auto data = static_cast<FenceCompletionUserdata*>(userdata);
-        data->server->OnFenceCompletedValueUpdated(status, data);
-    }
-
     void Server::OnFenceCompletedValueUpdated(WGPUFenceCompletionStatus status,
-                                              FenceCompletionUserdata* userdata) {
-        std::unique_ptr<FenceCompletionUserdata> data(userdata);
-
+                                              FenceCompletionUserdata* data) {
         if (status != WGPUFenceCompletionStatus_Success) {
             return;
         }
@@ -49,25 +42,20 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        FenceOnCompletionUserdata* userdata = new FenceOnCompletionUserdata;
-        userdata->server = this;
+        auto userdata = MakeUserdata<FenceOnCompletionUserdata>();
         userdata->fence = ObjectHandle{fenceId, fence->generation};
         userdata->requestSerial = requestSerial;
 
-        mProcs.fenceOnCompletion(fence->handle, value, ForwardFenceOnCompletion, userdata);
+        mProcs.fenceOnCompletion(
+            fence->handle, value,
+            ForwardToServer<decltype(
+                &Server::OnFenceOnCompletion)>::Func<&Server::OnFenceOnCompletion>(),
+            userdata.release());
         return true;
     }
 
-    // static
-    void Server::ForwardFenceOnCompletion(WGPUFenceCompletionStatus status, void* userdata) {
-        auto* data = reinterpret_cast<FenceOnCompletionUserdata*>(userdata);
-        data->server->OnFenceOnCompletion(status, data);
-    }
-
     void Server::OnFenceOnCompletion(WGPUFenceCompletionStatus status,
-                                     FenceOnCompletionUserdata* userdata) {
-        std::unique_ptr<FenceOnCompletionUserdata> data{userdata};
-
+                                     FenceOnCompletionUserdata* data) {
         ReturnFenceOnCompletionCallbackCmd cmd;
         cmd.fence = data->fence;
         cmd.requestSerial = data->requestSerial;

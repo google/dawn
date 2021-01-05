@@ -79,6 +79,12 @@ class WireMultipleDeviceTests : public testing::Test {
         ~WireHolder() {
             mApi.IgnoreAllReleaseCalls();
             mWireClient = nullptr;
+
+            // These are called on server destruction to clear the callbacks. They must not be
+            // called after the server is destroyed.
+            EXPECT_CALL(mApi, OnDeviceSetUncapturedErrorCallback(_, nullptr, nullptr))
+                .Times(Exactly(1));
+            EXPECT_CALL(mApi, OnDeviceSetDeviceLostCallback(_, nullptr, nullptr)).Times(Exactly(1));
             mWireServer = nullptr;
         }
 
