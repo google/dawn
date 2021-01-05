@@ -84,18 +84,20 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
 
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
-  auto* st =
-      create<ast::Struct>(ast::StructMemberList{Member("rt", ty.array<f32>()),
-                                                Member("vf", ty.f32)},
-                          decos);
+
+  SetSource(Source::Location{12, 34});
+  auto* rt = Member("rt", ty.array<f32>());
+  SetSource(Source{});
+  auto* st = create<ast::Struct>(
+      ast::StructMemberList{rt, Member("vf", ty.f32)}, decos);
 
   auto* struct_type = ty.struct_("Foo", st);
 
   mod->AddConstructedType(struct_type);
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
-            "v-0015: runtime arrays may only appear as the last member "
-            "of a struct: 'rt'");
+            "12:34 v-0015: runtime arrays may only appear as the last member "
+            "of a struct");
 }
 
 TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
@@ -118,7 +120,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   EXPECT_FALSE(v()->ValidateConstructedTypes(mod->constructed_types()));
   EXPECT_EQ(v()->error(),
             "v-0015: runtime arrays may only appear as the last member "
-            "of a struct: 'b'");
+            "of a struct");
 }
 
 TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
@@ -161,8 +163,39 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   EXPECT_FALSE(v()->Validate(mod));
   EXPECT_EQ(v()->error(),
             "12:34 v-0015: runtime arrays may only appear as the last member "
-            "of a struct: 'a'");
+            "of a struct");
 }
 
+TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
+  // fn func(a : array<u32>) {}
+  // [[stage(vertex)]] fn main() {}
+
+  auto* param =
+      Var(Source{Source::Location{12, 34}}, "a", ast::StorageClass::kNone,
+          ty.array<i32>(), nullptr, ast::VariableDecorationList{});
+
+  auto* func = Func("func", ast::VariableList{param}, ty.void_,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(),
+                    },
+                    ast::FunctionDecorationList{});
+  mod->AddFunction(func);
+
+  auto* main =
+      Func("main", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::ReturnStatement>(),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
+  mod->AddFunction(main);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(v()->Validate(mod));
+  EXPECT_EQ(v()->error(),
+            "12:34 v-0015: runtime arrays may only appear as the last member "
+            "of a struct");
+}
 }  // namespace
 }  // namespace tint

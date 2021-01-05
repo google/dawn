@@ -91,9 +91,8 @@ bool ValidatorImpl::ValidateConstructedTypes(
           if (r->IsRuntimeArray()) {
             if (member != st->impl()->members().back()) {
               add_error(member->source(), "v-0015",
-                        "runtime arrays may only appear as the last "
-                        "member of a struct: '" +
-                            member->name() + "'");
+                        "runtime arrays may only appear as the last member of "
+                        "a struct");
               return false;
             }
             if (!st->IsBlockDecorated()) {
@@ -199,6 +198,9 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
 
   for (auto* param : func->params()) {
     variable_stack_.set(param->name(), param);
+    if (!ValidateParameter(param)) {
+      return false;
+    }
   }
   if (!ValidateStatements(func->body())) {
     return false;
@@ -210,6 +212,18 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
         !func->get_last_statement()->Is<ast::ReturnStatement>()) {
       add_error(func->source(), "v-0002",
                 "non-void function must end with a return statement");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ValidatorImpl::ValidateParameter(const ast::Variable* param) {
+  if (auto* r = param->type()->UnwrapAll()->As<ast::type::Array>()) {
+    if (r->IsRuntimeArray()) {
+      add_error(
+          param->source(), "v-0015",
+          "runtime arrays may only appear as the last member of a struct");
       return false;
     }
   }
@@ -266,10 +280,9 @@ bool ValidatorImpl::ValidateDeclStatement(
   if (auto* arr =
           decl->variable()->type()->UnwrapAll()->As<ast::type::Array>()) {
     if (arr->IsRuntimeArray()) {
-      add_error(decl->source(), "v-0015",
-                "runtime arrays may only appear as the last "
-                "member of a struct: '" +
-                    decl->variable()->name() + "'");
+      add_error(
+          decl->source(), "v-0015",
+          "runtime arrays may only appear as the last member of a struct");
       return false;
     }
   }

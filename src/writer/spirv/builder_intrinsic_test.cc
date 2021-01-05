@@ -1285,8 +1285,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
                           ast::StructDecorationList{});
   auto* s_type = ty.struct_("my_struct", s);
   auto* var = Var("b", ast::StorageClass::kPrivate, s_type);
-  auto* expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
-                                       Expr("b"), Expr("a")));
+  auto* expr = Call("arrayLength", MemberAccessor("b", "a"));
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
@@ -1321,8 +1320,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   auto* s_type = ty.struct_("my_struct", s);
   auto* var = Var("b", ast::StorageClass::kPrivate, s_type);
-  auto* expr = Call("arrayLength", create<ast::MemberAccessorExpression>(
-                                       Expr("b"), Expr("a")));
+  auto* expr = Call("arrayLength", MemberAccessor("b", "a"));
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
@@ -1344,36 +1342,6 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 %5 = OpVariable %6 Private %10
 %12 = OpTypeInt 32 0
 )");
-
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpArrayLength %12 %5 1
-)");
-}
-
-// TODO(dsinclair): https://bugs.chromium.org/p/tint/issues/detail?id=266
-TEST_F(IntrinsicBuilderTest, DISABLED_Call_ArrayLength_Ptr) {
-  ast::type::Pointer ptr(ty.array<f32>(), ast::StorageClass::kStorageBuffer);
-
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.f32), Member("a", ty.array<f32>())},
-      ast::StructDecorationList{});
-  auto* s_type = ty.struct_("my_struct", s);
-  auto* var = Var("b", ast::StorageClass::kPrivate, s_type);
-
-  Var("ptr_var", ast::StorageClass::kPrivate, &ptr,
-      create<ast::MemberAccessorExpression>(Expr("b"), Expr("a")), {});
-
-  auto* expr = Call("arrayLength", "ptr_var");
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
-
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
-                    ast::StatementList{}, ast::FunctionDecorationList{});
-
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(expr), 11u) << b.error();
-
-  EXPECT_EQ(DumpInstructions(b.types()), R"( ... )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%11 = OpArrayLength %12 %5 1

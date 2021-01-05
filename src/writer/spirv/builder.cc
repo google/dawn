@@ -1871,15 +1871,15 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     if (call->params().empty()) {
       error_ = "missing param for runtime array length";
       return 0;
-    } else if (!call->params()[0]->Is<ast::MemberAccessorExpression>()) {
-      if (call->params()[0]->result_type()->Is<ast::type::Pointer>()) {
-        error_ = "pointer accessors not supported yet";
-      } else {
-        error_ = "invalid accessor for runtime array length";
-      }
+    }
+    auto* arg = call->params()[0];
+
+    auto* accessor = arg->As<ast::MemberAccessorExpression>();
+    if (accessor == nullptr) {
+      error_ = "invalid expression for array length";
       return 0;
     }
-    auto* accessor = call->params()[0]->As<ast::MemberAccessorExpression>();
+
     auto struct_id = GenerateExpression(accessor->structure());
     if (struct_id == 0) {
       return 0;
