@@ -14,8 +14,6 @@
 
 #include "dawn_native/QueryHelper.h"
 
-#include <cmath>
-
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
@@ -30,10 +28,9 @@ namespace dawn_native {
     namespace {
 
         // Assert the offsets in dawn_native::TimestampParams are same with the ones in the shader
-        static_assert(offsetof(dawn_native::TimestampParams, inputByteOffset) == 0, "");
-        static_assert(offsetof(dawn_native::TimestampParams, outputByteOffset) == 4, "");
-        static_assert(offsetof(dawn_native::TimestampParams, count) == 8, "");
-        static_assert(offsetof(dawn_native::TimestampParams, period) == 12, "");
+        static_assert(offsetof(dawn_native::TimestampParams, count) == 0, "");
+        static_assert(offsetof(dawn_native::TimestampParams, offset) == 4, "");
+        static_assert(offsetof(dawn_native::TimestampParams, period) == 8, "");
 
         static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
@@ -50,19 +47,16 @@ namespace dawn_native {
             };
 
             [[block]] struct TimestampParams {
-                [[offset(0)]]  inputByteOffset  : u32;
-                [[offset(4)]]  outputByteOffset : u32;
-                [[offset(8)]]  count            : u32;
-                [[offset(12)]] period           : f32;
+                [[offset(0)]]  count  : u32;
+                [[offset(4)]]  offset : u32;
+                [[offset(8)]]  period : f32;
             };
 
             [[set(0), binding(0)]]
-                var<storage_buffer> input : [[access(read)]] TimestampArr;
+                var<storage_buffer> timestamps : [[access(read_write)]] TimestampArr;
             [[set(0), binding(1)]]
                 var<storage_buffer> availability : [[access(read)]] AvailabilityArr;
-            [[set(0), binding(2)]]
-                var<storage_buffer> output : [[access(read_write)]] TimestampArr;
-            [[set(0), binding(3)]] var<uniform> params : TimestampParams;
+            [[set(0), binding(2)]] var<uniform> params : TimestampParams;
 
             [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
@@ -72,21 +66,18 @@ namespace dawn_native {
             fn main() -> void {
                 if (GlobalInvocationID.x >= params.count) { return; }
 
-                var inputIndex : u32 = GlobalInvocationID.x +
-                                       params.inputByteOffset / sizeofTimestamp;
-                var outputIndex : u32 = GlobalInvocationID.x +
-                                        params.outputByteOffset / sizeofTimestamp;
+                var index : u32 = GlobalInvocationID.x + params.offset / sizeofTimestamp;
 
-                var timestamp : Timestamp = input.t[inputIndex];
+                var timestamp : Timestamp = timestamps.t[index];
 
                 # Return 0 for the unavailable value.
-                if (availability.v[inputIndex] == 0u) {
-                    output.t[outputIndex].low = 0u;
-                    output.t[outputIndex].high = 0u;
+                if (availability.v[index] == 0u) {
+                    timestamps.t[index].low = 0u;
+                    timestamps.t[index].high = 0u;
                     return;
                 }
 
-                # Multiply input values by the period and store into output.
+                # Multiply the values in timestamps buffer by the period.
                 var period : f32 = params.period;
                 var w : u32 = 0u;
 
@@ -94,7 +85,7 @@ namespace dawn_native {
                 # directly do the multiplication, otherwise, use two u32 to represent the high
                 # 16-bits and low 16-bits of this u32, then multiply them by the period separately.
                 if (timestamp.low <= u32(f32(0xFFFFFFFFu) / period)) {
-                    output.t[outputIndex].low = u32(round(f32(timestamp.low) * period));
+                    timestamps.t[index].low = u32(round(f32(timestamp.low) * period));
                 } else {
                     var lo : u32 = timestamp.low & 0xFFFF;
                     var hi : u32 = timestamp.low >> 16;
@@ -105,12 +96,12 @@ namespace dawn_native {
 
                     var result : u32 = t1 << 16;
                     result = result | (t0 & 0xFFFF);
-                    output.t[outputIndex].low = result;
+                    timestamps.t[index].low = result;
                 }
 
                 # Get the nearest integer to the float result. For high 32-bits, the round
                 # function will greatly help reduce the accuracy loss of the final result.
-                output.t[outputIndex].high = u32(round(f32(timestamp.high) * period)) + w;
+                timestamps.t[index].high = u32(round(f32(timestamp.high) * period)) + w;
             }
         )";
 
@@ -145,9 +136,8 @@ namespace dawn_native {
     }  // anonymous namespace
 
     void EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
-                                              BufferBase* input,
+                                              BufferBase* timestamps,
                                               BufferBase* availability,
-                                              BufferBase* output,
                                               BufferBase* params) {
         DeviceBase* device = encoder->GetDevice();
 
@@ -157,25 +147,22 @@ namespace dawn_native {
         Ref<BindGroupLayoutBase> layout = AcquireRef(pipeline->GetBindGroupLayout(0));
 
         // Prepare bind group descriptor
-        std::array<BindGroupEntry, 4> bindGroupEntries = {};
+        std::array<BindGroupEntry, 3> bindGroupEntries = {};
         BindGroupDescriptor bgDesc = {};
         bgDesc.layout = layout.Get();
-        bgDesc.entryCount = 4;
+        bgDesc.entryCount = 3;
         bgDesc.entries = bindGroupEntries.data();
 
         // Set bind group entries.
         bindGroupEntries[0].binding = 0;
-        bindGroupEntries[0].buffer = input;
-        bindGroupEntries[0].size = input->GetSize();
+        bindGroupEntries[0].buffer = timestamps;
+        bindGroupEntries[0].size = timestamps->GetSize();
         bindGroupEntries[1].binding = 1;
         bindGroupEntries[1].buffer = availability;
         bindGroupEntries[1].size = availability->GetSize();
         bindGroupEntries[2].binding = 2;
-        bindGroupEntries[2].buffer = output;
-        bindGroupEntries[2].size = output->GetSize();
-        bindGroupEntries[3].binding = 3;
-        bindGroupEntries[3].buffer = params;
-        bindGroupEntries[3].size = params->GetSize();
+        bindGroupEntries[2].buffer = params;
+        bindGroupEntries[2].size = params->GetSize();
 
         // Create bind group after all binding entries are set.
         Ref<BindGroupBase> bindGroup = AcquireRef(device->CreateBindGroup(&bgDesc));
@@ -185,7 +172,7 @@ namespace dawn_native {
         Ref<ComputePassEncoder> pass = AcquireRef(encoder->BeginComputePass(&passDesc));
         pass->SetPipeline(pipeline);
         pass->SetBindGroup(0, bindGroup.Get());
-        pass->Dispatch(static_cast<uint32_t>(ceil((input->GetSize() / sizeof(uint64_t) + 7) / 8)));
+        pass->Dispatch(static_cast<uint32_t>((timestamps->GetSize() / sizeof(uint64_t) + 7) / 8));
         pass->EndPass();
     }
 

@@ -24,16 +24,14 @@ namespace dawn_native {
     class CommandEncoder;
 
     struct TimestampParams {
-        uint32_t inputByteOffset;
-        uint32_t outputByteOffset;
         uint32_t count;
+        uint32_t offset;
         float period;
     };
 
     void EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
-                                              BufferBase* input,
+                                              BufferBase* timestamps,
                                               BufferBase* availability,
-                                              BufferBase* output,
                                               BufferBase* params);
 
 }  // namespace dawn_native
