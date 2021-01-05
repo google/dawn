@@ -604,8 +604,8 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
 
 struct MatrixData {
   const char* input;
-  size_t rows;
   size_t columns;
+  size_t rows;
 };
 inline std::ostream& operator<<(std::ostream& out, MatrixData data) {
   out << std::string(data.input);

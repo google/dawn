@@ -1110,14 +1110,14 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   uint32_t rows = 2;
   uint32_t columns = 2;
   if (t.IsMat3x2() || t.IsMat3x3() || t.IsMat3x4()) {
-    rows = 3;
+    columns = 3;
   } else if (t.IsMat4x2() || t.IsMat4x3() || t.IsMat4x4()) {
-    rows = 4;
+    columns = 4;
   }
   if (t.IsMat2x3() || t.IsMat3x3() || t.IsMat4x3()) {
-    columns = 3;
+    rows = 3;
   } else if (t.IsMat2x4() || t.IsMat3x4() || t.IsMat4x4()) {
-    columns = 4;
+    rows = 4;
   }
 
   const char* use = "matrix";
