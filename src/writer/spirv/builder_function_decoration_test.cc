@@ -22,8 +22,6 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/type_determiner.h"
@@ -88,9 +86,6 @@ INSTANTIATE_TEST_SUITE_P(
                                       SpvExecutionModelGLCompute}));
 
 TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
-  ast::type::F32 f32;
-  ast::type::Void void_type;
-
   auto* func =
       Func("main", {}, ty.void_, ast::StatementList{},
            ast::FunctionDecorationList{

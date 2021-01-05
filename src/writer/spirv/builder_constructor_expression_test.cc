@@ -115,7 +115,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // cast<Int>(2.3f)
 
   auto* alias = ty.alias("Int", ty.i32);
-  auto* cast = create<ast::TypeConstructorExpression>(alias, ExprList(2.3f));
+  auto* cast = Construct(alias, 2.3f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -197,7 +197,7 @@ TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
-  auto* cast = create<ast::TypeConstructorExpression>(ty.bool_, ExprList(true));
+  auto* cast = Construct<bool>(true);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -213,7 +213,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
-  auto* cast = create<ast::TypeConstructorExpression>(ty.i32, ExprList(2));
+  auto* cast = Construct<i32>(2);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -227,7 +227,7 @@ TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
-  auto* cast = create<ast::TypeConstructorExpression>(ty.u32, ExprList(2u));
+  auto* cast = Construct<u32>(2u);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -241,7 +241,7 @@ TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
-  auto* cast = create<ast::TypeConstructorExpression>(ty.f32, ExprList(2.0f));
+  auto* cast = Construct<f32>(2.0f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -993,7 +993,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_I32) {
-  auto* t = Construct(ty.i32);
+  auto* t = Construct<i32>();
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
@@ -1008,7 +1008,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_U32) {
-  auto* t = Construct(ty.u32);
+  auto* t = Construct<u32>();
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
@@ -1110,7 +1110,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
-  auto* cast = Construct(ty.i32, 2u);
+  auto* cast = Construct<i32>(2u);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1127,7 +1127,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
-  auto* cast = Construct(ty.u32, 2);
+  auto* cast = Construct<u32>(2);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1144,7 +1144,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
-  auto* cast = Construct(ty.i32, 2.4f);
+  auto* cast = Construct<i32>(2.4f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1161,7 +1161,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
-  auto* cast = Construct(ty.u32, 2.4f);
+  auto* cast = Construct<u32>(2.4f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1178,7 +1178,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
-  auto* cast = Construct(ty.f32, 2);
+  auto* cast = Construct<f32>(2);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1195,7 +1195,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
-  auto* cast = Construct(ty.f32, 2u);
+  auto* cast = Construct<f32>(2u);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1214,7 +1214,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
   auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<u32>());
 
-  auto* cast = Construct(ty.vec3<i32>(), "i");
+  auto* cast = vec3<i32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1239,7 +1239,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
   auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<f32>());
 
-  auto* cast = Construct(ty.vec3<i32>(), "i");
+  auto* cast = vec3<i32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1264,7 +1264,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
   auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<i32>());
 
-  auto* cast = Construct(ty.vec3<u32>(), "i");
+  auto* cast = vec3<u32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1289,7 +1289,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
   auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<f32>());
 
-  auto* cast = Construct(ty.vec3<u32>(), "i");
+  auto* cast = vec3<u32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1314,7 +1314,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
   auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<i32>());
 
-  auto* cast = Construct(ty.vec3<f32>(), "i");
+  auto* cast = vec3<f32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
@@ -1339,7 +1339,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
   auto* var = Var("i", ast::StorageClass::kPrivate, ty.vec3<u32>());
 
-  auto* cast = Construct(ty.vec3<f32>(), "i");
+  auto* cast = vec3<f32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 

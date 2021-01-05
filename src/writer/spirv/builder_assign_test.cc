@@ -88,8 +88,7 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  auto* val = create<ast::TypeConstructorExpression>(ty.vec3<f32>(),
-                                                     ast::ExpressionList{});
+  auto* val = vec3<f32>();
   auto* assign = create<ast::AssignmentStatement>(Expr("var"), val);
 
   td.RegisterVariableForTesting(v);
@@ -115,11 +114,7 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
-  auto* first = create<ast::TypeConstructorExpression>(
-      ty.vec2<f32>(), ast::ExpressionList{Expr(1.f), Expr(2.f)});
-
-  auto* init = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{first, Expr(3.f)});
+  auto* init = vec3<f32>(vec2<f32>(1.f, 2.f), 3.f);
 
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
   auto* assign = create<ast::AssignmentStatement>(Expr("var"), init);
@@ -154,8 +149,7 @@ OpStore %1 %13
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
-  auto* init = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)});
+  auto* init = vec3<f32>(1.f, 2.f, 3.f);
 
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
   auto* assign = create<ast::AssignmentStatement>(Expr("var"), init);
@@ -231,8 +225,7 @@ OpStore %8 %9
 TEST_F(BuilderTest, Assign_Vector) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  auto* val = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+  auto* val = vec3<f32>(1.f, 1.f, 3.f);
 
   auto* assign = create<ast::AssignmentStatement>(Expr("var"), val);
   td.RegisterVariableForTesting(v);

@@ -578,8 +578,7 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(sub_func);
 
   ast::ExpressionList expr;
-  expr.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(ty.f32, 1.0f)));
+  expr.push_back(Expr(1.0f));
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
@@ -710,8 +709,7 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(sub_func);
 
   ast::ExpressionList expr;
-  expr.push_back(create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(ty.f32, 1.0f)));
+  expr.push_back(Expr(1.0f));
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
@@ -764,15 +762,9 @@ TEST_F(MslGeneratorImplTest,
   });
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(
-          Expr("bar"), create<ast::ScalarConstructorExpression>(
-                           create<ast::FloatLiteral>(ty.f32, 1.f))),
+      create<ast::AssignmentStatement>(Expr("bar"), Expr(1.f)),
       create<ast::IfStatement>(create<ast::BinaryExpression>(
-                                   ast::BinaryOp::kEqual,
-                                   create<ast::ScalarConstructorExpression>(
-                                       create<ast::SintLiteral>(ty.i32, 1)),
-                                   create<ast::ScalarConstructorExpression>(
-                                       create<ast::SintLiteral>(ty.i32, 1))),
+                                   ast::BinaryOp::kEqual, Expr(1), Expr(1)),
                                list, ast::ElseStatementList{}),
       create<ast::ReturnStatement>(),
   };
@@ -825,10 +817,8 @@ kernel void main_tint_0() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
-  ast::type::Array ary(ty.f32, 5, ast::ArrayDecorationList{});
-
   ast::VariableList params;
-  params.push_back(Var("a", ast::StorageClass::kNone, &ary));  // decorations
+  params.push_back(Var("a", ast::StorageClass::kNone, ty.array<f32, 5>()));
 
   auto* func = Func("my_func", params, ty.void_,
                     ast::StatementList{

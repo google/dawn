@@ -202,9 +202,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Void) {
-  ast::type::Void v;
-
-  ASSERT_TRUE(gen.EmitType(&v)) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.void_)) << gen.error();
   EXPECT_EQ(gen.result(), "void");
 }
 

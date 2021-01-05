@@ -117,8 +117,8 @@ using MslImportData_DualParam_VectorTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
   auto param = GetParam();
 
-  auto* expr = Call(param.name, Construct(ty.vec3<f32>(), 1.f, 2.f, 3.f),
-                    Construct(ty.vec3<f32>(), 4.f, 5.f, 6.f));
+  auto* expr =
+      Call(param.name, vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(4.f, 5.f, 6.f));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
   EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
@@ -178,10 +178,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                                          MslImportData{"clamp", "clamp"}));
 
 TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat(&f32, 3, 3);
-
-  auto* var = Var("var", ast::StorageClass::kFunction, &mat);
+  auto* var = Var("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   mod->AddGlobalVariable(var);
 
   auto* expr = Call("determinant", "var");

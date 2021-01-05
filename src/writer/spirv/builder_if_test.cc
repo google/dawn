@@ -41,12 +41,9 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, If_Empty) {
-  ast::type::Bool bool_type;
-
   // if (true) {
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(&bool_type, true));
+  auto* cond = Expr(true);
 
   auto* expr = create<ast::IfStatement>(
       cond, create<ast::BlockStatement>(ast::StatementList{}),
@@ -70,13 +67,10 @@ OpBranch %3
 }
 
 TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
-  ast::type::Bool bool_type;
-
   // Outside a function.
   // if (true) {
   // }
-  auto* cond = create<ast::ScalarConstructorExpression>(
-      create<ast::BoolLiteral>(&bool_type, true));
+  auto* cond = Expr(true);
 
   ast::ElseStatementList elses;
   auto* block = create<ast::BlockStatement>(ast::StatementList{});

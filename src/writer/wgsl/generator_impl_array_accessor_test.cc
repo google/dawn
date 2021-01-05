@@ -31,8 +31,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_ArrayAccessor) {
-  auto* lit = create<ast::SintLiteral>(ty.i32, 5);
-  auto* idx = create<ast::ScalarConstructorExpression>(lit);
+  auto* idx = Expr(5);
   auto* ary = Expr("ary");
 
   auto* expr = create<ast::ArrayAccessorExpression>(ary, idx);

@@ -169,9 +169,7 @@ TEST_F(ValidateControlBlockTest,
   //   case -1: {}
   //   default: {}
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.u32,
-                  create<ast::ScalarConstructorExpression>(
-                      create<ast::UintLiteral>(ty.u32, 2)),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.u32, Expr(2u),
                   ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;
@@ -203,9 +201,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   //   case 2, 2: {}
   //   default: {}
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.u32,
-                  create<ast::ScalarConstructorExpression>(
-                      create<ast::UintLiteral>(ty.u32, 3)),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.u32, Expr(3u),
                   ast::VariableDecorationList{});
 
   ast::CaseStatementList switch_body;

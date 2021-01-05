@@ -116,35 +116,27 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_alias) {
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_array) {
-  ast::type::F32 f32;
-  ast::type::Array ary(&f32, 4, ast::ArrayDecorationList{});
-  EXPECT_EQ(4u * 4u, gen.calculate_alignment_size(&ary));
+  EXPECT_EQ(4u * 4u, gen.calculate_alignment_size(ty.array<f32, 4>()));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_bool) {
-  ast::type::Bool bool_type;
-  EXPECT_EQ(1u, gen.calculate_alignment_size(&bool_type));
+  EXPECT_EQ(1u, gen.calculate_alignment_size(ty.bool_));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_f32) {
-  ast::type::F32 f32;
-  EXPECT_EQ(4u, gen.calculate_alignment_size(&f32));
+  EXPECT_EQ(4u, gen.calculate_alignment_size(ty.f32));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_i32) {
-  ast::type::I32 i32;
-  EXPECT_EQ(4u, gen.calculate_alignment_size(&i32));
+  EXPECT_EQ(4u, gen.calculate_alignment_size(ty.i32));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_matrix) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat(&f32, 3, 2);
-  EXPECT_EQ(4u * 3u * 2u, gen.calculate_alignment_size(&mat));
+  EXPECT_EQ(4u * 3u * 2u, gen.calculate_alignment_size(ty.mat3x2<f32>()));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_pointer) {
-  ast::type::Bool bool_type;
-  ast::type::Pointer ptr(&bool_type, ast::StorageClass::kPrivate);
+  ast::type::Pointer ptr(ty.bool_, ast::StorageClass::kPrivate);
   EXPECT_EQ(0u, gen.calculate_alignment_size(&ptr));
 }
 
@@ -179,8 +171,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_u32) {
-  ast::type::U32 u32;
-  EXPECT_EQ(4u, gen.calculate_alignment_size(&u32));
+  EXPECT_EQ(4u, gen.calculate_alignment_size(ty.u32));
 }
 
 struct MslVectorSizeData {
@@ -195,8 +186,7 @@ using MslVectorSizeBoolTest = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeBoolTest, calculate) {
   auto param = GetParam();
 
-  ast::type::Bool bool_type;
-  ast::type::Vector vec(&bool_type, param.elements);
+  ast::type::Vector vec(ty.bool_, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -209,8 +199,7 @@ using MslVectorSizeI32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeI32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::I32 i32;
-  ast::type::Vector vec(&i32, param.elements);
+  ast::type::Vector vec(ty.i32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -223,8 +212,7 @@ using MslVectorSizeU32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeU32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::U32 u32;
-  ast::type::Vector vec(&u32, param.elements);
+  ast::type::Vector vec(ty.u32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -237,8 +225,7 @@ using MslVectorSizeF32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeF32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, param.elements);
+  ast::type::Vector vec(ty.f32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,

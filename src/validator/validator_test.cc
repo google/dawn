@@ -301,7 +301,6 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
                   ast::VariableDecorationList{});
 
-  ast::type::Bool bool_type;
   auto* cond = Expr(true);
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
@@ -336,7 +335,6 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   auto* lhs = Expr("a");
   auto* rhs = Expr(3.14f);
 
-  ast::type::Bool bool_type;
   auto* cond = Expr(true);
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
@@ -476,7 +474,6 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
                   ast::VariableDecorationList{});
 
-  ast::type::Bool bool_type;
   auto* cond = Expr(true);
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
@@ -508,7 +505,6 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
                   ast::VariableDecorationList{});
 
-  ast::type::Bool bool_type;
   auto* cond = Expr(true);
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}}, var),

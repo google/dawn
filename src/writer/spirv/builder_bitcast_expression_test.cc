@@ -49,8 +49,6 @@ TEST_F(BuilderTest, Bitcast) {
 }
 
 TEST_F(BuilderTest, Bitcast_DuplicateType) {
-  ast::type::F32 f32;
-
   auto* bitcast = create<ast::BitcastExpression>(ty.f32, Expr(2.4f));
 
   ASSERT_TRUE(td.DetermineResultType(bitcast)) << td.error();

@@ -365,10 +365,8 @@ TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
-  ast::type::Array ary(ty.f32, 3, ast::ArrayDecorationList{});
-
   auto* idx = Expr(2);
-  auto* var = Var("my_var", ast::StorageClass::kFunction, &ary);
+  auto* var = Var("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
   mod->AddGlobalVariable(var);
 
   EXPECT_TRUE(td()->Determine());
@@ -383,8 +381,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
-  ast::type::Array ary(ty.f32, 3, ast::ArrayDecorationList{});
-  auto* aary = ty.alias("myarrty", &ary);
+  auto* aary = ty.alias("myarrty", ty.array<f32, 3>());
 
   mod->AddGlobalVariable(Var("my_var", ast::StorageClass::kFunction, aary));
 
@@ -400,9 +397,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
-  ast::type::Array ary(ty.f32, 3, ast::ArrayDecorationList{});
-
-  auto* var = Const("my_var", ast::StorageClass::kFunction, &ary);
+  auto* var = Const("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
   mod->AddGlobalVariable(var);
 
   EXPECT_TRUE(td()->Determine());
@@ -415,9 +410,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
-  ast::type::Matrix mat(ty.f32, 3, 2);
-
-  auto* var = Var("my_var", ast::StorageClass::kNone, &mat);
+  auto* var = Var("my_var", ast::StorageClass::kNone, ty.mat2x3<f32>());
   mod->AddGlobalVariable(var);
 
   EXPECT_TRUE(td()->Determine());
@@ -529,9 +522,7 @@ TEST_F(TypeDeterminerTest, Expr_Cast) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
-  auto* s = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(ty.f32, 1.0f));
-
+  auto* s = Expr(1.0f);
   EXPECT_TRUE(td()->DetermineResultType(s));
   ASSERT_NE(s->result_type(), nullptr);
   EXPECT_TRUE(s->result_type()->Is<ast::type::F32>());
@@ -746,9 +737,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
       Func("my_func", ast::VariableList{}, ty.f32,
            ast::StatementList{
                create<ast::VariableDeclStatement>(var),
-               create<ast::AssignmentStatement>(
-                   Expr("var"), create<ast::ScalarConstructorExpression>(
-                                    create<ast::FloatLiteral>(ty.f32, 1.f))),
+               create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)),
            },
            ast::FunctionDecorationList{});
 
@@ -1104,10 +1093,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
-  ast::type::Matrix mat3x2(ty.f32, 3, 2);
-
   auto* scalar = Var("scalar", ast::StorageClass::kNone, ty.f32);
-  auto* matrix = Var("matrix", ast::StorageClass::kNone, &mat3x2);
+  auto* matrix = Var("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
   mod->AddGlobalVariable(scalar);
   mod->AddGlobalVariable(matrix);
 
@@ -1126,10 +1113,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
-  ast::type::Matrix mat3x2(ty.f32, 3, 2);
-
   auto* scalar = Var("scalar", ast::StorageClass::kNone, ty.f32);
-  auto* matrix = Var("matrix", ast::StorageClass::kNone, &mat3x2);
+  auto* matrix = Var("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
   mod->AddGlobalVariable(scalar);
   mod->AddGlobalVariable(matrix);
 
@@ -1188,19 +1173,14 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
-  ast::type::Matrix mat4x3(ty.f32, 4, 3);
-  ast::type::Matrix mat3x4(ty.f32, 3, 4);
-
-  auto* matrix1 = Var(  // source
-      "mat4x3", ast::StorageClass::kNone, &mat4x3);
-  auto* matrix2 = Var(  // source
-      "mat3x4", ast::StorageClass::kNone, &mat3x4);
+  auto* matrix1 = Var("mat3x4", ast::StorageClass::kNone, ty.mat3x4<f32>());
+  auto* matrix2 = Var("mat4x3", ast::StorageClass::kNone, ty.mat4x3<f32>());
   mod->AddGlobalVariable(matrix1);
   mod->AddGlobalVariable(matrix2);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto* expr = Mul("mat4x3", "mat3x4");
+  auto* expr = Mul("mat3x4", "mat4x3");
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
@@ -2821,9 +2801,7 @@ TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
 TEST_P(ImportData_Matrix_OneParam_Test, TooManyParams) {
   auto param = GetParam();
 
-  ast::type::Matrix mat(ty.f32, 3, 3);
-
-  auto* var = Var("var", ast::StorageClass::kFunction, &mat);
+  auto* var = Var("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   mod->AddGlobalVariable(var);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();

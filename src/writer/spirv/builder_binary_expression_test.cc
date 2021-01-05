@@ -140,12 +140,8 @@ using BinaryArithUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::U32 u32;
-
-  auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 3));
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 4));
+  auto* lhs = Expr(3u);
+  auto* rhs = Expr(4u);
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -201,12 +197,8 @@ using BinaryArithFloatTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithFloatTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::F32 f32;
-
-  auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 3.2f));
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::FloatLiteral>(&f32, 4.5f));
+  auto* lhs = Expr(3.2f);
+  auto* rhs = Expr(4.5f);
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -256,12 +248,8 @@ using BinaryCompareUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
   auto param = GetParam();
 
-  ast::type::U32 u32;
-
-  auto* lhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 3));
-  auto* rhs = create<ast::ScalarConstructorExpression>(
-      create<ast::UintLiteral>(&u32, 4));
+  auto* lhs = Expr(3u);
+  auto* rhs = Expr(4u);
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -522,8 +510,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
   auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  auto* rhs = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(1.f)});
+  auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
   td.RegisterVariableForTesting(var);
 
@@ -552,8 +539,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
   auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  auto* lhs = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(1.f)});
+  auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
 
   td.RegisterVariableForTesting(var);
 
@@ -643,8 +629,6 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
-  ast::type::Bool bool_type;
-
   auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_, Expr(true),
                     ast::VariableDecorationList{});
   auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_, Expr(false),
@@ -686,24 +670,15 @@ OpBranch %9
 }
 
 TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
-  ast::type::Bool bool_ty;
-
   // Test an expression like
   //    a || (b && c)
   // From: crbug.com/tint/355
 
   auto* logical_and_expr = create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalAnd,
-      create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(&bool_ty, true)),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(&bool_ty, false)));
+      ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
 
-  auto* expr = create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalOr,
-      create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(&bool_ty, true)),
-      logical_and_expr);
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
+                                             Expr(true), logical_and_expr);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
@@ -733,24 +708,15 @@ OpBranch %4
 }
 
 TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
-  ast::type::Bool bool_ty;
-
   // Test an expression like
   //    a && (b || c)
   // From: crbug.com/tint/355
 
   auto* logical_or_expr = create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalOr,
-      create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(&bool_ty, true)),
-      create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(&bool_ty, false)));
+      ast::BinaryOp::kLogicalOr, Expr(true), Expr(false));
 
-  auto* expr = create<ast::BinaryExpression>(
-      ast::BinaryOp::kLogicalAnd,
-      create<ast::ScalarConstructorExpression>(
-          create<ast::BoolLiteral>(&bool_ty, true)),
-      logical_or_expr);
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
+                                             Expr(true), logical_or_expr);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
@@ -816,8 +782,6 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
-  ast::type::Bool bool_type;
-
   auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_, Expr(true),
                     ast::VariableDecorationList{});
   auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_, Expr(false),

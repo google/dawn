@@ -139,8 +139,7 @@ TEST_F(VertexPullingTest, BasicModule) {
 TEST_F(VertexPullingTest, OneAttribute) {
   InitBasicModule();
 
-  ast::type::F32 f32;
-  AddVertexInputVariable(0, "var_a", &f32);
+  AddVertexInputVariable(0, "var_a", ty.f32);
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
 
@@ -225,8 +224,7 @@ TEST_F(VertexPullingTest, OneAttribute) {
 TEST_F(VertexPullingTest, OneInstancedAttribute) {
   InitBasicModule();
 
-  ast::type::F32 f32;
-  AddVertexInputVariable(0, "var_a", &f32);
+  AddVertexInputVariable(0, "var_a", ty.f32);
 
   InitTransform(
       {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
@@ -312,8 +310,7 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
 TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
   InitBasicModule();
 
-  ast::type::F32 f32;
-  AddVertexInputVariable(0, "var_a", &f32);
+  AddVertexInputVariable(0, "var_a", ty.f32);
 
   InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
   transform()->SetPullingBufferBindingSet(5);
@@ -550,11 +547,8 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
 TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
   InitBasicModule();
 
-  ast::type::F32 f32;
-  AddVertexInputVariable(0, "var_a", &f32);
-
-  ast::type::Array vec4_f32{&f32, 4u, ast::ArrayDecorationList{}};
-  AddVertexInputVariable(1, "var_b", &vec4_f32);
+  AddVertexInputVariable(0, "var_a", ty.f32);
+  AddVertexInputVariable(1, "var_b", ty.array<f32, 4>());
 
   InitTransform(
       {{{16,
@@ -732,16 +726,9 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
 
 TEST_F(VertexPullingTest, FloatVectorAttributes) {
   InitBasicModule();
-
-  ast::type::F32 f32;
-  ast::type::Array vec2_f32{&f32, 2u, ast::ArrayDecorationList{}};
-  AddVertexInputVariable(0, "var_a", &vec2_f32);
-
-  ast::type::Array vec3_f32{&f32, 3u, ast::ArrayDecorationList{}};
-  AddVertexInputVariable(1, "var_b", &vec3_f32);
-
-  ast::type::Array vec4_f32{&f32, 4u, ast::ArrayDecorationList{}};
-  AddVertexInputVariable(2, "var_c", &vec4_f32);
+  AddVertexInputVariable(0, "var_a", ty.array<f32, 2>());
+  AddVertexInputVariable(1, "var_b", ty.array<f32, 3>());
+  AddVertexInputVariable(2, "var_c", ty.array<f32, 4>());
 
   InitTransform(
       {{{8, InputStepMode::kVertex, {{VertexFormat::kVec2F32, 0, 0}}},

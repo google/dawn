@@ -59,108 +59,78 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&a, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>(), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&c, "ary")) << gen.error();
+  auto* a = ty.array<bool, 4>();
+  auto* b = ty.array(a, 5);
+  ASSERT_TRUE(gen.EmitType(b, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[5][4]");
 }
 
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
-  ast::type::Array d(&c, 0, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&c, "ary")) << gen.error();
+  auto* a = ty.array<bool, 4>();
+  auto* b = ty.array(a, 5);
+  auto* c = ty.array(b, 0);
+  ASSERT_TRUE(gen.EmitType(c, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[5][4][1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-  ast::type::Array c(&a, 5, ast::ArrayDecorationList{});
-  ast::type::Array d(&c, 6, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&d, "ary")) << gen.error();
+  auto* a = ty.array<bool, 4>();
+  auto* b = ty.array(a, 5);
+  auto* c = ty.array(b, 6);
+  ASSERT_TRUE(gen.EmitType(c, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[6][5][4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&a, "bool")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>(), "bool")) << gen.error();
   EXPECT_EQ(gen.result(), "bool bool_tint_0[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 4, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&a, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>(), "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&a, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.array<bool, 1>(), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray_NameCollision) {
-  ast::type::Bool b;
-  ast::type::Array a(&b, 0, ast::ArrayDecorationList{});
-
-  ASSERT_TRUE(gen.EmitType(&a, "discard_fragment")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.array<bool, 1>(), "discard_fragment"))
+      << gen.error();
   EXPECT_EQ(gen.result(), "bool discard_fragment_tint_0[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
-  ast::type::Bool b;
-
-  ASSERT_TRUE(gen.EmitType(&b, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.bool_, "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_F32) {
-  ast::type::F32 f32;
-
-  ASSERT_TRUE(gen.EmitType(&f32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.f32, "")) << gen.error();
   EXPECT_EQ(gen.result(), "float");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_I32) {
-  ast::type::I32 i32;
-
-  ASSERT_TRUE(gen.EmitType(&i32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.i32, "")) << gen.error();
   EXPECT_EQ(gen.result(), "int");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
-  ast::type::F32 f32;
-  ast::type::Matrix m(&f32, 3, 2);
-
-  ASSERT_TRUE(gen.EmitType(&m, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.mat2x3<f32>(), "")) << gen.error();
   EXPECT_EQ(gen.result(), "float2x3");
 }
 
 // TODO(dsinclair): How to annotate as workgroup?
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
-  ast::type::F32 f32;
-  ast::type::Pointer p(&f32, ast::StorageClass::kWorkgroup);
+  ast::type::Pointer p(ty.f32, ast::StorageClass::kWorkgroup);
 
   ASSERT_TRUE(gen.EmitType(&p, "")) << gen.error();
   EXPECT_EQ(gen.result(), "float*");
@@ -247,24 +217,17 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_U32) {
-  ast::type::U32 u32;
-
-  ASSERT_TRUE(gen.EmitType(&u32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.u32, "")) << gen.error();
   EXPECT_EQ(gen.result(), "uint");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Vector) {
-  ast::type::F32 f32;
-  ast::type::Vector v(&f32, 3);
-
-  ASSERT_TRUE(gen.EmitType(&v, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.vec3<f32>(), "")) << gen.error();
   EXPECT_EQ(gen.result(), "float3");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Void) {
-  ast::type::Void v;
-
-  ASSERT_TRUE(gen.EmitType(&v, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ty.void_, "")) << gen.error();
   EXPECT_EQ(gen.result(), "void");
 }
 
@@ -324,8 +287,7 @@ using MslSampledtexturesTest = TestParamHelper<MslTextureData>;
 TEST_P(MslSampledtexturesTest, Emit) {
   auto params = GetParam();
 
-  ast::type::F32 f32;
-  ast::type::SampledTexture s(params.dim, &f32);
+  ast::type::SampledTexture s(params.dim, ty.f32);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
@@ -350,8 +312,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "texturecube_array<float, access::sample>"}));
 
 TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
-  ast::type::U32 u32;
-  ast::type::MultisampledTexture s(ast::type::TextureDimension::k2d, &u32);
+  ast::type::MultisampledTexture s(ast::type::TextureDimension::k2d, ty.u32);
 
   ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
   EXPECT_EQ(gen.result(), "texture2d_ms<uint, access::sample>");

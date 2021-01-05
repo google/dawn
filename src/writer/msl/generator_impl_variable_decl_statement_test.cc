@@ -131,9 +131,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
-  ast::ExpressionList values;
-  auto* zero_vec =
-      create<ast::TypeConstructorExpression>(ty.vec3<f32>(), values);
+  auto* zero_vec = vec3<f32>();
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.vec3<f32>(), zero_vec,
                   ast::VariableDecorationList{});

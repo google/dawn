@@ -718,7 +718,6 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   //   vec2<f32>(0.5, -0.5));
   // pos[1]
 
-  ast::type::U32 u32;
   ast::type::Array arr(ty.vec2<f32>(), 3, ast::ArrayDecorationList{});
 
   auto* var = Const("pos", ast::StorageClass::kPrivate, &arr,

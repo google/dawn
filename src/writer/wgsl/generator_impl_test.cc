@@ -30,9 +30,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
-  ast::type::Void void_type;
-
-  mod->AddFunction(Func("my_func", ast::VariableList{}, &void_type,
+  mod->AddFunction(Func("my_func", ast::VariableList{}, ty.void_,
                         ast::StatementList{}, ast::FunctionDecorationList{}));
 
   ASSERT_TRUE(gen.Generate(*mod)) << gen.error();

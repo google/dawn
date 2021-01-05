@@ -100,7 +100,6 @@ OpBranch %5
 }
 
 TEST_F(BuilderTest, Loop_WithContinuing) {
-  ast::type::I32 i32;
   // loop {
   //   a = 2;
   //   continuing {

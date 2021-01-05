@@ -28,8 +28,7 @@ namespace {
 using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
-  ast::type::Void void_type;
-  auto* func = Func("my_func", ast::VariableList{}, &void_type,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
 

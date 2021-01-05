@@ -46,8 +46,7 @@ TEST_F(BuilderTest, Return) {
 }
 
 TEST_F(BuilderTest, Return_WithValue) {
-  auto* val = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+  auto* val = vec3<f32>(1.f, 1.f, 3.f);
 
   auto* ret = create<ast::ReturnStatement>(val);
 

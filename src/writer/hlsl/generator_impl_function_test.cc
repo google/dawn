@@ -874,15 +874,14 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
-  ast::type::Array ary(ty.f32, 5, ast::ArrayDecorationList{});
-
-  auto* func = Func("my_func",
-                    ast::VariableList{Var("a", ast::StorageClass::kNone, &ary)},
-                    ty.void_,
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
+  auto* func = Func(
+      "my_func",
+      ast::VariableList{Var("a", ast::StorageClass::kNone, ty.array<f32, 5>())},
+      ty.void_,
+      ast::StatementList{
+          create<ast::ReturnStatement>(),
+      },
+      ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
   gen.increment_indent();

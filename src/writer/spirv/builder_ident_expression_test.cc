@@ -38,8 +38,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
-  auto* init = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+  auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
@@ -81,8 +80,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
-  auto* init = create<ast::TypeConstructorExpression>(
-      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+  auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,

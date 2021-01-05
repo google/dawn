@@ -35,12 +35,9 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
-  ast::type::Array ary(ty.f32, 3, ast::ArrayDecorationList{});
   auto* var =
-      Const("pos", ast::StorageClass::kNone, &ary,
-            create<ast::TypeConstructorExpression>(
-                &ary, ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)}),
-            ast::VariableDecorationList{});
+      Const("pos", ast::StorageClass::kNone, ty.array<f32, 3>(),
+            array<f32, 3>(1.f, 2.f, 3.f), ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");

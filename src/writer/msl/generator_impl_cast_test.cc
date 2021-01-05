@@ -31,20 +31,14 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
-  ast::ExpressionList params;
-  params.push_back(Expr("id"));
-
-  auto* cast = create<ast::TypeConstructorExpression>(ty.f32, params);
+  auto* cast = Construct<f32>("id");
 
   ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
   EXPECT_EQ(gen.result(), "float(id)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
-  ast::ExpressionList params;
-  params.push_back(Expr("id"));
-
-  auto* cast = create<ast::TypeConstructorExpression>(ty.vec3<f32>(), params);
+  auto* cast = vec3<f32>("id");
 
   ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
   EXPECT_EQ(gen.result(), "float3(id)");
