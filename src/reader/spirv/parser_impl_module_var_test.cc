@@ -26,6 +26,8 @@ namespace reader {
 namespace spirv {
 namespace {
 
+using SpvModuleScopeVarParserTest = SpvParserTest;
+
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;
@@ -64,7 +66,7 @@ std::string CommonTypes() {
   )";
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
+TEST_F(SpvModuleScopeVarParserTest, NoVar) {
   auto p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -72,7 +74,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
   EXPECT_THAT(module_ast, Not(HasSubstr("Variable")));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_NotAWebGPUStorageClass) {
+TEST_F(SpvModuleScopeVarParserTest, BadStorageClass_NotAWebGPUStorageClass) {
   auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer CrossWorkgroup %float
@@ -86,7 +88,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_NotAWebGPUStorageClass) {
   EXPECT_THAT(p->error(), HasSubstr("unknown SPIR-V storage class: 5"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_Function) {
+TEST_F(SpvModuleScopeVarParserTest, BadStorageClass_Function) {
   auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Function %float
@@ -102,7 +104,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_Function) {
                         "variable: %52 = OpVariable %2 Function"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
+TEST_F(SpvModuleScopeVarParserTest, BadPointerType) {
   auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %fn_ty = OpTypeFunction %float
@@ -118,7 +120,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
                                     "AST type for SPIR-V type with ID: 3"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_NonPointerType) {
+TEST_F(SpvModuleScopeVarParserTest, NonPointerType) {
   auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %5 = OpTypeFunction %float
@@ -132,7 +134,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NonPointerType) {
       HasSubstr("SPIR-V pointer type with ID 3 has invalid pointee type 5"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
+TEST_F(SpvModuleScopeVarParserTest, AnonWorkgroupVar) {
   auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Workgroup %float
@@ -151,7 +153,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_NamedWorkgroupVar) {
+TEST_F(SpvModuleScopeVarParserTest, NamedWorkgroupVar) {
   auto p = parser(test::Assemble(R"(
     OpName %52 "the_counter"
     %float = OpTypeFloat 32
@@ -171,7 +173,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NamedWorkgroupVar) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_PrivateVar) {
+TEST_F(SpvModuleScopeVarParserTest, PrivateVar) {
   auto p = parser(test::Assemble(R"(
     OpName %52 "my_own_private_idaho"
     %float = OpTypeFloat 32
@@ -191,7 +193,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_PrivateVar) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinVertexIndex) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
   auto p = parser(test::Assemble(R"(
     OpDecorate %52 BuiltIn VertexIndex
     %uint = OpTypeInt 32 0
@@ -238,7 +240,7 @@ std::string PerVertexPreamble() {
 )";
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_MapsToModuleScopeVec4Var) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_MapsToModuleScopeVec4Var) {
   // In Vulkan SPIR-V, Position is the first member of gl_PerVertex
   const std::string assembly = PerVertexPreamble();
   auto p = parser(test::Assemble(assembly));
@@ -266,8 +268,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_MapsToModuleScopeVec4Var) {
       << module_str;
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BuiltinPosition_StoreWholeStruct_NotSupported) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_StoreWholeStruct_NotSupported) {
   // Glslang does not generate this code pattern.
   const std::string assembly = PerVertexPreamble() + R"(
   %nil = OpConstantNull %10 ; the whole struct
@@ -285,8 +287,8 @@ TEST_F(SpvParserTest,
       << p->error();
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BuiltinPosition_IntermediateWholeStruct_NotSupported) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_IntermediateWholeStruct_NotSupported) {
   const std::string assembly = PerVertexPreamble() + R"(
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
@@ -301,8 +303,8 @@ TEST_F(SpvParserTest,
       << p->error();
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BuiltinPosition_IntermediatePtrWholeStruct_NotSupported) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_IntermediatePtrWholeStruct_NotSupported) {
   const std::string assembly = PerVertexPreamble() + R"(
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
@@ -318,7 +320,7 @@ TEST_F(SpvParserTest,
       << p->error();
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_StorePosition) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePosition) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr_v4float = OpTypePointer Output %12
   %nil = OpConstantNull %12
@@ -349,9 +351,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPosition_StorePosition) {
       << module_str;
 }
 
-TEST_F(
-    SpvParserTest,
-    ModuleScopeVar_BuiltinPosition_StorePosition_PerVertexStructOutOfOrderDecl) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_StorePosition_PerVertexStructOutOfOrderDecl) {
   const std::string assembly = R"(
   OpCapability Shader
   OpCapability Linkage ; so we don't have to declare an entry point
@@ -404,8 +405,8 @@ TEST_F(
       << module_str;
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BuiltinPosition_StorePositionMember_OneAccessChain) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_StorePositionMember_OneAccessChain) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
@@ -433,8 +434,8 @@ TEST_F(SpvParserTest,
       << module_str;
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BuiltinPosition_StorePositionMember_TwoAccessChain) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_StorePositionMember_TwoAccessChain) {
   // The algorithm is smart enough to collapse it down.
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %12
@@ -468,7 +469,7 @@ TEST_F(SpvParserTest,
       << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_Write1_IsErased) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %one = OpConstant %float 1.0
@@ -503,7 +504,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_Write1_IsErased) {
 )") << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_WriteNon1_IsError) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_WriteNon1_IsError) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %999 = OpConstant %float 2.0
@@ -522,7 +523,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_WriteNon1_IsError) {
                         "PointSize builtin: OpStore %100 %999"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_ReadReplaced) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %nil = OpConstantNull %12
@@ -569,9 +570,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPointSize_ReadReplaced) {
 )") << module_str;
 }
 
-TEST_F(
-    SpvParserTest,
-    ModuleScopeVar_BuiltinPointSize_WriteViaCopyObjectPriorAccess_Unsupported) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPointSize_WriteViaCopyObjectPriorAccess_Unsupported) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %nil = OpConstantNull %12
@@ -592,9 +592,8 @@ TEST_F(
                 "not supported: %20 = OpCopyObject %11 %1"));
 }
 
-TEST_F(
-    SpvParserTest,
-    ModuleScopeVar_BuiltinPointSize_WriteViaCopyObjectPostAccessChainErased) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPointSize_WriteViaCopyObjectPostAccessChainErased) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %12
   %one = OpConstant %float 1.0
@@ -630,7 +629,7 @@ TEST_F(
 )") << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinClipDistance_NotSupported) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinClipDistance_NotSupported) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
@@ -651,7 +650,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinClipDistance_NotSupported) {
             "supported, and PointSize is ignored");
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinCullDistance_NotSupported) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinCullDistance_NotSupported) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
@@ -672,7 +671,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinCullDistance_NotSupported) {
             "supported, and PointSize is ignored");
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPerVertex_MemberIndex_NotConstant) {
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPerVertex_MemberIndex_NotConstant) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
@@ -692,8 +691,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinPerVertex_MemberIndex_NotConstant) {
                  "a constant: %100 = OpAccessChain %9 %1 %16"));
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BuiltinPerVertex_MemberIndex_NotConstantInteger) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPerVertex_MemberIndex_NotConstantInteger) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
@@ -713,7 +712,7 @@ TEST_F(SpvParserTest,
                  "a constant integer: %100 = OpAccessChain %9 %1 %13"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %1 = OpVariable %ptr_bool Private %true
      %2 = OpVariable %ptr_bool Private %false
@@ -767,7 +766,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
@@ -817,7 +816,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %undef_bool = OpUndef %bool
      %undef_int = OpUndef %int
@@ -867,7 +866,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarUndefInitializers) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %two = OpConstant %float 2.0
@@ -892,7 +891,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolNullInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2bool
      %const = OpConstantNull %v2bool
@@ -916,7 +915,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolNullInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolUndefInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2bool
      %const = OpUndef %v2bool
@@ -940,7 +939,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolUndefInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorUintNullInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorUintNullInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2uint
      %const = OpConstantNull %v2uint
@@ -964,7 +963,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintNullInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorUintUndefInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2uint
      %const = OpUndef %v2uint
@@ -988,7 +987,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintUndefInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorIntNullInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorIntNullInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2int
      %const = OpConstantNull %v2int
@@ -1012,7 +1011,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntNullInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorIntUndefInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2int
      %const = OpUndef %v2int
@@ -1036,7 +1035,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntUndefInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatNullInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorFloatNullInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %const = OpConstantNull %v2float
@@ -1060,7 +1059,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatNullInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatUndefInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %const = OpUndef %v2float
@@ -1084,7 +1083,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatUndefInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %two = OpConstant %float 2.0
@@ -1127,7 +1126,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_MatrixNullInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %const = OpConstantNull %m3v2float
@@ -1164,7 +1163,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixNullInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_MatrixUndefInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %const = OpUndef %m3v2float
@@ -1201,7 +1200,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixUndefInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, ArrayInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %two = OpConstant %uint 2
@@ -1226,7 +1225,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ArrayNullInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, ArrayNullInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %const = OpConstantNull %arr2uint
@@ -1250,7 +1249,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayNullInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ArrayUndefInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %const = OpUndef %arr2uint
@@ -1274,7 +1273,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayUndefInitializer) {
   })"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %two = OpConstant %uint 2
@@ -1306,7 +1305,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
       << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %const = OpConstantNull %strct
@@ -1336,7 +1335,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
       << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
+TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %const = OpUndef %strct
@@ -1366,7 +1365,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
       << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_LocationDecoration_Valid) {
+TEST_F(SpvModuleScopeVarParserTest, LocationDecoration_Valid) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Location 3
@@ -1390,8 +1389,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_LocationDecoration_Valid) {
       << module_str;
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_LocationDecoration_MissingOperandWontAssemble) {
+TEST_F(SpvModuleScopeVarParserTest,
+       LocationDecoration_MissingOperandWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Location
@@ -1403,8 +1402,8 @@ TEST_F(SpvParserTest,
               Eq("4:4: Expected operand, found next instruction instead."));
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_LocationDecoration_TwoOperandsWontAssemble) {
+TEST_F(SpvModuleScopeVarParserTest,
+       LocationDecoration_TwoOperandsWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Location 3 4
@@ -1418,7 +1417,7 @@ TEST_F(SpvParserTest,
          "instruction, found '4'."));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_DescriptorSetDecoration_Valid) {
+TEST_F(SpvModuleScopeVarParserTest, DescriptorSetDecoration_Valid) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 3
@@ -1443,8 +1442,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_DescriptorSetDecoration_Valid) {
       << module_str;
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_DescriptorSetDecoration_MissingOperandWontAssemble) {
+TEST_F(SpvModuleScopeVarParserTest,
+       DescriptorSetDecoration_MissingOperandWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet
@@ -1457,8 +1456,8 @@ TEST_F(SpvParserTest,
               Eq("3:5: Expected operand, found next instruction instead."));
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_DescriptorSetDecoration_TwoOperandsWontAssemble) {
+TEST_F(SpvModuleScopeVarParserTest,
+       DescriptorSetDecoration_TwoOperandsWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 3 4
@@ -1473,7 +1472,7 @@ TEST_F(SpvParserTest,
          "instruction, found '4'."));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BindingDecoration_Valid) {
+TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Binding 3
@@ -1498,8 +1497,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_BindingDecoration_Valid) {
       << module_str;
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BindingDecoration_MissingOperandWontAssemble) {
+TEST_F(SpvModuleScopeVarParserTest,
+       BindingDecoration_MissingOperandWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Binding
@@ -1512,8 +1511,7 @@ TEST_F(SpvParserTest,
               Eq("3:5: Expected operand, found next instruction instead."));
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_BindingDecoration_TwoOperandsWontAssemble) {
+TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_TwoOperandsWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar Binding 3 4
@@ -1528,8 +1526,8 @@ TEST_F(SpvParserTest,
          "instruction, found '4'."));
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_StructMember_NonReadableDecoration_Dropped) {
+TEST_F(SpvModuleScopeVarParserTest,
+       StructMember_NonReadableDecoration_Dropped) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %strct Block
@@ -1557,7 +1555,7 @@ TEST_F(SpvParserTest,
 )")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
+TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
@@ -1587,7 +1585,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ColMajorDecoration_Dropped) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
+TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
@@ -1617,7 +1615,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixStrideDecoration_Dropped) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_RowMajorDecoration_IsError) {
+TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration_IsError) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
@@ -1637,7 +1635,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_RowMajorDecoration_IsError) {
       << p->error();
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_AllMembers) {
+TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   // Variable should have access(read)
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
@@ -1668,7 +1666,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_AllMembers) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers) {
+TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   // Variable should have access(read_write)
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
@@ -1699,8 +1697,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers) {
 }
 
 TEST_F(
-    SpvParserTest,
-    ModuleScopeVar_StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {  // NOLINT
+    SpvModuleScopeVarParserTest,
+    StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {  // NOLINT
   // Variable should have access(read_write)
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
@@ -1731,7 +1729,7 @@ TEST_F(
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_True) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
   auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
@@ -1757,7 +1755,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_True) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_False) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
   auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
@@ -1783,7 +1781,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_False) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_U32) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
   auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
@@ -1809,7 +1807,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_U32) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_I32) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
   auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
@@ -1835,7 +1833,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_I32) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
   auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
@@ -1861,8 +1859,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32) {
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest,
-       ModuleScopeVar_ScalarSpecConstant_DeclareConst_F32_WithoutSpecId) {
+TEST_F(SpvModuleScopeVarParserTest,
+       ScalarSpecConstant_DeclareConst_F32_WithoutSpecId) {
   // When we don't have a spec ID, declare an undecorated module-scope constant.
   auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
@@ -1885,7 +1883,7 @@ TEST_F(SpvParserTest,
 })")) << module_str;
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_ScalarSpecConstant_UsedInFunction) {
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
   auto p = parser(test::Assemble(R"(
      OpName %c "myconst"
      %float = OpTypeFloat 32
