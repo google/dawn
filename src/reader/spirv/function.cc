@@ -212,9 +212,9 @@ const char* GetUnaryBuiltInFunctionName(SpvOp opcode) {
     case SpvOpAll:
       return "all";
     case SpvOpIsNan:
-      return "is_nan";
+      return "isNan";
     case SpvOpIsInf:
-      return "is_inf";
+      return "isInf";
     default:
       break;
   }

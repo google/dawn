@@ -1380,7 +1380,7 @@ TEST_F(SpvLogicalTest, IsNan_Scalar) {
     __bool
     {
       Call[not set]{
-        Identifier[not set]{is_nan}
+        Identifier[not set]{isNan}
         (
           ScalarConstructor[not set]{50.000000}
         )
@@ -1410,7 +1410,7 @@ TEST_F(SpvLogicalTest, IsNan_Vector) {
     __vec_2__bool
     {
       Call[not set]{
-        Identifier[not set]{is_nan}
+        Identifier[not set]{isNan}
         (
           TypeConstructor[not set]{
             __vec_2__f32
@@ -1444,7 +1444,7 @@ TEST_F(SpvLogicalTest, IsInf_Scalar) {
     __bool
     {
       Call[not set]{
-        Identifier[not set]{is_inf}
+        Identifier[not set]{isInf}
         (
           ScalarConstructor[not set]{50.000000}
         )
@@ -1474,7 +1474,7 @@ TEST_F(SpvLogicalTest, IsInf_Vector) {
     __vec_2__bool
     {
       Call[not set]{
-        Identifier[not set]{is_inf}
+        Identifier[not set]{isInf}
         (
           TypeConstructor[not set]{
             __vec_2__f32
