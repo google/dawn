@@ -46,6 +46,7 @@ struct Options {
   bool parse_only = false;
   bool dump_ast = false;
   bool dawn_validation = false;
+  bool demangle = false;
 
   Format format = Format::kNone;
 
@@ -80,6 +81,8 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   --dump-ast                -- Dump the generated AST to stdout
   --dawn-validation         -- SPIRV outputs are validated with the same flags
                                as Dawn does. Has no effect on non-SPIRV outputs.
+  --demangle                -- Preserve original source names. Demangle them.
+                               Affects AST dumping, and text-based output languages.
   -h                        -- This help text)";
 
 #pragma clang diagnostic push
@@ -233,6 +236,8 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
       opts->dump_ast = true;
     } else if (arg == "--dawn-validation") {
       opts->dawn_validation = true;
+    } else if (arg == "--demangle") {
+      opts->demangle = true;
     } else if (!arg.empty()) {
       if (arg[0] == '-') {
         std::cerr << "Unrecognized option: " << arg << std::endl;
@@ -496,7 +501,11 @@ int main(int argc, const char** argv) {
   }
 
   if (options.dump_ast) {
-    std::cout << std::endl << mod.to_str() << std::endl;
+    auto ast_str = mod.to_str();
+    if (options.demangle) {
+      ast_str = tint::Demangler().Demangle(mod, ast_str);
+    }
+    std::cout << std::endl << ast_str << std::endl;
   }
   if (options.parse_only) {
     return 1;
@@ -622,7 +631,11 @@ int main(int argc, const char** argv) {
 
   if (options.format != Format::kSpvAsm && options.format != Format::kSpirv) {
     auto* w = static_cast<tint::writer::Text*>(writer.get());
-    if (!WriteFile(options.output_file, "w", w->result())) {
+    auto output = w->result();
+    if (options.demangle) {
+      output = tint::Demangler().Demangle(mod, output);
+    }
+    if (!WriteFile(options.output_file, "w", output)) {
       return 1;
     }
   }

@@ -20,6 +20,7 @@
 
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/type_manager.h"
+#include "src/demangler.h"
 #include "src/diagnostic/printer.h"
 #include "src/inspector/inspector.h"
 #include "src/namer.h"
