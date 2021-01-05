@@ -78,7 +78,7 @@ class Namer {
   /// Gets the registered name for a struct member. If no name has
   /// been registered for this member, then returns the empty string.
   /// member index is in bounds.
-  /// @param id the SPIR-V ID of the struct
+  /// @param id the SPIR-V ID of the struct type
   /// @param member_index the index of the member, counting from 0
   /// @returns the registered name for the ID, or an empty string if
   /// nothing has been registered.

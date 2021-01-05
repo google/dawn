@@ -834,6 +834,11 @@ class FunctionEmitter {
   /// @returns an expression
   TypedExpression MakeIntrinsicCall(const spvtools::opt::Instruction& inst);
 
+  /// Returns an expression for a SPIR-V OpArrayLength instruction.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  TypedExpression MakeArrayLength(const spvtools::opt::Instruction& inst);
+
   /// Emits a texture builtin function call for a SPIR-V instruction that
   /// accesses an image or sampled image.
   /// @param inst the SPIR-V instruction

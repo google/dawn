@@ -1011,6 +1011,69 @@ TEST_F(SpvParserTest, DISABLED_RemapStorageBuffer_ThroughFunctionParameter) {
   // TODO(dneto): Blocked on OpFunctionCall support.
 }
 
+std::string RuntimeArrayPreamble() {
+  return R"(
+     OpName %myvar "myvar"
+     OpMemberName %struct 0 "first"
+     OpMemberName %struct 1 "rtarr"
+
+     OpDecorate %struct Block
+     OpMemberDecorate %struct 0 Offset 0
+     OpMemberDecorate %struct 1 Offset 4
+     OpDecorate %arr ArrayStride 4
+
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %uint = OpTypeInt 32 0
+
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+
+     %arr = OpTypeRuntimeArray %uint
+     %struct = OpTypeStruct %uint %arr
+     %ptr_struct = OpTypePointer StorageBuffer %struct
+     %ptr_uint = OpTypePointer StorageBuffer %uint
+
+     %myvar = OpVariable %ptr_struct StorageBuffer
+  )";
+}
+
+TEST_F(SpvParserTest, ArrayLength) {
+  const auto assembly = RuntimeArrayPreamble() + R"(
+
+  %100 = OpFunction %void None %voidfn
+
+  %entry = OpLabel
+  %1 = OpArrayLength %uint %myvar 1
+  OpReturn
+  OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body_str = ToString(p->get_module(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    __u32
+    {
+      Call[not set]{
+        Identifier[not set]{arrayLength}
+        (
+          MemberAccessor[not set]{
+            Identifier[not set]{myvar}
+            Identifier[not set]{rtarr}
+          }
+        )
+      }
+    }
+  }
+}
+)")) << body_str;
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

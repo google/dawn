@@ -3143,6 +3143,10 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     return MakeSimpleSelect(inst);
   }
 
+  if (opcode == SpvOpArrayLength) {
+    return MakeArrayLength(inst);
+  }
+
   // builtin readonly function
   // glsl.std.450 readonly function
 
@@ -4488,6 +4492,45 @@ TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
                           Source{}, new_type, ast::ExpressionList{value.expr})};
   }
   return ToI32(value);
+}
+
+TypedExpression FunctionEmitter::MakeArrayLength(
+    const spvtools::opt::Instruction& inst) {
+  if (inst.NumInOperands() != 2) {
+    // Binary parsing will fail on this anyway.
+    Fail() << "invalid array length: requires 2 operands: "
+           << inst.PrettyPrint();
+    return {};
+  }
+  const auto struct_ptr_id = inst.GetSingleWordInOperand(0);
+  const auto field_index = inst.GetSingleWordInOperand(1);
+  const auto struct_ptr_type_id =
+      def_use_mgr_->GetDef(struct_ptr_id)->type_id();
+  // Trace through the pointer type to get to the struct type.
+  const auto struct_type_id =
+      def_use_mgr_->GetDef(struct_ptr_type_id)->GetSingleWordInOperand(1);
+  const auto field_name = namer_.GetMemberName(struct_type_id, field_index);
+  if (field_name.empty()) {
+    Fail() << "struct index out of bounds for array length: "
+           << inst.PrettyPrint();
+  }
+
+  auto* member_ident = create<ast::IdentifierExpression>(
+      Source{}, ast_module_.RegisterSymbol(field_name), field_name);
+  auto* member_access = create<ast::MemberAccessorExpression>(
+      Source{}, MakeExpression(struct_ptr_id).expr, member_ident);
+
+  // Generate the intrinsic function call.
+  std::string call_ident_str = "arrayLength";
+  auto* call_ident = create<ast::IdentifierExpression>(
+      Source{}, ast_module_.RegisterSymbol(call_ident_str), call_ident_str);
+  call_ident->set_intrinsic(ast::Intrinsic::kArrayLength);
+
+  ast::ExpressionList params{member_access};
+  auto* call_expr =
+      create<ast::CallExpression>(Source{}, call_ident, std::move(params));
+
+  return {parser_impl_.ConvertType(inst.type_id()), call_expr};
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
