@@ -44,16 +44,16 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Assign_Var) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
 
-  ast::AssignmentStatement assign(Source{}, Expr("var"), Expr(1.f));
+  auto* assign = create<ast::AssignmentStatement>(Expr("var"), Expr(1.f));
   td.RegisterVariableForTesting(v);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -70,15 +70,15 @@ TEST_F(BuilderTest, Assign_Var) {
 TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
 
-  ast::AssignmentStatement assign(Source{}, Expr("var"), Expr(1.f));
+  auto* assign = create<ast::AssignmentStatement>(Expr("var"), Expr(1.f));
   td.RegisterVariableForTesting(v);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_FALSE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_FALSE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(
       b.error(),
@@ -88,19 +88,19 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  auto* val = create<ast::TypeConstructorExpression>(Source{}, ty.vec3<f32>(),
+  auto* val = create<ast::TypeConstructorExpression>(ty.vec3<f32>(),
                                                      ast::ExpressionList{});
-  ast::AssignmentStatement assign(Source{}, Expr("var"), val);
+  auto* assign = create<ast::AssignmentStatement>(Expr("var"), val);
 
   td.RegisterVariableForTesting(v);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -116,22 +116,22 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 
 TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
   auto* first = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec2<f32>(), ast::ExpressionList{Expr(1.f), Expr(2.f)});
+      ty.vec2<f32>(), ast::ExpressionList{Expr(1.f), Expr(2.f)});
 
   auto* init = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec3<f32>(), ast::ExpressionList{first, Expr(3.f)});
+      ty.vec3<f32>(), ast::ExpressionList{first, Expr(3.f)});
 
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
-  ast::AssignmentStatement assign(Source{}, Expr("var"), init);
+  auto* assign = create<ast::AssignmentStatement>(Expr("var"), init);
 
   td.RegisterVariableForTesting(v);
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -155,20 +155,19 @@ OpStore %1 %13
 
 TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   auto* init = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec3<f32>(),
-      ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)});
+      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)});
 
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
-  ast::AssignmentStatement assign(Source{}, Expr("var"), init);
+  auto* assign = create<ast::AssignmentStatement>(Expr("var"), init);
 
   td.RegisterVariableForTesting(v);
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -200,17 +199,17 @@ TEST_F(BuilderTest, Assign_StructMember) {
   auto* s_type = ty.struct_("my_struct", s);
   auto* v = Var("ident", ast::StorageClass::kFunction, s_type);
 
-  ast::AssignmentStatement assign(Source{}, MemberAccessor("ident", "b"),
-                                  Expr(4.f));
+  auto* assign =
+      create<ast::AssignmentStatement>(MemberAccessor("ident", "b"), Expr(4.f));
   td.RegisterVariableForTesting(v);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -233,19 +232,18 @@ TEST_F(BuilderTest, Assign_Vector) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
   auto* val = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec3<f32>(),
-      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
 
-  ast::AssignmentStatement assign(Source{}, Expr("var"), val);
+  auto* assign = create<ast::AssignmentStatement>(Expr("var"), val);
   td.RegisterVariableForTesting(v);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -267,17 +265,17 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
 
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  ast::AssignmentStatement assign(Source{}, MemberAccessor("var", "y"),
-                                  Expr(1.f));
+  auto* assign =
+      create<ast::AssignmentStatement>(MemberAccessor("var", "y"), Expr(1.f));
   td.RegisterVariableForTesting(v);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
@@ -302,16 +300,17 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
 
   auto* v = Var("var", ast::StorageClass::kOutput, ty.vec3<f32>());
 
-  ast::AssignmentStatement assign(Source{}, IndexAccessor("var", 1), Expr(1.f));
+  auto* assign =
+      create<ast::AssignmentStatement>(IndexAccessor("var", 1), Expr(1.f));
   td.RegisterVariableForTesting(v);
 
-  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32

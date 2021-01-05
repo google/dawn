@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/ast/builder.h"
 #include "src/reader/wgsl/parser_impl.h"
 
 namespace tint {
@@ -28,7 +29,7 @@ namespace reader {
 namespace wgsl {
 
 /// WGSL Parser test class
-class ParserImplTest : public testing::Test {
+class ParserImplTest : public testing::Test, public ast::BuilderWithModule {
  public:
   /// Constructor
   ParserImplTest();
@@ -50,7 +51,8 @@ class ParserImplTest : public testing::Test {
 
 /// WGSL Parser test class with param
 template <typename T>
-class ParserImplTestWithParam : public testing::TestWithParam<T> {
+class ParserImplTestWithParam : public testing::TestWithParam<T>,
+                                public ast::BuilderWithModule {
  public:
   /// Constructor
   ParserImplTestWithParam() = default;

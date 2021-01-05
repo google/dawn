@@ -30,18 +30,18 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Return) {
-  ast::ReturnStatement r(Source{});
+  auto* r = create<ast::ReturnStatement>();
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&r)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
   EXPECT_EQ(gen.result(), "  return;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
-  ast::ReturnStatement r(Source{}, Expr("expr"));
+  auto* r = create<ast::ReturnStatement>(Expr("expr"));
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&r)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
   EXPECT_EQ(gen.result(), "  return expr;\n");
 }
 

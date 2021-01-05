@@ -39,11 +39,11 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
-  ast::LoopStatement l(Source{}, body, {});
+  auto* l = create<ast::LoopStatement>(body, nullptr);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&l)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  for(;;) {
     discard_fragment();
   }
@@ -57,11 +57,11 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
   auto* continuing = create<ast::BlockStatement>(ast::StatementList{
       create<ast::ReturnStatement>(),
   });
-  ast::LoopStatement l(Source{}, body, continuing);
+  auto* l = create<ast::LoopStatement>(body, continuing);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&l)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
     bool tint_msl_is_first_1 = true;
     for(;;) {
@@ -93,11 +93,11 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
       create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs")),
   });
 
-  ast::LoopStatement outer(Source{}, body, continuing);
+  auto* outer = create<ast::LoopStatement>(body, continuing);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&outer)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
     bool tint_msl_is_first_1 = true;
     for(;;) {
@@ -157,9 +157,9 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   });
   gen.increment_indent();
 
-  ast::LoopStatement outer(Source{}, body, continuing);
+  auto* outer = create<ast::LoopStatement>(body, continuing);
 
-  ASSERT_TRUE(gen.EmitStatement(&outer)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
     bool tint_msl_is_first_1 = true;
     float lhs;

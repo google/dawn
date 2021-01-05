@@ -35,17 +35,16 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Emit_Case) {
   ast::type::I32 i32;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
-  ast::CaseStatement c(Source{}, lit, body);
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  auto* c = create<ast::CaseStatement>(lit, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -56,14 +55,13 @@ TEST_F(MslGeneratorImplTest, Emit_Case_BreaksByDefault) {
   ast::type::I32 i32;
 
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
-  ast::CaseStatement c(
-      Source{}, lit,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  auto* c = create<ast::CaseStatement>(
+      lit, create<ast::BlockStatement>(ast::StatementList{}));
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -73,17 +71,16 @@ TEST_F(MslGeneratorImplTest, Emit_Case_BreaksByDefault) {
 TEST_F(MslGeneratorImplTest, Emit_Case_WithFallthrough) {
   ast::type::I32 i32;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::FallthroughStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::FallthroughStatement>(),
+  });
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
-  ast::CaseStatement c(Source{}, lit, body);
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  auto* c = create<ast::CaseStatement>(lit, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     /* fallthrough */
   }
@@ -93,18 +90,17 @@ TEST_F(MslGeneratorImplTest, Emit_Case_WithFallthrough) {
 TEST_F(MslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   ast::type::I32 i32;
 
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 5));
-  lit.push_back(create<ast::SintLiteral>(Source{}, &i32, 6));
-  ast::CaseStatement c(Source{}, lit, body);
+  lit.push_back(create<ast::SintLiteral>(&i32, 5));
+  lit.push_back(create<ast::SintLiteral>(&i32, 6));
+  auto* c = create<ast::CaseStatement>(lit, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5:
   case 6: {
     break;
@@ -113,15 +109,14 @@ TEST_F(MslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Case_Default) {
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
-  ast::CaseStatement c(Source{}, ast::CaseSelectorList{}, body);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
+  auto* c = create<ast::CaseStatement>(ast::CaseSelectorList{}, body);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }

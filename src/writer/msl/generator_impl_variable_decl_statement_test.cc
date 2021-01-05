@@ -42,21 +42,21 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32);
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   auto* var = Const("a", ast::StorageClass::kNone, ty.f32);
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  const float a = 0.0f;\n");
 }
 
@@ -64,11 +64,11 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
   ast::type::Array ary(ty.f32, 5, ast::ArrayDecorationList{});
 
   auto* var = Var("a", ast::StorageClass::kNone, &ary);
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  float a[5] = {0.0f};\n");
 }
 
@@ -80,52 +80,52 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 
   auto* s = ty.struct_("S", str);
   auto* var = Var("a", ast::StorageClass::kNone, s);
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  S a = {};
 )");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
   auto* var = Var("a", ast::StorageClass::kFunction, ty.vec2<f32>());
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  float2 a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   auto* var = Var("a", ast::StorageClass::kFunction, ty.mat3x2<f32>());
 
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  float3x2 a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
                   ast::VariableDecorationList{});
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float a = initializer;
 )");
 }
@@ -133,13 +133,13 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   ast::ExpressionList values;
   auto* zero_vec =
-      create<ast::TypeConstructorExpression>(Source{}, ty.vec3<f32>(), values);
+      create<ast::TypeConstructorExpression>(ty.vec3<f32>(), values);
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.vec3<f32>(), zero_vec,
                   ast::VariableDecorationList{});
-  ast::VariableDeclStatement stmt(Source{}, var);
+  auto* stmt = create<ast::VariableDeclStatement>(var);
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
 )");
 }

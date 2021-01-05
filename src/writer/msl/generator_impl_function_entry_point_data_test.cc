@@ -65,11 +65,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func = Func(
-      "vtx_main", ast::VariableList{}, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func("vtx_main", ast::VariableList{}, ty.f32, body,
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
 
   mod->AddFunction(func);
 
@@ -111,11 +111,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func = Func(
-      "vtx_main", ast::VariableList{}, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func("vtx_main", ast::VariableList{}, ty.f32, body,
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
 
   mod->AddFunction(func);
 
@@ -157,11 +157,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func = Func(
-      "main", ast::VariableList{}, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32, body,
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           });
 
   mod->AddFunction(func);
 
@@ -203,11 +203,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func = Func(
-      "main", ast::VariableList{}, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32, body,
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           });
 
   mod->AddFunction(func);
 
@@ -246,11 +246,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func = Func(
-      "main", ast::VariableList{}, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32, body,
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           });
 
   mod->AddFunction(func);
 
@@ -284,11 +284,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func = Func(
-      "main", ast::VariableList{}, ty.f32, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kCompute),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.f32, body,
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           });
 
   mod->AddFunction(func);
 
@@ -327,11 +327,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
 
   auto body = ast::StatementList{create<ast::AssignmentStatement>(
       Expr("depth"), MemberAccessor("coord", "x"))};
-  auto* func = Func(
-      "main", ast::VariableList{}, ty.void_, body,
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(Source{}, ast::PipelineStage::kFragment),
-      });
+  auto* func =
+      Func("main", ast::VariableList{}, ty.void_, body,
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           });
 
   mod->AddFunction(func);
 

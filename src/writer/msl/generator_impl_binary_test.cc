@@ -38,8 +38,9 @@ using MslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest, Emit) {
   auto params = GetParam();
 
-  ast::BinaryExpression expr(Source{}, params.op, Expr("left"), Expr("right"));
-  ASSERT_TRUE(gen.EmitExpression(&expr)) << gen.error();
+  auto* expr =
+      create<ast::BinaryExpression>(params.op, Expr("left"), Expr("right"));
+  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

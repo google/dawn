@@ -39,27 +39,22 @@ TEST_F(BuilderTest, Block) {
 
   // Note, this test uses shadow variables which aren't allowed in WGSL but
   // serves to prove the block code is pushing new scopes as needed.
-  auto* inner = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::VariableDeclStatement>(
-              Source{}, Var("var", ast::StorageClass::kFunction, ty.f32)),
-          create<ast::AssignmentStatement>(Source{}, Expr("var"), Expr(2.f))});
-  ast::BlockStatement outer(
-      Source{},
-      ast::StatementList{
-          create<ast::VariableDeclStatement>(
-              Source{}, Var("var", ast::StorageClass::kFunction, ty.f32)),
-          create<ast::AssignmentStatement>(Source{}, Expr("var"), Expr(1.f)),
-          inner,
-          create<ast::AssignmentStatement>(Source{}, Expr("var"), Expr(3.f))});
+  auto* inner = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(
+          Var("var", ast::StorageClass::kFunction, ty.f32)),
+      create<ast::AssignmentStatement>(Expr("var"), Expr(2.f))});
+  auto* outer = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(
+          Var("var", ast::StorageClass::kFunction, ty.f32)),
+      create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)), inner,
+      create<ast::AssignmentStatement>(Expr("var"), Expr(3.f))});
 
-  ASSERT_TRUE(td.DetermineResultType(&outer)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(outer)) << td.error();
 
   b.push_function(Function{});
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateStatement(&outer)) << b.error();
+  EXPECT_TRUE(b.GenerateStatement(outer)) << b.error();
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32

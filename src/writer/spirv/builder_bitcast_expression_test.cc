@@ -32,18 +32,12 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Bitcast) {
-  ast::type::U32 u32;
-  ast::type::F32 f32;
+  auto* bitcast = create<ast::BitcastExpression>(ty.u32, Expr(2.4f));
 
-  ast::BitcastExpression bitcast(
-      Source{}, &u32,
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.4)));
-
-  ASSERT_TRUE(td.DetermineResultType(&bitcast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(bitcast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateBitcastExpression(&bitcast), 1u);
+  EXPECT_EQ(b.GenerateBitcastExpression(bitcast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %3 = OpTypeFloat 32
@@ -57,15 +51,12 @@ TEST_F(BuilderTest, Bitcast) {
 TEST_F(BuilderTest, Bitcast_DuplicateType) {
   ast::type::F32 f32;
 
-  ast::BitcastExpression bitcast(
-      Source{}, &f32,
-      create<ast::ScalarConstructorExpression>(
-          Source{}, create<ast::FloatLiteral>(Source{}, &f32, 2.4)));
+  auto* bitcast = create<ast::BitcastExpression>(ty.f32, Expr(2.4f));
 
-  ASSERT_TRUE(td.DetermineResultType(&bitcast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(bitcast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateBitcastExpression(&bitcast), 1u);
+  EXPECT_EQ(b.GenerateBitcastExpression(bitcast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpConstant %2 2.4000001

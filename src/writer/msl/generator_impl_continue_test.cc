@@ -29,11 +29,11 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Continue) {
-  ast::ContinueStatement c(Source{});
+  auto* c = create<ast::ContinueStatement>();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&c)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(c)) << gen.error();
   EXPECT_EQ(gen.result(), "  continue;\n");
 }
 

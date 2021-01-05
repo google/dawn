@@ -57,10 +57,10 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
-  ast::CallStatement expr(Source{}, call);
+  auto* expr = create<ast::CallStatement>(call);
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitStatement(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
 }
 

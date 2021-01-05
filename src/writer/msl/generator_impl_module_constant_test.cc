@@ -36,11 +36,11 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   ast::type::Array ary(ty.f32, 3, ast::ArrayDecorationList{});
-  auto* var = Const(
-      "pos", ast::StorageClass::kNone, &ary,
-      create<ast::TypeConstructorExpression>(
-          Source{}, &ary, ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)}),
-      ast::VariableDecorationList{});
+  auto* var =
+      Const("pos", ast::StorageClass::kNone, &ary,
+            create<ast::TypeConstructorExpression>(
+                &ary, ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)}),
+            ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
   EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
@@ -49,7 +49,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
   auto* var = Const("pos", ast::StorageClass::kNone, ty.f32, Expr(3.f),
                     ast::VariableDecorationList{
-                        create<ast::ConstantIdDecoration>(Source{}, 23),
+                        create<ast::ConstantIdDecoration>(23),
                     });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();

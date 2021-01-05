@@ -38,128 +38,113 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Bool) {
-  ast::type::Bool bool_type;
-  auto* lit = create<ast::BoolLiteral>(Source{}, &bool_type, false);
-  ast::ScalarConstructorExpression expr(Source{}, lit);
+  auto* lit = create<ast::BoolLiteral>(ty.bool_, false);
+  auto* expr = create<ast::ScalarConstructorExpression>(lit);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "false");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Int) {
-  ast::type::I32 i32;
-  auto* lit = create<ast::SintLiteral>(Source{}, &i32, -12345);
-  ast::ScalarConstructorExpression expr(Source{}, lit);
+  auto* lit = create<ast::SintLiteral>(ty.i32, -12345);
+  auto* expr = create<ast::ScalarConstructorExpression>(lit);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "-12345");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_UInt) {
-  ast::type::U32 u32;
-  auto* lit = create<ast::UintLiteral>(Source{}, &u32, 56779);
-  ast::ScalarConstructorExpression expr(Source{}, lit);
+  auto* lit = create<ast::UintLiteral>(ty.u32, 56779);
+  auto* expr = create<ast::ScalarConstructorExpression>(lit);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "56779u");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
-  ast::type::F32 f32;
   // Use a number close to 1<<30 but whose decimal representation ends in 0.
-  auto* lit = create<ast::FloatLiteral>(Source{}, &f32,
-                                        static_cast<float>((1 << 30) - 4));
-  ast::ScalarConstructorExpression expr(Source{}, lit);
+  auto* lit =
+      create<ast::FloatLiteral>(ty.f32, static_cast<float>((1 << 30) - 4));
+  auto* expr = create<ast::ScalarConstructorExpression>(lit);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "1073741824.0f");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
-  ast::type::F32 f32;
-
-  auto* lit = create<ast::FloatLiteral>(Source{}, &f32, -1.2e-5);
+  auto* lit = create<ast::FloatLiteral>(ty.f32, -1.2e-5);
   ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit));
+  values.push_back(create<ast::ScalarConstructorExpression>(lit));
 
-  ast::TypeConstructorExpression expr(Source{}, &f32, values);
+  auto* expr = create<ast::TypeConstructorExpression>(ty.f32, values);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "float(-0.000012f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Bool) {
-  ast::type::Bool b;
-
-  auto* lit = create<ast::BoolLiteral>(Source{}, &b, true);
+  auto* lit = create<ast::BoolLiteral>(ty.bool_, true);
   ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit));
+  values.push_back(create<ast::ScalarConstructorExpression>(lit));
 
-  ast::TypeConstructorExpression expr(Source{}, &b, values);
+  auto* expr = create<ast::TypeConstructorExpression>(ty.bool_, values);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "bool(true)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Int) {
-  ast::type::I32 i32;
-
-  auto* lit = create<ast::SintLiteral>(Source{}, &i32, -12345);
+  auto* lit = create<ast::SintLiteral>(ty.i32, -12345);
   ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit));
+  values.push_back(create<ast::ScalarConstructorExpression>(lit));
 
-  ast::TypeConstructorExpression expr(Source{}, &i32, values);
+  auto* expr = create<ast::TypeConstructorExpression>(ty.i32, values);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "int(-12345)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Uint) {
-  ast::type::U32 u32;
-
-  auto* lit = create<ast::UintLiteral>(Source{}, &u32, 12345);
+  auto* lit = create<ast::UintLiteral>(ty.u32, 12345);
   ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit));
+  values.push_back(create<ast::ScalarConstructorExpression>(lit));
 
-  ast::TypeConstructorExpression expr(Source{}, &u32, values);
+  auto* expr = create<ast::TypeConstructorExpression>(ty.u32, values);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "uint(12345u)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
+  ast::type::Vector vec(ty.f32, 3);
 
-  auto* lit1 = create<ast::FloatLiteral>(Source{}, &f32, 1.f);
-  auto* lit2 = create<ast::FloatLiteral>(Source{}, &f32, 2.f);
-  auto* lit3 = create<ast::FloatLiteral>(Source{}, &f32, 3.f);
+  auto* lit1 = create<ast::FloatLiteral>(ty.f32, 1.f);
+  auto* lit2 = create<ast::FloatLiteral>(ty.f32, 2.f);
+  auto* lit3 = create<ast::FloatLiteral>(ty.f32, 3.f);
   ast::ExpressionList values;
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit1));
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit2));
-  values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit3));
+  values.push_back(create<ast::ScalarConstructorExpression>(lit1));
+  values.push_back(create<ast::ScalarConstructorExpression>(lit2));
+  values.push_back(create<ast::ScalarConstructorExpression>(lit3));
 
-  ast::TypeConstructorExpression expr(Source{}, &vec, values);
+  auto* expr = create<ast::TypeConstructorExpression>(&vec, values);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "float3(1.0f, 2.0f, 3.0f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
+  ast::type::Vector vec(ty.f32, 3);
 
   ast::ExpressionList values;
-  ast::TypeConstructorExpression expr(Source{}, &vec, values);
+  auto* expr = create<ast::TypeConstructorExpression>(&vec, values);
 
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "float3(0.0f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
-  ast::type::F32 f32;
-  ast::type::Matrix mat(&f32, 3, 2);  // 3 ROWS, 2 COLUMNS
-  ast::type::Vector vec(&f32, 3);
+  ast::type::Matrix mat(ty.f32, 3, 2);  // 3 ROWS, 2 COLUMNS
+  ast::type::Vector vec(ty.f32, 3);
 
   // WGSL matrix is mat2x3 (it flips for AST, sigh). With a type constructor
   // of <vec3, vec3>
@@ -167,24 +152,23 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
   ast::ExpressionList mat_values;
 
   for (size_t i = 0; i < 2; i++) {
-    auto* lit1 = create<ast::FloatLiteral>(Source{}, &f32,
-                                           static_cast<float>(1 + (i * 2)));
-    auto* lit2 = create<ast::FloatLiteral>(Source{}, &f32,
-                                           static_cast<float>(2 + (i * 2)));
-    auto* lit3 = create<ast::FloatLiteral>(Source{}, &f32,
-                                           static_cast<float>(3 + (i * 2)));
+    auto* lit1 =
+        create<ast::FloatLiteral>(ty.f32, static_cast<float>(1 + (i * 2)));
+    auto* lit2 =
+        create<ast::FloatLiteral>(ty.f32, static_cast<float>(2 + (i * 2)));
+    auto* lit3 =
+        create<ast::FloatLiteral>(ty.f32, static_cast<float>(3 + (i * 2)));
 
     ast::ExpressionList values;
-    values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit1));
-    values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit2));
-    values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit3));
+    values.push_back(create<ast::ScalarConstructorExpression>(lit1));
+    values.push_back(create<ast::ScalarConstructorExpression>(lit2));
+    values.push_back(create<ast::ScalarConstructorExpression>(lit3));
 
-    mat_values.push_back(
-        create<ast::TypeConstructorExpression>(Source{}, &vec, values));
+    mat_values.push_back(create<ast::TypeConstructorExpression>(&vec, values));
   }
 
-  ast::TypeConstructorExpression expr(Source{}, &mat, mat_values);
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  auto* expr = create<ast::TypeConstructorExpression>(&mat, mat_values);
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
 
   // A matrix of type T with n columns and m rows can also be constructed from
   // n vectors of type T with m components.
@@ -193,31 +177,29 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
-  ast::type::F32 f32;
-  ast::type::Vector vec(&f32, 3);
+  ast::type::Vector vec(ty.f32, 3);
   ast::type::Array ary(&vec, 3, ast::ArrayDecorationList{});
 
   ast::ExpressionList ary_values;
 
   for (size_t i = 0; i < 3; i++) {
-    auto* lit1 = create<ast::FloatLiteral>(Source{}, &f32,
-                                           static_cast<float>(1 + (i * 3)));
-    auto* lit2 = create<ast::FloatLiteral>(Source{}, &f32,
-                                           static_cast<float>(2 + (i * 3)));
-    auto* lit3 = create<ast::FloatLiteral>(Source{}, &f32,
-                                           static_cast<float>(3 + (i * 3)));
+    auto* lit1 =
+        create<ast::FloatLiteral>(ty.f32, static_cast<float>(1 + (i * 3)));
+    auto* lit2 =
+        create<ast::FloatLiteral>(ty.f32, static_cast<float>(2 + (i * 3)));
+    auto* lit3 =
+        create<ast::FloatLiteral>(ty.f32, static_cast<float>(3 + (i * 3)));
 
     ast::ExpressionList values;
-    values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit1));
-    values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit2));
-    values.push_back(create<ast::ScalarConstructorExpression>(Source{}, lit3));
+    values.push_back(create<ast::ScalarConstructorExpression>(lit1));
+    values.push_back(create<ast::ScalarConstructorExpression>(lit2));
+    values.push_back(create<ast::ScalarConstructorExpression>(lit3));
 
-    ary_values.push_back(
-        create<ast::TypeConstructorExpression>(Source{}, &vec, values));
+    ary_values.push_back(create<ast::TypeConstructorExpression>(&vec, values));
   }
 
-  ast::TypeConstructorExpression expr(Source{}, &ary, ary_values);
-  ASSERT_TRUE(gen.EmitConstructor(&expr)) << gen.error();
+  auto* expr = create<ast::TypeConstructorExpression>(&ary, ary_values);
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(),
             "{float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), "
             "float3(7.0f, 8.0f, 9.0f)}");

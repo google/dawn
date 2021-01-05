@@ -30,8 +30,8 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
-  ast::BitcastExpression bitcast(Source{}, ty.f32, Expr("id"));
-  ASSERT_TRUE(gen.EmitExpression(&bitcast)) << gen.error();
+  auto* bitcast = create<ast::BitcastExpression>(ty.f32, Expr("id"));
+  ASSERT_TRUE(gen.EmitExpression(bitcast)) << gen.error();
   EXPECT_EQ(gen.result(), "as_type<float>(id)");
 }
 

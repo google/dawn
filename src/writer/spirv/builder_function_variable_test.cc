@@ -64,8 +64,7 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   auto* init = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec3<f32>(),
-      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, init,
@@ -95,7 +94,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   auto* init = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec2<f32>(), ast::ExpressionList{Expr(1.f), Add(3.f, 3.f)});
+      ty.vec2<f32>(), ast::ExpressionList{Expr(1.f), Add(3.f, 3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   auto* v = Var("var", ast::StorageClass::kFunction, ty.vec2<f32>(), init,
@@ -205,8 +204,7 @@ OpStore %7 %6
 
 TEST_F(BuilderTest, FunctionVar_Const) {
   auto* init = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec3<f32>(),
-      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,

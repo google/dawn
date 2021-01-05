@@ -115,12 +115,12 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // cast<Int>(2.3f)
 
   auto* alias = ty.alias("Int", ty.i32);
-  ast::TypeConstructorExpression cast(Source{}, alias, ExprList(2.3f));
+  auto* cast = create<ast::TypeConstructorExpression>(alias, ExprList(2.3f));
 
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 1u);
+  EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpTypeFloat 32
@@ -184,8 +184,8 @@ TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
-  auto* rel = create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kAdd,
-                                            Expr(3.0f), Expr(3.0f));
+  auto* rel = create<ast::BinaryExpression>(ast::BinaryOp::kAdd, Expr(3.0f),
+                                            Expr(3.0f));
 
   auto* t = vec2<f32>(1.0f, rel);
 
@@ -197,13 +197,13 @@ TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
-  ast::TypeConstructorExpression cast(Source{}, ty.bool_, ExprList(true));
+  auto* cast = create<ast::TypeConstructorExpression>(ty.bool_, ExprList(true));
 
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateExpression(&cast), 3u);
+  EXPECT_EQ(b.GenerateExpression(cast), 3u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
@@ -213,12 +213,12 @@ TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
-  ast::TypeConstructorExpression cast(Source{}, ty.i32, ExprList(2));
+  auto* cast = create<ast::TypeConstructorExpression>(ty.i32, ExprList(2));
 
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 3u);
+  EXPECT_EQ(b.GenerateExpression(cast), 3u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 2
@@ -227,12 +227,12 @@ TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
-  ast::TypeConstructorExpression cast(Source{}, ty.u32, ExprList(2u));
+  auto* cast = create<ast::TypeConstructorExpression>(ty.u32, ExprList(2u));
 
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 3u);
+  EXPECT_EQ(b.GenerateExpression(cast), 3u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %3 = OpConstant %2 2
@@ -241,12 +241,12 @@ TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
-  ast::TypeConstructorExpression cast(Source{}, ty.f32, ExprList(2.0f));
+  auto* cast = create<ast::TypeConstructorExpression>(ty.f32, ExprList(2.0f));
 
-  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(&cast), 3u);
+  EXPECT_EQ(b.GenerateExpression(cast), 3u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpConstant %2 2

@@ -2793,10 +2793,11 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
   ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  ast::CallExpression call{Source{}, Expr(param.function), param.args(this)};
+  auto* call =
+      create<ast::CallExpression>(Expr(param.function), param.args(this));
 
-  EXPECT_TRUE(td.DetermineResultType(&call)) << td.error();
-  EXPECT_EQ(b.GenerateExpression(&call), 0u);
+  EXPECT_TRUE(td.DetermineResultType(call)) << td.error();
+  EXPECT_EQ(b.GenerateExpression(call), 0u);
   EXPECT_THAT(b.error(),
               ::testing::StartsWith(
                   "Internal error: trying to add SPIR-V instruction "));

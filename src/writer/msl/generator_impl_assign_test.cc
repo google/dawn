@@ -30,10 +30,10 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Assign) {
-  ast::AssignmentStatement assign(Source{}, Expr("lhs"), Expr("rhs"));
+  auto* assign = create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs"));
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&assign)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
   EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
 }
 

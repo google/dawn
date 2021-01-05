@@ -38,11 +38,11 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
-  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNegation, Expr(1));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateUnaryOpExpression(&expr), 1u) << b.error();
+  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 )");
@@ -52,11 +52,12 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Negation_Float) {
-  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNegation, Expr(1.f));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1.f));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateUnaryOpExpression(&expr), 1u) << b.error();
+  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpConstant %2 1
 )");
@@ -66,11 +67,11 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Not) {
-  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNot, Expr(false));
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(false));
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateUnaryOpExpression(&expr), 1u) << b.error();
+  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %3 = OpConstantFalse %2
 )");
@@ -82,14 +83,15 @@ TEST_F(BuilderTest, UnaryOp_Not) {
 TEST_F(BuilderTest, UnaryOp_LoadRequired) {
   auto* var = Var("param", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  ast::UnaryOpExpression expr(Source{}, ast::UnaryOp::kNegation, Expr("param"));
+  auto* expr =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("param"));
 
   td.RegisterVariableForTesting(var);
-  EXPECT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateUnaryOpExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 6u) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32

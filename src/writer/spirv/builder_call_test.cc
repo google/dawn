@@ -47,10 +47,10 @@ TEST_F(BuilderTest, Expression_Call) {
   func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32));
   func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32));
 
-  auto* a_func = Func(
-      "a_func", func_params, ty.f32,
-      ast::StatementList{create<ast::ReturnStatement>(Source{}, Add("a", "b"))},
-      ast::FunctionDecorationList{});
+  auto* a_func =
+      Func("a_func", func_params, ty.f32,
+           ast::StatementList{create<ast::ReturnStatement>(Add("a", "b"))},
+           ast::FunctionDecorationList{});
 
   auto* func = Func("main", {}, ty.void_, ast::StatementList{},
                     ast::FunctionDecorationList{});
@@ -95,24 +95,24 @@ TEST_F(BuilderTest, Statement_Call) {
   func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32));
   func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32));
 
-  auto* a_func = Func(
-      "a_func", func_params, ty.void_,
-      ast::StatementList{create<ast::ReturnStatement>(Source{}, Add("a", "b"))},
-      ast::FunctionDecorationList{});
+  auto* a_func =
+      Func("a_func", func_params, ty.void_,
+           ast::StatementList{create<ast::ReturnStatement>(Add("a", "b"))},
+           ast::FunctionDecorationList{});
 
   auto* func = Func("main", {}, ty.void_, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
-  ast::CallStatement expr(Source{}, Call("a_func", 1.f, 1.f));
+  auto* expr = create<ast::CallStatement>(Call("a_func", 1.f, 1.f));
 
   ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(a_func)) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_TRUE(b.GenerateStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateStatement(expr)) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
 OpName %5 "a"
 OpName %6 "b"

@@ -43,12 +43,12 @@ TEST_F(BuilderTest, Switch_Empty) {
   // switch (1) {
   // }
 
-  ast::SwitchStatement expr(Source{}, Expr(1), ast::CaseStatementList{});
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr = create<ast::SwitchStatement>(Expr(1), ast::CaseStatementList{});
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 )");
@@ -73,12 +73,10 @@ TEST_F(BuilderTest, Switch_WithCase) {
   auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(1))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
 
   auto* case_2_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(Literal(1));
@@ -87,16 +85,14 @@ TEST_F(BuilderTest, Switch_WithCase) {
   selector_2.push_back(Literal(2));
 
   ast::CaseStatementList cases;
-  cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_1, case_1_body));
-  cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_2, case_2_body));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
 
-  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
+  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
@@ -105,7 +101,7 @@ TEST_F(BuilderTest, Switch_WithCase) {
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
@@ -147,18 +143,17 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* default_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(1))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
 
   ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{},
-                                             default_body));
+  cases.push_back(
+      create<ast::CaseStatement>(ast::CaseSelectorList{}, default_body));
 
-  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
+  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
@@ -167,7 +162,7 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
@@ -207,16 +202,13 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(1))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
 
   auto* case_2_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
 
   auto* default_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(3))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(Literal(1));
@@ -226,18 +218,16 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   selector_2.push_back(Literal(3));
 
   ast::CaseStatementList cases;
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
   cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_1, case_1_body));
-  cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_2, case_2_body));
-  cases.push_back(create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{},
-                                             default_body));
+      create<ast::CaseStatement>(ast::CaseSelectorList{}, default_body));
 
-  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
+  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
@@ -246,7 +236,7 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
@@ -295,18 +285,14 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(Source{}, Expr("v"), Expr(1)),
-          create<ast::FallthroughStatement>(Source{})});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
+                         create<ast::FallthroughStatement>()});
 
   auto* case_2_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
 
   auto* default_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(3))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(Literal(1));
@@ -315,18 +301,16 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   selector_2.push_back(Literal(2));
 
   ast::CaseStatementList cases;
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
   cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_1, case_1_body));
-  cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_2, case_2_body));
-  cases.push_back(create<ast::CaseStatement>(Source{}, ast::CaseSelectorList{},
-                                             default_body));
+      create<ast::CaseStatement>(ast::CaseSelectorList{}, default_body));
 
-  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
+  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
@@ -335,7 +319,7 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
@@ -380,23 +364,20 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
   auto* case_1_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::AssignmentStatement>(Source{}, Expr("v"), Expr(1)),
-          create<ast::FallthroughStatement>(Source{})});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
+                         create<ast::FallthroughStatement>()});
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(Literal(1));
 
   ast::CaseStatementList cases;
-  cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
 
-  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
+  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
@@ -405,7 +386,7 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_FALSE(b.GenerateSwitchStatement(&expr)) << b.error();
+  EXPECT_FALSE(b.GenerateSwitchStatement(expr)) << b.error();
   EXPECT_EQ(b.error(), "fallthrough of last case statement is disallowed");
 }
 
@@ -421,30 +402,25 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
 
-  auto* if_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
 
-  auto* case_1_body = create<ast::BlockStatement>(
-      Source{},
-      ast::StatementList{
-          create<ast::IfStatement>(Source{}, Expr(true), if_body,
-                                   ast::ElseStatementList{}),
-          create<ast::AssignmentStatement>(Source{}, Expr("v"), Expr(1))});
+  auto* case_1_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{}),
+      create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(Literal(1));
 
   ast::CaseStatementList cases;
-  cases.push_back(
-      create<ast::CaseStatement>(Source{}, selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
 
-  ast::SwitchStatement expr(Source{}, Expr("a"), cases);
+  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
 
   td.RegisterVariableForTesting(v);
   td.RegisterVariableForTesting(a);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
@@ -453,7 +429,7 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_TRUE(b.GenerateSwitchStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"

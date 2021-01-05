@@ -51,10 +51,10 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
   body.push_back(case_stmt);
   body.push_back(def);
 
-  ast::SwitchStatement s(Source{}, Expr("cond"), body);
+  auto* s = create<ast::SwitchStatement>(Expr("cond"), body);
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&s)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;

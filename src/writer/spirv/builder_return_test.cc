@@ -35,10 +35,10 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Return) {
-  ast::ReturnStatement ret(Source{});
+  auto* ret = create<ast::ReturnStatement>();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateReturnStatement(&ret));
+  EXPECT_TRUE(b.GenerateReturnStatement(ret));
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
@@ -47,15 +47,14 @@ TEST_F(BuilderTest, Return) {
 
 TEST_F(BuilderTest, Return_WithValue) {
   auto* val = create<ast::TypeConstructorExpression>(
-      Source{}, ty.vec3<f32>(),
-      ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
+      ty.vec3<f32>(), ast::ExpressionList{Expr(1.f), Expr(1.f), Expr(3.f)});
 
-  ast::ReturnStatement ret(Source{}, val);
+  auto* ret = create<ast::ReturnStatement>(val);
 
-  EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(ret)) << td.error();
 
   b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateReturnStatement(&ret));
+  EXPECT_TRUE(b.GenerateReturnStatement(ret));
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -72,14 +71,14 @@ TEST_F(BuilderTest, Return_WithValue) {
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
   auto* var = Var("param", ast::StorageClass::kFunction, ty.f32);
 
-  ast::ReturnStatement ret(Source{}, Expr("param"));
+  auto* ret = create<ast::ReturnStatement>(Expr("param"));
 
   td.RegisterVariableForTesting(var);
-  EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
+  EXPECT_TRUE(td.DetermineResultType(ret)) << td.error();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-  EXPECT_TRUE(b.GenerateReturnStatement(&ret)) << b.error();
+  EXPECT_TRUE(b.GenerateReturnStatement(ret)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32

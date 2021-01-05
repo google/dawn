@@ -33,11 +33,11 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::ReturnStatement>(),
   });
-  ast::IfStatement i(Source{}, cond, body, ast::ElseStatementList{});
+  auto* i = create<ast::IfStatement>(cond, body, ast::ElseStatementList{});
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   }
@@ -54,12 +54,15 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::ReturnStatement>(),
   });
-  ast::IfStatement i(Source{}, cond, body,
-                     {create<ast::ElseStatement>(else_cond, else_body)});
+  auto* i = create<ast::IfStatement>(
+      cond, body,
+      ast::ElseStatementList{
+          create<ast::ElseStatement>(else_cond, else_body),
+      });
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else if (else_cond) {
@@ -77,12 +80,15 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::ReturnStatement>(),
   });
-  ast::IfStatement i(Source{}, cond, body,
-                     {create<ast::ElseStatement>(nullptr, else_body)});
+  auto* i = create<ast::IfStatement>(
+      cond, body,
+      ast::ElseStatementList{
+          create<ast::ElseStatement>(nullptr, else_body),
+      });
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
@@ -94,30 +100,28 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
 TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
   auto* else_cond = Expr("else_cond");
 
-  auto* else_body =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{
-                                                create<ast::ReturnStatement>(),
-                                            });
+  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
 
-  auto* else_body_2 =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{
-                                                create<ast::ReturnStatement>(),
-                                            });
+  auto* else_body_2 = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
 
   auto* cond = Expr("cond");
-  auto* body =
-      create<ast::BlockStatement>(Source{}, ast::StatementList{
-                                                create<ast::ReturnStatement>(),
-                                            });
-  ast::IfStatement i(Source{}, cond, body,
-                     {
-                         create<ast::ElseStatement>(else_cond, else_body),
-                         create<ast::ElseStatement>(nullptr, else_body_2),
-                     });
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
+  auto* i = create<ast::IfStatement>(
+      cond, body,
+      ast::ElseStatementList{
+          create<ast::ElseStatement>(else_cond, else_body),
+          create<ast::ElseStatement>(nullptr, else_body_2),
+      });
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&i)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else if (else_cond) {

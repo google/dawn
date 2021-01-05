@@ -83,23 +83,20 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
-  ast::type::I32 i32;
-
   auto p = parser("my_var : [[access(read)]] S");
 
-  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
-                        &i32, ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
-  members.push_back(&mem);
+  members.push_back(mem);
 
-  ast::StructBlockDecoration block_deco(Source{});
+  auto* block_deco = create<ast::StructBlockDecoration>();
   ast::StructDecorationList decos;
-  decos.push_back(&block_deco);
+  decos.push_back(block_deco);
 
-  ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
+  auto* str = create<ast::Struct>(members, decos);
+  auto* s = ty.struct_("S", str);
 
-  p->register_constructed("S", &s);
+  p->register_constructed("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -111,23 +108,20 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
-  ast::type::I32 i32;
-
   auto p = parser("my_var : [[access(read_write)]] S");
 
-  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
-                        &i32, ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
-  members.push_back(&mem);
+  members.push_back(mem);
 
-  ast::StructBlockDecoration block_deco(Source{});
+  auto* block_deco = create<ast::StructBlockDecoration>();
   ast::StructDecorationList decos;
-  decos.push_back(&block_deco);
+  decos.push_back(block_deco);
 
-  ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
+  auto* str = create<ast::Struct>(members, decos);
+  auto* s = ty.struct_("S", str);
 
-  p->register_constructed("S", &s);
+  p->register_constructed("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -139,23 +133,20 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
-  ast::type::I32 i32;
-
   auto p = parser("my_var : [[access(read), access(read_write)]] S");
 
-  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
-                        &i32, ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
-  members.push_back(&mem);
+  members.push_back(mem);
 
-  ast::StructBlockDecoration block_deco(Source{});
+  auto* block_deco = create<ast::StructBlockDecoration>();
   ast::StructDecorationList decos;
-  decos.push_back(&block_deco);
+  decos.push_back(block_deco);
 
-  ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
+  auto* str = create<ast::Struct>(members, decos);
+  auto* s = ty.struct_("S", str);
 
-  p->register_constructed("S", &s);
+  p->register_constructed("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
@@ -164,23 +155,20 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
-  ast::type::I32 i32;
-
   auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
 
-  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
-                        &i32, ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
-  members.push_back(&mem);
+  members.push_back(mem);
 
-  ast::StructBlockDecoration block_deco(Source{});
+  auto* block_deco = create<ast::StructBlockDecoration>();
   ast::StructDecorationList decos;
-  decos.push_back(&block_deco);
+  decos.push_back(block_deco);
 
-  ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
+  auto* str = create<ast::Struct>(members, decos);
+  auto* s = ty.struct_("S", str);
 
-  p->register_constructed("S", &s);
+  p->register_constructed("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
@@ -205,23 +193,20 @@ TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
-  ast::type::I32 i32;
-
   auto p = parser("my_var : [[stride(1)]] S");
 
-  ast::StructMember mem(Source{}, p->get_module().RegisterSymbol("a"), "a",
-                        &i32, ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32, ast::StructMemberDecorationList{});
   ast::StructMemberList members;
-  members.push_back(&mem);
+  members.push_back(mem);
 
-  ast::StructBlockDecoration block_deco(Source{});
+  auto* block_deco = create<ast::StructBlockDecoration>();
   ast::StructDecorationList decos;
-  decos.push_back(&block_deco);
+  decos.push_back(block_deco);
 
-  ast::Struct str(Source{}, members, decos);
-  ast::type::Struct s(p->get_module().RegisterSymbol("S"), "S", &str);
+  auto* str = create<ast::Struct>(members, decos);
+  auto* s = ty.struct_("S", str);
 
-  p->register_constructed("S", &s);
+  p->register_constructed("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());

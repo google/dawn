@@ -26,11 +26,11 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Discard) {
-  ast::DiscardStatement stmt(Source{});
+  auto* stmt = create<ast::DiscardStatement>();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(&stmt)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  discard_fragment();\n");
 }
 

@@ -39,14 +39,14 @@ TEST_F(BuilderTest, Loop_Empty) {
   // loop {
   // }
 
-  ast::LoopStatement loop(
-      Source{}, create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* loop = create<ast::LoopStatement>(
+      create<ast::BlockStatement>(ast::StatementList{}),
+      create<ast::BlockStatement>(ast::StatementList{}));
 
-  ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&loop)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(OpBranch %1
 %1 = OpLabel
@@ -67,20 +67,18 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
 
-  ast::LoopStatement loop(
-      Source{}, body,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* loop = create<ast::LoopStatement>(
+      body, create<ast::BlockStatement>(ast::StatementList{}));
 
   td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&loop)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -112,21 +110,19 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* continuing = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(3))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
 
-  ast::LoopStatement loop(Source{}, body, continuing);
+  auto* loop = create<ast::LoopStatement>(body, continuing);
 
   td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&loop)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -153,19 +149,17 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   // loop {
   //   continue;
   // }
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ContinueStatement>(Source{}),
-                });
-  ast::LoopStatement loop(
-      Source{}, body,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ContinueStatement>(),
+  });
+  auto* loop = create<ast::LoopStatement>(
+      body, create<ast::BlockStatement>(ast::StatementList{}));
 
-  ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&loop)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(OpBranch %1
 %1 = OpLabel
@@ -183,19 +177,17 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   // loop {
   //   break;
   // }
-  auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
-  ast::LoopStatement loop(
-      Source{}, body,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
+  auto* loop = create<ast::LoopStatement>(
+      body, create<ast::BlockStatement>(ast::StatementList{}));
 
-  ASSERT_TRUE(td.DetermineResultType(&loop)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&loop)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(OpBranch %1
 %1 = OpLabel

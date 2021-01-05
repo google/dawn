@@ -114,7 +114,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
   ast::type::Array ary(ty.i32, 4,
                        ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(Source{}, 16u),
+                           create<ast::StrideDecoration>(16u),
                        });
 
   auto id = b.GenerateTypeIfNeeded(&ary);
@@ -242,8 +242,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
-  auto* s = create<ast::Struct>(Source{}, ast::StructMemberList{},
-                                ast::StructDecorationList{});
+  auto* s =
+      create<ast::Struct>(ast::StructMemberList{}, ast::StructDecorationList{});
   auto* s_type = ty.struct_("S", s);
 
   auto id = b.GenerateTypeIfNeeded(s_type);
@@ -276,7 +276,7 @@ OpMemberName %1 0 "a"
 
 TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   ast::StructDecorationList struct_decos;
-  struct_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
+  struct_decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* s = create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32)},
                                 struct_decos);

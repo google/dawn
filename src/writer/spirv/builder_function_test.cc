@@ -63,7 +63,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_Return) {
   auto* func = Func("a_func", {}, ty.void_,
                     ast::StatementList{
-                        create<ast::ReturnStatement>(Source{}),
+                        create<ast::ReturnStatement>(),
                     },
                     ast::FunctionDecorationList{});
 
@@ -108,7 +108,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_Discard) {
   auto* func = Func("a_func", {}, ty.void_,
                     ast::StatementList{
-                        create<ast::DiscardStatement>(Source{}),
+                        create<ast::DiscardStatement>(),
                     },
                     ast::FunctionDecorationList{});
 
@@ -155,7 +155,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_WithBody) {
   auto* func = Func("a_func", {}, ty.void_,
                     ast::StatementList{
-                        create<ast::ReturnStatement>(Source{}),
+                        create<ast::ReturnStatement>(),
                     },
                     ast::FunctionDecorationList{});
 
@@ -211,7 +211,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // }
 
   ast::StructDecorationList s_decos;
-  s_decos.push_back(create<ast::StructBlockDecoration>(Source{}));
+  s_decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
@@ -221,8 +221,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   auto* data_var = Var("data", ast::StorageClass::kStorageBuffer, &ac, nullptr,
                        ast::VariableDecorationList{
-                           create<ast::BindingDecoration>(Source{}, 0),
-                           create<ast::SetDecoration>(Source{}, 0),
+                           create<ast::BindingDecoration>(0),
+                           create<ast::SetDecoration>(0),
                        });
 
   mod->AddConstructedType(s);
@@ -234,15 +234,15 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func = Func("a", ast::VariableList{}, ty.void_,
-                      ast::StatementList{
-                          create<ast::VariableDeclStatement>(Source{}, var),
-                          create<ast::ReturnStatement>(Source{}),
-                      },
-                      ast::FunctionDecorationList{
-                          create<ast::StageDecoration>(
-                              Source{}, ast::PipelineStage::kCompute),
-                      });
+    auto* func =
+        Func("a", ast::VariableList{}, ty.void_,
+             ast::StatementList{
+                 create<ast::VariableDeclStatement>(var),
+                 create<ast::ReturnStatement>(),
+             },
+             ast::FunctionDecorationList{
+                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             });
 
     mod->AddFunction(func);
   }
@@ -251,15 +251,15 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func = Func("b", ast::VariableList{}, ty.void_,
-                      ast::StatementList{
-                          create<ast::VariableDeclStatement>(Source{}, var),
-                          create<ast::ReturnStatement>(Source{}),
-                      },
-                      ast::FunctionDecorationList{
-                          create<ast::StageDecoration>(
-                              Source{}, ast::PipelineStage::kCompute),
-                      });
+    auto* func =
+        Func("b", ast::VariableList{}, ty.void_,
+             ast::StatementList{
+                 create<ast::VariableDeclStatement>(var),
+                 create<ast::ReturnStatement>(),
+             },
+             ast::FunctionDecorationList{
+                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             });
 
     mod->AddFunction(func);
   }

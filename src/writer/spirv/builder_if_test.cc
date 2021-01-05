@@ -46,18 +46,17 @@ TEST_F(BuilderTest, If_Empty) {
   // if (true) {
   // }
   auto* cond = create<ast::ScalarConstructorExpression>(
-      Source{}, create<ast::BoolLiteral>(Source{}, &bool_type, true));
+      create<ast::BoolLiteral>(&bool_type, true));
 
-  ast::IfStatement expr(
-      Source{}, cond,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* expr = create<ast::IfStatement>(
+      cond, create<ast::BlockStatement>(ast::StatementList{}),
       ast::ElseStatementList{});
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
 )");
@@ -80,12 +79,12 @@ TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
       create<ast::BoolLiteral>(&bool_type, true));
 
   ast::ElseStatementList elses;
-  auto* block = create<ast::BlockStatement>(Source{}, ast::StatementList{});
-  ast::IfStatement expr(Source{}, cond, block, elses);
+  auto* block = create<ast::BlockStatement>(ast::StatementList{});
+  auto* expr = create<ast::IfStatement>(cond, block, elses);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  EXPECT_FALSE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_FALSE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(),
             "Internal error: trying to add SPIR-V instruction 247 outside a "
@@ -99,17 +98,17 @@ TEST_F(BuilderTest, If_WithStatements) {
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
-  ast::IfStatement expr(Source{}, Expr(true), body, ast::ElseStatementList{});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
+  auto* expr =
+      create<ast::IfStatement>(Expr(true), body, ast::ElseStatementList{});
 
   td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -137,24 +136,22 @@ TEST_F(BuilderTest, If_WithElse) {
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(3))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
 
-  ast::IfStatement expr(
-      Source{}, Expr(true), body,
-      {create<ast::ElseStatement>(Source{}, nullptr, else_body)});
+  auto* expr = create<ast::IfStatement>(
+      Expr(true), body,
+      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
 
   td.RegisterVariableForTesting(var);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -186,24 +183,24 @@ TEST_F(BuilderTest, If_WithElseIf) {
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(3))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
 
-  ast::IfStatement expr(
-      Source{}, Expr(true), body,
-      {create<ast::ElseStatement>(Source{}, Expr(true), else_body)});
+  auto* expr = create<ast::IfStatement>(
+      Expr(true), body,
+      ast::ElseStatementList{
+          create<ast::ElseStatement>(Expr(true), else_body),
+      });
 
   td.RegisterVariableForTesting(var);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -244,34 +241,30 @@ TEST_F(BuilderTest, If_WithMultiple) {
 
   auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
   auto* body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(2))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* elseif_1_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(3))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
   auto* elseif_2_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(4))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(4))});
   auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{create<ast::AssignmentStatement>(
-                    Source{}, Expr("v"), Expr(5))});
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(5))});
 
-  ast::IfStatement expr(
-      Source{}, Expr(true), body,
-      {
-          create<ast::ElseStatement>(Source{}, Expr(true), elseif_1_body),
-          create<ast::ElseStatement>(Source{}, Expr(false), elseif_2_body),
-          create<ast::ElseStatement>(Source{}, nullptr, else_body),
+  auto* expr = create<ast::IfStatement>(
+      Expr(true), body,
+      ast::ElseStatementList{
+          create<ast::ElseStatement>(Expr(true), elseif_1_body),
+          create<ast::ElseStatement>(Expr(false), elseif_2_body),
+          create<ast::ElseStatement>(nullptr, else_body),
       });
 
   td.RegisterVariableForTesting(var);
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -320,27 +313,25 @@ TEST_F(BuilderTest, If_WithBreak) {
   //   }
   // }
 
-  auto* if_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
 
-  auto* if_stmt = create<ast::IfStatement>(Source{}, Expr(true), if_body,
-                                           ast::ElseStatementList{});
+  auto* if_stmt =
+      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
 
-  auto* loop_body = create<ast::BlockStatement>(Source{}, ast::StatementList{
-                                                              if_stmt,
-                                                          });
+  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
+      if_stmt,
+  });
 
-  ast::LoopStatement expr(
-      Source{}, loop_body,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(
+      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -369,30 +360,26 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   //     break;
   //   }
   // }
-  auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::BreakStatement>(Source{}),
-                });
+  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::BreakStatement>(),
+  });
 
   auto* if_stmt = create<ast::IfStatement>(
-      Source{}, Expr(true),
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(Source{}, nullptr, else_body)});
+      Expr(true), create<ast::BlockStatement>(ast::StatementList{}),
+      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
 
-  auto* loop_body = create<ast::BlockStatement>(Source{}, ast::StatementList{
-                                                              if_stmt,
-                                                          });
+  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
+      if_stmt,
+  });
 
-  ast::LoopStatement expr(
-      Source{}, loop_body,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(
+      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -422,27 +409,25 @@ TEST_F(BuilderTest, If_WithContinue) {
   //     continue;
   //   }
   // }
-  auto* if_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ContinueStatement>(Source{}),
-                });
+  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ContinueStatement>(),
+  });
 
-  auto* if_stmt = create<ast::IfStatement>(Source{}, Expr(true), if_body,
-                                           ast::ElseStatementList{});
+  auto* if_stmt =
+      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
 
-  auto* loop_body = create<ast::BlockStatement>(Source{}, ast::StatementList{
-                                                              if_stmt,
-                                                          });
+  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
+      if_stmt,
+  });
 
-  ast::LoopStatement expr(
-      Source{}, loop_body,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(
+      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -471,30 +456,26 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   //     continue;
   //   }
   // }
-  auto* else_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ContinueStatement>(Source{}),
-                });
+  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ContinueStatement>(),
+  });
 
   auto* if_stmt = create<ast::IfStatement>(
-      Source{}, Expr(true),
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(Source{}, nullptr, else_body)});
+      Expr(true), create<ast::BlockStatement>(ast::StatementList{}),
+      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
 
-  auto* loop_body = create<ast::BlockStatement>(Source{}, ast::StatementList{
-                                                              if_stmt,
-                                                          });
+  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
+      if_stmt,
+  });
 
-  ast::LoopStatement expr(
-      Source{}, loop_body,
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(
+      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -522,18 +503,17 @@ TEST_F(BuilderTest, If_WithReturn) {
   // if (true) {
   //   return;
   // }
-  auto* if_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}),
-                });
+  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(),
+  });
 
-  ast::IfStatement expr(Source{}, Expr(true), if_body,
-                        ast::ElseStatementList{});
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr =
+      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
 )");
@@ -550,18 +530,17 @@ TEST_F(BuilderTest, If_WithReturnValue) {
   // if (true) {
   //   return false;
   // }
-  auto* if_body = create<ast::BlockStatement>(
-      Source{}, ast::StatementList{
-                    create<ast::ReturnStatement>(Source{}, Expr(false)),
-                });
+  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::ReturnStatement>(Expr(false)),
+  });
 
-  ast::IfStatement expr(Source{}, Expr(true), if_body,
-                        ast::ElseStatementList{});
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  auto* expr =
+      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
 %5 = OpConstantFalse %1
@@ -583,17 +562,16 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   auto* var = Var("a", ast::StorageClass::kFunction, ty.bool_);
   td.RegisterVariableForTesting(var);
 
-  ast::IfStatement expr(
-      Source{}, Expr("a"),
-      create<ast::BlockStatement>(Source{}, ast::StatementList{}),
+  auto* expr = create<ast::IfStatement>(
+      Expr("a"), create<ast::BlockStatement>(ast::StatementList{}),
       ast::ElseStatementList{});
 
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
 %2 = OpTypePointer Function %3
 %1 = OpVariable %2 Function
