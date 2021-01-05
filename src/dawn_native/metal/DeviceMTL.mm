@@ -402,4 +402,8 @@ namespace dawn_native { namespace metal {
         return 1;
     }
 
+    float Device::GetTimestampPeriodInNS() const {
+        return 1.0f;
+    }
+
 }}  // namespace dawn_native::metal

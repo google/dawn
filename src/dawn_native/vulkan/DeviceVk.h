@@ -108,6 +108,8 @@ namespace dawn_native { namespace vulkan {
         uint32_t GetOptimalBytesPerRowAlignment() const override;
         uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
+        float GetTimestampPeriodInNS() const override;
+
       private:
         Device(Adapter* adapter, const DeviceDescriptor* descriptor);
 

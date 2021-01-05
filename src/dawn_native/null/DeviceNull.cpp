@@ -470,4 +470,8 @@ namespace dawn_native { namespace null {
         return 1;
     }
 
+    float Device::GetTimestampPeriodInNS() const {
+        return 1.0f;
+    }
+
 }}  // namespace dawn_native::null

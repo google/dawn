@@ -141,6 +141,8 @@ namespace dawn_native { namespace d3d12 {
         uint32_t GetOptimalBytesPerRowAlignment() const override;
         uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
+        float GetTimestampPeriodInNS() const override;
+
       private:
         using DeviceBase::DeviceBase;
 
@@ -236,6 +238,9 @@ namespace dawn_native { namespace d3d12 {
         // Sampler cache needs to be destroyed before the CPU sampler allocator to ensure the final
         // release is called.
         std::unique_ptr<SamplerHeapCache> mSamplerHeapCache;
+
+        // The number of nanoseconds required for a timestamp query to be incremented by 1
+        float mTimestampPeriod = 1.0f;
     };
 
 }}  // namespace dawn_native::d3d12

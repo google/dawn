@@ -116,6 +116,8 @@ namespace dawn_native { namespace null {
         uint32_t GetOptimalBytesPerRowAlignment() const override;
         uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
+        float GetTimestampPeriodInNS() const override;
+
       private:
         using DeviceBase::DeviceBase;
 

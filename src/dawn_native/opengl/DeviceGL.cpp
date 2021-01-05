@@ -228,4 +228,8 @@ namespace dawn_native { namespace opengl {
         return 1;
     }
 
+    float Device::GetTimestampPeriodInNS() const {
+        return 1.0f;
+    }
+
 }}  // namespace dawn_native::opengl

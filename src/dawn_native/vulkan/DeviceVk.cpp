@@ -945,4 +945,8 @@ namespace dawn_native { namespace vulkan {
         return mDeviceInfo.properties.limits.optimalBufferCopyOffsetAlignment;
     }
 
+    float Device::GetTimestampPeriodInNS() const {
+        return mDeviceInfo.properties.limits.timestampPeriod;
+    }
+
 }}  // namespace dawn_native::vulkan

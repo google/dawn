@@ -77,6 +77,15 @@ namespace dawn_native { namespace d3d12 {
             CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
                          "D3D12 create command queue"));
 
+        // Get GPU timestamp counter frequency (in ticks/second). This fails if the specified
+        // command queue doesn't support timestamps, D3D12_COMMAND_LIST_TYPE_DIRECT always support
+        // timestamps.
+        uint64_t frequency;
+        DAWN_TRY(CheckHRESULT(mCommandQueue->GetTimestampFrequency(&frequency),
+                              "D3D12 get timestamp frequency"));
+        // Calculate the period in nanoseconds by the frequency.
+        mTimestampPeriod = static_cast<float>(1e9) / frequency;
+
         // If PIX is not attached, the QueryInterface fails. Hence, no need to check the return
         // value.
         mCommandQueue.As(&mD3d12SharingContract);
@@ -653,6 +662,10 @@ namespace dawn_native { namespace d3d12 {
     // so we return 1 and let ComputeTextureCopySplits take care of the alignment.
     uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
         return 1;
+    }
+
+    float Device::GetTimestampPeriodInNS() const {
+        return mTimestampPeriod;
     }
 
 }}  // namespace dawn_native::d3d12
