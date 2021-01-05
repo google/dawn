@@ -414,7 +414,8 @@ namespace dawn_native { namespace vulkan {
 
         // Create the temporary buffer. Note that We don't need to respect WebGPU's 256 alignment
         // because it isn't a hard constraint in Vulkan.
-        uint64_t tempBufferSize = widthInBlocks * heightInBlocks * blockInfo.byteSize;
+        uint64_t tempBufferSize =
+            widthInBlocks * heightInBlocks * copySize.depth * blockInfo.byteSize;
         BufferDescriptor tempBufferDescriptor;
         tempBufferDescriptor.size = tempBufferSize;
         tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;

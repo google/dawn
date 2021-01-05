@@ -405,9 +405,12 @@ class CompressedTextureBCFormatTest : public DawnTest {
         return expectedData;
     }
 
+    // Right now we only test 2D array textures with BC formats.
+    // TODO(jiawei.shao@intel.com): support 1D/3D textures
     static wgpu::Extent3D GetVirtualSizeAtLevel(const CopyConfig& config) {
         return {config.textureDescriptor.size.width >> config.viewMipmapLevel,
-                config.textureDescriptor.size.height >> config.viewMipmapLevel, 1};
+                config.textureDescriptor.size.height >> config.viewMipmapLevel,
+                config.textureDescriptor.size.depth};
     }
 
     static wgpu::Extent3D GetPhysicalSizeAtLevel(const CopyConfig& config) {
@@ -777,6 +780,79 @@ TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVi
             VerifyCompressedTexturePixelValues(renderPipeline, bindGroup0, dstVirtualSizes[i],
                                                dstConfigs[i].copyOrigin3D, dstVirtualSizes[i],
                                                expectedData);
+        }
+    }
+}
+
+// A regression test for a bug for the toggle UseTemporaryBufferInCompressedTextureToTextureCopy on
+// Vulkan backend: test BC format texture-to-texture partial copies with multiple array layers
+// where the physical size of the source subresource is different from its virtual size.
+TEST_P(CompressedTextureBCFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqualToVirtualSize) {
+    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+
+    // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
+    // subresource and does not fit in another one on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kArrayLayerCount = 5;
+
+    CopyConfig srcConfig;
+    srcConfig.textureDescriptor.size = {60, 60, kArrayLayerCount};
+    constexpr uint32_t kMipmapLevelCount = 3;
+    srcConfig.textureDescriptor.mipLevelCount = kMipmapLevelCount;
+    srcConfig.viewMipmapLevel = srcConfig.textureDescriptor.mipLevelCount - 1;
+    srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+
+    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
+    // required in the copies.
+    const wgpu::Extent3D kSrcVirtualSize = GetVirtualSizeAtLevel(srcConfig);
+    ASSERT_NE(0u, kSrcVirtualSize.width % kBCBlockWidthInTexels);
+    ASSERT_NE(0u, kSrcVirtualSize.height % kBCBlockHeightInTexels);
+
+    CopyConfig dstConfig;
+    dstConfig.textureDescriptor.size = {16, 16, kArrayLayerCount};
+    dstConfig.viewMipmapLevel = dstConfig.textureDescriptor.mipLevelCount - 1;
+
+    const wgpu::Extent3D kDstVirtualSize = GetVirtualSizeAtLevel(dstConfig);
+    srcConfig.copyExtent3D = dstConfig.copyExtent3D = kDstVirtualSize;
+    srcConfig.rowsPerImage = srcConfig.copyExtent3D.height / kBCBlockHeightInTexels;
+
+    ASSERT_GT(srcConfig.copyOrigin3D.x + srcConfig.copyExtent3D.width, kSrcVirtualSize.width);
+    ASSERT_GT(srcConfig.copyOrigin3D.y + srcConfig.copyExtent3D.height, kSrcVirtualSize.height);
+
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
+        srcConfig.textureDescriptor.format = dstConfig.textureDescriptor.format = format;
+        srcConfig.bytesPerRowAlignment =
+            Align(srcConfig.copyExtent3D.width / kBCBlockWidthInTexels *
+                      utils::GetTexelBlockSizeInBytes(format),
+                  kTextureBytesPerRowAlignment);
+        dstConfig.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+
+        // Create bcTextureSrc as the source texture and initialize it with pre-prepared BC
+        // compressed data.
+        wgpu::Texture bcTextureSrc = CreateTextureWithCompressedData(srcConfig);
+
+        // Create bcTexture and copy from the content in bcTextureSrc into it.
+        wgpu::Texture bcTextureDst = CreateTextureFromTexture(bcTextureSrc, srcConfig, dstConfig);
+
+        // We use the render pipeline to test if each layer can be correctly sampled with the
+        // expected data.
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+
+        const wgpu::Extent3D kExpectedDataRegionPerLayer = {kDstVirtualSize.width,
+                                                            kDstVirtualSize.height, 1u};
+        std::vector<RGBA8> kExpectedDataPerLayer =
+            GetExpectedData(format, kExpectedDataRegionPerLayer);
+        const wgpu::Origin3D kCopyOriginPerLayer = {dstConfig.copyOrigin3D.x,
+                                                    dstConfig.copyOrigin3D.y, 0};
+        for (uint32_t copyLayer = 0; copyLayer < kArrayLayerCount; ++copyLayer) {
+            wgpu::BindGroup bindGroup = CreateBindGroupForTest(
+                renderPipeline.GetBindGroupLayout(0), bcTextureDst, format,
+                dstConfig.copyOrigin3D.z + copyLayer, dstConfig.viewMipmapLevel);
+
+            VerifyCompressedTexturePixelValues(renderPipeline, bindGroup,
+                                               kExpectedDataRegionPerLayer, kCopyOriginPerLayer,
+                                               kExpectedDataRegionPerLayer, kExpectedDataPerLayer);
         }
     }
 }
