@@ -465,10 +465,6 @@ if(${TINT_BUILD_TESTS})
     scope_stack_test.cc
     symbol_table_test.cc
     symbol_test.cc
-    transform/emit_vertex_point_size_test.cc
-    transform/bound_array_accessors_test.cc
-    transform/first_index_offset_test.cc
-    transform/vertex_pulling_test.cc
     type_determiner_test.cc
     validator/validator_control_block_test.cc
     validator/validator_function_test.cc
@@ -653,6 +649,16 @@ if(${TINT_BUILD_TESTS})
       writer/wgsl/generator_impl_variable_decl_statement_test.cc
       writer/wgsl/generator_impl_variable_test.cc
       writer/wgsl/test_helper.h
+    )
+  endif()
+
+  if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      transform/bound_array_accessors_test.cc
+      transform/emit_vertex_point_size_test.cc
+      transform/first_index_offset_test.cc
+      transform/test_helper.h
+      transform/vertex_pulling_test.cc
     )
   endif()
 

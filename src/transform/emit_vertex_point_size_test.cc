@@ -14,203 +14,106 @@
 
 #include "src/transform/emit_vertex_point_size.h"
 
-#include <memory>
-#include <utility>
-
-#include "gtest/gtest.h"
-#include "src/ast/builder.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/demangler.h"
-#include "src/diagnostic/formatter.h"
-#include "src/transform/manager.h"
+#include "src/transform/test_helper.h"
 
 namespace tint {
 namespace transform {
 namespace {
 
-class EmitVertexPointSizeTest : public testing::Test {
- public:
-  Transform::Output GetTransform(ast::Module in) {
-    Manager manager;
-    manager.append(std::make_unique<EmitVertexPointSize>());
-    return manager.Run(&in);
-  }
-};
-
-struct ModuleBuilder : public ast::BuilderWithModule {
-  ModuleBuilder() {}
-
-  ast::Module Module() {
-    Build();
-    return std::move(*mod);
-  }
-
- protected:
-  virtual void Build() = 0;
-};
+using EmitVertexPointSizeTest = TransformTest;
 
 TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
-  struct Builder : ModuleBuilder {
-    void Build() override {
-      mod->AddFunction(Func("non_entry_a", ast::VariableList{}, ty.void_,
-                            ast::StatementList{},
-                            ast::FunctionDecorationList{}));
+  auto* src = R"(
+fn non_entry_a() -> void {
+}
 
-      auto* entry =
-          Func("entry", ast::VariableList{}, ty.void_,
-               ast::StatementList{
-                   create<ast::VariableDeclStatement>(
-                       Var("builtin_assignments_should_happen_before_this",
-                           tint::ast::StorageClass::kFunction, ty.f32)),
-               },
-               ast::FunctionDecorationList{
-                   create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-               });
-      mod->AddFunction(entry);
+[[stage(vertex)]]
+fn entry() -> void {
+  var builtin_assignments_should_happen_before_this : f32;
+}
 
-      mod->AddFunction(Func("non_entry_b", ast::VariableList{}, ty.void_,
-                            ast::StatementList{},
-                            ast::FunctionDecorationList{}));
-    }
-  };
-
-  auto result = GetTransform(Builder{}.Module());
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto* expected = R"(Module{
-  Variable{
-    Decorations{
-      BuiltinDecoration{pointsize}
-    }
-    tint_pointsize
-    out
-    __f32
-  }
-  Function non_entry_a -> __void
-  ()
-  {
-  }
-  Function entry -> __void
-  StageDecoration{vertex}
-  ()
-  {
-    Assignment{
-      Identifier[__ptr_out__f32]{tint_pointsize}
-      ScalarConstructor[__f32]{1.000000}
-    }
-    VariableDeclStatement{
-      Variable{
-        builtin_assignments_should_happen_before_this
-        function
-        __f32
-      }
-    }
-  }
-  Function non_entry_b -> __void
-  ()
-  {
-  }
+fn non_entry_b() -> void {
 }
 )";
-  EXPECT_EQ(expected,
-            Demangler().Demangle(result.module, result.module.to_str()));
+
+  auto* expect = R"(
+[[builtin(pointsize)]] var<out> tint_pointsize : f32;
+
+fn non_entry_a() -> void {
+}
+
+[[stage(vertex)]]
+fn entry() -> void {
+  tint_pointsize = 1.0;
+  var builtin_assignments_should_happen_before_this : f32;
+}
+
+fn non_entry_b() -> void {
+}
+)";
+
+  auto got = Transform<EmitVertexPointSize>(src);
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
-  struct Builder : ModuleBuilder {
-    void Build() override {
-      mod->AddFunction(Func("non_entry_a", ast::VariableList{}, ty.void_,
-                            ast::StatementList{},
-                            ast::FunctionDecorationList{}));
+  auto* src = R"(
+fn non_entry_a() -> void {
+}
 
-      mod->AddFunction(
-          Func("entry", ast::VariableList{}, ty.void_, ast::StatementList{},
-               ast::FunctionDecorationList{
-                   create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-               }));
+[[stage(vertex)]]
+fn entry() -> void {
+}
 
-      mod->AddFunction(Func("non_entry_b", ast::VariableList{}, ty.void_,
-                            ast::StatementList{},
-                            ast::FunctionDecorationList{}));
-    }
-  };
-
-  auto result = GetTransform(Builder{}.Module());
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto* expected = R"(Module{
-  Variable{
-    Decorations{
-      BuiltinDecoration{pointsize}
-    }
-    tint_pointsize
-    out
-    __f32
-  }
-  Function non_entry_a -> __void
-  ()
-  {
-  }
-  Function entry -> __void
-  StageDecoration{vertex}
-  ()
-  {
-    Assignment{
-      Identifier[__ptr_out__f32]{tint_pointsize}
-      ScalarConstructor[__f32]{1.000000}
-    }
-  }
-  Function non_entry_b -> __void
-  ()
-  {
-  }
+fn non_entry_b() -> void {
 }
 )";
-  EXPECT_EQ(expected,
-            Demangler().Demangle(result.module, result.module.to_str()));
+
+  auto* expect = R"(
+[[builtin(pointsize)]] var<out> tint_pointsize : f32;
+
+fn non_entry_a() -> void {
+}
+
+[[stage(vertex)]]
+fn entry() -> void {
+  tint_pointsize = 1.0;
+}
+
+fn non_entry_b() -> void {
+}
+)";
+
+  auto got = Transform<EmitVertexPointSize>(src);
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
-  struct Builder : ModuleBuilder {
-    void Build() override {
-      auto* fragment_entry = Func(
-          "fragment_entry", ast::VariableList{}, ty.void_, ast::StatementList{},
-          ast::FunctionDecorationList{
-              create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-          });
-      mod->AddFunction(fragment_entry);
+  auto* src = R"(
+[[stage(fragment)]]
+fn fragment_entry() -> void {
+}
 
-      auto* compute_entry = Func(
-          "compute_entry", ast::VariableList{}, ty.void_, ast::StatementList{},
-          ast::FunctionDecorationList{
-              create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-          });
-      mod->AddFunction(compute_entry);
-    }
-  };
-
-  auto result = GetTransform(Builder{}.Module());
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto* expected = R"(Module{
-  Function fragment_entry -> __void
-  StageDecoration{fragment}
-  ()
-  {
-  }
-  Function compute_entry -> __void
-  StageDecoration{compute}
-  ()
-  {
-  }
+[[stage(compute)]]
+fn compute_entry() -> void {
 }
 )";
-  EXPECT_EQ(expected,
-            Demangler().Demangle(result.module, result.module.to_str()));
+
+  auto* expect = R"(
+[[stage(fragment)]]
+fn fragment_entry() -> void {
+}
+
+[[stage(compute)]]
+fn compute_entry() -> void {
+}
+)";
+
+  auto got = Transform<EmitVertexPointSize>(src);
+
+  EXPECT_EQ(expect, got);
 }
 
 }  // namespace

@@ -831,6 +831,7 @@ source_set("tint_unittests_core_src") {
     "src/transform/bound_array_accessors_test.cc",
     "src/transform/emit_vertex_point_size_test.cc",
     "src/transform/first_index_offset_test.cc",
+    "src/transform/test_helper.h",
     "src/transform/vertex_pulling_test.cc",
     "src/type_determiner_test.cc",
     "src/validator/validator_control_block_test.cc",

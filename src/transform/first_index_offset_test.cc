@@ -15,413 +15,223 @@
 #include "src/transform/first_index_offset.h"
 
 #include <memory>
-#include <string>
 #include <utility>
+#include <vector>
 
-#include "gtest/gtest.h"
-#include "src/ast/block_statement.h"
-#include "src/ast/builder.h"
-#include "src/ast/builtin.h"
-#include "src/ast/builtin_decoration.h"
-#include "src/ast/call_expression.h"
-#include "src/ast/call_statement.h"
-#include "src/ast/function.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/storage_class.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decoration.h"
-#include "src/demangler.h"
-#include "src/diagnostic/formatter.h"
-#include "src/source.h"
-#include "src/transform/manager.h"
+#include "src/transform/test_helper.h"
 
 namespace tint {
 namespace transform {
 namespace {
 
-class FirstIndexOffsetTest : public testing::Test {};
-
-struct ModuleBuilder : public ast::BuilderWithModule {
-  ast::Module Module() {
-    Build();
-    return std::move(*mod);
-  }
-
- protected:
-  void AddBuiltinInput(const std::string& name, ast::Builtin builtin) {
-    mod->AddGlobalVariable(Var(name, ast::StorageClass::kInput, ty.u32, nullptr,
-                               {create<ast::BuiltinDecoration>(builtin)}));
-  }
-
-  ast::Function* AddFunction(const std::string& name,
-                             ast::StatementList stmts) {
-    auto* func = Func(name, ast::VariableList{}, ty.u32, stmts,
-                      ast::FunctionDecorationList{});
-    mod->AddFunction(func);
-    return func;
-  }
-
-  virtual void Build() = 0;
-};
+using FirstIndexOffsetTest = TransformTest;
 
 TEST_F(FirstIndexOffsetTest, Error_AlreadyTransformed) {
-  struct Builder : public ModuleBuilder {
-    void Build() override {
-      AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      AddFunction("test", {create<ast::ReturnStatement>(Expr("vert_idx"))});
-    }
-  };
+  auto* src = R"(
+[[builtin(vertex_idx)]] var<in> vert_idx : u32;
 
-  Manager manager;
-  manager.append(std::make_unique<FirstIndexOffset>(0, 0));
-  manager.append(std::make_unique<FirstIndexOffset>(1, 1));
+fn test() -> u32 {
+  return vert_idx;
+}
 
-  auto module = Builder{}.Module();
-  auto result = manager.Run(&module);
+[[stage(vertex)]]
+fn entry() -> void {
+  test();
+}
+)";
 
-  // Release the source module to ensure there's no uncloned data in result
-  { auto tmp = std::move(module); }
+  auto* expect = R"(manager().Run() errored:
+error: First index offset transform has already been applied.)";
 
-  ASSERT_EQ(diag::Formatter().format(result.diagnostics),
-            "error: First index offset transform has already been applied.");
+  std::vector<std::unique_ptr<transform::Transform>> transforms;
+  transforms.emplace_back(std::make_unique<FirstIndexOffset>(0, 0));
+  transforms.emplace_back(std::make_unique<FirstIndexOffset>(1, 1));
+
+  auto got = Transform(src, std::move(transforms));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(FirstIndexOffsetTest, EmptyModule) {
-  Manager manager;
-  manager.append(std::make_unique<FirstIndexOffset>(0, 0));
+  auto* src = "";
+  auto* expect = "";
 
-  ast::Module module;
-  auto result = manager.Run(&module);
+  auto got = Transform<FirstIndexOffset>(src, 0, 0);
 
-  // Release the source module to ensure there's no uncloned data in result
-  { auto tmp = std::move(module); }
-
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto got = result.module.to_str();
-  auto* expected = "Module{\n}\n";
-  EXPECT_EQ(got, expected);
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
-  struct Builder : public ModuleBuilder {
-    void Build() override {
-      AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      AddFunction("test", {create<ast::ReturnStatement>(Expr("vert_idx"))});
-    }
-  };
+  auto* src = R"(
+[[builtin(vertex_idx)]] var<in> vert_idx : u32;
 
-  Manager manager;
-  manager.append(std::make_unique<FirstIndexOffset>(1, 2));
+fn test() -> u32 {
+  return vert_idx;
+}
 
-  auto module = Builder{}.Module();
-  auto result = manager.Run(&module);
-
-  // Release the source module to ensure there's no uncloned data in result
-  { auto tmp = std::move(module); }
-
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto got = result.module.to_str();
-  auto* expected =
-      R"(Module{
-  TintFirstIndexOffsetData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    tint_first_index_offset_vert_idx
-    in
-    __u32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{1}
-      SetDecoration{2}
-    }
-    tint_first_index_data
-    uniform
-    __struct_TintFirstIndexOffsetData
-  }
-  Function test -> __u32
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        vert_idx
-        none
-        __u32
-        {
-          Binary[__u32]{
-            Identifier[__ptr_in__u32]{tint_first_index_offset_vert_idx}
-            add
-            MemberAccessor[__ptr_uniform__u32]{
-              Identifier[__ptr_uniform__struct_TintFirstIndexOffsetData]{tint_first_index_data}
-              Identifier[not set]{tint_first_vertex_index}
-            }
-          }
-        }
-      }
-    }
-    Return{
-      {
-        Identifier[__u32]{vert_idx}
-      }
-    }
-  }
+[[stage(vertex)]]
+fn entry() -> void {
+  test();
 }
 )";
-  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
+
+  auto* expect = R"(
+[[block]]
+struct TintFirstIndexOffsetData {
+  [[offset(0)]]
+  tint_first_vertex_index : u32;
+};
+
+[[builtin(vertex_idx)]] var<in> tint_first_index_offset_vert_idx : u32;
+[[binding(1), set(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
+fn test() -> u32 {
+  const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
+  return vert_idx;
+}
+
+[[stage(vertex)]]
+fn entry() -> void {
+  test();
+}
+)";
+
+  auto got = Transform<FirstIndexOffset>(src, 1, 2);
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
-  struct Builder : public ModuleBuilder {
-    void Build() override {
-      AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
-      AddFunction("test", {create<ast::ReturnStatement>(Expr("inst_idx"))});
-    }
-  };
+  auto* src = R"(
+[[builtin(instance_idx)]] var<in> inst_idx : u32;
 
-  Manager manager;
-  manager.append(std::make_unique<FirstIndexOffset>(1, 7));
+fn test() -> u32 {
+  return inst_idx;
+}
 
-  auto module = Builder{}.Module();
-  auto result = manager.Run(&module);
-
-  // Release the source module to ensure there's no uncloned data in result
-  { auto tmp = std::move(module); }
-
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto got = result.module.to_str();
-  auto* expected = R"(Module{
-  TintFirstIndexOffsetData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] tint_first_instance_index: __u32}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{instance_idx}
-    }
-    tint_first_index_offset_inst_idx
-    in
-    __u32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{1}
-      SetDecoration{7}
-    }
-    tint_first_index_data
-    uniform
-    __struct_TintFirstIndexOffsetData
-  }
-  Function test -> __u32
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        inst_idx
-        none
-        __u32
-        {
-          Binary[__u32]{
-            Identifier[__ptr_in__u32]{tint_first_index_offset_inst_idx}
-            add
-            MemberAccessor[__ptr_uniform__u32]{
-              Identifier[__ptr_uniform__struct_TintFirstIndexOffsetData]{tint_first_index_data}
-              Identifier[not set]{tint_first_instance_index}
-            }
-          }
-        }
-      }
-    }
-    Return{
-      {
-        Identifier[__u32]{inst_idx}
-      }
-    }
-  }
+[[stage(vertex)]]
+fn entry() -> void {
+  test();
 }
 )";
-  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
+
+  auto* expect = R"(
+[[block]]
+struct TintFirstIndexOffsetData {
+  [[offset(0)]]
+  tint_first_instance_index : u32;
+};
+
+[[builtin(instance_idx)]] var<in> tint_first_index_offset_inst_idx : u32;
+[[binding(1), set(7)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
+fn test() -> u32 {
+  const inst_idx : u32 = (tint_first_index_offset_inst_idx + tint_first_index_data.tint_first_instance_index);
+  return inst_idx;
+}
+
+[[stage(vertex)]]
+fn entry() -> void {
+  test();
+}
+)";
+
+  auto got = Transform<FirstIndexOffset>(src, 1, 7);
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
-  struct Builder : public ModuleBuilder {
-    void Build() override {
-      AddBuiltinInput("inst_idx", ast::Builtin::kInstanceIdx);
-      AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      AddFunction("test", {
-                              create<ast::ReturnStatement>(Expr(1u)),
-                          });
-    }
-  };
+  auto* src = R"(
+[[builtin(instance_idx)]] var<in> instance_idx : u32;
+[[builtin(vertex_idx)]] var<in> vert_idx : u32;
 
-  auto transform = std::make_unique<FirstIndexOffset>(1, 7);
-  auto* transform_ptr = transform.get();
+fn test() -> u32 {
+  return instance_idx + vert_idx;
+}
 
-  Manager manager;
-  manager.append(std::move(transform));
-
-  auto module = Builder{}.Module();
-  auto result = manager.Run(&module);
-
-  // Release the source module to ensure there's no uncloned data in result
-  { auto tmp = std::move(module); }
-
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto got = result.module.to_str();
-  auto* expected = R"(Module{
-  TintFirstIndexOffsetData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
-    StructMember{[[ offset 4 ]] tint_first_instance_index: __u32}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{instance_idx}
-    }
-    tint_first_index_offset_inst_idx
-    in
-    __u32
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    tint_first_index_offset_vert_idx
-    in
-    __u32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{1}
-      SetDecoration{7}
-    }
-    tint_first_index_data
-    uniform
-    __struct_TintFirstIndexOffsetData
-  }
-  Function test -> __u32
-  ()
-  {
-    Return{
-      {
-        ScalarConstructor[__u32]{1}
-      }
-    }
-  }
+[[stage(vertex)]]
+fn entry() -> void {
+  test();
 }
 )";
-  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
 
-  EXPECT_TRUE(transform_ptr->HasVertexIndex());
-  EXPECT_EQ(transform_ptr->GetFirstVertexOffset(), 0u);
+  auto* expect = R"(
+[[block]]
+struct TintFirstIndexOffsetData {
+  [[offset(0)]]
+  tint_first_vertex_index : u32;
+  [[offset(4)]]
+  tint_first_instance_index : u32;
+};
 
-  EXPECT_TRUE(transform_ptr->HasInstanceIndex());
-  EXPECT_EQ(transform_ptr->GetFirstInstanceOffset(), 4u);
+[[builtin(instance_idx)]] var<in> tint_first_index_offset_instance_idx : u32;
+[[builtin(vertex_idx)]] var<in> tint_first_index_offset_vert_idx : u32;
+[[binding(1), set(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
+fn test() -> u32 {
+  const instance_idx : u32 = (tint_first_index_offset_instance_idx + tint_first_index_data.tint_first_instance_index);
+  const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
+  return (instance_idx + vert_idx);
+}
+
+[[stage(vertex)]]
+fn entry() -> void {
+  test();
+}
+)";
+
+  auto got = Transform<FirstIndexOffset>(src, 1, 2);
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(FirstIndexOffsetTest, NestedCalls) {
-  struct Builder : public ModuleBuilder {
-    void Build() override {
-      AddBuiltinInput("vert_idx", ast::Builtin::kVertexIdx);
-      AddFunction("func1", {create<ast::ReturnStatement>(Expr("vert_idx"))});
-      AddFunction("func2", {create<ast::ReturnStatement>(Call("func1"))});
-    }
-  };
+  auto* src = R"(
+[[builtin(vertex_idx)]] var<in> vert_idx : u32;
 
-  auto transform = std::make_unique<FirstIndexOffset>(2, 2);
+fn func1() -> u32 {
+  return vert_idx;
+}
 
-  Manager manager;
-  manager.append(std::move(transform));
+fn func2() -> u32 {
+  return func1();
+}
 
-  auto module = Builder{}.Module();
-  auto result = manager.Run(&module);
-
-  // Release the source module to ensure there's no uncloned data in result
-  { auto tmp = std::move(module); }
-
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  auto got = result.module.to_str();
-  auto* expected = R"(Module{
-  TintFirstIndexOffsetData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] tint_first_vertex_index: __u32}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    tint_first_index_offset_vert_idx
-    in
-    __u32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{2}
-      SetDecoration{2}
-    }
-    tint_first_index_data
-    uniform
-    __struct_TintFirstIndexOffsetData
-  }
-  Function func1 -> __u32
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        vert_idx
-        none
-        __u32
-        {
-          Binary[__u32]{
-            Identifier[__ptr_in__u32]{tint_first_index_offset_vert_idx}
-            add
-            MemberAccessor[__ptr_uniform__u32]{
-              Identifier[__ptr_uniform__struct_TintFirstIndexOffsetData]{tint_first_index_data}
-              Identifier[not set]{tint_first_vertex_index}
-            }
-          }
-        }
-      }
-    }
-    Return{
-      {
-        Identifier[__u32]{vert_idx}
-      }
-    }
-  }
-  Function func2 -> __u32
-  ()
-  {
-    Return{
-      {
-        Call[__u32]{
-          Identifier[__u32]{func1}
-          (
-          )
-        }
-      }
-    }
-  }
+[[stage(vertex)]]
+fn entry() -> void {
+  func2();
 }
 )";
-  EXPECT_EQ(Demangler().Demangle(result.module, got), expected);
+
+  auto* expect = R"(
+[[block]]
+struct TintFirstIndexOffsetData {
+  [[offset(0)]]
+  tint_first_vertex_index : u32;
+};
+
+[[builtin(vertex_idx)]] var<in> tint_first_index_offset_vert_idx : u32;
+[[binding(1), set(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
+fn func1() -> u32 {
+  const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
+  return vert_idx;
+}
+
+fn func2() -> u32 {
+  return func1();
+}
+
+[[stage(vertex)]]
+fn entry() -> void {
+  func2();
+}
+)";
+
+  auto got = Transform<FirstIndexOffset>(src, 1, 2);
+
+  EXPECT_EQ(expect, got);
 }
 
 }  // namespace

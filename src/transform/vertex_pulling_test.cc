@@ -16,1008 +16,369 @@
 
 #include <utility>
 
-#include "gtest/gtest.h"
-#include "src/ast/builder.h"
-#include "src/ast/function.h"
-#include "src/ast/pipeline_stage.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/void_type.h"
-#include "src/demangler.h"
-#include "src/diagnostic/formatter.h"
-#include "src/transform/manager.h"
-#include "src/type_determiner.h"
-#include "src/validator/validator.h"
+#include "src/transform/test_helper.h"
 
 namespace tint {
 namespace transform {
 namespace {
 
-class VertexPullingHelper : public ast::BuilderWithModule {
- public:
-  VertexPullingHelper() {
-    manager_ = std::make_unique<Manager>();
-    auto transform = std::make_unique<VertexPulling>();
-    transform_ = transform.get();
-    manager_->append(std::move(transform));
-  }
-
-  // Create basic module with an entry point and vertex function
-  void InitBasicModule() {
-    auto* func =
-        Func("main", ast::VariableList{}, ty.void_, ast::StatementList{},
-             ast::FunctionDecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
-
-    mod->AddFunction(func);
-  }
-
-  // Set up the transformation, after building the module
-  void InitTransform(VertexStateDescriptor vertex_state) {
-    EXPECT_TRUE(mod->IsValid());
-
-    TypeDeterminer td(mod);
-    EXPECT_TRUE(td.Determine());
-
-    transform_->SetVertexState(vertex_state);
-    transform_->SetEntryPoint("main");
-  }
-
-  // Inserts a variable which will be converted to vertex pulling
-  void AddVertexInputVariable(uint32_t location,
-                              std::string name,
-                              ast::type::Type* type) {
-    auto* var = Var(name, ast::StorageClass::kInput, type, nullptr,
-                    ast::VariableDecorationList{
-                        create<ast::LocationDecoration>(location),
-                    });
-
-    mod->AddGlobalVariable(var);
-  }
-
-  Manager* manager() { return manager_.get(); }
-  VertexPulling* transform() { return transform_; }
-
- private:
-  std::unique_ptr<Manager> manager_;
-  VertexPulling* transform_;
-};
-
-class VertexPullingTest : public VertexPullingHelper, public testing::Test {};
+using VertexPullingTest = TransformTest;
 
 TEST_F(VertexPullingTest, Error_NoVertexState) {
-  auto result = manager()->Run(mod);
-  EXPECT_TRUE(result.diagnostics.contains_errors());
-  EXPECT_EQ(diag::Formatter().format(result.diagnostics),
-            "error: SetVertexState not called");
+  auto* src = R"(
+[[stage(vertex)]]
+fn main() -> void {}
+)";
+
+  auto* expect = R"(manager().Run() errored:
+error: SetVertexState not called)";
+
+  auto got = Transform<VertexPulling>(src);
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, Error_NoEntryPoint) {
-  transform()->SetVertexState({});
-  auto result = manager()->Run(mod);
-  EXPECT_TRUE(result.diagnostics.contains_errors());
-  EXPECT_EQ(diag::Formatter().format(result.diagnostics),
-            "error: Vertex stage entry point not found");
+  auto* src = "";
+
+  auto* expect = R"(manager().Run() errored:
+error: Vertex stage entry point not found)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState({});
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
-  InitBasicModule();
-  InitTransform({});
-  transform()->SetEntryPoint("_");
+  auto* src = R"(
+[[stage(vertex)]]
+fn main() -> void {}
+)";
 
-  auto result = manager()->Run(mod);
-  EXPECT_TRUE(result.diagnostics.contains_errors());
-  EXPECT_EQ(diag::Formatter().format(result.diagnostics),
-            "error: Vertex stage entry point not found");
+  auto* expect = R"(manager().Run() errored:
+error: Vertex stage entry point not found)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState({});
+  transform->SetEntryPoint("_");
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
-  auto* func =
-      Func("main", ast::VariableList{}, ty.void_, ast::StatementList{},
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-  mod->AddFunction(func);
+  auto* src = R"(
+[[stage(fragment)]]
+fn main() -> void {}
+)";
 
-  InitTransform({});
-  auto result = manager()->Run(mod);
-  EXPECT_TRUE(result.diagnostics.contains_errors());
-  EXPECT_EQ(diag::Formatter().format(result.diagnostics),
-            "error: Vertex stage entry point not found");
+  auto* expect = R"(manager().Run() errored:
+error: Vertex stage entry point not found)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState({});
+  transform->SetEntryPoint("main");
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, BasicModule) {
-  InitBasicModule();
-  InitTransform({});
-  auto result = manager()->Run(mod);
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
+  auto* src = R"(
+[[stage(vertex)]]
+fn main() -> void {}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct TintVertexData {
+  [[offset(0)]]
+  _tint_vertex_data : [[stride(4)]] array<u32>;
+};
+
+[[stage(vertex)]]
+fn main() -> void {
+  {
+    var _tint_pulling_pos : i32;
+  }
+}
+)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState({});
+  transform->SetEntryPoint("main");
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, OneAttribute) {
-  InitBasicModule();
+  auto* src = R"(
+[[location(0)]] var<in> var_a : f32;
 
-  AddVertexInputVariable(0, "var_a", ty.f32);
+[[stage(vertex)]]
+fn main() -> void {}
+)";
 
-  InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
+  auto* expect = R"(
+[[block]]
+struct TintVertexData {
+  [[offset(0)]]
+  _tint_vertex_data : [[stride(4)]] array<u32>;
+};
 
-  auto result = manager()->Run(mod);
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
+[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[binding(0), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+var<private> var_a : f32;
 
-  EXPECT_EQ(R"(Module{
-  TintVertexData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    _tint_pulling_vertex_index
-    in
-    __i32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{0}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_0
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    var_a
-    private
-    __f32
-  }
-  Function main -> __void
-  StageDecoration{vertex}
-  ()
+[[stage(vertex)]]
+fn main() -> void {
   {
-    Block{
-      VariableDeclStatement{
-        Variable{
-          _tint_pulling_pos
-          function
-          __i32
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{4}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__f32]{var_a}
-        Bitcast[__f32]<__f32>{
-          ArrayAccessor[__ptr_storage_buffer__u32]{
-            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-              Identifier[not set]{_tint_vertex_data}
-            }
-            Binary[__i32]{
-              Identifier[__ptr_function__i32]{_tint_pulling_pos}
-              divide
-              ScalarConstructor[__u32]{4}
-            }
-          }
-        }
-      }
-    }
+    var _tint_pulling_pos : i32;
+    _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
+    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
   }
 }
-)",
-            Demangler().Demangle(result.module, result.module.to_str()));
+)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState(
+      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
+  transform->SetEntryPoint("main");
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, OneInstancedAttribute) {
-  InitBasicModule();
+  auto* src = R"(
+[[location(0)]] var<in> var_a : f32;
 
-  AddVertexInputVariable(0, "var_a", ty.f32);
+[[stage(vertex)]]
+fn main() -> void {}
+)";
 
-  InitTransform(
-      {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
+  auto* expect = R"(
+[[block]]
+struct TintVertexData {
+  [[offset(0)]]
+  _tint_vertex_data : [[stride(4)]] array<u32>;
+};
 
-  auto result = manager()->Run(mod);
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
+[[builtin(instance_idx)]] var<in> _tint_pulling_instance_index : i32;
+[[binding(0), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+var<private> var_a : f32;
 
-  EXPECT_EQ(R"(Module{
-  TintVertexData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{instance_idx}
-    }
-    _tint_pulling_instance_index
-    in
-    __i32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{0}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_0
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    var_a
-    private
-    __f32
-  }
-  Function main -> __void
-  StageDecoration{vertex}
-  ()
+[[stage(vertex)]]
+fn main() -> void {
   {
-    Block{
-      VariableDeclStatement{
-        Variable{
-          _tint_pulling_pos
-          function
-          __i32
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_instance_index}
-            multiply
-            ScalarConstructor[__u32]{4}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__f32]{var_a}
-        Bitcast[__f32]<__f32>{
-          ArrayAccessor[__ptr_storage_buffer__u32]{
-            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-              Identifier[not set]{_tint_vertex_data}
-            }
-            Binary[__i32]{
-              Identifier[__ptr_function__i32]{_tint_pulling_pos}
-              divide
-              ScalarConstructor[__u32]{4}
-            }
-          }
-        }
-      }
-    }
+    var _tint_pulling_pos : i32;
+    _tint_pulling_pos = ((_tint_pulling_instance_index * 4u) + 0u);
+    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
   }
 }
-)",
-            Demangler().Demangle(result.module, result.module.to_str()));
+)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState(
+      {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
+  transform->SetEntryPoint("main");
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
-  InitBasicModule();
+  auto* src = R"(
+[[location(0)]] var<in> var_a : f32;
 
-  AddVertexInputVariable(0, "var_a", ty.f32);
+[[stage(vertex)]]
+fn main() -> void {}
+)";
 
-  InitTransform({{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
-  transform()->SetPullingBufferBindingSet(5);
+  auto* expect = R"(
+[[block]]
+struct TintVertexData {
+  [[offset(0)]]
+  _tint_vertex_data : [[stride(4)]] array<u32>;
+};
 
-  auto result = manager()->Run(mod);
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
+[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[binding(0), set(5)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+var<private> var_a : f32;
 
-  EXPECT_EQ(R"(Module{
-  TintVertexData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    _tint_pulling_vertex_index
-    in
-    __i32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{0}
-      SetDecoration{5}
-    }
-    _tint_pulling_vertex_buffer_0
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    var_a
-    private
-    __f32
-  }
-  Function main -> __void
-  StageDecoration{vertex}
-  ()
+[[stage(vertex)]]
+fn main() -> void {
   {
-    Block{
-      VariableDeclStatement{
-        Variable{
-          _tint_pulling_pos
-          function
-          __i32
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{4}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__f32]{var_a}
-        Bitcast[__f32]<__f32>{
-          ArrayAccessor[__ptr_storage_buffer__u32]{
-            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-              Identifier[not set]{_tint_vertex_data}
-            }
-            Binary[__i32]{
-              Identifier[__ptr_function__i32]{_tint_pulling_pos}
-              divide
-              ScalarConstructor[__u32]{4}
-            }
-          }
-        }
-      }
-    }
+    var _tint_pulling_pos : i32;
+    _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
+    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
   }
 }
-)",
-            Demangler().Demangle(result.module, result.module.to_str()));
+)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState(
+      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
+  transform->SetPullingBufferBindingSet(5);
+  transform->SetEntryPoint("main");
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 // We expect the transform to use an existing builtin variables if it finds them
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
-  InitBasicModule();
+  auto* src = R"(
+[[location(0)]] var<in> var_a : f32;
+[[location(1)]] var<in> var_b : f32;
+[[builtin(vertex_idx)]] var<in> custom_vertex_index : i32;
+[[builtin(instance_idx)]] var<in> custom_instance_index : i32;
 
-  AddVertexInputVariable(0, "var_a", ty.f32);
-  AddVertexInputVariable(1, "var_b", ty.f32);
+[[stage(vertex)]]
+fn main() -> void {}
+)";
 
-  mod->AddGlobalVariable(
-      Var("custom_vertex_index", ast::StorageClass::kInput, ty.i32, nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kVertexIdx),
-          }));
+  auto* expect = R"(
+[[block]]
+struct TintVertexData {
+  [[offset(0)]]
+  _tint_vertex_data : [[stride(4)]] array<u32>;
+};
 
-  mod->AddGlobalVariable(
-      Var("custom_instance_index", ast::StorageClass::kInput, ty.i32, nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kInstanceIdx),
-          }));
+[[binding(0), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(1), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_1 : TintVertexData;
+var<private> var_a : f32;
+var<private> var_b : f32;
+[[builtin(vertex_idx)]] var<in> custom_vertex_index : i32;
+[[builtin(instance_idx)]] var<in> custom_instance_index : i32;
 
-  InitTransform(
-      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}},
-        {4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 1}}}}});
-
-  auto result = manager()->Run(mod);
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
-
-  EXPECT_EQ(R"(Module{
-  TintVertexData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{0}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_0
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{1}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_1
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    var_a
-    private
-    __f32
-  }
-  Variable{
-    var_b
-    private
-    __f32
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    custom_vertex_index
-    in
-    __i32
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{instance_idx}
-    }
-    custom_instance_index
-    in
-    __i32
-  }
-  Function main -> __void
-  StageDecoration{vertex}
-  ()
+[[stage(vertex)]]
+fn main() -> void {
   {
-    Block{
-      VariableDeclStatement{
-        Variable{
-          _tint_pulling_pos
-          function
-          __i32
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{custom_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{4}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__f32]{var_a}
-        Bitcast[__f32]<__f32>{
-          ArrayAccessor[__ptr_storage_buffer__u32]{
-            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-              Identifier[not set]{_tint_vertex_data}
-            }
-            Binary[__i32]{
-              Identifier[__ptr_function__i32]{_tint_pulling_pos}
-              divide
-              ScalarConstructor[__u32]{4}
-            }
-          }
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{custom_instance_index}
-            multiply
-            ScalarConstructor[__u32]{4}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__f32]{var_b}
-        Bitcast[__f32]<__f32>{
-          ArrayAccessor[__ptr_storage_buffer__u32]{
-            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
-              Identifier[not set]{_tint_vertex_data}
-            }
-            Binary[__i32]{
-              Identifier[__ptr_function__i32]{_tint_pulling_pos}
-              divide
-              ScalarConstructor[__u32]{4}
-            }
-          }
-        }
-      }
-    }
+    var _tint_pulling_pos : i32;
+    _tint_pulling_pos = ((custom_vertex_index * 4u) + 0u);
+    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
+    _tint_pulling_pos = ((custom_instance_index * 4u) + 0u);
+    var_b = bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[(_tint_pulling_pos / 4u)]);
   }
 }
-)",
-            Demangler().Demangle(result.module, result.module.to_str()));
+)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState(
+      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}},
+        {4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 1}}}}});
+  transform->SetEntryPoint("main");
+
+  auto got = Transform(src, std::move(transform));
+
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
-  InitBasicModule();
+  auto* src = R"(
+[[location(0)]] var<in> var_a : f32;
+[[location(1)]] var<in> var_b : array<f32, 4>;
 
-  AddVertexInputVariable(0, "var_a", ty.f32);
-  AddVertexInputVariable(1, "var_b", ty.array<f32, 4>());
+[[stage(vertex)]]
+fn main() -> void {}
+)";
 
-  InitTransform(
+  auto* expect = R"(
+[[block]]
+struct TintVertexData {
+  [[offset(0)]]
+  _tint_vertex_data : [[stride(4)]] array<u32>;
+};
+
+[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[binding(0), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+var<private> var_a : f32;
+var<private> var_b : array<f32, 4>;
+
+[[stage(vertex)]]
+fn main() -> void {
+  {
+    var _tint_pulling_pos : i32;
+    _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
+    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
+    _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
+    var_b = vec4<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 12u) / 4u)]));
+  }
+}
+)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState(
       {{{16,
          InputStepMode::kVertex,
          {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}});
+  transform->SetEntryPoint("main");
 
-  auto result = manager()->Run(mod);
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
+  auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(R"(Module{
-  TintVertexData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    _tint_pulling_vertex_index
-    in
-    __i32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{0}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_0
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    var_a
-    private
-    __f32
-  }
-  Variable{
-    var_b
-    private
-    __array__f32_4
-  }
-  Function main -> __void
-  StageDecoration{vertex}
-  ()
-  {
-    Block{
-      VariableDeclStatement{
-        Variable{
-          _tint_pulling_pos
-          function
-          __i32
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{16}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__f32]{var_a}
-        Bitcast[__f32]<__f32>{
-          ArrayAccessor[__ptr_storage_buffer__u32]{
-            MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-              Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-              Identifier[not set]{_tint_vertex_data}
-            }
-            Binary[__i32]{
-              Identifier[__ptr_function__i32]{_tint_pulling_pos}
-              divide
-              ScalarConstructor[__u32]{4}
-            }
-          }
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{16}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__array__f32_4]{var_b}
-        TypeConstructor[__vec_4__f32]{
-          __vec_4__f32
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{0}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{4}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{8}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{12}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-)",
-            Demangler().Demangle(result.module, result.module.to_str()));
+  EXPECT_EQ(expect, got);
 }
 
 TEST_F(VertexPullingTest, FloatVectorAttributes) {
-  InitBasicModule();
-  AddVertexInputVariable(0, "var_a", ty.array<f32, 2>());
-  AddVertexInputVariable(1, "var_b", ty.array<f32, 3>());
-  AddVertexInputVariable(2, "var_c", ty.array<f32, 4>());
+  auto* src = R"(
+[[location(0)]] var<in> var_a : array<f32, 2>;
+[[location(1)]] var<in> var_b : array<f32, 3>;
+[[location(2)]] var<in> var_c : array<f32, 4>;
 
-  InitTransform(
+[[stage(vertex)]]
+fn main() -> void {}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct TintVertexData {
+  [[offset(0)]]
+  _tint_vertex_data : [[stride(4)]] array<u32>;
+};
+
+[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[binding(0), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(1), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_1 : TintVertexData;
+[[binding(2), set(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_2 : TintVertexData;
+var<private> var_a : array<f32, 2>;
+var<private> var_b : array<f32, 3>;
+var<private> var_c : array<f32, 4>;
+
+[[stage(vertex)]]
+fn main() -> void {
+  {
+    var _tint_pulling_pos : i32;
+    _tint_pulling_pos = ((_tint_pulling_vertex_index * 8u) + 0u);
+    var_a = vec2<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]));
+    _tint_pulling_pos = ((_tint_pulling_vertex_index * 12u) + 0u);
+    var_b = vec3<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[((_tint_pulling_pos + 8u) / 4u)]));
+    _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
+    var_c = vec4<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 12u) / 4u)]));
+  }
+}
+)";
+
+  auto transform = std::make_unique<VertexPulling>();
+  transform->SetVertexState(
       {{{8, InputStepMode::kVertex, {{VertexFormat::kVec2F32, 0, 0}}},
         {12, InputStepMode::kVertex, {{VertexFormat::kVec3F32, 0, 1}}},
         {16, InputStepMode::kVertex, {{VertexFormat::kVec4F32, 0, 2}}}}});
+  transform->SetEntryPoint("main");
 
-  auto result = manager()->Run(mod);
-  ASSERT_FALSE(result.diagnostics.contains_errors())
-      << diag::Formatter().format(result.diagnostics);
+  auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(R"(Module{
-  TintVertexData Struct{
-    [[block]]
-    StructMember{[[ offset 0 ]] _tint_vertex_data: __array__u32_stride_4}
-  }
-  Variable{
-    Decorations{
-      BuiltinDecoration{vertex_idx}
-    }
-    _tint_pulling_vertex_index
-    in
-    __i32
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{0}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_0
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{1}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_1
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    Decorations{
-      BindingDecoration{2}
-      SetDecoration{4}
-    }
-    _tint_pulling_vertex_buffer_2
-    storage_buffer
-    __struct_TintVertexData
-  }
-  Variable{
-    var_a
-    private
-    __array__f32_2
-  }
-  Variable{
-    var_b
-    private
-    __array__f32_3
-  }
-  Variable{
-    var_c
-    private
-    __array__f32_4
-  }
-  Function main -> __void
-  StageDecoration{vertex}
-  ()
-  {
-    Block{
-      VariableDeclStatement{
-        Variable{
-          _tint_pulling_pos
-          function
-          __i32
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{8}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__array__f32_2]{var_a}
-        TypeConstructor[__vec_2__f32]{
-          __vec_2__f32
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{0}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_0}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{4}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{12}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__array__f32_3]{var_b}
-        TypeConstructor[__vec_3__f32]{
-          __vec_3__f32
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{0}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{4}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_1}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{8}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-        }
-      }
-      Assignment{
-        Identifier[__ptr_function__i32]{_tint_pulling_pos}
-        Binary[__i32]{
-          Binary[__i32]{
-            Identifier[__ptr_in__i32]{_tint_pulling_vertex_index}
-            multiply
-            ScalarConstructor[__u32]{16}
-          }
-          add
-          ScalarConstructor[__u32]{0}
-        }
-      }
-      Assignment{
-        Identifier[__ptr_private__array__f32_4]{var_c}
-        TypeConstructor[__vec_4__f32]{
-          __vec_4__f32
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{0}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{4}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{8}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-          Bitcast[__f32]<__f32>{
-            ArrayAccessor[__ptr_storage_buffer__u32]{
-              MemberAccessor[__ptr_storage_buffer__array__u32_stride_4]{
-                Identifier[__ptr_storage_buffer__struct_TintVertexData]{_tint_pulling_vertex_buffer_2}
-                Identifier[not set]{_tint_vertex_data}
-              }
-              Binary[__i32]{
-                Binary[__i32]{
-                  Identifier[__ptr_function__i32]{_tint_pulling_pos}
-                  add
-                  ScalarConstructor[__u32]{12}
-                }
-                divide
-                ScalarConstructor[__u32]{4}
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-)",
-            Demangler().Demangle(result.module, result.module.to_str()));
+  EXPECT_EQ(expect, got);
 }
 
 }  // namespace
