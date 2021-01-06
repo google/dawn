@@ -151,6 +151,9 @@ class PrimitiveTopologyTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
+        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
