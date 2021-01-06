@@ -1654,8 +1654,6 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
 
         DAWN_SKIP_TEST_IF(UsesWire());
         DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
-        // TODO: find out why this test is flaky on Windows Intel Vulkan bots.
-        DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
     }
 
     std::vector<const char*> GetRequiredExtensions() override {
