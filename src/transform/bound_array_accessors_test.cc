@@ -446,16 +446,35 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
   // -> var b : f32 = a[1][min(u32(idx), 0, 1)]
 }
 
-// TODO(dsinclair): Implement when we have arrayLength for Runtime Arrays
-TEST_F(BoundArrayAccessorsTest, DISABLED_RuntimeArray_Clamps) {
-  // struct S {
-  //   a : f32;
-  //   b : array<f32>;
-  // }
-  // S s;
-  // var b : f32 = s.b[25]
-  //
-  // -> var b : f32 = s.b[min(u32(25), arrayLength(s.b))]
+TEST_F(BoundArrayAccessorsTest, RuntimeArray_Clamps) {
+  auto* src = R"(
+struct S {
+  a : f32;
+  b : array<f32>;
+};
+var s : S;
+
+fn f() -> void {
+  var d : f32 = s.b[25];
+}
+)";
+
+  auto* expect = R"(
+struct S {
+  a : f32;
+  b : array<f32>;
+};
+
+var s : S;
+
+fn f() -> void {
+  var d : f32 = s.b[min(u32(25), (arrayLength(s.b) - 1u))];
+}
+)";
+
+  auto got = Transform<BoundArrayAccessors>(src);
+
+  EXPECT_EQ(expect, got);
 }
 
 // TODO(dsinclair): Clamp atomics when available.
