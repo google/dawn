@@ -46,7 +46,7 @@ fn main() -> void {
 
 TEST_F(ParserImplTest, HandlesError) {
   auto p = parser(R"(
-fn main() ->  {  # missing return type
+fn main() ->  {  // missing return type
   return;
 })");
 

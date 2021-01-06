@@ -49,9 +49,9 @@ TEST_F(LexerTest, Skips_Whitespace) {
 }
 
 TEST_F(LexerTest, Skips_Comments) {
-  Source::File file("test.wgsl", R"(#starts with comment
-ident1 #ends with comment
-# blank line
+  Source::File file("test.wgsl", R"(//starts with comment
+ident1 //ends with comment
+// blank line
  ident2)");
   Lexer l(&file);
 

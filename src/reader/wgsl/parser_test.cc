@@ -48,7 +48,7 @@ fn main() -> void {
 
 TEST_F(ParserTest, HandlesError) {
   Source::File file("test.wgsl", R"(
-fn main() ->  {  # missing return type
+fn main() ->  {  // missing return type
   return;
 })");
   Parser p(&file);

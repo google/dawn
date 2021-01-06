@@ -143,7 +143,8 @@ void Lexer::skip_whitespace() {
 }
 
 void Lexer::skip_comments() {
-  if (!matches(pos_, "#")) {
+  // TODO(bclayton): Remove support for # comments
+  if (!matches(pos_, "#") && !matches(pos_, "//")) {
     return;
   }
 

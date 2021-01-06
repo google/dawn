@@ -135,7 +135,7 @@ TEST_F(ForStmtTest, All) {
      })";
 
   std::string loop_str =
-      R"({ # Introduce new scope for loop variable i
+      R"({ // Introduce new scope for loop variable i
       var i : i32 = 0;
       loop {
         if (!(i < 4)) {
