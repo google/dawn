@@ -13,9 +13,9 @@
 # limitations under the License.
 
 tint_root_dir = "//third_party/tint"
-tint_spirv_tools_dir = "//third_party/SPIRV-Tools"
+tint_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
 tint_googletest_dir = "//third_party/googletest"
-tint_spirv_headers_dir = "//third_party/spirv-headers"
+tint_spirv_headers_dir = "//third_party/vulkan-deps/spirv-headers/src"
 
 tint_build_spv_reader = true
 tint_build_spv_writer = true

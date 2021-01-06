@@ -15,9 +15,9 @@
 # These are variables that are overridable by projects that include Dawn.
 # The values in this file are the defaults for when we are building from
 # Dawn's repository.
-vulkan_headers_dir = "//third_party/vulkan-headers"
-vvl_spirv_tools_dir = "//third_party/SPIRV-Tools"
-vvl_glslang_dir = "//third_party/glslang"
+vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
+vvl_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
+vvl_glslang_dir = "//third_party/vulkan-deps/glslang/src"
 
 # Subdirectories for generated files
 vulkan_data_subdir = "vulkandata"

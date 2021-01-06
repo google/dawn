@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-glslang_spirv_tools_dir = "//third_party/SPIRV-Tools"
+glslang_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"

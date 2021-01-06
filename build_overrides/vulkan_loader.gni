@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-vulkan_headers_dir = "//third_party/vulkan-headers"
+vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
 
 vulkan_gen_subdir = "vulkan_loader"
 vulkan_loader_shared = true

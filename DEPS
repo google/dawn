@@ -56,25 +56,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # SPIRV-Cross
-  'third_party/spirv-cross': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Cross@be527632a6c80291ab012a79758e0e41224ad5e2',
-    'condition': 'dawn_standalone',
-  },
-
-  # SPIRV compiler dependencies: SPIRV-Tools, SPIRV-headers, glslang and shaderc
-  'third_party/SPIRV-Tools': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@671914c28e8249f0a555726a0f3f38691fe5c1df',
-    'condition': 'dawn_standalone',
-  },
-  'third_party/spirv-headers': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers@5ab5c96198f30804a6a29961b8905f292a8ae600',
-    'condition': 'dawn_standalone',
-  },
-  'third_party/glslang': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@4d41da3b810bc11c1c8a954e516638e437360a67',
-    'condition': 'dawn_standalone',
-  },
+  # SPIRV compiler dependencies: shaderc
   'third_party/shaderc': {
     'url': '{chromium_git}/external/github.com/google/shaderc@6216d098d8abe3ccda8781016c4f69372c48afb9',
     'condition': 'dawn_standalone',
@@ -98,25 +80,15 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # Khronos Vulkan headers, validation layers and loader.
-  'third_party/vulkan-headers': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@30e70cbd9850560cb55bffadb8017e90c04c42f5',
-    'condition': 'dawn_standalone',
-  },
-  'third_party/vulkan-validation-layers': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@8756b1cb930a6a6125dc070b01e4fce5dc6f352a',
-    'condition': 'dawn_standalone',
-  },
-  'third_party/vulkan-loader': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@d846ea5a2427eb0119cf98288aa337eced10edbd',
-    'condition': 'dawn_standalone',
-  },
-
   'third_party/swiftshader': {
     'url': '{swiftshader_git}/SwiftShader@df17a76102dfabb3f1bd6e51449cece9f77b45e3',
     'condition': 'dawn_standalone',
   },
 
+  'third_party/vulkan-deps': {
+    'url': '{chromium_git}/vulkan-deps@b08eace32e9cb8dd7dce9866f051558ac57acb15',
+    'condition': 'dawn_standalone',
+  },
 }
 
 hooks = [
@@ -216,4 +188,5 @@ hooks = [
 recursedeps = [
   # buildtools provides clang_format, libc++, and libc++abi
   'buildtools',
+  'third_party/vulkan-deps',
 ]
