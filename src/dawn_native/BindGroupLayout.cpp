@@ -443,8 +443,7 @@ namespace dawn_native {
                     case wgpu::BindingType::SampledTexture:
                         bindingInfo.bindingType = BindingInfoType::Texture;
                         bindingInfo.texture.viewDimension = binding.viewDimension;
-                        if (binding.texture.viewDimension ==
-                            wgpu::TextureViewDimension::Undefined) {
+                        if (binding.viewDimension == wgpu::TextureViewDimension::Undefined) {
                             bindingInfo.texture.viewDimension = wgpu::TextureViewDimension::e2D;
                         }
 
@@ -469,8 +468,7 @@ namespace dawn_native {
                         bindingInfo.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
                         bindingInfo.storageTexture.format = binding.storageTextureFormat;
                         bindingInfo.storageTexture.viewDimension = binding.viewDimension;
-                        if (binding.storageTexture.viewDimension ==
-                            wgpu::TextureViewDimension::Undefined) {
+                        if (binding.viewDimension == wgpu::TextureViewDimension::Undefined) {
                             bindingInfo.storageTexture.viewDimension =
                                 wgpu::TextureViewDimension::e2D;
                         }
@@ -480,8 +478,7 @@ namespace dawn_native {
                         bindingInfo.storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
                         bindingInfo.storageTexture.format = binding.storageTextureFormat;
                         bindingInfo.storageTexture.viewDimension = binding.viewDimension;
-                        if (binding.storageTexture.viewDimension ==
-                            wgpu::TextureViewDimension::Undefined) {
+                        if (binding.viewDimension == wgpu::TextureViewDimension::Undefined) {
                             bindingInfo.storageTexture.viewDimension =
                                 wgpu::TextureViewDimension::e2D;
                         }

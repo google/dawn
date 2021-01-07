@@ -105,6 +105,51 @@ TEST_P(DeprecationTests, BindGroupLayoutEntryTypeConflict) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
 }
 
+// Test that the deprecated BGLEntry path correctly handles the defaulting of viewDimension.
+// This is a regression test for crbug.com/dawn/620
+TEST_P(DeprecationTests, BindGroupLayoutEntryViewDimensionDefaulting) {
+    wgpu::BindGroupLayoutEntry binding;
+    binding.binding = 0;
+    binding.visibility = wgpu::ShaderStage::Vertex;
+    binding.type = wgpu::BindingType::SampledTexture;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &binding;
+
+    // Check that the default viewDimension is 2D.
+    {
+        binding.viewDimension = wgpu::TextureViewDimension::Undefined;
+        wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+
+        wgpu::TextureDescriptor desc;
+        desc.usage = wgpu::TextureUsage::Sampled;
+        desc.size = {1, 1, 1};
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+        desc.dimension = wgpu::TextureDimension::e2D;
+        wgpu::Texture texture = device.CreateTexture(&desc);
+
+        // Success, the default is 2D and we give it a 2D view.
+        utils::MakeBindGroup(device, bgl, {{0, texture.CreateView()}});
+    }
+
+    // Check that setting a non-default viewDimension works.
+    {
+        binding.viewDimension = wgpu::TextureViewDimension::e2DArray;
+        wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+
+        wgpu::TextureDescriptor desc;
+        desc.usage = wgpu::TextureUsage::Sampled;
+        desc.size = {1, 1, 4};
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+        desc.dimension = wgpu::TextureDimension::e2D;
+        wgpu::Texture texture = device.CreateTexture(&desc);
+
+        // Success, the view will be 2DArray and the BGL expects a 2DArray.
+        utils::MakeBindGroup(device, bgl, {{0, texture.CreateView()}});
+    }
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),
