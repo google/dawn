@@ -1092,8 +1092,10 @@ bool ParserImpl::EmitScalarSpecConstants() {
       auto* ast_var =
           MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type,
                        true, ast_expr, std::move(spec_id_decos));
-      ast_module_.AddGlobalVariable(ast_var);
-      scalar_spec_constants_.insert(inst.result_id());
+      if (ast_var) {
+        ast_module_.AddGlobalVariable(ast_var);
+        scalar_spec_constants_.insert(inst.result_id());
+      }
     }
   }
   return success_;
@@ -1209,7 +1211,9 @@ bool ParserImpl::EmitModuleScopeVariables() {
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type, false,
                      ast_constructor, ast::VariableDecorationList{});
     // TODO(dneto): initializers (a.k.a. constructor expression)
-    ast_module_.AddGlobalVariable(ast_var);
+    if (ast_var) {
+      ast_module_.AddGlobalVariable(ast_var);
+    }
   }
 
   // Emit gl_Position instead of gl_PerVertex
@@ -1261,8 +1265,15 @@ ast::Variable* ParserImpl::MakeVariable(
                << ": has no operand";
         return nullptr;
       }
-      auto ast_builtin =
-          enum_converter_.ToBuiltin(static_cast<SpvBuiltIn>(deco[1]));
+      const auto spv_builtin = static_cast<SpvBuiltIn>(deco[1]);
+      switch (spv_builtin) {
+        case SpvBuiltInPointSize:
+          ignored_builtins_[id] = spv_builtin;
+          return nullptr;
+        default:
+          break;
+      }
+      auto ast_builtin = enum_converter_.ToBuiltin(spv_builtin);
       if (ast_builtin == ast::Builtin::kNone) {
         return nullptr;
       }

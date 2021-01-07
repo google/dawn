@@ -976,6 +976,9 @@ bool FunctionEmitter::EmitBody() {
     return false;
   }
 
+  if (!RegisterIgnoredBuiltInVariables()) {
+    return false;
+  }
   if (!RegisterLocallyDefinedValues()) {
     return false;
   }
@@ -2880,6 +2883,9 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
 }
 
 bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
+  if (failed()) {
+    return false;
+  }
   const auto result_id = inst.result_id();
   const auto type_id = inst.type_id();
 
@@ -2994,14 +3000,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // a new named constant definition.
       auto value_id = inst.GetSingleWordInOperand(0);
       const auto skip = GetSkipReason(value_id);
-      switch (skip) {
-        case SkipReason::kDontSkip:
-          break;
-        case SkipReason::kOpaqueObject:
-        case SkipReason::kPointSizeBuiltinPointer:
-        case SkipReason::kPointSizeBuiltinValue:
-          GetDefInfo(inst.result_id())->skip = skip;
-          return true;
+      if (skip != SkipReason::kDontSkip) {
+        GetDefInfo(inst.result_id())->skip = skip;
+        return true;
       }
       auto expr = MakeExpression(value_id);
       expr.type = RemapStorageClass(expr.type, result_id);
@@ -3235,6 +3236,14 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     return {};
   }
 
+  const auto base_id = inst.GetSingleWordInOperand(0);
+  const auto base_skip = GetSkipReason(base_id);
+  if (base_skip != SkipReason::kDontSkip) {
+    // This can occur for AccessChain with no indices.
+    GetDefInfo(inst.result_id())->skip = base_skip;
+    return {};
+  }
+
   // A SPIR-V access chain is a single instruction with multiple indices
   // walking down into composites.  The Tint AST represents this as
   // ever-deeper nested indexing expressions. Start off with an expression
@@ -3242,7 +3251,6 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   TypedExpression current_expr(MakeOperand(inst, 0));
   const auto constants = constant_mgr_->GetOperandConstants(&inst);
 
-  const auto base_id = inst.GetSingleWordInOperand(0);
   auto ptr_ty_id = def_use_mgr_->GetDef(base_id)->type_id();
   uint32_t first_index = 1;
   const auto num_in_operands = inst.NumInOperands();
@@ -3592,9 +3600,29 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
           create<ast::TypeConstructorExpression>(source, result_type, values)};
 }
 
+bool FunctionEmitter::RegisterIgnoredBuiltInVariables() {
+  size_t index = def_info_.size();
+  for (auto& ignored_var : parser_impl_.ignored_builtins()) {
+    const auto id = ignored_var.first;
+    const auto builtin = ignored_var.second;
+    def_info_[id] =
+        std::make_unique<DefInfo>(*(def_use_mgr_->GetDef(id)), 0, index);
+    ++index;
+    auto& def = def_info_[id];
+    switch (builtin) {
+      case SpvBuiltInPointSize:
+        def->skip = SkipReason::kPointSizeBuiltinPointer;
+        break;
+      default:
+        return Fail() << "unrecognized ignored builtin: " << int(builtin);
+    }
+  }
+  return true;
+}
+
 bool FunctionEmitter::RegisterLocallyDefinedValues() {
   // Create a DefInfo for each value definition in this function.
-  size_t index = 0;
+  size_t index = def_info_.size();
   for (auto block_id : block_order_) {
     const auto* block_info = GetBlockInfo(block_id);
     const auto block_pos = block_info->pos;
@@ -3604,7 +3632,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
         continue;
       }
       def_info_[result_id] = std::make_unique<DefInfo>(inst, block_pos, index);
-      index++;
+      ++index;
       auto& info = def_info_[result_id];
 
       // Determine storage class for pointer values. Do this in order because

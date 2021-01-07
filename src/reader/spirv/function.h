@@ -223,10 +223,13 @@ enum class SkipReason {
   kPointSizeBuiltinValue,
 };
 
-/// Bookkeeping info for a SPIR-V ID defined in the function.
-/// This will be valid for result IDs for:
-/// - instructions that are not OpLabel, and not OpFunctionParameter
-/// - are defined in a basic block visited in the block-order for the function.
+/// Bookkeeping info for a SPIR-V ID defined in the function, or some
+/// module-scope variables. This will be valid for result IDs that are:
+/// - defined in the function and:
+///    - instructions that are not OpLabel, and not OpFunctionParameter
+///    - are defined in a basic block visited in the block-order for the
+///    function.
+/// - certain module-scope builtin variables.
 struct DefInfo {
   /// Constructor.
   /// @param def_inst the SPIR-V instruction defining the ID
@@ -240,8 +243,11 @@ struct DefInfo {
 
   /// The SPIR-V instruction that defines the ID.
   const spvtools::opt::Instruction& inst;
-  /// The position of the block that defines this ID, in the function block
-  /// order.  See method `FunctionEmitter::ComputeBlockOrderAndPositions`
+  /// The position of the first block in which this ID is visible, in function
+  /// block order.  For IDs defined outside of the function, it is 0.
+  /// For IDs defined in the function, it is the position of the block
+  /// containing the definition of the ID.
+  /// See method `FunctionEmitter::ComputeBlockOrderAndPositions`
   const uint32_t block_pos = 0;
 
   /// An index for uniquely and deterministically ordering all DefInfo records
@@ -290,8 +296,8 @@ struct DefInfo {
   /// This is kNone for non-pointers.
   ast::StorageClass storage_class = ast::StorageClass::kNone;
 
-  /// The reason, if any, that this value should not be generated.
-  /// Normally all values are generated.  This field can be updated while
+  /// The reason, if any, that this value should be ignored.
+  /// Normally no values are ignored.  This field can be updated while
   /// generating code because sometimes we only discover necessary facts
   /// in the middle of generating code.
   SkipReason skip = SkipReason::kDontSkip;
@@ -456,8 +462,14 @@ class FunctionEmitter {
   /// @returns false if bad nesting has been detected.
   bool FindIfSelectionInternalHeaders();
 
+  /// Creates a DefInfo record for each module-scope builtin variable
+  /// that should be ignored.
+  /// Populates the `def_info_` mapping for such IDs.
+  /// @returns false on failure
+  bool RegisterIgnoredBuiltInVariables();
+
   /// Creates a DefInfo record for each locally defined SPIR-V ID.
-  /// Populates the `def_info_` mapping with basic results.
+  /// Populates the `def_info_` mapping with basic results for such IDs.
   /// @returns false on failure
   bool RegisterLocallyDefinedValues();
 

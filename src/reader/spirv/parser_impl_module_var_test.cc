@@ -629,6 +629,160 @@ TEST_F(SpvModuleScopeVarParserTest,
 )") << module_str;
 }
 
+std::string LoosePointSizePreamble() {
+  return R"(
+    OpCapability Shader
+    OpCapability Linkage ; so we don't have to declare an entry point
+    OpMemoryModel Logical Simple
+
+    OpDecorate %1 BuiltIn PointSize
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %uint = OpTypeInt 32 0
+    %uint_0 = OpConstant %uint 0
+    %uint_1 = OpConstant %uint 1
+    %11 = OpTypePointer Output %float
+    %1 = OpVariable %11 Output
+)";
+}
+
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_Write1_IsErased) {
+  const std::string assembly = LoosePointSizePreamble() + R"(
+  %ptr = OpTypePointer Output %float
+  %one = OpConstant %float 1.0
+
+  %500 = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpStore %1 %one
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_EQ(module_str, R"(Module{
+  Function x_500 -> __void
+  ()
+  {
+    Return{}
+  }
+}
+)") << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_WriteNon1_IsError) {
+  const std::string assembly = LoosePointSizePreamble() + R"(
+  %ptr = OpTypePointer Output %float
+  %999 = OpConstant %float 2.0
+
+  %500 = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpStore %1 %999
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->error(),
+              HasSubstr("cannot store a value other than constant 1.0 to "
+                        "PointSize builtin: OpStore %1 %999"));
+}
+
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_ReadReplaced) {
+  const std::string assembly = LoosePointSizePreamble() + R"(
+  %ptr = OpTypePointer Private %float
+  %900 = OpVariable %ptr Private
+
+  %500 = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %99 = OpLoad %float %1
+  OpStore %900 %99
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_EQ(module_str, R"(Module{
+  Variable{
+    x_900
+    private
+    __f32
+  }
+  Function x_500 -> __void
+  ()
+  {
+    Assignment{
+      Identifier[not set]{x_900}
+      ScalarConstructor[not set]{1.000000}
+    }
+    Return{}
+  }
+}
+)") << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPointSize_Loose_WriteViaCopyObjectPriorAccess_Erased) {
+  const std::string assembly = LoosePointSizePreamble() + R"(
+  %one = OpConstant %float 1.0
+
+  %500 = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %20 = OpCopyObject %11 %1
+  %100 = OpAccessChain %11 %20
+  OpStore %100 %one
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_EQ(module_str, R"(Module{
+  Function x_500 -> __void
+  ()
+  {
+    Return{}
+  }
+}
+)") << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPointSize_Loose_WriteViaCopyObjectPostAccessChainErased) {
+  const std::string assembly = LoosePointSizePreamble() + R"(
+  %one = OpConstant %float 1.0
+
+  %500 = OpFunction %void None %voidfn
+  %entry = OpLabel
+  %100 = OpAccessChain %11 %1
+  %101 = OpCopyObject %11 %100
+  OpStore %101 %one
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  EXPECT_TRUE(p->error().empty()) << p->error();
+  const auto module_str =
+      Demangler().Demangle(p->get_module(), p->get_module().to_str());
+  EXPECT_EQ(module_str, R"(Module{
+  Function x_500 -> __void
+  ()
+  {
+    Return{}
+  }
+}
+)") << module_str;
+}
+
 TEST_F(SpvModuleScopeVarParserTest, BuiltinClipDistance_NotSupported) {
   const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float

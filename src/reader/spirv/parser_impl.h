@@ -287,14 +287,15 @@ class ParserImpl : Reader {
   bool EmitFunction(const spvtools::opt::Function& f);
 
   /// Creates an AST Variable node for a SPIR-V ID, including any attached
-  /// decorations.
+  /// decorations, unless it's an ignorable builtin variable.
   /// @param id the SPIR-V result ID
   /// @param sc the storage class, which cannot be ast::StorageClass::kNone
   /// @param type the type
   /// @param is_const if true, the variable is const
   /// @param constructor the variable constructor
   /// @param decorations the variable decorations
-  /// @returns a new Variable node, or null in the error case
+  /// @returns a new Variable node, or null in the ignorable variable case and
+  /// in the error case
   ast::Variable* MakeVariable(uint32_t id,
                               ast::StorageClass sc,
                               ast::type::Type* type,
@@ -473,6 +474,9 @@ class ParserImpl : Reader {
   /// @returns the instruction, or nullptr on error
   const spvtools::opt::Instruction* GetInstructionForTest(uint32_t id) const;
 
+  using BuiltInsMap = std::unordered_map<uint32_t, SpvBuiltIn>;
+  const BuiltInsMap& ignored_builtins() const { return ignored_builtins_; }
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
@@ -626,6 +630,10 @@ class ParserImpl : Reader {
   // The inferred pointer type for the given handle variable.
   std::unordered_map<const spvtools::opt::Instruction*, ast::type::Pointer*>
       handle_type_;
+
+  /// Maps the SPIR-V ID of a module-scope builtin variable that should be
+  /// ignored, to its builtin kind.
+  BuiltInsMap ignored_builtins_;
 };
 
 }  // namespace spirv
