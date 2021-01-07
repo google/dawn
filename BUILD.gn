@@ -1308,6 +1308,10 @@ if (build_with_chromium) {
   source_set("tint_fuzzer_common") {
     configs += [ ":tint_common_config" ]
     public_configs = [ ":tint_public_config" ]
+    sources = [
+      "fuzzers/tint_common_fuzzer.cc",
+      "fuzzers/tint_common_fuzzer.h",
+    ]
   }
 
   if (tint_build_wgsl_reader) {

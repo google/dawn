@@ -14,17 +14,9 @@
 
 #include <vector>
 
-#include "src/reader/spirv/parser.h"
+#include "fuzzers/tint_common_fuzzer.h"
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  size_t sizeInU32 = size / sizeof(uint32_t);
-  const uint32_t* u32Data = reinterpret_cast<const uint32_t*>(data);
-  std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
-
-  if (input.size() != 0) {
-    tint::reader::spirv::Parser parser(input);
-    parser.Parse();
-  }
-
-  return 0;
+  tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kSpv);
+  return fuzzer.Run(data, size);
 }

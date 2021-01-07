@@ -13,7 +13,9 @@
 # limitations under the License.
 
 function(add_tint_fuzzer NAME)
-  add_executable(${NAME} ${NAME}.cc)
+  add_executable(${NAME}
+    ${NAME}.cc
+    tint_common_fuzzer.cc)
   target_link_libraries(${NAME} libtint-fuzz)
   tint_default_compile_options(${NAME})
   target_compile_options(${NAME} PRIVATE -Wno-missing-prototypes)
