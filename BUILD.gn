@@ -1324,10 +1324,98 @@ if (build_with_chromium) {
     }
   }
 
+  if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
+    fuzzer_test("tint_wgsl_reader_wgsl_writer_fuzzer") {
+      sources = [ "fuzzers/tint_wgsl_reader_wgsl_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_wgsl_reader_src",
+        ":libtint_wgsl_writer_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_wgsl_reader && tint_build_spv_writer) {
+    fuzzer_test("tint_wgsl_reader_spv_writer_fuzzer") {
+      sources = [ "fuzzers/tint_wgsl_reader_spv_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_writer_src",
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_wgsl_reader && tint_build_hlsl_writer) {
+    fuzzer_test("tint_wgsl_reader_hlsl_writer_fuzzer") {
+      sources = [ "fuzzers/tint_wgsl_reader_hlsl_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_hlsl_writer_src",
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_wgsl_reader && tint_build_msl_writer) {
+    fuzzer_test("tint_wgsl_reader_msl_writer_fuzzer") {
+      sources = [ "fuzzers/tint_wgsl_reader_msl_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_msl_writer_src",
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
   if (tint_build_spv_reader) {
     fuzzer_test("tint_spv_reader_fuzzer") {
       sources = [ "fuzzers/tint_spv_reader_fuzzer.cc" ]
       deps = [
+        ":libtint_spv_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_spv_reader && tint_build_wgsl_writer) {
+    fuzzer_test("tint_spv_reader_wgsl_writer_fuzzer") {
+      sources = [ "fuzzers/tint_spv_reader_wgsl_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_reader_src",
+        ":libtint_wgsl_writer_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_spv_reader && tint_build_spv_writer) {
+    fuzzer_test("tint_spv_reader_spv_writer_fuzzer") {
+      sources = [ "fuzzers/tint_spv_reader_spv_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_reader_src",
+        ":libtint_spv_writer_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_spv_reader && tint_build_hlsl_writer) {
+    fuzzer_test("tint_spv_reader_hlsl_writer_fuzzer") {
+      sources = [ "fuzzers/tint_spv_reader_hlsl_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_hlsl_writer_src",
+        ":libtint_spv_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+  }
+
+  if (tint_build_spv_reader && tint_build_msl_writer) {
+    fuzzer_test("tint_spv_reader_msl_writer_fuzzer") {
+      sources = [ "fuzzers/tint_spv_reader_msl_writer_fuzzer.cc" ]
+      deps = [
+        ":libtint_msl_writer_src",
         ":libtint_spv_reader_src",
         ":tint_fuzzer_common",
       ]

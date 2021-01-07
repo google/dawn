@@ -16,12 +16,14 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace tint {
 namespace fuzzers {
 
-CommonFuzzer::CommonFuzzer(InputFormat input) : input_(input) {}
+CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
+    : input_(input), output_(output) {}
 CommonFuzzer::~CommonFuzzer() = default;
 
 int CommonFuzzer::Run(const uint8_t* data, size_t size) {
@@ -58,8 +60,62 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       break;
   }
 
-  if (parser) {
-    parser->Parse();
+  if (!parser) {
+    return 0;
+  }
+
+  if (!parser->Parse()) {
+    return 0;
+  }
+
+  if (output_ == OutputFormat::kNone) {
+    return 0;
+  }
+
+  auto mod = parser->module();
+  if (!mod.IsValid()) {
+    return 0;
+  }
+
+  tint::TypeDeterminer td(&mod);
+  if (!td.Determine()) {
+    return 0;
+  }
+
+  tint::Validator v;
+  if (!v.Validate(&mod)) {
+    return 0;
+  }
+
+  std::unique_ptr<tint::writer::Writer> writer;
+
+  switch (output_) {
+    case OutputFormat::kWGSL:
+#if TINT_BUILD_WGSL_WRITER
+      writer = std::make_unique<tint::writer::wgsl::Generator>(std::move(mod));
+#endif  // TINT_BUILD_WGSL_WRITER
+      break;
+    case OutputFormat::kSpv:
+#if TINT_BUILD_SPV_WRITER
+      writer = std::make_unique<tint::writer::spirv::Generator>(std::move(mod));
+#endif  // TINT_BUILD_SPV_WRITER
+      break;
+    case OutputFormat::kHLSL:
+#if TINT_BUILD_HLSL_WRITER
+      writer = std::make_unique<tint::writer::hlsl::Generator>(std::move(mod));
+#endif  // TINT_BUILD_HLSL_WRITER
+      break;
+    case OutputFormat::kMSL:
+#if TINT_BUILD_MSL_WRITER
+      writer = std::make_unique<tint::writer::msl::Generator>(std::move(mod));
+#endif  // TINT_BUILD_MSL_WRITER
+      break;
+    case OutputFormat::kNone:
+      break;
+  }
+
+  if (writer) {
+    writer->Generate();
   }
 
   return 0;

@@ -22,15 +22,18 @@ namespace fuzzers {
 
 enum class InputFormat { kWGSL, kSpv, kNone };
 
+enum class OutputFormat { kWGSL, kSpv, kHLSL, kMSL, kNone };
+
 class CommonFuzzer {
  public:
-  explicit CommonFuzzer(InputFormat input);
+  explicit CommonFuzzer(InputFormat input, OutputFormat output);
   ~CommonFuzzer();
 
   int Run(const uint8_t* data, size_t size);
 
  private:
   InputFormat input_;
+  OutputFormat output_;
 };
 
 }  // namespace fuzzers
