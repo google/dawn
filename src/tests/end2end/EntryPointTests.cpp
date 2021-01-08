@@ -22,7 +22,7 @@ class EntryPointTests : public DawnTest {};
 // Test creating a render pipeline from two entryPoints in the same module.
 TEST_P(EntryPointTests, FragAndVertexSameModule) {
     // TODO: Reenable once Tint is able to produce Vulkan 1.0 / 1.1 SPIR-V.
-    DAWN_SKIP_TEST_IF(IsVulkan());
+    DAWN_SKIP_TEST_IF(IsVulkan() || IsOpenGL() || IsOpenGLES());
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
