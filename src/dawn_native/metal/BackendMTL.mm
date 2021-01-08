@@ -221,7 +221,10 @@ namespace dawn_native { namespace metal {
                 if ([*mDevice supportsFamily:MTLGPUFamilyMac2] ||
                     [*mDevice supportsFamily:MTLGPUFamilyApple5]) {
                     mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
-                    mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+
+                    // TODO(hao.x.li@intel.com): Not enable timestamp query here becuase it's not
+                    // clear how to convert timestamps to nanoseconds on Metal.
+                    // See https://github.com/gpuweb/gpuweb/issues/1325
                 }
             }
 
