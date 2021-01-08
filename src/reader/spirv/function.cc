@@ -4077,7 +4077,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   const auto num_args = inst.NumInOperands();
 
   std::string builtin_name;
-  bool use_load_suffix = true;
+  bool use_level_of_detail_suffix = true;
   switch (opcode) {
     case SpvOpImageSampleImplicitLod:
     case SpvOpImageSampleExplicitLod:
@@ -4103,16 +4103,16 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     case SpvOpImageFetch:
       // Read a single texel from a sampled image.
       builtin_name = "textureLoad";
-      use_load_suffix = false;
+      use_level_of_detail_suffix = false;
       break;
     case SpvOpImageRead:
       // Read a single texel from a storage image.
       builtin_name = "textureLoad";
-      use_load_suffix = false;
+      use_level_of_detail_suffix = false;
       break;
     case SpvOpImageWrite:
       builtin_name = "textureStore";
-      use_load_suffix = false;
+      use_level_of_detail_suffix = false;
       if (arg_index < num_args) {
         auto texel = MakeOperand(inst, arg_index);
         auto* converted_texel =
@@ -4147,7 +4147,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     arg_index++;
   }
   if (arg_index < num_args && (image_operands_mask & SpvImageOperandsLodMask)) {
-    if (use_load_suffix) {
+    if (use_level_of_detail_suffix) {
       builtin_name += "Level";
     }
     TypedExpression lod = MakeOperand(inst, arg_index);
