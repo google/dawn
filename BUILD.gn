@@ -1344,6 +1344,42 @@ if (build_with_chromium) {
         ":tint_fuzzer_common",
       ]
     }
+
+    fuzzer_test("tint_all_transforms_fuzzer") {
+      sources = [ "fuzzers/tint_all_transforms_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_writer_src",
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+
+    fuzzer_test("tint_bound_array_accessors_fuzzer") {
+      sources = [ "fuzzers/tint_bound_array_accessors_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_writer_src",
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+
+    fuzzer_test("tint_emit_vertex_point_size_fuzzer") {
+      sources = [ "fuzzers/tint_emit_vertex_point_size_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_writer_src",
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
+
+    fuzzer_test("tint_first_index_offset_fuzzer") {
+      sources = [ "fuzzers/tint_first_index_offset_fuzzer.cc" ]
+      deps = [
+        ":libtint_spv_writer_src",
+        ":libtint_wgsl_reader_src",
+        ":tint_fuzzer_common",
+      ]
+    }
   }
 
   if (tint_build_wgsl_reader && tint_build_hlsl_writer) {

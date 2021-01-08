@@ -87,6 +87,15 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     return 0;
   }
 
+  if (transform_manager_) {
+    auto out = transform_manager_->Run(&mod);
+    if (out.diagnostics.contains_errors()) {
+      return 0;
+    }
+
+    mod = std::move(out.module);
+  }
+
   std::unique_ptr<tint::writer::Writer> writer;
 
   switch (output_) {

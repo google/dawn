@@ -12,34 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef FUZZERS_TINT_COMMON_FUZZER_H_
-#define FUZZERS_TINT_COMMON_FUZZER_H_
-
-#include "include/tint/tint.h"
+#include "fuzzers/tint_common_fuzzer.h"
 
 namespace tint {
 namespace fuzzers {
 
-enum class InputFormat { kWGSL, kSpv, kNone };
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+  tint::transform::Manager transform_manager;
+  transform_manager.append(
+      std::make_unique<tint::transform::BoundArrayAccessors>());
 
-enum class OutputFormat { kWGSL, kSpv, kHLSL, kMSL, kNone };
+  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+  fuzzer.SetTransformManager(&transform_manager);
 
-class CommonFuzzer {
- public:
-  explicit CommonFuzzer(InputFormat input, OutputFormat output);
-  ~CommonFuzzer();
-
-  void SetTransformManager(transform::Manager* tm) { transform_manager_ = tm; }
-
-  int Run(const uint8_t* data, size_t size);
-
- private:
-  InputFormat input_;
-  OutputFormat output_;
-  transform::Manager* transform_manager_;
-};
+  return fuzzer.Run(data, size);
+}
 
 }  // namespace fuzzers
 }  // namespace tint
-
-#endif  // FUZZERS_TINT_COMMON_FUZZER_H_
