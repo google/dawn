@@ -40,7 +40,7 @@ Symbol SymbolTable::Register(const std::string& name) {
   ++next_symbol_;
 
   name_to_symbol_[name] = sym;
-  symbol_to_name_[sym.value()] = name;
+  symbol_to_name_[sym] = name;
 
   return sym;
 }
@@ -51,7 +51,7 @@ Symbol SymbolTable::GetSymbol(const std::string& name) const {
 }
 
 std::string SymbolTable::NameFor(const Symbol symbol) const {
-  auto it = symbol_to_name_.find(symbol.value());
+  auto it = symbol_to_name_.find(symbol);
   if (it == symbol_to_name_.end())
     return "";
 

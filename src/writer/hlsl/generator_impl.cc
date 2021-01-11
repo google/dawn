@@ -160,7 +160,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     }
   }
 
-  std::unordered_set<uint32_t> emitted_globals;
+  std::unordered_set<Symbol> emitted_globals;
   // Make sure all entry point data is emitted before the entry point functions
   for (auto* func : module_->functions()) {
     if (!func->IsEntryPoint()) {
@@ -198,14 +198,14 @@ Symbol GeneratorImpl::current_ep_var_symbol(VarType type) {
   Symbol sym;
   switch (type) {
     case VarType::kIn: {
-      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_.value());
+      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_);
       if (in_it != ep_sym_to_in_data_.end()) {
         sym = in_it->second.var_symbol;
       }
       break;
     }
     case VarType::kOut: {
-      auto outit = ep_sym_to_out_data_.find(current_ep_sym_.value());
+      auto outit = ep_sym_to_out_data_.find(current_ep_sym_);
       if (outit != ep_sym_to_out_data_.end()) {
         sym = outit->second.var_symbol;
       }
@@ -1279,14 +1279,14 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
   //
   // We emit both of them if they're there regardless of if they're both used.
   if (emit_duplicate_functions) {
-    auto in_it = ep_sym_to_in_data_.find(ep_sym.value());
+    auto in_it = ep_sym_to_in_data_.find(ep_sym);
     if (in_it != ep_sym_to_in_data_.end()) {
       out << "in " << namer_->NameFor(in_it->second.struct_symbol) << " "
           << namer_->NameFor(in_it->second.var_symbol);
       first = false;
     }
 
-    auto outit = ep_sym_to_out_data_.find(ep_sym.value());
+    auto outit = ep_sym_to_out_data_.find(ep_sym);
     if (outit != ep_sym_to_out_data_.end()) {
       if (!first) {
         out << ", ";
@@ -1328,7 +1328,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
 bool GeneratorImpl::EmitEntryPointData(
     std::ostream& out,
     ast::Function* func,
-    std::unordered_set<uint32_t>& emitted_globals) {
+    std::unordered_set<Symbol>& emitted_globals) {
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> in_variables;
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> outvariables;
   for (auto data : func->referenced_location_variables()) {
@@ -1369,10 +1369,10 @@ bool GeneratorImpl::EmitEntryPointData(
 
     // If the global has already been emitted we skip it, it's been emitted by
     // a previous entry point.
-    if (emitted_globals.count(var->symbol().value()) != 0) {
+    if (emitted_globals.count(var->symbol()) != 0) {
       continue;
     }
-    emitted_globals.insert(var->symbol().value());
+    emitted_globals.insert(var->symbol());
 
     auto* type = var->type()->UnwrapIfNeeded();
     if (auto* strct = type->As<ast::type::Struct>()) {
@@ -1413,10 +1413,10 @@ bool GeneratorImpl::EmitEntryPointData(
 
     // If the global has already been emitted we skip it, it's been emitted by
     // a previous entry point.
-    if (emitted_globals.count(var->symbol().value()) != 0) {
+    if (emitted_globals.count(var->symbol()) != 0) {
       continue;
     }
-    emitted_globals.insert(var->symbol().value());
+    emitted_globals.insert(var->symbol());
 
     auto* ac = var->type()->As<ast::type::AccessControl>();
     if (ac == nullptr) {
@@ -1439,8 +1439,8 @@ bool GeneratorImpl::EmitEntryPointData(
     auto in_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
         module_->SymbolToName(func->symbol()) + "_" + kInStructNameSuffix));
     auto in_var_name = namer_->GenerateName(kTintStructInVarPrefix);
-    ep_sym_to_in_data_[func->symbol().value()] = {
-        in_struct_sym, module_->RegisterSymbol(in_var_name)};
+    ep_sym_to_in_data_[func->symbol()] = {in_struct_sym,
+                                          module_->RegisterSymbol(in_var_name)};
 
     make_indent(out);
     out << "struct " << namer_->NameFor(in_struct_sym) << " {" << std::endl;
@@ -1486,7 +1486,7 @@ bool GeneratorImpl::EmitEntryPointData(
     auto outstruct_sym = module_->RegisterSymbol(namer_->GenerateName(
         module_->SymbolToName(func->symbol()) + "_" + kOutStructNameSuffix));
     auto outvar_name = namer_->GenerateName(kTintStructOutVarPrefix);
-    ep_sym_to_out_data_[func->symbol().value()] = {
+    ep_sym_to_out_data_[func->symbol()] = {
         outstruct_sym, module_->RegisterSymbol(outvar_name)};
 
     make_indent(out);
@@ -1577,7 +1577,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     make_indent(out);
   }
 
-  auto outdata = ep_sym_to_out_data_.find(current_ep_sym_.value());
+  auto outdata = ep_sym_to_out_data_.find(current_ep_sym_);
   bool has_outdata = outdata != ep_sym_to_out_data_.end();
   if (has_outdata) {
     out << namer_->NameFor(outdata->second.struct_symbol);
@@ -1586,7 +1586,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   }
   out << " " << namer_->NameFor(current_ep_sym_) << "(";
 
-  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_.value());
+  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
   if (in_data != ep_sym_to_in_data_.end()) {
     out << namer_->NameFor(in_data->second.struct_symbol) << " "
         << namer_->NameFor(in_data->second.var_symbol);
@@ -2023,7 +2023,7 @@ bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
 
   if (generating_entry_point_) {
     out << "return";
-    auto outdata = ep_sym_to_out_data_.find(current_ep_sym_.value());
+    auto outdata = ep_sym_to_out_data_.find(current_ep_sym_);
     if (outdata != ep_sym_to_out_data_.end()) {
       out << " " << namer_->NameFor(outdata->second.var_symbol);
     }

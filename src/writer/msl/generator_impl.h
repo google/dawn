@@ -281,8 +281,8 @@ class GeneratorImpl : public TextGenerator {
   uint32_t loop_emission_counter_ = 0;
   Namer* namer_;
 
-  std::unordered_map<uint32_t, EntryPointData> ep_sym_to_in_data_;
-  std::unordered_map<uint32_t, EntryPointData> ep_sym_to_out_data_;
+  std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
+  std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;
 
   // This maps an input of "<entry_point_name>_<function_name>" to a remapped
   // function name. If there is no entry for a given key then function did

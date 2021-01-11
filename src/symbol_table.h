@@ -62,7 +62,7 @@ class SymbolTable {
   // The value to be associated to the next registered symbol table entry.
   uint32_t next_symbol_ = 1;
 
-  std::unordered_map<uint32_t, std::string> symbol_to_name_;
+  std::unordered_map<Symbol, std::string> symbol_to_name_;
   std::unordered_map<std::string, Symbol> name_to_symbol_;
 };
 

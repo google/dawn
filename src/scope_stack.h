@@ -48,14 +48,12 @@ class ScopeStack {
   /// Set a global variable in the stack
   /// @param symbol the symbol of the variable
   /// @param val the value
-  void set_global(const Symbol& symbol, T val) {
-    stack_[0][symbol.value()] = val;
-  }
+  void set_global(const Symbol& symbol, T val) { stack_[0][symbol] = val; }
 
   /// Sets variable into the top most scope of the stack
   /// @param symbol the symbol of the variable
   /// @param val the value
-  void set(const Symbol& symbol, T val) { stack_.back()[symbol.value()] = val; }
+  void set(const Symbol& symbol, T val) { stack_.back()[symbol] = val; }
 
   /// Checks for the given `symbol` in the stack
   /// @param symbol the symbol to look for
@@ -79,7 +77,7 @@ class ScopeStack {
   bool get(const Symbol& symbol, T* ret, bool* is_global) const {
     for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
       auto& map = *iter;
-      auto val = map.find(symbol.value());
+      auto val = map.find(symbol);
 
       if (val != map.end()) {
         if (ret) {
@@ -95,7 +93,7 @@ class ScopeStack {
   }
 
  private:
-  std::vector<std::unordered_map<uint32_t, T>> stack_;
+  std::vector<std::unordered_map<Symbol, T>> stack_;
 };
 
 }  // namespace tint

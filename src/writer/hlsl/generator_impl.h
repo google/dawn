@@ -225,7 +225,7 @@ class GeneratorImpl {
   /// @returns true if the entry point data was emitted
   bool EmitEntryPointData(std::ostream& out,
                           ast::Function* func,
-                          std::unordered_set<uint32_t>& emitted_globals);
+                          std::unordered_set<Symbol>& emitted_globals);
   /// Handles emitting the entry point function
   /// @param out the output stream
   /// @param func the entry point
@@ -395,8 +395,8 @@ class GeneratorImpl {
   bool generating_entry_point_ = false;
   uint32_t loop_emission_counter_ = 0;
   ScopeStack<ast::Variable*> global_variables_;
-  std::unordered_map<uint32_t, EntryPointData> ep_sym_to_in_data_;
-  std::unordered_map<uint32_t, EntryPointData> ep_sym_to_out_data_;
+  std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
+  std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;
 
   // This maps an input of "<entry_point_name>_<function_name>" to a remapped
   // function name. If there is no entry for a given key then function did

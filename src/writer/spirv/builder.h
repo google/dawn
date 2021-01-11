@@ -508,7 +508,7 @@ class Builder {
   std::vector<Function> functions_;
 
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
-  std::unordered_map<uint32_t, uint32_t> func_symbol_to_id_;
+  std::unordered_map<Symbol, uint32_t> func_symbol_to_id_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
   std::unordered_map<std::string, uint32_t> const_to_id_;
   std::unordered_map<std::string, uint32_t>

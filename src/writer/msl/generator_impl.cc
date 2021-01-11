@@ -400,14 +400,14 @@ Symbol GeneratorImpl::current_ep_var_symbol(VarType type) {
   Symbol sym;
   switch (type) {
     case VarType::kIn: {
-      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_.value());
+      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_);
       if (in_it != ep_sym_to_in_data_.end()) {
         sym = in_it->second.var_symbol;
       }
       break;
     }
     case VarType::kOut: {
-      auto out_it = ep_sym_to_out_data_.find(current_ep_sym_.value());
+      auto out_it = ep_sym_to_out_data_.find(current_ep_sym_);
       if (out_it != ep_sym_to_out_data_.end()) {
         sym = out_it->second.var_symbol;
       }
@@ -1061,7 +1061,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
     auto in_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
         module_->SymbolToName(func->symbol()) + "_" + kInStructNameSuffix));
     auto in_var_name = namer_->GenerateName(kTintStructInVarPrefix);
-    ep_sym_to_in_data_[func->symbol().value()] = {
+    ep_sym_to_in_data_[func->symbol()] = {
         in_struct_sym, module_->RegisterSymbol(in_var_name)};
 
     make_indent();
@@ -1099,7 +1099,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
     auto out_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
         module_->SymbolToName(func->symbol()) + "_" + kOutStructNameSuffix));
     auto out_var_name = namer_->GenerateName(kTintStructOutVarPrefix);
-    ep_sym_to_out_data_[func->symbol().value()] = {
+    ep_sym_to_out_data_[func->symbol()] = {
         out_struct_sym, module_->RegisterSymbol(out_var_name)};
 
     make_indent();
@@ -1284,14 +1284,14 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   //
   // We emit both of them if they're there regardless of if they're both used.
   if (emit_duplicate_functions) {
-    auto in_it = ep_sym_to_in_data_.find(ep_sym.value());
+    auto in_it = ep_sym_to_in_data_.find(ep_sym);
     if (in_it != ep_sym_to_in_data_.end()) {
       out_ << "thread " << namer_->NameFor(in_it->second.struct_symbol) << "& "
            << namer_->NameFor(in_it->second.var_symbol);
       first = false;
     }
 
-    auto out_it = ep_sym_to_out_data_.find(ep_sym.value());
+    auto out_it = ep_sym_to_out_data_.find(ep_sym);
     if (out_it != ep_sym_to_out_data_.end()) {
       if (!first) {
         out_ << ", ";
@@ -1421,7 +1421,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
   // This is an entry point, the return type is the entry point output structure
   // if one exists, or void otherwise.
-  auto out_data = ep_sym_to_out_data_.find(current_ep_sym_.value());
+  auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
   bool has_out_data = out_data != ep_sym_to_out_data_.end();
   if (has_out_data) {
     out_ << namer_->NameFor(out_data->second.struct_symbol);
@@ -1431,7 +1431,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   out_ << " " << namer_->NameFor(func->symbol()) << "(";
 
   bool first = true;
-  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_.value());
+  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
   if (in_data != ep_sym_to_in_data_.end()) {
     out_ << namer_->NameFor(in_data->second.struct_symbol) << " "
          << namer_->NameFor(in_data->second.var_symbol) << " [[stage_in]]";
@@ -1734,7 +1734,7 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   out_ << "return";
 
   if (generating_entry_point_) {
-    auto out_data = ep_sym_to_out_data_.find(current_ep_sym_.value());
+    auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
     if (out_data != ep_sym_to_out_data_.end()) {
       out_ << " " << namer_->NameFor(out_data->second.var_symbol);
     }

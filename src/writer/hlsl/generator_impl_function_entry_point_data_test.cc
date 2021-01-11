@@ -72,7 +72,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod->AddFunction(func);
 
-  std::unordered_set<uint32_t> globals;
+  std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
@@ -122,7 +122,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod->AddFunction(func);
 
-  std::unordered_set<uint32_t> globals;
+  std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
@@ -172,7 +172,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod->AddFunction(func);
 
-  std::unordered_set<uint32_t> globals;
+  std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
@@ -222,7 +222,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod->AddFunction(func);
 
-  std::unordered_set<uint32_t> globals;
+  std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
@@ -269,7 +269,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod->AddFunction(func);
 
-  std::unordered_set<uint32_t> globals;
+  std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_FALSE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
@@ -311,7 +311,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod->AddFunction(func);
 
-  std::unordered_set<uint32_t> globals;
+  std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_FALSE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
@@ -361,7 +361,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   mod->AddFunction(func);
 
-  std::unordered_set<uint32_t> globals;
+  std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();

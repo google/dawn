@@ -124,7 +124,7 @@ bool TypeDeterminer::Determine() {
     if (!func->IsEntryPoint()) {
       continue;
     }
-    for (const auto& callee : caller_to_callee_[func->symbol().value()]) {
+    for (const auto& callee : caller_to_callee_[func->symbol()]) {
       set_entry_points(callee, func->symbol());
     }
   }
@@ -133,9 +133,9 @@ bool TypeDeterminer::Determine() {
 }
 
 void TypeDeterminer::set_entry_points(const Symbol& fn_sym, Symbol ep_sym) {
-  symbol_to_function_[fn_sym.value()]->add_ancestor_entry_point(ep_sym);
+  symbol_to_function_[fn_sym]->add_ancestor_entry_point(ep_sym);
 
-  for (const auto& callee : caller_to_callee_[fn_sym.value()]) {
+  for (const auto& callee : caller_to_callee_[fn_sym]) {
     set_entry_points(callee, ep_sym);
   }
 }
@@ -150,7 +150,7 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 }
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
-  symbol_to_function_[func->symbol().value()] = func;
+  symbol_to_function_[func->symbol()] = func;
 
   current_function_ = func;
 
@@ -389,7 +389,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
       }
     } else {
       if (current_function_) {
-        caller_to_callee_[current_function_->symbol().value()].push_back(
+        caller_to_callee_[current_function_->symbol()].push_back(
             ident->symbol());
 
         auto* callee_func = mod_->FindFunctionBySymbol(ident->symbol());
@@ -906,7 +906,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     return true;
   }
 
-  auto iter = symbol_to_function_.find(symbol.value());
+  auto iter = symbol_to_function_.find(symbol);
   if (iter != symbol_to_function_.end()) {
     expr->set_result_type(iter->second->return_type());
     return true;

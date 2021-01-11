@@ -67,4 +67,20 @@ class Symbol {
 
 }  // namespace tint
 
+namespace std {
+
+/// Custom std::hash specialization for tint::Symbol so symbols can be used as
+/// keys for std::unordered_map and std::unordered_set.
+template <>
+class hash<tint::Symbol> {
+ public:
+  /// @param sym the symbol to return
+  /// @return the Symbol internal value
+  inline std::size_t operator()(const tint::Symbol& sym) const {
+    return static_cast<std::size_t>(sym.value());
+  }
+};
+
+}  // namespace std
+
 #endif  // SRC_SYMBOL_H_

@@ -129,11 +129,11 @@ class TypeDeterminer {
   ast::Module* mod_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
-  std::unordered_map<uint32_t, ast::Function*> symbol_to_function_;
+  std::unordered_map<Symbol, ast::Function*> symbol_to_function_;
   ast::Function* current_function_ = nullptr;
 
   // Map from caller functions to callee functions.
-  std::unordered_map<uint32_t, std::vector<Symbol>> caller_to_callee_;
+  std::unordered_map<Symbol, std::vector<Symbol>> caller_to_callee_;
 };
 
 }  // namespace tint

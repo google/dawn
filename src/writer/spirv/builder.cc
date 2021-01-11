@@ -587,7 +587,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
   scope_stack_.pop_scope();
 
-  func_symbol_to_id_[func->symbol().value()] = func_id;
+  func_symbol_to_id_[func->symbol()] = func_id;
 
   return true;
 }
@@ -1814,7 +1814,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
 
   OperandList ops = {Operand::Int(type_id), result};
 
-  auto func_id = func_symbol_to_id_[ident->symbol().value()];
+  auto func_id = func_symbol_to_id_[ident->symbol()];
   if (func_id == 0) {
     error_ = "unable to find called function: " +
              mod_->SymbolToName(ident->symbol());
