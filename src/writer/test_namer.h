@@ -27,7 +27,7 @@ class TestNamer : public Namer {
  public:
   /// Constructor
   /// @param mod the module to retrieve names from
-  explicit TestNamer(ast::Module* mod);
+  explicit TestNamer(const ast::Module* mod);
   /// Destructor
   ~TestNamer() override;
 

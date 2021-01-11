@@ -77,7 +77,7 @@ class Inspector {
   Inspector(ast::Module& module, Namer* namer);
   /// Constructor
   /// @param module Shader module to extract information from.
-  explicit Inspector(ast::Module& module);
+  explicit Inspector(const ast::Module& module);
   ~Inspector();
 
   /// @returns error messages from the Inspector

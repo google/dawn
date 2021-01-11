@@ -17,7 +17,7 @@
 namespace tint {
 namespace writer {
 
-TestNamer::TestNamer(ast::Module* mod) : Namer(mod) {}
+TestNamer::TestNamer(const ast::Module* mod) : Namer(mod) {}
 
 TestNamer::~TestNamer() = default;
 

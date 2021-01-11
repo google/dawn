@@ -46,9 +46,9 @@ namespace inspector {
 Inspector::Inspector(ast::Module& module, Namer* namer)
     : module_(module), namer_(namer), namer_is_owned_(false) {}
 
-Inspector::Inspector(ast::Module& module)
+Inspector::Inspector(const ast::Module& module)
     : module_(module),
-      namer_(new MangleNamer(&module)),
+      namer_(new MangleNamer(&module_)),
       namer_is_owned_(true) {}
 
 Inspector::~Inspector() {

@@ -28,7 +28,7 @@ class Namer {
  public:
   /// Constructor
   /// @param mod the module this namer works with
-  explicit Namer(ast::Module* mod);
+  explicit Namer(const ast::Module* mod);
   /// Destructor
   virtual ~Namer();
 
@@ -52,7 +52,7 @@ class Namer {
   bool IsUsed(const std::string& name);
 
   /// The module storing the symbol table
-  ast::Module* module_ = nullptr;
+  const ast::Module* module_ = nullptr;
 
  private:
   // The list of names taken by the remapper
@@ -64,7 +64,7 @@ class MangleNamer : public Namer {
  public:
   /// Constructor
   /// @param mod the module to retrieve names from
-  explicit MangleNamer(ast::Module* mod);
+  explicit MangleNamer(const ast::Module* mod);
   /// Destructor
   ~MangleNamer() override;
 
@@ -81,7 +81,7 @@ class UnsafeNamer : public Namer {
  public:
   /// Constructor
   /// @param mod the module to retrieve names from
-  explicit UnsafeNamer(ast::Module* mod);
+  explicit UnsafeNamer(const ast::Module* mod);
   /// Destructor
   ~UnsafeNamer() override;
 
