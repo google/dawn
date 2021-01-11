@@ -53,7 +53,7 @@ namespace wgsl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  /// @param module the module to generate
+  /// @param mod the module to generate
   explicit GeneratorImpl(ast::Module* mod);
   ~GeneratorImpl();
 
