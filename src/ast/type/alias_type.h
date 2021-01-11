@@ -39,8 +39,6 @@ class Alias : public Castable<Alias, Type> {
 
   /// @returns the alias symbol
   Symbol symbol() const { return symbol_; }
-  /// @returns the alias name
-  const std::string& name() const { return name_; }
   /// @returns the alias type
   Type* type() const { return subtype_; }
 

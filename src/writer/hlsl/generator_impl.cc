@@ -238,7 +238,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
     if (auto* str = alias->type()->As<ast::type::Struct>()) {
-      if (!EmitStructType(out, str, alias->name())) {
+      if (!EmitStructType(out, str, namer_->NameFor(alias->symbol()))) {
         return false;
       }
       return true;

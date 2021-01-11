@@ -175,7 +175,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
 bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
   make_indent();
   if (auto* alias = ty->As<ast::type::Alias>()) {
-    out_ << "type " << alias->name() << " = ";
+    out_ << "type " << module_.SymbolToName(alias->symbol()) << " = ";
     if (!EmitType(alias->type())) {
       return false;
     }
@@ -414,7 +414,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       return false;
     }
   } else if (auto* alias = type->As<ast::type::Alias>()) {
-    out_ << alias->name();
+    out_ << module_.SymbolToName(alias->symbol());
   } else if (auto* ary = type->As<ast::type::Array>()) {
     for (auto* deco : ary->decorations()) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
