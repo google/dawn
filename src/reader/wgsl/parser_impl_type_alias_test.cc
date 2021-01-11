@@ -60,7 +60,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
 
   auto* s = alias->type()->As<ast::type::Struct>();
   EXPECT_EQ(s->symbol(), p->get_module().RegisterSymbol("B"));
-  EXPECT_EQ(s->name(), "B");
+  EXPECT_EQ(s->symbol(), p->get_module().RegisterSymbol("B"));
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {

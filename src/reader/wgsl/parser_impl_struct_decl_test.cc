@@ -39,7 +39,7 @@ struct S {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->name(), "S");
+  ASSERT_EQ(s->symbol(), p->get_module().RegisterSymbol("S"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->name(), "B");
+  ASSERT_EQ(s->symbol(), p->get_module().RegisterSymbol("B"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->name(), "S");
+  ASSERT_EQ(s->symbol(), p->get_module().RegisterSymbol("S"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");

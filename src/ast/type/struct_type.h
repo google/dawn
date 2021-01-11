@@ -40,8 +40,6 @@ class Struct : public Castable<Struct, Type> {
 
   /// @returns the struct symbol
   const Symbol& symbol() const { return symbol_; }
-  /// @returns the struct name
-  const std::string& name() const { return name_; }
 
   /// @returns true if the struct has a block decoration
   bool IsBlockDecorated() const { return struct_->IsBlockDecorated(); }

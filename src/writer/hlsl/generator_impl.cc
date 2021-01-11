@@ -249,7 +249,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     }
     out << " " << namer_->NameFor(alias->symbol()) << ";" << std::endl;
   } else if (auto* str = ty->As<ast::type::Struct>()) {
-    if (!EmitStructType(out, str, str->name())) {
+    if (!EmitStructType(out, str, namer_->NameFor(str->symbol()))) {
       return false;
     }
   } else {
@@ -1353,7 +1353,7 @@ bool GeneratorImpl::EmitEntryPointData(
 
     auto* type = var->type()->UnwrapIfNeeded();
     if (auto* strct = type->As<ast::type::Struct>()) {
-      out << "ConstantBuffer<" << strct->name() << "> "
+      out << "ConstantBuffer<" << namer_->NameFor(strct->symbol()) << "> "
           << namer_->NameFor(var->symbol()) << " : register(b"
           << binding->value() << ");" << std::endl;
     } else {
@@ -2139,7 +2139,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
     out << "State";
   } else if (auto* str = type->As<ast::type::Struct>()) {
-    out << str->name();
+    out << namer_->NameFor(str->symbol());
   } else if (auto* tex = type->As<ast::type::Texture>()) {
     if (tex->Is<ast::type::StorageTexture>()) {
       out << "RW";

@@ -357,7 +357,8 @@ Expect<bool> ParserImpl::expect_global_decl() {
         return Failure::kErrored;
 
       auto* type = module_.unique_type(std::move(str.value));
-      register_constructed(type->As<ast::type::Struct>()->name(), type);
+      register_constructed(
+          module_.SymbolToName(type->As<ast::type::Struct>()->symbol()), type);
       module_.AddConstructedType(type);
       return true;
     }

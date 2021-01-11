@@ -40,7 +40,8 @@ TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(), HasSubstr("S Struct"));
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+              HasSubstr("S Struct"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
@@ -50,7 +51,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(), HasSubstr("mystruct Struct"));
+  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+              HasSubstr("mystruct Struct"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {

@@ -458,7 +458,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
   } else if (auto* str = type->As<ast::type::Struct>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
-    out_ << str->name();
+    out_ << module_.SymbolToName(str->symbol());
   } else if (auto* texture = type->As<ast::type::Texture>()) {
     out_ << "texture_";
     if (texture->Is<ast::type::DepthTexture>()) {
@@ -554,7 +554,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
     deco->to_str(out_, 0);
     out_ << "]]" << std::endl;
   }
-  out_ << "struct " << str->name() << " {" << std::endl;
+  out_ << "struct " << module_.SymbolToName(str->symbol()) << " {" << std::endl;
 
   increment_indent();
   for (auto* mem : impl->members()) {

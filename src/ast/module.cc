@@ -103,12 +103,12 @@ bool Module::IsValid() const {
         return false;
       }
       if (auto* str = alias->type()->As<type::Struct>()) {
-        if (str->name().empty()) {
+        if (!str->symbol().IsValid()) {
           return false;
         }
       }
     } else if (auto* str = ty->As<type::Struct>()) {
-      if (str->name().empty()) {
+      if (!str->symbol().IsValid()) {
         return false;
       }
     } else {
@@ -139,7 +139,7 @@ std::string Module::to_str() const {
         str->impl()->to_str(out, indent);
       }
     } else if (auto* str = ty->As<type::Struct>()) {
-      out << str->name() << " ";
+      out << str->symbol().to_str() << " ";
       str->impl()->to_str(out, indent);
     }
   }

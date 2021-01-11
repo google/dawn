@@ -1852,7 +1852,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
   } else if (auto* str = type->As<ast::type::Struct>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
-    out_ << str->name();
+    out_ << namer_->NameFor(str->symbol());
   } else if (auto* tex = type->As<ast::type::Texture>()) {
     if (tex->Is<ast::type::DepthTexture>()) {
       out_ << "depth";
@@ -1942,7 +1942,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
   // }
-  out_ << "struct " << str->name() << " {" << std::endl;
+  out_ << "struct " << namer_->NameFor(str->symbol()) << " {" << std::endl;
 
   increment_indent();
   uint32_t current_offset = 0;

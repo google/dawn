@@ -2788,7 +2788,7 @@ bool Builder::GenerateStructType(ast::type::Struct* struct_type,
   auto struct_id = result.to_i();
   auto* impl = struct_type->impl();
 
-  if (!struct_type->name().empty()) {
+  if (struct_type->symbol().IsValid()) {
     push_debug(spv::Op::OpName,
                {Operand::Int(struct_id),
                 Operand::String(namer_->NameFor(struct_type->symbol()))});

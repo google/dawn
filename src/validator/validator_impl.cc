@@ -96,7 +96,7 @@ bool ValidatorImpl::ValidateConstructedTypes(
               add_error(member->source(), "v-0031",
                         "a struct containing a runtime-sized array "
                         "must be in the 'storage' storage class: '" +
-                            st->name() + "'");
+                            module_.SymbolToName(st->symbol()) + "'");
               return false;
             }
           }
