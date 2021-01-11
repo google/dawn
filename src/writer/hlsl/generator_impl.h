@@ -387,6 +387,7 @@ class GeneratorImpl {
   };
 
   std::string current_ep_var_name(VarType type);
+  std::string get_buffer_name(ast::Expression* expr);
 
   std::string error_;
   size_t indent_ = 0;

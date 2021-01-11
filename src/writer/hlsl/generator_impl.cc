@@ -81,21 +81,6 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
          stmts->last()->Is<ast::FallthroughStatement>();
 }
 
-std::string get_buffer_name(ast::Expression* expr) {
-  for (;;) {
-    if (auto* ident = expr->As<ast::IdentifierExpression>()) {
-      return ident->name();
-    } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
-      expr = member->structure();
-    } else if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
-      expr = array->array();
-    } else {
-      break;
-    }
-  }
-  return "";
-}
-
 uint32_t convert_swizzle_to_index(const std::string& swizzle) {
   if (swizzle == "r" || swizzle == "x") {
     return 0;
@@ -684,17 +669,18 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     return true;
   }
 
-  auto name = ident->name();
-  auto caller_sym = module_->GetSymbol(name);
+  auto name = namer_->NameFor(ident->symbol());
+  auto caller_sym = ident->symbol();
   auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
                                         caller_sym.to_str());
   if (it != ep_func_name_remapped_.end()) {
     name = it->second;
   }
 
-  auto* func = module_->FindFunctionBySymbol(module_->GetSymbol(ident->name()));
+  auto* func = module_->FindFunctionBySymbol(ident->symbol());
   if (func == nullptr) {
-    error_ = "Unable to find function: " + name;
+    error_ =
+        "Unable to find function: " + module_->SymbolToName(ident->symbol());
     return false;
   }
 
@@ -782,7 +768,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
-               ident->name() + "'";
+               module_->SymbolToName(ident->symbol()) + "'";
       return false;
   }
 
@@ -885,7 +871,7 @@ std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
     case ast::Intrinsic::kMax:
     case ast::Intrinsic::kMin:
     case ast::Intrinsic::kClamp:
-      out = ident->name();
+      out = module_->SymbolToName(ident->symbol());
       break;
     case ast::Intrinsic::kFaceForward:
       out = "faceforward";
@@ -900,7 +886,8 @@ std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
       out = "smoothstep";
       break;
     default:
-      error_ = "Unknown builtin method: " + ident->name();
+      error_ =
+          "Unknown builtin method: " + module_->SymbolToName(ident->symbol());
       return "";
   }
 
@@ -1948,9 +1935,12 @@ bool GeneratorImpl::is_storage_buffer_access(
     ast::MemberAccessorExpression* expr) {
   auto* structure = expr->structure();
   auto* data_type = structure->result_type()->UnwrapAll();
+  // TODO(dsinclair): Swizzle
+  //
   // If the data is a multi-element swizzle then we will not load the swizzle
   // portion through the Load command.
-  if (data_type->Is<ast::type::Vector>() && expr->member()->name().size() > 1) {
+  if (data_type->Is<ast::type::Vector>() &&
+      module_->SymbolToName(expr->member()->symbol()).size() > 1) {
     return false;
   }
 
@@ -2362,6 +2352,21 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
   }
 
   return true;
+}
+
+std::string GeneratorImpl::get_buffer_name(ast::Expression* expr) {
+  for (;;) {
+    if (auto* ident = expr->As<ast::IdentifierExpression>()) {
+      return namer_->NameFor(ident->symbol());
+    } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
+      expr = member->structure();
+    } else if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
+      expr = array->array();
+    } else {
+      break;
+    }
+  }
+  return "";
 }
 
 }  // namespace hlsl

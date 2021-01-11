@@ -504,8 +504,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                                         ast::CallExpression* expr) {
   if (ast::intrinsic::IsDerivative(ident->intrinsic())) {
     if (expr->params().size() != 1) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " + ident->name());
+      set_error(expr->source(), "incorrect number of parameters for " +
+                                    mod_->SymbolToName(ident->symbol()));
       return false;
     }
 
@@ -525,8 +525,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
     if (expr->params().size() != 1) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " + ident->name());
+      set_error(expr->source(), "incorrect number of parameters for " +
+                                    mod_->SymbolToName(ident->symbol()));
       return false;
     }
 
@@ -548,7 +548,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     if (!texture_param->result_type()
              ->UnwrapPtrIfNeeded()
              ->Is<ast::type::Texture>()) {
-      set_error(expr->source(), "invalid first argument for " + ident->name());
+      set_error(expr->source(), "invalid first argument for " +
+                                    mod_->SymbolToName(ident->symbol()));
       return false;
     }
     ast::type::Texture* texture = texture_param->result_type()
@@ -658,9 +659,10 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     if (expr->params().size() != param.count) {
       set_error(expr->source(),
-                "incorrect number of parameters for " + ident->name() +
-                    ", got " + std::to_string(expr->params().size()) +
-                    " and expected " + std::to_string(param.count));
+                "incorrect number of parameters for " +
+                    mod_->SymbolToName(ident->symbol()) + ", got " +
+                    std::to_string(expr->params().size()) + " and expected " +
+                    std::to_string(param.count));
       return false;
     }
 
@@ -701,8 +703,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
     if (expr->params().size() != 2) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " + ident->name());
+      set_error(expr->source(), "incorrect number of parameters for " +
+                                    mod_->SymbolToName(ident->symbol()));
       return false;
     }
 
@@ -710,7 +712,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
     if (!param0_type->Is<ast::type::Vector>() ||
         !param1_type->Is<ast::type::Vector>()) {
-      set_error(expr->source(), "invalid parameter type for " + ident->name());
+      set_error(expr->source(), "invalid parameter type for " +
+                                    mod_->SymbolToName(ident->symbol()));
       return false;
     }
 
@@ -723,7 +726,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
     if (expr->params().size() != 3) {
       set_error(expr->source(), "incorrect number of parameters for " +
-                                    ident->name() + " expected 3 got " +
+                                    mod_->SymbolToName(ident->symbol()) +
+                                    " expected 3 got " +
                                     std::to_string(expr->params().size()));
       return false;
     }
@@ -742,13 +746,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
   }
   if (data == nullptr) {
-    error_ = "unable to find intrinsic " + ident->name();
+    error_ = "unable to find intrinsic " + mod_->SymbolToName(ident->symbol());
     return false;
   }
 
   if (expr->params().size() != data->param_count) {
     set_error(expr->source(), "incorrect number of parameters for " +
-                                  ident->name() + ". Expected " +
+                                  mod_->SymbolToName(ident->symbol()) +
+                                  ". Expected " +
                                   std::to_string(data->param_count) + " got " +
                                   std::to_string(expr->params().size()));
     return false;
@@ -764,7 +769,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_float_scalar_or_vector() &&
             !result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
-                    "incorrect type for " + ident->name() + ". " +
+                    "incorrect type for " +
+                        mod_->SymbolToName(ident->symbol()) + ". " +
                         "Requires float or int, scalar or vector values");
           return false;
         }
@@ -772,7 +778,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       case IntrinsicDataType::kFloatScalarOrVector:
         if (!result_types.back()->is_float_scalar_or_vector()) {
           set_error(expr->source(),
-                    "incorrect type for " + ident->name() + ". " +
+                    "incorrect type for " +
+                        mod_->SymbolToName(ident->symbol()) + ". " +
                         "Requires float scalar or float vector values");
           return false;
         }
@@ -781,14 +788,16 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       case IntrinsicDataType::kIntScalarOrVector:
         if (!result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
-                    "incorrect type for " + ident->name() + ". " +
+                    "incorrect type for " +
+                        mod_->SymbolToName(ident->symbol()) + ". " +
                         "Requires integer scalar or integer vector values");
           return false;
         }
         break;
       case IntrinsicDataType::kFloatVector:
         if (!result_types.back()->is_float_vector()) {
-          set_error(expr->source(), "incorrect type for " + ident->name() +
+          set_error(expr->source(), "incorrect type for " +
+                                        mod_->SymbolToName(ident->symbol()) +
                                         ". " + "Requires float vector values");
           return false;
         }
@@ -796,7 +805,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
             result_types.back()->As<ast::type::Vector>()->size() !=
                 data->vector_size) {
           set_error(expr->source(), "incorrect vector size for " +
-                                        ident->name() + ". " + "Requires " +
+                                        mod_->SymbolToName(ident->symbol()) +
+                                        ". " + "Requires " +
                                         std::to_string(data->vector_size) +
                                         " elements");
           return false;
@@ -804,7 +814,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         break;
       case IntrinsicDataType::kMatrix:
         if (!result_types.back()->Is<ast::type::Matrix>()) {
-          set_error(expr->source(), "incorrect type for " + ident->name() +
+          set_error(expr->source(), "incorrect type for " +
+                                        mod_->SymbolToName(ident->symbol()) +
                                         ". Requires matrix value");
           return false;
         }
@@ -815,8 +826,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   // Verify all the parameter types match
   for (size_t i = 1; i < data->param_count; ++i) {
     if (result_types[0] != result_types[i]) {
-      set_error(expr->source(),
-                "mismatched parameter types for " + ident->name());
+      set_error(expr->source(), "mismatched parameter types for " +
+                                    mod_->SymbolToName(ident->symbol()));
       return false;
     }
   }
@@ -891,143 +902,144 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
 }
 
 bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
-  if (ident->name() == "abs") {
+  auto name = mod_->SymbolToName(ident->symbol());
+  if (name == "abs") {
     ident->set_intrinsic(ast::Intrinsic::kAbs);
-  } else if (ident->name() == "acos") {
+  } else if (name == "acos") {
     ident->set_intrinsic(ast::Intrinsic::kAcos);
-  } else if (ident->name() == "all") {
+  } else if (name == "all") {
     ident->set_intrinsic(ast::Intrinsic::kAll);
-  } else if (ident->name() == "any") {
+  } else if (name == "any") {
     ident->set_intrinsic(ast::Intrinsic::kAny);
-  } else if (ident->name() == "arrayLength") {
+  } else if (name == "arrayLength") {
     ident->set_intrinsic(ast::Intrinsic::kArrayLength);
-  } else if (ident->name() == "asin") {
+  } else if (name == "asin") {
     ident->set_intrinsic(ast::Intrinsic::kAsin);
-  } else if (ident->name() == "atan") {
+  } else if (name == "atan") {
     ident->set_intrinsic(ast::Intrinsic::kAtan);
-  } else if (ident->name() == "atan2") {
+  } else if (name == "atan2") {
     ident->set_intrinsic(ast::Intrinsic::kAtan2);
-  } else if (ident->name() == "ceil") {
+  } else if (name == "ceil") {
     ident->set_intrinsic(ast::Intrinsic::kCeil);
-  } else if (ident->name() == "clamp") {
+  } else if (name == "clamp") {
     ident->set_intrinsic(ast::Intrinsic::kClamp);
-  } else if (ident->name() == "cos") {
+  } else if (name == "cos") {
     ident->set_intrinsic(ast::Intrinsic::kCos);
-  } else if (ident->name() == "cosh") {
+  } else if (name == "cosh") {
     ident->set_intrinsic(ast::Intrinsic::kCosh);
-  } else if (ident->name() == "countOneBits") {
+  } else if (name == "countOneBits") {
     ident->set_intrinsic(ast::Intrinsic::kCountOneBits);
-  } else if (ident->name() == "cross") {
+  } else if (name == "cross") {
     ident->set_intrinsic(ast::Intrinsic::kCross);
-  } else if (ident->name() == "determinant") {
+  } else if (name == "determinant") {
     ident->set_intrinsic(ast::Intrinsic::kDeterminant);
-  } else if (ident->name() == "distance") {
+  } else if (name == "distance") {
     ident->set_intrinsic(ast::Intrinsic::kDistance);
-  } else if (ident->name() == "dot") {
+  } else if (name == "dot") {
     ident->set_intrinsic(ast::Intrinsic::kDot);
-  } else if (ident->name() == "dpdx") {
+  } else if (name == "dpdx") {
     ident->set_intrinsic(ast::Intrinsic::kDpdx);
-  } else if (ident->name() == "dpdxCoarse") {
+  } else if (name == "dpdxCoarse") {
     ident->set_intrinsic(ast::Intrinsic::kDpdxCoarse);
-  } else if (ident->name() == "dpdxFine") {
+  } else if (name == "dpdxFine") {
     ident->set_intrinsic(ast::Intrinsic::kDpdxFine);
-  } else if (ident->name() == "dpdy") {
+  } else if (name == "dpdy") {
     ident->set_intrinsic(ast::Intrinsic::kDpdy);
-  } else if (ident->name() == "dpdyCoarse") {
+  } else if (name == "dpdyCoarse") {
     ident->set_intrinsic(ast::Intrinsic::kDpdyCoarse);
-  } else if (ident->name() == "dpdyFine") {
+  } else if (name == "dpdyFine") {
     ident->set_intrinsic(ast::Intrinsic::kDpdyFine);
-  } else if (ident->name() == "exp") {
+  } else if (name == "exp") {
     ident->set_intrinsic(ast::Intrinsic::kExp);
-  } else if (ident->name() == "exp2") {
+  } else if (name == "exp2") {
     ident->set_intrinsic(ast::Intrinsic::kExp2);
-  } else if (ident->name() == "faceForward") {
+  } else if (name == "faceForward") {
     ident->set_intrinsic(ast::Intrinsic::kFaceForward);
-  } else if (ident->name() == "floor") {
+  } else if (name == "floor") {
     ident->set_intrinsic(ast::Intrinsic::kFloor);
-  } else if (ident->name() == "fma") {
+  } else if (name == "fma") {
     ident->set_intrinsic(ast::Intrinsic::kFma);
-  } else if (ident->name() == "fract") {
+  } else if (name == "fract") {
     ident->set_intrinsic(ast::Intrinsic::kFract);
-  } else if (ident->name() == "frexp") {
+  } else if (name == "frexp") {
     ident->set_intrinsic(ast::Intrinsic::kFrexp);
-  } else if (ident->name() == "fwidth") {
+  } else if (name == "fwidth") {
     ident->set_intrinsic(ast::Intrinsic::kFwidth);
-  } else if (ident->name() == "fwidthCoarse") {
+  } else if (name == "fwidthCoarse") {
     ident->set_intrinsic(ast::Intrinsic::kFwidthCoarse);
-  } else if (ident->name() == "fwidthFine") {
+  } else if (name == "fwidthFine") {
     ident->set_intrinsic(ast::Intrinsic::kFwidthFine);
-  } else if (ident->name() == "inverseSqrt") {
+  } else if (name == "inverseSqrt") {
     ident->set_intrinsic(ast::Intrinsic::kInverseSqrt);
-  } else if (ident->name() == "isFinite") {
+  } else if (name == "isFinite") {
     ident->set_intrinsic(ast::Intrinsic::kIsFinite);
-  } else if (ident->name() == "isInf") {
+  } else if (name == "isInf") {
     ident->set_intrinsic(ast::Intrinsic::kIsInf);
-  } else if (ident->name() == "isNan") {
+  } else if (name == "isNan") {
     ident->set_intrinsic(ast::Intrinsic::kIsNan);
-  } else if (ident->name() == "isNormal") {
+  } else if (name == "isNormal") {
     ident->set_intrinsic(ast::Intrinsic::kIsNormal);
-  } else if (ident->name() == "ldexp") {
+  } else if (name == "ldexp") {
     ident->set_intrinsic(ast::Intrinsic::kLdexp);
-  } else if (ident->name() == "length") {
+  } else if (name == "length") {
     ident->set_intrinsic(ast::Intrinsic::kLength);
-  } else if (ident->name() == "log") {
+  } else if (name == "log") {
     ident->set_intrinsic(ast::Intrinsic::kLog);
-  } else if (ident->name() == "log2") {
+  } else if (name == "log2") {
     ident->set_intrinsic(ast::Intrinsic::kLog2);
-  } else if (ident->name() == "max") {
+  } else if (name == "max") {
     ident->set_intrinsic(ast::Intrinsic::kMax);
-  } else if (ident->name() == "min") {
+  } else if (name == "min") {
     ident->set_intrinsic(ast::Intrinsic::kMin);
-  } else if (ident->name() == "mix") {
+  } else if (name == "mix") {
     ident->set_intrinsic(ast::Intrinsic::kMix);
-  } else if (ident->name() == "modf") {
+  } else if (name == "modf") {
     ident->set_intrinsic(ast::Intrinsic::kModf);
-  } else if (ident->name() == "normalize") {
+  } else if (name == "normalize") {
     ident->set_intrinsic(ast::Intrinsic::kNormalize);
-  } else if (ident->name() == "outerProduct") {
+  } else if (name == "outerProduct") {
     ident->set_intrinsic(ast::Intrinsic::kOuterProduct);
-  } else if (ident->name() == "pow") {
+  } else if (name == "pow") {
     ident->set_intrinsic(ast::Intrinsic::kPow);
-  } else if (ident->name() == "reflect") {
+  } else if (name == "reflect") {
     ident->set_intrinsic(ast::Intrinsic::kReflect);
-  } else if (ident->name() == "reverseBits") {
+  } else if (name == "reverseBits") {
     ident->set_intrinsic(ast::Intrinsic::kReverseBits);
-  } else if (ident->name() == "round") {
+  } else if (name == "round") {
     ident->set_intrinsic(ast::Intrinsic::kRound);
-  } else if (ident->name() == "select") {
+  } else if (name == "select") {
     ident->set_intrinsic(ast::Intrinsic::kSelect);
-  } else if (ident->name() == "sign") {
+  } else if (name == "sign") {
     ident->set_intrinsic(ast::Intrinsic::kSign);
-  } else if (ident->name() == "sin") {
+  } else if (name == "sin") {
     ident->set_intrinsic(ast::Intrinsic::kSin);
-  } else if (ident->name() == "sinh") {
+  } else if (name == "sinh") {
     ident->set_intrinsic(ast::Intrinsic::kSinh);
-  } else if (ident->name() == "smoothStep") {
+  } else if (name == "smoothStep") {
     ident->set_intrinsic(ast::Intrinsic::kSmoothStep);
-  } else if (ident->name() == "sqrt") {
+  } else if (name == "sqrt") {
     ident->set_intrinsic(ast::Intrinsic::kSqrt);
-  } else if (ident->name() == "step") {
+  } else if (name == "step") {
     ident->set_intrinsic(ast::Intrinsic::kStep);
-  } else if (ident->name() == "tan") {
+  } else if (name == "tan") {
     ident->set_intrinsic(ast::Intrinsic::kTan);
-  } else if (ident->name() == "tanh") {
+  } else if (name == "tanh") {
     ident->set_intrinsic(ast::Intrinsic::kTanh);
-  } else if (ident->name() == "textureLoad") {
+  } else if (name == "textureLoad") {
     ident->set_intrinsic(ast::Intrinsic::kTextureLoad);
-  } else if (ident->name() == "textureStore") {
+  } else if (name == "textureStore") {
     ident->set_intrinsic(ast::Intrinsic::kTextureStore);
-  } else if (ident->name() == "textureSample") {
+  } else if (name == "textureSample") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSample);
-  } else if (ident->name() == "textureSampleBias") {
+  } else if (name == "textureSampleBias") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleBias);
-  } else if (ident->name() == "textureSampleCompare") {
+  } else if (name == "textureSampleCompare") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleCompare);
-  } else if (ident->name() == "textureSampleGrad") {
+  } else if (name == "textureSampleGrad") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleGrad);
-  } else if (ident->name() == "textureSampleLevel") {
+  } else if (name == "textureSampleLevel") {
     ident->set_intrinsic(ast::Intrinsic::kTextureSampleLevel);
-  } else if (ident->name() == "trunc") {
+  } else if (name == "trunc") {
     ident->set_intrinsic(ast::Intrinsic::kTrunc);
   } else {
     return false;

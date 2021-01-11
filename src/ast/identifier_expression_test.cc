@@ -25,13 +25,11 @@ using IdentifierExpressionTest = TestHelper;
 TEST_F(IdentifierExpressionTest, Creation) {
   auto* i = Expr("ident");
   EXPECT_EQ(i->symbol(), Symbol(1));
-  EXPECT_EQ(i->name(), "ident");
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
   auto* i = Expr(Source{Source::Location{20, 2}}, "ident");
   EXPECT_EQ(i->symbol(), Symbol(1));
-  EXPECT_EQ(i->name(), "ident");
 
   auto src = i->source();
   EXPECT_EQ(src.range.begin.line, 20u);

@@ -563,17 +563,18 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return true;
   }
 
-  auto name = ident->name();
-  auto caller_sym = module_->GetSymbol(name);
+  auto name = namer_->NameFor(ident->symbol());
+  auto caller_sym = ident->symbol();
   auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
                                         caller_sym.to_str());
   if (it != ep_func_name_remapped_.end()) {
     name = it->second;
   }
 
-  auto* func = module_->FindFunctionBySymbol(module_->GetSymbol(ident->name()));
+  auto* func = module_->FindFunctionBySymbol(ident->symbol());
   if (func == nullptr) {
-    error_ = "Unable to find function: " + name;
+    error_ =
+        "Unable to find function: " + module_->SymbolToName(ident->symbol());
     return false;
   }
 
@@ -678,7 +679,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
       break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
-               ident->name() + "'";
+               module_->SymbolToName(ident->symbol()) + "'";
       return false;
   }
 
@@ -805,7 +806,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case ast::Intrinsic::kTrunc:
     case ast::Intrinsic::kSign:
     case ast::Intrinsic::kClamp:
-      out += ident->name();
+      out += module_->SymbolToName(ident->symbol());
       break;
     case ast::Intrinsic::kAbs:
       if (ident->result_type()->Is<ast::type::F32>()) {
@@ -841,7 +842,8 @@ std::string GeneratorImpl::generate_builtin_name(
       out += "rsqrt";
       break;
     default:
-      error_ = "Unknown import method: " + ident->name();
+      error_ =
+          "Unknown import method: " + module_->SymbolToName(ident->symbol());
       return "";
   }
   return out;

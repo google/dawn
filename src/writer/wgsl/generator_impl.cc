@@ -338,7 +338,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
-  out_ << ident->name();
+  out_ << module_.SymbolToName(ident->symbol());
   return true;
 }
 

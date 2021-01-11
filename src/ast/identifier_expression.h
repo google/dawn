@@ -42,8 +42,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
 
   /// @returns the symbol for the identifier
   Symbol symbol() const { return sym_; }
-  /// @returns the name part of the identifier
-  std::string name() const { return name_; }
 
   /// Sets the intrinsic for this identifier
   /// @param i the intrinsic to set

@@ -441,12 +441,6 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
     return false;
   }
 
-  // TODO(dsinclair): This should be using the namer to update the entry point
-  // name to a non-user provided string. Disable for now until we can update
-  // the inspector and land the same change in MSL / HLSL to all roll into Dawn
-  // at the same time.
-  // OperandList operands = {Operand::Int(stage), Operand::Int(id),
-  //                         Operand::String(func->name())};
   OperandList operands = {Operand::Int(stage), Operand::Int(id),
                           Operand::String(namer_->NameFor(func->symbol()))};
 
@@ -1119,7 +1113,8 @@ uint32_t Builder::GenerateIdentifierExpression(
     return val;
   }
 
-  error_ = "unable to find variable with identifier: " + expr->name();
+  error_ = "unable to find variable with identifier: " +
+           mod_->SymbolToName(expr->symbol());
   return 0;
 }
 
@@ -1821,7 +1816,8 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
 
   auto func_id = func_symbol_to_id_[ident->symbol().value()];
   if (func_id == 0) {
-    error_ = "unable to find called function: " + ident->name();
+    error_ = "unable to find called function: " +
+             mod_->SymbolToName(ident->symbol());
     return 0;
   }
   ops.push_back(Operand::Int(func_id));
@@ -1951,7 +1947,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     auto inst_id =
         intrinsic_to_glsl_method(ident->result_type(), ident->intrinsic());
     if (inst_id == 0) {
-      error_ = "unknown method " + ident->name();
+      error_ = "unknown method " + mod_->SymbolToName(ident->symbol());
       return 0;
     }
 
@@ -1962,7 +1958,8 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   }
 
   if (op == spv::Op::OpNop) {
-    error_ = "unable to determine operator for: " + ident->name();
+    error_ = "unable to determine operator for: " +
+             mod_->SymbolToName(ident->symbol());
     return 0;
   }
 
@@ -2173,7 +2170,8 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   }
 
   if (op == spv::Op::OpNop) {
-    error_ = "unable to determine operator for: " + ident->name();
+    error_ = "unable to determine operator for: " +
+             mod_->SymbolToName(ident->symbol());
     return false;
   }
 
