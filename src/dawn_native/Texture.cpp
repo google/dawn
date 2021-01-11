@@ -155,8 +155,8 @@ namespace dawn_native {
 
         MaybeError ValidateTextureSize(const TextureDescriptor* descriptor, const Format* format) {
             ASSERT(descriptor->size.width != 0 && descriptor->size.height != 0);
-            if (descriptor->size.width > kMaxTextureSize ||
-                descriptor->size.height > kMaxTextureSize) {
+            if (descriptor->size.width > kMaxTextureDimension2D ||
+                descriptor->size.height > kMaxTextureDimension2D) {
                 return DAWN_VALIDATION_ERROR("Texture max size exceeded");
             }
 
@@ -176,7 +176,7 @@ namespace dawn_native {
             }
 
             if (descriptor->dimension == wgpu::TextureDimension::e2D &&
-                descriptor->size.depth > kMaxTexture2DArrayLayers) {
+                descriptor->size.depth > kMaxTextureArrayLayers) {
                 return DAWN_VALIDATION_ERROR("Texture 2D array layer count exceeded");
             }
             if (descriptor->mipLevelCount > kMaxTexture2DMipLevels) {
@@ -444,12 +444,12 @@ namespace dawn_native {
     uint32_t TextureBase::GetSubresourceIndex(uint32_t mipLevel,
                                               uint32_t arraySlice,
                                               Aspect aspect) const {
-        ASSERT(arraySlice <= kMaxTexture2DArrayLayers);
+        ASSERT(arraySlice <= kMaxTextureArrayLayers);
         ASSERT(mipLevel <= kMaxTexture2DMipLevels);
         ASSERT(HasOneBit(aspect));
-        static_assert(kMaxTexture2DMipLevels <=
-                          std::numeric_limits<uint32_t>::max() / kMaxTexture2DArrayLayers,
-                      "texture size overflows uint32_t");
+        static_assert(
+            kMaxTexture2DMipLevels <= std::numeric_limits<uint32_t>::max() / kMaxTextureArrayLayers,
+            "texture size overflows uint32_t");
         return mipLevel +
                GetNumMipLevels() * (arraySlice + GetArrayLayers() * GetAspectIndex(aspect));
     }

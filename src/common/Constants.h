@@ -58,11 +58,13 @@ static constexpr float kLodMin = 0.0;
 static constexpr float kLodMax = 1000.0;
 
 // Max texture size constants
-static constexpr uint32_t kMaxTextureSize = 8192u;
-static constexpr uint32_t kMaxTexture2DArrayLayers = 256u;
+static constexpr uint32_t kMaxTextureDimension1D = 8192u;
+static constexpr uint32_t kMaxTextureDimension2D = 8192u;
+static constexpr uint32_t kMaxTextureDimension3D = 2048u;
+static constexpr uint32_t kMaxTextureArrayLayers = 2048u;
 static constexpr uint32_t kMaxTexture2DMipLevels = 14u;
-static_assert(1 << (kMaxTexture2DMipLevels - 1) == kMaxTextureSize,
-              "kMaxTexture2DMipLevels and kMaxTextureSize size mismatch");
+static_assert(1 << (kMaxTexture2DMipLevels - 1) == kMaxTextureDimension2D,
+              "kMaxTexture2DMipLevels and kMaxTextureDimension2D size mismatch");
 
 // Offset alignment for CopyB2B. Strictly speaking this alignment is required only
 // on macOS, but we decide to do it on all platforms.
