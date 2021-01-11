@@ -89,15 +89,18 @@ void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
 }
 
 bool TypeDeterminer::Determine() {
-  for (auto& iter : mod_->types()) {
-    auto& type = iter.second;
-    if (auto* storage = type->As<ast::type::StorageTexture>()) {
-      if (!DetermineStorageTextureSubtype(storage)) {
-        set_error(Source{},
-                  "unable to determine storage texture subtype for: " +
-                      type->type_name());
-        return false;
-      }
+  std::vector<ast::type::StorageTexture*> storage_textures;
+  for (auto& it : mod_->types()) {
+    if (auto* storage = it.second->As<ast::type::StorageTexture>()) {
+      storage_textures.emplace_back(storage);
+    }
+  }
+
+  for (auto* storage : storage_textures) {
+    if (!DetermineStorageTextureSubtype(storage)) {
+      set_error(Source{}, "unable to determine storage texture subtype for: " +
+                              storage->type_name());
+      return false;
     }
   }
 
