@@ -490,16 +490,6 @@ class Builder {
   /// automatically.
   Operand result_op();
 
-  /// Retrives the id for the given function name
-  /// @param name the function name to search for
-  /// @returns the id for the given name or 0 on failure
-  uint32_t id_for_func_name(const std::string& name) {
-    if (func_name_to_id_.count(name) == 0) {
-      return 0;
-    }
-    return func_name_to_id_[name];
-  }
-
   ast::Module* mod_;
   std::unique_ptr<Namer> namer_;
   std::string error_;
@@ -517,8 +507,7 @@ class Builder {
   std::vector<Function> functions_;
 
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
-  std::unordered_map<std::string, uint32_t> func_name_to_id_;
-  std::unordered_map<std::string, ast::Function*> func_name_to_func_;
+  std::unordered_map<uint32_t, uint32_t> func_symbol_to_id_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
   std::unordered_map<std::string, uint32_t> const_to_id_;
   std::unordered_map<std::string, uint32_t>

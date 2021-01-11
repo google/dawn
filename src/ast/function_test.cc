@@ -36,7 +36,6 @@ TEST_F(FunctionTest, Creation) {
   auto* f =
       Func("func", params, ty.void_, StatementList{}, FunctionDecorationList{});
   EXPECT_EQ(f->symbol(), mod->RegisterSymbol("func"));
-  EXPECT_EQ(f->name(), "func");
   ASSERT_EQ(f->params().size(), 1u);
   EXPECT_EQ(f->return_type(), ty.void_);
   EXPECT_EQ(f->params()[0], var);

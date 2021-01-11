@@ -121,7 +121,7 @@ bool TypeDeterminer::Determine() {
     if (!func->IsEntryPoint()) {
       continue;
     }
-    for (const auto& callee : caller_to_callee_[func->name()]) {
+    for (const auto& callee : caller_to_callee_[func->symbol().value()]) {
       set_entry_points(callee, func->symbol());
     }
   }
@@ -129,11 +129,10 @@ bool TypeDeterminer::Determine() {
   return true;
 }
 
-void TypeDeterminer::set_entry_points(const std::string& fn_name,
-                                      Symbol ep_sym) {
-  name_to_function_[fn_name]->add_ancestor_entry_point(ep_sym);
+void TypeDeterminer::set_entry_points(const Symbol& fn_sym, Symbol ep_sym) {
+  symbol_to_function_[fn_sym.value()]->add_ancestor_entry_point(ep_sym);
 
-  for (const auto& callee : caller_to_callee_[fn_name]) {
+  for (const auto& callee : caller_to_callee_[fn_sym.value()]) {
     set_entry_points(callee, ep_sym);
   }
 }
@@ -148,7 +147,7 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 }
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
-  name_to_function_[func->name()] = func;
+  symbol_to_function_[func->symbol().value()] = func;
 
   current_function_ = func;
 
@@ -387,13 +386,13 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
       }
     } else {
       if (current_function_) {
-        caller_to_callee_[current_function_->name()].push_back(ident->name());
+        caller_to_callee_[current_function_->symbol().value()].push_back(
+            ident->symbol());
 
-        auto* callee_func =
-            mod_->FindFunctionBySymbol(mod_->GetSymbol(ident->name()));
+        auto* callee_func = mod_->FindFunctionBySymbol(ident->symbol());
         if (callee_func == nullptr) {
-          set_error(expr->source(),
-                    "unable to find called function: " + ident->name());
+          set_error(expr->source(), "unable to find called function: " +
+                                        mod_->SymbolToName(ident->symbol()));
           return false;
         }
 
@@ -416,10 +415,10 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   }
 
   if (!expr->func()->result_type()) {
-    auto func_name = expr->func()->As<ast::IdentifierExpression>()->name();
-    set_error(
-        expr->source(),
-        "v-0005: function must be declared before use: '" + func_name + "'");
+    auto func_sym = expr->func()->As<ast::IdentifierExpression>()->symbol();
+    set_error(expr->source(),
+              "v-0005: function must be declared before use: '" +
+                  mod_->SymbolToName(func_sym) + "'");
     return false;
   }
 
@@ -858,7 +857,6 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
-  auto name = expr->name();
   auto symbol = expr->symbol();
   ast::Variable* var;
   if (variable_stack_.get(symbol, &var)) {
@@ -877,15 +875,16 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     return true;
   }
 
-  auto iter = name_to_function_.find(name);
-  if (iter != name_to_function_.end()) {
+  auto iter = symbol_to_function_.find(symbol.value());
+  if (iter != symbol_to_function_.end()) {
     expr->set_result_type(iter->second->return_type());
     return true;
   }
 
   if (!SetIntrinsicIfNeeded(expr)) {
     set_error(expr->source(),
-              "v-0006: identifier must be declared before use: " + name);
+              "v-0006: identifier must be declared before use: " +
+                  mod_->SymbolToName(symbol));
     return false;
   }
   return true;

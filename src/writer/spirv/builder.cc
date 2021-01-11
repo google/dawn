@@ -448,7 +448,7 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
   // OperandList operands = {Operand::Int(stage), Operand::Int(id),
   //                         Operand::String(func->name())};
   OperandList operands = {Operand::Int(stage), Operand::Int(id),
-                          Operand::String(func->name())};
+                          Operand::String(namer_->NameFor(func->symbol()))};
 
   for (const auto* var : func->referenced_module_variables()) {
     // For SPIR-V 1.3 we only output Input/output variables. If we update to
@@ -593,8 +593,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
   scope_stack_.pop_scope();
 
-  func_name_to_id_[func->name()] = func_id;
-  func_name_to_func_[func->name()] = func;
+  func_symbol_to_id_[func->symbol().value()] = func_id;
 
   return true;
 }
@@ -1820,7 +1819,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
 
   OperandList ops = {Operand::Int(type_id), result};
 
-  auto func_id = func_name_to_id_[ident->name()];
+  auto func_id = func_symbol_to_id_[ident->symbol().value()];
   if (func_id == 0) {
     error_ = "unable to find called function: " + ident->name();
     return 0;

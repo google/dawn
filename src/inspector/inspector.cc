@@ -57,8 +57,8 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     }
 
     EntryPoint entry_point;
-    entry_point.name = func->name();
-    entry_point.remapped_name = func->name();
+    entry_point.name = module_.SymbolToName(func->symbol());
+    entry_point.remapped_name = namer_->NameFor(func->symbol());
     entry_point.stage = func->pipeline_stage();
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();

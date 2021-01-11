@@ -361,7 +361,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   }
 
   make_indent();
-  out_ << "fn " << func->name() << "(";
+  out_ << "fn " << module_.SymbolToName(func->symbol()) << "(";
 
   bool first = true;
   for (auto* v : func->params()) {

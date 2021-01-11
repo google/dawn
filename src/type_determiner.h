@@ -113,7 +113,7 @@ class TypeDeterminer {
  private:
   void set_error(const Source& src, const std::string& msg);
   void set_referenced_from_function_if_needed(ast::Variable* var, bool local);
-  void set_entry_points(const std::string& fn_name, Symbol ep_sym);
+  void set_entry_points(const Symbol& fn_sym, Symbol ep_sym);
 
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineBinary(ast::BinaryExpression* expr);
@@ -129,11 +129,11 @@ class TypeDeterminer {
   ast::Module* mod_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
-  std::unordered_map<std::string, ast::Function*> name_to_function_;
+  std::unordered_map<uint32_t, ast::Function*> symbol_to_function_;
   ast::Function* current_function_ = nullptr;
 
   // Map from caller functions to callee functions.
-  std::unordered_map<std::string, std::vector<std::string>> caller_to_callee_;
+  std::unordered_map<uint32_t, std::vector<Symbol>> caller_to_callee_;
 };
 
 }  // namespace tint

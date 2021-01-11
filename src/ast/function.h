@@ -74,7 +74,7 @@ class Function : public Castable<Function, Node> {
   /// @returns the function symbol
   Symbol symbol() const { return symbol_; }
   /// @returns the function name
-  const std::string& name() { return name_; }
+  const std::string& name_for_clone() { return name_; }
   /// @returns the function params
   const VariableList& params() const { return params_; }
 

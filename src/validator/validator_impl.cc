@@ -160,14 +160,14 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
       if (!func->params().empty()) {
         add_error(func->source(), "v-0023",
                   "Entry point function must accept no parameters: '" +
-                      func->name() + "'");
+                      module_.SymbolToName(func->symbol()) + "'");
         return false;
       }
 
       if (!func->return_type()->Is<ast::type::Void>()) {
-        add_error(
-            func->source(), "v-0024",
-            "Entry point function must return void: '" + func->name() + "'");
+        add_error(func->source(), "v-0024",
+                  "Entry point function must return void: '" +
+                      module_.SymbolToName(func->symbol()) + "'");
         return false;
       }
       auto stage_deco_count = 0;
