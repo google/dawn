@@ -27,7 +27,7 @@ Generator::Generator(ast::Module module)
 
 Generator::Generator(ast::Module* module)
     : Text(module),
-      namer_(std::make_unique<UnsafeNamer>(module_)),
+      namer_(std::make_unique<MangleNamer>(module_)),
       impl_(std::make_unique<GeneratorImpl>(module_, namer_.get())) {}
 
 Generator::~Generator() = default;

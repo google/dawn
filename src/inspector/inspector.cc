@@ -48,7 +48,7 @@ Inspector::Inspector(ast::Module& module, Namer* namer)
 
 Inspector::Inspector(ast::Module& module)
     : module_(module),
-      namer_(new UnsafeNamer(&module)),
+      namer_(new MangleNamer(&module)),
       namer_is_owned_(true) {}
 
 Inspector::~Inspector() {
