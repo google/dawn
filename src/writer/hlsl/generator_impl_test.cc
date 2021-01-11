@@ -33,7 +33,7 @@ TEST_F(HlslGeneratorImplTest, Generate) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(void my_func() {
+  EXPECT_EQ(result(), R"(void test_my_func() {
 }
 
 )");

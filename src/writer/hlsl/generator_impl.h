@@ -54,7 +54,8 @@ class GeneratorImpl {
  public:
   /// Constructor
   /// @param module the module to generate
-  explicit GeneratorImpl(ast::Module* module);
+  /// @param namer the namer to use
+  GeneratorImpl(ast::Module* module, Namer* namer);
   ~GeneratorImpl();
 
   /// Increment the emitter indent level
@@ -295,11 +296,11 @@ class GeneratorImpl {
   /// Handles generating a structure declaration
   /// @param out the output stream
   /// @param ty the struct to generate
-  /// @param name the struct name
+  /// @param sym the struct symbol
   /// @returns true if the struct is emitted
   bool EmitStructType(std::ostream& out,
                       const ast::type::Struct* ty,
-                      const std::string& name);
+                      const Symbol& sym);
   /// Handles a unary op expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -382,18 +383,18 @@ class GeneratorImpl {
   enum class VarType { kIn, kOut };
 
   struct EntryPointData {
-    std::string struct_name;
-    std::string var_name;
+    Symbol struct_symbol;
+    Symbol var_symbol;
   };
 
-  std::string current_ep_var_name(VarType type);
+  Symbol current_ep_var_symbol(VarType type);
   std::string get_buffer_name(ast::Expression* expr);
 
   std::string error_;
   size_t indent_ = 0;
 
   ast::Module* module_ = nullptr;
-  std::unique_ptr<Namer> namer_;
+  Namer* namer_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   uint32_t loop_emission_counter_ = 0;
@@ -404,7 +405,7 @@ class GeneratorImpl {
   // This maps an input of "<entry_point_name>_<function_name>" to a remapped
   // function name. If there is no entry for a given key then function did
   // not need to be remapped for the entry point and can be emitted directly.
-  std::unordered_map<std::string, std::string> ep_func_name_remapped_;
+  std::unordered_map<std::string, Symbol> ep_func_name_remapped_;
 };
 
 }  // namespace hlsl

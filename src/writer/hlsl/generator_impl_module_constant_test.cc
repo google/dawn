@@ -38,7 +38,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
             array<f32, 3>(1.f, 2.f, 3.f), ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
-  EXPECT_EQ(result(), "static const float pos[3] = {1.0f, 2.0f, 3.0f};\n");
+  EXPECT_EQ(result(), "static const float test_pos[3] = {1.0f, 2.0f, 3.0f};\n");
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
@@ -51,7 +51,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #define WGSL_SPEC_CONSTANT_23 3.0f
 #endif
-static const float pos = WGSL_SPEC_CONSTANT_23;
+static const float test_pos = WGSL_SPEC_CONSTANT_23;
 #undef WGSL_SPEC_CONSTANT_23
 )");
 }
@@ -66,7 +66,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #error spec constant required for constant id 23
 #endif
-static const float pos = WGSL_SPEC_CONSTANT_23;
+static const float test_pos = WGSL_SPEC_CONSTANT_23;
 #undef WGSL_SPEC_CONSTANT_23
 )");
 }

@@ -26,7 +26,7 @@ using HlslGeneratorImplTest_Identifier = TestHelper;
 TEST_F(HlslGeneratorImplTest_Identifier, EmitIdentifierExpression) {
   auto* i = Expr("foo");
   ASSERT_TRUE(gen.EmitExpression(pre, out, i)) << gen.error();
-  EXPECT_EQ(result(), "foo");
+  EXPECT_EQ(result(), "test_foo");
 }
 
 }  // namespace

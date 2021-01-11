@@ -47,20 +47,20 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
   auto* alias = ty.alias("alias", ty.f32);
 
   ASSERT_TRUE(gen.EmitType(out, alias, Symbol())) << gen.error();
-  EXPECT_EQ(result(), "alias");
+  EXPECT_EQ(result(), "test_alias");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(out, ty.array<bool, 4>(), sym)) << gen.error();
-  EXPECT_EQ(result(), "bool ary[4]");
+  EXPECT_EQ(result(), "bool test_ary[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
   auto* arr = ty.array(ty.array<bool, 4>(), 5);
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(out, arr, sym)) << gen.error();
-  EXPECT_EQ(result(), "bool ary[5][4]");
+  EXPECT_EQ(result(), "bool test_ary[5][4]");
 }
 
 // TODO(dsinclair): Is this possible? What order should it output in?
@@ -69,14 +69,14 @@ TEST_F(HlslGeneratorImplTest_Type,
   auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(out, arr, sym)) << gen.error();
-  EXPECT_EQ(result(), "bool ary[5][4][1]");
+  EXPECT_EQ(result(), "bool test_ary[5][4][1]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
   auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(out, arr, sym)) << gen.error();
-  EXPECT_EQ(result(), "bool ary[6][5][4]");
+  EXPECT_EQ(result(), "bool test_ary[6][5][4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
@@ -125,10 +125,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
-  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
-  EXPECT_EQ(result(), R"(struct S {
-  int a;
-  float b;
+  ASSERT_TRUE(gen.EmitStructType(out, s, mod->RegisterSymbol("S")))
+      << gen.error();
+  EXPECT_EQ(result(), R"(struct test_S {
+  int test_a;
+  float test_b;
 };
 )");
 }
@@ -140,8 +141,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
-  ASSERT_TRUE(gen.EmitType(out, s, Symbol())) << gen.error();
-  EXPECT_EQ(result(), "S");
+  ASSERT_TRUE(gen.EmitType(out, s, mod->RegisterSymbol("S"))) << gen.error();
+  EXPECT_EQ(result(), "test_S");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
@@ -153,13 +154,13 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 
   auto* s = ty.struct_("S", str);
   ASSERT_TRUE(gen.EmitType(out, s, Symbol())) << gen.error();
-  EXPECT_EQ(result(), R"(struct {
+  EXPECT_EQ(result(), R"(struct test_S {
   int8_t pad_0[4];
-  int a;
+  int test_a;
   int8_t pad_1[24];
-  float b;
+  float test_b;
   int8_t pad_2[92];
-  float c;
+  float test_c;
 })");
 }
 
@@ -169,10 +170,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
-  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
-  EXPECT_EQ(result(), R"(struct S {
-  int double;
-  float float;
+  ASSERT_TRUE(gen.EmitStructType(out, s, mod->RegisterSymbol("S")))
+      << gen.error();
+  EXPECT_EQ(result(), R"(struct test_S {
+  int test_double;
+  float test_float;
 };
 )");
 }
@@ -188,10 +190,11 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
       decos);
 
   auto* s = ty.struct_("S", str);
-  ASSERT_TRUE(gen.EmitStructType(out, s, "B")) << gen.error();
-  EXPECT_EQ(result(), R"(struct B {
-  int a;
-  float b;
+  ASSERT_TRUE(gen.EmitStructType(out, s, mod->RegisterSymbol("B")))
+      << gen.error();
+  EXPECT_EQ(result(), R"(struct test_B {
+  int test_a;
+  float test_b;
 })");
 }
 

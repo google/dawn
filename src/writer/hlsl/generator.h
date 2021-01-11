@@ -19,6 +19,7 @@
 #include <sstream>
 #include <string>
 
+#include "src/namer.h"
 #include "src/writer/hlsl/generator_impl.h"
 #include "src/writer/text.h"
 
@@ -56,6 +57,7 @@ class Generator : public Text {
 
  private:
   std::ostringstream out_;
+  std::unique_ptr<Namer> namer_;
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

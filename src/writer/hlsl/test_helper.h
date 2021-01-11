@@ -24,6 +24,7 @@
 #include "src/ast/builder.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
+#include "src/writer/test_namer.h"
 
 namespace tint {
 namespace writer {
@@ -33,7 +34,7 @@ namespace hlsl {
 template <typename BODY>
 class TestHelperBase : public BODY, public ast::BuilderWithModule {
  public:
-  TestHelperBase() : td(mod), gen(mod) {}
+  TestHelperBase() : td(mod), namer(mod), gen(mod, &namer) {}
   ~TestHelperBase() = default;
 
   /// @returns the result string
@@ -44,6 +45,8 @@ class TestHelperBase : public BODY, public ast::BuilderWithModule {
 
   /// The type determiner
   TypeDeterminer td;
+  /// The test namer
+  TestNamer namer;
   /// The generator
   GeneratorImpl gen;
 

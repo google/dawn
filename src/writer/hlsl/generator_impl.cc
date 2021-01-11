@@ -126,8 +126,8 @@ const char* image_format_to_rwtexture_type(
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(ast::Module* module)
-    : module_(module), namer_(std::make_unique<UnsafeNamer>(module)) {}
+GeneratorImpl::GeneratorImpl(ast::Module* module, Namer* namer)
+    : module_(module), namer_(namer) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -194,25 +194,25 @@ void GeneratorImpl::register_global(ast::Variable* global) {
   global_variables_.set(global->symbol(), global);
 }
 
-std::string GeneratorImpl::current_ep_var_name(VarType type) {
-  std::string name = "";
+Symbol GeneratorImpl::current_ep_var_symbol(VarType type) {
+  Symbol sym;
   switch (type) {
     case VarType::kIn: {
       auto in_it = ep_sym_to_in_data_.find(current_ep_sym_.value());
       if (in_it != ep_sym_to_in_data_.end()) {
-        name = in_it->second.var_name;
+        sym = in_it->second.var_symbol;
       }
       break;
     }
     case VarType::kOut: {
       auto outit = ep_sym_to_out_data_.find(current_ep_sym_.value());
       if (outit != ep_sym_to_out_data_.end()) {
-        name = outit->second.var_name;
+        sym = outit->second.var_symbol;
       }
       break;
     }
   }
-  return name;
+  return sym;
 }
 
 bool GeneratorImpl::EmitConstructedType(std::ostream& out,
@@ -223,7 +223,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
     if (auto* str = alias->type()->As<ast::type::Struct>()) {
-      if (!EmitStructType(out, str, namer_->NameFor(alias->symbol()))) {
+      if (!EmitStructType(out, str, alias->symbol())) {
         return false;
       }
       return true;
@@ -234,7 +234,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     }
     out << " " << namer_->NameFor(alias->symbol()) << ";" << std::endl;
   } else if (auto* str = ty->As<ast::type::Struct>()) {
-    if (!EmitStructType(out, str, namer_->NameFor(str->symbol()))) {
+    if (!EmitStructType(out, str, str->symbol())) {
       return false;
     }
   } else {
@@ -669,12 +669,12 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     return true;
   }
 
-  auto name = namer_->NameFor(ident->symbol());
-  auto caller_sym = ident->symbol();
-  auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
-                                        caller_sym.to_str());
+  auto func_name_sym = ident->symbol();
+  auto it =
+      ep_func_name_remapped_.find(module_->SymbolToName(current_ep_sym_) + "_" +
+                                  module_->SymbolToName(func_name_sym));
   if (it != ep_func_name_remapped_.end()) {
-    name = it->second;
+    func_name_sym = it->second;
   }
 
   auto* func = module_->FindFunctionBySymbol(ident->symbol());
@@ -684,24 +684,24 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     return false;
   }
 
-  out << name << "(";
+  out << namer_->NameFor(func_name_sym) << "(";
 
   bool first = true;
   if (has_referenced_in_var_needing_struct(func)) {
-    auto var_name = current_ep_var_name(VarType::kIn);
-    if (!var_name.empty()) {
-      out << var_name;
+    auto var_sym = current_ep_var_symbol(VarType::kIn);
+    if (var_sym.IsValid()) {
+      out << namer_->NameFor(var_sym);
       first = false;
     }
   }
   if (has_referenced_out_var_needing_struct(func)) {
-    auto var_name = current_ep_var_name(VarType::kOut);
-    if (!var_name.empty()) {
+    auto var_sym = current_ep_var_symbol(VarType::kOut);
+    if (var_sym.IsValid()) {
       if (!first) {
         out << ", ";
       }
       first = false;
-      out << var_name;
+      out << namer_->NameFor(var_sym);
     }
   }
 
@@ -1059,15 +1059,21 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
       auto var_type = var->storage_class() == ast::StorageClass::kInput
                           ? VarType::kIn
                           : VarType::kOut;
-      auto name = current_ep_var_name(var_type);
-      if (name.empty()) {
+      auto sym = current_ep_var_symbol(var_type);
+      if (!sym.IsValid()) {
         error_ = "unable to find entry point data for variable";
         return false;
       }
-      out << name << ".";
+      out << namer_->NameFor(sym) << ".";
     }
   }
-  out << namer_->NameFor(ident->symbol());
+
+  // Swizzle outputs the name directly
+  if (ident->IsSwizzle()) {
+    out << module_->SymbolToName(ident->symbol());
+  } else {
+    out << namer_->NameFor(ident->symbol());
+  }
 
   return true;
 }
@@ -1216,25 +1222,22 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
                                          ast::Function* func,
                                          bool emit_duplicate_functions,
                                          Symbol ep_sym) {
-  auto name = func->symbol().to_str();
-
   if (!EmitType(out, func->return_type(), Symbol())) {
     return false;
   }
 
   out << " ";
 
+  auto func_name_sym = func->symbol();
   if (emit_duplicate_functions) {
-    auto func_name = name;
-    auto ep_name = ep_sym.to_str();
-    name = namer_->GenerateName(namer_->NameFor(func->symbol()) + "_" +
-                                namer_->NameFor(ep_sym));
-    ep_func_name_remapped_[ep_name + "_" + func_name] = name;
-  } else {
-    name = namer_->NameFor(func->symbol());
+    auto func_name = module_->SymbolToName(func_name_sym);
+    auto ep_name = module_->SymbolToName(ep_sym);
+    func_name_sym = module_->RegisterSymbol(
+        namer_->GenerateName(func_name + "_" + ep_name));
+    ep_func_name_remapped_[ep_name + "_" + func_name] = func_name_sym;
   }
 
-  out << name << "(";
+  out << namer_->NameFor(func_name_sym) << "(";
 
   bool first = true;
 
@@ -1245,8 +1248,8 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
   if (emit_duplicate_functions) {
     auto in_it = ep_sym_to_in_data_.find(ep_sym.value());
     if (in_it != ep_sym_to_in_data_.end()) {
-      out << "in " << in_it->second.struct_name << " "
-          << in_it->second.var_name;
+      out << "in " << namer_->NameFor(in_it->second.struct_symbol) << " "
+          << namer_->NameFor(in_it->second.var_symbol);
       first = false;
     }
 
@@ -1255,8 +1258,8 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
       if (!first) {
         out << ", ";
       }
-      out << "out " << outit->second.struct_name << " "
-          << outit->second.var_name;
+      out << "out " << namer_->NameFor(outit->second.struct_symbol) << " "
+          << namer_->NameFor(outit->second.var_symbol);
       first = false;
     }
   }
@@ -1400,13 +1403,14 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   if (!in_variables.empty()) {
-    auto in_struct_name = namer_->GenerateName(namer_->NameFor(func->symbol()) +
-                                               "_" + kInStructNameSuffix);
+    auto in_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
+        module_->SymbolToName(func->symbol()) + "_" + kInStructNameSuffix));
     auto in_var_name = namer_->GenerateName(kTintStructInVarPrefix);
-    ep_sym_to_in_data_[func->symbol().value()] = {in_struct_name, in_var_name};
+    ep_sym_to_in_data_[func->symbol().value()] = {
+        in_struct_sym, module_->RegisterSymbol(in_var_name)};
 
     make_indent(out);
-    out << "struct " << in_struct_name << " {" << std::endl;
+    out << "struct " << namer_->NameFor(in_struct_sym) << " {" << std::endl;
 
     increment_indent();
 
@@ -1446,13 +1450,14 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   if (!outvariables.empty()) {
-    auto outstruct_name = namer_->GenerateName(namer_->NameFor(func->symbol()) +
-                                               "_" + kOutStructNameSuffix);
+    auto outstruct_sym = module_->RegisterSymbol(namer_->GenerateName(
+        module_->SymbolToName(func->symbol()) + "_" + kOutStructNameSuffix));
     auto outvar_name = namer_->GenerateName(kTintStructOutVarPrefix);
-    ep_sym_to_out_data_[func->symbol().value()] = {outstruct_name, outvar_name};
+    ep_sym_to_out_data_[func->symbol().value()] = {
+        outstruct_sym, module_->RegisterSymbol(outvar_name)};
 
     make_indent(out);
-    out << "struct " << outstruct_name << " {" << std::endl;
+    out << "struct " << namer_->NameFor(outstruct_sym) << " {" << std::endl;
 
     increment_indent();
     for (auto& data : outvariables) {
@@ -1542,7 +1547,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   auto outdata = ep_sym_to_out_data_.find(current_ep_sym_.value());
   bool has_outdata = outdata != ep_sym_to_out_data_.end();
   if (has_outdata) {
-    out << outdata->second.struct_name;
+    out << namer_->NameFor(outdata->second.struct_symbol);
   } else {
     out << "void";
   }
@@ -1550,7 +1555,8 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
 
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_.value());
   if (in_data != ep_sym_to_in_data_.end()) {
-    out << in_data->second.struct_name << " " << in_data->second.var_name;
+    out << namer_->NameFor(in_data->second.struct_symbol) << " "
+        << namer_->NameFor(in_data->second.var_symbol);
   }
   out << ") {" << std::endl;
 
@@ -1558,8 +1564,8 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
 
   if (has_outdata) {
     make_indent(out);
-    out << outdata->second.struct_name << " " << outdata->second.var_name << ";"
-        << std::endl;
+    out << namer_->NameFor(outdata->second.struct_symbol) << " "
+        << namer_->NameFor(outdata->second.var_symbol) << ";" << std::endl;
   }
 
   generating_entry_point_ = true;
@@ -1986,7 +1992,7 @@ bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
     out << "return";
     auto outdata = ep_sym_to_out_data_.find(current_ep_sym_.value());
     if (outdata != ep_sym_to_out_data_.end()) {
-      out << " " << outdata->second.var_name;
+      out << " " << namer_->NameFor(outdata->second.var_symbol);
     }
   } else if (stmt->has_value()) {
     std::ostringstream pre;
@@ -2205,11 +2211,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
 bool GeneratorImpl::EmitStructType(std::ostream& out,
                                    const ast::type::Struct* str,
-                                   const std::string& name) {
+                                   const Symbol& sym) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
   // }
-  out << "struct " << name << " {" << std::endl;
+  out << "struct " << namer_->NameFor(sym) << " {" << std::endl;
 
   increment_indent();
   for (auto* mem : str->impl()->members()) {

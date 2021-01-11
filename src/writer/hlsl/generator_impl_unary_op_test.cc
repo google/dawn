@@ -41,7 +41,7 @@ TEST_P(HlslUnaryOpTest, Emit) {
   auto* op = create<ast::UnaryOpExpression>(params.op, expr);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), std::string(params.name) + "(expr)");
+  EXPECT_EQ(result(), std::string(params.name) + "(test_expr)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_UnaryOp,
                          HlslUnaryOpTest,

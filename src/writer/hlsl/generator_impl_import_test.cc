@@ -198,7 +198,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string("determinant(var)"));
+  EXPECT_EQ(result(), std::string("determinant(test_var)"));
 }
 
 }  // namespace

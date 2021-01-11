@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
   auto* bitcast = create<ast::BitcastExpression>(ty.f32, id);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(id)");
+  EXPECT_EQ(result(), "asfloat(test_id)");
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
@@ -42,7 +42,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
   auto* bitcast = create<ast::BitcastExpression>(ty.i32, id);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
-  EXPECT_EQ(result(), "asint(id)");
+  EXPECT_EQ(result(), "asint(test_id)");
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
@@ -50,7 +50,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
   auto* bitcast = create<ast::BitcastExpression>(ty.u32, id);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
-  EXPECT_EQ(result(), "asuint(id)");
+  EXPECT_EQ(result(), "asuint(test_id)");
 }
 
 }  // namespace
