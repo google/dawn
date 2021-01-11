@@ -27,6 +27,8 @@ if (build_with_chromium) {
 }
 
 declare_args() {
+  dawn_use_angle = true
+
   # Enables usage of swiftshader on the Vulkan backend.
   # Note that this will only work in standalone and in projects that set the
   # dawn_swiftshader_dir variable in build_overrides/dawn.gni

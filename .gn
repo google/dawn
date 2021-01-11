@@ -23,6 +23,21 @@ default_args = {
   # Chromium is still on 10.10).
   mac_deployment_target = "10.11.0"
   mac_min_system_version = "10.11.0"
+
+  angle_enable_abseil = false
+
+  angle_standalone = false
+
+  angle_build_all = false
+
+  angle_vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
+
+  angle_vulkan_loader_dir = "//third_party/vulkan-deps/vulkan-loader/src"
+
+  angle_vulkan_tools_dir = "//third_party/vulkan-deps/vulkan-tools/src"
+
+  angle_vulkan_validation_layers_dir =
+      "//third_party/vulkan-deps/vulkan-validation-layers/src"
 }
 
 check_targets = [

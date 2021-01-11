@@ -80,6 +80,16 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  'third_party/vulkan_memory_allocator': {
+    'url': '{chromium_git}/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator@065e739079d9d58bef28ccd793cbf512261f09ed',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/angle': {
+    'url': '{chromium_git}/angle/angle@f4cd17472aca1939277b145ef0f72b0946b83716',
+    'condition': 'dawn_standalone',
+  },
+
   'third_party/swiftshader': {
     'url': '{swiftshader_git}/SwiftShader@df17a76102dfabb3f1bd6e51449cece9f77b45e3',
     'condition': 'dawn_standalone',
@@ -87,6 +97,10 @@ deps = {
 
   'third_party/vulkan-deps': {
     'url': '{chromium_git}/vulkan-deps@c493c61120215a00f54cc59f067f7419dabad066',
+  },
+
+  'third_party/zlib': {
+    'url': '{chromium_git}/chromium/src/third_party/zlib@c29ee8c9c3824ca013479bf8115035527967fe02',
     'condition': 'dawn_standalone',
   },
 }

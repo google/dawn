@@ -27,6 +27,7 @@ dawn_has_build = true
 # users of Dawn don't have to set dirs if they happen to use the same as Dawn.
 
 # The paths to Dawn's dependencies
+dawn_angle_dir = "//third_party/angle"
 dawn_jinja2_dir = "//third_party/jinja2"
 dawn_glfw_dir = "//third_party/glfw"
 dawn_glm_dir = "//third_party/glm"
