@@ -15,6 +15,7 @@
 #ifndef COMMON_ALLOC_H_
 #define COMMON_ALLOC_H_
 
+#include <cstddef>
 #include <new>
 
 template <typename T>
