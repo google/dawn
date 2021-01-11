@@ -43,10 +43,18 @@
 namespace tint {
 namespace inspector {
 
-Inspector::Inspector(ast::Module& module)
-    : module_(module), namer_(std::make_unique<UnsafeNamer>(&module)) {}
+Inspector::Inspector(ast::Module& module, Namer* namer)
+    : module_(module), namer_(namer), namer_is_owned_(false) {}
 
-Inspector::~Inspector() = default;
+Inspector::Inspector(ast::Module& module)
+    : module_(module),
+      namer_(new UnsafeNamer(&module)),
+      namer_is_owned_(true) {}
+
+Inspector::~Inspector() {
+  if (namer_is_owned_)
+    delete namer_;
+}
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
