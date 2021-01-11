@@ -4078,6 +4078,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
 
   std::string builtin_name;
   bool use_level_of_detail_suffix = true;
+  bool is_dref = false;
   switch (opcode) {
     case SpvOpImageSampleImplicitLod:
     case SpvOpImageSampleExplicitLod:
@@ -4085,6 +4086,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       break;
     case SpvOpImageSampleDrefImplicitLod:
     case SpvOpImageSampleDrefExplicitLod:
+      is_dref = true;
       builtin_name = "textureSampleCompare";
       if (arg_index < num_args) {
         params.push_back(MakeOperand(inst, arg_index).expr);
@@ -4141,6 +4143,11 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsBiasMask)) {
+    if (is_dref) {
+      return Fail() << "WGSL does not support depth-reference sampling with "
+                       "level-of-detail bias: "
+                    << inst.PrettyPrint();
+    }
     builtin_name += "Bias";
     params.push_back(MakeOperand(inst, arg_index).expr);
     image_operands_mask ^= SpvImageOperandsBiasMask;
@@ -4162,6 +4169,11 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index + 1 < num_args &&
       (image_operands_mask & SpvImageOperandsGradMask)) {
+    if (is_dref) {
+      return Fail() << "WGSL does not support depth-reference sampling with "
+                       "explicit gradient: "
+                    << inst.PrettyPrint();
+    }
     builtin_name += "Grad";
     params.push_back(MakeOperand(inst, arg_index).expr);
     params.push_back(MakeOperand(inst, arg_index + 1).expr);

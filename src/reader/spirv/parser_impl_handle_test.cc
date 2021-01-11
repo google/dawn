@@ -1702,7 +1702,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     // This test shows the use of a sampled image used with both regular
-    // sampling and depth-refernce sampling.  The texture is a depth-texture,
+    // sampling and depth-reference sampling.  The texture is a depth-texture,
     // and we use builtins textureSample and textureSampleCompare
     ImageSampleImplicitLod_BothDrefAndNonDref,
     SpvParserTest_SampledImageAccessTest,
@@ -4426,6 +4426,44 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf1234 "
          "ConstOffset %the_vu12",
          "ConstOffset is only permitted for 2D, 2D Arrayed, and 3D textures: ",
+         {}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleDref_Bias_IsError,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // Implicit Lod
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleDrefImplicitLod %float %sampled_image %vf1234 "
+         "%depth Bias %float_null",
+         "WGSL does not support depth-reference sampling with level-of-detail "
+         "bias: ",
+         {}},
+        // Explicit Lod
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf1234 "
+         "%depth Lod|Bias %float_null %float_null",
+         "WGSL does not support depth-reference sampling with level-of-detail "
+         "bias: ",
+         {}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleDref_Grad_IsError,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // Implicit Lod
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleDrefImplicitLod %float %sampled_image %vf1234 "
+         "%depth Grad %float_1 %float_2",
+         "WGSL does not support depth-reference sampling with explicit "
+         "gradient: ",
+         {}},
+        // Explicit Lod
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf1234 "
+         "%depth Lod|Grad %float_null %float_1  %float_2",
+         "WGSL does not support depth-reference sampling with explicit "
+         "gradient: ",
          {}}}));
 
 }  // namespace
