@@ -278,7 +278,8 @@ Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 
 Builder::AccessorInfo::~AccessorInfo() {}
 
-Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
+Builder::Builder(ast::Module* mod)
+    : mod_(mod), namer_(std::make_unique<UnsafeNamer>(mod)), scope_stack_({}) {}
 
 Builder::~Builder() = default;
 
@@ -539,7 +540,8 @@ bool Builder::GenerateFunction(ast::Function* func) {
   auto func_id = func_op.to_i();
 
   push_debug(spv::Op::OpName,
-             {Operand::Int(func_id), Operand::String(func->name())});
+             {Operand::Int(func_id),
+              Operand::String(namer_->NameFor(func->symbol()))});
 
   auto ret_id = GenerateTypeIfNeeded(func->return_type());
   if (ret_id == 0) {
@@ -564,7 +566,8 @@ bool Builder::GenerateFunction(ast::Function* func) {
     }
 
     push_debug(spv::Op::OpName,
-               {Operand::Int(param_id), Operand::String(param->name())});
+               {Operand::Int(param_id),
+                Operand::String(namer_->NameFor(param->symbol()))});
     params.push_back(Instruction{spv::Op::OpFunctionParameter,
                                  {Operand::Int(param_type_id), param_op}});
 
@@ -654,8 +657,9 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
     return false;
   }
 
-  push_debug(spv::Op::OpName,
-             {Operand::Int(var_id), Operand::String(var->name())});
+  push_debug(
+      spv::Op::OpName,
+      {Operand::Int(var_id), Operand::String(namer_->NameFor(var->symbol()))});
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
@@ -706,7 +710,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       return false;
     }
     push_debug(spv::Op::OpName,
-               {Operand::Int(init_id), Operand::String(var->name())});
+               {Operand::Int(init_id),
+                Operand::String(namer_->NameFor(var->symbol()))});
 
     scope_stack_.set_global(var->symbol(), init_id);
     spirv_id_to_variable_[init_id] = var;
@@ -726,8 +731,9 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  push_debug(spv::Op::OpName,
-             {Operand::Int(var_id), Operand::String(var->name())});
+  push_debug(
+      spv::Op::OpName,
+      {Operand::Int(var_id), Operand::String(namer_->NameFor(var->symbol()))});
 
   auto* type = var->type()->UnwrapAll();
 
@@ -2784,7 +2790,8 @@ bool Builder::GenerateStructType(ast::type::Struct* struct_type,
 
   if (!struct_type->name().empty()) {
     push_debug(spv::Op::OpName,
-               {Operand::Int(struct_id), Operand::String(struct_type->name())});
+               {Operand::Int(struct_id),
+                Operand::String(namer_->NameFor(struct_type->symbol()))});
   }
 
   OperandList ops;
