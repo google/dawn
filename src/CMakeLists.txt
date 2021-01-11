@@ -352,8 +352,6 @@ if(${TINT_BUILD_HLSL_WRITER})
     writer/hlsl/generator.h
     writer/hlsl/generator_impl.cc
     writer/hlsl/generator_impl.h
-    writer/hlsl/namer.cc
-    writer/hlsl/namer.h
   )
 endif()
 
@@ -726,7 +724,6 @@ if(${TINT_BUILD_TESTS})
       writer/hlsl/generator_impl_type_test.cc
       writer/hlsl/generator_impl_unary_op_test.cc
       writer/hlsl/generator_impl_variable_decl_statement_test.cc
-      writer/hlsl/namer_test.cc
       writer/hlsl/test_helper.h
     )
   endif()

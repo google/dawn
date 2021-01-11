@@ -74,7 +74,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_OuterProduct) {
   auto* a = Var("a", ast::StorageClass::kNone, ty.vec2<f32>());
   auto* b = Var("b", ast::StorageClass::kNone, ty.vec3<f32>());
 
-  auto* call = Call("outer_product", "a", "b");
+  auto* call = Call("outerProduct", "a", "b");
 
   td.RegisterVariableForTesting(a);
   td.RegisterVariableForTesting(b);

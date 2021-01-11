@@ -70,24 +70,6 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
-  auto* func = Func("GeometryShader", ast::VariableList{}, ty.void_,
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
-
-  mod->AddFunction(func);
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(  void GeometryShader_tint_0() {
-    return;
-  }
-
-)");
-}
-
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
   auto* func =
       Func("my_func",
@@ -804,23 +786,6 @@ ep_1_out ep_1() {
     return tint_out;
   }
   return tint_out;
-}
-
-)");
-}
-
-TEST_F(HlslGeneratorImplTest_Function,
-       Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
-  auto* func = Func(
-      "GeometryShader", ast::VariableList{}, ty.void_, ast::StatementList{},
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
-
-  mod->AddFunction(func);
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(void GeometryShader_tint_0() {
 }
 
 )");

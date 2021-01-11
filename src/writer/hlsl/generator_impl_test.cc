@@ -39,25 +39,6 @@ TEST_F(HlslGeneratorImplTest, Generate) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, InputStructName) {
-  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
-}
-
-TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
-  // Register the struct name as existing.
-  auto* namer = gen.namer_for_testing();
-  namer->NameFor("func_main_out");
-
-  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_0");
-}
-
-TEST_F(HlslGeneratorImplTest, NameConflictWith_InputStructName) {
-  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
-
-  ASSERT_TRUE(gen.EmitIdentifier(pre, out, Expr("func_main_in")));
-  EXPECT_EQ(result(), "func_main_in_0");
-}
-
 struct HlslBuiltinData {
   ast::Builtin builtin;
   const char* attribute_name;

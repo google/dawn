@@ -264,9 +264,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
 
-  /// @returns the namer for testing purposes
-  Namer* namer_for_testing() { return namer_.get(); }
-
  private:
   enum class VarType { kIn, kOut };
 

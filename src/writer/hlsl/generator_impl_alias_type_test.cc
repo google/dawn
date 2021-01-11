@@ -34,14 +34,6 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
-  auto* alias = ty.alias("float", ty.f32);
-
-  ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
-  EXPECT_EQ(result(), R"(typedef float float_tint_0;
-)");
-}
-
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.f32),

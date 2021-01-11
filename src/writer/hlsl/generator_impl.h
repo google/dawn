@@ -15,6 +15,7 @@
 #ifndef SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -41,8 +42,8 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/namer.h"
 #include "src/scope_stack.h"
-#include "src/writer/hlsl/namer.h"
 
 namespace tint {
 namespace writer {
@@ -288,11 +289,9 @@ class GeneratorImpl {
   /// Handles generating type
   /// @param out the output stream
   /// @param type the type to generate
-  /// @param name the name of the variable, only used for array emission
+  /// @param sym the symbol of the variable, Only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(std::ostream& out,
-                ast::type::Type* type,
-                const std::string& name);
+  bool EmitType(std::ostream& out, ast::type::Type* type, const Symbol& sym);
   /// Handles generating a structure declaration
   /// @param out the output stream
   /// @param ty the struct to generate
@@ -379,9 +378,6 @@ class GeneratorImpl {
   /// @returns true if an input or output struct is required.
   bool has_referenced_var_needing_struct(ast::Function* func);
 
-  /// @returns the namer for testing
-  Namer* namer_for_testing() { return &namer_; }
-
  private:
   enum class VarType { kIn, kOut };
 
@@ -395,8 +391,8 @@ class GeneratorImpl {
   std::string error_;
   size_t indent_ = 0;
 
-  Namer namer_;
   ast::Module* module_ = nullptr;
+  std::unique_ptr<Namer> namer_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   uint32_t loop_emission_counter_ = 0;
