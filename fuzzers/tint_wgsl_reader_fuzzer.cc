@@ -14,15 +14,14 @@
 
 #include <string>
 
-#include "fuzzers/tint_common_fuzzer.h"
-
-namespace tint {
-namespace fuzzers {
+#include "src/reader/wgsl/parser.h"
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kNone);
-  return fuzzer.Run(data, size);
-}
+  std::string str(reinterpret_cast<const char*>(data), size);
 
-}  // namespace fuzzers
-}  // namespace tint
+  tint::Source::File file("test.wgsl", str);
+  tint::reader::wgsl::Parser parser(&file);
+  parser.Parse();
+
+  return 0;
+}
