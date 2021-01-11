@@ -43,7 +43,8 @@
 namespace tint {
 namespace inspector {
 
-Inspector::Inspector(const ast::Module& module) : module_(module) {}
+Inspector::Inspector(ast::Module& module)
+    : module_(module), namer_(std::make_unique<UnsafeNamer>(&module)) {}
 
 Inspector::~Inspector() = default;
 
@@ -77,15 +78,11 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
 std::string Inspector::GetRemappedNameForEntryPoint(
     const std::string& entry_point) {
-  // TODO(rharrison): Reenable once all of the backends are using the renamed
-  //                  entry points.
-
-  //  auto* func = FindEntryPointByName(entry_point);
-  //  if (!func) {
-  //    return {};
-  //  }
-  //  return func->name();
-  return entry_point;
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+  return namer_->NameFor(func->symbol());
 }
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {

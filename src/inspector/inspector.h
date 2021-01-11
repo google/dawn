@@ -25,6 +25,7 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/inspector/entry_point.h"
 #include "src/inspector/scalar.h"
+#include "src/namer.h"
 
 namespace tint {
 namespace inspector {
@@ -72,7 +73,7 @@ class Inspector {
  public:
   /// Constructor
   /// @param module Shader module to extract information from.
-  explicit Inspector(const ast::Module& module);
+  explicit Inspector(ast::Module& module);
   ~Inspector();
 
   /// @returns error messages from the Inspector
@@ -128,6 +129,7 @@ class Inspector {
 
  private:
   const ast::Module& module_;
+  std::unique_ptr<Namer> namer_;
   std::string error_;
 
   /// @param name name of the entry point to find
