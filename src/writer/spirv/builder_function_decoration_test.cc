@@ -45,7 +45,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %3 "main"
+            R"(OpEntryPoint Vertex %3 "test_main"
 )");
 }
 
@@ -105,10 +105,10 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   mod->AddGlobalVariable(v_wg);
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
-OpName %4 "my_out"
-OpName %7 "my_wg"
-OpName %11 "main"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "test_my_in"
+OpName %4 "test_my_out"
+OpName %7 "test_my_wg"
+OpName %11 "test_main"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
@@ -122,7 +122,7 @@ OpName %11 "main"
 %9 = OpTypeFunction %10
 )");
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %11 "main"
+            R"(OpEntryPoint Vertex %11 "test_main"
 )");
 }
 
@@ -158,10 +158,10 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   mod->AddGlobalVariable(v_wg);
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
-OpName %4 "my_out"
-OpName %7 "my_wg"
-OpName %11 "main"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "test_my_in"
+OpName %4 "test_my_out"
+OpName %7 "test_my_wg"
+OpName %11 "test_main"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
@@ -175,7 +175,7 @@ OpName %11 "main"
 %9 = OpTypeFunction %10
 )");
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %11 "main" %4 %1
+            R"(OpEntryPoint Vertex %11 "test_main" %4 %1
 )");
 }
 
@@ -235,12 +235,12 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
   ASSERT_TRUE(b.GenerateFunction(func1)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func2)) << b.error();
   EXPECT_EQ(DumpBuilder(b),
-            R"(OpEntryPoint Fragment %3 "main1"
-OpEntryPoint Fragment %5 "main2"
+            R"(OpEntryPoint Fragment %3 "test_main1"
+OpEntryPoint Fragment %5 "test_main2"
 OpExecutionMode %3 OriginUpperLeft
 OpExecutionMode %5 OriginUpperLeft
-OpName %3 "main1"
-OpName %5 "main2"
+OpName %3 "test_main1"
+OpName %5 "test_main2"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1

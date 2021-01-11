@@ -24,6 +24,7 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/test_namer.h"
 
 namespace tint {
 namespace writer {
@@ -2708,7 +2709,8 @@ class IntrinsicTextureTest
   }
 
   TypeDeterminer td{mod};
-  spirv::Builder b{mod};
+  TestNamer namer{mod};
+  spirv::Builder b{mod, &namer};
 };
 
 INSTANTIATE_TEST_SUITE_P(

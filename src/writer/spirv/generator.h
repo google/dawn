@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "src/ast/module.h"
+#include "src/namer.h"
 #include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/writer.h"
@@ -54,6 +55,7 @@ class Generator : public writer::Writer {
   const std::vector<uint32_t>& result() const { return writer_->result(); }
 
  private:
+  std::unique_ptr<Namer> namer_;
   std::unique_ptr<Builder> builder_;
   std::unique_ptr<BinaryWriter> writer_;
 };

@@ -278,8 +278,8 @@ Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 
 Builder::AccessorInfo::~AccessorInfo() {}
 
-Builder::Builder(ast::Module* mod)
-    : mod_(mod), namer_(std::make_unique<UnsafeNamer>(mod)), scope_stack_({}) {}
+Builder::Builder(ast::Module* mod, Namer* namer)
+    : mod_(mod), namer_(namer), scope_stack_({}) {}
 
 Builder::~Builder() = default;
 

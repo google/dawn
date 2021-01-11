@@ -23,6 +23,7 @@
 #include "src/ast/module.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
+#include "src/writer/test_namer.h"
 
 namespace tint {
 namespace writer {
@@ -32,11 +33,13 @@ namespace spirv {
 template <typename BASE>
 class TestHelperBase : public ast::BuilderWithModule, public BASE {
  public:
-  TestHelperBase() : td(mod), b(mod) {}
+  TestHelperBase() : td(mod), namer(mod), b(mod, &namer) {}
   ~TestHelperBase() override = default;
 
   /// The type determiner
   TypeDeterminer td;
+  /// The test namer
+  TestNamer namer;
   /// The generator
   spirv::Builder b;
 

@@ -85,7 +85,8 @@ class Builder {
 
   /// Constructor
   /// @param mod the module to generate from
-  explicit Builder(ast::Module* mod);
+  /// @param namer the namer to use
+  Builder(ast::Module* mod, Namer* namer);
   ~Builder();
 
   /// Generates the SPIR-V instructions for the given module
@@ -491,7 +492,7 @@ class Builder {
   Operand result_op();
 
   ast::Module* mod_;
-  std::unique_ptr<Namer> namer_;
+  Namer* namer_ = nullptr;
   std::string error_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;
