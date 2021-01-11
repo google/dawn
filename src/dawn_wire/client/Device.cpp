@@ -83,7 +83,7 @@ namespace dawn_wire { namespace client {
 
     void Device::DestroyAllObjects() {
         for (auto& objectList : mObjects) {
-            ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.begin());
+            ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.data());
             while (!objectList.empty()) {
                 ObjectBase* object = objectList.head()->value();
 
