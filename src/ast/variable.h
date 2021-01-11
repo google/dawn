@@ -104,8 +104,6 @@ class Variable : public Castable<Variable, Node> {
 
   /// @returns the variable symbol
   const Symbol& symbol() const { return symbol_; }
-  /// @returns the variable name
-  const std::string& name() const { return name_; }
 
   /// @returns the variable's type.
   type::Type* type() const { return type_; }

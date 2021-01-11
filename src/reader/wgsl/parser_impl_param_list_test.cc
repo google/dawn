@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, ParamList_Single) {
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 1u);
 
-  EXPECT_EQ(e.value[0]->name(), "a");
+  EXPECT_EQ(e.value[0]->symbol(), p->get_module().RegisterSymbol("a"));
   EXPECT_EQ(e.value[0]->type(), i32);
   EXPECT_TRUE(e.value[0]->is_const());
 
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 3u);
 
-  EXPECT_EQ(e.value[0]->name(), "a");
+  EXPECT_EQ(e.value[0]->symbol(), p->get_module().RegisterSymbol("a"));
   EXPECT_EQ(e.value[0]->type(), i32);
   EXPECT_TRUE(e.value[0]->is_const());
 
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
   ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
 
-  EXPECT_EQ(e.value[1]->name(), "b");
+  EXPECT_EQ(e.value[1]->symbol(), p->get_module().RegisterSymbol("b"));
   EXPECT_EQ(e.value[1]->type(), f32);
   EXPECT_TRUE(e.value[1]->is_const());
 
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[1]->source().range.end.line, 1u);
   ASSERT_EQ(e.value[1]->source().range.end.column, 11u);
 
-  EXPECT_EQ(e.value[2]->name(), "c");
+  EXPECT_EQ(e.value[2]->symbol(), p->get_module().RegisterSymbol("c"));
   EXPECT_EQ(e.value[2]->type(), vec2);
   EXPECT_TRUE(e.value[2]->is_const());
 

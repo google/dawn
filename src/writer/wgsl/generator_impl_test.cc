@@ -33,7 +33,7 @@ TEST_F(WgslGeneratorImplTest, Generate) {
   mod->AddFunction(Func("my_func", ast::VariableList{}, ty.void_,
                         ast::StatementList{}, ast::FunctionDecorationList{}));
 
-  ASSERT_TRUE(gen.Generate(*mod)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(fn my_func() -> void {
 }
 

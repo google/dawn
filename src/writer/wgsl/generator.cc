@@ -21,17 +21,18 @@ namespace writer {
 namespace wgsl {
 
 Generator::Generator(ast::Module module)
-    : Text(std::move(module)), impl_(std::make_unique<GeneratorImpl>()) {}
+    : Text(std::move(module)),
+      impl_(std::make_unique<GeneratorImpl>(&module_)) {}
 
 Generator::~Generator() = default;
 
 void Generator::Reset() {
   set_error("");
-  impl_ = std::make_unique<GeneratorImpl>();
+  impl_ = std::make_unique<GeneratorImpl>(&module_);
 }
 
 bool Generator::Generate() {
-  auto ret = impl_->Generate(module_);
+  auto ret = impl_->Generate();
   if (!ret) {
     error_ = impl_->error();
   }
@@ -40,7 +41,7 @@ bool Generator::Generate() {
 
 bool Generator::GenerateEntryPoint(ast::PipelineStage stage,
                                    const std::string& name) {
-  auto ret = impl_->GenerateEntryPoint(module_, stage, name);
+  auto ret = impl_->GenerateEntryPoint(stage, name);
   if (!ret) {
     error_ = impl_->error();
   }

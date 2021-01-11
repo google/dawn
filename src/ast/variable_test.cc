@@ -30,7 +30,6 @@ TEST_F(VariableTest, Creation) {
   auto* v = Var("my_var", StorageClass::kFunction, ty.i32);
 
   EXPECT_EQ(v->symbol(), Symbol(1));
-  EXPECT_EQ(v->name(), "my_var");
   EXPECT_EQ(v->storage_class(), StorageClass::kFunction);
   EXPECT_EQ(v->type(), ty.i32);
   EXPECT_EQ(v->source().range.begin.line, 0u);
@@ -45,7 +44,6 @@ TEST_F(VariableTest, CreationWithSource) {
       "i", StorageClass::kPrivate, ty.f32, nullptr, VariableDecorationList{});
 
   EXPECT_EQ(v->symbol(), Symbol(1));
-  EXPECT_EQ(v->name(), "i");
   EXPECT_EQ(v->storage_class(), StorageClass::kPrivate);
   EXPECT_EQ(v->type(), ty.f32);
   EXPECT_EQ(v->source().range.begin.line, 27u);
@@ -61,7 +59,6 @@ TEST_F(VariableTest, CreationEmpty) {
       VariableDecorationList{});
 
   EXPECT_EQ(v->symbol(), Symbol(1));
-  EXPECT_EQ(v->name(), "a_var");
   EXPECT_EQ(v->storage_class(), StorageClass::kWorkgroup);
   EXPECT_EQ(v->type(), ty.i32);
   EXPECT_EQ(v->source().range.begin.line, 27u);

@@ -224,7 +224,7 @@ class GeneratorImpl {
   /// @returns true if the entry point data was emitted
   bool EmitEntryPointData(std::ostream& out,
                           ast::Function* func,
-                          std::unordered_set<std::string>& emitted_globals);
+                          std::unordered_set<uint32_t>& emitted_globals);
   /// Handles emitting the entry point function
   /// @param out the output stream
   /// @param func the entry point

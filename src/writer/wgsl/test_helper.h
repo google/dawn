@@ -31,7 +31,7 @@ namespace wgsl {
 template <typename BASE>
 class TestHelperBase : public BASE, public ast::BuilderWithModule {
  public:
-  TestHelperBase() : td(mod), gen() {}
+  TestHelperBase() : td(mod), gen(mod) {}
 
   ~TestHelperBase() = default;
 

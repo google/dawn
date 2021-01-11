@@ -53,22 +53,19 @@ namespace wgsl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  GeneratorImpl();
+  /// @param module the module to generate
+  explicit GeneratorImpl(ast::Module* mod);
   ~GeneratorImpl();
 
   /// Generates the result data
-  /// @param module the module to generate
   /// @returns true on successful generation; false otherwise
-  bool Generate(const ast::Module& module);
+  bool Generate();
 
   /// Generates a single entry point
-  /// @param module the module to generate from
   /// @param stage the pipeline stage
   /// @param name the entry point name
   /// @returns true on successful generation; false otherwise
-  bool GenerateEntryPoint(const ast::Module& module,
-                          ast::PipelineStage stage,
-                          const std::string& name);
+  bool GenerateEntryPoint(ast::PipelineStage stage, const std::string& name);
 
   /// Handles generating a constructed type
   /// @param ty the constructed to generate
@@ -206,6 +203,9 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the decorated variable
   /// @returns true if the variable decoration was emitted
   bool EmitVariableDecorations(ast::Variable* var);
+
+ private:
+  ast::Module& module_;
 };
 
 }  // namespace wgsl

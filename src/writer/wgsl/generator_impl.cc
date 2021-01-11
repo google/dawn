@@ -78,29 +78,30 @@ namespace tint {
 namespace writer {
 namespace wgsl {
 
-GeneratorImpl::GeneratorImpl() : TextGenerator() {}
+GeneratorImpl::GeneratorImpl(ast::Module* module)
+    : TextGenerator(), module_(*module) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
-bool GeneratorImpl::Generate(const ast::Module& module) {
-  for (auto* const ty : module.constructed_types()) {
+bool GeneratorImpl::Generate() {
+  for (auto* const ty : module_.constructed_types()) {
     if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!module.constructed_types().empty())
+  if (!module_.constructed_types().empty())
     out_ << std::endl;
 
-  for (auto* var : module.global_variables()) {
+  for (auto* var : module_.global_variables()) {
     if (!EmitVariable(var)) {
       return false;
     }
   }
-  if (!module.global_variables().empty()) {
+  if (!module_.global_variables().empty()) {
     out_ << std::endl;
   }
 
-  for (auto* func : module.functions()) {
+  for (auto* func : module_.functions()) {
     if (!EmitFunction(func)) {
       return false;
     }
@@ -110,11 +111,10 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   return true;
 }
 
-bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
-                                       ast::PipelineStage stage,
+bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
                                        const std::string& name) {
   auto* func =
-      module.FindFunctionBySymbolAndStage(module.GetSymbol(name), stage);
+      module_.FindFunctionBySymbolAndStage(module_.GetSymbol(name), stage);
   if (func == nullptr) {
     error_ = "Unable to find requested entry point: " + name;
     return false;
@@ -122,18 +122,18 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
 
   // TODO(dsinclair): We always emit constructed types even if they aren't
   // strictly needed
-  for (auto* const ty : module.constructed_types()) {
+  for (auto* const ty : module_.constructed_types()) {
     if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!module.constructed_types().empty()) {
+  if (!module_.constructed_types().empty()) {
     out_ << std::endl;
   }
 
   // TODO(dsinclair): This should be smarter and only emit needed const
   // variables
-  for (auto* var : module.global_variables()) {
+  for (auto* var : module_.global_variables()) {
     if (!var->is_const()) {
       continue;
     }
@@ -153,8 +153,8 @@ bool GeneratorImpl::GenerateEntryPoint(const ast::Module& module,
     out_ << std::endl;
   }
 
-  for (auto* f : module.functions()) {
-    if (!f->HasAncestorEntryPoint(module.GetSymbol(name))) {
+  for (auto* f : module_.functions()) {
+    if (!f->HasAncestorEntryPoint(module_.GetSymbol(name))) {
       continue;
     }
 
@@ -370,7 +370,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     }
     first = false;
 
-    out_ << v->name() << " : ";
+    out_ << module_.SymbolToName(v->symbol()) << " : ";
 
     if (!EmitType(v->type())) {
       return false;
@@ -597,7 +597,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     }
   }
 
-  out_ << " " << var->name() << " : ";
+  out_ << " " << module_.SymbolToName(var->symbol()) << " : ";
   if (!EmitType(var->type())) {
     return false;
   }

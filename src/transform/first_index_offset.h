@@ -19,6 +19,7 @@
 
 #include "src/ast/module.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/symbol.h"
 #include "src/transform/transform.h"
 
 namespace tint {

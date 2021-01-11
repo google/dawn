@@ -42,8 +42,8 @@ TEST_F(ParserImplTest, FunctionDecl) {
   EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
 
   ASSERT_EQ(f->params().size(), 2u);
-  EXPECT_EQ(f->params()[0]->name(), "a");
-  EXPECT_EQ(f->params()[1]->name(), "b");
+  EXPECT_EQ(f->params()[0]->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(f->params()[1]->symbol(), p->get_module().RegisterSymbol("b"));
 
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());

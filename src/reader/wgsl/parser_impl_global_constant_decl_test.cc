@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_TRUE(e->is_const());
-  EXPECT_EQ(e->name(), "a");
+  EXPECT_EQ(e->symbol(), p->get_module().RegisterSymbol("a"));
   ASSERT_NE(e->type(), nullptr);
   EXPECT_TRUE(e->type()->Is<ast::type::F32>());
 

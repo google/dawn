@@ -69,7 +69,7 @@ PipelineStage Function::pipeline_stage() const {
 
 void Function::add_referenced_module_variable(Variable* var) {
   for (const auto* v : referenced_module_vars_) {
-    if (v->name() == var->name()) {
+    if (v->symbol() == var->symbol()) {
       return;
     }
   }
@@ -78,7 +78,7 @@ void Function::add_referenced_module_variable(Variable* var) {
 
 void Function::add_local_referenced_module_variable(Variable* var) {
   for (const auto* v : local_referenced_module_vars_) {
-    if (v->name() == var->name()) {
+    if (v->symbol() == var->symbol()) {
       return;
     }
   }

@@ -175,7 +175,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     }
   }
 
-  std::unordered_set<std::string> emitted_globals;
+  std::unordered_set<uint32_t> emitted_globals;
   // Make sure all entry point data is emitted before the entry point functions
   for (auto* func : module_->functions()) {
     if (!func->IsEntryPoint()) {
@@ -1285,7 +1285,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     }
     // Array name is output as part of the type
     if (!v->type()->Is<ast::type::Array>()) {
-      out << " " << v->name();
+      out << " " << namer_->NameFor(v->symbol());
     }
   }
 
@@ -1305,7 +1305,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
 bool GeneratorImpl::EmitEntryPointData(
     std::ostream& out,
     ast::Function* func,
-    std::unordered_set<std::string>& emitted_globals) {
+    std::unordered_set<uint32_t>& emitted_globals) {
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> in_variables;
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> outvariables;
   for (auto data : func->referenced_location_variables()) {
@@ -1338,22 +1338,24 @@ bool GeneratorImpl::EmitEntryPointData(
     // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
     auto* binding = data.second.binding;
     if (binding == nullptr) {
-      error_ = "unable to find binding information for uniform: " + var->name();
+      error_ = "unable to find binding information for uniform: " +
+               module_->SymbolToName(var->symbol());
       return false;
     }
     // auto* set = data.second.set;
 
     // If the global has already been emitted we skip it, it's been emitted by
     // a previous entry point.
-    if (emitted_globals.count(var->name()) != 0) {
+    if (emitted_globals.count(var->symbol().value()) != 0) {
       continue;
     }
-    emitted_globals.insert(var->name());
+    emitted_globals.insert(var->symbol().value());
 
     auto* type = var->type()->UnwrapIfNeeded();
     if (auto* strct = type->As<ast::type::Struct>()) {
-      out << "ConstantBuffer<" << strct->name() << "> " << var->name()
-          << " : register(b" << binding->value() << ");" << std::endl;
+      out << "ConstantBuffer<" << strct->name() << "> "
+          << namer_->NameFor(var->symbol()) << " : register(b"
+          << binding->value() << ");" << std::endl;
     } else {
       // TODO(dsinclair): There is outstanding spec work to require all uniform
       // buffers to be [[block]] decorated, which means structs. This is
@@ -1361,7 +1363,7 @@ bool GeneratorImpl::EmitEntryPointData(
       // is not a block.
       // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
       //           https://github.com/gpuweb/gpuweb/issues/1008
-      auto name = "cbuffer_" + var->name();
+      auto name = "cbuffer_" + namer_->NameFor(var->symbol());
       out << "cbuffer " << name << " : register(b" << binding->value() << ") {"
           << std::endl;
 
@@ -1370,7 +1372,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, type, Symbol())) {
         return false;
       }
-      out << " " << var->name() << ";" << std::endl;
+      out << " " << namer_->NameFor(var->symbol()) << ";" << std::endl;
       decrement_indent();
       out << "};" << std::endl;
     }
@@ -1388,10 +1390,10 @@ bool GeneratorImpl::EmitEntryPointData(
 
     // If the global has already been emitted we skip it, it's been emitted by
     // a previous entry point.
-    if (emitted_globals.count(var->name()) != 0) {
+    if (emitted_globals.count(var->symbol().value()) != 0) {
       continue;
     }
-    emitted_globals.insert(var->name());
+    emitted_globals.insert(var->symbol().value());
 
     auto* ac = var->type()->As<ast::type::AccessControl>();
     if (ac == nullptr) {
@@ -1402,8 +1404,8 @@ bool GeneratorImpl::EmitEntryPointData(
     if (ac->IsReadWrite()) {
       out << "RW";
     }
-    out << "ByteAddressBuffer " << var->name() << " : register(u"
-        << binding->value() << ");" << std::endl;
+    out << "ByteAddressBuffer " << namer_->NameFor(var->symbol())
+        << " : register(u" << binding->value() << ");" << std::endl;
     emitted_storagebuffer = true;
   }
   if (emitted_storagebuffer) {
@@ -1430,7 +1432,7 @@ bool GeneratorImpl::EmitEntryPointData(
         return false;
       }
 
-      out << " " << var->name() << " : ";
+      out << " " << namer_->NameFor(var->symbol()) << " : ";
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
           error_ = "invalid location variable for pipeline stage";
@@ -1475,7 +1477,7 @@ bool GeneratorImpl::EmitEntryPointData(
         return false;
       }
 
-      out << " " << var->name() << " : ";
+      out << " " << namer_->NameFor(var->symbol()) << " : ";
 
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         auto loc = location->value();
@@ -1697,7 +1699,7 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
         }
         out << pre.str();
 
-        out << var->name() << " = ";
+        out << namer_->NameFor(var->symbol()) << " = ";
         if (var->constructor() != nullptr) {
           out << constructor_out.str();
         } else {
@@ -2289,7 +2291,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
     return false;
   }
   if (!var->type()->Is<ast::type::Array>()) {
-    out << " " << var->name();
+    out << " " << namer_->NameFor(var->symbol());
   }
   out << constructor_out.str() << ";" << std::endl;
 
@@ -2337,8 +2339,8 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     if (!EmitType(out, var->type(), var->symbol())) {
       return false;
     }
-    out << " " << var->name() << " = WGSL_SPEC_CONSTANT_" << const_id << ";"
-        << std::endl;
+    out << " " << namer_->NameFor(var->symbol()) << " = WGSL_SPEC_CONSTANT_"
+        << const_id << ";" << std::endl;
     out << "#undef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
   } else {
     out << "static const ";
@@ -2346,7 +2348,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
       return false;
     }
     if (!var->type()->Is<ast::type::Array>()) {
-      out << " " << var->name();
+      out << " " << namer_->NameFor(var->symbol());
     }
 
     if (var->constructor() != nullptr) {

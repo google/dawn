@@ -86,7 +86,7 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // First do a quick check to see if the transform has already been applied.
   for (ast::Variable* var : in->global_variables()) {
     if (auto* dec_var = var->As<ast::Variable>()) {
-      if (dec_var->name() == kBufferName) {
+      if (dec_var->symbol() == in->RegisterSymbol(kBufferName)) {
         diag::Diagnostic err;
         err.message = "First index offset transform has already been applied.";
         err.severity = diag::Severity::Error;
@@ -110,8 +110,8 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
     return out;
   }
 
-  std::string vertex_index_name;
-  std::string instance_index_name;
+  Symbol vertex_index_sym;
+  Symbol instance_index_sym;
 
   // Lazilly construct the UniformBuffer on first call to
   // maybe_create_buffer_var()
@@ -134,15 +134,17 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
               if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
                 ast::Builtin blt_type = blt_dec->value();
                 if (blt_type == ast::Builtin::kVertexIdx) {
-                  vertex_index_name = var->name();
+                  vertex_index_sym = var->symbol();
                   has_vertex_index_ = true;
                   return clone_variable_with_new_name(
-                      ctx, var, kIndexOffsetPrefix + var->name());
+                      ctx, var,
+                      kIndexOffsetPrefix + in->SymbolToName(var->symbol()));
                 } else if (blt_type == ast::Builtin::kInstanceIdx) {
-                  instance_index_name = var->name();
+                  instance_index_sym = var->symbol();
                   has_instance_index_ = true;
                   return clone_variable_with_new_name(
-                      ctx, var, kIndexOffsetPrefix + var->name());
+                      ctx, var,
+                      kIndexOffsetPrefix + in->SymbolToName(var->symbol()));
                 }
               }
             }
@@ -161,11 +163,12 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
                  func->local_referenced_builtin_variables()) {
               if (data.second->value() == ast::Builtin::kVertexIdx) {
                 statements.emplace_back(CreateFirstIndexOffset(
-                    vertex_index_name, kFirstVertexName, buffer_var, ctx->mod));
+                    in->SymbolToName(vertex_index_sym), kFirstVertexName,
+                    buffer_var, ctx->mod));
               } else if (data.second->value() == ast::Builtin::kInstanceIdx) {
                 statements.emplace_back(CreateFirstIndexOffset(
-                    instance_index_name, kFirstInstanceName, buffer_var,
-                    ctx->mod));
+                    in->SymbolToName(instance_index_sym), kFirstInstanceName,
+                    buffer_var, ctx->mod));
               }
             }
             return CloneWithStatementsAtStart(ctx, func, statements);
@@ -252,12 +255,13 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
     ast::Variable* buffer_var,
     ast::Module* mod) {
   auto* buffer = mod->create<ast::IdentifierExpression>(
-      Source{}, mod->RegisterSymbol(buffer_var->name()), buffer_var->name());
+      Source{}, buffer_var->symbol(), mod->SymbolToName(buffer_var->symbol()));
+
+  auto lhs_name = kIndexOffsetPrefix + original_name;
   auto* constructor = mod->create<ast::BinaryExpression>(
       Source{}, ast::BinaryOp::kAdd,
       mod->create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol(kIndexOffsetPrefix + original_name),
-          kIndexOffsetPrefix + original_name),
+          Source{}, mod->RegisterSymbol(lhs_name), lhs_name),
       mod->create<ast::MemberAccessorExpression>(
           Source{}, buffer,
           mod->create<ast::IdentifierExpression>(

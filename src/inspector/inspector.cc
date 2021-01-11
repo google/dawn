@@ -64,10 +64,11 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
              entry_point.workgroup_size_z) = func->workgroup_size();
 
     for (auto* var : func->referenced_module_variables()) {
+      auto name = namer_->NameFor(var->symbol());
       if (var->storage_class() == ast::StorageClass::kInput) {
-        entry_point.input_variables.push_back(var->name());
+        entry_point.input_variables.push_back(name);
       } else {
-        entry_point.output_variables.push_back(var->name());
+        entry_point.output_variables.push_back(name);
       }
     }
     result.push_back(std::move(entry_point));

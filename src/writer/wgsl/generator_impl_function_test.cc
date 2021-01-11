@@ -226,7 +226,7 @@ TEST_F(WgslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  ASSERT_TRUE(gen.Generate(*mod)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]
 struct Data {
   [[offset(0)]]

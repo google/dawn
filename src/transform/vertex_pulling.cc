@@ -155,7 +155,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
     for (auto* d : v->decorations()) {
       if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
         if (builtin->value() == ast::Builtin::kVertexIdx) {
-          vertex_index_name = v->name();
+          vertex_index_name = in->SymbolToName(v->symbol());
           return;
         }
       }
@@ -203,7 +203,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
     for (auto* d : v->decorations()) {
       if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
         if (builtin->value() == ast::Builtin::kInstanceIdx) {
-          instance_index_name = v->name();
+          instance_index_name = in->SymbolToName(v->symbol());
           return;
         }
       }
@@ -244,7 +244,7 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
         v = out->create<ast::Variable>(
             Source{},                        // source
             v->symbol(),                     // symbol
-            v->name(),                       // name
+            out->SymbolToName(v->symbol()),  // name
             ast::StorageClass::kPrivate,     // storage_class
             v->type(),                       // type
             false,                           // is_const
@@ -358,10 +358,11 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
           Source{}, CreatePullingPositionIdent(), pos_value);
       stmts.emplace_back(set_pos_expr);
 
+      auto ident_name = in->SymbolToName(v->symbol());
       stmts.emplace_back(out->create<ast::AssignmentStatement>(
           Source{},
           out->create<ast::IdentifierExpression>(
-              Source{}, out->RegisterSymbol(v->name()), v->name()),
+              Source{}, out->RegisterSymbol(ident_name), ident_name),
           AccessByFormat(i, attribute_desc.format)));
     }
   }

@@ -607,7 +607,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << var->name();
+    out_ << namer_->NameFor(var->symbol());
   }
 
   for (const auto& data : func->referenced_uniform_variables()) {
@@ -616,7 +616,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << var->name();
+    out_ << namer_->NameFor(var->symbol());
   }
 
   for (const auto& data : func->referenced_storagebuffer_variables()) {
@@ -625,7 +625,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << var->name();
+    out_ << namer_->NameFor(var->symbol());
   }
 
   const auto& params = expr->params();
@@ -1035,7 +1035,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
         return false;
       }
 
-      out_ << " " << var->name() << " [[";
+      out_ << " " << namer_->NameFor(var->symbol()) << " [[";
       if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
         out_ << "attribute(" << loc << ")";
       } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
@@ -1072,7 +1072,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
         return false;
       }
 
-      out_ << " " << var->name() << " [[";
+      out_ << " " << namer_->NameFor(var->symbol()) << " [[";
 
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         auto loc = location->value();
@@ -1275,7 +1275,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     if (!EmitType(var->type(), Symbol())) {
       return false;
     }
-    out_ << "& " << var->name();
+    out_ << "& " << namer_->NameFor(var->symbol());
   }
 
   for (const auto& data : func->referenced_uniform_variables()) {
@@ -1290,7 +1290,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     if (!EmitType(var->type(), Symbol())) {
       return false;
     }
-    out_ << "& " << var->name();
+    out_ << "& " << namer_->NameFor(var->symbol());
   }
 
   for (const auto& data : func->referenced_storagebuffer_variables()) {
@@ -1313,7 +1313,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     if (!EmitType(ac->type(), Symbol())) {
       return false;
     }
-    out_ << "& " << var->name();
+    out_ << "& " << namer_->NameFor(var->symbol());
   }
 
   for (auto* v : func->params()) {
@@ -1327,7 +1327,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     // Array name is output as part of the type
     if (!v->type()->Is<ast::type::Array>()) {
-      out_ << " " << v->name();
+      out_ << " " << namer_->NameFor(v->symbol());
     }
   }
 
@@ -1419,7 +1419,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
       error_ = "unknown builtin";
       return false;
     }
-    out_ << " " << var->name() << " [[" << attr << "]]";
+    out_ << " " << namer_->NameFor(var->symbol()) << " [[" << attr << "]]";
   }
 
   for (auto data : func->referenced_uniform_variables()) {
@@ -1434,7 +1434,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
     auto* binding = data.second.binding;
     if (binding == nullptr) {
-      error_ = "unable to find binding information for uniform: " + var->name();
+      error_ = "unable to find binding information for uniform: " +
+               module_->SymbolToName(var->symbol());
       return false;
     }
     // auto* set = data.second.set;
@@ -1445,7 +1446,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     if (!EmitType(var->type(), Symbol())) {
       return false;
     }
-    out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
+    out_ << "& " << namer_->NameFor(var->symbol()) << " [[buffer("
+         << binding->value() << ")]]";
   }
 
   for (auto data : func->referenced_storagebuffer_variables()) {
@@ -1474,7 +1476,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     if (!EmitType(ac->type(), Symbol())) {
       return false;
     }
-    out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
+    out_ << "& " << namer_->NameFor(var->symbol()) << " [[buffer("
+         << binding->value() << ")]]";
   }
 
   out_ << ") {" << std::endl;
@@ -1589,7 +1592,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
       make_indent();
 
       auto* var = decl->variable();
-      out_ << var->name() << " = ";
+      out_ << namer_->NameFor(var->symbol()) << " = ";
       if (var->constructor() != nullptr) {
         if (!EmitExpression(var->constructor())) {
           return false;
@@ -2020,7 +2023,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
     return false;
   }
   if (!var->type()->Is<ast::type::Array>()) {
-    out_ << " " << var->name();
+    out_ << " " << namer_->NameFor(var->symbol());
   }
 
   if (!skip_constructor) {
@@ -2062,7 +2065,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     return false;
   }
   if (!var->type()->Is<ast::type::Array>()) {
-    out_ << " " << var->name();
+    out_ << " " << namer_->NameFor(var->symbol());
   }
 
   if (var->HasConstantIdDecoration()) {
