@@ -42,6 +42,9 @@ class Namer {
   /// @returns the unique name string
   std::string GenerateName(const std::string& prefix);
 
+  /// Resets the namer, removing all known symbols.
+  void Reset();
+
  protected:
   /// Checks if `name` has been used
   /// @param name the name to check

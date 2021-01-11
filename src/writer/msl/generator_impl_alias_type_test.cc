@@ -31,7 +31,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
   auto* alias = ty.alias("a", ty.f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(typedef float a;
+  EXPECT_EQ(gen.result(), R"(typedef float test_a;
 )");
 }
 
@@ -43,9 +43,9 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
 
   auto* s = ty.struct_("a", str);
   ASSERT_TRUE(gen.EmitConstructedType(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct a {
-  float a;
-  int b;
+  EXPECT_EQ(gen.result(), R"(struct test_a {
+  float test_a;
+  int test_b;
 };
 )");
 }
@@ -60,7 +60,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   auto* alias = ty.alias("a", s);
 
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(typedef b a;
+  EXPECT_EQ(gen.result(), R"(typedef test_b test_a;
 )");
 }
 

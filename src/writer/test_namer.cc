@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
-#include "src/writer/msl/generator_impl.h"
-#include "src/writer/msl/test_helper.h"
+#include "src/writer/test_namer.h"
 
 namespace tint {
 namespace writer {
-namespace msl {
-namespace {
 
-using MslGeneratorImplTest = TestHelper;
+TestNamer::TestNamer(ast::Module* mod) : Namer(mod) {}
 
-TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
-  auto* i = Expr("foo");
-  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
-  EXPECT_EQ(gen.result(), "test_foo");
+TestNamer::~TestNamer() = default;
+
+std::string TestNamer::NameFor(const Symbol& sym) {
+  return "test_" + module_->SymbolToName(sym);
 }
 
-}  // namespace
-}  // namespace msl
 }  // namespace writer
 }  // namespace tint

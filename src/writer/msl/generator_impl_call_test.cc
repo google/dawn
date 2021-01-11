@@ -38,7 +38,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "my_func()");
+  EXPECT_EQ(gen.result(), "test_my_func()");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
@@ -48,7 +48,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "my_func(param1, param2)");
+  EXPECT_EQ(gen.result(), "test_my_func(test_param1, test_param2)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
@@ -61,7 +61,7 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
+  EXPECT_EQ(gen.result(), "  test_my_func(test_param1, test_param2);\n");
 }
 
 }  // namespace

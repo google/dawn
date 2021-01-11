@@ -26,6 +26,10 @@ Namer::Namer(ast::Module* mod) : module_(mod) {}
 
 Namer::~Namer() = default;
 
+void Namer::Reset() {
+  used_.clear();
+}
+
 bool Namer::IsUsed(const std::string& name) {
   auto it = used_.find(name);
   return it != used_.end();

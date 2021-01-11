@@ -15,7 +15,6 @@
 #ifndef SRC_WRITER_MSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_MSL_GENERATOR_IMPL_H_
 
-#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -56,7 +55,8 @@ class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
   /// @param module the module to generate
-  explicit GeneratorImpl(ast::Module* module);
+  /// @param namer the namer to use for generation
+  GeneratorImpl(ast::Module* module, Namer* namer);
   ~GeneratorImpl();
 
   /// @returns true on successful generation; false otherwise
@@ -268,18 +268,18 @@ class GeneratorImpl : public TextGenerator {
   enum class VarType { kIn, kOut };
 
   struct EntryPointData {
-    std::string struct_name;
-    std::string var_name;
+    Symbol struct_symbol;
+    Symbol var_symbol;
   };
 
-  std::string current_ep_var_name(VarType type);
+  Symbol current_ep_var_symbol(VarType type);
 
   ScopeStack<ast::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
-  const ast::Module* module_ = nullptr;
+  ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
-  std::unique_ptr<Namer> namer_;
+  Namer* namer_;
 
   std::unordered_map<uint32_t, EntryPointData> ep_sym_to_in_data_;
   std::unordered_map<uint32_t, EntryPointData> ep_sym_to_out_data_;
@@ -287,7 +287,7 @@ class GeneratorImpl : public TextGenerator {
   // This maps an input of "<entry_point_name>_<function_name>" to a remapped
   // function name. If there is no entry for a given key then function did
   // not need to be remapped for the entry point and can be emitted directly.
-  std::unordered_map<std::string, std::string> ep_func_name_remapped_;
+  std::unordered_map<std::string, Symbol> ep_func_name_remapped_;
 };
 
 }  // namespace msl

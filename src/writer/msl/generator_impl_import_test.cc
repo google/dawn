@@ -187,7 +187,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string("metal::determinant(var)"));
+  EXPECT_EQ(gen.result(), std::string("metal::determinant(test_var)"));
 }
 
 }  // namespace

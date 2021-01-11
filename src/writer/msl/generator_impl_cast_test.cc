@@ -34,14 +34,14 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
   auto* cast = Construct<f32>("id");
 
   ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
-  EXPECT_EQ(gen.result(), "float(id)");
+  EXPECT_EQ(gen.result(), "float(test_id)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
   auto* cast = vec3<f32>("id");
 
   ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
-  EXPECT_EQ(gen.result(), "float3(id)");
+  EXPECT_EQ(gen.result(), "float3(test_id)");
 }
 
 }  // namespace

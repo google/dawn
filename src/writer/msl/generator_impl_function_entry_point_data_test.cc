@@ -76,9 +76,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct vtx_main_in {
-  float foo [[attribute(0)]];
-  int bar [[attribute(1)]];
+  EXPECT_EQ(gen.result(), R"(struct test_vtx_main_in {
+  float test_foo [[attribute(0)]];
+  int test_bar [[attribute(1)]];
 };
 
 )");
@@ -122,9 +122,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct vtx_main_out {
-  float foo [[user(locn0)]];
-  int bar [[user(locn1)]];
+  EXPECT_EQ(gen.result(), R"(struct test_vtx_main_out {
+  float test_foo [[user(locn0)]];
+  int test_bar [[user(locn1)]];
 };
 
 )");
@@ -168,9 +168,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct main_in {
-  float foo [[user(locn0)]];
-  int bar [[user(locn1)]];
+  EXPECT_EQ(gen.result(), R"(struct test_main_in {
+  float test_foo [[user(locn0)]];
+  int test_bar [[user(locn1)]];
 };
 
 )");
@@ -214,9 +214,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct main_out {
-  float foo [[color(0)]];
-  int bar [[color(1)]];
+  EXPECT_EQ(gen.result(), R"(struct test_main_out {
+  float test_foo [[color(0)]];
+  int test_bar [[color(1)]];
 };
 
 )");
@@ -338,8 +338,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   ASSERT_TRUE(td.Determine()) << td.error();
 
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct main_out {
-  float depth [[depth(any)]];
+  EXPECT_EQ(gen.result(), R"(struct test_main_out {
+  float test_depth [[depth(any)]];
 };
 
 )");

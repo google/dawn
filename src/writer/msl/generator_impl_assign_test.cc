@@ -34,7 +34,7 @@ TEST_F(MslGeneratorImplTest, Emit_Assign) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
-  EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
+  EXPECT_EQ(gen.result(), "  test_lhs = test_rhs;\n");
 }
 
 }  // namespace

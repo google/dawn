@@ -23,6 +23,7 @@
 #include "src/ast/module.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/test_namer.h"
 
 namespace tint {
 namespace writer {
@@ -32,11 +33,13 @@ namespace msl {
 template <typename BASE>
 class TestHelperBase : public BASE, public ast::BuilderWithModule {
  public:
-  TestHelperBase() : td(mod), gen(mod) {}
+  TestHelperBase() : td(mod), namer_(mod), gen(mod, &namer_) {}
   ~TestHelperBase() = default;
 
   /// The type determiner
   TypeDeterminer td;
+  /// The namer
+  TestNamer namer_;
   /// The generator
   GeneratorImpl gen;
 };

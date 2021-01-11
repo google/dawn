@@ -55,7 +55,7 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  switch(cond) {
+  EXPECT_EQ(gen.result(), R"(  switch(test_cond) {
     case 5: {
       break;
     }

@@ -96,10 +96,8 @@ uint32_t adjust_for_alignment(uint32_t count, uint32_t alignment) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(ast::Module* module)
-    : TextGenerator(),
-      module_(module),
-      namer_(std::make_unique<UnsafeNamer>(module)) {}
+GeneratorImpl::GeneratorImpl(ast::Module* module, Namer* namer)
+    : TextGenerator(), module_(module), namer_(namer) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -398,25 +396,25 @@ bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   return true;
 }
 
-std::string GeneratorImpl::current_ep_var_name(VarType type) {
-  std::string name = "";
+Symbol GeneratorImpl::current_ep_var_symbol(VarType type) {
+  Symbol sym;
   switch (type) {
     case VarType::kIn: {
       auto in_it = ep_sym_to_in_data_.find(current_ep_sym_.value());
       if (in_it != ep_sym_to_in_data_.end()) {
-        name = in_it->second.var_name;
+        sym = in_it->second.var_symbol;
       }
       break;
     }
     case VarType::kOut: {
       auto out_it = ep_sym_to_out_data_.find(current_ep_sym_.value());
       if (out_it != ep_sym_to_out_data_.end()) {
-        name = out_it->second.var_name;
+        sym = out_it->second.var_symbol;
       }
       break;
     }
   }
-  return name;
+  return sym;
 }
 
 std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
@@ -563,12 +561,11 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return true;
   }
 
-  auto name = namer_->NameFor(ident->symbol());
-  auto caller_sym = ident->symbol();
-  auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
-                                        caller_sym.to_str());
+  auto name_sym = ident->symbol();
+  auto it = ep_func_name_remapped_.find(module_->SymbolToName(current_ep_sym_) +
+                                        "_" + module_->SymbolToName(name_sym));
   if (it != ep_func_name_remapped_.end()) {
-    name = it->second;
+    name_sym = it->second;
   }
 
   auto* func = module_->FindFunctionBySymbol(ident->symbol());
@@ -578,24 +575,24 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return false;
   }
 
-  out_ << name << "(";
+  out_ << namer_->NameFor(name_sym) << "(";
 
   bool first = true;
   if (has_referenced_in_var_needing_struct(func)) {
-    auto var_name = current_ep_var_name(VarType::kIn);
-    if (!var_name.empty()) {
-      out_ << var_name;
+    auto var_sym = current_ep_var_symbol(VarType::kIn);
+    if (var_sym.IsValid()) {
+      out_ << namer_->NameFor(var_sym);
       first = false;
     }
   }
   if (has_referenced_out_var_needing_struct(func)) {
-    auto var_name = current_ep_var_name(VarType::kOut);
-    if (!var_name.empty()) {
+    auto var_sym = current_ep_var_symbol(VarType::kOut);
+    if (var_sym.IsValid()) {
       if (!first) {
         out_ << ", ";
       }
       first = false;
-      out_ << var_name;
+      out_ << namer_->NameFor(var_sym);
     }
   }
 
@@ -1018,13 +1015,14 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   }
 
   if (!in_locations.empty()) {
-    auto in_struct_name = namer_->GenerateName(namer_->NameFor(func->symbol()) +
-                                               "_" + kInStructNameSuffix);
+    auto in_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
+        module_->SymbolToName(func->symbol()) + "_" + kInStructNameSuffix));
     auto in_var_name = namer_->GenerateName(kTintStructInVarPrefix);
-    ep_sym_to_in_data_[func->symbol().value()] = {in_struct_name, in_var_name};
+    ep_sym_to_in_data_[func->symbol().value()] = {
+        in_struct_sym, module_->RegisterSymbol(in_var_name)};
 
     make_indent();
-    out_ << "struct " << in_struct_name << " {" << std::endl;
+    out_ << "struct " << namer_->NameFor(in_struct_sym) << " {" << std::endl;
 
     increment_indent();
 
@@ -1055,14 +1053,14 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   }
 
   if (!out_variables.empty()) {
-    auto out_struct_name = namer_->GenerateName(
-        namer_->NameFor(func->symbol()) + "_" + kOutStructNameSuffix);
+    auto out_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
+        module_->SymbolToName(func->symbol()) + "_" + kOutStructNameSuffix));
     auto out_var_name = namer_->GenerateName(kTintStructOutVarPrefix);
-    ep_sym_to_out_data_[func->symbol().value()] = {out_struct_name,
-                                                   out_var_name};
+    ep_sym_to_out_data_[func->symbol().value()] = {
+        out_struct_sym, module_->RegisterSymbol(out_var_name)};
 
     make_indent();
-    out_ << "struct " << out_struct_name << " {" << std::endl;
+    out_ << "struct " << namer_->NameFor(out_struct_sym) << " {" << std::endl;
 
     increment_indent();
     for (auto& data : out_variables) {
@@ -1221,22 +1219,20 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
                                          bool emit_duplicate_functions,
                                          Symbol ep_sym) {
-  auto name = func->symbol().to_str();
   if (!EmitType(func->return_type(), Symbol())) {
     return false;
   }
 
   out_ << " ";
+  auto func_name_sym = func->symbol();
   if (emit_duplicate_functions) {
-    auto func_name = name;
-    auto ep_name = ep_sym.to_str();
-    name = namer_->GenerateName(namer_->NameFor(func->symbol()) + "_" +
-                                namer_->NameFor(ep_sym));
-    ep_func_name_remapped_[ep_name + "_" + func_name] = name;
-  } else {
-    name = namer_->NameFor(func->symbol());
+    auto func_name = module_->SymbolToName(func_name_sym);
+    auto ep_name = module_->SymbolToName(ep_sym);
+    func_name_sym = module_->RegisterSymbol(
+        namer_->GenerateName(func_name + "_" + ep_name));
+    ep_func_name_remapped_[ep_name + "_" + func_name] = func_name_sym;
   }
-  out_ << name << "(";
+  out_ << namer_->NameFor(func_name_sym) << "(";
 
   bool first = true;
 
@@ -1247,8 +1243,8 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   if (emit_duplicate_functions) {
     auto in_it = ep_sym_to_in_data_.find(ep_sym.value());
     if (in_it != ep_sym_to_in_data_.end()) {
-      out_ << "thread " << in_it->second.struct_name << "& "
-           << in_it->second.var_name;
+      out_ << "thread " << namer_->NameFor(in_it->second.struct_symbol) << "& "
+           << namer_->NameFor(in_it->second.var_symbol);
       first = false;
     }
 
@@ -1257,8 +1253,8 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
       if (!first) {
         out_ << ", ";
       }
-      out_ << "thread " << out_it->second.struct_name << "& "
-           << out_it->second.var_name;
+      out_ << "thread " << namer_->NameFor(out_it->second.struct_symbol) << "& "
+           << namer_->NameFor(out_it->second.var_symbol);
       first = false;
     }
   }
@@ -1385,7 +1381,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   auto out_data = ep_sym_to_out_data_.find(current_ep_sym_.value());
   bool has_out_data = out_data != ep_sym_to_out_data_.end();
   if (has_out_data) {
-    out_ << out_data->second.struct_name;
+    out_ << namer_->NameFor(out_data->second.struct_symbol);
   } else {
     out_ << "void";
   }
@@ -1394,8 +1390,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   bool first = true;
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_.value());
   if (in_data != ep_sym_to_in_data_.end()) {
-    out_ << in_data->second.struct_name << " " << in_data->second.var_name
-         << " [[stage_in]]";
+    out_ << namer_->NameFor(in_data->second.struct_symbol) << " "
+         << namer_->NameFor(in_data->second.var_symbol) << " [[stage_in]]";
     first = false;
   }
 
@@ -1488,8 +1484,9 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
   if (has_out_data) {
     make_indent();
-    out_ << out_data->second.struct_name << " " << out_data->second.var_name
-         << " = {};" << std::endl;
+    out_ << namer_->NameFor(out_data->second.struct_symbol) << " "
+         << namer_->NameFor(out_data->second.var_symbol) << " = {};"
+         << std::endl;
   }
 
   generating_entry_point_ = true;
@@ -1527,15 +1524,21 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
       auto var_type = var->storage_class() == ast::StorageClass::kInput
                           ? VarType::kIn
                           : VarType::kOut;
-      auto name = current_ep_var_name(var_type);
-      if (name.empty()) {
+      auto sym = current_ep_var_symbol(var_type);
+      if (!sym.IsValid()) {
         error_ = "unable to find entry point data for variable";
         return false;
       }
-      out_ << name << ".";
+      out_ << namer_->NameFor(sym) << ".";
     }
   }
-  out_ << namer_->NameFor(ident->symbol());
+
+  // Swizzles get written out directly
+  if (ident->IsSwizzle()) {
+    out_ << module_->SymbolToName(ident->symbol());
+  } else {
+    out_ << namer_->NameFor(ident->symbol());
+  }
 
   return true;
 }
@@ -1690,7 +1693,7 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   if (generating_entry_point_) {
     auto out_data = ep_sym_to_out_data_.find(current_ep_sym_.value());
     if (out_data != ep_sym_to_out_data_.end()) {
-      out_ << " " << out_data->second.var_name;
+      out_ << " " << namer_->NameFor(out_data->second.var_symbol);
     }
   } else if (stmt->has_value()) {
     out_ << " ";

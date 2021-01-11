@@ -102,7 +102,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
     bool tint_msl_is_first_1 = true;
     for(;;) {
       if (!tint_msl_is_first_1) {
-        lhs = rhs;
+        test_lhs = test_rhs;
       }
       tint_msl_is_first_1 = false;
 
@@ -162,16 +162,16 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  {
     bool tint_msl_is_first_1 = true;
-    float lhs;
-    float other;
+    float test_lhs;
+    float test_other;
     for(;;) {
       if (!tint_msl_is_first_1) {
-        lhs = rhs;
+        test_lhs = test_rhs;
       }
       tint_msl_is_first_1 = false;
 
-      lhs = 2.400000095f;
-      other = 0.0f;
+      test_lhs = 2.400000095f;
+      test_other = 0.0f;
     }
   }
 )");

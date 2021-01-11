@@ -22,13 +22,15 @@ namespace msl {
 
 Generator::Generator(ast::Module module)
     : Text(std::move(module)),
-      impl_(std::make_unique<GeneratorImpl>(&module_)) {}
+      namer_(std::make_unique<UnsafeNamer>(&module_)),
+      impl_(std::make_unique<GeneratorImpl>(&module_, namer_.get())) {}
 
 Generator::~Generator() = default;
 
 void Generator::Reset() {
   set_error("");
-  impl_ = std::make_unique<GeneratorImpl>(&module_);
+  namer_->Reset();
+  impl_ = std::make_unique<GeneratorImpl>(&module_, namer_.get());
 }
 
 bool Generator::Generate() {

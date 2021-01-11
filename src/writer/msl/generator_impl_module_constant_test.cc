@@ -40,7 +40,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
             array<f32, 3>(1.f, 2.f, 3.f), ast::VariableDecorationList{});
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-  EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
+  EXPECT_EQ(gen.result(), "constant float test_pos[3] = {1.0f, 2.0f, 3.0f};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
@@ -50,7 +50,8 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
                     });
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-  EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");
+  EXPECT_EQ(gen.result(),
+            "constant float test_pos [[function_constant(23)]];\n");
 }
 
 }  // namespace

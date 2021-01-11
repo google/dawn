@@ -834,6 +834,8 @@ source_set("tint_unittests_core_src") {
     "src/validator/validator_function_test.cc",
     "src/validator/validator_test.cc",
     "src/writer/float_to_string_test.cc",
+    "src/writer/test_namer.cc",
+    "src/writer/test_namer.h",
   ]
 
   configs += [

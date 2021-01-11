@@ -1079,7 +1079,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
       ret = mod_->create<ast::type::Pointer>(ret, ptr->storage_class());
     }
   } else if (auto* vec = data_type->As<ast::type::Vector>()) {
-    // TODO(dsinclair): Swizzle, record into the identifier experesion
+    expr->member()->SetIsSwizzle();
 
     auto size = mod_->SymbolToName(expr->member()->symbol()).size();
     if (size == 1) {

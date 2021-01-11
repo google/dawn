@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 
+#include "src/namer.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/text.h"
 
@@ -54,6 +55,7 @@ class Generator : public Text {
   std::string error() const;
 
  private:
+  std::unique_ptr<Namer> namer_;
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

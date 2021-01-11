@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
-#include "src/writer/msl/generator_impl.h"
-#include "src/writer/msl/test_helper.h"
+#ifndef SRC_WRITER_TEST_NAMER_H_
+#define SRC_WRITER_TEST_NAMER_H_
+
+#include <string>
+
+#include "src/namer.h"
 
 namespace tint {
 namespace writer {
-namespace msl {
-namespace {
 
-using MslGeneratorImplTest = TestHelper;
+/// A namer which returns the provided name prefixed with `test_`.
+class TestNamer : public Namer {
+ public:
+  /// Constructor
+  /// @param mod the module to retrieve names from
+  explicit TestNamer(ast::Module* mod);
+  /// Destructor
+  ~TestNamer() override;
 
-TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
-  auto* i = Expr("foo");
-  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
-  EXPECT_EQ(gen.result(), "test_foo");
-}
+  /// Returns `name`
+  /// @param sym the symbol
+  /// @returns `name` or "" if not found
+  std::string NameFor(const Symbol& sym) override;
+};
 
-}  // namespace
-}  // namespace msl
 }  // namespace writer
 }  // namespace tint
+
+#endif  // SRC_WRITER_TEST_NAMER_H_

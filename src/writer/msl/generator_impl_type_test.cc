@@ -49,13 +49,13 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitType_Alias) {
   auto* alias = ty.alias("alias", ty.f32);
   ASSERT_TRUE(gen.EmitType(alias, Symbol())) << gen.error();
-  EXPECT_EQ(gen.result(), "alias");
+  EXPECT_EQ(gen.result(), "test_alias");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>(), sym)) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[4]");
+  EXPECT_EQ(gen.result(), "bool test_ary[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
@@ -63,7 +63,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
   auto* b = ty.array(a, 5);
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(b, sym)) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[5][4]");
+  EXPECT_EQ(gen.result(), "bool test_ary[5][4]");
 }
 
 // TODO(dsinclair): Is this possible? What order should it output in?
@@ -73,7 +73,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
   auto* c = ty.array(b, 0);
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(c, sym)) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[5][4][1]");
+  EXPECT_EQ(gen.result(), "bool test_ary[5][4][1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
@@ -82,7 +82,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
   auto* c = ty.array(b, 6);
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(c, sym)) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[6][5][4]");
+  EXPECT_EQ(gen.result(), "bool test_ary[6][5][4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
@@ -93,7 +93,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
   auto sym = mod->RegisterSymbol("ary");
   ASSERT_TRUE(gen.EmitType(ty.array<bool, 1>(), sym)) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[1]");
+  EXPECT_EQ(gen.result(), "bool test_ary[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
@@ -132,7 +132,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 
   auto* s = ty.struct_("S", str);
   ASSERT_TRUE(gen.EmitType(s, Symbol())) << gen.error();
-  EXPECT_EQ(gen.result(), "S");
+  EXPECT_EQ(gen.result(), "test_S");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
@@ -144,9 +144,9 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
   auto* s = ty.struct_("S", str);
 
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct S {
-  int a;
-  float b;
+  EXPECT_EQ(gen.result(), R"(struct test_S {
+  int test_a;
+  float test_b;
 };
 )");
 }
@@ -162,13 +162,13 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
 
   auto* s = ty.struct_("S", str);
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct S {
+  EXPECT_EQ(gen.result(), R"(struct test_S {
   int8_t pad_0[4];
-  int a;
+  int test_a;
   int8_t pad_1[24];
-  float b;
+  float test_b;
   int8_t pad_2[92];
-  float c;
+  float test_c;
 };
 )");
 }
@@ -184,9 +184,9 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 
   auto* s = ty.struct_("S", str);
   ASSERT_TRUE(gen.EmitType(s, Symbol())) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct {
-  int a;
-  float b;
+  EXPECT_EQ(gen.result(), R"(struct test_S {
+  int test_a;
+  float test_b;
 })");
 }
 

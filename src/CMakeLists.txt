@@ -467,6 +467,8 @@ if(${TINT_BUILD_TESTS})
     validator/validator_test.cc
     validator/validator_type_test.cc
     writer/float_to_string_test.cc
+    writer/test_namer.cc
+    writer/test_namer.h
   )
 
   if(${TINT_BUILD_SPV_READER})
