@@ -205,7 +205,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
 }
 
 void GeneratorImpl::register_global(ast::Variable* global) {
-  global_variables_.set(global->name(), global);
+  global_variables_.set(global->symbol(), global);
 }
 
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
@@ -1077,7 +1077,7 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
                                    ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
   ast::Variable* var = nullptr;
-  if (global_variables_.get(ident->name(), &var)) {
+  if (global_variables_.get(ident->symbol(), &var)) {
     if (global_is_in_struct(var)) {
       auto var_type = var->storage_class() == ast::StorageClass::kInput
                           ? VarType::kIn
@@ -1964,7 +1964,7 @@ bool GeneratorImpl::is_storage_buffer_access(
   // Check if this is a storage buffer variable
   if (auto* ident = expr->structure()->As<ast::IdentifierExpression>()) {
     ast::Variable* var = nullptr;
-    if (!global_variables_.get(ident->name(), &var)) {
+    if (!global_variables_.get(ident->symbol(), &var)) {
       return false;
     }
     return var->storage_class() == ast::StorageClass::kStorageBuffer;

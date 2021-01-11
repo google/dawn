@@ -102,7 +102,7 @@ bool TypeDeterminer::Determine() {
   }
 
   for (auto* var : mod_->global_variables()) {
-    variable_stack_.set_global(var->name(), var);
+    variable_stack_.set_global(var->symbol(), var);
 
     if (var->has_constructor()) {
       if (!DetermineResultType(var->constructor())) {
@@ -154,7 +154,7 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
-    variable_stack_.set(param->name(), param);
+    variable_stack_.set(param->symbol(), param);
   }
 
   if (!DetermineStatements(func->body())) {
@@ -267,7 +267,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-    variable_stack_.set(v->variable()->name(), v->variable());
+    variable_stack_.set(v->variable()->symbol(), v->variable());
     return DetermineResultType(v->variable()->constructor());
   }
 
@@ -859,8 +859,9 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
 
 bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   auto name = expr->name();
+  auto symbol = expr->symbol();
   ast::Variable* var;
-  if (variable_stack_.get(name, &var)) {
+  if (variable_stack_.get(symbol, &var)) {
     // A constant is the type, but a variable is always a pointer so synthesize
     // the pointer around the variable type.
     if (var->is_const()) {

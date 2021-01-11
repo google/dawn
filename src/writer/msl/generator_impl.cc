@@ -116,7 +116,7 @@ bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
 
   for (auto* global : module_->global_variables()) {
-    global_variables_.set(global->name(), global);
+    global_variables_.set(global->symbol(), global);
   }
 
   for (auto* const ty : module_->constructed_types()) {
@@ -1528,7 +1528,7 @@ bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
   ast::Variable* var = nullptr;
-  if (global_variables_.get(ident->name(), &var)) {
+  if (global_variables_.get(ident->symbol(), &var)) {
     if (global_is_in_struct(var)) {
       auto var_type = var->storage_class() == ast::StorageClass::kInput
                           ? VarType::kIn

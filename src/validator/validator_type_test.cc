@@ -160,7 +160,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod));
+  EXPECT_FALSE(v()->Validate());
   EXPECT_EQ(v()->error(),
             "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct");
@@ -192,7 +192,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
   mod->AddFunction(main);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod));
+  EXPECT_FALSE(v()->Validate());
   EXPECT_EQ(v()->error(),
             "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct");

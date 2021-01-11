@@ -18,15 +18,14 @@
 
 namespace tint {
 
-Validator::Validator() : impl_(std::make_unique<tint::ValidatorImpl>()) {}
+Validator::Validator() = default;
 
 Validator::~Validator() = default;
 
 bool Validator::Validate(const ast::Module* module) {
-  bool ret = impl_->Validate(module);
-
-  diags_ = impl_->diagnostics();
-
+  ValidatorImpl impl(module);
+  bool ret = impl.Validate();
+  diags_ = impl.diagnostics();
   return ret;
 }
 

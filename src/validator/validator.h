@@ -27,8 +27,6 @@
 
 namespace tint {
 
-class ValidatorImpl;
-
 /// Determines if the module is complete and valid
 class Validator {
  public:
@@ -52,7 +50,6 @@ class Validator {
   const diag::List& diagnostics() const { return diags_; }
 
  private:
-  std::unique_ptr<ValidatorImpl> impl_;
   diag::List diags_;
 };
 

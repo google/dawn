@@ -14,9 +14,10 @@
 #ifndef SRC_SCOPE_STACK_H_
 #define SRC_SCOPE_STACK_H_
 
-#include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "src/symbol.h"
 
 namespace tint {
 
@@ -45,38 +46,40 @@ class ScopeStack {
   }
 
   /// Set a global variable in the stack
-  /// @param name the name of the variable
+  /// @param symbol the symbol of the variable
   /// @param val the value
-  void set_global(const std::string& name, T val) { stack_[0][name] = val; }
-
-  /// Sets variable into the top most scope of the stack
-  /// @param name the name of the variable
-  /// @param val the value
-  void set(const std::string& name, T val) { stack_.back()[name] = val; }
-
-  /// Checks for the given `name` in the stack
-  /// @param name the name to look for
-  /// @returns true if the stack contains `name`
-  bool has(const std::string& name) const { return get(name, nullptr); }
-
-  /// Retrieves a given name from the stack
-  /// @param name the name to look for
-  /// @param ret where to place the name
-  /// @returns true if the name was successfully found, false otherwise
-  bool get(const std::string& name, T* ret) const {
-    return get(name, ret, nullptr);
+  void set_global(const Symbol& symbol, T val) {
+    stack_[0][symbol.value()] = val;
   }
 
-  /// Retrieves a given name from the stack
-  /// @param name the name to look for
-  /// @param ret where to place the name
-  /// @param is_global set true if the name references a global variable
+  /// Sets variable into the top most scope of the stack
+  /// @param symbol the symbol of the variable
+  /// @param val the value
+  void set(const Symbol& symbol, T val) { stack_.back()[symbol.value()] = val; }
+
+  /// Checks for the given `symbol` in the stack
+  /// @param symbol the symbol to look for
+  /// @returns true if the stack contains `symbol`
+  bool has(const Symbol& symbol) const { return get(symbol, nullptr); }
+
+  /// Retrieves a given variable from the stack
+  /// @param symbol the symbol to look for
+  /// @param ret where to place the value
+  /// @returns true if the symbol was successfully found, false otherwise
+  bool get(const Symbol& symbol, T* ret) const {
+    return get(symbol, ret, nullptr);
+  }
+
+  /// Retrieves a given variable from the stack
+  /// @param symbol the symbol to look for
+  /// @param ret where to place the value
+  /// @param is_global set true if the symbol references a global variable
   /// otherwise unchanged
-  /// @returns true if the name was successfully found, false otherwise
-  bool get(const std::string& name, T* ret, bool* is_global) const {
+  /// @returns true if the symbol was successfully found, false otherwise
+  bool get(const Symbol& symbol, T* ret, bool* is_global) const {
     for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
       auto& map = *iter;
-      auto val = map.find(name);
+      auto val = map.find(symbol.value());
 
       if (val != map.end()) {
         if (ret) {
@@ -92,7 +95,7 @@ class ScopeStack {
   }
 
  private:
-  std::vector<std::unordered_map<std::string, T>> stack_;
+  std::vector<std::unordered_map<uint32_t, T>> stack_;
 };
 
 }  // namespace tint

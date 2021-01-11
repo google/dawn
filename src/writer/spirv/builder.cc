@@ -458,8 +458,9 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
     }
 
     uint32_t var_id;
-    if (!scope_stack_.get(var->name(), &var_id)) {
-      error_ = "unable to find ID for global variable: " + var->name();
+    if (!scope_stack_.get(var->symbol(), &var_id)) {
+      error_ = "unable to find ID for global variable: " +
+               mod_->SymbolToName(var->symbol());
       return false;
     }
 
@@ -567,7 +568,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
     params.push_back(Instruction{spv::Op::OpFunctionParameter,
                                  {Operand::Int(param_type_id), param_op}});
 
-    scope_stack_.set(param->name(), param_id);
+    scope_stack_.set(param->symbol(), param_id);
   }
 
   push_function(Function{definition_inst, result_op(), std::move(params)});
@@ -639,7 +640,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
-    scope_stack_.set(var->name(), init_id);
+    scope_stack_.set(var->symbol(), init_id);
     spirv_id_to_variable_[init_id] = var;
     return true;
   }
@@ -673,7 +674,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
     }
   }
 
-  scope_stack_.set(var->name(), var_id);
+  scope_stack_.set(var->symbol(), var_id);
   spirv_id_to_variable_[var_id] = var;
 
   return true;
@@ -707,7 +708,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     push_debug(spv::Op::OpName,
                {Operand::Int(init_id), Operand::String(var->name())});
 
-    scope_stack_.set_global(var->name(), init_id);
+    scope_stack_.set_global(var->symbol(), init_id);
     spirv_id_to_variable_[init_id] = var;
     return true;
   }
@@ -820,7 +821,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     }
   }
 
-  scope_stack_.set_global(var->name(), var_id);
+  scope_stack_.set_global(var->symbol(), var_id);
   spirv_id_to_variable_[var_id] = var;
   return true;
 }
@@ -1108,7 +1109,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 uint32_t Builder::GenerateIdentifierExpression(
     ast::IdentifierExpression* expr) {
   uint32_t val = 0;
-  if (scope_stack_.get(expr->name(), &val)) {
+  if (scope_stack_.get(expr->symbol(), &val)) {
     return val;
   }
 

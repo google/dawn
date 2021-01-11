@@ -217,7 +217,7 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
                              ast::StorageClass::kNone, ty.f32, nullptr,
                              ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod));
+  EXPECT_FALSE(v()->Validate());
   EXPECT_EQ(v()->error(),
             "12:34 v-0022: global variables must have a storage class");
 }
@@ -228,7 +228,7 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
                                ast::StorageClass::kInput, ty.f32, nullptr,
                                ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod));
+  EXPECT_FALSE(v()->Validate());
   EXPECT_EQ(
       v()->error(),
       "12:34 v-global01: global constants shouldn't have a storage class");
@@ -240,7 +240,7 @@ TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
                                ast::StorageClass::kNone, ty.f32, nullptr,
                                ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod)) << v()->error();
+  EXPECT_FALSE(v()->Validate()) << v()->error();
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
@@ -263,7 +263,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
                     ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
-  EXPECT_FALSE(v()->Validate(mod));
+  EXPECT_FALSE(v()->Validate());
   EXPECT_EQ(v()->error(), "12:34 v-0006: 'not_global_var' is not declared");
 }
 
@@ -290,7 +290,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod)) << v()->error();
+  EXPECT_TRUE(v()->Validate()) << v()->error();
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
@@ -435,7 +435,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod)) << v()->error();
+  EXPECT_FALSE(v()->Validate()) << v()->error();
   EXPECT_EQ(v()->error(), "12:34 v-0013: redeclared identifier 'a'");
 }
 
@@ -462,7 +462,7 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
-  EXPECT_FALSE(v()->Validate(mod));
+  EXPECT_FALSE(v()->Validate());
   EXPECT_EQ(v()->error(), "12:34 v-0014: redeclared identifier 'a'");
 }
 
@@ -552,7 +552,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   mod->AddFunction(func1);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate(mod)) << v()->error();
+  EXPECT_TRUE(v()->Validate()) << v()->error();
 }
 
 TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {

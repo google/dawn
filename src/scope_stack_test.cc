@@ -17,6 +17,7 @@
 #include "src/ast/builder.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace {
@@ -25,68 +26,75 @@ class ScopeStackTest : public ast::BuilderWithModule, public testing::Test {};
 
 TEST_F(ScopeStackTest, Global) {
   ScopeStack<uint32_t> s;
-  s.set_global("var", 5);
+  Symbol sym(1);
+  s.set_global(sym, 5);
 
   uint32_t val = 0;
-  EXPECT_TRUE(s.get("var", &val));
+  EXPECT_TRUE(s.get(sym, &val));
   EXPECT_EQ(val, 5u);
 }
 
 TEST_F(ScopeStackTest, Global_SetWithPointer) {
   auto* v = Var("my_var", ast::StorageClass::kNone, ty.f32);
   ScopeStack<ast::Variable*> s;
-  s.set_global("var", v);
+  s.set_global(v->symbol(), v);
 
   ast::Variable* v2 = nullptr;
-  EXPECT_TRUE(s.get("var", &v2));
-  EXPECT_EQ(v2->name(), "my_var");
+  EXPECT_TRUE(s.get(v->symbol(), &v2));
+  EXPECT_EQ(v2->symbol(), v->symbol());
 }
 
 TEST_F(ScopeStackTest, Global_CanNotPop) {
   ScopeStack<uint32_t> s;
-  s.set_global("var", 5);
+  Symbol sym(1);
+  s.set_global(sym, 5);
   s.pop_scope();
 
   uint32_t val = 0;
-  EXPECT_TRUE(s.get("var", &val));
+  EXPECT_TRUE(s.get(sym, &val));
   EXPECT_EQ(val, 5u);
 }
 
 TEST_F(ScopeStackTest, Scope) {
   ScopeStack<uint32_t> s;
+  Symbol sym(1);
   s.push_scope();
-  s.set("var", 5);
+  s.set(sym, 5);
 
   uint32_t val = 0;
-  EXPECT_TRUE(s.get("var", &val));
+  EXPECT_TRUE(s.get(sym, &val));
   EXPECT_EQ(val, 5u);
 }
 
-TEST_F(ScopeStackTest, Get_MissingName) {
+TEST_F(ScopeStackTest, Get_MissingSymbol) {
   ScopeStack<uint32_t> s;
+  Symbol sym(1);
   uint32_t ret = 0;
-  EXPECT_FALSE(s.get("val", &ret));
+  EXPECT_FALSE(s.get(sym, &ret));
   EXPECT_EQ(ret, 0u);
 }
 
 TEST_F(ScopeStackTest, Has) {
   ScopeStack<uint32_t> s;
-  s.set_global("var2", 3);
+  Symbol sym(1);
+  Symbol sym2(2);
+  s.set_global(sym2, 3);
   s.push_scope();
-  s.set("var", 5);
+  s.set(sym, 5);
 
-  EXPECT_TRUE(s.has("var"));
-  EXPECT_TRUE(s.has("var2"));
+  EXPECT_TRUE(s.has(sym));
+  EXPECT_TRUE(s.has(sym2));
 }
 
 TEST_F(ScopeStackTest, ReturnsScopeBeforeGlobalFirst) {
   ScopeStack<uint32_t> s;
-  s.set_global("var", 3);
+  Symbol sym(1);
+  s.set_global(sym, 3);
   s.push_scope();
-  s.set("var", 5);
+  s.set(sym, 5);
 
   uint32_t ret;
-  EXPECT_TRUE(s.get("var", &ret));
+  EXPECT_TRUE(s.get(sym, &ret));
   EXPECT_EQ(ret, 5u);
 }
 

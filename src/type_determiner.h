@@ -89,7 +89,7 @@ class TypeDeterminer {
   /// Testing method to set a given variable into the type stack
   /// @param var the variable to set
   void RegisterVariableForTesting(ast::Variable* var) {
-    variable_stack_.set(var->name(), var);
+    variable_stack_.set(var->symbol(), var);
   }
 
   /// Retrieves information for the requested import.

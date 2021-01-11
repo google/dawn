@@ -39,13 +39,13 @@ namespace tint {
 class ValidatorImpl {
  public:
   /// Constructor
-  ValidatorImpl();
+  /// @param module the module to validate
+  explicit ValidatorImpl(const ast::Module* module);
   ~ValidatorImpl();
 
   /// Runs the validator
-  /// @param module the module to validate
   /// @returns true if the validation was successful
-  bool Validate(const ast::Module* module);
+  bool Validate();
 
   /// @returns the diagnostic messages
   const diag::List& diagnostics() const { return diags_; }
@@ -148,6 +148,7 @@ class ValidatorImpl {
       const std::vector<ast::type::Type*>& constructed_types);
 
  private:
+  const ast::Module& module_;
   diag::List diags_;
   ScopeStack<ast::Variable*> variable_stack_;
   ScopeStack<ast::Function*> function_stack_;
