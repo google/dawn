@@ -88,7 +88,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-  void main_tint_0() {
+  void main() {
     return;
   }
 
@@ -792,25 +792,6 @@ fragment ep_1_out ep_1() {
     return tint_out;
   }
   return tint_out;
-}
-
-)");
-}
-
-TEST_F(MslGeneratorImplTest,
-       Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
-  auto* func =
-      Func("main", ast::VariableList{}, ty.void_, ast::StatementList{},
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
-
-  mod->AddFunction(func);
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
-
-kernel void main_tint_0() {
 }
 
 )");

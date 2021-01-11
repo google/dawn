@@ -34,7 +34,7 @@ TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
   auto* i = Expr("virtual");
   ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
-  EXPECT_EQ(gen.result(), "virtual_tint_0");
+  EXPECT_EQ(gen.result(), "virtual");
 }
 
 }  // namespace

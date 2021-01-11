@@ -35,14 +35,6 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
-  auto* alias = ty.alias("float", ty.f32);
-
-  ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(typedef float float_tint_0;
-)");
-}
-
 TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.f32),

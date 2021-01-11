@@ -15,6 +15,7 @@
 #ifndef SRC_WRITER_MSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_MSL_GENERATOR_IMPL_H_
 
+#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -42,8 +43,8 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/namer.h"
 #include "src/scope_stack.h"
-#include "src/writer/msl/namer.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -202,9 +203,9 @@ class GeneratorImpl : public TextGenerator {
   bool EmitSwitch(ast::SwitchStatement* stmt);
   /// Handles generating type
   /// @param type the type to generate
-  /// @param name the name of the variable, only used for array emission
+  /// @param symbol the symbol of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(ast::type::Type* type, const std::string& name);
+  bool EmitType(ast::type::Type* type, const Symbol& symbol);
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
@@ -244,10 +245,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if an input or output struct is required.
   bool has_referenced_var_needing_struct(ast::Function* func);
 
-  /// Generates a name for the prefix
-  /// @param prefix the prefix of the name to generate
-  /// @returns the name
-  std::string generate_name(const std::string& prefix);
   /// Generates an intrinsic name from the given name
   /// @param intrinsic the intrinsic to convert to an method name
   /// @returns the intrinsic name or blank on error
@@ -268,7 +265,7 @@ class GeneratorImpl : public TextGenerator {
   std::string builtin_to_attribute(ast::Builtin builtin) const;
 
   /// @returns the namer for testing purposes
-  Namer* namer_for_testing() { return &namer_; }
+  Namer* namer_for_testing() { return namer_.get(); }
 
  private:
   enum class VarType { kIn, kOut };
@@ -280,12 +277,12 @@ class GeneratorImpl : public TextGenerator {
 
   std::string current_ep_var_name(VarType type);
 
-  Namer namer_;
   ScopeStack<ast::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   const ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
+  std::unique_ptr<Namer> namer_;
 
   std::unordered_map<uint32_t, EntryPointData> ep_sym_to_in_data_;
   std::unordered_map<uint32_t, EntryPointData> ep_sym_to_out_data_;
