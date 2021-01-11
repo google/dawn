@@ -927,13 +927,13 @@ INSTANTIATE_TEST_SUITE_P(
                              "Usage(Texture( is_sampled ))"},
         // OpImageSampleDrefImplicitLod
         UsageImageAccessCase{"%result = OpImageSampleDrefImplicitLod "
-                             "%v4float %sampled_image %coords %depth",
+                             "%float %sampled_image %coords %depth",
                              "Usage(Sampler( comparison ))",
                              "Usage(Texture( is_sampled depth ))"},
         // OpImageSampleDrefExplicitLod
         UsageImageAccessCase{
             "%result = OpImageSampleDrefExplicitLod "
-            "%v4float %sampled_image %coords %depth Lod %float_null",
+            "%float %sampled_image %coords %depth Lod %float_null",
             "Usage(Sampler( comparison ))",
             "Usage(Texture( is_sampled depth ))"},
 
@@ -952,13 +952,13 @@ INSTANTIATE_TEST_SUITE_P(
                              "Usage(Texture( is_sampled ))"},
         // OpImageSampleProjDrefImplicitLod
         UsageImageAccessCase{"%result = OpImageSampleProjDrefImplicitLod "
-                             "%v4float %sampled_image %coords %depth",
+                             "%float %sampled_image %coords %depth",
                              "Usage(Sampler( comparison ))",
                              "Usage(Texture( is_sampled depth ))"},
         // OpImageSampleProjDrefExplicitLod
         UsageImageAccessCase{
             "%result = OpImageSampleProjDrefExplicitLod "
-            "%v4float %sampled_image %coords %depth Lod %float_null",
+            "%float %sampled_image %coords %depth Lod %float_null",
             "Usage(Sampler( comparison ))",
             "Usage(Texture( is_sampled depth ))"},
 
@@ -1714,7 +1714,7 @@ INSTANTIATE_TEST_SUITE_P(
      %sampled_dref_image = OpSampledImage %si_ty %im %sam_dref
 
      %200 = OpImageSampleImplicitLod %v4float %sampled_image %coords12
-     %210 = OpImageSampleDrefImplicitLod %v4float %sampled_dref_image %coords12 %depth
+     %210 = OpImageSampleDrefImplicitLod %float %sampled_dref_image %coords12 %depth
 )",
                         R"(
   Variable{
@@ -1772,22 +1772,16 @@ INSTANTIATE_TEST_SUITE_P(
       VariableConst{
         x_210
         none
-        __vec_4__f32
+        __f32
         {
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSampleCompare}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_30}
-                Identifier[not set]{coords12}
-                ScalarConstructor[not set]{0.200000}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_30}
+              Identifier[not set]{coords12}
+              ScalarConstructor[not set]{0.200000}
+            )
           }
         }
       }
@@ -1800,7 +1794,7 @@ INSTANTIATE_TEST_SUITE_P(
         // ImageSampleDrefImplicitLod
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleDrefImplicitLod "
-                        "%v4float %sampled_image %coords12 %depth",
+                        "%float %sampled_image %coords12 %depth",
                         R"(
   Variable{
     Decorations{
@@ -1821,25 +1815,19 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d
   })",
                         R"(
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSampleCompare}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
-                Identifier[not set]{coords12}
-                ScalarConstructor[not set]{0.200000}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{coords12}
+              ScalarConstructor[not set]{0.200000}
+            )
           })"},
         // ImageSampleDrefImplicitLod - arrayed
         ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
                         "%result = OpImageSampleDrefImplicitLod "
-                        "%v4float %sampled_image %coords123 %depth",
+                        "%float %sampled_image %coords123 %depth",
                         R"(
   Variable{
     Decorations{
@@ -1860,35 +1848,29 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d_array
   })",
                         R"(
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSampleCompare}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              MemberAccessor[not set]{
+                Identifier[not set]{coords123}
+                Identifier[not set]{xy}
+              }
+              TypeConstructor[not set]{
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
+                  Identifier[not set]{z}
                 }
-                TypeConstructor[not set]{
-                  __i32
-                  MemberAccessor[not set]{
-                    Identifier[not set]{coords123}
-                    Identifier[not set]{z}
-                  }
-                }
-                ScalarConstructor[not set]{0.200000}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{0.200000}
+            )
           })"},
         // ImageSampleDrefImplicitLod with ConstOffset
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
-            "%result = OpImageSampleDrefImplicitLod %v4float "
+            "%result = OpImageSampleDrefImplicitLod %float "
             "%sampled_image %coords12 %depth ConstOffset %offsets2d",
             R"(
   Variable{
@@ -1910,26 +1892,20 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d
   })",
             R"(
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSampleCompare}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
-                Identifier[not set]{coords12}
-                ScalarConstructor[not set]{0.200000}
-                Identifier[not set]{offsets2d}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Identifier[not set]{coords12}
+              ScalarConstructor[not set]{0.200000}
+              Identifier[not set]{offsets2d}
+            )
           })"},
         // ImageSampleDrefImplicitLod arrayed with ConstOffset
         ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
-            "%result = OpImageSampleDrefImplicitLod %v4float "
+            "%result = OpImageSampleDrefImplicitLod %float "
             "%sampled_image %coords123 %depth ConstOffset %offsets2d",
             R"(
   Variable{
@@ -1951,31 +1927,25 @@ INSTANTIATE_TEST_SUITE_P(
     __depth_texture_2d_array
   })",
             R"(
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSampleCompare}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              MemberAccessor[not set]{
+                Identifier[not set]{coords123}
+                Identifier[not set]{xy}
+              }
+              TypeConstructor[not set]{
+                __i32
                 MemberAccessor[not set]{
                   Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
+                  Identifier[not set]{z}
                 }
-                TypeConstructor[not set]{
-                  __i32
-                  MemberAccessor[not set]{
-                    Identifier[not set]{coords123}
-                    Identifier[not set]{z}
-                  }
-                }
-                ScalarConstructor[not set]{0.200000}
-                Identifier[not set]{offsets2d}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
+              }
+              ScalarConstructor[not set]{0.200000}
+              Identifier[not set]{offsets2d}
+            )
           })"}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3126,6 +3096,48 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"}}));
 
+INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
+                         // In SPIR-V OpImageFetch always yields a vector of 4
+                         // elements, even for depth images.  But in WGSL,
+                         // textureLoad on a depth image yields f32.
+                         // crbug.com/tint/439
+                         SpvParserTest_ImageAccessTest,
+                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
+                             // ImageFetch on depth image.
+                             {"%float 2D 1 0 0 1 Unknown",
+                              "%99 = OpImageFetch %v4float %im %vi12 ",
+                              R"(Variable{
+    Decorations{
+      SetDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+                              R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vi12}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+          }
+        }
+      }
+    })"}}));
+
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_Multisampled,
     SpvParserTest_ImageAccessTest,
@@ -3966,12 +3978,12 @@ INSTANTIATE_TEST_SUITE_P(
          "",
          {"Identifier[not set]{vf12}\n"}},
         {"%float 2D 1 0 0 1 Unknown",
-         "%result = OpImageSampleDrefImplicitLod %v4float %sampled_image %vf12 "
+         "%result = OpImageSampleDrefImplicitLod %float %sampled_image %vf12 "
          "%depth",
          "",
          {"Identifier[not set]{vf12}\n"}},
         {"%float 2D 1 0 0 1 Unknown",
-         "%result = OpImageSampleDrefExplicitLod %v4float %sampled_image %vf12 "
+         "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf12 "
          "%depth Lod %f1",
          "",
          {"Identifier[not set]{vf12}\n"}},
@@ -4022,7 +4034,7 @@ INSTANTIATE_TEST_SUITE_P(
 }
 )"}},
         {"%float 2D 1 1 0 1 Unknown",
-         "%result = OpImageSampleDrefImplicitLod %v4float %sampled_image "
+         "%result = OpImageSampleDrefImplicitLod %float %sampled_image "
          "%vf123 %depth",
          "",
          {
@@ -4040,7 +4052,7 @@ INSTANTIATE_TEST_SUITE_P(
 }
 )"}},
         {"%float 2D 1 1 0 1 Unknown",
-         "%result = OpImageSampleDrefExplicitLod %v4float %sampled_image "
+         "%result = OpImageSampleDrefExplicitLod %float %sampled_image "
          "%vf123 %depth Lod %f1",
          "",
          {
@@ -4354,23 +4366,23 @@ INSTANTIATE_TEST_SUITE_P(
          {}},
         // ImageSampleDrefImplicitLod
         {"%uint 2D 0 0 0 1 Unknown",
-         "%result = OpImageSampleDrefImplicitLod %v4uint %sampled_image %vf12 "
+         "%result = OpImageSampleDrefImplicitLod %uint %sampled_image %vf12 "
          "%f1",
          "sampled image must have float component type",
          {}},
         {"%int 2D 0 0 0 1 Unknown",
-         "%result = OpImageSampleDrefImplicitLod %v4int %sampled_image %vf12 "
+         "%result = OpImageSampleDrefImplicitLod %int %sampled_image %vf12 "
          "%f1",
          "sampled image must have float component type",
          {}},
         // ImageSampleDrefExplicitLod
         {"%uint 2D 0 0 0 1 Unknown",
-         "%result = OpImageSampleDrefExplicitLod %v4uint %sampled_image %vf12 "
+         "%result = OpImageSampleDrefExplicitLod %uint %sampled_image %vf12 "
          "%f1 Lod %f1",
          "sampled image must have float component type",
          {}},
         {"%int 2D 0 0 0 1 Unknown",
-         "%result = OpImageSampleDrefExplicitLod %v4int %sampled_image %vf12 "
+         "%result = OpImageSampleDrefExplicitLod %int %sampled_image %vf12 "
          "%f1 Lod %f1",
          "sampled image must have float component type",
          {}}}));

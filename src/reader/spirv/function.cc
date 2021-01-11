@@ -4073,15 +4073,17 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
 
   std::string builtin_name;
   bool use_level_of_detail_suffix = true;
-  bool is_dref = false;
+  bool is_dref_sample = false;
+  bool is_non_dref_sample = false;
   switch (opcode) {
     case SpvOpImageSampleImplicitLod:
     case SpvOpImageSampleExplicitLod:
+      is_non_dref_sample = true;
       builtin_name = "textureSample";
       break;
     case SpvOpImageSampleDrefImplicitLod:
     case SpvOpImageSampleDrefExplicitLod:
-      is_dref = true;
+      is_dref_sample = true;
       builtin_name = "textureSampleCompare";
       if (arg_index < num_args) {
         params.push_back(MakeOperand(inst, arg_index).expr);
@@ -4138,7 +4140,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index < num_args &&
       (image_operands_mask & SpvImageOperandsBiasMask)) {
-    if (is_dref) {
+    if (is_dref_sample) {
       return Fail() << "WGSL does not support depth-reference sampling with "
                        "level-of-detail bias: "
                     << inst.PrettyPrint();
@@ -4164,7 +4166,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
   if (arg_index + 1 < num_args &&
       (image_operands_mask & SpvImageOperandsGradMask)) {
-    if (is_dref) {
+    if (is_dref_sample) {
       return Fail() << "WGSL does not support depth-reference sampling with "
                        "explicit gradient: "
                     << inst.PrettyPrint();
@@ -4224,19 +4226,27 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       result_component_type = result_vector_type->type();
     }
 
-    // Convert the arity of the result when operating on depth textures.
-    // SPIR-V operations on depth textures always result in 4-element vectors.
-    // But WGSL operations on depth textures always result in a f32 scalar.
+    // For depth textures, the arity might mot match WGSL:
+    //  Operation           SPIR-V                     WGSL
+    //   normal sampling     vec4  ImplicitLod          f32
+    //   normal sampling     vec4  ExplicitLod          f32
+    //   compare sample      f32   DrefImplicitLod      f32
+    //   compare sample      f32   DrefExplicitLod      f32
+    //   texel load          vec4  ImageFetch           f32
+    //   normal gather       vec4  ImageGather          vec4 TODO(dneto)
+    //   dref gather         vec4  ImageFetch           vec4 TODO(dneto)
     // Construct a 4-element vector with the result from the builtin in the
     // first component.
     if (texture_type->Is<ast::type::DepthTexture>()) {
-      value = create<ast::TypeConstructorExpression>(
-          Source{},
-          result_type,  // a vec4
-          ast::ExpressionList{
-              value, parser_impl_.MakeNullValue(result_component_type),
-              parser_impl_.MakeNullValue(result_component_type),
-              parser_impl_.MakeNullValue(result_component_type)});
+      if (is_non_dref_sample || (opcode == SpvOpImageFetch)) {
+        value = create<ast::TypeConstructorExpression>(
+            Source{},
+            result_type,  // a vec4
+            ast::ExpressionList{
+                value, parser_impl_.MakeNullValue(result_component_type),
+                parser_impl_.MakeNullValue(result_component_type),
+                parser_impl_.MakeNullValue(result_component_type)});
+      }
     }
 
     // If necessary, convert the result to the signedness of the instruction
