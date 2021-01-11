@@ -19,7 +19,10 @@
 namespace tint {
 namespace writer {
 
-Writer::Writer(ast::Module module) : module_(std::move(module)) {}
+Writer::Writer(ast::Module module)
+    : owned_module_(std::move(module)), module_(&owned_module_) {}
+
+Writer::Writer(ast::Module* module) : module_(module) {}
 
 Writer::~Writer() = default;
 

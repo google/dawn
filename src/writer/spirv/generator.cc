@@ -22,15 +22,21 @@ namespace spirv {
 
 Generator::Generator(ast::Module module)
     : writer::Writer(std::move(module)),
-      namer_(std::make_unique<UnsafeNamer>(&module_)),
-      builder_(std::make_unique<Builder>(&module_, namer_.get())),
+      namer_(std::make_unique<UnsafeNamer>(module_)),
+      builder_(std::make_unique<Builder>(module_, namer_.get())),
+      writer_(std::make_unique<BinaryWriter>()) {}
+
+Generator::Generator(ast::Module* module)
+    : writer::Writer(module),
+      namer_(std::make_unique<UnsafeNamer>(module_)),
+      builder_(std::make_unique<Builder>(module_, namer_.get())),
       writer_(std::make_unique<BinaryWriter>()) {}
 
 Generator::~Generator() = default;
 
 void Generator::Reset() {
   namer_->Reset();
-  builder_ = std::make_unique<Builder>(&module_, namer_.get());
+  builder_ = std::make_unique<Builder>(module_, namer_.get());
   writer_ = std::make_unique<BinaryWriter>();
 }
 

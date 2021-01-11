@@ -33,8 +33,12 @@ namespace spirv {
 class Generator : public writer::Writer {
  public:
   /// Constructor
+  /// DEPRECATED
   /// @param module the module to convert
   explicit Generator(ast::Module module);
+  /// Constructor
+  /// @param module the module to convert
+  explicit Generator(ast::Module* module);
   ~Generator() override;
 
   /// Resets the generator

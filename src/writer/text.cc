@@ -21,6 +21,8 @@ namespace writer {
 
 Text::Text(ast::Module module) : Writer(std::move(module)) {}
 
+Text::Text(ast::Module* module) : Writer(module) {}
+
 Text::~Text() = default;
 
 }  // namespace writer
