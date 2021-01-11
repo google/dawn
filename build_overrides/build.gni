@@ -16,9 +16,6 @@ declare_args() {
   # Tell Dawn and dependencies to not do Chromium-specific things
   build_with_chromium = false
 
-  # Use Chromium's binutils to have "hermetic" builds on bots
-  linux_use_bundled_binutils_override = true
-
   # In standalone Dawn builds, don't try to use the hermetic install of Xcode
   # that Chromium uses
   use_system_xcode = ""
