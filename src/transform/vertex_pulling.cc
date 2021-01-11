@@ -168,7 +168,6 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   auto* var = out->create<ast::Variable>(
       Source{},                                // source
       out->RegisterSymbol(vertex_index_name),  // symbol
-      vertex_index_name,                       // name
       ast::StorageClass::kInput,               // storage_class
       GetI32Type(),                            // type
       false,                                   // is_const
@@ -216,7 +215,6 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   auto* var = out->create<ast::Variable>(
       Source{},                                  // source
       out->RegisterSymbol(instance_index_name),  // symbol
-      instance_index_name,                       // name
       ast::StorageClass::kInput,                 // storage_class
       GetI32Type(),                              // type
       false,                                     // is_const
@@ -244,7 +242,6 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
         v = out->create<ast::Variable>(
             Source{},                        // source
             v->symbol(),                     // symbol
-            out->SymbolToName(v->symbol()),  // name
             ast::StorageClass::kPrivate,     // storage_class
             v->type(),                       // type
             false,                           // is_const
@@ -273,14 +270,14 @@ void VertexPulling::State::AddVertexStorageBuffers() {
       out->create<ast::StructMemberOffsetDecoration>(Source{}, 0u));
 
   members.push_back(out->create<ast::StructMember>(
-      Source{}, out->RegisterSymbol(kStructBufferName), kStructBufferName,
-      internal_array_type, std::move(member_dec)));
+      Source{}, out->RegisterSymbol(kStructBufferName), internal_array_type,
+      std::move(member_dec)));
 
   ast::StructDecorationList decos;
   decos.push_back(out->create<ast::StructBlockDecoration>(Source{}));
 
   auto* struct_type = out->create<ast::type::Struct>(
-      out->RegisterSymbol(kStructName), kStructName,
+      out->RegisterSymbol(kStructName),
       out->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
@@ -289,7 +286,6 @@ void VertexPulling::State::AddVertexStorageBuffers() {
     auto* var = out->create<ast::Variable>(
         Source{},                           // source
         out->RegisterSymbol(name),          // symbol
-        name,                               // name
         ast::StorageClass::kStorageBuffer,  // storage_class
         struct_type,                        // type
         false,                              // is_const
@@ -315,7 +311,6 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
       Source{}, out->create<ast::Variable>(
                     Source{},                                 // source
                     out->RegisterSymbol(kPullingPosVarName),  // symbol
-                    kPullingPosVarName,                       // name
                     ast::StorageClass::kFunction,             // storage_class
                     GetI32Type(),                             // type
                     false,                                    // is_const
@@ -343,7 +338,7 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
                       : instance_index_name;
       // Identifier to index by
       auto* index_identifier = out->create<ast::IdentifierExpression>(
-          Source{}, out->RegisterSymbol(name), name);
+          Source{}, out->RegisterSymbol(name));
 
       // An expression for the start of the read in the buffer in bytes
       auto* pos_value = out->create<ast::BinaryExpression>(
@@ -362,7 +357,7 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
       stmts.emplace_back(out->create<ast::AssignmentStatement>(
           Source{},
           out->create<ast::IdentifierExpression>(
-              Source{}, out->RegisterSymbol(ident_name), ident_name),
+              Source{}, out->RegisterSymbol(ident_name)),
           AccessByFormat(i, attribute_desc.format)));
     }
   }
@@ -377,7 +372,7 @@ ast::Expression* VertexPulling::State::GenUint(uint32_t value) const {
 
 ast::Expression* VertexPulling::State::CreatePullingPositionIdent() const {
   return out->create<ast::IdentifierExpression>(
-      Source{}, out->RegisterSymbol(kPullingPosVarName), kPullingPosVarName);
+      Source{}, out->RegisterSymbol(kPullingPosVarName));
 }
 
 ast::Expression* VertexPulling::State::AccessByFormat(
@@ -421,10 +416,9 @@ ast::Expression* VertexPulling::State::AccessU32(uint32_t buffer,
       out->create<ast::MemberAccessorExpression>(
           Source{},
           out->create<ast::IdentifierExpression>(
-              Source{}, out->RegisterSymbol(vbuf_name), vbuf_name),
+              Source{}, out->RegisterSymbol(vbuf_name)),
           out->create<ast::IdentifierExpression>(
-              Source{}, out->RegisterSymbol(kStructBufferName),
-              kStructBufferName)),
+              Source{}, out->RegisterSymbol(kStructBufferName))),
       out->create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kDivide, pos,
                                          GenUint(4)));
 }

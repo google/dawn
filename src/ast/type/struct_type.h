@@ -31,9 +31,8 @@ class Struct : public Castable<Struct, Type> {
  public:
   /// Constructor
   /// @param sym the symbol representing the struct
-  /// @param name the name of the struct
   /// @param impl the struct data
-  Struct(const Symbol& sym, const std::string& name, ast::Struct* impl);
+  Struct(const Symbol& sym, ast::Struct* impl);
   /// Move constructor
   Struct(Struct&&);
   ~Struct() override;
@@ -44,7 +43,7 @@ class Struct : public Castable<Struct, Type> {
   /// @returns true if the struct has a block decoration
   bool IsBlockDecorated() const { return struct_->IsBlockDecorated(); }
 
-  /// @returns the struct name
+  /// @returns the struct
   ast::Struct* impl() const { return struct_; }
 
   /// @returns the name for the type
@@ -67,7 +66,6 @@ class Struct : public Castable<Struct, Type> {
 
  private:
   Symbol const symbol_;
-  std::string const name_;
   ast::Struct* const struct_;
 
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;

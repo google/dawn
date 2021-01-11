@@ -22,10 +22,8 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::IdentifierExpression);
 namespace tint {
 namespace ast {
 
-IdentifierExpression::IdentifierExpression(const Source& source,
-                                           Symbol sym,
-                                           const std::string& name)
-    : Base(source), sym_(sym), name_(name) {}
+IdentifierExpression::IdentifierExpression(const Source& source, Symbol sym)
+    : Base(source), sym_(sym) {}
 
 IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 
@@ -33,7 +31,7 @@ IdentifierExpression::~IdentifierExpression() = default;
 
 IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
   return ctx->mod->create<IdentifierExpression>(ctx->Clone(source()),
-                                                ctx->Clone(symbol()), name_);
+                                                ctx->Clone(symbol()));
 }
 
 bool IdentifierExpression::IsValid() const {

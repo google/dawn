@@ -54,14 +54,12 @@ class Function : public Castable<Function, Node> {
   /// Create a function
   /// @param source the variable source
   /// @param symbol the function symbol
-  /// @param name the function name
   /// @param params the function parameters
   /// @param return_type the return type
   /// @param body the function body
   /// @param decorations the function decorations
   Function(const Source& source,
            Symbol symbol,
-           const std::string& name,
            VariableList params,
            type::Type* return_type,
            BlockStatement* body,
@@ -73,8 +71,6 @@ class Function : public Castable<Function, Node> {
 
   /// @returns the function symbol
   Symbol symbol() const { return symbol_; }
-  /// @returns the function name
-  const std::string& name_for_clone() { return name_; }
   /// @returns the function params
   const VariableList& params() const { return params_; }
 
@@ -184,7 +180,7 @@ class Function : public Castable<Function, Node> {
   /// @return the newly cloned node
   Function* Clone(CloneContext* ctx) const override;
 
-  /// @returns true if the name and type are both present
+  /// @returns true if the symbol and type are both present
   bool IsValid() const override;
 
   /// Writes a representation of the node to the output stream
@@ -203,7 +199,6 @@ class Function : public Castable<Function, Node> {
   ReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
   Symbol const symbol_;
-  std::string const name_;
   VariableList const params_;
   type::Type* const return_type_;
   BlockStatement* const body_;

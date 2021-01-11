@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <ostream>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -35,12 +34,10 @@ class StructMember : public Castable<StructMember, Node> {
   /// Create a new struct member statement
   /// @param source The input source for the struct member statement
   /// @param sym The struct member symbol
-  /// @param name The struct member name
   /// @param type The struct member type
   /// @param decorations The struct member decorations
   StructMember(const Source& source,
                const Symbol& sym,
-               const std::string& name,
                type::Type* type,
                StructMemberDecorationList decorations);
   /// Move constructor
@@ -81,7 +78,6 @@ class StructMember : public Castable<StructMember, Node> {
   StructMember(const StructMember&) = delete;
 
   Symbol const symbol_;
-  std::string const name_;
   type::Type* const type_;
   StructMemberDecorationList const decorations_;
 };

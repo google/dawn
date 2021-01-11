@@ -25,12 +25,10 @@ namespace ast {
 
 StructMember::StructMember(const Source& source,
                            const Symbol& sym,
-                           const std::string& name,
                            type::Type* type,
                            StructMemberDecorationList decorations)
     : Base(source),
       symbol_(sym),
-      name_(name),
       type_(type),
       decorations_(std::move(decorations)) {}
 
@@ -57,13 +55,13 @@ uint32_t StructMember::offset() const {
 }
 
 StructMember* StructMember::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StructMember>(
-      ctx->Clone(source()), ctx->Clone(symbol_), name_, ctx->Clone(type_),
-      ctx->Clone(decorations_));
+  return ctx->mod->create<StructMember>(ctx->Clone(source()),
+                                        ctx->Clone(symbol_), ctx->Clone(type_),
+                                        ctx->Clone(decorations_));
 }
 
 bool StructMember::IsValid() const {
-  if (name_.empty() || type_ == nullptr || !symbol_.IsValid()) {
+  if (type_ == nullptr || !symbol_.IsValid()) {
     return false;
   }
   for (auto* deco : decorations_) {

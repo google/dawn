@@ -166,7 +166,7 @@ class TypesBuilder {
   /// @param type the alias type
   /// @returns the alias pointer
   type::Alias* alias(const std::string& name, type::Type* type) const {
-    return mod_->create<type::Alias>(mod_->RegisterSymbol(name), name, type);
+    return mod_->create<type::Alias>(mod_->RegisterSymbol(name), type);
   }
 
   /// @return the tint AST pointer to type `T` with the given StorageClass.
@@ -180,7 +180,7 @@ class TypesBuilder {
   /// @param impl the struct implementation
   /// @returns a struct pointer
   type::Struct* struct_(const std::string& name, ast::Struct* impl) const {
-    return mod_->create<type::Struct>(mod_->RegisterSymbol(name), name, impl);
+    return mod_->create<type::Struct>(mod_->RegisterSymbol(name), impl);
   }
 
  private:
@@ -227,21 +227,20 @@ class Builder {
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const std::string& name) {
-    return create<IdentifierExpression>(mod->RegisterSymbol(name), name);
+    return create<IdentifierExpression>(mod->RegisterSymbol(name));
   }
 
   /// @param source the source information
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const Source& source, const std::string& name) {
-    return create<IdentifierExpression>(source, mod->RegisterSymbol(name),
-                                        name);
+    return create<IdentifierExpression>(source, mod->RegisterSymbol(name));
   }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const char* name) {
-    return create<IdentifierExpression>(mod->RegisterSymbol(name), name);
+    return create<IdentifierExpression>(mod->RegisterSymbol(name));
   }
 
   /// @param value the boolean value
@@ -620,9 +619,9 @@ class Builder {
                  type::Type* type,
                  ast::StatementList body,
                  ast::FunctionDecorationList decorations) {
-    return mod->create<ast::Function>(
-        source, mod->RegisterSymbol(name), name, params, type,
-        create<ast::BlockStatement>(body), decorations);
+    return mod->create<ast::Function>(source, mod->RegisterSymbol(name), params,
+                                      type, create<ast::BlockStatement>(body),
+                                      decorations);
   }
 
   /// Creates a Function
@@ -637,7 +636,7 @@ class Builder {
                  type::Type* type,
                  ast::StatementList body,
                  ast::FunctionDecorationList decorations) {
-    return create<ast::Function>(mod->RegisterSymbol(name), name, params, type,
+    return create<ast::Function>(mod->RegisterSymbol(name), params, type,
                                  create<ast::BlockStatement>(body),
                                  decorations);
   }
@@ -650,8 +649,8 @@ class Builder {
   StructMember* Member(const Source& source,
                        const std::string& name,
                        type::Type* type) {
-    return mod->create<StructMember>(source, mod->RegisterSymbol(name), name,
-                                     type, StructMemberDecorationList{});
+    return mod->create<StructMember>(source, mod->RegisterSymbol(name), type,
+                                     StructMemberDecorationList{});
   }
 
   /// Creates a StructMember
@@ -659,8 +658,8 @@ class Builder {
   /// @param type the struct member type
   /// @returns the struct member pointer
   StructMember* Member(const std::string& name, type::Type* type) {
-    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), name,
-                                     type, StructMemberDecorationList{});
+    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), type,
+                                     StructMemberDecorationList{});
   }
 
   /// Creates a StructMember
@@ -671,8 +670,8 @@ class Builder {
   StructMember* Member(const std::string& name,
                        type::Type* type,
                        StructMemberDecorationList decos) {
-    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), name,
-                                     type, decos);
+    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), type,
+                                     decos);
   }
 
   /// Creates a new Node owned by the Module, with the explicit Source.

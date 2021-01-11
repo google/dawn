@@ -434,7 +434,6 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
 
   return create<ast::Variable>(decl->source,                        // source
                                module_.RegisterSymbol(decl->name),  // symbol
-                               decl->name,                          // name
                                decl->storage_class,          // storage_class
                                decl->type,                   // type
                                false,                        // is_const
@@ -463,7 +462,6 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
 
   return create<ast::Variable>(decl->source,                        // source
                                module_.RegisterSymbol(decl->name),  // symbol
-                               decl->name,                          // name
                                ast::StorageClass::kNone,        // storage_class
                                decl->type,                      // type
                                true,                            // is_const
@@ -941,7 +939,7 @@ Maybe<ast::type::Type*> ParserImpl::type_alias() {
     return add_error(peek(), "invalid type alias");
 
   auto* alias = module_.create<ast::type::Alias>(
-      module_.RegisterSymbol(name.value), name.value, type.value);
+      module_.RegisterSymbol(name.value), type.value);
   register_constructed(name.value, alias);
 
   return alias;
@@ -1195,7 +1193,7 @@ Maybe<std::unique_ptr<ast::type::Struct>> ParserImpl::struct_decl(
     return Failure::kErrored;
 
   return std::make_unique<ast::type::Struct>(
-      module_.RegisterSymbol(name.value), name.value,
+      module_.RegisterSymbol(name.value),
       create<ast::Struct>(source, std::move(body.value),
                           std::move(struct_decos.value)));
 }
@@ -1249,9 +1247,9 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
   if (!expect("struct member", Token::Type::kSemicolon))
     return Failure::kErrored;
 
-  return create<ast::StructMember>(
-      decl->source, module_.RegisterSymbol(decl->name), decl->name, decl->type,
-      std::move(member_decos.value));
+  return create<ast::StructMember>(decl->source,
+                                   module_.RegisterSymbol(decl->name),
+                                   decl->type, std::move(member_decos.value));
 }
 
 // function_decl
@@ -1287,8 +1285,8 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   return create<ast::Function>(
-      header->source, module_.RegisterSymbol(header->name), header->name,
-      header->params, header->return_type, body.value, func_decos.value);
+      header->source, module_.RegisterSymbol(header->name), header->params,
+      header->return_type, body.value, func_decos.value);
 }
 
 // function_type_decl
@@ -1358,7 +1356,6 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
     auto* var =
         create<ast::Variable>(decl->source,                        // source
                               module_.RegisterSymbol(decl->name),  // symbol
-                              decl->name,                          // name
                               ast::StorageClass::kNone,        // storage_class
                               decl->type,                      // type
                               true,                            // is_const
@@ -1630,7 +1627,6 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
     auto* var =
         create<ast::Variable>(decl->source,                        // source
                               module_.RegisterSymbol(decl->name),  // symbol
-                              decl->name,                          // name
                               ast::StorageClass::kNone,        // storage_class
                               decl->type,                      // type
                               true,                            // is_const
@@ -1660,7 +1656,6 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   auto* var =
       create<ast::Variable>(decl->source,                        // source
                             module_.RegisterSymbol(decl->name),  // symbol
-                            decl->name,                          // name
                             decl->storage_class,             // storage_class
                             decl->type,                      // type
                             false,                           // is_const
@@ -2046,11 +2041,11 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
     return Failure::kErrored;
 
   return create<ast::CallStatement>(
-      Source{}, create<ast::CallExpression>(
-                    source,
-                    create<ast::IdentifierExpression>(
-                        source, module_.RegisterSymbol(name), name),
-                    std::move(params)));
+      Source{},
+      create<ast::CallExpression>(source,
+                                  create<ast::IdentifierExpression>(
+                                      source, module_.RegisterSymbol(name)),
+                                  std::move(params)));
 }
 
 // break_stmt
@@ -2122,7 +2117,7 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 
   if (match(Token::Type::kIdentifier))
     return create<ast::IdentifierExpression>(
-        t.source(), module_.RegisterSymbol(t.to_str()), t.to_str());
+        t.source(), module_.RegisterSymbol(t.to_str()));
 
   auto type = type_decl();
   if (type.errored)
@@ -2198,7 +2193,7 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
     return postfix_expr(create<ast::MemberAccessorExpression>(
         ident.source, prefix,
         create<ast::IdentifierExpression>(
-            ident.source, module_.RegisterSymbol(ident.value), ident.value)));
+            ident.source, module_.RegisterSymbol(ident.value))));
   }
 
   return prefix;

@@ -25,8 +25,8 @@ namespace tint {
 namespace ast {
 namespace type {
 
-Alias::Alias(const Symbol& sym, const std::string& name, Type* subtype)
-    : symbol_(sym), name_(name), subtype_(subtype) {
+Alias::Alias(const Symbol& sym, Type* subtype)
+    : symbol_(sym), subtype_(subtype) {
   assert(subtype_);
 }
 
@@ -47,8 +47,7 @@ uint64_t Alias::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Alias* Alias::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Alias>(ctx->Clone(symbol()), name_,
-                                 ctx->Clone(subtype_));
+  return ctx->mod->create<Alias>(ctx->Clone(symbol()), ctx->Clone(subtype_));
 }
 
 }  // namespace type

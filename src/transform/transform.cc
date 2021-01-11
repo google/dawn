@@ -32,7 +32,7 @@ ast::Function* Transform::CloneWithStatementsAtStart(
     statements.emplace_back(ctx->Clone(s));
   }
   return ctx->mod->create<ast::Function>(
-      ctx->Clone(in->source()), ctx->Clone(in->symbol()), in->name_for_clone(),
+      ctx->Clone(in->source()), ctx->Clone(in->symbol()),
       ctx->Clone(in->params()), ctx->Clone(in->return_type()),
       ctx->mod->create<ast::BlockStatement>(ctx->Clone(in->body()->source()),
                                             statements),

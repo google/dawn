@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
 
   auto* int_type = mod.create<ast::type::I32>();
   auto* alias_type =
-      mod.create<ast::type::Alias>(mod.RegisterSymbol("A"), "A", int_type);
+      mod.create<ast::type::Alias>(mod.RegisterSymbol("A"), int_type);
 
   p->register_constructed("A", alias_type);
 

@@ -16,7 +16,6 @@
 #define SRC_AST_IDENTIFIER_EXPRESSION_H_
 
 #include <memory>
-#include <string>
 #include <utility>
 
 #include "src/ast/expression.h"
@@ -32,10 +31,7 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   /// Constructor
   /// @param source the source
   /// @param sym the symbol for the identifier
-  /// @param name the name
-  IdentifierExpression(const Source& source,
-                       Symbol sym,
-                       const std::string& name);
+  IdentifierExpression(const Source& source, Symbol sym);
   /// Move constructor
   IdentifierExpression(IdentifierExpression&&);
   ~IdentifierExpression() override;
@@ -82,7 +78,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   IdentifierExpression(const IdentifierExpression&) = delete;
 
   Symbol const sym_;
-  std::string const name_;
 
   Intrinsic intrinsic_ = Intrinsic::kNone;               // Semantic info
   std::unique_ptr<intrinsic::Signature> intrinsic_sig_;  // Semantic info

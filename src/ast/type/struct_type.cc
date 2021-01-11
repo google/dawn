@@ -30,8 +30,8 @@ namespace tint {
 namespace ast {
 namespace type {
 
-Struct::Struct(const Symbol& sym, const std::string& name, ast::Struct* impl)
-    : symbol_(sym), name_(name), struct_(impl) {}
+Struct::Struct(const Symbol& sym, ast::Struct* impl)
+    : symbol_(sym), struct_(impl) {}
 
 Struct::Struct(Struct&&) = default;
 
@@ -84,8 +84,7 @@ uint64_t Struct::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Struct* Struct::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Struct>(ctx->Clone(symbol()), name_,
-                                  ctx->Clone(struct_));
+  return ctx->mod->create<Struct>(ctx->Clone(symbol()), ctx->Clone(struct_));
 }
 
 }  // namespace type

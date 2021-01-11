@@ -29,9 +29,8 @@ class Alias : public Castable<Alias, Type> {
  public:
   /// Constructor
   /// @param sym the symbol for the alias
-  /// @param name the alias name
   /// @param subtype the alias'd type
-  Alias(const Symbol& sym, const std::string& name, Type* subtype);
+  Alias(const Symbol& sym, Type* subtype);
   /// Move constructor
   Alias(Alias&&);
   /// Destructor
@@ -42,7 +41,7 @@ class Alias : public Castable<Alias, Type> {
   /// @returns the alias type
   Type* type() const { return subtype_; }
 
-  /// @returns the name for this type
+  /// @returns the type_name for this type
   std::string type_name() const override;
 
   /// @param mem_layout type of memory layout to use in calculation.
@@ -62,7 +61,6 @@ class Alias : public Castable<Alias, Type> {
 
  private:
   Symbol const symbol_;
-  std::string const name_;
   Type* const subtype_;
 };
 

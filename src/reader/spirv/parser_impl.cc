@@ -948,8 +948,8 @@ ast::type::Type* ParserImpl::ConvertType(
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);
     auto* ast_struct_member = create<ast::StructMember>(
-        Source{}, ast_module_.RegisterSymbol(member_name), member_name,
-        ast_member_ty, std::move(ast_member_decorations));
+        Source{}, ast_module_.RegisterSymbol(member_name), ast_member_ty,
+        std::move(ast_member_decorations));
     ast_members.push_back(ast_struct_member);
   }
   if (is_per_vertex_struct) {
@@ -965,7 +965,7 @@ ast::type::Type* ParserImpl::ConvertType(
 
   auto name = namer_.GetName(type_id);
   auto* result = ast_module_.create<ast::type::Struct>(
-      ast_module_.RegisterSymbol(name), name, ast_struct);
+      ast_module_.RegisterSymbol(name), ast_struct);
   id_to_type_[type_id] = result;
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(result);
@@ -1132,7 +1132,7 @@ void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
   }
   const auto name = namer_.GetName(type_id);
   auto* ast_alias_type = ast_module_.create<ast::type::Alias>(
-      ast_module_.RegisterSymbol(name), name, ast_underlying_type);
+      ast_module_.RegisterSymbol(name), ast_underlying_type);
   // Record this new alias as the AST type for this SPIR-V ID.
   id_to_type_[type_id] = ast_alias_type;
   ast_module_.AddConstructedType(ast_alias_type);
@@ -1311,7 +1311,6 @@ ast::Variable* ParserImpl::MakeVariable(
   std::string name = namer_.Name(id);
   return create<ast::Variable>(Source{},                          // source
                                ast_module_.RegisterSymbol(name),  // symbol
-                               name,                              // name
                                sc,            // storage_class
                                type,          // type
                                is_const,      // is_const

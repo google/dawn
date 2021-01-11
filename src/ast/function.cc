@@ -32,14 +32,12 @@ namespace ast {
 
 Function::Function(const Source& source,
                    Symbol symbol,
-                   const std::string& name,
                    VariableList params,
                    type::Type* return_type,
                    BlockStatement* body,
                    FunctionDecorationList decorations)
     : Base(source),
       symbol_(symbol),
-      name_(name),
       params_(std::move(params)),
       return_type_(return_type),
       body_(body),
@@ -228,7 +226,7 @@ const Statement* Function::get_last_statement() const {
 
 Function* Function::Clone(CloneContext* ctx) const {
   return ctx->mod->create<Function>(
-      ctx->Clone(source()), ctx->Clone(symbol()), name_, ctx->Clone(params_),
+      ctx->Clone(source()), ctx->Clone(symbol()), ctx->Clone(params_),
       ctx->Clone(return_type_), ctx->Clone(body_), ctx->Clone(decorations_));
 }
 
@@ -240,7 +238,7 @@ bool Function::IsValid() const {
   if (body_ == nullptr || !body_->IsValid()) {
     return false;
   }
-  if (name_.length() == 0 || !symbol_.IsValid()) {
+  if (!symbol_.IsValid()) {
     return false;
   }
   if (return_type_ == nullptr) {

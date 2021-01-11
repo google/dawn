@@ -27,7 +27,6 @@ namespace ast {
 
 Variable::Variable(const Source& source,
                    const Symbol& sym,
-                   const std::string& name,
                    StorageClass sc,
                    type::Type* type,
                    bool is_const,
@@ -35,7 +34,6 @@ Variable::Variable(const Source& source,
                    VariableDecorationList decorations)
     : Base(source),
       symbol_(sym),
-      name_(name),
       type_(type),
       is_const_(is_const),
       constructor_(constructor),
@@ -85,13 +83,13 @@ uint32_t Variable::constant_id() const {
 
 Variable* Variable::Clone(CloneContext* ctx) const {
   return ctx->mod->create<Variable>(ctx->Clone(source()), ctx->Clone(symbol_),
-                                    name_, storage_class(), ctx->Clone(type()),
+                                    storage_class(), ctx->Clone(type()),
                                     is_const_, ctx->Clone(constructor()),
                                     ctx->Clone(decorations_));
 }
 
 bool Variable::IsValid() const {
-  if (name_.length() == 0 || !symbol_.IsValid()) {
+  if (!symbol_.IsValid()) {
     return false;
   }
   if (type_ == nullptr) {

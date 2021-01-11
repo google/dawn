@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  ast::type::Struct str(p->get_module().RegisterSymbol("B"), "B", {});
+  ast::type::Struct str(p->get_module().RegisterSymbol("B"), {});
   p->register_constructed("B", &str);
 
   auto t = p->type_alias();

@@ -67,7 +67,6 @@ ast::Variable* clone_variable_with_new_name(ast::CloneContext* ctx,
   return ctx->mod->create<ast::Variable>(
       ctx->Clone(in->source()),            // source
       ctx->mod->RegisterSymbol(new_name),  // symbol
-      new_name,                            // name
       in->storage_class(),                 // storage_class
       ctx->Clone(in->type()),              // type
       in->is_const(),                      // is_const
@@ -205,8 +204,8 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
     member_dec.push_back(
         mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(mod->create<ast::StructMember>(
-        Source{}, mod->RegisterSymbol(kFirstVertexName), kFirstVertexName,
-        u32_type, std::move(member_dec)));
+        Source{}, mod->RegisterSymbol(kFirstVertexName), u32_type,
+        std::move(member_dec)));
     vertex_index_offset_ = offset;
     offset += 4;
   }
@@ -216,8 +215,8 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
     member_dec.push_back(
         mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(mod->create<ast::StructMember>(
-        Source{}, mod->RegisterSymbol(kFirstInstanceName), kFirstInstanceName,
-        u32_type, std::move(member_dec)));
+        Source{}, mod->RegisterSymbol(kFirstInstanceName), u32_type,
+        std::move(member_dec)));
     instance_index_offset_ = offset;
     offset += 4;
   }
@@ -226,13 +225,12 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
   decos.push_back(mod->create<ast::StructBlockDecoration>(Source{}));
 
   auto* struct_type = mod->create<ast::type::Struct>(
-      mod->RegisterSymbol(kStructName), kStructName,
+      mod->RegisterSymbol(kStructName),
       mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   auto* idx_var = mod->create<ast::Variable>(
       Source{},                          // source
       mod->RegisterSymbol(kBufferName),  // symbol
-      kBufferName,                       // name
       ast::StorageClass::kUniform,       // storage_class
       struct_type,                       // type
       false,                             // is_const
@@ -254,22 +252,21 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
     const std::string& field_name,
     ast::Variable* buffer_var,
     ast::Module* mod) {
-  auto* buffer = mod->create<ast::IdentifierExpression>(
-      Source{}, buffer_var->symbol(), mod->SymbolToName(buffer_var->symbol()));
+  auto* buffer =
+      mod->create<ast::IdentifierExpression>(Source{}, buffer_var->symbol());
 
   auto lhs_name = kIndexOffsetPrefix + original_name;
   auto* constructor = mod->create<ast::BinaryExpression>(
       Source{}, ast::BinaryOp::kAdd,
-      mod->create<ast::IdentifierExpression>(
-          Source{}, mod->RegisterSymbol(lhs_name), lhs_name),
+      mod->create<ast::IdentifierExpression>(Source{},
+                                             mod->RegisterSymbol(lhs_name)),
       mod->create<ast::MemberAccessorExpression>(
           Source{}, buffer,
           mod->create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol(field_name), field_name)));
+              Source{}, mod->RegisterSymbol(field_name))));
   auto* var =
       mod->create<ast::Variable>(Source{},                            // source
                                  mod->RegisterSymbol(original_name),  // symbol
-                                 original_name,                       // name
                                  ast::StorageClass::kNone,  // storage_class
                                  mod->create<ast::type::U32>(),   // type
                                  true,                            // is_const

@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <ostream>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -83,7 +82,6 @@ class Variable : public Castable<Variable, Node> {
   /// Create a variable
   /// @param source the variable source
   /// @param sym the variable symbol
-  /// @param name the variables name
   /// @param sc the variable storage class
   /// @param type the value type
   /// @param is_const true if the variable is const
@@ -91,7 +89,6 @@ class Variable : public Castable<Variable, Node> {
   /// @param decorations the variable decorations
   Variable(const Source& source,
            const Symbol& sym,
-           const std::string& name,
            StorageClass sc,
            type::Type* type,
            bool is_const,
@@ -166,7 +163,6 @@ class Variable : public Castable<Variable, Node> {
   Variable(const Variable&) = delete;
 
   Symbol const symbol_;
-  std::string const name_;
   // The value type if a const or formal paramter, and the store type if a var
   type::Type* const type_;
   bool const is_const_;
