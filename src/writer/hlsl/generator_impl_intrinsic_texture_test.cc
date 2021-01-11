@@ -29,10 +29,77 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-std::string expected_texture_overload(
+struct ExpectedResult {
+  ExpectedResult(const char* o) : out(o) {}  // NOLINT
+  ExpectedResult(const char* p, const char* o) : pre(p), out(o) {}
+
+  std::string pre;
+  std::string out;
+};
+
+ExpectedResult expected_texture_overload(
     ast::intrinsic::test::ValidTextureOverload overload) {
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
+    case ValidTextureOverload::kDimensions1d:
+    case ValidTextureOverload::kDimensions1dArray:
+    case ValidTextureOverload::kDimensionsStorageRO1d:
+    case ValidTextureOverload::kDimensionsStorageRO1dArray:
+    case ValidTextureOverload::kDimensionsStorageWO1d:
+    case ValidTextureOverload::kDimensionsStorageWO1dArray:
+      return {
+          "int _tint_tmp;\n"
+          "test_texture.GetDimensions(_tint_tmp);",
+          "_tint_tmp",
+      };
+    case ValidTextureOverload::kDimensions2d:
+    case ValidTextureOverload::kDimensions2dArray:
+    case ValidTextureOverload::kDimensionsMultisampled_2d:
+    case ValidTextureOverload::kDimensionsMultisampled_2dArray:
+    case ValidTextureOverload::kDimensionsDepth2d:
+    case ValidTextureOverload::kDimensionsDepth2dArray:
+    case ValidTextureOverload::kDimensionsStorageRO2d:
+    case ValidTextureOverload::kDimensionsStorageRO2dArray:
+    case ValidTextureOverload::kDimensionsStorageWO2d:
+    case ValidTextureOverload::kDimensionsStorageWO2dArray:
+      return {
+          "int2 _tint_tmp;\n"
+          "test_texture.GetDimensions(_tint_tmp[0], _tint_tmp[1]);",
+          "_tint_tmp",
+      };
+    case ValidTextureOverload::kDimensions3d:
+    case ValidTextureOverload::kDimensionsCube:
+    case ValidTextureOverload::kDimensionsCubeArray:
+    case ValidTextureOverload::kDimensionsDepthCube:
+    case ValidTextureOverload::kDimensionsDepthCubeArray:
+    case ValidTextureOverload::kDimensionsStorageRO3d:
+    case ValidTextureOverload::kDimensionsStorageWO3d:
+      return {
+          "int3 _tint_tmp;\n"
+          "test_texture.GetDimensions(_tint_tmp[0], _tint_tmp[1], "
+          "_tint_tmp[2]);",
+          "_tint_tmp",
+      };
+    case ValidTextureOverload::kDimensions2dLevel:
+    case ValidTextureOverload::kDimensions2dArrayLevel:
+    case ValidTextureOverload::kDimensionsDepth2dLevel:
+    case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
+      return {
+          "int2 _tint_tmp;\n"
+          "test_texture.GetDimensions(1, _tint_tmp[0], _tint_tmp[1]);",
+          "_tint_tmp",
+      };
+    case ValidTextureOverload::kDimensions3dLevel:
+    case ValidTextureOverload::kDimensionsCubeLevel:
+    case ValidTextureOverload::kDimensionsCubeArrayLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
+      return {
+          "int3 _tint_tmp;\n"
+          "test_texture.GetDimensions(1, _tint_tmp[0], _tint_tmp[1], "
+          "_tint_tmp[2]);",
+          "_tint_tmp",
+      };
     case ValidTextureOverload::kSample1dF32:
       return R"(test_texture.Sample(test_sampler, 1.0f))";
     case ValidTextureOverload::kSample1dArrayF32:
@@ -282,10 +349,10 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
 
-  EXPECT_TRUE(pre_result().empty());
-
   auto expected = expected_texture_overload(param.overload);
-  EXPECT_EQ(result(), expected);
+
+  EXPECT_EQ(expected.pre, pre_result());
+  EXPECT_EQ(expected.out, result());
 }
 
 INSTANTIATE_TEST_SUITE_P(

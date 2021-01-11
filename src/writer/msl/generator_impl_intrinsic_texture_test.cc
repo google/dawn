@@ -33,6 +33,43 @@ std::string expected_texture_overload(
     ast::intrinsic::test::ValidTextureOverload overload) {
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
+    case ValidTextureOverload::kDimensions1d:
+    case ValidTextureOverload::kDimensions1dArray:
+    case ValidTextureOverload::kDimensionsStorageRO1d:
+    case ValidTextureOverload::kDimensionsStorageRO1dArray:
+    case ValidTextureOverload::kDimensionsStorageWO1d:
+    case ValidTextureOverload::kDimensionsStorageWO1dArray:
+      return R"(test_texture.get_width())";
+    case ValidTextureOverload::kDimensions2d:
+    case ValidTextureOverload::kDimensions2dArray:
+    case ValidTextureOverload::kDimensionsMultisampled_2d:
+    case ValidTextureOverload::kDimensionsMultisampled_2dArray:
+    case ValidTextureOverload::kDimensionsDepth2d:
+    case ValidTextureOverload::kDimensionsDepth2dArray:
+    case ValidTextureOverload::kDimensionsStorageRO2d:
+    case ValidTextureOverload::kDimensionsStorageRO2dArray:
+    case ValidTextureOverload::kDimensionsStorageWO2d:
+    case ValidTextureOverload::kDimensionsStorageWO2dArray:
+      return R"(int2(test_texture.get_width(), test_texture.get_height()))";
+    case ValidTextureOverload::kDimensions3d:
+    case ValidTextureOverload::kDimensionsCube:
+    case ValidTextureOverload::kDimensionsCubeArray:
+    case ValidTextureOverload::kDimensionsDepthCube:
+    case ValidTextureOverload::kDimensionsDepthCubeArray:
+    case ValidTextureOverload::kDimensionsStorageRO3d:
+    case ValidTextureOverload::kDimensionsStorageWO3d:
+      return R"(int3(test_texture.get_width(), test_texture.get_height(), test_texture.get_depth()))";
+    case ValidTextureOverload::kDimensions2dLevel:
+    case ValidTextureOverload::kDimensions2dArrayLevel:
+    case ValidTextureOverload::kDimensionsDepth2dLevel:
+    case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
+      return R"(int2(test_texture.get_width(1), test_texture.get_height(1)))";
+    case ValidTextureOverload::kDimensions3dLevel:
+    case ValidTextureOverload::kDimensionsCubeLevel:
+    case ValidTextureOverload::kDimensionsCubeArrayLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
+      return R"(int3(test_texture.get_width(1), test_texture.get_height(1), test_texture.get_depth(1)))";
     case ValidTextureOverload::kSample1dF32:
       return R"(test_texture.sample(test_sampler, 1.0f))";
     case ValidTextureOverload::kSample1dArrayF32:
@@ -275,7 +312,7 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
 
   auto expected = expected_texture_overload(param.overload);
-  EXPECT_EQ(gen.result(), expected);
+  EXPECT_EQ(expected, gen.result());
 }
 
 INSTANTIATE_TEST_SUITE_P(

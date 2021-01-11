@@ -1812,6 +1812,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"step", ast::Intrinsic::kStep},
         IntrinsicData{"tan", ast::Intrinsic::kTan},
         IntrinsicData{"tanh", ast::Intrinsic::kTanh},
+        IntrinsicData{"textureDimensions", ast::Intrinsic::kTextureDimensions},
         IntrinsicData{"textureLoad", ast::Intrinsic::kTextureLoad},
         IntrinsicData{"textureSample", ast::Intrinsic::kTextureSample},
         IntrinsicData{"textureSampleBias", ast::Intrinsic::kTextureSampleBias},
@@ -2953,6 +2954,40 @@ const char* expected_texture_overload(
     ast::intrinsic::test::ValidTextureOverload overload) {
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
+    case ValidTextureOverload::kDimensions1d:
+    case ValidTextureOverload::kDimensions1dArray:
+    case ValidTextureOverload::kDimensions2d:
+    case ValidTextureOverload::kDimensions2dArray:
+    case ValidTextureOverload::kDimensions3d:
+    case ValidTextureOverload::kDimensionsCube:
+    case ValidTextureOverload::kDimensionsCubeArray:
+    case ValidTextureOverload::kDimensionsMultisampled_2d:
+    case ValidTextureOverload::kDimensionsMultisampled_2dArray:
+    case ValidTextureOverload::kDimensionsDepth2d:
+    case ValidTextureOverload::kDimensionsDepth2dArray:
+    case ValidTextureOverload::kDimensionsDepthCube:
+    case ValidTextureOverload::kDimensionsDepthCubeArray:
+    case ValidTextureOverload::kDimensionsStorageRO1d:
+    case ValidTextureOverload::kDimensionsStorageRO1dArray:
+    case ValidTextureOverload::kDimensionsStorageRO2d:
+    case ValidTextureOverload::kDimensionsStorageRO2dArray:
+    case ValidTextureOverload::kDimensionsStorageRO3d:
+    case ValidTextureOverload::kDimensionsStorageWO1d:
+    case ValidTextureOverload::kDimensionsStorageWO1dArray:
+    case ValidTextureOverload::kDimensionsStorageWO2d:
+    case ValidTextureOverload::kDimensionsStorageWO2dArray:
+    case ValidTextureOverload::kDimensionsStorageWO3d:
+      return R"(textureDimensions(texture))";
+    case ValidTextureOverload::kDimensions2dLevel:
+    case ValidTextureOverload::kDimensions2dArrayLevel:
+    case ValidTextureOverload::kDimensions3dLevel:
+    case ValidTextureOverload::kDimensionsCubeLevel:
+    case ValidTextureOverload::kDimensionsCubeArrayLevel:
+    case ValidTextureOverload::kDimensionsDepth2dLevel:
+    case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
+      return R"(textureDimensions(texture, level))";
     case ValidTextureOverload::kSample1dF32:
       return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSample1dArrayF32:
@@ -3176,7 +3211,27 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
   ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_TRUE(td()->DetermineResultType(call)) << td()->error();
 
-  if (std::string(param.function) == "textureStore") {
+  if (std::string(param.function) == "textureDimensions") {
+    switch (param.texture_dimension) {
+      default:
+        FAIL() << "invalid texture dimensions: " << param.texture_dimension;
+      case ast::type::TextureDimension::k1d:
+      case ast::type::TextureDimension::k1dArray:
+        EXPECT_EQ(call->result_type()->type_name(), ty.i32->type_name());
+        break;
+      case ast::type::TextureDimension::k2d:
+      case ast::type::TextureDimension::k2dArray:
+        EXPECT_EQ(call->result_type()->type_name(),
+                  ty.vec2<i32>()->type_name());
+        break;
+      case ast::type::TextureDimension::k3d:
+      case ast::type::TextureDimension::kCube:
+      case ast::type::TextureDimension::kCubeArray:
+        EXPECT_EQ(call->result_type()->type_name(),
+                  ty.vec3<i32>()->type_name());
+        break;
+    }
+  } else if (std::string(param.function) == "textureStore") {
     EXPECT_EQ(call->result_type(), ty.void_);
   } else {
     switch (param.texture_kind) {

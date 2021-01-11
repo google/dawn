@@ -34,12 +34,694 @@ namespace {
 struct expected_texture_overload_spirv {
   std::string types;
   std::string instructions;
+  std::string capabilities;
 };
 
 expected_texture_overload_spirv expected_texture_overload(
     ast::intrinsic::test::ValidTextureOverload overload) {
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
+    case ValidTextureOverload::kDimensions1d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 1D 0 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%9 = OpTypeInt 32 1
+)",
+          R"(
+%10 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %10
+)",
+          R"(
+OpCapability Sampled1D
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensions1dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 1D 0 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%9 = OpTypeInt 32 1
+%11 = OpTypeVector %9 2
+)",
+          R"(
+%12 = OpLoad %3 %1
+%10 = OpImageQuerySize %11 %12
+%8 = OpCompositeExtract %9 %10 0
+)",
+          R"(
+OpCapability Sampled1D
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensions2d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensions2dLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpConstant %10 1
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySizeLod %9 %11 %12
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensions2dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpTypeVector %10 3
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySize %12 %13
+%8 = OpVectorShuffle %9 %11 %11 0 1
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensions2dArrayLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpTypeVector %10 3
+%14 = OpConstant %10 1
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySizeLod %12 %13 %14
+%8 = OpVectorShuffle %9 %11 %11 0 1
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensions3d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 3D 0 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensions3dLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 3D 0 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+%12 = OpConstant %10 1
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySizeLod %9 %11 %12
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsCube:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsCubeLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+%12 = OpConstant %10 1
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySizeLod %9 %11 %12
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsCubeArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+%12 = OpTypeVector %10 4
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySize %12 %13
+%8 = OpVectorShuffle %9 %11 %11 0 1 2
+)",
+          R"(
+OpCapability SampledCubeArray
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsCubeArrayLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+%12 = OpTypeVector %10 4
+%14 = OpConstant %10 1
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySizeLod %12 %13 %14
+%8 = OpVectorShuffle %9 %11 %11 0 1 2
+)",
+          R"(
+OpCapability SampledCubeArray
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsMultisampled_2d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 1 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsMultisampled_2dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 1 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpTypeVector %10 3
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySize %12 %13
+%8 = OpVectorShuffle %9 %11 %11 0 1
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepth2d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepth2dLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpConstant %10 1
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySizeLod %9 %11 %12
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepth2dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpTypeVector %10 3
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySize %12 %13
+%8 = OpVectorShuffle %9 %11 %11 0 1
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpTypeVector %10 3
+%14 = OpConstant %10 1
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySizeLod %12 %13 %14
+%8 = OpVectorShuffle %9 %11 %11 0 1
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepthCube:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepthCubeLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+%12 = OpConstant %10 1
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySizeLod %9 %11 %12
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepthCubeArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+%12 = OpTypeVector %10 4
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySize %12 %13
+%8 = OpVectorShuffle %9 %11 %11 0 1 2
+)",
+          R"(
+OpCapability SampledCubeArray
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+%12 = OpTypeVector %10 4
+%14 = OpConstant %10 1
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySizeLod %12 %13 %14
+%8 = OpVectorShuffle %9 %11 %11 0 1 2
+)",
+          R"(
+OpCapability SampledCubeArray
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageRO1d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%9 = OpTypeInt 32 1
+)",
+          R"(
+%10 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %10
+)",
+          R"(
+OpCapability Image1D
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageRO1dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%9 = OpTypeInt 32 1
+%11 = OpTypeVector %9 2
+)",
+          R"(
+%12 = OpLoad %3 %1
+%10 = OpImageQuerySize %11 %12
+%8 = OpCompositeExtract %9 %10 0
+)",
+          R"(
+OpCapability Image1D
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageRO2d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageRO2dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpTypeVector %10 3
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySize %12 %13
+%8 = OpVectorShuffle %9 %11 %11 0 1
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageRO3d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageWO1d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%9 = OpTypeInt 32 1
+)",
+          R"(
+%10 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %10
+)",
+          R"(
+OpCapability Image1D
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageWO1dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%9 = OpTypeInt 32 1
+%11 = OpTypeVector %9 2
+)",
+          R"(
+%12 = OpLoad %3 %1
+%10 = OpImageQuerySize %11 %12
+%8 = OpCompositeExtract %9 %10 0
+)",
+          R"(
+OpCapability Image1D
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageWO2d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageWO2dArray:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+%12 = OpTypeVector %10 3
+)",
+          R"(
+%13 = OpLoad %3 %1
+%11 = OpImageQuerySize %12 %13
+%8 = OpVectorShuffle %9 %11 %11 0 1
+)",
+          R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kDimensionsStorageWO3d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%7 = OpTypeSampler
+%6 = OpTypePointer Private %7
+%5 = OpVariable %6 Private
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 3
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
     case ValidTextureOverload::kSample1dF32:
       return {
           R"(
@@ -59,6 +741,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %14
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kSample1dArrayF32:
       return {
@@ -84,6 +769,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %14 %15 %16
 %8 = OpImageSampleImplicitLod %9 %13 %19
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kSample2dF32:
       return {
@@ -107,6 +795,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSample2dOffsetF32:
       return {
@@ -135,6 +825,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %17 Offset %22
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSample2dArrayF32:
       return {
@@ -161,6 +853,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSample2dArrayOffsetF32:
       return {
@@ -191,6 +885,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20 Offset %24
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSample3dF32:
       return {
@@ -215,6 +911,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %18
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSample3dOffsetF32:
       return {
@@ -245,6 +943,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %18 Offset %24
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleCubeF32:
       return {
@@ -269,6 +969,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %18
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleCubeArrayF32:
       return {
@@ -295,6 +997,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20
+)",
+          R"(
+OpCapability SampledCubeArray
 )"};
     case ValidTextureOverload::kSampleDepth2dF32:
       return {
@@ -317,6 +1022,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleImplicitLod %4 %12 %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleDepth2dOffsetF32:
       return {
@@ -344,6 +1051,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleImplicitLod %4 %12 %16 Offset %21
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleDepth2dArrayF32:
       return {
@@ -369,6 +1078,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleImplicitLod %4 %12 %19
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleDepth2dArrayOffsetF32:
       return {
@@ -398,6 +1109,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleImplicitLod %4 %12 %19 Offset %23
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleDepthCubeF32:
       return {
@@ -421,6 +1134,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleImplicitLod %4 %12 %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleDepthCubeArrayF32:
       return {
@@ -447,6 +1162,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %13 %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %4 %12 %20
+)",
+          R"(
+OpCapability SampledCubeArray
 )"};
     case ValidTextureOverload::kSampleBias2dF32:
       return {
@@ -471,6 +1189,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %17 Bias %18
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleBias2dOffsetF32:
       return {
@@ -500,6 +1220,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %17 Bias|Offset %18 %23
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleBias2dArrayF32:
       return {
@@ -527,6 +1249,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20 Bias %21
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleBias2dArrayOffsetF32:
       return {
@@ -558,6 +1282,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20 Bias|Offset %21 %25
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleBias3dF32:
       return {
@@ -583,6 +1309,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %18 Bias %19
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleBias3dOffsetF32:
       return {
@@ -614,6 +1342,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %18 Bias|Offset %19 %25
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleBiasCubeF32:
       return {
@@ -639,6 +1369,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %18 Bias %19
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleBiasCubeArrayF32:
       return {
@@ -666,6 +1398,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleImplicitLod %9 %13 %20 Bias %21
+)",
+          R"(
+OpCapability SampledCubeArray
 )"};
     case ValidTextureOverload::kSampleLevel2dF32:
       return {
@@ -690,6 +1425,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %17 Lod %18
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevel2dOffsetF32:
       return {
@@ -719,6 +1456,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %17 Lod|Offset %18 %23
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevel2dArrayF32:
       return {
@@ -746,6 +1485,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Lod %21
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevel2dArrayOffsetF32:
       return {
@@ -777,6 +1518,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Lod|Offset %21 %25
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevel3dF32:
       return {
@@ -802,6 +1545,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %18 Lod %19
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevel3dOffsetF32:
       return {
@@ -833,6 +1578,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %18 Lod|Offset %19 %25
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevelCubeF32:
       return {
@@ -858,6 +1605,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %18 Lod %19
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevelCubeArrayF32:
       return {
@@ -885,6 +1634,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Lod %21
+)",
+          R"(
+OpCapability SampledCubeArray
 )"};
     case ValidTextureOverload::kSampleLevelDepth2dF32:
       return {
@@ -909,6 +1661,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleExplicitLod %4 %12 %16 Lod %18
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevelDepth2dOffsetF32:
       return {
@@ -937,6 +1691,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleExplicitLod %4 %12 %16 Lod|Offset %18 %22
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevelDepth2dArrayF32:
       return {
@@ -963,6 +1719,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleExplicitLod %4 %12 %19 Lod %20
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevelDepth2dArrayOffsetF32:
       return {
@@ -993,6 +1751,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleExplicitLod %4 %12 %19 Lod|Offset %20 %24
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevelDepthCubeF32:
       return {
@@ -1018,6 +1778,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleExplicitLod %4 %12 %17 Lod %19
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleLevelDepthCubeArrayF32:
       return {
@@ -1045,6 +1807,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %13 %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %4 %12 %20 Lod %21
+)",
+          R"(
+OpCapability SampledCubeArray
 )"};
     case ValidTextureOverload::kSampleGrad2dF32:
       return {
@@ -1074,6 +1839,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %17 Grad %20 %23
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGrad2dOffsetF32:
       return {
@@ -1108,6 +1875,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %17 Grad|Offset %20 %23 %28
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGrad2dArrayF32:
       return {
@@ -1141,6 +1910,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Grad %24 %27
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGrad2dArrayOffsetF32:
       return {
@@ -1178,6 +1949,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Grad|Offset %24 %27 %31
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGrad3dF32:
       return {
@@ -1210,6 +1983,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %18 Grad %22 %26
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGrad3dOffsetF32:
       return {
@@ -1248,6 +2023,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %18 Grad|Offset %22 %26 %32
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGradCubeF32:
       return {
@@ -1280,6 +2057,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleExplicitLod %9 %13 %18 Grad %22 %26
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGradCubeArrayF32:
       return {
@@ -1315,6 +2094,9 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %9 %14 %15 %16 %17
 %8 = OpImageSampleExplicitLod %9 %13 %20 Grad %25 %29
+)",
+          R"(
+OpCapability SampledCubeArray
 )"};
     case ValidTextureOverload::kSampleGradDepth2dF32:
       return {
@@ -1339,6 +2121,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleDrefExplicitLod %4 %12 %16 %17 Lod %18
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGradDepth2dOffsetF32:
       return {
@@ -1368,6 +2152,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleDrefExplicitLod %4 %12 %16 %17 Lod|Offset %18 %23
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGradDepth2dArrayF32:
       return {
@@ -1395,6 +2181,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleDrefExplicitLod %4 %12 %19 %20 Lod %21
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGradDepth2dArrayOffsetF32:
       return {
@@ -1426,6 +2214,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
 %8 = OpImageSampleDrefExplicitLod %4 %12 %19 %20 Lod|Offset %21 %25
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGradDepthCubeF32:
       return {
@@ -1451,6 +2241,8 @@ expected_texture_overload_spirv expected_texture_overload(
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleDrefExplicitLod %4 %12 %17 %18 Lod %19
+)",
+          R"(
 )"};
     case ValidTextureOverload::kSampleGradDepthCubeArrayF32:
       return {
@@ -1479,9 +2271,13 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %13 %14 %15 %16 %17
 %8 = OpImageSampleDrefExplicitLod %4 %12 %20 %21 Lod %22
+)",
+          R"(
+OpCapability SampledCubeArray
 )"};
     case ValidTextureOverload::kLoad1dF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1493,12 +2289,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpTypeInt 32 1
 %12 = OpConstant %11 1
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %12
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kLoad1dU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1510,12 +2310,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpTypeInt 32 1
 %12 = OpConstant %11 1
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %12
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kLoad1dI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1526,12 +2330,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %9 = OpTypeVector %4 4
 %11 = OpConstant %4 1
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %11
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kLoad1dArrayF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1546,12 +2354,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kLoad1dArrayU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1566,12 +2378,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kLoad1dArrayI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1585,12 +2401,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %4 2
 %14 = OpConstantComposite %11 %12 %13
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %14
+)",
+          R"(
+OpCapability Sampled1D
 )"};
     case ValidTextureOverload::kLoad2dF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1605,12 +2425,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1625,12 +2448,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1644,12 +2470,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %4 2
 %14 = OpConstantComposite %11 %12 %13
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %14
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dLevelF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1665,12 +2494,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %11 %13 %14
 %16 = OpConstant %12 3
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15 Lod %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dLevelU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1686,12 +2518,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %11 %13 %14
 %16 = OpConstant %12 3
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15 Lod %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dLevelI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1706,12 +2541,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstantComposite %11 %12 %13
 %15 = OpConstant %4 3
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %14 Lod %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dArrayF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1727,12 +2565,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstant %12 3
 %16 = OpConstantComposite %11 %13 %14 %15
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dArrayU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1748,12 +2589,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstant %12 3
 %16 = OpConstantComposite %11 %13 %14 %15
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dArrayI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1768,12 +2612,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 3
 %15 = OpConstantComposite %11 %12 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dArrayLevelF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1790,12 +2637,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConstantComposite %11 %13 %14 %15
 %17 = OpConstant %12 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16 Lod %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dArrayLevelU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1812,12 +2662,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConstantComposite %11 %13 %14 %15
 %17 = OpConstant %12 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16 Lod %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad2dArrayLevelI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1833,12 +2686,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %11 %12 %13 %14
 %16 = OpConstant %4 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15 Lod %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad3dF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1854,12 +2710,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstant %12 3
 %16 = OpConstantComposite %11 %13 %14 %15
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad3dU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1875,12 +2734,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstant %12 3
 %16 = OpConstantComposite %11 %13 %14 %15
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad3dI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1895,12 +2757,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %4 3
 %15 = OpConstantComposite %11 %12 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad3dLevelF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1917,12 +2782,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConstantComposite %11 %13 %14 %15
 %17 = OpConstant %12 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16 Lod %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad3dLevelU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1939,12 +2807,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConstantComposite %11 %13 %14 %15
 %17 = OpConstant %12 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16 Lod %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoad3dLevelI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1960,12 +2831,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %11 %12 %13 %14
 %16 = OpConstant %4 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15 Lod %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadMultisampled2dF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
 %2 = OpTypePointer Private %3
@@ -1981,12 +2855,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %11 %13 %14
 %16 = OpConstant %12 3
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15 Sample %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadMultisampled2dU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2002,12 +2879,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %11 %13 %14
 %16 = OpConstant %12 3
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15 Sample %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadMultisampled2dI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2022,12 +2902,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstantComposite %11 %12 %13
 %15 = OpConstant %4 3
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %14 Sample %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadMultisampled2dArrayF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2044,12 +2927,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConstantComposite %11 %13 %14 %15
 %17 = OpConstant %12 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16 Sample %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadMultisampled2dArrayU32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2066,12 +2952,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %16 = OpConstantComposite %11 %13 %14 %15
 %17 = OpConstant %12 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %16 Sample %17
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadMultisampled2dArrayI32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2087,12 +2976,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %11 %12 %13 %14
 %16 = OpConstant %4 4
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageFetch %9 %10 %15 Sample %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadDepth2dF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2106,12 +2998,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %11 2
 %14 = OpConstantComposite %10 %12 %13
 )",
-              R"(
+          R"(
 %9 = OpLoad %3 %1
 %8 = OpImageFetch %4 %9 %14
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadDepth2dLevelF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2126,12 +3021,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstantComposite %10 %12 %13
 %15 = OpConstant %11 3
 )",
-              R"(
+          R"(
 %9 = OpLoad %3 %1
 %8 = OpImageFetch %4 %9 %14 Lod %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadDepth2dArrayF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2146,12 +3044,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %11 3
 %15 = OpConstantComposite %10 %12 %13 %14
 )",
-              R"(
+          R"(
 %9 = OpLoad %3 %1
 %8 = OpImageFetch %4 %9 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
 %2 = OpTypePointer Private %3
@@ -2167,12 +3068,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstantComposite %10 %12 %13 %14
 %16 = OpConstant %11 4
 )",
-              R"(
+          R"(
 %9 = OpLoad %3 %1
 %8 = OpImageFetch %4 %9 %15 Lod %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO1dRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2184,12 +3088,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %11 = OpTypeInt 32 1
 %12 = OpConstant %11 1
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %12
+)",
+          R"(
+OpCapability Image1D
 )"};
     case ValidTextureOverload::kLoadStorageRO1dArrayRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2204,12 +3112,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
+OpCapability Image1D
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8
 %2 = OpTypePointer Private %3
@@ -2224,12 +3136,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8Snorm
 %2 = OpTypePointer Private %3
@@ -2244,12 +3159,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8ui
 %2 = OpTypePointer Private %3
@@ -2264,12 +3182,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba8sint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8i
 %2 = OpTypePointer Private %3
@@ -2283,12 +3204,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %4 2
 %14 = OpConstantComposite %11 %12 %13
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %14
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba16uint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba16ui
 %2 = OpTypePointer Private %3
@@ -2303,12 +3227,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba16sint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba16i
 %2 = OpTypePointer Private %3
@@ -2322,12 +3249,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %4 2
 %14 = OpConstantComposite %11 %12 %13
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %14
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba16float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba16f
 %2 = OpTypePointer Private %3
@@ -2342,12 +3272,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dR32uint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 R32ui
 %2 = OpTypePointer Private %3
@@ -2362,12 +3295,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dR32sint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 R32i
 %2 = OpTypePointer Private %3
@@ -2381,12 +3317,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %4 2
 %14 = OpConstantComposite %11 %12 %13
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %14
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dR32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 R32f
 %2 = OpTypePointer Private %3
@@ -2401,12 +3340,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRg32uint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rg32ui
 %2 = OpTypePointer Private %3
@@ -2421,12 +3363,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
+OpCapability StorageImageExtendedFormats
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRg32sint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rg32i
 %2 = OpTypePointer Private %3
@@ -2440,12 +3386,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %4 2
 %14 = OpConstantComposite %11 %12 %13
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %14
+)",
+          R"(
+OpCapability StorageImageExtendedFormats
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRg32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rg32f
 %2 = OpTypePointer Private %3
@@ -2460,12 +3410,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
+OpCapability StorageImageExtendedFormats
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba32uint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32ui
 %2 = OpTypePointer Private %3
@@ -2480,12 +3434,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba32sint:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32i
 %2 = OpTypePointer Private %3
@@ -2499,12 +3456,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %13 = OpConstant %4 2
 %14 = OpConstantComposite %11 %12 %13
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %14
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2519,13 +3479,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %14 = OpConstant %12 2
 %15 = OpConstantComposite %11 %13 %14
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %15
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO2dArrayRgba32float:
 
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2541,12 +3504,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstant %12 3
 %16 = OpConstantComposite %11 %13 %14 %15
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kLoadStorageRO3dRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2562,12 +3528,15 @@ expected_texture_overload_spirv expected_texture_overload(
 %15 = OpConstant %12 3
 %16 = OpConstantComposite %11 %13 %14 %15
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 %8 = OpImageRead %9 %10 %16
+)",
+          R"(
 )"};
     case ValidTextureOverload::kStoreWO1dRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2585,12 +3554,16 @@ expected_texture_overload_spirv expected_texture_overload(
 %17 = OpConstant %4 5
 %18 = OpConstantComposite %13 %14 %15 %16 %17
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 OpImageWrite %10 %12 %18
+)",
+          R"(
+OpCapability Image1D
 )"};
     case ValidTextureOverload::kStoreWO1dArrayRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2611,12 +3584,16 @@ OpImageWrite %10 %12 %18
 %20 = OpConstant %4 6
 %21 = OpConstantComposite %16 %17 %18 %19 %20
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 OpImageWrite %10 %15 %21
+)",
+          R"(
+OpCapability Image1D
 )"};
     case ValidTextureOverload::kStoreWO2dRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2637,12 +3614,15 @@ OpImageWrite %10 %15 %21
 %20 = OpConstant %4 6
 %21 = OpConstantComposite %16 %17 %18 %19 %20
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 OpImageWrite %10 %15 %21
+)",
+          R"(
 )"};
     case ValidTextureOverload::kStoreWO2dArrayRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2664,12 +3644,15 @@ OpImageWrite %10 %15 %21
 %21 = OpConstant %4 7
 %22 = OpConstantComposite %17 %18 %19 %20 %21
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 OpImageWrite %10 %16 %22
+)",
+          R"(
 )"};
     case ValidTextureOverload::kStoreWO3dRgba32float:
-      return {R"(
+      return {
+          R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
 %2 = OpTypePointer Private %3
@@ -2691,13 +3674,16 @@ OpImageWrite %10 %16 %22
 %21 = OpConstant %4 7
 %22 = OpConstantComposite %17 %18 %19 %20 %21
 )",
-              R"(
+          R"(
 %10 = OpLoad %3 %1
 OpImageWrite %10 %16 %22
+)",
+          R"(
 )"};
   }
 
-  return {"<unmatched texture overload>", "<unmatched texture overload>"};
+  return {"<unmatched texture overload>", "<unmatched texture overload>",
+          "<unmatched texture overload>"};
 }  // NOLINT - Ignore the length of this function
 
 class IntrinsicTextureTest
@@ -2741,6 +3727,7 @@ TEST_P(IntrinsicTextureTest, Call) {
   EXPECT_EQ(expected.types, "\n" + DumpInstructions(b.types()));
   EXPECT_EQ(expected.instructions,
             "\n" + DumpInstructions(b.functions()[0].instructions()));
+  EXPECT_EQ(expected.capabilities, "\n" + DumpInstructions(b.capabilities()));
 }
 
 TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {

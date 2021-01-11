@@ -84,6 +84,7 @@ enum class Intrinsic {
   kStep,
   kTan,
   kTanh,
+  kTextureDimensions,
   kTextureLoad,
   kTextureSample,
   kTextureSampleBias,
@@ -186,6 +187,11 @@ bool IsFloatClassificationIntrinsic(Intrinsic i);
 /// @param i the intrinsic
 /// @returns true if the given `i` is a texture operation intrinsic
 bool IsTextureIntrinsic(Intrinsic i);
+
+/// Determines if the given `i` is a image query intrinsic
+/// @param i the intrinsic
+/// @returns true if the given `i` is a image query intrinsic
+bool IsImageQueryIntrinsic(Intrinsic i);
 
 }  // namespace intrinsic
 }  // namespace ast

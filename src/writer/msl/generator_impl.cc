@@ -652,6 +652,49 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
   auto& pidx = signature->params.idx;
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
+  if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
+    auto get_dim = [&](const char* name) {
+      if (!EmitExpression(params[pidx.texture])) {
+        return false;
+      }
+      out_ << ".get_" << name << "(";
+      if (pidx.level != kNotUsed) {
+        out_ << pidx.level;
+      }
+      out_ << ")";
+      return true;
+    };
+
+    size_t dims = 1;
+    if (auto* vec = expr->result_type()->As<ast::type::Vector>()) {
+      dims = vec->size();
+    }
+    switch (dims) {
+      case 1:
+        get_dim("width");
+        break;
+      case 2:
+        EmitType(expr->result_type(), Symbol());
+        out_ << "(";
+        get_dim("width");
+        out_ << ", ";
+        get_dim("height");
+        out_ << ")";
+        break;
+      case 3:
+        EmitType(expr->result_type(), Symbol());
+        out_ << "(";
+        get_dim("width");
+        out_ << ", ";
+        get_dim("height");
+        out_ << ", ";
+        get_dim("depth");
+        out_ << ")";
+        break;
+    }
+    return true;
+  }
+
   if (!EmitExpression(params[pidx.texture]))
     return false;
 

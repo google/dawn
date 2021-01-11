@@ -350,10 +350,6 @@ class GeneratorImpl {
   /// @returns the index string, or blank if unable to generate
   std::string generate_storage_buffer_index_expression(std::ostream& pre,
                                                        ast::Expression* expr);
-  /// Generates a name for the prefix
-  /// @param prefix the prefix of the name to generate
-  /// @returns the name
-  std::string generate_name(const std::string& prefix);
   /// Generates an intrinsic name from the given name
   /// @param intrinsic the intrinsic to convert to a name
   /// @returns the intrinsic name or blank on error

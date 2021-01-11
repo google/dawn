@@ -262,11 +262,16 @@ bool IsFloatClassificationIntrinsic(Intrinsic i) {
 }
 
 bool IsTextureIntrinsic(Intrinsic i) {
-  return i == Intrinsic::kTextureLoad || i == Intrinsic::kTextureSample ||
+  return i == Intrinsic::kTextureDimensions || i == Intrinsic::kTextureLoad ||
+         i == Intrinsic::kTextureSample ||
          i == Intrinsic::kTextureSampleLevel ||
          i == Intrinsic::kTextureSampleBias ||
          i == Intrinsic::kTextureSampleCompare ||
          i == Intrinsic::kTextureSampleGrad || i == Intrinsic::kTextureStore;
+}
+
+bool IsImageQueryIntrinsic(Intrinsic i) {
+  return i == ast::Intrinsic::kTextureDimensions;
 }
 
 }  // namespace intrinsic

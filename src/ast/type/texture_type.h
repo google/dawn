@@ -42,6 +42,10 @@ enum class TextureDimension {
 };
 std::ostream& operator<<(std::ostream& out, TextureDimension dim);
 
+/// @param dim the TextureDimension to query
+/// @return true if the given TextureDimension is an array texture
+bool IsTextureArray(TextureDimension dim);
+
 /// A texture type.
 class Texture : public Castable<Texture, Type> {
  public:

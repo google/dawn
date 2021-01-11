@@ -56,6 +56,22 @@ std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
   return out;
 }
 
+bool IsTextureArray(TextureDimension dim) {
+  switch (dim) {
+    case TextureDimension::k1dArray:
+    case TextureDimension::k2dArray:
+    case TextureDimension::kCubeArray:
+      return true;
+    case TextureDimension::k2d:
+    case TextureDimension::kNone:
+    case TextureDimension::k1d:
+    case TextureDimension::k3d:
+    case TextureDimension::kCube:
+      return false;
+  }
+  return false;
+}
+
 Texture::Texture(TextureDimension dim) : dim_(dim) {}
 
 Texture::Texture(Texture&&) = default;

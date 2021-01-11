@@ -736,6 +736,39 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto* texture = params[pidx.texture];
   auto* texture_type = texture->result_type()->UnwrapPtrIfNeeded();
 
+  if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
+    // Declare a variable to hold the texture dimensions
+    auto dims = namer_->GenerateName(kTempNamePrefix);
+    EmitType(pre, expr->result_type(), Symbol());
+    pre << " " << dims << ";" << std::endl;
+
+    // Now call GetDimensions() on the texture object, populating the dims
+    // variable.
+    std::stringstream tex_out;
+    if (!EmitExpression(pre, tex_out, texture)) {
+      return false;
+    }
+    pre << tex_out.str() << ".GetDimensions(";
+    if (pidx.level != kNotUsed) {
+      pre << pidx.level << ", ";
+    }
+    if (auto* vec = expr->result_type()->As<ast::type::Vector>()) {
+      for (uint32_t i = 0; i < vec->size(); i++) {
+        if (i > 0) {
+          pre << ", ";
+        }
+        pre << dims << "[" << i << "]";
+      }
+    } else {
+      pre << dims;
+    }
+    pre << ");";
+
+    // The result of the textureDimensions() call is now the temporary variable.
+    out << dims;
+    return true;
+  }
+
   if (!EmitExpression(pre, out, texture))
     return false;
 

@@ -1850,6 +1850,15 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
 
   auto intrinsic = ident->intrinsic();
 
+  if (ast::intrinsic::IsFineDerivative(intrinsic) ||
+      ast::intrinsic::IsCoarseDerivative(intrinsic)) {
+    push_capability(SpvCapabilityDerivativeControl);
+  }
+
+  if (ast::intrinsic::IsImageQueryIntrinsic(intrinsic)) {
+    push_capability(SpvCapabilityImageQuery);
+  }
+
   if (ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
     if (!GenerateTextureIntrinsic(ident, call, Operand::Int(result_type_id),
                                   result)) {
@@ -1859,11 +1868,6 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   }
 
   OperandList params = {Operand::Int(result_type_id), result};
-
-  if (ast::intrinsic::IsFineDerivative(intrinsic) ||
-      ast::intrinsic::IsCoarseDerivative(intrinsic)) {
-    push_capability(SpvCapabilityDerivativeControl);
-  }
 
   spv::Op op = spv::Op::OpNop;
   if (intrinsic == ast::Intrinsic::kAny) {
@@ -1982,8 +1986,8 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
 
 bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                        ast::CallExpression* call,
-                                       spirv::Operand result_type,
-                                       spirv::Operand result_id) {
+                                       Operand result_type,
+                                       Operand result_id) {
   auto* texture_type =
       call->params()[0]->result_type()->UnwrapAll()->As<ast::type::Texture>();
 
@@ -2008,21 +2012,25 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     return Operand::Int(val_id);
   };
 
+  // Custom function to call after the texture-intrinsic op has been generated.
+  std::function<bool()> post_emission = [] { return true; };
+
   // Populate the spirv_params with common parameters
   OperandList spirv_params;
   spirv_params.reserve(8);  // Enough to fit most parameter lists
-  if (ident->intrinsic() != ast::Intrinsic::kTextureStore) {
-    spirv_params.emplace_back(std::move(result_type));
-    spirv_params.emplace_back(std::move(result_id));
-  }
 
   // Extra image operands, appended to spirv_params.
   struct ImageOperand {
     SpvImageOperandsMask mask;
-    tint::writer::spirv::Operand operand;
+    Operand operand;
   };
   std::vector<ImageOperand> image_operands;
   image_operands.reserve(4);  // Enough to fit most parameter lists
+
+  auto append_result_type_and_id_to_spirv_params = [&]() {
+    spirv_params.emplace_back(std::move(result_type));
+    spirv_params.emplace_back(std::move(result_id));
+  };
 
   auto append_coords_to_spirv_params = [&]() -> bool {
     if (pidx.array_index != kNotUsed) {
@@ -2062,10 +2070,67 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   };
 
   switch (ident->intrinsic()) {
+    case ast::Intrinsic::kTextureDimensions: {
+      if (ast::type::IsTextureArray(texture_type->dim())) {
+        // OpImageQuerySize[Lod] will append another element to the returned
+        // vector describing the number of array elements. textureDimensions()
+        // does not include this in the returned vector, so it needs to be
+        // stripped from the resulting vector.
+        auto unstripped_result = result_op();
+
+        ast::type::Type* unstripped_result_type;
+        if (auto* v = call->result_type()->As<ast::type::Vector>()) {
+          unstripped_result_type =
+              mod_->create<ast::type::Vector>(v->type(), v->size() + 1);
+          post_emission = [=] {
+            // Swizzle the unstripped vector to form a vec2 or vec3
+            OperandList operands{
+                result_type,
+                result_id,
+                unstripped_result,
+                unstripped_result,
+            };
+            for (uint32_t i = 0; i < v->size(); i++) {
+              operands.emplace_back(Operand::Int(i));
+            }
+            return push_function_inst(spv::Op::OpVectorShuffle, operands);
+          };
+        } else {
+          unstripped_result_type =
+              mod_->create<ast::type::Vector>(call->result_type(), 2);
+          post_emission = [=] {
+            // Extract the first element of the unstripped vec2 to form a scalar
+            return push_function_inst(
+                spv::Op::OpCompositeExtract,
+                {result_type, result_id, unstripped_result, Operand::Int(0)});
+          };
+        }
+
+        auto unstripped_result_type_id =
+            GenerateTypeIfNeeded(unstripped_result_type);
+        if (unstripped_result_type_id == 0) {
+          return false;
+        }
+        spirv_params.emplace_back(Operand::Int(unstripped_result_type_id));
+        spirv_params.emplace_back(unstripped_result);
+      } else {
+        append_result_type_and_id_to_spirv_params();
+      }
+
+      spirv_params.emplace_back(gen_param(pidx.texture));
+      if (pidx.level != kNotUsed) {
+        op = spv::Op::OpImageQuerySizeLod;
+        spirv_params.emplace_back(gen_param(pidx.level));
+      } else {
+        op = spv::Op::OpImageQuerySize;
+      }
+      break;
+    }
     case ast::Intrinsic::kTextureLoad: {
       op = texture_type->Is<ast::type::StorageTexture>()
                ? spv::Op::OpImageRead
                : spv::Op::OpImageFetch;
+      append_result_type_and_id_to_spirv_params();
       spirv_params.emplace_back(gen_param(pidx.texture));
       if (!append_coords_to_spirv_params()) {
         return false;
@@ -2094,6 +2159,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSample: {
       op = spv::Op::OpImageSampleImplicitLod;
+      append_result_type_and_id_to_spirv_params();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2101,6 +2167,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleBias: {
       op = spv::Op::OpImageSampleImplicitLod;
+      append_result_type_and_id_to_spirv_params();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2111,6 +2178,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleLevel: {
       op = spv::Op::OpImageSampleExplicitLod;
+      append_result_type_and_id_to_spirv_params();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2121,6 +2189,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleGrad: {
       op = spv::Op::OpImageSampleExplicitLod;
+      append_result_type_and_id_to_spirv_params();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2134,6 +2203,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleCompare: {
       op = spv::Op::OpImageSampleDrefExplicitLod;
+      append_result_type_and_id_to_spirv_params();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2175,7 +2245,11 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     return false;
   }
 
-  return push_function_inst(op, spirv_params);
+  if (!push_function_inst(op, spirv_params)) {
+    return false;
+  }
+
+  return post_emission();
 }
 
 uint32_t Builder::GenerateSampledImage(ast::type::Type* texture_type,
