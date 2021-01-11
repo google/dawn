@@ -567,7 +567,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
       out_ << "[[offset(" << offset->offset() << ")]]" << std::endl;
     }
     make_indent();
-    out_ << mem->name() << " : ";
+    out_ << module_.SymbolToName(mem->symbol()) << " : ";
     if (!EmitType(mem->type())) {
       return false;
     }

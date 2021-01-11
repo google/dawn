@@ -41,8 +41,10 @@ struct S {
   ASSERT_NE(s.value, nullptr);
   ASSERT_EQ(s->symbol(), p->get_module().RegisterSymbol("S"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
-  EXPECT_EQ(s->impl()->members()[0]->name(), "a");
-  EXPECT_EQ(s->impl()->members()[1]->name(), "b");
+  EXPECT_EQ(s->impl()->members()[0]->symbol(),
+            p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(s->impl()->members()[1]->symbol(),
+            p->get_module().RegisterSymbol("b"));
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
@@ -63,8 +65,10 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   ASSERT_NE(s.value, nullptr);
   ASSERT_EQ(s->symbol(), p->get_module().RegisterSymbol("B"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
-  EXPECT_EQ(s->impl()->members()[0]->name(), "a");
-  EXPECT_EQ(s->impl()->members()[1]->name(), "b");
+  EXPECT_EQ(s->impl()->members()[0]->symbol(),
+            p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(s->impl()->members()[1]->symbol(),
+            p->get_module().RegisterSymbol("b"));
   ASSERT_EQ(s->impl()->decorations().size(), 1u);
   EXPECT_TRUE(s->impl()->decorations()[0]->Is<ast::StructBlockDecoration>());
 }
@@ -88,8 +92,10 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   ASSERT_NE(s.value, nullptr);
   ASSERT_EQ(s->symbol(), p->get_module().RegisterSymbol("S"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
-  EXPECT_EQ(s->impl()->members()[0]->name(), "a");
-  EXPECT_EQ(s->impl()->members()[1]->name(), "b");
+  EXPECT_EQ(s->impl()->members()[0]->symbol(),
+            p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(s->impl()->members()[1]->symbol(),
+            p->get_module().RegisterSymbol("b"));
   ASSERT_EQ(s->impl()->decorations().size(), 2u);
   EXPECT_TRUE(s->impl()->decorations()[0]->Is<ast::StructBlockDecoration>());
   EXPECT_TRUE(s->impl()->decorations()[1]->Is<ast::StructBlockDecoration>());

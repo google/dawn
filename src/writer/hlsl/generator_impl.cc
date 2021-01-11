@@ -1749,7 +1749,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       auto* res_type = mem->structure()->result_type()->UnwrapAll();
       if (auto* str = res_type->As<ast::type::Struct>()) {
         auto* str_type = str->impl();
-        auto* str_member = str_type->get_member(mem->member()->name());
+        auto* str_member = str_type->get_member(mem->member()->symbol());
 
         if (!str_member->has_offset_decoration()) {
           error_ = "missing offset decoration for struct member";
@@ -1758,9 +1758,11 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         out << str_member->offset();
 
       } else if (res_type->Is<ast::type::Vector>()) {
+        // TODO(dsinclair): Swizzle stuff
+        //
         // This must be a single element swizzle if we've got a vector at this
         // point.
-        if (mem->member()->name().size() != 1) {
+        if (module_->SymbolToName(mem->member()->symbol()).size() != 1) {
           error_ =
               "Encountered multi-element swizzle when should have only one "
               "level";
@@ -1770,7 +1772,9 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // TODO(dsinclair): All our types are currently 4 bytes (f32, i32, u32)
         // so this is assuming 4. This will need to be fixed when we get f16 or
         // f64 types.
-        out << "(4 * " << convert_swizzle_to_index(mem->member()->name())
+        out << "(4 * "
+            << convert_swizzle_to_index(
+                   module_->SymbolToName(mem->member()->symbol()))
             << ")";
       } else {
         error_ =

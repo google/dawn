@@ -30,7 +30,6 @@ using StructMemberTest = TestHelper;
 TEST_F(StructMemberTest, Creation) {
   auto* st = Member("a", ty.i32, {MemberOffset(4)});
   EXPECT_EQ(st->symbol(), Symbol(1));
-  EXPECT_EQ(st->name(), "a");
   EXPECT_EQ(st->type(), ty.i32);
   EXPECT_EQ(st->decorations().size(), 1u);
   EXPECT_TRUE(st->decorations()[0]->Is<StructMemberOffsetDecoration>());
@@ -45,7 +44,6 @@ TEST_F(StructMemberTest, CreationWithSource) {
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
       "a", ty.i32);
   EXPECT_EQ(st->symbol(), Symbol(1));
-  EXPECT_EQ(st->name(), "a");
   EXPECT_EQ(st->type(), ty.i32);
   EXPECT_EQ(st->decorations().size(), 0u);
   EXPECT_EQ(st->source().range.begin.line, 27u);

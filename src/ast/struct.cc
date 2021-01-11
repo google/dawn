@@ -34,9 +34,9 @@ Struct::Struct(Struct&&) = default;
 
 Struct::~Struct() = default;
 
-StructMember* Struct::get_member(const std::string& name) const {
+StructMember* Struct::get_member(const Symbol& symbol) const {
   for (auto* mem : members_) {
-    if (mem->name() == name) {
+    if (mem->symbol() == symbol) {
       return mem;
     }
   }

@@ -888,12 +888,12 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     }
 
     auto* strct = data_type->As<ast::type::Struct>()->impl();
-    auto name = expr->member()->name();
+    auto symbol = expr->member()->symbol();
 
     uint32_t i = 0;
     for (; i < strct->members().size(); ++i) {
       auto* member = strct->members()[i];
-      if (member->name() == name) {
+      if (member->symbol() == symbol) {
         break;
       }
     }
@@ -912,7 +912,8 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     return false;
   }
 
-  auto swiz = expr->member()->name();
+  // TODO(dsinclair): Swizzle stuff
+  auto swiz = mod_->SymbolToName(expr->member()->symbol());
   // Single element swizzle is either an access chain or a composite extract
   if (swiz.size() == 1) {
     auto val = IndexFromName(swiz[0]);
@@ -2832,8 +2833,9 @@ bool Builder::GenerateStructType(ast::type::Struct* struct_type,
 uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                                        uint32_t idx,
                                        ast::StructMember* member) {
-  push_debug(spv::Op::OpMemberName, {Operand::Int(struct_id), Operand::Int(idx),
-                                     Operand::String(member->name())});
+  push_debug(spv::Op::OpMemberName,
+             {Operand::Int(struct_id), Operand::Int(idx),
+              Operand::String(namer_->NameFor(member->symbol()))});
 
   bool has_layout = false;
   for (auto* deco : member->decorations()) {

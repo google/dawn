@@ -50,8 +50,6 @@ class StructMember : public Castable<StructMember, Node> {
 
   /// @returns the symbol
   const Symbol& symbol() const { return symbol_; }
-  /// @returns the name
-  const std::string& name() const { return name_; }
   /// @returns the type
   type::Type* type() const { return type_; }
 

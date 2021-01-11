@@ -1048,17 +1048,18 @@ bool TypeDeterminer::DetermineMemberAccessor(
   ast::type::Type* ret = nullptr;
   if (auto* ty = data_type->As<ast::type::Struct>()) {
     auto* strct = ty->impl();
-    auto name = expr->member()->name();
+    auto symbol = expr->member()->symbol();
 
     for (auto* member : strct->members()) {
-      if (member->name() == name) {
+      if (member->symbol() == symbol) {
         ret = member->type();
         break;
       }
     }
 
     if (ret == nullptr) {
-      set_error(expr->source(), "struct member " + name + " not found");
+      set_error(expr->source(),
+                "struct member " + mod_->SymbolToName(symbol) + " not found");
       return false;
     }
 
@@ -1067,7 +1068,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
       ret = mod_->create<ast::type::Pointer>(ret, ptr->storage_class());
     }
   } else if (auto* vec = data_type->As<ast::type::Vector>()) {
-    auto size = expr->member()->name().size();
+    // TODO(dsinclair): Swizzle, record into the identifier experesion
+
+    auto size = mod_->SymbolToName(expr->member()->symbol()).size();
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
