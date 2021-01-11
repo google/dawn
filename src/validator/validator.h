@@ -41,7 +41,7 @@ class Validator {
 
   /// @returns error messages from the validator
   std::string error() {
-    diag::Formatter formatter{{false, false, false}};
+    diag::Formatter formatter{{false, false, false, false}};
     return formatter.format(diags_);
   }
   /// @returns true if an error was encountered

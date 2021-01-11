@@ -21,16 +21,21 @@ namespace reader {
 namespace wgsl {
 namespace {
 
+const diag::Formatter::Style formatter_style{
+    /* print_file: */ true, /* print_severity: */ true,
+    /* print_line: */ true, /* print_newline_at_end: */ false};
+
 class ParserImplErrorResyncTest : public ParserImplTest {};
 
-#define EXPECT(SOURCE, EXPECTED)                                     \
-  do {                                                               \
-    std::string source = SOURCE;                                     \
-    std::string expected = EXPECTED;                                 \
-    auto p = parser(source);                                         \
-    EXPECT_EQ(false, p->Parse());                                    \
-    EXPECT_EQ(true, p->diagnostics().contains_errors());             \
-    EXPECT_EQ(expected, diag::Formatter().format(p->diagnostics())); \
+#define EXPECT(SOURCE, EXPECTED)                                          \
+  do {                                                                    \
+    std::string source = SOURCE;                                          \
+    std::string expected = EXPECTED;                                      \
+    auto p = parser(source);                                              \
+    EXPECT_EQ(false, p->Parse());                                         \
+    EXPECT_EQ(true, p->diagnostics().contains_errors());                  \
+    EXPECT_EQ(expected,                                                   \
+              diag::Formatter(formatter_style).format(p->diagnostics())); \
   } while (false)
 
 TEST_F(ParserImplErrorResyncTest, BadFunctionDecls) {

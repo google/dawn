@@ -297,7 +297,7 @@ class ParserImpl {
 
   /// @returns the parser error string
   std::string error() const {
-    diag::Formatter formatter{{false, false, false}};
+    diag::Formatter formatter{{false, false, false, false}};
     return formatter.format(diags_);
   }
 

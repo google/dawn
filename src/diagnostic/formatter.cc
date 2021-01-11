@@ -121,6 +121,9 @@ void Formatter::format(const List& list, Printer* printer) const {
     format(diag, state);
     first = false;
   }
+  if (style_.print_newline_at_end) {
+    state.newline();
+  }
 }
 
 void Formatter::format(const Diagnostic& diag, State& state) const {

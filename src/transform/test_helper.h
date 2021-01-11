@@ -59,8 +59,10 @@ class TransformTest : public testing::Test {
     auto result = manager.Run(&module);
 
     if (result.diagnostics.contains_errors()) {
+      diag::Formatter::Style style;
+      style.print_newline_at_end = false;
       return "manager().Run() errored:\n" +
-             diag::Formatter().format(result.diagnostics);
+             diag::Formatter(style).format(result.diagnostics);
     }
 
     // Release the source module to ensure there's no uncloned data in result

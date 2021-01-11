@@ -36,6 +36,8 @@ class Formatter {
     bool print_severity = true;
     /// include the source line(s) for the diagnostic
     bool print_line = true;
+    /// print a newline at the end of a diagnostic list
+    bool print_newline_at_end = true;
   };
 
   /// Constructor for the formatter using a default style.
