@@ -4499,7 +4499,6 @@ TEST_F(SpvParserTest, CombinedImageSampler_IsError) {
            OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  std::cout << assembly;
   EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
   EXPECT_THAT(p->error(),
               HasSubstr("WGSL does not support combined image-samplers: "));
