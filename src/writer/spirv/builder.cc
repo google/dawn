@@ -272,6 +272,14 @@ uint32_t intrinsic_to_glsl_method(ast::type::Type* type,
   return 0;
 }
 
+/// @return the vector element type if ty is a vector, otherwise return ty.
+ast::type::Type* ElementTypeOf(ast::type::Type* ty) {
+  if (auto* v = ty->As<ast::type::Vector>()) {
+    return v->type();
+  }
+  return ty;
+}
+
 }  // namespace
 
 Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
@@ -1987,9 +1995,6 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                        ast::CallExpression* call,
                                        Operand result_type,
                                        Operand result_id) {
-  auto* texture_type =
-      call->params()[0]->result_type()->UnwrapAll()->As<ast::type::Texture>();
-
   auto* sig = static_cast<const ast::intrinsic::TextureSignature*>(
       ident->intrinsic_signature());
   assert(sig != nullptr);
@@ -1997,6 +2002,10 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
   assert(pidx.texture != kNotUsed);
+  auto* texture_type = call->params()[pidx.texture]
+                           ->result_type()
+                           ->UnwrapAll()
+                           ->As<ast::type::Texture>();
 
   auto op = spv::Op::OpNop;
 
@@ -2070,50 +2079,76 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
 
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureDimensions: {
-      if (ast::type::IsTextureArray(texture_type->dim())) {
-        // OpImageQuerySize[Lod] will append another element to the returned
-        // vector describing the number of array elements. textureDimensions()
-        // does not include this in the returned vector, so it needs to be
-        // stripped from the resulting vector.
-        auto unstripped_result = result_op();
+      // Number of returned elements from OpImageQuerySize[Lod] may not match
+      // those of textureDimensions().
+      // This might be due to an extra vector scalar describing the number of
+      // array elements or textureDimensions() returning a vec3 for cubes
+      // when only width / height is returned by OpImageQuerySize[Lod]
+      // (see https://github.com/gpuweb/gpuweb/issues/1345).
+      // Handle these mismatches by swizzling the returned vector.
+      std::vector<uint32_t> swizzle;
+      uint32_t spirv_dims = 0;
+      switch (texture_type->dim()) {
+        case ast::type::TextureDimension::kNone:
+          error_ = "texture dimension is kNone";
+          return false;
+        case ast::type::TextureDimension::k1d:
+        case ast::type::TextureDimension::k2d:
+        case ast::type::TextureDimension::k3d:
+          break;  // No swizzle needed
+        case ast::type::TextureDimension::k1dArray:
+          swizzle = {0};   // Strip array index
+          spirv_dims = 2;  // [width, array count]
+          break;
+        case ast::type::TextureDimension::kCube:
+          swizzle = {0, 1, 1};  // Duplicate height for depth
+          spirv_dims = 2;       // [width, height]
+          break;
+        case ast::type::TextureDimension::k2dArray:
+          swizzle = {0, 1};  // Strip array index
+          spirv_dims = 3;    // [width, height, array_count]
+          break;
+        case ast::type::TextureDimension::kCubeArray:
+          swizzle = {0, 1, 1};  // Strip array index, duplicate height for depth
+          spirv_dims = 3;       // [width, height, array_count]
+          break;
+      }
 
-        ast::type::Type* unstripped_result_type;
-        if (auto* v = call->result_type()->As<ast::type::Vector>()) {
-          unstripped_result_type =
-              mod_->create<ast::type::Vector>(v->type(), v->size() + 1);
+      if (swizzle.empty()) {
+        append_result_type_and_id_to_spirv_params();
+      } else {
+        // Assign post_emission to swizzle the result of the call to
+        // OpImageQuerySize[Lod].
+        auto* element_type = ElementTypeOf(call->result_type());
+        auto spirv_result = result_op();
+        auto* spirv_result_type =
+            mod_->create<ast::type::Vector>(element_type, spirv_dims);
+        if (swizzle.size() > 1) {
           post_emission = [=] {
-            // Swizzle the unstripped vector to form a vec2 or vec3
             OperandList operands{
                 result_type,
                 result_id,
-                unstripped_result,
-                unstripped_result,
+                spirv_result,
+                spirv_result,
             };
-            for (uint32_t i = 0; i < v->size(); i++) {
-              operands.emplace_back(Operand::Int(i));
+            for (auto idx : swizzle) {
+              operands.emplace_back(Operand::Int(idx));
             }
             return push_function_inst(spv::Op::OpVectorShuffle, operands);
           };
         } else {
-          unstripped_result_type =
-              mod_->create<ast::type::Vector>(call->result_type(), 2);
           post_emission = [=] {
-            // Extract the first element of the unstripped vec2 to form a scalar
-            return push_function_inst(
-                spv::Op::OpCompositeExtract,
-                {result_type, result_id, unstripped_result, Operand::Int(0)});
+            return push_function_inst(spv::Op::OpCompositeExtract,
+                                      {result_type, result_id, spirv_result,
+                                       Operand::Int(swizzle[0])});
           };
         }
-
-        auto unstripped_result_type_id =
-            GenerateTypeIfNeeded(unstripped_result_type);
-        if (unstripped_result_type_id == 0) {
+        auto spirv_result_type_id = GenerateTypeIfNeeded(spirv_result_type);
+        if (spirv_result_type_id == 0) {
           return false;
         }
-        spirv_params.emplace_back(Operand::Int(unstripped_result_type_id));
-        spirv_params.emplace_back(unstripped_result);
-      } else {
-        append_result_type_and_id_to_spirv_params();
+        spirv_params.emplace_back(Operand::Int(spirv_result_type_id));
+        spirv_params.emplace_back(spirv_result);
       }
 
       spirv_params.emplace_back(gen_param(pidx.texture));

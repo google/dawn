@@ -665,7 +665,37 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
   auto& pidx = signature->params.idx;
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
+  assert(pidx.texture != kNotUsed);
+  auto* texture_type = params[pidx.texture]
+                           ->result_type()
+                           ->UnwrapAll()
+                           ->As<ast::type::Texture>();
+
   if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
+    std::vector<const char*> dims;
+    switch (texture_type->dim()) {
+      case ast::type::TextureDimension::kNone:
+        error_ = "texture dimension is kNone";
+        return false;
+      case ast::type::TextureDimension::k1d:
+      case ast::type::TextureDimension::k1dArray:
+        dims = {"width"};
+        break;
+      case ast::type::TextureDimension::k2d:
+      case ast::type::TextureDimension::k2dArray:
+        dims = {"width", "height"};
+        break;
+      case ast::type::TextureDimension::k3d:
+        dims = {"width", "height", "depth"};
+        break;
+      case ast::type::TextureDimension::kCube:
+      case ast::type::TextureDimension::kCubeArray:
+        // width == height == depth for cubes
+        // See https://github.com/gpuweb/gpuweb/issues/1345
+        dims = {"width", "height", "height"};
+        break;
+    }
+
     auto get_dim = [&](const char* name) {
       if (!EmitExpression(params[pidx.texture])) {
         return false;
@@ -678,32 +708,18 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
       return true;
     };
 
-    size_t dims = 1;
-    if (auto* vec = expr->result_type()->As<ast::type::Vector>()) {
-      dims = vec->size();
-    }
-    switch (dims) {
-      case 1:
-        get_dim("width");
-        break;
-      case 2:
-        EmitType(expr->result_type(), "");
-        out_ << "(";
-        get_dim("width");
-        out_ << ", ";
-        get_dim("height");
-        out_ << ")";
-        break;
-      case 3:
-        EmitType(expr->result_type(), "");
-        out_ << "(";
-        get_dim("width");
-        out_ << ", ";
-        get_dim("height");
-        out_ << ", ";
-        get_dim("depth");
-        out_ << ")";
-        break;
+    if (dims.size() == 1) {
+      get_dim(dims[0]);
+    } else {
+      EmitType(expr->result_type(), "");
+      out_ << "(";
+      for (size_t i = 0; i < dims.size(); i++) {
+        if (i > 0) {
+          out_ << ", ";
+        }
+        get_dim(dims[i]);
+      }
+      out_ << ")";
     }
     return true;
   }

@@ -745,7 +745,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
   auto* texture = params[pidx.texture];
-  auto* texture_type = texture->result_type()->UnwrapPtrIfNeeded();
+  auto* texture_type =
+      texture->result_type()->UnwrapPtrIfNeeded()->As<ast::type::Texture>();
 
   if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
     // Declare a variable to hold the texture dimensions
@@ -763,17 +764,29 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     if (pidx.level != kNotUsed) {
       pre << pidx.level << ", ";
     }
-    if (auto* vec = expr->result_type()->As<ast::type::Vector>()) {
-      for (uint32_t i = 0; i < vec->size(); i++) {
-        if (i > 0) {
-          pre << ", ";
-        }
-        pre << dims << "[" << i << "]";
-      }
-    } else {
-      pre << dims;
+    switch (texture_type->dim()) {
+      case ast::type::TextureDimension::kNone:
+        error_ = "texture dimension is kNone";
+        return false;
+      case ast::type::TextureDimension::k1d:
+      case ast::type::TextureDimension::k1dArray:
+        pre << dims << ");";
+        break;
+      case ast::type::TextureDimension::k2d:
+      case ast::type::TextureDimension::k2dArray:
+        pre << dims << "[0], " << dims << "[1]);";
+        break;
+      case ast::type::TextureDimension::k3d:
+        pre << dims << "[0], " << dims << "[1], " << dims << "[2]);";
+        break;
+      case ast::type::TextureDimension::kCube:
+      case ast::type::TextureDimension::kCubeArray:
+        // width == height == depth for cubes
+        // See https://github.com/gpuweb/gpuweb/issues/1345
+        pre << dims << "[0], " << dims << "[1]);\n";
+        pre << dims << "[2] = " << dims << "[1];";  // dims[2] = dims[1]
+        break;
     }
-    pre << ");";
 
     // The result of the textureDimensions() call is now the temporary variable.
     out << dims;

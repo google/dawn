@@ -51,24 +51,26 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
       return R"(int2(texture_tint_0.get_width(), texture_tint_0.get_height()))";
     case ValidTextureOverload::kDimensions3d:
+    case ValidTextureOverload::kDimensionsStorageRO3d:
+    case ValidTextureOverload::kDimensionsStorageWO3d:
+      return R"(int3(texture_tint_0.get_width(), texture_tint_0.get_height(), texture_tint_0.get_depth()))";
     case ValidTextureOverload::kDimensionsCube:
     case ValidTextureOverload::kDimensionsCubeArray:
     case ValidTextureOverload::kDimensionsDepthCube:
     case ValidTextureOverload::kDimensionsDepthCubeArray:
-    case ValidTextureOverload::kDimensionsStorageRO3d:
-    case ValidTextureOverload::kDimensionsStorageWO3d:
-      return R"(int3(texture_tint_0.get_width(), texture_tint_0.get_height(), texture_tint_0.get_depth()))";
+      return R"(int3(texture_tint_0.get_width(), texture_tint_0.get_height(), texture_tint_0.get_height()))";
     case ValidTextureOverload::kDimensions2dLevel:
     case ValidTextureOverload::kDimensions2dArrayLevel:
     case ValidTextureOverload::kDimensionsDepth2dLevel:
     case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
       return R"(int2(texture_tint_0.get_width(1), texture_tint_0.get_height(1)))";
     case ValidTextureOverload::kDimensions3dLevel:
+      return R"(int3(texture_tint_0.get_width(1), texture_tint_0.get_height(1), texture_tint_0.get_depth(1)))";
     case ValidTextureOverload::kDimensionsCubeLevel:
     case ValidTextureOverload::kDimensionsCubeArrayLevel:
     case ValidTextureOverload::kDimensionsDepthCubeLevel:
     case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
-      return R"(int3(texture_tint_0.get_width(1), texture_tint_0.get_height(1), texture_tint_0.get_depth(1)))";
+      return R"(int3(texture_tint_0.get_width(1), texture_tint_0.get_height(1), texture_tint_0.get_height(1)))";
     case ValidTextureOverload::kSample1dF32:
       return R"(texture_tint_0.sample(sampler_tint_0, 1.0f))";
     case ValidTextureOverload::kSample1dArrayF32:
