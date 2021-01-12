@@ -1099,38 +1099,6 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
       << ToString(p->get_module(), fe.ast_body());
 }
 
-TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
-  const auto assembly = CommonTypes() + R"(
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
-     %1 = OpCopyObject %v2float %v2float_50_60
-     %2 = OpCopyObject %v2float %v2float_60_50
-     %3 = OpOuterProduct %m2v2float %1 %2
-     OpReturn
-     OpFunctionEnd
-)";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
-              HasSubstr(R"(VariableConst{
-    x_3
-    none
-    __mat_2_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{outerProduct}
-        (
-          Identifier[not set]{x_1}
-          Identifier[not set]{x_2}
-        )
-      }
-    }
-  })"))
-      << ToString(p->get_module(), fe.ast_body());
-}
-
 // TODO(dneto): OpSRem. Missing from WGSL
 // https://github.com/gpuweb/gpuweb/issues/702
 

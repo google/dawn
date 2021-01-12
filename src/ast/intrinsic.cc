@@ -162,9 +162,6 @@ std::ostream& operator<<(std::ostream& out, Intrinsic i) {
     case Intrinsic::kNormalize:
       out << "normalize";
       break;
-    case Intrinsic::kOuterProduct:
-      out << "outerProduct";
-      break;
     case Intrinsic::kPow:
       out << "pow";
       break;

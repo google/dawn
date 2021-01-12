@@ -88,7 +88,6 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 | mix | GLSLstd450FMix | mix | mix |
 | modf | GLSLstd450Modf | | |
 | normalize | GLSLstd450Normalize | normalize | normalize |
-| outerProduct | SpvOpOuterProduct | | |
 | pow | GLSLstd450Pow | pow | pow |
 | reflect | GLSLstd450Reflect | reflect | reflect |
 | reverseBits | SpvOpBitReverse | reverse_bits | reversebits |

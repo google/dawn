@@ -487,89 +487,34 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   }
 
   if (ident->IsIntrinsic()) {
-    const auto& params = expr->params();
-    if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
-      error_ = "outer_product not supported yet";
-      return false;
-      // TODO(dsinclair): This gets tricky. We need to generate two variables to
-      // hold the outer_product expressions, but we maybe inside an expression
-      // ourselves. So, this will need to, possibly, output the variables
-      // _before_ the expression which contains the outer product.
-      //
-      // This then has the follow on, what if we have `(false &&
-      // outer_product())` in that case, we shouldn't evaluate the expressions
-      // at all because of short circuting.
-      //
-      // So .... this turns out to be hard ...
-
-      // // We create variables to hold the two parameters in case they're
-      // // function calls with side effects.
-      // auto* param0 = param[0].get();
-      // auto* name0 = generate_name("outer_product_expr_0");
-
-      // auto* param1 = param[1].get();
-      // auto* name1 = generate_name("outer_product_expr_1");
-
-      // make_indent();
-      // if (!EmitType(expr->result_type(), "")) {
-      //   return false;
-      // }
-      // out_ << "(";
-
-      // auto param1_type = params[1]->result_type()->UnwrapPtrIfNeeded();
-      // if (!param1_type->Is<ast::type::Vector>()) {
-      //   error_ = "invalid param type in outer_product got: " +
-      //            param1_type->type_name();
-      //   return false;
-      // }
-
-      // for (uint32_t i = 0; i <
-      // param1_type->As<ast::type::Vector>()->size(); ++i) {
-      //   if (i > 0) {
-      //     out_ << ", ";
-      //   }
-
-      //   if (!EmitExpression(params[0].get())) {
-      //     return false;
-      //   }
-      //   out_ << " * ";
-
-      //   if (!EmitExpression(params[1].get())) {
-      //     return false;
-      //   }
-      //   out_ << "[" << i << "]";
-      // }
-
-      // out_ << ")";
-    } else {
-      auto name = generate_intrinsic_name(ident->intrinsic());
+    auto name = generate_intrinsic_name(ident->intrinsic());
+    if (name.empty()) {
+      if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
+        return EmitTextureCall(expr);
+      }
+      name = generate_builtin_name(ident);
       if (name.empty()) {
-        if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-          return EmitTextureCall(expr);
-        }
-        name = generate_builtin_name(ident);
-        if (name.empty()) {
-          return false;
-        }
+        return false;
       }
-
-      make_indent();
-      out_ << name << "(";
-
-      bool first = true;
-      for (auto* param : params) {
-        if (!first) {
-          out_ << ", ";
-        }
-        first = false;
-
-        if (!EmitExpression(param)) {
-          return false;
-        }
-      }
-
-      out_ << ")";
     }
+
+    make_indent();
+    out_ << name << "(";
+
+    bool first = true;
+    const auto& params = expr->params();
+    for (auto* param : params) {
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+
+      if (!EmitExpression(param)) {
+        return false;
+      }
+    }
+
+    out_ << ")";
     return true;
   }
 

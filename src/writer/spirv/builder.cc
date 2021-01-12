@@ -1940,8 +1940,6 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     op = spv::Op::OpIsInf;
   } else if (intrinsic == ast::Intrinsic::kIsNan) {
     op = spv::Op::OpIsNan;
-  } else if (intrinsic == ast::Intrinsic::kOuterProduct) {
-    op = spv::Op::OpOuterProduct;
   } else if (intrinsic == ast::Intrinsic::kReverseBits) {
     op = spv::Op::OpBitReverse;
   } else if (intrinsic == ast::Intrinsic::kSelect) {

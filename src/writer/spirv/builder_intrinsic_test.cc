@@ -349,38 +349,6 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"fwidthFine", "OpFwidthFine"},
                     IntrinsicData{"fwidthCoarse", "OpFwidthCoarse"}));
 
-TEST_F(IntrinsicBuilderTest, Call_OuterProduct) {
-  auto* v2 = Var("v2", ast::StorageClass::kPrivate, ty.vec2<f32>());
-  auto* v3 = Var("v3", ast::StorageClass::kPrivate, ty.vec3<f32>());
-
-  auto* expr = Call("outerProduct", "v2", "v3");
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
-
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(v2)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
-
-  EXPECT_EQ(b.GenerateCallExpression(expr), 10u) << b.error();
-
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
-%3 = OpTypeVector %4 2
-%2 = OpTypePointer Private %3
-%5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
-%8 = OpTypeVector %4 3
-%7 = OpTypePointer Private %8
-%9 = OpConstantNull %8
-%6 = OpVariable %7 Private %9
-%11 = OpTypeMatrix %3 3
-)");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%12 = OpLoad %3 %1
-%13 = OpLoad %8 %6
-%10 = OpOuterProduct %11 %12 %13
-)");
-}
-
 TEST_F(IntrinsicBuilderTest, Call_Select) {
   auto* v3 = Var("v3", ast::StorageClass::kPrivate, ty.vec3<f32>());
   auto* bool_v3 = Var("bool_v3", ast::StorageClass::kPrivate, ty.vec3<bool>());

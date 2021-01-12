@@ -65,25 +65,6 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{ast::Intrinsic::kReverseBits, "reverse_bits"},
                     IntrinsicData{ast::Intrinsic::kSelect, "select"}));
 
-TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
-  auto* a = Var("a", ast::StorageClass::kNone, ty.vec2<f32>());
-  auto* b = Var("b", ast::StorageClass::kNone, ty.vec3<f32>());
-
-  auto* call = Call("outer_product", "a", "b");
-  td.RegisterVariableForTesting(a);
-  td.RegisterVariableForTesting(b);
-
-  mod->AddGlobalVariable(a);
-  mod->AddGlobalVariable(b);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
-
-  gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
-}
-
 TEST_F(MslGeneratorImplTest, Intrinsic_Bad_Name) {
   EXPECT_EQ(gen.generate_intrinsic_name(ast::Intrinsic::kNone), "");
 }

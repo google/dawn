@@ -70,7 +70,6 @@ enum class Intrinsic {
   kMix,
   kModf,
   kNormalize,
-  kOuterProduct,
   kPow,
   kReflect,
   kReverseBits,

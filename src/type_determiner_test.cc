@@ -1617,55 +1617,6 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_TooManyParams) {
             "incorrect number of parameters for select expected 3 got 4");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
-  auto* var1 = Var(  // source
-      "v3", ast::StorageClass::kNone, ty.vec3<f32>());
-  auto* var2 = Var(  // source
-      "v2", ast::StorageClass::kNone, ty.vec2<f32>());
-  mod->AddGlobalVariable(var1);
-  mod->AddGlobalVariable(var2);
-
-  auto* expr = Call("outerProduct", "v3", "v2");
-
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(expr));
-
-  ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Matrix>());
-
-  auto* mat = expr->result_type()->As<ast::type::Matrix>();
-  EXPECT_TRUE(mat->type()->Is<ast::type::F32>());
-  EXPECT_EQ(mat->rows(), 3u);
-  EXPECT_EQ(mat->columns(), 2u);
-}
-
-TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooFewParams) {
-  auto* var2 = Var(  // source
-      "v2", ast::StorageClass::kNone, ty.vec2<f32>());
-  mod->AddGlobalVariable(var2);
-
-  auto* expr = Call("outerProduct", "v2");
-
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_FALSE(td()->DetermineResultType(expr));
-  EXPECT_EQ(td()->error(), "incorrect number of parameters for outerProduct");
-}
-
-TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooManyParams) {
-  auto* var2 = Var(  // source
-      "v2", ast::StorageClass::kNone, ty.vec2<f32>());
-  mod->AddGlobalVariable(var2);
-
-  auto* expr = Call("outerProduct", "v2", "v2", "v2");
-
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_FALSE(td()->DetermineResultType(expr));
-  EXPECT_EQ(td()->error(), "incorrect number of parameters for outerProduct");
-}
-
 using UnaryOpExpressionTest = TypeDeterminerTestWithParam<ast::UnaryOp>;
 TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto op = GetParam();
@@ -1798,7 +1749,6 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"mix", ast::Intrinsic::kMix},
         IntrinsicData{"modf", ast::Intrinsic::kModf},
         IntrinsicData{"normalize", ast::Intrinsic::kNormalize},
-        IntrinsicData{"outerProduct", ast::Intrinsic::kOuterProduct},
         IntrinsicData{"pow", ast::Intrinsic::kPow},
         IntrinsicData{"reflect", ast::Intrinsic::kReflect},
         IntrinsicData{"reverseBits", ast::Intrinsic::kReverseBits},

@@ -472,8 +472,6 @@ ast::Intrinsic GetIntrinsic(SpvOp opcode) {
       return ast::Intrinsic::kReverseBits;
     case SpvOpDot:
       return ast::Intrinsic::kDot;
-    case SpvOpOuterProduct:
-      return ast::Intrinsic::kOuterProduct;
     default:
       break;
   }

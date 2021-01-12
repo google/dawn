@@ -721,28 +721,6 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     expr->func()->set_result_type(mod_->create<ast::type::F32>());
     return true;
   }
-  if (ident->intrinsic() == ast::Intrinsic::kOuterProduct) {
-    if (expr->params().size() != 2) {
-      set_error(expr->source(), "incorrect number of parameters for " +
-                                    mod_->SymbolToName(ident->symbol()));
-      return false;
-    }
-
-    auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-    auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
-    if (!param0_type->Is<ast::type::Vector>() ||
-        !param1_type->Is<ast::type::Vector>()) {
-      set_error(expr->source(), "invalid parameter type for " +
-                                    mod_->SymbolToName(ident->symbol()));
-      return false;
-    }
-
-    expr->func()->set_result_type(mod_->create<ast::type::Matrix>(
-        mod_->create<ast::type::F32>(),
-        param0_type->As<ast::type::Vector>()->size(),
-        param1_type->As<ast::type::Vector>()->size()));
-    return true;
-  }
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
     if (expr->params().size() != 3) {
       set_error(expr->source(), "incorrect number of parameters for " +
@@ -1017,8 +995,6 @@ bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
     ident->set_intrinsic(ast::Intrinsic::kModf);
   } else if (name == "normalize") {
     ident->set_intrinsic(ast::Intrinsic::kNormalize);
-  } else if (name == "outerProduct") {
-    ident->set_intrinsic(ast::Intrinsic::kOuterProduct);
   } else if (name == "pow") {
     ident->set_intrinsic(ast::Intrinsic::kPow);
   } else if (name == "reflect") {
