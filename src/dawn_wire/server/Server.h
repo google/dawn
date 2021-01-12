@@ -53,8 +53,6 @@ namespace dawn_wire { namespace server {
         Server* const server;
         std::weak_ptr<bool> const serverIsAlive;
 
-      private:
-        friend class Server;
         CallbackUserdata() = delete;
         CallbackUserdata(Server* server, const std::shared_ptr<bool>& serverIsAlive)
             : server(server), serverIsAlive(serverIsAlive) {
