@@ -15,13 +15,17 @@
 #include <memory>
 
 #include "gmock/gmock.h"
+#include "spirv-tools/libspirv.hpp"
 #include "src/ast/builder.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/type_determiner.h"
+#include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -3777,6 +3781,65 @@ TEST_P(IntrinsicTextureTest, Call) {
   EXPECT_EQ(expected.instructions,
             "\n" + DumpInstructions(b.functions()[0].instructions()));
   EXPECT_EQ(expected.capabilities, "\n" + DumpInstructions(b.capabilities()));
+}
+
+// Check the SPIRV generated passes validation
+TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
+  auto param = GetParam();
+
+  mod->AddGlobalVariable(param.buildTextureVariable(this));
+  mod->AddGlobalVariable(param.buildSamplerVariable(this));
+
+  auto* call =
+      create<ast::CallExpression>(Expr(param.function), param.args(this));
+
+  auto* main =
+      Func("main", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::CallStatement>(call),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           });
+
+  mod->AddFunction(main);
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  ASSERT_TRUE(b.Build()) << td.error();
+
+  BinaryWriter writer;
+  writer.WriteHeader(b.id_bound());
+  writer.WriteBuilder(&b);
+  auto binary = writer.result();
+
+  std::string spv_errors;
+  auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
+                                    const spv_position_t& position,
+                                    const char* message) {
+    switch (level) {
+      case SPV_MSG_FATAL:
+      case SPV_MSG_INTERNAL_ERROR:
+      case SPV_MSG_ERROR:
+        spv_errors += "error: line " + std::to_string(position.index) + ": " +
+                      message + "\n";
+        break;
+      case SPV_MSG_WARNING:
+        spv_errors += "warning: line " + std::to_string(position.index) + ": " +
+                      message + "\n";
+        break;
+      case SPV_MSG_INFO:
+        spv_errors += "info: line " + std::to_string(position.index) + ": " +
+                      message + "\n";
+        break;
+      case SPV_MSG_DEBUG:
+        break;
+    }
+  };
+
+  spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_2);
+  tools.SetMessageConsumer(msg_consumer);
+  ASSERT_TRUE(tools.Validate(binary)) << spv_errors;
 }
 
 TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
