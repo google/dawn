@@ -838,7 +838,7 @@ OpCapability Sampled1D
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleImplicitLod %9 %13 %17 Offset %22
+%8 = OpImageSampleImplicitLod %9 %13 %17 ConstOffset %22
 )",
           R"(
 )"};
@@ -898,7 +898,7 @@ OpCapability Sampled1D
 %13 = OpSampledImage %12 %11 %10
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleImplicitLod %9 %13 %20 Offset %24
+%8 = OpImageSampleImplicitLod %9 %13 %20 ConstOffset %24
 )",
           R"(
 )"};
@@ -956,7 +956,7 @@ OpCapability Sampled1D
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleImplicitLod %9 %13 %18 Offset %24
+%8 = OpImageSampleImplicitLod %9 %13 %18 ConstOffset %24
 )",
           R"(
 )"};
@@ -1064,7 +1064,7 @@ OpCapability SampledCubeArray
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleImplicitLod %4 %12 %16 Offset %21
+%8 = OpImageSampleImplicitLod %4 %12 %16 ConstOffset %21
 )",
           R"(
 )"};
@@ -1122,7 +1122,7 @@ OpCapability SampledCubeArray
 %12 = OpSampledImage %11 %10 %9
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleImplicitLod %4 %12 %19 Offset %23
+%8 = OpImageSampleImplicitLod %4 %12 %19 ConstOffset %23
 )",
           R"(
 )"};
@@ -1233,7 +1233,7 @@ OpCapability SampledCubeArray
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleImplicitLod %9 %13 %17 Bias|Offset %18 %23
+%8 = OpImageSampleImplicitLod %9 %13 %17 Bias|ConstOffset %18 %23
 )",
           R"(
 )"};
@@ -1295,7 +1295,7 @@ OpCapability SampledCubeArray
 %13 = OpSampledImage %12 %11 %10
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleImplicitLod %9 %13 %20 Bias|Offset %21 %25
+%8 = OpImageSampleImplicitLod %9 %13 %20 Bias|ConstOffset %21 %25
 )",
           R"(
 )"};
@@ -1355,7 +1355,7 @@ OpCapability SampledCubeArray
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleImplicitLod %9 %13 %18 Bias|Offset %19 %25
+%8 = OpImageSampleImplicitLod %9 %13 %18 Bias|ConstOffset %19 %25
 )",
           R"(
 )"};
@@ -1469,7 +1469,7 @@ OpCapability SampledCubeArray
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleExplicitLod %9 %13 %17 Lod|Offset %18 %23
+%8 = OpImageSampleExplicitLod %9 %13 %17 Lod|ConstOffset %18 %23
 )",
           R"(
 )"};
@@ -1531,7 +1531,7 @@ OpCapability SampledCubeArray
 %13 = OpSampledImage %12 %11 %10
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleExplicitLod %9 %13 %20 Lod|Offset %21 %25
+%8 = OpImageSampleExplicitLod %9 %13 %20 Lod|ConstOffset %21 %25
 )",
           R"(
 )"};
@@ -1591,7 +1591,7 @@ OpCapability SampledCubeArray
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleExplicitLod %9 %13 %18 Lod|Offset %19 %25
+%8 = OpImageSampleExplicitLod %9 %13 %18 Lod|ConstOffset %19 %25
 )",
           R"(
 )"};
@@ -1704,7 +1704,7 @@ OpCapability SampledCubeArray
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleExplicitLod %4 %12 %16 Lod|Offset %18 %22
+%8 = OpImageSampleExplicitLod %4 %12 %16 Lod|ConstOffset %18 %22
 )",
           R"(
 )"};
@@ -1764,7 +1764,7 @@ OpCapability SampledCubeArray
 %12 = OpSampledImage %11 %10 %9
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleExplicitLod %4 %12 %19 Lod|Offset %20 %24
+%8 = OpImageSampleExplicitLod %4 %12 %19 Lod|ConstOffset %20 %24
 )",
           R"(
 )"};
@@ -1888,7 +1888,7 @@ OpCapability SampledCubeArray
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleExplicitLod %9 %13 %17 Grad|Offset %20 %23 %28
+%8 = OpImageSampleExplicitLod %9 %13 %17 Grad|ConstOffset %20 %23 %28
 )",
           R"(
 )"};
@@ -1962,7 +1962,7 @@ OpCapability SampledCubeArray
 %13 = OpSampledImage %12 %11 %10
 %17 = OpConvertSToF %4 %19
 %20 = OpCompositeConstruct %14 %15 %16 %17
-%8 = OpImageSampleExplicitLod %9 %13 %20 Grad|Offset %24 %27 %31
+%8 = OpImageSampleExplicitLod %9 %13 %20 Grad|ConstOffset %24 %27 %31
 )",
           R"(
 )"};
@@ -2036,7 +2036,7 @@ OpCapability SampledCubeArray
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleExplicitLod %9 %13 %18 Grad|Offset %22 %26 %32
+%8 = OpImageSampleExplicitLod %9 %13 %18 Grad|ConstOffset %22 %26 %32
 )",
           R"(
 )"};
@@ -2165,7 +2165,7 @@ OpCapability SampledCubeArray
 %9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleDrefExplicitLod %4 %12 %16 %17 Lod|Offset %18 %23
+%8 = OpImageSampleDrefExplicitLod %4 %12 %16 %17 Lod|ConstOffset %18 %23
 )",
           R"(
 )"};
@@ -2227,7 +2227,7 @@ OpCapability SampledCubeArray
 %12 = OpSampledImage %11 %10 %9
 %16 = OpConvertSToF %4 %18
 %19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleDrefExplicitLod %4 %12 %19 %20 Lod|Offset %21 %25
+%8 = OpImageSampleDrefExplicitLod %4 %12 %19 %20 Lod|ConstOffset %21 %25
 )",
           R"(
 )"};

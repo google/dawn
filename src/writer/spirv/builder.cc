@@ -2263,7 +2263,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
 
   if (pidx.offset != kNotUsed) {
     image_operands.emplace_back(
-        ImageOperand{SpvImageOperandsOffsetMask, gen_param(pidx.offset)});
+        ImageOperand{SpvImageOperandsConstOffsetMask, gen_param(pidx.offset)});
   }
 
   if (!image_operands.empty()) {
