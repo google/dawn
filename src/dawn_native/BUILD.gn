@@ -77,6 +77,17 @@ config("dawn_native_weak_framework") {
   }
 }
 
+# Config that adds the @executable_path rpath if needed so that Swiftshader or the Vulkan loader are found.
+config("dawn_native_vulkan_rpath") {
+  if (is_mac && dawn_enable_vulkan &&
+      (use_swiftshader || enable_vulkan_loader)) {
+    ldflags = [
+      "-rpath",
+      "@executable_path/",
+    ]
+  }
+}
+
 dawn_json_generator("dawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
@@ -633,7 +644,10 @@ dawn_component("dawn_native") {
   ]
   sources = [ "DawnNative.cpp" ]
   configs = [ ":dawn_native_internal" ]
-  public_configs = [ ":dawn_native_weak_framework" ]
+  public_configs = [
+    ":dawn_native_weak_framework",
+    ":dawn_native_vulkan_rpath",
+  ]
 
   if (dawn_enable_d3d12) {
     sources += [ "d3d12/D3D12Backend.cpp" ]
