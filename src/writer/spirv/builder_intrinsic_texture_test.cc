@@ -51,10 +51,11 @@ expected_texture_overload_spirv expected_texture_overload(
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
+%11 = OpConstant %9 0
 )",
           R"(
 %10 = OpLoad %3 %1
-%8 = OpImageQuerySize %9 %10
+%8 = OpImageQuerySizeLod %9 %10 %11
 )",
           R"(
 OpCapability Sampled1D
@@ -72,10 +73,11 @@ OpCapability ImageQuery
 %5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
 %11 = OpTypeVector %9 2
+%13 = OpConstant %9 0
 )",
           R"(
 %12 = OpLoad %3 %1
-%10 = OpImageQuerySize %11 %12
+%10 = OpImageQuerySizeLod %11 %12 %13
 %8 = OpCompositeExtract %9 %10 0
 )",
           R"(
@@ -94,10 +96,11 @@ OpCapability ImageQuery
 %5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
+%12 = OpConstant %10 0
 )",
           R"(
 %11 = OpLoad %3 %1
-%8 = OpImageQuerySize %9 %11
+%8 = OpImageQuerySizeLod %9 %11 %12
 )",
           R"(
 OpCapability ImageQuery
@@ -136,10 +139,11 @@ OpCapability ImageQuery
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
+%14 = OpConstant %10 0
 )",
           R"(
 %13 = OpLoad %3 %1
-%11 = OpImageQuerySize %12 %13
+%11 = OpImageQuerySizeLod %12 %13 %14
 %8 = OpVectorShuffle %9 %11 %11 0 1
 )",
           R"(
@@ -180,10 +184,11 @@ OpCapability ImageQuery
 %5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
+%12 = OpConstant %10 0
 )",
           R"(
 %11 = OpLoad %3 %1
-%8 = OpImageQuerySize %9 %11
+%8 = OpImageQuerySizeLod %9 %11 %12
 )",
           R"(
 OpCapability ImageQuery
@@ -221,10 +226,11 @@ OpCapability ImageQuery
 %5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
+%12 = OpConstant %10 0
 )",
           R"(
 %11 = OpLoad %3 %1
-%8 = OpImageQuerySize %9 %11
+%8 = OpImageQuerySizeLod %9 %11 %12
 )",
           R"(
 OpCapability ImageQuery
@@ -263,10 +269,11 @@ OpCapability ImageQuery
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpTypeVector %10 4
+%14 = OpConstant %10 0
 )",
           R"(
 %13 = OpLoad %3 %1
-%11 = OpImageQuerySize %12 %13
+%11 = OpImageQuerySizeLod %12 %13 %14
 %8 = OpVectorShuffle %9 %11 %11 0 1 2
 )",
           R"(
@@ -351,10 +358,11 @@ OpCapability ImageQuery
 %5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
+%12 = OpConstant %10 0
 )",
           R"(
 %11 = OpLoad %3 %1
-%8 = OpImageQuerySize %9 %11
+%8 = OpImageQuerySizeLod %9 %11 %12
 )",
           R"(
 OpCapability ImageQuery
@@ -393,10 +401,11 @@ OpCapability ImageQuery
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
+%14 = OpConstant %10 0
 )",
           R"(
 %13 = OpLoad %3 %1
-%11 = OpImageQuerySize %12 %13
+%11 = OpImageQuerySizeLod %12 %13 %14
 %8 = OpVectorShuffle %9 %11 %11 0 1
 )",
           R"(
@@ -437,10 +446,11 @@ OpCapability ImageQuery
 %5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
+%12 = OpConstant %10 0
 )",
           R"(
 %11 = OpLoad %3 %1
-%8 = OpImageQuerySize %9 %11
+%8 = OpImageQuerySizeLod %9 %11 %12
 )",
           R"(
 OpCapability ImageQuery
@@ -479,10 +489,11 @@ OpCapability ImageQuery
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpTypeVector %10 4
+%14 = OpConstant %10 0
 )",
           R"(
 %13 = OpLoad %3 %1
-%11 = OpImageQuerySize %12 %13
+%11 = OpImageQuerySizeLod %12 %13 %14
 %8 = OpVectorShuffle %9 %11 %11 0 1 2
 )",
           R"(

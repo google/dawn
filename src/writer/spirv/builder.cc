@@ -2117,11 +2117,17 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       }
 
       spirv_params.emplace_back(gen_param(pidx.texture));
-      if (pidx.level != kNotUsed) {
+      if (texture_type->Is<ast::type::MultisampledTexture>() ||
+          texture_type->Is<ast::type::StorageTexture>()) {
+        op = spv::Op::OpImageQuerySize;
+      } else if (pidx.level != kNotUsed) {
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(gen_param(pidx.level));
       } else {
-        op = spv::Op::OpImageQuerySize;
+        ast::SintLiteral i32_0(Source{}, mod_->create<ast::type::I32>(), 0);
+        op = spv::Op::OpImageQuerySizeLod;
+        spirv_params.emplace_back(
+            Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
       }
       break;
     }
