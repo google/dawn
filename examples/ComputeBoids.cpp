@@ -95,8 +95,7 @@ void initBuffers() {
 }
 
 void initRender() {
-    wgpu::ShaderModule vsModule =
-        utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[location(0)]] var<in> a_particlePos : vec2<f32>;
         [[location(1)]] var<in> a_particleVel : vec2<f32>;
         [[location(2)]] var<in> a_pos : vec2<f32>;
@@ -113,8 +112,7 @@ void initRender() {
         }
     )");
 
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[stage(fragment)]]
         fn main() -> void {

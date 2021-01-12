@@ -93,8 +93,8 @@ class SamplerFilterAnisotropicTest : public DawnTest {
     void InitTexture() {
         const uint32_t mipLevelCount = colors.size();
 
-        const uint32_t textureWidthLevel0 = 1 << mipLevelCount;
-        const uint32_t textureHeightLevel0 = 1 << mipLevelCount;
+        const uint32_t textureWidthLevel0 = 1 << (mipLevelCount - 1);
+        const uint32_t textureHeightLevel0 = 1 << (mipLevelCount - 1);
 
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
@@ -197,18 +197,18 @@ class SamplerFilterAnisotropicTest : public DawnTest {
         queue.Submit(1, &commands);
 
         // https://jsfiddle.net/t8k7c95o/5/
-        // (x, y) -> (8, [0,15)) full readpixels result on Mac metal backend Intel GPU
+        // (x, y) -> (8, [0,15)) full readpixels result on Win10 Nvidia D3D12 GPU
         // maxAnisotropy: 1
         //  0 - 00 00 00
         //  1 - 00 00 ff
         //  2 - 00 00 ff
         //  3 - 00 00 ff
-        //  4 - 00 00 ff
-        //  5 - 00 00 ff
-        //  6 - 00 ef 10
-        //  7 - 00 ef 10
-        //  8 - a7 58 00
-        //  9 - a7 58 00
+        //  4 - 00 f9 06
+        //  5 - 00 f9 06
+        //  6 - f2 0d 00
+        //  7 - f2 0d 00
+        //  8 - ff 00 00
+        //  9 - ff 00 00
         // 10 - ff 00 00
         // 11 - ff 00 00
         // 12 - ff 00 00
@@ -219,12 +219,12 @@ class SamplerFilterAnisotropicTest : public DawnTest {
         // maxAnisotropy: 2
         //  0 - 00 00 00
         //  1 - 00 00 ff
-        //  2 - 00 00 ff
-        //  3 - 00 00 ff
-        //  4 - 00 f7 08
-        //  5 - 00 f7 08
-        //  6 - ed 12 00
-        //  7 - ed 12 10
+        //  2 - 00 7e 81
+        //  3 - 00 7e 81
+        //  4 - ff 00 00
+        //  5 - ff 00 00
+        //  6 - ff 00 00
+        //  7 - ff 00 00
         //  8 - ff 00 00
         //  9 - ff 00 00
         // 10 - ff 00 00
@@ -237,10 +237,10 @@ class SamplerFilterAnisotropicTest : public DawnTest {
         // maxAnisotropy: 16
         //  0 - 00 00 00
         //  1 - 00 00 ff
-        //  2 - 00 ad 52
-        //  3 - 00 ad 52
-        //  4 - 81 7e 00
-        //  5 - 81 7e 00
+        //  2 - dd 22 00
+        //  3 - dd 22 00
+        //  4 - ff 00 00
+        //  5 - ff 00 00
         //  6 - ff 00 00
         //  7 - ff 00 00
         //  8 - ff 00 00
@@ -253,14 +253,14 @@ class SamplerFilterAnisotropicTest : public DawnTest {
         // 15 - ff 00 00
 
         if (maxAnisotropy >= 16) {
-            EXPECT_PIXEL_RGBA8_BETWEEN(colors[0], colors[1], mRenderPass.color, 8, 4);
-            EXPECT_PIXEL_RGBA8_EQ(colors[0], mRenderPass.color, 8, 7);
+            EXPECT_PIXEL_RGBA8_BETWEEN(colors[0], colors[1], mRenderPass.color, 8, 2);
+            EXPECT_PIXEL_RGBA8_EQ(colors[0], mRenderPass.color, 8, 6);
         } else if (maxAnisotropy == 2) {
-            EXPECT_PIXEL_RGBA8_BETWEEN(colors[1], colors[2], mRenderPass.color, 8, 4);
-            EXPECT_PIXEL_RGBA8_BETWEEN(colors[0], colors[1], mRenderPass.color, 8, 7);
+            EXPECT_PIXEL_RGBA8_BETWEEN(colors[1], colors[2], mRenderPass.color, 8, 2);
+            EXPECT_PIXEL_RGBA8_EQ(colors[0], mRenderPass.color, 8, 6);
         } else if (maxAnisotropy <= 1) {
-            EXPECT_PIXEL_RGBA8_EQ(colors[2], mRenderPass.color, 8, 4);
-            EXPECT_PIXEL_RGBA8_BETWEEN(colors[1], colors[2], mRenderPass.color, 8, 7);
+            EXPECT_PIXEL_RGBA8_EQ(colors[2], mRenderPass.color, 8, 2);
+            EXPECT_PIXEL_RGBA8_BETWEEN(colors[0], colors[1], mRenderPass.color, 8, 6);
         }
     }
 

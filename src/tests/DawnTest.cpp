@@ -901,7 +901,6 @@ void DawnTestBase::SetUp() {
     // upgrade. Violently suppress this whole configuration until we figure out what to do.
     // See https://crbug.com/dawn/598
     DAWN_SKIP_TEST_IF(IsBackendValidationEnabled() && IsIntel() && IsD3D12());
-
 }
 
 void DawnTestBase::TearDown() {
