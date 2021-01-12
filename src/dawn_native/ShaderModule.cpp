@@ -173,12 +173,11 @@ namespace dawn_native {
         }
 
 #ifdef DAWN_ENABLE_WGSL
-        ResultOrError<tint::ast::Module> ParseWGSL(const char* wgsl) {
+        ResultOrError<tint::ast::Module> ParseWGSL(const tint::Source::File* file) {
             std::ostringstream errorStream;
             errorStream << "Tint WGSL reader failure:" << std::endl;
 
-            tint::Source::File file("", wgsl);
-            tint::reader::wgsl::Parser parser(&file);
+            tint::reader::wgsl::Parser parser(file);
             if (!parser.Parse()) {
                 errorStream << "Parser: " << parser.error() << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -827,16 +826,18 @@ namespace dawn_native {
                 const auto* wgslDesc =
                     static_cast<const ShaderModuleWGSLDescriptor*>(chainedDescriptor);
 
+                tint::Source::File file("", wgslDesc->source);
+
                 if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
                     tint::ast::Module module;
-                    DAWN_TRY_ASSIGN(module, ParseWGSL(wgslDesc->source));
+                    DAWN_TRY_ASSIGN(module, ParseWGSL(&file));
                     if (device->IsValidationEnabled()) {
                         DAWN_TRY(ValidateModule(&module));
                     }
                     parseResult.tintModule = std::make_unique<tint::ast::Module>(std::move(module));
                 } else {
                     tint::ast::Module module;
-                    DAWN_TRY_ASSIGN(module, ParseWGSL(wgslDesc->source));
+                    DAWN_TRY_ASSIGN(module, ParseWGSL(&file));
 
                     {
                         tint::transform::Manager transformManager;
