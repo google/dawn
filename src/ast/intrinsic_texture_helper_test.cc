@@ -153,26 +153,34 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
     ast::Builder* b) const {
   auto* datatype = resultVectorComponentType(b);
 
+  VariableDecorationList decos = {
+      b->create<ast::SetDecoration>(0),
+      b->create<ast::BindingDecoration>(0),
+  };
   switch (texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
       return b->Var(
-          "texture", ast::StorageClass::kNone,
-          b->create<ast::type::SampledTexture>(texture_dimension, datatype));
+          "texture", ast::StorageClass::kUniformConstant,
+          b->create<ast::type::SampledTexture>(texture_dimension, datatype),
+          nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kDepth:
-      return b->Var("texture", ast::StorageClass::kNone,
-                    b->create<ast::type::DepthTexture>(texture_dimension));
+      return b->Var("texture", ast::StorageClass::kUniformConstant,
+                    b->create<ast::type::DepthTexture>(texture_dimension),
+                    nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kMultisampled:
-      return b->Var("texture", ast::StorageClass::kNone,
+      return b->Var("texture", ast::StorageClass::kUniformConstant,
                     b->create<ast::type::MultisampledTexture>(texture_dimension,
-                                                              datatype));
+                                                              datatype),
+                    nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
       auto* st = b->create<ast::type::StorageTexture>(
           texture_dimension, access_control, image_format);
       st->set_type(datatype);
-      return b->Var("texture", ast::StorageClass::kNone, st);
+      return b->Var("texture", ast::StorageClass::kUniformConstant, st, nullptr,
+                    decos);
     }
   }
 
@@ -182,8 +190,13 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
 
 ast::Variable* TextureOverloadCase::buildSamplerVariable(
     ast::Builder* b) const {
-  return b->Var("sampler", ast::StorageClass::kNone,
-                b->create<ast::type::Sampler>(sampler_kind));
+
+  VariableDecorationList decos = {
+      b->create<ast::SetDecoration>(0),
+      b->create<ast::BindingDecoration>(1),
+  };
+  return b->Var("sampler", ast::StorageClass::kUniformConstant,
+                b->create<ast::type::Sampler>(sampler_kind), nullptr, decos);
 }
 
 std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {

@@ -45,11 +45,11 @@ expected_texture_overload_spirv expected_texture_overload(
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
 )",
           R"(
@@ -65,11 +65,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
 %11 = OpTypeVector %9 2
 )",
@@ -87,11 +87,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 )",
@@ -107,11 +107,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpConstant %10 1
@@ -128,11 +128,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
@@ -150,11 +150,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
@@ -173,11 +173,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 )",
@@ -193,11 +193,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpConstant %10 1
@@ -214,11 +214,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 )",
@@ -234,11 +234,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpConstant %10 1
@@ -255,11 +255,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpTypeVector %10 4
@@ -278,11 +278,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpTypeVector %10 4
@@ -302,11 +302,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 )",
@@ -322,11 +322,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
@@ -344,11 +344,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 )",
@@ -364,11 +364,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpConstant %10 1
@@ -385,11 +385,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
@@ -407,11 +407,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
@@ -430,11 +430,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 )",
@@ -450,11 +450,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpConstant %10 1
@@ -471,11 +471,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpTypeVector %10 4
@@ -494,11 +494,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 %12 = OpTypeVector %10 4
@@ -518,11 +518,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
 )",
           R"(
@@ -538,11 +538,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
 %11 = OpTypeVector %9 2
 )",
@@ -560,11 +560,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 )",
@@ -580,11 +580,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
@@ -602,11 +602,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 )",
@@ -622,11 +622,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
 )",
           R"(
@@ -642,11 +642,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeInt 32 1
 %11 = OpTypeVector %9 2
 )",
@@ -664,11 +664,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 )",
@@ -684,11 +684,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 2
 %12 = OpTypeVector %10 3
@@ -706,11 +706,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %10 = OpTypeInt 32 1
 %9 = OpTypeVector %10 3
 )",
@@ -726,11 +726,11 @@ OpCapability ImageQuery
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpConstant %4 1
@@ -749,11 +749,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -777,11 +777,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -802,11 +802,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -832,11 +832,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -860,11 +860,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -892,11 +892,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -918,11 +918,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -950,11 +950,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -976,11 +976,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpConstant %4 1
@@ -1005,11 +1005,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 2
 %14 = OpConstant %4 1
@@ -1029,11 +1029,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 2
 %14 = OpConstant %4 1
@@ -1058,11 +1058,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -1085,11 +1085,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -1116,11 +1116,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -1141,11 +1141,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 4
 %14 = OpConstant %4 1
@@ -1170,11 +1170,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -1196,11 +1196,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -1227,11 +1227,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1256,11 +1256,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1289,11 +1289,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1316,11 +1316,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1349,11 +1349,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1376,11 +1376,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpConstant %4 1
@@ -1406,11 +1406,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -1432,11 +1432,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -1463,11 +1463,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1492,11 +1492,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1525,11 +1525,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1552,11 +1552,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1585,11 +1585,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1612,11 +1612,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpConstant %4 1
@@ -1642,11 +1642,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 2
 %14 = OpConstant %4 1
@@ -1668,11 +1668,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 2
 %14 = OpConstant %4 1
@@ -1698,11 +1698,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -1726,11 +1726,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -1758,11 +1758,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -1785,11 +1785,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 4
 %14 = OpConstant %4 1
@@ -1815,11 +1815,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -1846,11 +1846,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 2
@@ -1882,11 +1882,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1917,11 +1917,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1956,11 +1956,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -1990,11 +1990,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -2030,11 +2030,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpTypeVector %4 3
@@ -2064,11 +2064,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeSampledImage %3
 %14 = OpConstant %4 1
@@ -2102,11 +2102,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 2
 %14 = OpConstant %4 1
@@ -2128,11 +2128,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 2
 %14 = OpConstant %4 1
@@ -2159,11 +2159,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -2188,11 +2188,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -2221,11 +2221,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 3
 %14 = OpConstant %4 1
@@ -2248,11 +2248,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 4
 %14 = OpConstant %4 1
@@ -2279,11 +2279,11 @@ OpCapability SampledCubeArray
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeInt 32 1
 %12 = OpConstant %11 1
@@ -2300,11 +2300,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeInt 32 1
 %12 = OpConstant %11 1
@@ -2321,11 +2321,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 1D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpConstant %4 1
 )",
@@ -2341,11 +2341,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2365,11 +2365,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2389,11 +2389,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -2412,11 +2412,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2435,11 +2435,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2458,11 +2458,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -2480,11 +2480,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2504,11 +2504,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2528,11 +2528,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -2551,11 +2551,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2575,11 +2575,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2599,11 +2599,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 3
 %12 = OpConstant %4 1
@@ -2622,11 +2622,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2647,11 +2647,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2672,11 +2672,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 3
 %12 = OpConstant %4 1
@@ -2696,11 +2696,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2720,11 +2720,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2744,11 +2744,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 3
 %12 = OpConstant %4 1
@@ -2767,11 +2767,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2792,11 +2792,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2817,11 +2817,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 3D 0 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 3
 %12 = OpConstant %4 1
@@ -2841,11 +2841,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2865,11 +2865,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -2889,11 +2889,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -2912,11 +2912,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2937,11 +2937,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -2962,11 +2962,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 3
 %12 = OpConstant %4 1
@@ -2986,11 +2986,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeInt 32 1
 %10 = OpTypeVector %11 2
 %12 = OpConstant %11 1
@@ -3008,11 +3008,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeInt 32 1
 %10 = OpTypeVector %11 2
 %12 = OpConstant %11 1
@@ -3031,11 +3031,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeInt 32 1
 %10 = OpTypeVector %11 3
 %12 = OpConstant %11 1
@@ -3054,11 +3054,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 1 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %11 = OpTypeInt 32 1
 %10 = OpTypeVector %11 3
 %12 = OpConstant %11 1
@@ -3078,11 +3078,11 @@ OpCapability Sampled1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeInt 32 1
 %12 = OpConstant %11 1
@@ -3099,11 +3099,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3123,11 +3123,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3146,11 +3146,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8Snorm
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3169,11 +3169,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8ui
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3192,11 +3192,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba8i
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -3214,11 +3214,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba16ui
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3237,11 +3237,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba16i
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -3259,11 +3259,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba16f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3282,11 +3282,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 R32ui
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3305,11 +3305,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 R32i
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -3327,11 +3327,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 R32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3350,11 +3350,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rg32ui
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3374,11 +3374,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rg32i
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -3397,11 +3397,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rg32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3421,11 +3421,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32ui
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3444,11 +3444,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeInt 32 1
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32i
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %11 = OpTypeVector %4 2
 %12 = OpConstant %4 1
@@ -3466,11 +3466,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3490,11 +3490,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -3514,11 +3514,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVector %4 4
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -3538,11 +3538,11 @@ OpCapability StorageImageExtendedFormats
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVoid
 %11 = OpTypeInt 32 1
 %12 = OpConstant %11 1
@@ -3565,11 +3565,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVoid
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3595,11 +3595,11 @@ OpCapability Image1D
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVoid
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 2
@@ -3624,11 +3624,11 @@ OpImageWrite %10 %15 %21
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVoid
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
@@ -3654,11 +3654,11 @@ OpImageWrite %10 %16 %22
           R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 3D 0 0 0 2 Rgba32f
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
 %9 = OpTypeVoid
 %12 = OpTypeInt 32 1
 %11 = OpTypeVector %12 3
