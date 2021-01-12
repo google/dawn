@@ -1751,6 +1751,10 @@ ParserImpl::GetSpirvTypeForHandleMemoryObjectDeclaration(
              "translate variable or function parameter: "
           << var.PrettyPrint();
       return nullptr;
+    case SpvOpTypeSampledImage:
+      Fail() << "WGSL does not support combined image-samplers: "
+             << var.PrettyPrint();
+      return nullptr;
     default:
       Fail() << "invalid type for image or sampler variable or function "
                 "parameter: "

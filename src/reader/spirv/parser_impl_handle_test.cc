@@ -4478,6 +4478,33 @@ INSTANTIATE_TEST_SUITE_P(
          "gradient: ",
          {}}}));
 
+TEST_F(SpvParserTest, CombinedImageSampler_IsError) {
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
+
+     OpDecorate %var DescriptorSet 0
+     OpDecorate %var Binding 0
+  %float = OpTypeFloat 32
+     %im = OpTypeImage %float 2D 0 0 0 1 Unknown
+     %si = OpTypeSampledImage %im
+ %ptr_si = OpTypePointer UniformConstant %si
+    %var = OpVariable %ptr_si UniformConstant
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+
+    %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+           OpReturn
+           OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  std::cout << assembly;
+  EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
+  EXPECT_THAT(p->error(),
+              HasSubstr("WGSL does not support combined image-samplers: "));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
