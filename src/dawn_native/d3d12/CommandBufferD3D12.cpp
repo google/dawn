@@ -60,7 +60,7 @@ namespace dawn_native { namespace d3d12 {
         D3D12_QUERY_TYPE D3D12QueryType(wgpu::QueryType type) {
             switch (type) {
                 case wgpu::QueryType::Occlusion:
-                    return D3D12_QUERY_TYPE_OCCLUSION;
+                    return D3D12_QUERY_TYPE_BINARY_OCCLUSION;
                 case wgpu::QueryType::PipelineStatistics:
                     return D3D12_QUERY_TYPE_PIPELINE_STATISTICS;
                 case wgpu::QueryType::Timestamp:
@@ -1433,11 +1433,23 @@ namespace dawn_native { namespace d3d12 {
                 }
 
                 case Command::BeginOcclusionQuery: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                    ASSERT(D3D12QueryType(querySet->GetQueryType()) ==
+                           D3D12_QUERY_TYPE_BINARY_OCCLUSION);
+                    commandList->BeginQuery(querySet->GetQueryHeap(),
+                                            D3D12_QUERY_TYPE_BINARY_OCCLUSION, cmd->queryIndex);
+                    break;
                 }
 
                 case Command::EndOcclusionQuery: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    EndOcclusionQueryCmd* cmd = mCommands.NextCommand<EndOcclusionQueryCmd>();
+                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                    ASSERT(D3D12QueryType(querySet->GetQueryType()) ==
+                           D3D12_QUERY_TYPE_BINARY_OCCLUSION);
+                    commandList->EndQuery(querySet->GetQueryHeap(),
+                                          D3D12_QUERY_TYPE_BINARY_OCCLUSION, cmd->queryIndex);
+                    break;
                 }
 
                 case Command::WriteTimestamp: {

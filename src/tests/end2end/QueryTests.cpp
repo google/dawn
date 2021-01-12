@@ -19,6 +19,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 class QueryTests : public DawnTest {
@@ -32,23 +33,190 @@ class QueryTests : public DawnTest {
     }
 };
 
-class OcclusionQueryTests : public QueryTests {};
+class OcclusionQueryTests : public QueryTests {
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>( 1.0,  1.0),
+                    vec2<f32>(-1.0, -1.0),
+                    vec2<f32>( 1.0, -1.0));
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            })");
+
+        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            })");
+    }
+
+    struct ScissorRect {
+        uint32_t x;
+        uint32_t y;
+        uint32_t width;
+        uint32_t height;
+    };
+
+    wgpu::QuerySet CreateOcclusionQuerySet(uint32_t count) {
+        wgpu::QuerySetDescriptor descriptor;
+        descriptor.count = count;
+        descriptor.type = wgpu::QueryType::Occlusion;
+        return device.CreateQuerySet(&descriptor);
+    }
+
+    wgpu::Texture CreateRenderTexture(wgpu::TextureFormat format) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {kRTSize, kRTSize, 1};
+        descriptor.format = format;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+        return device.CreateTexture(&descriptor);
+    }
+
+    void TestOcclusionQueryWithDepthStencilTest(bool depthTestEnabled,
+                                                bool stencilTestEnabled,
+                                                uint64_t expected) {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+
+        // Enable depth and stencil tests and set comparison tests never pass.
+        wgpu::DepthStencilStateDescriptor depthStencilState;
+        depthStencilState.depthCompare =
+            depthTestEnabled ? wgpu::CompareFunction::Never : wgpu::CompareFunction::Always;
+        depthStencilState.stencilFront.compare =
+            stencilTestEnabled ? wgpu::CompareFunction::Never : wgpu::CompareFunction::Always;
+        depthStencilState.stencilBack.compare =
+            stencilTestEnabled ? wgpu::CompareFunction::Never : wgpu::CompareFunction::Always;
+
+        descriptor.cDepthStencilState = depthStencilState;
+        descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        descriptor.depthStencilState = &descriptor.cDepthStencilState;
+
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        wgpu::Texture renderTarget = CreateRenderTexture(wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::TextureView renderTargetView = renderTarget.CreateView();
+
+        wgpu::Texture depthTexture = CreateRenderTexture(wgpu::TextureFormat::Depth24PlusStencil8);
+        wgpu::TextureView depthTextureView = depthTexture.CreateView();
+
+        wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
+        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+        uint64_t myData = ~uint64_t(1);
+        // Set all bits in buffer to check 0 is correctly written if there is no sample passed the
+        // occlusion testing
+        queue.WriteBuffer(destination, 0, &myData, sizeof(myData));
+
+        utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthTextureView);
+        renderPass.occlusionQuerySet = querySet;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline);
+        pass.SetStencilReference(0);
+        pass.BeginOcclusionQuery(0);
+        pass.Draw(3);
+        pass.EndOcclusionQuery();
+        pass.EndPass();
+
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER_U64_EQ(expected, destination, 0);
+    }
+
+    void TestOcclusionQueryWithScissorTest(ScissorRect rect, uint64_t expected) {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
+        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+        uint64_t myData = ~uint64_t(1);
+        // Set all bits in buffer to check 0 is correctly written if there is no sample passed the
+        // occlusion testing
+        queue.WriteBuffer(destination, 0, &myData, sizeof(myData));
+
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        renderPass.renderPassInfo.occlusionQuerySet = querySet;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetScissorRect(rect.x, rect.y, rect.width, rect.height);
+        pass.BeginOcclusionQuery(0);
+        pass.Draw(3);
+        pass.EndOcclusionQuery();
+        pass.EndPass();
+
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER_U64_EQ(expected, destination, 0);
+    }
+
+    wgpu::ShaderModule vsModule;
+    wgpu::ShaderModule fsModule;
+
+    constexpr static unsigned int kRTSize = 4;
+    constexpr static uint32_t kQueryCount = 1;
+};
 
 // Test creating query set with the type of Occlusion
 TEST_P(OcclusionQueryTests, QuerySetCreation) {
-    wgpu::QuerySetDescriptor descriptor;
-    descriptor.count = 1;
-    descriptor.type = wgpu::QueryType::Occlusion;
-    device.CreateQuerySet(&descriptor);
+    CreateOcclusionQuerySet(kQueryCount);
 }
 
 // Test destroying query set
 TEST_P(OcclusionQueryTests, QuerySetDestroy) {
-    wgpu::QuerySetDescriptor descriptor;
-    descriptor.count = 1;
-    descriptor.type = wgpu::QueryType::Occlusion;
-    wgpu::QuerySet querySet = device.CreateQuerySet(&descriptor);
+    wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
     querySet.Destroy();
+}
+
+// Draw a bottom right triangle with depth/stencil testing enabled and check whether there is
+// sample passed the testing by non-precise occlusion query with the binary results:
+// 0 indicates that no sample passed depth/stencil testing,
+// 1 indicates that at least one sample passed depth/stencil testing.
+TEST_P(OcclusionQueryTests, QueryWithDepthStencilTest) {
+    // TODO(hao.x.li@intel.com): Implement non-precise occlusion on Metal and Vulkan
+    DAWN_SKIP_TEST_IF(IsMetal() || IsVulkan());
+
+    // Disable depth/stencil testing, the samples always pass the testing, the expected occlusion
+    // result is 1.
+    TestOcclusionQueryWithDepthStencilTest(false, false, 1);
+
+    // Only enable depth testing and set the samples never pass the testing, the expected occlusion
+    // result is 0.
+    TestOcclusionQueryWithDepthStencilTest(true, false, 0);
+
+    // Only enable stencil testing and set the samples never pass the testing, the expected
+    // occlusion result is 0.
+    TestOcclusionQueryWithDepthStencilTest(false, true, 0);
+}
+
+// Draw a bottom right triangle with scissor testing enabled and check whether there is
+// sample passed the testing by non-precise occlusion query with the binary results:
+// 0 indicates that no sample passed scissor testing,
+// 1 indicates that at least one sample passed scissor testing.
+TEST_P(OcclusionQueryTests, QueryWithScissorTest) {
+    // TODO(hao.x.li@intel.com): Implement non-precise occlusion on Metal and Vulkan
+    DAWN_SKIP_TEST_IF(IsMetal() || IsVulkan());
+
+    // Test there are samples passed scissor testing, the expected occlusion result is 1.
+    TestOcclusionQueryWithScissorTest({2, 1, 2, 1}, 1);
+
+    // Test there is no sample passed scissor testing, the expected occlusion result is 0.
+    TestOcclusionQueryWithScissorTest({0, 0, 2, 1}, 0);
 }
 
 DAWN_INSTANTIATE_TEST(OcclusionQueryTests, D3D12Backend(), MetalBackend(), VulkanBackend());

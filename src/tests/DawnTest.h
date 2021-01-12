@@ -49,6 +49,9 @@
     EXPECT_BUFFER(buffer, offset, sizeof(uint32_t) * (count),       \
                   new ::detail::ExpectEq<uint32_t>(expected, count))
 
+#define EXPECT_BUFFER_U64_EQ(expected, buffer, offset) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint64_t), new ::detail::ExpectEq<uint64_t>(expected))
+
 #define EXPECT_BUFFER_U64_RANGE_EQ(expected, buffer, offset, count) \
     EXPECT_BUFFER(buffer, offset, sizeof(uint64_t) * (count),       \
                   new ::detail::ExpectEq<uint64_t>(expected, count))
