@@ -3734,50 +3734,10 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
   // The point of this test is to try to generate the texture
   // intrinsic call outside a function.
 
-  ast::type::Type* datatype = nullptr;
-  switch (param.texture_data_type) {
-    case ast::intrinsic::test::TextureDataType::kF32:
-      datatype = ty.f32;
-      break;
-    case ast::intrinsic::test::TextureDataType::kU32:
-      datatype = ty.u32;
-      break;
-    case ast::intrinsic::test::TextureDataType::kI32:
-      datatype = ty.i32;
-      break;
-  }
+  auto* texture = param.buildTextureVariable(this);
+  auto* sampler = param.buildSamplerVariable(this);
 
-  ast::type::Sampler sampler_type{param.sampler_kind};
-  ast::Variable* tex = nullptr;
-  switch (param.texture_kind) {
-    case ast::intrinsic::test::TextureKind::kRegular:
-      tex = Var("texture", ast::StorageClass::kNone,
-                mod->create<ast::type::SampledTexture>(param.texture_dimension,
-                                                       datatype));
-      break;
-
-    case ast::intrinsic::test::TextureKind::kDepth:
-      tex = Var("texture", ast::StorageClass::kNone,
-                mod->create<ast::type::DepthTexture>(param.texture_dimension));
-      break;
-
-    case ast::intrinsic::test::TextureKind::kMultisampled:
-      tex = Var("texture", ast::StorageClass::kNone,
-                mod->create<ast::type::MultisampledTexture>(
-                    param.texture_dimension, datatype));
-      break;
-
-    case ast::intrinsic::test::TextureKind::kStorage: {
-      auto* st = mod->create<ast::type::StorageTexture>(
-          param.texture_dimension, param.access_control, param.image_format);
-      st->set_type(datatype);
-      tex = Var("texture", ast::StorageClass::kNone, st);
-    } break;
-  }
-
-  auto* sampler = Var("sampler", ast::StorageClass::kNone, &sampler_type);
-
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   auto* call =

@@ -168,10 +168,12 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
                     b->create<ast::type::MultisampledTexture>(texture_dimension,
                                                               datatype));
 
-    case ast::intrinsic::test::TextureKind::kStorage:
-      return b->Var("texture", ast::StorageClass::kNone,
-                    b->create<ast::type::StorageTexture>(
-                        texture_dimension, access_control, image_format));
+    case ast::intrinsic::test::TextureKind::kStorage: {
+      auto* st = b->create<ast::type::StorageTexture>(
+          texture_dimension, access_control, image_format);
+      st->set_type(datatype);
+      return b->Var("texture", ast::StorageClass::kNone, st);
+    }
   }
 
   assert(false /* unreachable */);
