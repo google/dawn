@@ -468,7 +468,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         };
         [[set(0), binding(1)]] var<storage_buffer> ibContents : [[access(read_write)]] IBContents;
 
-        # TODO(crbug.com/tint/386): Use the same struct.
+        // TODO(crbug.com/tint/386): Use the same struct.
         [[block]] struct ColorContents1 {
             [[offset(0)]] color : f32;
         };

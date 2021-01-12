@@ -157,7 +157,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
+        // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         [[block]] struct VertexUniformBuffer {
             [[offset(0)]] transform : vec4<f32>;
         };
@@ -245,7 +245,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
+        // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         [[block]] struct VertexUniformBuffer {
             [[offset(0)]] transform : vec4<f32>;
         };
@@ -360,8 +360,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
-        # TODO(crbug.com/tint/386): Use the same struct.
+        // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
+        // TODO(crbug.com/tint/386): Use the same struct.
         [[block]] struct VertexUniformBuffer1 {
             [[offset(0)]] transform : vec4<f32>;
         };
@@ -370,7 +370,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
             [[offset(0)]] transform : vec4<f32>;
         };
 
-        # TODO(crbug.com/tint/386): Use the same struct definition.
+        // TODO(crbug.com/tint/386): Use the same struct definition.
         [[set(0), binding(0)]] var <uniform> vertexUbo1 : VertexUniformBuffer1;
         [[set(1), binding(0)]] var <uniform> vertexUbo2 : VertexUniformBuffer2;
 
@@ -390,7 +390,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/386): Use the same struct
+        // TODO(crbug.com/tint/386): Use the same struct
         [[block]] struct FragmentUniformBuffer1 {
             [[offset(0)]] color : vec4<f32>;
         };
@@ -399,7 +399,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
             [[offset(0)]] color : vec4<f32>;
         };
 
-        # TODO(crbug.com/tint/386): Use the same struct definition.
+        // TODO(crbug.com/tint/386): Use the same struct definition.
         [[set(0), binding(1)]] var <uniform> fragmentUbo1 : FragmentUniformBuffer1;
         [[set(1), binding(1)]] var <uniform> fragmentUbo2 : FragmentUniformBuffer2;
 
@@ -846,7 +846,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/386): Use the same struct
+        // TODO(crbug.com/tint/386): Use the same struct
         [[block]] struct Buffer0 {
             [[offset(0)]] value : u32;
         };
@@ -974,7 +974,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/386): Use the same struct
+        // TODO(crbug.com/tint/386): Use the same struct
         [[block]] struct Ubo1 {
             [[offset(0)]] color : vec4<f32>;
         };
@@ -987,7 +987,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
             [[offset(0)]] color : vec4<f32>;
         };
 
-        # TODO(crbug.com/tint/386): Use the same struct definition.
+        // TODO(crbug.com/tint/386): Use the same struct definition.
         [[set(0), binding(953)]] var <uniform> ubo1 : Ubo1;
         [[set(0), binding(47)]] var <uniform> ubo2 : Ubo2;
         [[set(0), binding(111)]] var <uniform> ubo3 : Ubo3;

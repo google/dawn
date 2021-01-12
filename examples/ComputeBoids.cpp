@@ -151,8 +151,7 @@ void initRender() {
 }
 
 void initSim() {
-    wgpu::ShaderModule module =
-        utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Particle {
             [[offset(0)]] pos : vec2<f32>;
             [[offset(8)]] vel : vec2<f32>;
@@ -175,7 +174,7 @@ void initSim() {
         [[binding(2), set(0)]] var<storage_buffer> particlesB : [[access(read_write)]] Particles;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
-        # https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
+        // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
         [[stage(compute)]]
         fn main() -> void {
             var index : u32 = GlobalInvocationID.x;
@@ -222,12 +221,12 @@ void initSim() {
             vVel = vVel + (cMass * params.rule1Scale) + (colVel * params.rule2Scale) +
                 (cVel * params.rule3Scale);
 
-            # clamp velocity for a more pleasing simulation
+            // clamp velocity for a more pleasing simulation
             vVel = normalize(vVel) * clamp(length(vVel), 0.0, 0.1);
-            # kinematic update
+            // kinematic update
             vPos = vPos + (vVel * params.deltaT);
 
-            # Wrap around boundary
+            // Wrap around boundary
             if (vPos.x < -1.0) {
                 vPos.x = 1.0;
             }
@@ -241,7 +240,7 @@ void initSim() {
                 vPos.y = -1.0;
             }
 
-            # Write back
+            // Write back
             particlesB.particles[index].pos = vPos;
             particlesB.particles[index].vel = vVel;
             return;

@@ -49,8 +49,8 @@ namespace dawn_native {
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
 
-                # Texture coordinate takes top-left as origin point. We need to map the
-                # texture to triangle carefully.
+                // Texture coordinate takes top-left as origin point. We need to map the
+                // texture to triangle carefully.
                 v_texcoord = (texcoord[VertexIndex] * vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0)) *
                     uniforms.u_scale + uniforms.u_offset;
             }
@@ -62,7 +62,7 @@ namespace dawn_native {
             [[location(0)]] var<in> v_texcoord : vec2<f32>;
             [[location(0)]] var<out> rgbaColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
-                # Clamp the texcoord and discard the out-of-bound pixels.
+                // Clamp the texcoord and discard the out-of-bound pixels.
                 var clampedTexcoord : vec2<f32> =
                     clamp(v_texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
                 if (all(clampedTexcoord == v_texcoord)) {

@@ -83,7 +83,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/386):  Use the same struct.
+        // TODO(crbug.com/tint/386):  Use the same struct.
         [[block]] struct Src {
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
         };
@@ -154,7 +154,7 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        # TODO(crbug.com/tint/386):  Use the same struct.
+        // TODO(crbug.com/tint/386):  Use the same struct.
         [[block]] struct Src {
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
         };

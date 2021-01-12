@@ -37,7 +37,7 @@ class IndexFormatTest : public DawnTest {
             [[builtin(vertex_idx)]] var<in> idx : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
-                # 0xFFFFFFFE is a designated invalid index used by some tests.
+                // 0xFFFFFFFE is a designated invalid index used by some tests.
                 if (idx == 0xFFFFFFFEu) {
                     Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 } else {

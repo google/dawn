@@ -37,10 +37,10 @@ class VertexBufferRobustnessTest : public DawnTest {
 
                 [[stage(vertex)]] fn main() -> void {
                     if ()" + successExpression + R"() {
-                        # Success case, move the vertex out of the viewport
+                        // Success case, move the vertex out of the viewport
                         Position = vec4<f32>(-10.0, 0.0, 0.0, 1.0);
                     } else {
-                        # Failure case, move the vertex inside the viewport
+                        // Failure case, move the vertex inside the viewport
                         Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                     }
                     return;

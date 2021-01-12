@@ -108,7 +108,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::ostringstream fs;
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         fs << R"(
-            # TODO(crbug.com/tint/386):  Use the same struct.
+            // TODO(crbug.com/tint/386):  Use the same struct.
             [[block]] struct Buffer1 {
                 [[offset(0)]] value : vec2<u32>;
             };
@@ -177,7 +177,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::ostringstream cs;
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         cs << R"(
-            # TODO(crbug.com/tint/386):  Use the same struct.
+            // TODO(crbug.com/tint/386):  Use the same struct.
             [[block]] struct Buffer1 {
                 [[offset(0)]] value : vec2<u32>;
             };

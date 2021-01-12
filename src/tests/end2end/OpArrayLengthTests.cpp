@@ -56,7 +56,7 @@ class OpArrayLengthTest : public DawnTest {
         // Common shader code to use these buffers in shaders, assuming they are in bindgroup index
         // 0.
         mShaderInterface = R"(
-            # TODO(crbug.com/tint/386): Use the same struct.
+            // TODO(crbug.com/tint/386): Use the same struct.
             [[block]] struct DataBuffer1 {
                 [[offset(0)]] data : [[stride(4)]] array<f32>;
             };
@@ -65,14 +65,14 @@ class OpArrayLengthTest : public DawnTest {
                 [[offset(0)]] data : [[stride(4)]] array<f32>;
             };
 
-            # The length should be 1 because the buffer is 4-byte long.
+            // The length should be 1 because the buffer is 4-byte long.
             [[set(0), binding(0)]] var<storage_buffer> buffer1 : [[access(read)]] DataBuffer1;
 
-            # The length should be 64 because the buffer is 256 bytes long.
+            // The length should be 64 because the buffer is 256 bytes long.
             [[set(0), binding(1)]] var<storage_buffer> buffer2 : [[access(read)]] DataBuffer2;
 
-            # The length should be (512 - 16*4) / 8 = 56 because the buffer is 512 bytes long
-            # and the structure is 8 bytes big.
+            // The length should be (512 - 16*4) / 8 = 56 because the buffer is 512 bytes long
+            // and the structure is 8 bytes big.
             struct Buffer3Data {
                 [[offset(0)]] a : f32;
                 [[offset(4)]] b : i32;
