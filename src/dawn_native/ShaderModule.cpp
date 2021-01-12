@@ -179,7 +179,8 @@ namespace dawn_native {
 
             tint::reader::wgsl::Parser parser(file);
             if (!parser.Parse()) {
-                errorStream << "Parser: " << parser.error() << std::endl;
+                auto err = tint::diag::Formatter{}.format(parser.diagnostics());
+                errorStream << "Parser: " << err << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
@@ -229,7 +230,8 @@ namespace dawn_native {
 
             tint::Validator validator;
             if (!validator.Validate(module)) {
-                errorStream << "Validation: " << validator.error() << std::endl;
+                auto err = tint::diag::Formatter{}.format(validator.diagnostics());
+                errorStream << "Validation: " << err << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
