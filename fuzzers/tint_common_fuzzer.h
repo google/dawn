@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
+#ifndef FUZZERS_TINT_COMMON_FUZZER_H_
+#define FUZZERS_TINT_COMMON_FUZZER_H_
 
-#include "fuzzers/tint_common_fuzzer.h"
+#include "include/tint/tint.h"
 
 namespace tint {
 namespace fuzzers {
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kNone);
-  return fuzzer.Run(data, size);
-}
+enum class InputFormat { kWGSL, kSpv, kNone };
+
+enum class OutputFormat { kWGSL, kSpv, kHLSL, kMSL, kNone };
+
+class CommonFuzzer {
+ public:
+  explicit CommonFuzzer(InputFormat input, OutputFormat output);
+  ~CommonFuzzer();
+
+  void SetTransformManager(transform::Manager* tm) { transform_manager_ = tm; }
+
+  int Run(const uint8_t* data, size_t size);
+
+ private:
+  InputFormat input_;
+  OutputFormat output_;
+  transform::Manager* transform_manager_;
+};
 
 }  // namespace fuzzers
 }  // namespace tint
+
+#endif  // FUZZERS_TINT_COMMON_FUZZER_H_
