@@ -1025,17 +1025,19 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 2
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstantComposite %13 %14 %15
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 2
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%18 = OpConstantComposite %15 %16 %17
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleImplicitLod %4 %12 %16
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%9 = OpImageSampleImplicitLod %10 %14 %18
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1049,22 +1051,24 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 2
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstantComposite %13 %14 %15
-%18 = OpTypeInt 32 1
-%17 = OpTypeVector %18 2
-%19 = OpConstant %18 3
-%20 = OpConstant %18 4
-%21 = OpConstantComposite %17 %19 %20
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 2
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%18 = OpConstantComposite %15 %16 %17
+%20 = OpTypeInt 32 1
+%19 = OpTypeVector %20 2
+%21 = OpConstant %20 3
+%22 = OpConstant %20 4
+%23 = OpConstantComposite %19 %21 %22
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleImplicitLod %4 %12 %16 ConstOffset %21
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%9 = OpImageSampleImplicitLod %10 %14 %18 ConstOffset %23
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1078,20 +1082,22 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 3
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%17 = OpTypeInt 32 1
-%18 = OpConstant %17 3
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 3
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 3
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%16 = OpConvertSToF %4 %18
-%19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleImplicitLod %4 %12 %19
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%18 = OpConvertSToF %4 %20
+%21 = OpCompositeConstruct %15 %16 %17 %18
+%9 = OpImageSampleImplicitLod %10 %14 %21
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1105,24 +1111,26 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 3
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%17 = OpTypeInt 32 1
-%18 = OpConstant %17 3
-%20 = OpTypeVector %17 2
-%21 = OpConstant %17 4
-%22 = OpConstant %17 5
-%23 = OpConstantComposite %20 %21 %22
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 3
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 3
+%22 = OpTypeVector %19 2
+%23 = OpConstant %19 4
+%24 = OpConstant %19 5
+%25 = OpConstantComposite %22 %23 %24
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%16 = OpConvertSToF %4 %18
-%19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleImplicitLod %4 %12 %19 ConstOffset %23
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%18 = OpConvertSToF %4 %20
+%21 = OpCompositeConstruct %15 %16 %17 %18
+%9 = OpImageSampleImplicitLod %10 %14 %21 ConstOffset %25
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1136,18 +1144,20 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 3
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstant %4 3
-%17 = OpConstantComposite %13 %14 %15 %16
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 3
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%18 = OpConstant %4 3
+%19 = OpConstantComposite %15 %16 %17 %18
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleImplicitLod %4 %12 %17
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%9 = OpImageSampleImplicitLod %10 %14 %19
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1161,21 +1171,22 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 4
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstant %4 3
-%18 = OpTypeInt 32 1
-%19 = OpConstant %18 4
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstant %4 3
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 4
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%17 = OpConvertSToF %4 %19
-%20 = OpCompositeConstruct %13 %14 %15 %16 %17
-%8 = OpImageSampleImplicitLod %4 %12 %20
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%18 = OpConvertSToF %4 %20
+%21 = OpCompositeConstruct %10 %15 %16 %17 %18
+%9 = OpImageSampleImplicitLod %10 %14 %21
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 OpCapability SampledCubeArray
@@ -1662,19 +1673,21 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 2
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstantComposite %13 %14 %15
-%17 = OpTypeInt 32 1
-%18 = OpConstant %17 3
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 2
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%18 = OpConstantComposite %15 %16 %17
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 3
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleExplicitLod %4 %12 %16 Lod %18
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%9 = OpImageSampleExplicitLod %10 %14 %18 Lod %20
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1688,23 +1701,25 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 2
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstantComposite %13 %14 %15
-%17 = OpTypeInt 32 1
-%18 = OpConstant %17 3
-%19 = OpTypeVector %17 2
-%20 = OpConstant %17 4
-%21 = OpConstant %17 5
-%22 = OpConstantComposite %19 %20 %21
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 2
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%18 = OpConstantComposite %15 %16 %17
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 3
+%21 = OpTypeVector %19 2
+%22 = OpConstant %19 4
+%23 = OpConstant %19 5
+%24 = OpConstantComposite %21 %22 %23
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleExplicitLod %4 %12 %16 Lod|ConstOffset %18 %22
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%9 = OpImageSampleExplicitLod %10 %14 %18 Lod|ConstOffset %20 %24
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1718,21 +1733,23 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 3
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%17 = OpTypeInt 32 1
-%18 = OpConstant %17 3
-%20 = OpConstant %17 4
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 3
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 3
+%22 = OpConstant %19 4
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%16 = OpConvertSToF %4 %18
-%19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleExplicitLod %4 %12 %19 Lod %20
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%18 = OpConvertSToF %4 %20
+%21 = OpCompositeConstruct %15 %16 %17 %18
+%9 = OpImageSampleExplicitLod %10 %14 %21 Lod %22
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1746,25 +1763,27 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 3
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%17 = OpTypeInt 32 1
-%18 = OpConstant %17 3
-%20 = OpConstant %17 4
-%21 = OpTypeVector %17 2
-%22 = OpConstant %17 5
-%23 = OpConstant %17 6
-%24 = OpConstantComposite %21 %22 %23
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 3
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 3
+%22 = OpConstant %19 4
+%23 = OpTypeVector %19 2
+%24 = OpConstant %19 5
+%25 = OpConstant %19 6
+%26 = OpConstantComposite %23 %24 %25
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%16 = OpConvertSToF %4 %18
-%19 = OpCompositeConstruct %13 %14 %15 %16
-%8 = OpImageSampleExplicitLod %4 %12 %19 Lod|ConstOffset %20 %24
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%18 = OpConvertSToF %4 %20
+%21 = OpCompositeConstruct %15 %16 %17 %18
+%9 = OpImageSampleExplicitLod %10 %14 %21 Lod|ConstOffset %22 %26
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1778,20 +1797,22 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 3
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstant %4 3
-%17 = OpConstantComposite %13 %14 %15 %16
-%18 = OpTypeInt 32 1
-%19 = OpConstant %18 4
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpTypeVector %4 3
+%16 = OpConstant %4 1
+%17 = OpConstant %4 2
+%18 = OpConstant %4 3
+%19 = OpConstantComposite %15 %16 %17 %18
+%20 = OpTypeInt 32 1
+%21 = OpConstant %20 4
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleExplicitLod %4 %12 %17 Lod %19
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%9 = OpImageSampleExplicitLod %10 %14 %19 Lod %21
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -1805,22 +1826,23 @@ OpCapability SampledCubeArray
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeSampledImage %3
-%13 = OpTypeVector %4 4
-%14 = OpConstant %4 1
-%15 = OpConstant %4 2
-%16 = OpConstant %4 3
-%18 = OpTypeInt 32 1
-%19 = OpConstant %18 4
-%21 = OpConstant %18 5
+%10 = OpTypeVector %4 4
+%13 = OpTypeSampledImage %3
+%15 = OpConstant %4 1
+%16 = OpConstant %4 2
+%17 = OpConstant %4 3
+%19 = OpTypeInt 32 1
+%20 = OpConstant %19 4
+%22 = OpConstant %19 5
 )",
           R"(
-%9 = OpLoad %7 %5
-%10 = OpLoad %3 %1
-%12 = OpSampledImage %11 %10 %9
-%17 = OpConvertSToF %4 %19
-%20 = OpCompositeConstruct %13 %14 %15 %16 %17
-%8 = OpImageSampleExplicitLod %4 %12 %20 Lod %21
+%11 = OpLoad %7 %5
+%12 = OpLoad %3 %1
+%14 = OpSampledImage %13 %12 %11
+%18 = OpConvertSToF %4 %20
+%21 = OpCompositeConstruct %10 %15 %16 %17 %18
+%9 = OpImageSampleExplicitLod %10 %14 %21 Lod %22
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 OpCapability SampledCubeArray
@@ -3006,15 +3028,17 @@ OpCapability Sampled1D
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeInt 32 1
-%10 = OpTypeVector %11 2
-%12 = OpConstant %11 1
-%13 = OpConstant %11 2
-%14 = OpConstantComposite %10 %12 %13
+%10 = OpTypeVector %4 4
+%13 = OpTypeInt 32 1
+%12 = OpTypeVector %13 2
+%14 = OpConstant %13 1
+%15 = OpConstant %13 2
+%16 = OpConstantComposite %12 %14 %15
 )",
           R"(
-%9 = OpLoad %3 %1
-%8 = OpImageFetch %4 %9 %14
+%11 = OpLoad %3 %1
+%9 = OpImageFetch %10 %11 %16
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -3028,16 +3052,18 @@ OpCapability Sampled1D
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeInt 32 1
-%10 = OpTypeVector %11 2
-%12 = OpConstant %11 1
-%13 = OpConstant %11 2
-%14 = OpConstantComposite %10 %12 %13
-%15 = OpConstant %11 3
+%10 = OpTypeVector %4 4
+%13 = OpTypeInt 32 1
+%12 = OpTypeVector %13 2
+%14 = OpConstant %13 1
+%15 = OpConstant %13 2
+%16 = OpConstantComposite %12 %14 %15
+%17 = OpConstant %13 3
 )",
           R"(
-%9 = OpLoad %3 %1
-%8 = OpImageFetch %4 %9 %14 Lod %15
+%11 = OpLoad %3 %1
+%9 = OpImageFetch %10 %11 %16 Lod %17
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -3051,16 +3077,18 @@ OpCapability Sampled1D
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeInt 32 1
-%10 = OpTypeVector %11 3
-%12 = OpConstant %11 1
-%13 = OpConstant %11 2
-%14 = OpConstant %11 3
-%15 = OpConstantComposite %10 %12 %13 %14
+%10 = OpTypeVector %4 4
+%13 = OpTypeInt 32 1
+%12 = OpTypeVector %13 3
+%14 = OpConstant %13 1
+%15 = OpConstant %13 2
+%16 = OpConstant %13 3
+%17 = OpConstantComposite %12 %14 %15 %16
 )",
           R"(
-%9 = OpLoad %3 %1
-%8 = OpImageFetch %4 %9 %15
+%11 = OpLoad %3 %1
+%9 = OpImageFetch %10 %11 %17
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};
@@ -3074,17 +3102,19 @@ OpCapability Sampled1D
 %7 = OpTypeSampler
 %6 = OpTypePointer UniformConstant %7
 %5 = OpVariable %6 UniformConstant
-%11 = OpTypeInt 32 1
-%10 = OpTypeVector %11 3
-%12 = OpConstant %11 1
-%13 = OpConstant %11 2
-%14 = OpConstant %11 3
-%15 = OpConstantComposite %10 %12 %13 %14
-%16 = OpConstant %11 4
+%10 = OpTypeVector %4 4
+%13 = OpTypeInt 32 1
+%12 = OpTypeVector %13 3
+%14 = OpConstant %13 1
+%15 = OpConstant %13 2
+%16 = OpConstant %13 3
+%17 = OpConstantComposite %12 %14 %15 %16
+%18 = OpConstant %13 4
 )",
           R"(
-%9 = OpLoad %3 %1
-%8 = OpImageFetch %4 %9 %15 Lod %16
+%11 = OpLoad %3 %1
+%9 = OpImageFetch %10 %11 %17 Lod %18
+%8 = OpCompositeExtract %4 %9 0
 )",
           R"(
 )"};

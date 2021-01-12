@@ -2035,9 +2035,43 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   std::vector<ImageOperand> image_operands;
   image_operands.reserve(4);  // Enough to fit most parameter lists
 
+  // Appends `result_type` and `result_id` to `spirv_params`
   auto append_result_type_and_id_to_spirv_params = [&]() {
     spirv_params.emplace_back(std::move(result_type));
     spirv_params.emplace_back(std::move(result_id));
+  };
+
+  // Appends a result type and id to `spirv_params`, possibly adding a
+  // post_emission step.
+  //
+  // If the texture is a depth texture, then this function wraps the result of
+  // the op with a OpCompositeExtract to evaluate to the first element of the
+  // returned vector. This is done as the WGSL texture reading functions for
+  // depths return a single float scalar instead of a vector.
+  //
+  // If the texture is not a depth texture, then this function simply delegates
+  // to calling append_result_type_and_id_to_spirv_params().
+  auto append_result_type_and_id_to_spirv_params_for_read = [&]() {
+    if (texture_type->Is<ast::type::DepthTexture>()) {
+      auto* f32 = mod_->create<ast::type::F32>();
+      auto* spirv_result_type = mod_->create<ast::type::Vector>(f32, 4);
+      auto spirv_result = result_op();
+      post_emission = [=] {
+        return push_function_inst(
+            spv::Op::OpCompositeExtract,
+            {result_type, result_id, spirv_result, Operand::Int(0)});
+      };
+      auto spirv_result_type_id = GenerateTypeIfNeeded(spirv_result_type);
+      if (spirv_result_type_id == 0) {
+        return false;
+      }
+      spirv_params.emplace_back(Operand::Int(spirv_result_type_id));
+      spirv_params.emplace_back(spirv_result);
+      return true;
+    }
+
+    append_result_type_and_id_to_spirv_params();
+    return true;
   };
 
   auto append_coords_to_spirv_params = [&]() -> bool {
@@ -2170,7 +2204,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       op = texture_type->Is<ast::type::StorageTexture>()
                ? spv::Op::OpImageRead
                : spv::Op::OpImageFetch;
-      append_result_type_and_id_to_spirv_params();
+      append_result_type_and_id_to_spirv_params_for_read();
       spirv_params.emplace_back(gen_param(pidx.texture));
       if (!append_coords_to_spirv_params()) {
         return false;
@@ -2199,7 +2233,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSample: {
       op = spv::Op::OpImageSampleImplicitLod;
-      append_result_type_and_id_to_spirv_params();
+      append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2207,7 +2241,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleBias: {
       op = spv::Op::OpImageSampleImplicitLod;
-      append_result_type_and_id_to_spirv_params();
+      append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2218,7 +2252,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleLevel: {
       op = spv::Op::OpImageSampleExplicitLod;
-      append_result_type_and_id_to_spirv_params();
+      append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
@@ -2229,7 +2263,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     }
     case ast::Intrinsic::kTextureSampleGrad: {
       op = spv::Op::OpImageSampleExplicitLod;
-      append_result_type_and_id_to_spirv_params();
+      append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
