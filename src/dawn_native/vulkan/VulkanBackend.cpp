@@ -91,8 +91,8 @@ namespace dawn_native { namespace vulkan {
 #endif  // DAWN_PLATFORM_LINUX
 
     WGPUTexture WrapVulkanImage(WGPUDevice cDevice, const ExternalImageDescriptorVk* descriptor) {
-        switch (descriptor->type) {
 #if defined(DAWN_PLATFORM_LINUX)
+        switch (descriptor->type) {
             case ExternalImageType::OpaqueFD:
             case ExternalImageType::DmaBuf: {
                 const ExternalImageDescriptorFD* fdDescriptor =
@@ -102,10 +102,12 @@ namespace dawn_native { namespace vulkan {
                     fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs);
                 return reinterpret_cast<WGPUTexture>(texture);
             }
-#endif  // DAWN_PLATFORM_LINUX
             default:
                 return nullptr;
         }
+#else
+        return nullptr;
+#endif  // DAWN_PLATFORM_LINUX
     }
 
     bool ExportVulkanImage(WGPUTexture cTexture,
@@ -114,8 +116,8 @@ namespace dawn_native { namespace vulkan {
         if (cTexture == nullptr) {
             return false;
         }
-        switch (info->type) {
 #if defined(DAWN_PLATFORM_LINUX)
+        switch (info->type) {
             case ExternalImageType::OpaqueFD:
             case ExternalImageType::DmaBuf: {
                 Texture* texture = reinterpret_cast<Texture*>(cTexture);
@@ -124,10 +126,12 @@ namespace dawn_native { namespace vulkan {
                 return device->SignalAndExportExternalTexture(texture, desiredLayout, fdInfo,
                                                               &fdInfo->semaphoreHandles);
             }
-#endif  // DAWN_PLATFORM_LINUX
             default:
                 return false;
         }
+#else
+        return false;
+#endif  // DAWN_PLATFORM_LINUX
     }
 
 }}  // namespace dawn_native::vulkan
