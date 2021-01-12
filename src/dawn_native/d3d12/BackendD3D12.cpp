@@ -128,6 +128,16 @@ namespace dawn_native { namespace d3d12 {
         return mDxcCompiler.Get();
     }
 
+    ResultOrError<IDxcValidator*> Backend::GetOrCreateDxcValidator() {
+        if (mDxcValidator == nullptr) {
+            DAWN_TRY(CheckHRESULT(
+                mFunctions->dxcCreateInstance(CLSID_DxcValidator, IID_PPV_ARGS(&mDxcValidator)),
+                "DXC create validator"));
+            ASSERT(mDxcValidator != nullptr);
+        }
+        return mDxcValidator.Get();
+    }
+
     const PlatformFunctions* Backend::GetFunctions() const {
         return mFunctions.get();
     }

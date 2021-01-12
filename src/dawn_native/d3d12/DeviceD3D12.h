@@ -74,6 +74,7 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<IDXGIFactory4> GetFactory() const;
         ResultOrError<IDxcLibrary*> GetOrCreateDxcLibrary() const;
         ResultOrError<IDxcCompiler*> GetOrCreateDxcCompiler() const;
+        ResultOrError<IDxcValidator*> GetOrCreateDxcValidator() const;
 
         ResultOrError<CommandRecordingContext*> GetPendingCommandContext();
 

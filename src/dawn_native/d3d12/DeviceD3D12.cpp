@@ -218,6 +218,10 @@ namespace dawn_native { namespace d3d12 {
         return ToBackend(GetAdapter())->GetBackend()->GetOrCreateDxcCompiler();
     }
 
+    ResultOrError<IDxcValidator*> Device::GetOrCreateDxcValidator() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetOrCreateDxcValidator();
+    }
+
     const PlatformFunctions* Device::GetFunctions() const {
         return ToBackend(GetAdapter())->GetBackend()->GetFunctions();
     }
