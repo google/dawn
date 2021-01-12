@@ -48,6 +48,11 @@ class Generator : public writer::Writer {
   /// @returns true on successful generation; false otherwise
   bool Generate() override;
 
+  /// Generates the result data
+  /// DO NOT USE. Temporary fix for Dawn usage of SPRIV-Cross
+  /// @returns true on successful generation; false otherwise
+  bool GenerateUnsafe();
+
   /// Converts a single entry point
   /// @param stage the pipeline stage
   /// @param name the entry point name

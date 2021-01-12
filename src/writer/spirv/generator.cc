@@ -51,6 +51,22 @@ bool Generator::Generate() {
   return true;
 }
 
+bool Generator::GenerateUnsafe() {
+  auto unsafe_namer = std::make_unique<UnsafeNamer>(module_);
+  builder_ = std::make_unique<Builder>(module_, unsafe_namer.get());
+
+  if (!builder_->Build()) {
+    set_error(builder_->error());
+    return false;
+  }
+
+  writer_->WriteHeader(builder_->id_bound());
+  writer_->WriteBuilder(builder_.get());
+
+  builder_ = std::make_unique<Builder>(module_, namer_.get());
+  return true;
+}
+
 bool Generator::GenerateEntryPoint(ast::PipelineStage, const std::string&) {
   return false;
 }
