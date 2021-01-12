@@ -42,8 +42,8 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/namer.h"
 #include "src/scope_stack.h"
+#include "src/writer/msl/namer.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -55,8 +55,7 @@ class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
   /// @param module the module to generate
-  /// @param namer the namer to use for generation
-  GeneratorImpl(ast::Module* module, Namer* namer);
+  explicit GeneratorImpl(ast::Module* module);
   ~GeneratorImpl();
 
   /// @returns true on successful generation; false otherwise
@@ -203,9 +202,9 @@ class GeneratorImpl : public TextGenerator {
   bool EmitSwitch(ast::SwitchStatement* stmt);
   /// Handles generating type
   /// @param type the type to generate
-  /// @param symbol the symbol of the variable, only used for array emission
+  /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(ast::type::Type* type, const Symbol& symbol);
+  bool EmitType(ast::type::Type* type, const std::string& name);
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
@@ -245,6 +244,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if an input or output struct is required.
   bool has_referenced_var_needing_struct(ast::Function* func);
 
+  /// Generates a name for the prefix
+  /// @param prefix the prefix of the name to generate
+  /// @returns the name
+  std::string generate_name(const std::string& prefix);
   /// Generates an intrinsic name from the given name
   /// @param intrinsic the intrinsic to convert to an method name
   /// @returns the intrinsic name or blank on error
@@ -264,22 +267,25 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
 
+  /// @returns the namer for testing purposes
+  Namer* namer_for_testing() { return &namer_; }
+
  private:
   enum class VarType { kIn, kOut };
 
   struct EntryPointData {
-    Symbol struct_symbol;
-    Symbol var_symbol;
+    std::string struct_name;
+    std::string var_name;
   };
 
-  Symbol current_ep_var_symbol(VarType type);
+  std::string current_ep_var_name(VarType type);
 
+  Namer namer_;
   ScopeStack<ast::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
-  ast::Module* module_ = nullptr;
+  const ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
-  Namer* namer_;
 
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;
@@ -287,7 +293,7 @@ class GeneratorImpl : public TextGenerator {
   // This maps an input of "<entry_point_name>_<function_name>" to a remapped
   // function name. If there is no entry for a given key then function did
   // not need to be remapped for the entry point and can be emitted directly.
-  std::unordered_map<std::string, Symbol> ep_func_name_remapped_;
+  std::unordered_map<std::string, std::string> ep_func_name_remapped_;
 };
 
 }  // namespace msl

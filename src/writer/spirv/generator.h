@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "src/ast/module.h"
-#include "src/namer.h"
 #include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/writer.h"
@@ -33,12 +32,8 @@ namespace spirv {
 class Generator : public writer::Writer {
  public:
   /// Constructor
-  /// DEPRECATED
   /// @param module the module to convert
   explicit Generator(ast::Module module);
-  /// Constructor
-  /// @param module the module to convert
-  explicit Generator(ast::Module* module);
   ~Generator() override;
 
   /// Resets the generator
@@ -47,11 +42,6 @@ class Generator : public writer::Writer {
   /// Generates the result data
   /// @returns true on successful generation; false otherwise
   bool Generate() override;
-
-  /// Generates the result data
-  /// DO NOT USE. Temporary fix for Dawn usage of SPRIV-Cross
-  /// @returns true on successful generation; false otherwise
-  bool GenerateUnsafe();
 
   /// Converts a single entry point
   /// @param stage the pipeline stage
@@ -64,7 +54,6 @@ class Generator : public writer::Writer {
   const std::vector<uint32_t>& result() const { return writer_->result(); }
 
  private:
-  std::unique_ptr<Namer> namer_;
   std::unique_ptr<Builder> builder_;
   std::unique_ptr<BinaryWriter> writer_;
 };

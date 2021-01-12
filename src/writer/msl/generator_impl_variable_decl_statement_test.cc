@@ -47,7 +47,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float test_a = 0.0f;\n");
+  EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
@@ -57,7 +57,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  const float test_a = 0.0f;\n");
+  EXPECT_EQ(gen.result(), "  const float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
@@ -69,7 +69,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float test_a[5] = {0.0f};\n");
+  EXPECT_EQ(gen.result(), "  float a[5] = {0.0f};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
@@ -85,7 +85,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  test_S test_a = {};
+  EXPECT_EQ(gen.result(), R"(  S a = {};
 )");
 }
 
@@ -96,7 +96,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float2 test_a = 0.0f;\n");
+  EXPECT_EQ(gen.result(), "  float2 a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
@@ -107,7 +107,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float3x2 test_a = 0.0f;\n");
+  EXPECT_EQ(gen.result(), "  float3x2 a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
@@ -117,7 +117,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float test_a = 0.0f;\n");
+  EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
@@ -126,7 +126,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(float test_a = test_initializer;
+  EXPECT_EQ(gen.result(), R"(float a = initializer;
 )");
 }
 
@@ -138,7 +138,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(float3 test_a = float3(0.0f);
+  EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
 )");
 }
 

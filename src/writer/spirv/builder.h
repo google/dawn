@@ -16,7 +16,6 @@
 #define SRC_WRITER_SPIRV_BUILDER_H_
 
 #include <functional>
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -52,7 +51,6 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/namer.h"
 #include "src/scope_stack.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
@@ -85,8 +83,7 @@ class Builder {
 
   /// Constructor
   /// @param mod the module to generate from
-  /// @param namer the namer to use
-  Builder(ast::Module* mod, Namer* namer);
+  explicit Builder(ast::Module* mod);
   ~Builder();
 
   /// Generates the SPIR-V instructions for the given module
@@ -492,7 +489,6 @@ class Builder {
   Operand result_op();
 
   ast::Module* mod_;
-  Namer* namer_ = nullptr;
   std::string error_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;

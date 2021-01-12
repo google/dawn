@@ -39,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float test_a;\n");
+  EXPECT_EQ(result(), "  float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
@@ -49,7 +49,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  const float test_a;\n");
+  EXPECT_EQ(result(), "  const float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
@@ -59,7 +59,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float test_a[5];\n");
+  EXPECT_EQ(result(), "  float a[5];\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
@@ -70,7 +70,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float test_a;\n");
+  EXPECT_EQ(result(), "  float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
@@ -80,7 +80,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float test_a;\n");
+  EXPECT_EQ(result(), "  float a;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
@@ -90,7 +90,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), R"(float test_a = test_initializer;
+  EXPECT_EQ(result(), R"(float a = initializer;
 )");
 }
 
@@ -101,7 +101,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), R"(float3 test_a = float3(0.0f);
+  EXPECT_EQ(result(), R"(float3 a = float3(0.0f);
 )");
 }
 
@@ -113,7 +113,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   auto* stmt = create<ast::VariableDeclStatement>(var);
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(),
-            R"(float3x2 test_a = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            R"(float3x2 a = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 )");
 }
 

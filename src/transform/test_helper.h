@@ -68,7 +68,7 @@ class TransformTest : public testing::Test {
     // Release the source module to ensure there's no uncloned data in result
     { auto tmp = std::move(module); }
 
-    writer::wgsl::Generator generator(&(result.module));
+    writer::wgsl::Generator generator(std::move(result.module));
     if (!generator.Generate()) {
       return "WGSL writer failed:\n" + generator.error();
     }

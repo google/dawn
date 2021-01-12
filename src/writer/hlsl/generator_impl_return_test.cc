@@ -40,7 +40,7 @@ TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, r)) << gen.error();
-  EXPECT_EQ(result(), "  return test_expr;\n");
+  EXPECT_EQ(result(), "  return expr;\n");
 }
 
 }  // namespace

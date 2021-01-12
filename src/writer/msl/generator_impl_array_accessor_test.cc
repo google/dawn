@@ -35,7 +35,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
   auto* expr = IndexAccessor(Expr("ary"), 5);
 
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "test_ary[5]");
+  EXPECT_EQ(gen.result(), "ary[5]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitArrayAccessor) {
@@ -43,7 +43,7 @@ TEST_F(MslGeneratorImplTest, EmitArrayAccessor) {
 
   ASSERT_TRUE(gen.EmitArrayAccessor(expr->As<ast::ArrayAccessorExpression>()))
       << gen.error();
-  EXPECT_EQ(gen.result(), "test_ary[test_idx]");
+  EXPECT_EQ(gen.result(), "ary[idx]");
 }
 
 }  // namespace

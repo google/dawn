@@ -32,29 +32,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
   auto* expr = MemberAccessor("str", "mem");
 
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "test_str.test_mem");
-}
-
-TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
-  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
-  td.RegisterVariableForTesting(vec);
-  mod->AddGlobalVariable(vec);
-
-  auto* expr = MemberAccessor("my_vec", "xyz");
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
-  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "test_my_vec.xyz");
-}
-
-TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
-  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
-  td.RegisterVariableForTesting(vec);
-  mod->AddGlobalVariable(vec);
-
-  auto* expr = MemberAccessor("my_vec", "gbr");
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
-  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "test_my_vec.gbr");
+  EXPECT_EQ(gen.result(), "str.mem");
 }
 
 }  // namespace

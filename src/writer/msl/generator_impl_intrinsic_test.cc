@@ -69,7 +69,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
   auto* a = Var("a", ast::StorageClass::kNone, ty.vec2<f32>());
   auto* b = Var("b", ast::StorageClass::kNone, ty.vec3<f32>());
 
-  auto* call = Call("outerProduct", "a", "b");
+  auto* call = Call("outer_product", "a", "b");
   td.RegisterVariableForTesting(a);
   td.RegisterVariableForTesting(b);
 
@@ -81,9 +81,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_Intrinsic_OuterProduct) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(
-      gen.result(),
-      "  float3x2(test_a * test_b[0], test_a * test_b[1], test_a * test_b[2])");
+  EXPECT_EQ(gen.result(), "  float3x2(a * b[0], a * b[1], a * b[2])");
 }
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Bad_Name) {
@@ -103,7 +101,7 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "  dot(test_param1, test_param2)");
+  EXPECT_EQ(gen.result(), "  dot(param1, param2)");
 }
 
 }  // namespace

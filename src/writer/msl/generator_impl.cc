@@ -96,10 +96,21 @@ uint32_t adjust_for_alignment(uint32_t count, uint32_t alignment) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(ast::Module* module, Namer* namer)
-    : TextGenerator(), module_(module), namer_(namer) {}
+GeneratorImpl::GeneratorImpl(ast::Module* module)
+    : TextGenerator(), module_(module) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
+
+std::string GeneratorImpl::generate_name(const std::string& prefix) {
+  std::string name = prefix;
+  uint32_t i = 0;
+  while (namer_.IsMapped(name)) {
+    name = prefix + "_" + std::to_string(i);
+    ++i;
+  }
+  namer_.RegisterRemappedName(name);
+  return name;
+}
 
 bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
@@ -245,10 +256,11 @@ bool GeneratorImpl::EmitConstructedType(const ast::type::Type* ty) {
 
   if (auto* alias = ty->As<ast::type::Alias>()) {
     out_ << "typedef ";
-    if (!EmitType(alias->type(), Symbol())) {
+    if (!EmitType(alias->type(), "")) {
       return false;
     }
-    out_ << " " << namer_->NameFor(alias->symbol()) << ";" << std::endl;
+    out_ << " " << namer_.NameFor(module_->SymbolToName(alias->symbol())) << ";"
+         << std::endl;
   } else if (auto* str = ty->As<ast::type::Struct>()) {
     if (!EmitStructType(str)) {
       return false;
@@ -277,7 +289,7 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
 
 bool GeneratorImpl::EmitBitcast(ast::BitcastExpression* expr) {
   out_ << "as_type<";
-  if (!EmitType(expr->type(), Symbol())) {
+  if (!EmitType(expr->type(), "")) {
     return false;
   }
 
@@ -396,25 +408,25 @@ bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   return true;
 }
 
-Symbol GeneratorImpl::current_ep_var_symbol(VarType type) {
-  Symbol sym;
+std::string GeneratorImpl::current_ep_var_name(VarType type) {
+  std::string name = "";
   switch (type) {
     case VarType::kIn: {
       auto in_it = ep_sym_to_in_data_.find(current_ep_sym_);
       if (in_it != ep_sym_to_in_data_.end()) {
-        sym = in_it->second.var_symbol;
+        name = in_it->second.var_name;
       }
       break;
     }
     case VarType::kOut: {
       auto out_it = ep_sym_to_out_data_.find(current_ep_sym_);
       if (out_it != ep_sym_to_out_data_.end()) {
-        sym = out_it->second.var_symbol;
+        name = out_it->second.var_name;
       }
       break;
     }
   }
-  return sym;
+  return name;
 }
 
 std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
@@ -493,13 +505,13 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       // // We create variables to hold the two parameters in case they're
       // // function calls with side effects.
       // auto* param0 = param[0].get();
-      // auto* name0 = namer_->GenerateName("outer_product_expr_0");
+      // auto* name0 = generate_name("outer_product_expr_0");
 
       // auto* param1 = param[1].get();
-      // auto* name1 = namer_->GenerateName("outer_product_expr_1");
+      // auto* name1 = generate_name("outer_product_expr_1");
 
       // make_indent();
-      // if (!EmitType(expr->result_type(), Symbol())) {
+      // if (!EmitType(expr->result_type(), "")) {
       //   return false;
       // }
       // out_ << "(";
@@ -561,11 +573,12 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return true;
   }
 
-  auto name_sym = ident->symbol();
-  auto it = ep_func_name_remapped_.find(module_->SymbolToName(current_ep_sym_) +
-                                        "_" + module_->SymbolToName(name_sym));
+  auto name = module_->SymbolToName(ident->symbol());
+  auto caller_sym = ident->symbol();
+  auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
+                                        caller_sym.to_str());
   if (it != ep_func_name_remapped_.end()) {
-    name_sym = it->second;
+    name = it->second;
   }
 
   auto* func = module_->FindFunctionBySymbol(ident->symbol());
@@ -575,24 +588,24 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return false;
   }
 
-  out_ << namer_->NameFor(name_sym) << "(";
+  out_ << name << "(";
 
   bool first = true;
   if (has_referenced_in_var_needing_struct(func)) {
-    auto var_sym = current_ep_var_symbol(VarType::kIn);
-    if (var_sym.IsValid()) {
-      out_ << namer_->NameFor(var_sym);
+    auto var_name = current_ep_var_name(VarType::kIn);
+    if (!var_name.empty()) {
+      out_ << var_name;
       first = false;
     }
   }
   if (has_referenced_out_var_needing_struct(func)) {
-    auto var_sym = current_ep_var_symbol(VarType::kOut);
-    if (var_sym.IsValid()) {
+    auto var_name = current_ep_var_name(VarType::kOut);
+    if (!var_name.empty()) {
       if (!first) {
         out_ << ", ";
       }
       first = false;
-      out_ << namer_->NameFor(var_sym);
+      out_ << var_name;
     }
   }
 
@@ -605,7 +618,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << namer_->NameFor(var->symbol());
+    out_ << module_->SymbolToName(var->symbol());
   }
 
   for (const auto& data : func->referenced_uniform_variables()) {
@@ -614,7 +627,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << namer_->NameFor(var->symbol());
+    out_ << module_->SymbolToName(var->symbol());
   }
 
   for (const auto& data : func->referenced_storagebuffer_variables()) {
@@ -623,7 +636,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << namer_->NameFor(var->symbol());
+    out_ << module_->SymbolToName(var->symbol());
   }
 
   const auto& params = expr->params();
@@ -674,7 +687,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
         get_dim("width");
         break;
       case 2:
-        EmitType(expr->result_type(), Symbol());
+        EmitType(expr->result_type(), "");
         out_ << "(";
         get_dim("width");
         out_ << ", ";
@@ -682,7 +695,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
         out_ << ")";
         break;
       case 3:
-        EmitType(expr->result_type(), Symbol());
+        EmitType(expr->result_type(), "");
         out_ << "(";
         get_dim("width");
         out_ << ", ";
@@ -950,7 +963,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   if (expr->type()->Is<ast::type::Array>()) {
     out_ << "{";
   } else {
-    if (!EmitType(expr->type(), Symbol())) {
+    if (!EmitType(expr->type(), "")) {
       return false;
     }
     out_ << "(";
@@ -1058,14 +1071,13 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   }
 
   if (!in_locations.empty()) {
-    auto in_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
-        module_->SymbolToName(func->symbol()) + "_" + kInStructNameSuffix));
-    auto in_var_name = namer_->GenerateName(kTintStructInVarPrefix);
-    ep_sym_to_in_data_[func->symbol()] = {
-        in_struct_sym, module_->RegisterSymbol(in_var_name)};
+    auto in_struct_name = generate_name(module_->SymbolToName(func->symbol()) +
+                                        "_" + kInStructNameSuffix);
+    auto in_var_name = generate_name(kTintStructInVarPrefix);
+    ep_sym_to_in_data_[func->symbol()] = {in_struct_name, in_var_name};
 
     make_indent();
-    out_ << "struct " << namer_->NameFor(in_struct_sym) << " {" << std::endl;
+    out_ << "struct " << in_struct_name << " {" << std::endl;
 
     increment_indent();
 
@@ -1074,11 +1086,11 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
       uint32_t loc = data.second;
 
       make_indent();
-      if (!EmitType(var->type(), var->symbol())) {
+      if (!EmitType(var->type(), module_->SymbolToName(var->symbol()))) {
         return false;
       }
 
-      out_ << " " << namer_->NameFor(var->symbol()) << " [[";
+      out_ << " " << module_->SymbolToName(var->symbol()) << " [[";
       if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
         out_ << "attribute(" << loc << ")";
       } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
@@ -1096,14 +1108,13 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   }
 
   if (!out_variables.empty()) {
-    auto out_struct_sym = module_->RegisterSymbol(namer_->GenerateName(
-        module_->SymbolToName(func->symbol()) + "_" + kOutStructNameSuffix));
-    auto out_var_name = namer_->GenerateName(kTintStructOutVarPrefix);
-    ep_sym_to_out_data_[func->symbol()] = {
-        out_struct_sym, module_->RegisterSymbol(out_var_name)};
+    auto out_struct_name = generate_name(module_->SymbolToName(func->symbol()) +
+                                         "_" + kOutStructNameSuffix);
+    auto out_var_name = generate_name(kTintStructOutVarPrefix);
+    ep_sym_to_out_data_[func->symbol()] = {out_struct_name, out_var_name};
 
     make_indent();
-    out_ << "struct " << namer_->NameFor(out_struct_sym) << " {" << std::endl;
+    out_ << "struct " << out_struct_name << " {" << std::endl;
 
     increment_indent();
     for (auto& data : out_variables) {
@@ -1111,11 +1122,11 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
       auto* deco = data.second;
 
       make_indent();
-      if (!EmitType(var->type(), var->symbol())) {
+      if (!EmitType(var->type(), module_->SymbolToName(var->symbol()))) {
         return false;
       }
 
-      out_ << " " << namer_->NameFor(var->symbol()) << " [[";
+      out_ << " " << module_->SymbolToName(var->symbol()) << " [[";
 
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         auto loc = location->value();
@@ -1262,20 +1273,25 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
                                          bool emit_duplicate_functions,
                                          Symbol ep_sym) {
-  if (!EmitType(func->return_type(), Symbol())) {
+  auto name = func->symbol().to_str();
+  if (!EmitType(func->return_type(), "")) {
     return false;
   }
 
   out_ << " ";
-  auto func_name_sym = func->symbol();
   if (emit_duplicate_functions) {
-    auto func_name = module_->SymbolToName(func_name_sym);
-    auto ep_name = module_->SymbolToName(ep_sym);
-    func_name_sym = module_->RegisterSymbol(
-        namer_->GenerateName(func_name + "_" + ep_name));
-    ep_func_name_remapped_[ep_name + "_" + func_name] = func_name_sym;
+    auto func_name = name;
+    auto ep_name = ep_sym.to_str();
+    // TODO(dsinclair): The SymbolToName should go away and just use
+    // to_str() here when the conversion is complete.
+    name = generate_name(module_->SymbolToName(func->symbol()) + "_" +
+                         module_->SymbolToName(ep_sym));
+    ep_func_name_remapped_[ep_name + "_" + func_name] = name;
+  } else {
+    // TODO(dsinclair): this should be updated to a remapped name
+    name = namer_.NameFor(module_->SymbolToName(func->symbol()));
   }
-  out_ << namer_->NameFor(func_name_sym) << "(";
+  out_ << name << "(";
 
   bool first = true;
 
@@ -1286,8 +1302,8 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   if (emit_duplicate_functions) {
     auto in_it = ep_sym_to_in_data_.find(ep_sym);
     if (in_it != ep_sym_to_in_data_.end()) {
-      out_ << "thread " << namer_->NameFor(in_it->second.struct_symbol) << "& "
-           << namer_->NameFor(in_it->second.var_symbol);
+      out_ << "thread " << in_it->second.struct_name << "& "
+           << in_it->second.var_name;
       first = false;
     }
 
@@ -1296,8 +1312,8 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
       if (!first) {
         out_ << ", ";
       }
-      out_ << "thread " << namer_->NameFor(out_it->second.struct_symbol) << "& "
-           << namer_->NameFor(out_it->second.var_symbol);
+      out_ << "thread " << out_it->second.struct_name << "& "
+           << out_it->second.var_name;
       first = false;
     }
   }
@@ -1313,10 +1329,10 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     first = false;
 
     out_ << "thread ";
-    if (!EmitType(var->type(), Symbol())) {
+    if (!EmitType(var->type(), "")) {
       return false;
     }
-    out_ << "& " << namer_->NameFor(var->symbol());
+    out_ << "& " << module_->SymbolToName(var->symbol());
   }
 
   for (const auto& data : func->referenced_uniform_variables()) {
@@ -1328,10 +1344,10 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
     out_ << "constant ";
     // TODO(dsinclair): Can arrays be uniform? If so, fix this ...
-    if (!EmitType(var->type(), Symbol())) {
+    if (!EmitType(var->type(), "")) {
       return false;
     }
-    out_ << "& " << namer_->NameFor(var->symbol());
+    out_ << "& " << module_->SymbolToName(var->symbol());
   }
 
   for (const auto& data : func->referenced_storagebuffer_variables()) {
@@ -1351,10 +1367,10 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
 
     out_ << "device ";
-    if (!EmitType(ac->type(), Symbol())) {
+    if (!EmitType(ac->type(), "")) {
       return false;
     }
-    out_ << "& " << namer_->NameFor(var->symbol());
+    out_ << "& " << module_->SymbolToName(var->symbol());
   }
 
   for (auto* v : func->params()) {
@@ -1363,12 +1379,12 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    if (!EmitType(v->type(), v->symbol())) {
+    if (!EmitType(v->type(), module_->SymbolToName(v->symbol()))) {
       return false;
     }
     // Array name is output as part of the type
     if (!v->type()->Is<ast::type::Array>()) {
-      out_ << " " << namer_->NameFor(v->symbol());
+      out_ << " " << module_->SymbolToName(v->symbol());
     }
   }
 
@@ -1424,17 +1440,17 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
   bool has_out_data = out_data != ep_sym_to_out_data_.end();
   if (has_out_data) {
-    out_ << namer_->NameFor(out_data->second.struct_symbol);
+    out_ << out_data->second.struct_name;
   } else {
     out_ << "void";
   }
-  out_ << " " << namer_->NameFor(func->symbol()) << "(";
+  out_ << " " << namer_.NameFor(module_->SymbolToName(func->symbol())) << "(";
 
   bool first = true;
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
   if (in_data != ep_sym_to_in_data_.end()) {
-    out_ << namer_->NameFor(in_data->second.struct_symbol) << " "
-         << namer_->NameFor(in_data->second.var_symbol) << " [[stage_in]]";
+    out_ << in_data->second.struct_name << " " << in_data->second.var_name
+         << " [[stage_in]]";
     first = false;
   }
 
@@ -1451,7 +1467,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     auto* builtin = data.second;
 
-    if (!EmitType(var->type(), Symbol())) {
+    if (!EmitType(var->type(), "")) {
       return false;
     }
 
@@ -1460,7 +1476,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
       error_ = "unknown builtin";
       return false;
     }
-    out_ << " " << namer_->NameFor(var->symbol()) << " [[" << attr << "]]";
+    out_ << " " << module_->SymbolToName(var->symbol()) << " [[" << attr
+         << "]]";
   }
 
   for (auto data : func->referenced_uniform_variables()) {
@@ -1484,10 +1501,10 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     out_ << "constant ";
     // TODO(dsinclair): Can you have a uniform array? If so, this needs to be
     // updated to handle arrays property.
-    if (!EmitType(var->type(), Symbol())) {
+    if (!EmitType(var->type(), "")) {
       return false;
     }
-    out_ << "& " << namer_->NameFor(var->symbol()) << " [[buffer("
+    out_ << "& " << module_->SymbolToName(var->symbol()) << " [[buffer("
          << binding->value() << ")]]";
   }
 
@@ -1514,10 +1531,10 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     }
 
     out_ << "device ";
-    if (!EmitType(ac->type(), Symbol())) {
+    if (!EmitType(ac->type(), "")) {
       return false;
     }
-    out_ << "& " << namer_->NameFor(var->symbol()) << " [[buffer("
+    out_ << "& " << module_->SymbolToName(var->symbol()) << " [[buffer("
          << binding->value() << ")]]";
   }
 
@@ -1527,9 +1544,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
   if (has_out_data) {
     make_indent();
-    out_ << namer_->NameFor(out_data->second.struct_symbol) << " "
-         << namer_->NameFor(out_data->second.var_symbol) << " = {};"
-         << std::endl;
+    out_ << out_data->second.struct_name << " " << out_data->second.var_name
+         << " = {};" << std::endl;
   }
 
   generating_entry_point_ = true;
@@ -1567,21 +1583,15 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
       auto var_type = var->storage_class() == ast::StorageClass::kInput
                           ? VarType::kIn
                           : VarType::kOut;
-      auto sym = current_ep_var_symbol(var_type);
-      if (!sym.IsValid()) {
+      auto name = current_ep_var_name(var_type);
+      if (name.empty()) {
         error_ = "unable to find entry point data for variable";
         return false;
       }
-      out_ << namer_->NameFor(sym) << ".";
+      out_ << name << ".";
     }
   }
-
-  // Swizzles get written out directly
-  if (ident->IsSwizzle()) {
-    out_ << module_->SymbolToName(ident->symbol());
-  } else {
-    out_ << namer_->NameFor(ident->symbol());
-  }
+  out_ << namer_.NameFor(module_->SymbolToName(ident->symbol()));
 
   return true;
 }
@@ -1589,8 +1599,8 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   loop_emission_counter_++;
 
-  std::string guard = namer_->GenerateName(
-      "tint_msl_is_first_" + std::to_string(loop_emission_counter_));
+  std::string guard = namer_.NameFor("tint_msl_is_first_" +
+                                     std::to_string(loop_emission_counter_));
 
   if (stmt->has_continuing()) {
     make_indent();
@@ -1640,7 +1650,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
       make_indent();
 
       auto* var = decl->variable();
-      out_ << namer_->NameFor(var->symbol()) << " = ";
+      out_ << module_->SymbolToName(var->symbol()) << " = ";
       if (var->constructor() != nullptr) {
         if (!EmitExpression(var->constructor())) {
           return false;
@@ -1736,7 +1746,7 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   if (generating_entry_point_) {
     auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
     if (out_data != ep_sym_to_out_data_.end()) {
-      out_ << " " << namer_->NameFor(out_data->second.var_symbol);
+      out_ << " " << out_data->second.var_name;
     }
   } else if (stmt->has_value()) {
     out_ << " ";
@@ -1855,9 +1865,9 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
+bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
   if (auto* alias = type->As<ast::type::Alias>()) {
-    out_ << namer_->NameFor(alias->symbol());
+    out_ << namer_.NameFor(module_->SymbolToName(alias->symbol()));
   } else if (auto* ary = type->As<ast::type::Array>()) {
     ast::type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
@@ -1869,11 +1879,11 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
       }
       base_type = arr->type();
     }
-    if (!EmitType(base_type, Symbol())) {
+    if (!EmitType(base_type, "")) {
       return false;
     }
-    if (symbol.IsValid()) {
-      out_ << " " << namer_->NameFor(symbol);
+    if (!name.empty()) {
+      out_ << " " << namer_.NameFor(name);
     }
     for (uint32_t size : sizes) {
       out_ << "[" << size << "]";
@@ -1885,13 +1895,13 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
   } else if (type->Is<ast::type::I32>()) {
     out_ << "int";
   } else if (auto* mat = type->As<ast::type::Matrix>()) {
-    if (!EmitType(mat->type(), Symbol())) {
+    if (!EmitType(mat->type(), "")) {
       return false;
     }
     out_ << mat->columns() << "x" << mat->rows();
   } else if (auto* ptr = type->As<ast::type::Pointer>()) {
     // TODO(dsinclair): Storage class?
-    if (!EmitType(ptr->type(), Symbol())) {
+    if (!EmitType(ptr->type(), "")) {
       return false;
     }
     out_ << "*";
@@ -1900,7 +1910,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
   } else if (auto* str = type->As<ast::type::Struct>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
-    out_ << namer_->NameFor(str->symbol());
+    out_ << module_->SymbolToName(str->symbol());
   } else if (auto* tex = type->As<ast::type::Texture>()) {
     if (tex->Is<ast::type::DepthTexture>()) {
       out_ << "depth";
@@ -1941,7 +1951,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
     if (tex->Is<ast::type::DepthTexture>()) {
       out_ << "float, access::sample";
     } else if (auto* storage = tex->As<ast::type::StorageTexture>()) {
-      if (!EmitType(storage->type(), Symbol())) {
+      if (!EmitType(storage->type(), "")) {
         return false;
       }
       out_ << ", access::";
@@ -1954,12 +1964,12 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
         return false;
       }
     } else if (auto* ms = tex->As<ast::type::MultisampledTexture>()) {
-      if (!EmitType(ms->type(), Symbol())) {
+      if (!EmitType(ms->type(), "")) {
         return false;
       }
       out_ << ", access::sample";
     } else if (auto* sampled = tex->As<ast::type::SampledTexture>()) {
-      if (!EmitType(sampled->type(), Symbol())) {
+      if (!EmitType(sampled->type(), "")) {
         return false;
       }
       out_ << ", access::sample";
@@ -1972,7 +1982,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const Symbol& symbol) {
   } else if (type->Is<ast::type::U32>()) {
     out_ << "uint";
   } else if (auto* vec = type->As<ast::type::Vector>()) {
-    if (!EmitType(vec->type(), Symbol())) {
+    if (!EmitType(vec->type(), "")) {
       return false;
     }
     out_ << vec->size();
@@ -1990,7 +2000,8 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
   // }
-  out_ << "struct " << namer_->NameFor(str->symbol()) << " {" << std::endl;
+  out_ << "struct " << module_->SymbolToName(str->symbol()) << " {"
+       << std::endl;
 
   increment_indent();
   uint32_t current_offset = 0;
@@ -2013,7 +2024,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
       }
     }
 
-    if (!EmitType(mem->type(), mem->symbol())) {
+    if (!EmitType(mem->type(), module_->SymbolToName(mem->symbol()))) {
       return false;
     }
     auto size = calculate_alignment_size(mem->type());
@@ -2025,7 +2036,7 @@ bool GeneratorImpl::EmitStructType(const ast::type::Struct* str) {
 
     // Array member name will be output with the type
     if (!mem->type()->Is<ast::type::Array>()) {
-      out_ << " " << namer_->NameFor(mem->symbol());
+      out_ << " " << namer_.NameFor(module_->SymbolToName(mem->symbol()));
     }
     out_ << ";" << std::endl;
   }
@@ -2067,11 +2078,11 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
   if (var->is_const()) {
     out_ << "const ";
   }
-  if (!EmitType(var->type(), var->symbol())) {
+  if (!EmitType(var->type(), module_->SymbolToName(var->symbol()))) {
     return false;
   }
   if (!var->type()->Is<ast::type::Array>()) {
-    out_ << " " << namer_->NameFor(var->symbol());
+    out_ << " " << module_->SymbolToName(var->symbol());
   }
 
   if (!skip_constructor) {
@@ -2109,11 +2120,11 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   }
 
   out_ << "constant ";
-  if (!EmitType(var->type(), var->symbol())) {
+  if (!EmitType(var->type(), module_->SymbolToName(var->symbol()))) {
     return false;
   }
   if (!var->type()->Is<ast::type::Array>()) {
-    out_ << " " << namer_->NameFor(var->symbol());
+    out_ << " " << module_->SymbolToName(var->symbol());
   }
 
   if (var->HasConstantIdDecoration()) {

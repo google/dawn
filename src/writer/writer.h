@@ -51,9 +51,6 @@ class Writer {
   /// Constructor
   /// @param module the tint module to convert
   explicit Writer(ast::Module module);
-  /// Constructor
-  /// @param module the tint module to convert
-  explicit Writer(ast::Module* module);
 
   /// Sets the error string
   /// @param msg the error message
@@ -61,11 +58,8 @@ class Writer {
 
   /// An error message, if an error was encountered
   std::string error_;
-
-  /// Temporary owned module until we can update the API ...
-  ast::Module owned_module_;
   /// The module being converted
-  ast::Module* module_;
+  ast::Module module_;
 };
 
 }  // namespace writer

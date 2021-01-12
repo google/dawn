@@ -76,9 +76,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_vtx_main_in {
-  float test_foo : TEXCOORD0;
-  int test_bar : TEXCOORD1;
+  EXPECT_EQ(result(), R"(struct vtx_main_in {
+  float foo : TEXCOORD0;
+  int bar : TEXCOORD1;
 };
 
 )");
@@ -126,9 +126,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_vtx_main_out {
-  float test_foo : TEXCOORD0;
-  int test_bar : TEXCOORD1;
+  EXPECT_EQ(result(), R"(struct vtx_main_out {
+  float foo : TEXCOORD0;
+  int bar : TEXCOORD1;
 };
 
 )");
@@ -176,9 +176,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_main_in {
-  float test_foo : TEXCOORD0;
-  int test_bar : TEXCOORD1;
+  EXPECT_EQ(result(), R"(struct main_in {
+  float foo : TEXCOORD0;
+  int bar : TEXCOORD1;
 };
 
 )");
@@ -226,9 +226,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_main_out {
-  float test_foo : SV_Target0;
-  int test_bar : SV_Target1;
+  EXPECT_EQ(result(), R"(struct main_out {
+  float foo : SV_Target0;
+  int bar : SV_Target1;
 };
 
 )");
@@ -365,12 +365,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_main_in {
-  float4 test_coord : SV_Position;
+  EXPECT_EQ(result(), R"(struct main_in {
+  float4 coord : SV_Position;
 };
 
-struct test_main_out {
-  float test_depth : SV_Depth;
+struct main_out {
+  float depth : SV_Depth;
 };
 
 )");

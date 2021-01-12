@@ -550,7 +550,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
-    writer = std::make_unique<tint::writer::spirv::Generator>(&mod);
+    writer = std::make_unique<tint::writer::spirv::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
@@ -562,13 +562,13 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_MSL_WRITER
   if (options.format == Format::kMsl) {
-    writer = std::make_unique<tint::writer::msl::Generator>(&mod);
+    writer = std::make_unique<tint::writer::msl::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
   if (options.format == Format::kHlsl) {
-    writer = std::make_unique<tint::writer::hlsl::Generator>(&mod);
+    writer = std::make_unique<tint::writer::hlsl::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_HLSL_WRITER
 

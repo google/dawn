@@ -22,13 +22,9 @@
 
 namespace tint {
 
-Namer::Namer(const ast::Module* mod) : module_(mod) {}
+Namer::Namer(ast::Module* mod) : module_(mod) {}
 
 Namer::~Namer() = default;
-
-void Namer::Reset() {
-  used_.clear();
-}
 
 bool Namer::IsUsed(const std::string& name) {
   auto it = used_.find(name);
@@ -46,7 +42,7 @@ std::string Namer::GenerateName(const std::string& prefix) {
   return name;
 }
 
-MangleNamer::MangleNamer(const ast::Module* mod) : Namer(mod) {}
+MangleNamer::MangleNamer(ast::Module* mod) : Namer(mod) {}
 
 MangleNamer::~MangleNamer() = default;
 
@@ -54,7 +50,7 @@ std::string MangleNamer::NameFor(const Symbol& sym) {
   return sym.to_str();
 }
 
-UnsafeNamer::UnsafeNamer(const ast::Module* mod) : Namer(mod) {}
+UnsafeNamer::UnsafeNamer(ast::Module* mod) : Namer(mod) {}
 
 UnsafeNamer::~UnsafeNamer() = default;
 

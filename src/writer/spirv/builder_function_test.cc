@@ -50,7 +50,7 @@ TEST_F(BuilderTest, Function_Empty) {
                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "test_a_func"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -68,7 +68,7 @@ TEST_F(BuilderTest, Function_Terminator_Return) {
                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "test_a_func"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -89,8 +89,8 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
   ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "test_a"
-OpName %7 "test_a_func"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
+OpName %7 "a_func"
 %3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -113,7 +113,7 @@ TEST_F(BuilderTest, Function_Terminator_Discard) {
                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "test_a_func"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -136,9 +136,9 @@ TEST_F(BuilderTest, Function_WithParams) {
   EXPECT_TRUE(td.DetermineFunction(func));
 
   ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "test_a_func"
-OpName %5 "test_a"
-OpName %6 "test_b"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
+OpName %5 "a"
+OpName %6 "b"
 %2 = OpTypeFloat 32
 %3 = OpTypeInt 32 1
 %1 = OpTypeFunction %2 %2 %3
@@ -160,7 +160,7 @@ TEST_F(BuilderTest, Function_WithBody) {
                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "test_a_func"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -269,17 +269,17 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %7 "test_a"
-OpEntryPoint GLCompute %17 "test_b"
+OpEntryPoint GLCompute %7 "a"
+OpEntryPoint GLCompute %17 "b"
 OpExecutionMode %7 LocalSize 1 1 1
 OpExecutionMode %17 LocalSize 1 1 1
-OpName %3 "test_Data"
-OpMemberName %3 0 "test_d"
-OpName %1 "test_data"
-OpName %7 "test_a"
-OpName %14 "test_v"
-OpName %17 "test_b"
-OpName %21 "test_v"
+OpName %3 "Data"
+OpMemberName %3 0 "d"
+OpName %1 "data"
+OpName %7 "a"
+OpName %14 "v"
+OpName %17 "b"
+OpName %21 "v"
 OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpDecorate %1 Binding 0

@@ -66,7 +66,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "test_var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
@@ -108,7 +108,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "test_var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3

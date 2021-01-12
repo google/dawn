@@ -22,21 +22,13 @@ namespace spirv {
 
 Generator::Generator(ast::Module module)
     : writer::Writer(std::move(module)),
-      namer_(std::make_unique<MangleNamer>(module_)),
-      builder_(std::make_unique<Builder>(module_, namer_.get())),
-      writer_(std::make_unique<BinaryWriter>()) {}
-
-Generator::Generator(ast::Module* module)
-    : writer::Writer(module),
-      namer_(std::make_unique<MangleNamer>(module_)),
-      builder_(std::make_unique<Builder>(module_, namer_.get())),
+      builder_(std::make_unique<Builder>(&module_)),
       writer_(std::make_unique<BinaryWriter>()) {}
 
 Generator::~Generator() = default;
 
 void Generator::Reset() {
-  namer_->Reset();
-  builder_ = std::make_unique<Builder>(module_, namer_.get());
+  builder_ = std::make_unique<Builder>(&module_);
   writer_ = std::make_unique<BinaryWriter>();
 }
 
@@ -48,22 +40,6 @@ bool Generator::Generate() {
 
   writer_->WriteHeader(builder_->id_bound());
   writer_->WriteBuilder(builder_.get());
-  return true;
-}
-
-bool Generator::GenerateUnsafe() {
-  auto unsafe_namer = std::make_unique<UnsafeNamer>(module_);
-  builder_ = std::make_unique<Builder>(module_, unsafe_namer.get());
-
-  if (!builder_->Build()) {
-    set_error(builder_->error());
-    return false;
-  }
-
-  writer_->WriteHeader(builder_->id_bound());
-  writer_->WriteBuilder(builder_.get());
-
-  builder_ = std::make_unique<Builder>(module_, namer_.get());
   return true;
 }
 

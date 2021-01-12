@@ -26,7 +26,14 @@ using HlslGeneratorImplTest_Identifier = TestHelper;
 TEST_F(HlslGeneratorImplTest_Identifier, EmitIdentifierExpression) {
   auto* i = Expr("foo");
   ASSERT_TRUE(gen.EmitExpression(pre, out, i)) << gen.error();
-  EXPECT_EQ(result(), "test_foo");
+  EXPECT_EQ(result(), "foo");
+}
+
+TEST_F(HlslGeneratorImplTest_Identifier,
+       EmitIdentifierExpression_Single_WithCollision) {
+  auto* i = Expr("virtual");
+  ASSERT_TRUE(gen.EmitExpression(pre, out, i)) << gen.error();
+  EXPECT_EQ(result(), "virtual_tint_0");
 }
 
 }  // namespace

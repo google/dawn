@@ -61,10 +61,10 @@ TEST_F(BuilderTest, Expression_Call) {
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 14u) << b.error();
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "test_a_func"
-OpName %4 "test_a"
-OpName %5 "test_b"
-OpName %12 "test_main"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+OpName %4 "a"
+OpName %5 "b"
+OpName %12 "main"
 %2 = OpTypeFloat 32
 %1 = OpTypeFunction %2 %2 %2
 %11 = OpTypeVoid
@@ -110,10 +110,10 @@ TEST_F(BuilderTest, Statement_Call) {
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_TRUE(b.GenerateStatement(expr)) << b.error();
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "test_a_func"
-OpName %5 "test_a"
-OpName %6 "test_b"
-OpName %12 "test_main"
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
+OpName %5 "a"
+OpName %6 "b"
+OpName %12 "main"
 %2 = OpTypeVoid
 %3 = OpTypeFloat 32
 %1 = OpTypeFunction %2 %3 %3

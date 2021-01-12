@@ -115,23 +115,22 @@ INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest,
     HlslBinaryTest,
     testing::Values(
-        BinaryData{"(test_left & test_right)", ast::BinaryOp::kAnd},
-        BinaryData{"(test_left | test_right)", ast::BinaryOp::kOr},
-        BinaryData{"(test_left ^ test_right)", ast::BinaryOp::kXor},
-        BinaryData{"(test_left == test_right)", ast::BinaryOp::kEqual},
-        BinaryData{"(test_left != test_right)", ast::BinaryOp::kNotEqual},
-        BinaryData{"(test_left < test_right)", ast::BinaryOp::kLessThan},
-        BinaryData{"(test_left > test_right)", ast::BinaryOp::kGreaterThan},
-        BinaryData{"(test_left <= test_right)", ast::BinaryOp::kLessThanEqual},
-        BinaryData{"(test_left >= test_right)",
-                   ast::BinaryOp::kGreaterThanEqual},
-        BinaryData{"(test_left << test_right)", ast::BinaryOp::kShiftLeft},
-        BinaryData{"(test_left >> test_right)", ast::BinaryOp::kShiftRight},
-        BinaryData{"(test_left + test_right)", ast::BinaryOp::kAdd},
-        BinaryData{"(test_left - test_right)", ast::BinaryOp::kSubtract},
-        BinaryData{"(test_left * test_right)", ast::BinaryOp::kMultiply},
-        BinaryData{"(test_left / test_right)", ast::BinaryOp::kDivide},
-        BinaryData{"(test_left % test_right)", ast::BinaryOp::kModulo}));
+        BinaryData{"(left & right)", ast::BinaryOp::kAnd},
+        BinaryData{"(left | right)", ast::BinaryOp::kOr},
+        BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
+        BinaryData{"(left == right)", ast::BinaryOp::kEqual},
+        BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
+        BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
+        BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
+        BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
+        BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
+        BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
+        BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
+        BinaryData{"(left + right)", ast::BinaryOp::kAdd},
+        BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
+        BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
+        BinaryData{"(left / right)", ast::BinaryOp::kDivide},
+        BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
@@ -173,7 +172,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(test_mat * 1.0f)");
+  EXPECT_EQ(result(), "(mat * 1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
@@ -188,7 +187,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(1.0f * test_mat)");
+  EXPECT_EQ(result(), "(1.0f * mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
@@ -203,7 +202,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "mul(test_mat, float3(1.0f, 1.0f, 1.0f))");
+  EXPECT_EQ(result(), "mul(mat, float3(1.0f, 1.0f, 1.0f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
@@ -218,7 +217,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "mul(float3(1.0f, 1.0f, 1.0f), test_mat)");
+  EXPECT_EQ(result(), "mul(float3(1.0f, 1.0f, 1.0f), mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
@@ -233,7 +232,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "mul(test_mat, test_mat)");
+  EXPECT_EQ(result(), "mul(mat, mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
@@ -245,9 +244,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = test_left;
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
 if (_tint_tmp) {
-  _tint_tmp = test_right;
+  _tint_tmp = right;
 }
 )");
 }
@@ -266,15 +265,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp_0)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = test_a;
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
-  _tint_tmp = test_b;
+  _tint_tmp = b;
 }
 bool _tint_tmp_0 = (_tint_tmp);
 if (!_tint_tmp_0) {
-  bool _tint_tmp_1 = test_c;
+  bool _tint_tmp_1 = c;
   if (!_tint_tmp_1) {
-    _tint_tmp_1 = test_d;
+    _tint_tmp_1 = d;
   }
   _tint_tmp_0 = (_tint_tmp_1);
 }
@@ -290,9 +289,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = test_left;
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
 if (!_tint_tmp) {
-  _tint_tmp = test_right;
+  _tint_tmp = right;
 }
 )");
 }
@@ -333,16 +332,16 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
       });
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = test_a;
+  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
-  _tint_tmp = test_b;
+  _tint_tmp = b;
 }
 if ((_tint_tmp)) {
   return 1;
 } else {
-  bool _tint_tmp_0 = test_b;
+  bool _tint_tmp_0 = b;
   if (!_tint_tmp_0) {
-    _tint_tmp_0 = test_c;
+    _tint_tmp_0 = c;
   }
   if ((_tint_tmp_0)) {
     return 2;
@@ -364,13 +363,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b), c));
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = test_a;
+  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
-  _tint_tmp = test_b;
+  _tint_tmp = b;
 }
 bool _tint_tmp_0 = (_tint_tmp);
 if (!_tint_tmp_0) {
-  _tint_tmp_0 = test_c;
+  _tint_tmp_0 = c;
 }
 return (_tint_tmp_0);
 )");
@@ -390,15 +389,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c), d));
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = test_b;
+  EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (!_tint_tmp) {
-  _tint_tmp = test_c;
+  _tint_tmp = c;
 }
 bool _tint_tmp_0 = (_tint_tmp);
 if (_tint_tmp_0) {
-  _tint_tmp_0 = test_d;
+  _tint_tmp_0 = d;
 }
-test_a = (_tint_tmp_0);
+a = (_tint_tmp_0);
 )");
 }
 
@@ -419,15 +418,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   auto* expr = create<ast::VariableDeclStatement>(var);
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = test_b;
+  EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (_tint_tmp) {
-  _tint_tmp = test_c;
+  _tint_tmp = c;
 }
 bool _tint_tmp_0 = (_tint_tmp);
 if (!_tint_tmp_0) {
-  _tint_tmp_0 = test_d;
+  _tint_tmp_0 = d;
 }
-bool test_a = (_tint_tmp_0);
+bool a = (_tint_tmp_0);
 )");
 }
 
@@ -445,11 +444,11 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c)));
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = test_a;
+  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
-  bool _tint_tmp_0 = test_b;
+  bool _tint_tmp_0 = b;
   if (!_tint_tmp_0) {
-    _tint_tmp_0 = test_c;
+    _tint_tmp_0 = c;
   }
   _tint_tmp = (_tint_tmp_0);
 }
@@ -479,27 +478,27 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   auto* expr = create<ast::CallStatement>(Call("foo", params));
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = test_a;
+  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
-  _tint_tmp = test_b;
+  _tint_tmp = b;
 }
-bool _tint_tmp_0 = test_c;
+bool _tint_tmp_0 = c;
 if (!_tint_tmp_0) {
-  _tint_tmp_0 = test_d;
+  _tint_tmp_0 = d;
 }
-bool _tint_tmp_1 = test_a;
+bool _tint_tmp_1 = a;
 if (!_tint_tmp_1) {
-  _tint_tmp_1 = test_c;
+  _tint_tmp_1 = c;
 }
 bool _tint_tmp_2 = (_tint_tmp_1);
 if (_tint_tmp_2) {
-  bool _tint_tmp_3 = test_b;
+  bool _tint_tmp_3 = b;
   if (!_tint_tmp_3) {
-    _tint_tmp_3 = test_d;
+    _tint_tmp_3 = d;
   }
   _tint_tmp_2 = (_tint_tmp_3);
 }
-test_foo((_tint_tmp), (_tint_tmp_0), (_tint_tmp_2));
+foo((_tint_tmp), (_tint_tmp_0), (_tint_tmp_2));
 )");
 }
 

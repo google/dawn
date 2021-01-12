@@ -61,7 +61,6 @@
 #include "src/ast/variable_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/type_determiner.h"
-#include "src/writer/test_namer.h"
 #include "tint/tint.h"
 
 namespace tint {
@@ -72,8 +71,7 @@ class InspectorHelper : public ast::BuilderWithModule {
  public:
   InspectorHelper()
       : td_(std::make_unique<TypeDeterminer>(mod)),
-        namer_(mod),
-        inspector_(std::make_unique<Inspector>(*mod, &namer_)),
+        inspector_(std::make_unique<Inspector>(*mod)),
         sampler_type_(ast::type::SamplerKind::kSampler),
         comparison_sampler_type_(ast::type::SamplerKind::kComparisonSampler) {}
 
@@ -641,7 +639,6 @@ class InspectorHelper : public ast::BuilderWithModule {
 
  private:
   std::unique_ptr<TypeDeterminer> td_;
-  writer::TestNamer namer_;
   std::unique_ptr<Inspector> inspector_;
 
   ast::type::Sampler sampler_type_;
@@ -723,12 +720,14 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
              });
   mod->AddFunction(foo);
 
+  // TODO(dsinclair): Update to run the namer transform when available.
+
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ("foo", result[0].name);
-  EXPECT_EQ("test_foo", result[0].remapped_name);
+  EXPECT_EQ("foo", result[0].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kVertex, result[0].stage);
 }
 
@@ -745,15 +744,17 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
              });
   mod->AddFunction(bar);
 
+  // TODO(dsinclair): Update to run the namer transform when available.
+
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(2u, result.size());
   EXPECT_EQ("foo", result[0].name);
-  EXPECT_EQ("test_foo", result[0].remapped_name);
+  EXPECT_EQ("foo", result[0].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kVertex, result[0].stage);
   EXPECT_EQ("bar", result[1].name);
-  EXPECT_EQ("test_bar", result[1].remapped_name);
+  EXPECT_EQ("bar", result[1].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kCompute, result[1].stage);
 }
 
@@ -775,15 +776,17 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
       });
   mod->AddFunction(bar);
 
+  // TODO(dsinclair): Update to run the namer transform when available.
+
   auto result = inspector()->GetEntryPoints();
   EXPECT_FALSE(inspector()->has_error());
 
   ASSERT_EQ(2u, result.size());
   EXPECT_EQ("foo", result[0].name);
-  EXPECT_EQ("test_foo", result[0].remapped_name);
+  EXPECT_EQ("foo", result[0].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kVertex, result[0].stage);
   EXPECT_EQ("bar", result[1].name);
-  EXPECT_EQ("test_bar", result[1].remapped_name);
+  EXPECT_EQ("bar", result[1].remapped_name);
   EXPECT_EQ(ast::PipelineStage::kFragment, result[1].stage);
 }
 
@@ -862,9 +865,9 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("test_in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0]);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("test_out_var", result[0].output_variables[0]);
+  EXPECT_EQ("out_var", result[0].output_variables[0]);
 }
 
 TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
@@ -889,9 +892,9 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("test_in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0]);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("test_out_var", result[0].output_variables[0]);
+  EXPECT_EQ("out_var", result[0].output_variables[0]);
 }
 
 TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
@@ -916,9 +919,9 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("test_in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0]);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("test_out_var", result[0].output_variables[0]);
+  EXPECT_EQ("out_var", result[0].output_variables[0]);
 }
 
 TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
@@ -939,11 +942,11 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(2u, result[0].input_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "test_in_var"));
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "test_in2_var"));
+  EXPECT_TRUE(ContainsString(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsString(result[0].input_variables, "in2_var"));
   ASSERT_EQ(2u, result[0].output_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "test_out_var"));
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "test_out2_var"));
+  EXPECT_TRUE(ContainsString(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsString(result[0].output_variables, "out2_var"));
 }
 
 TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
@@ -968,11 +971,11 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(2u, result[0].input_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "test_in_var"));
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "test_in2_var"));
+  EXPECT_TRUE(ContainsString(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsString(result[0].input_variables, "in2_var"));
   ASSERT_EQ(2u, result[0].output_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "test_out_var"));
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "test_out2_var"));
+  EXPECT_TRUE(ContainsString(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsString(result[0].output_variables, "out2_var"));
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
@@ -994,24 +997,26 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
+  // TODO(dsinclair): Update to run the namer transform when available.
+
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(2u, result.size());
 
   ASSERT_EQ("foo", result[0].name);
-  ASSERT_EQ("test_foo", result[0].remapped_name);
+  ASSERT_EQ("foo", result[0].remapped_name);
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("test_in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0]);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("test_out2_var", result[0].output_variables[0]);
+  EXPECT_EQ("out2_var", result[0].output_variables[0]);
 
   ASSERT_EQ("bar", result[1].name);
-  ASSERT_EQ("test_bar", result[1].remapped_name);
+  ASSERT_EQ("bar", result[1].remapped_name);
   ASSERT_EQ(1u, result[1].input_variables.size());
-  EXPECT_EQ("test_in2_var", result[1].input_variables[0]);
+  EXPECT_EQ("in2_var", result[1].input_variables[0]);
   ASSERT_EQ(1u, result[1].output_variables.size());
-  EXPECT_EQ("test_out_var", result[1].output_variables[0]);
+  EXPECT_EQ("out_var", result[1].output_variables[0]);
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
@@ -1037,36 +1042,42 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
+  // TODO(dsinclair): Update to run the namer transform when available.
+
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
   ASSERT_EQ(2u, result.size());
 
   ASSERT_EQ("foo", result[0].name);
-  ASSERT_EQ("test_foo", result[0].remapped_name);
+  ASSERT_EQ("foo", result[0].remapped_name);
   EXPECT_EQ(2u, result[0].input_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "test_in_var"));
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "test_in2_var"));
+  EXPECT_TRUE(ContainsString(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsString(result[0].input_variables, "in2_var"));
   EXPECT_EQ(2u, result[0].output_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "test_out_var"));
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "test_out2_var"));
+  EXPECT_TRUE(ContainsString(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsString(result[0].output_variables, "out2_var"));
 
   ASSERT_EQ("bar", result[1].name);
-  ASSERT_EQ("test_bar", result[1].remapped_name);
+  ASSERT_EQ("bar", result[1].remapped_name);
   EXPECT_EQ(1u, result[1].input_variables.size());
-  EXPECT_EQ("test_in2_var", result[1].input_variables[0]);
+  EXPECT_EQ("in2_var", result[1].input_variables[0]);
   EXPECT_EQ(1u, result[1].output_variables.size());
-  EXPECT_EQ("test_out2_var", result[1].output_variables[0]);
+  EXPECT_EQ("out2_var", result[1].output_variables[0]);
 }
 
-TEST_F(InspectorGetRemappedNameForEntryPointTest, NoFunctions) {
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
   auto result = inspector()->GetRemappedNameForEntryPoint("foo");
   ASSERT_TRUE(inspector()->has_error());
 
   EXPECT_EQ("", result);
 }
 
-TEST_F(InspectorGetRemappedNameForEntryPointTest, NoEntryPoints) {
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
   mod->AddFunction(MakeEmptyBodyFunction("foo", {}));
 
   auto result = inspector()->GetRemappedNameForEntryPoint("foo");
@@ -1075,25 +1086,34 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, NoEntryPoints) {
   EXPECT_EQ("", result);
 }
 
-TEST_F(InspectorGetRemappedNameForEntryPointTest, OneEntryPoint) {
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
   auto* foo = MakeEmptyBodyFunction(
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
   mod->AddFunction(foo);
+
+  // TODO(dsinclair): Update to run the namer transform when available.
 
   auto result = inspector()->GetRemappedNameForEntryPoint("foo");
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
 
-  EXPECT_EQ("test_foo", result);
+  EXPECT_EQ("foo", result);
 }
 
-TEST_F(InspectorGetRemappedNameForEntryPointTest, MultipleEntryPoints) {
+// TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
+// through
+TEST_F(InspectorGetRemappedNameForEntryPointTest,
+       DISABLED_MultipleEntryPoints) {
   auto* foo = MakeEmptyBodyFunction(
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
   mod->AddFunction(foo);
+
+  // TODO(dsinclair): Update to run the namer transform when available.
 
   auto* bar = MakeEmptyBodyFunction(
       "bar", ast::FunctionDecorationList{
@@ -1104,12 +1124,12 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, MultipleEntryPoints) {
   {
     auto result = inspector()->GetRemappedNameForEntryPoint("foo");
     ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
-    EXPECT_EQ("test_foo", result);
+    EXPECT_EQ("foo", result);
   }
   {
     auto result = inspector()->GetRemappedNameForEntryPoint("bar");
     ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
-    EXPECT_EQ("test_bar", result);
+    EXPECT_EQ("bar", result);
   }
 }
 

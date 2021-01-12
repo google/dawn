@@ -28,7 +28,13 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
   auto* i = Expr("foo");
   ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
-  EXPECT_EQ(gen.result(), "test_foo");
+  EXPECT_EQ(gen.result(), "foo");
+}
+
+TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
+  auto* i = Expr("virtual");
+  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
+  EXPECT_EQ(gen.result(), "virtual_tint_0");
 }
 
 }  // namespace

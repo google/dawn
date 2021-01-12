@@ -43,18 +43,9 @@
 namespace tint {
 namespace inspector {
 
-Inspector::Inspector(ast::Module& module, Namer* namer)
-    : module_(module), namer_(namer), namer_is_owned_(false) {}
+Inspector::Inspector(const ast::Module& module) : module_(module) {}
 
-Inspector::Inspector(const ast::Module& module)
-    : module_(module),
-      namer_(new MangleNamer(&module_)),
-      namer_is_owned_(true) {}
-
-Inspector::~Inspector() {
-  if (namer_is_owned_)
-    delete namer_;
-}
+Inspector::~Inspector() = default;
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
@@ -66,13 +57,13 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
     EntryPoint entry_point;
     entry_point.name = module_.SymbolToName(func->symbol());
-    entry_point.remapped_name = namer_->NameFor(func->symbol());
+    entry_point.remapped_name = module_.SymbolToName(func->symbol());
     entry_point.stage = func->pipeline_stage();
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
 
     for (auto* var : func->referenced_module_variables()) {
-      auto name = namer_->NameFor(var->symbol());
+      auto name = module_.SymbolToName(var->symbol());
       if (var->storage_class() == ast::StorageClass::kInput) {
         entry_point.input_variables.push_back(name);
       } else {
@@ -87,11 +78,15 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
 std::string Inspector::GetRemappedNameForEntryPoint(
     const std::string& entry_point) {
-  auto* func = FindEntryPointByName(entry_point);
-  if (!func) {
-    return {};
-  }
-  return namer_->NameFor(func->symbol());
+  // TODO(rharrison): Reenable once all of the backends are using the renamed
+  //                  entry points.
+
+  //  auto* func = FindEntryPointByName(entry_point);
+  //  if (!func) {
+  //    return {};
+  //  }
+  //  return func->name();
+  return entry_point;
 }
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {

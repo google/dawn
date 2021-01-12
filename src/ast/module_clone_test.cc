@@ -149,13 +149,13 @@ fn main() -> void {
   // reconstruct the WGSL.
   std::string src_wgsl;
   {
-    writer::wgsl::Generator src_gen(&src);
+    writer::wgsl::Generator src_gen(std::move(src));
     ASSERT_TRUE(src_gen.Generate());
     src_wgsl = src_gen.result();
   }
 
   // Print the dst module, check it matches the original source
-  writer::wgsl::Generator dst_gen(&dst);
+  writer::wgsl::Generator dst_gen(std::move(dst));
   ASSERT_TRUE(dst_gen.Generate());
   auto dst_wgsl = dst_gen.result();
   ASSERT_EQ(src_wgsl, dst_wgsl);

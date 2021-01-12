@@ -590,6 +590,8 @@ source_set("libtint_msl_writer_src") {
     "src/writer/msl/generator.h",
     "src/writer/msl/generator_impl.cc",
     "src/writer/msl/generator_impl.h",
+    "src/writer/msl/namer.cc",
+    "src/writer/msl/namer.h",
   ]
 
   configs += [ ":tint_common_config" ]
@@ -609,6 +611,8 @@ source_set("libtint_hlsl_writer_src") {
     "src/writer/hlsl/generator.h",
     "src/writer/hlsl/generator_impl.cc",
     "src/writer/hlsl/generator_impl.h",
+    "src/writer/hlsl/namer.cc",
+    "src/writer/hlsl/namer.h",
   ]
 
   configs += [ ":tint_common_config" ]
@@ -834,8 +838,6 @@ source_set("tint_unittests_core_src") {
     "src/validator/validator_function_test.cc",
     "src/validator/validator_test.cc",
     "src/writer/float_to_string_test.cc",
-    "src/writer/test_namer.cc",
-    "src/writer/test_namer.h",
   ]
 
   configs += [
@@ -1145,6 +1147,7 @@ source_set("tint_unittests_msl_writer_src") {
     "src/writer/msl/generator_impl_type_test.cc",
     "src/writer/msl/generator_impl_unary_op_test.cc",
     "src/writer/msl/generator_impl_variable_decl_statement_test.cc",
+    "src/writer/msl/namer_test.cc",
     "src/writer/msl/test_helper.h",
   ]
 
@@ -1199,6 +1202,7 @@ source_set("tint_unittests_hlsl_writer_src") {
     "src/writer/hlsl/generator_impl_type_test.cc",
     "src/writer/hlsl/generator_impl_unary_op_test.cc",
     "src/writer/hlsl/generator_impl_variable_decl_statement_test.cc",
+    "src/writer/hlsl/namer_test.cc",
     "src/writer/hlsl/test_helper.h",
   ]
 

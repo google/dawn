@@ -30,7 +30,15 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
   auto* alias = ty.alias("a", ty.f32);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
-  EXPECT_EQ(result(), R"(typedef float test_a;
+  EXPECT_EQ(result(), R"(typedef float a;
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
+  auto* alias = ty.alias("float", ty.f32);
+
+  ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
+  EXPECT_EQ(result(), R"(typedef float float_tint_0;
 )");
 }
 
@@ -44,9 +52,9 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   auto* alias = ty.alias("B", s);
 
   ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_B {
-  float test_a;
-  int test_b;
+  EXPECT_EQ(result(), R"(struct B {
+  float a;
+  int b;
 };
 )");
 }

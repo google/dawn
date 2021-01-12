@@ -18,7 +18,6 @@
 #include <memory>
 #include <string>
 
-#include "src/namer.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/text.h"
 
@@ -30,12 +29,8 @@ namespace msl {
 class Generator : public Text {
  public:
   /// Constructor
-  /// DEPRECATED
   /// @param module the module to convert
   explicit Generator(ast::Module module);
-  /// Constructor
-  /// @param module the module to convert
-  explicit Generator(ast::Module* module);
   ~Generator() override;
 
   /// Resets the generator
@@ -59,7 +54,6 @@ class Generator : public Text {
   std::string error() const;
 
  private:
-  std::unique_ptr<Namer> namer_;
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

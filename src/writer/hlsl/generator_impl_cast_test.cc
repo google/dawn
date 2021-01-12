@@ -31,13 +31,13 @@ using HlslGeneratorImplTest_Cast = TestHelper;
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
   auto* cast = Construct<f32>("id");
   ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
-  EXPECT_EQ(result(), "float(test_id)");
+  EXPECT_EQ(result(), "float(id)");
 }
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
   auto* cast = vec3<f32>("id");
   ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
-  EXPECT_EQ(result(), "float3(test_id)");
+  EXPECT_EQ(result(), "float3(id)");
 }
 
 }  // namespace

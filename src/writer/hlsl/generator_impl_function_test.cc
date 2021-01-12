@@ -63,7 +63,25 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(  void test_my_func() {
+  EXPECT_EQ(result(), R"(  void my_func() {
+    return;
+  }
+
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
+  auto* func = Func("GeometryShader", ast::VariableList{}, ty.void_,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(),
+                    },
+                    ast::FunctionDecorationList{});
+
+  mod->AddFunction(func);
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"(  void GeometryShader_tint_0() {
     return;
   }
 
@@ -85,7 +103,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(  void test_my_func(float test_a, int test_b) {
+  EXPECT_EQ(result(), R"(  void my_func(float a, int b) {
     return;
   }
 
@@ -124,18 +142,18 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_frag_main_in {
-  float test_foo : TEXCOORD0;
+  EXPECT_EQ(result(), R"(struct frag_main_in {
+  float foo : TEXCOORD0;
 };
 
-struct test_frag_main_out {
-  float test_bar : SV_Target1;
+struct frag_main_out {
+  float bar : SV_Target1;
 };
 
-test_frag_main_out test_frag_main(test_frag_main_in test_tint_in) {
-  test_frag_main_out test_tint_out;
-  test_tint_out.test_bar = test_tint_in.test_foo;
-  return test_tint_out;
+frag_main_out frag_main(frag_main_in tint_in) {
+  frag_main_out tint_out;
+  tint_out.bar = tint_in.foo;
+  return tint_out;
 }
 
 )");
@@ -176,18 +194,18 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_frag_main_in {
-  float4 test_coord : SV_Position;
+  EXPECT_EQ(result(), R"(struct frag_main_in {
+  float4 coord : SV_Position;
 };
 
-struct test_frag_main_out {
-  float test_depth : SV_Depth;
+struct frag_main_out {
+  float depth : SV_Depth;
 };
 
-test_frag_main_out test_frag_main(test_frag_main_in test_tint_in) {
-  test_frag_main_out test_tint_out;
-  test_tint_out.test_depth = test_tint_in.test_coord.x;
-  return test_tint_out;
+frag_main_out frag_main(frag_main_in tint_in) {
+  frag_main_out tint_out;
+  tint_out.depth = tint_in.coord.x;
+  return tint_out;
 }
 
 )");
@@ -222,12 +240,12 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer cbuffer_test_coord : register(b0) {
-  float4 test_coord;
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
+  float4 coord;
 };
 
-void test_frag_main() {
-  float test_v = test_coord.x;
+void frag_main() {
+  float v = coord.x;
   return;
 }
 
@@ -272,14 +290,14 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_Uniforms {
-  float4 test_coord;
+  EXPECT_EQ(result(), R"(struct Uniforms {
+  float4 coord;
 };
 
-ConstantBuffer<test_Uniforms> test_uniforms : register(b0);
+ConstantBuffer<Uniforms> uniforms : register(b0);
 
-void test_frag_main() {
-  float test_v = test_uniforms.test_coord.x;
+void frag_main() {
+  float v = uniforms.coord.x;
   return;
 }
 
@@ -323,10 +341,10 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer test_coord : register(u0);
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
-void test_frag_main() {
-  float test_v = asfloat(test_coord.Load(4));
+void frag_main() {
+  float v = asfloat(coord.Load(4));
   return;
 }
 
@@ -371,10 +389,10 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(ByteAddressBuffer test_coord : register(u0);
+  EXPECT_EQ(result(), R"(ByteAddressBuffer coord : register(u0);
 
-void test_frag_main() {
-  float test_v = asfloat(test_coord.Load(4));
+void frag_main() {
+  float v = asfloat(coord.Load(4));
   return;
 }
 
@@ -416,10 +434,10 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer test_coord : register(u0);
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
-void test_frag_main() {
-  test_coord.Store(4, asuint(2.0f));
+void frag_main() {
+  coord.Store(4, asuint(2.0f));
   return;
 }
 
@@ -480,25 +498,25 @@ TEST_F(
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_ep_1_in {
-  float test_foo : TEXCOORD0;
+  EXPECT_EQ(result(), R"(struct ep_1_in {
+  float foo : TEXCOORD0;
 };
 
-struct test_ep_1_out {
-  float test_bar : SV_Target1;
-  float test_val : SV_Target0;
+struct ep_1_out {
+  float bar : SV_Target1;
+  float val : SV_Target0;
 };
 
-float test_sub_func_ep_1(in test_ep_1_in test_tint_in, out test_ep_1_out test_tint_out, float test_param) {
-  test_tint_out.test_bar = test_tint_in.test_foo;
-  test_tint_out.test_val = test_param;
-  return test_tint_in.test_foo;
+float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
+  tint_out.bar = tint_in.foo;
+  tint_out.val = param;
+  return tint_in.foo;
 }
 
-test_ep_1_out test_ep_1(test_ep_1_in test_tint_in) {
-  test_ep_1_out test_tint_out;
-  test_tint_out.test_bar = test_sub_func_ep_1(test_tint_in, test_tint_out, 1.0f);
-  return test_tint_out;
+ep_1_out ep_1(ep_1_in tint_in) {
+  ep_1_out tint_out;
+  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.0f);
+  return tint_out;
 }
 
 )");
@@ -542,18 +560,18 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_ep_1_out {
-  float test_depth : SV_Depth;
+  EXPECT_EQ(result(), R"(struct ep_1_out {
+  float depth : SV_Depth;
 };
 
-float test_sub_func(float test_param) {
-  return test_param;
+float sub_func(float param) {
+  return param;
 }
 
-test_ep_1_out test_ep_1() {
-  test_ep_1_out test_tint_out;
-  test_tint_out.test_depth = test_sub_func(1.0f);
-  return test_tint_out;
+ep_1_out ep_1() {
+  ep_1_out tint_out;
+  tint_out.depth = sub_func(1.0f);
+  return tint_out;
 }
 
 )");
@@ -609,23 +627,23 @@ TEST_F(
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_ep_1_in {
-  float4 test_coord : SV_Position;
+  EXPECT_EQ(result(), R"(struct ep_1_in {
+  float4 coord : SV_Position;
 };
 
-struct test_ep_1_out {
-  float test_depth : SV_Depth;
+struct ep_1_out {
+  float depth : SV_Depth;
 };
 
-float test_sub_func_ep_1(in test_ep_1_in test_tint_in, out test_ep_1_out test_tint_out, float test_param) {
-  test_tint_out.test_depth = test_tint_in.test_coord.x;
-  return test_param;
+float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
+  tint_out.depth = tint_in.coord.x;
+  return param;
 }
 
-test_ep_1_out test_ep_1(test_ep_1_in test_tint_in) {
-  test_ep_1_out test_tint_out;
-  test_tint_out.test_depth = test_sub_func_ep_1(test_tint_in, test_tint_out, 1.0f);
-  return test_tint_out;
+ep_1_out ep_1(ep_1_in tint_in) {
+  ep_1_out tint_out;
+  tint_out.depth = sub_func_ep_1(tint_in, tint_out, 1.0f);
+  return tint_out;
 }
 
 )");
@@ -672,16 +690,16 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer cbuffer_test_coord : register(b0) {
-  float4 test_coord;
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
+  float4 coord;
 };
 
-float test_sub_func(float test_param) {
-  return test_coord.x;
+float sub_func(float param) {
+  return coord.x;
 }
 
-void test_frag_main() {
-  float test_v = test_sub_func(1.0f);
+void frag_main() {
+  float v = sub_func(1.0f);
   return;
 }
 
@@ -730,14 +748,14 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer test_coord : register(u0);
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
-float test_sub_func(float test_param) {
-  return asfloat(test_coord.Load((4 * 0)));
+float sub_func(float param) {
+  return asfloat(coord.Load((4 * 0)));
 }
 
-void test_frag_main() {
-  float test_v = test_sub_func(1.0f);
+void frag_main() {
+  float v = sub_func(1.0f);
   return;
 }
 
@@ -775,17 +793,34 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_ep_1_out {
-  float test_bar : SV_Target1;
+  EXPECT_EQ(result(), R"(struct ep_1_out {
+  float bar : SV_Target1;
 };
 
-test_ep_1_out test_ep_1() {
-  test_ep_1_out test_tint_out;
-  test_tint_out.test_bar = 1.0f;
+ep_1_out ep_1() {
+  ep_1_out tint_out;
+  tint_out.bar = 1.0f;
   if ((1 == 1)) {
-    return test_tint_out;
+    return tint_out;
   }
-  return test_tint_out;
+  return tint_out;
+}
+
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
+  auto* func = Func(
+      "GeometryShader", ast::VariableList{}, ty.void_, ast::StatementList{},
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+      });
+
+  mod->AddFunction(func);
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"(void GeometryShader_tint_0() {
 }
 
 )");
@@ -807,7 +842,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
-void test_main() {
+void main() {
   return;
 }
 
@@ -831,7 +866,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"([numthreads(2, 4, 6)]
-void test_main() {
+void main() {
   return;
 }
 
@@ -852,7 +887,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(  void test_my_func(float test_a[5]) {
+  EXPECT_EQ(result(), R"(  void my_func(float a[5]) {
     return;
   }
 
@@ -930,21 +965,21 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct test_Data {
-  float test_d;
+  EXPECT_EQ(result(), R"(struct Data {
+  float d;
 };
 
-RWByteAddressBuffer test_data : register(u0);
+RWByteAddressBuffer data : register(u0);
 
 [numthreads(1, 1, 1)]
-void test_a() {
-  float test_v = asfloat(test_data.Load(0));
+void a() {
+  float v = asfloat(data.Load(0));
   return;
 }
 
 [numthreads(1, 1, 1)]
-void test_b() {
-  float test_v = asfloat(test_data.Load(0));
+void b() {
+  float v = asfloat(data.Load(0));
   return;
 }
 

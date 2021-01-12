@@ -68,7 +68,27 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-  void test_my_func() {
+  void my_func() {
+    return;
+  }
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
+  auto* func = Func("main", ast::VariableList{}, ty.void_,
+                    ast::StatementList{
+                        create<ast::ReturnStatement>(),
+                    },
+                    ast::FunctionDecorationList{});
+
+  mod->AddFunction(func);
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+  void main_tint_0() {
     return;
   }
 
@@ -92,7 +112,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-  void test_my_func(float test_a, int test_b) {
+  void my_func(float a, int b) {
     return;
   }
 
@@ -129,18 +149,18 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_frag_main_in {
-  float test_foo [[user(locn0)]];
+struct frag_main_in {
+  float foo [[user(locn0)]];
 };
 
-struct test_frag_main_out {
-  float test_bar [[color(1)]];
+struct frag_main_out {
+  float bar [[color(1)]];
 };
 
-fragment test_frag_main_out test_frag_main(test_frag_main_in test_tint_in [[stage_in]]) {
-  test_frag_main_out test_tint_out = {};
-  test_tint_out.test_bar = test_tint_in.test_foo;
-  return test_tint_out;
+fragment frag_main_out frag_main(frag_main_in tint_in [[stage_in]]) {
+  frag_main_out tint_out = {};
+  tint_out.bar = tint_in.foo;
+  return tint_out;
 }
 
 )");
@@ -182,14 +202,14 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_frag_main_out {
-  float test_depth [[depth(any)]];
+struct frag_main_out {
+  float depth [[depth(any)]];
 };
 
-fragment test_frag_main_out test_frag_main(float4 test_coord [[position]]) {
-  test_frag_main_out test_tint_out = {};
-  test_tint_out.test_depth = test_coord.x;
-  return test_tint_out;
+fragment frag_main_out frag_main(float4 coord [[position]]) {
+  frag_main_out tint_out = {};
+  tint_out.depth = coord.x;
+  return tint_out;
 }
 
 )");
@@ -225,8 +245,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-fragment void test_frag_main(constant float4& test_coord [[buffer(0)]]) {
-  float test_v = test_coord.x;
+fragment void frag_main(constant float4& coord [[buffer(0)]]) {
+  float v = coord.x;
   return;
 }
 
@@ -273,13 +293,13 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_Data {
-  int test_a;
-  float test_b;
+struct Data {
+  int a;
+  float b;
 };
 
-fragment void test_frag_main(device test_Data& test_coord [[buffer(0)]]) {
-  float test_v = test_coord.test_b;
+fragment void frag_main(device Data& coord [[buffer(0)]]) {
+  float v = coord.b;
   return;
 }
 
@@ -290,7 +310,7 @@ TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_With_RO_StorageBuffer) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
-                            Member("x", ty.f32, {MemberOffset(4)})},
+                            Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
@@ -306,7 +326,7 @@ TEST_F(MslGeneratorImplTest,
   mod->AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
-                  MemberAccessor("coord", "x"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "b"), ast::VariableDecorationList{});
 
   auto* func =
       Func("frag_main", ast::VariableList{}, ty.void_,
@@ -325,13 +345,13 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_Data {
-  int test_a;
-  float test_x;
+struct Data {
+  int a;
+  float b;
 };
 
-fragment void test_frag_main(const device test_Data& test_coord [[buffer(0)]]) {
-  float test_v = test_coord.test_x;
+fragment void frag_main(const device Data& coord [[buffer(0)]]) {
+  float v = coord.b;
   return;
 }
 
@@ -390,25 +410,25 @@ TEST_F(
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_ep_1_in {
-  float test_foo [[user(locn0)]];
+struct ep_1_in {
+  float foo [[user(locn0)]];
 };
 
-struct test_ep_1_out {
-  float test_bar [[color(1)]];
-  float test_val [[color(0)]];
+struct ep_1_out {
+  float bar [[color(1)]];
+  float val [[color(0)]];
 };
 
-float test_sub_func_ep_1(thread test_ep_1_in& test_tint_in, thread test_ep_1_out& test_tint_out, float test_param) {
-  test_tint_out.test_bar = test_tint_in.test_foo;
-  test_tint_out.test_val = test_param;
-  return test_tint_in.test_foo;
+float sub_func_ep_1(thread ep_1_in& tint_in, thread ep_1_out& tint_out, float param) {
+  tint_out.bar = tint_in.foo;
+  tint_out.val = param;
+  return tint_in.foo;
 }
 
-fragment test_ep_1_out test_ep_1(test_ep_1_in test_tint_in [[stage_in]]) {
-  test_ep_1_out test_tint_out = {};
-  test_tint_out.test_bar = test_sub_func_ep_1(test_tint_in, test_tint_out, 1.0f);
-  return test_tint_out;
+fragment ep_1_out ep_1(ep_1_in tint_in [[stage_in]]) {
+  ep_1_out tint_out = {};
+  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.0f);
+  return tint_out;
 }
 
 )");
@@ -453,18 +473,18 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_ep_1_out {
-  float test_depth [[depth(any)]];
+struct ep_1_out {
+  float depth [[depth(any)]];
 };
 
-float test_sub_func(float test_param) {
-  return test_param;
+float sub_func(float param) {
+  return param;
 }
 
-fragment test_ep_1_out test_ep_1() {
-  test_ep_1_out test_tint_out = {};
-  test_tint_out.test_depth = test_sub_func(1.0f);
-  return test_tint_out;
+fragment ep_1_out ep_1() {
+  ep_1_out tint_out = {};
+  tint_out.depth = sub_func(1.0f);
+  return tint_out;
 }
 
 )");
@@ -518,19 +538,19 @@ TEST_F(
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_ep_1_out {
-  float test_depth [[depth(any)]];
+struct ep_1_out {
+  float depth [[depth(any)]];
 };
 
-float test_sub_func_ep_1(thread test_ep_1_out& test_tint_out, thread float4& test_coord, float test_param) {
-  test_tint_out.test_depth = test_coord.x;
-  return test_param;
+float sub_func_ep_1(thread ep_1_out& tint_out, thread float4& coord, float param) {
+  tint_out.depth = coord.x;
+  return param;
 }
 
-fragment test_ep_1_out test_ep_1(float4 test_coord [[position]]) {
-  test_ep_1_out test_tint_out = {};
-  test_tint_out.test_depth = test_sub_func_ep_1(test_tint_out, test_coord, 1.0f);
-  return test_tint_out;
+fragment ep_1_out ep_1(float4 coord [[position]]) {
+  ep_1_out tint_out = {};
+  tint_out.depth = sub_func_ep_1(tint_out, coord, 1.0f);
+  return tint_out;
 }
 
 )");
@@ -579,12 +599,12 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-float test_sub_func(constant float4& test_coord, float test_param) {
-  return test_coord.x;
+float sub_func(constant float4& coord, float param) {
+  return coord.x;
 }
 
-fragment void test_frag_main(constant float4& test_coord [[buffer(0)]]) {
-  float test_v = test_sub_func(test_coord, 1.0f);
+fragment void frag_main(constant float4& coord [[buffer(0)]]) {
+  float v = sub_func(coord, 1.0f);
   return;
 }
 
@@ -641,17 +661,17 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_Data {
-  int test_a;
-  float test_b;
+struct Data {
+  int a;
+  float b;
 };
 
-float test_sub_func(device test_Data& test_coord, float test_param) {
-  return test_coord.test_b;
+float sub_func(device Data& coord, float param) {
+  return coord.b;
 }
 
-fragment void test_frag_main(device test_Data& test_coord [[buffer(0)]]) {
-  float test_v = test_sub_func(test_coord, 1.0f);
+fragment void frag_main(device Data& coord [[buffer(0)]]) {
+  float v = sub_func(coord, 1.0f);
   return;
 }
 
@@ -711,17 +731,17 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_Data {
-  int test_a;
-  float test_b;
+struct Data {
+  int a;
+  float b;
 };
 
-float test_sub_func(const device test_Data& test_coord, float test_param) {
-  return test_coord.test_b;
+float sub_func(const device Data& coord, float param) {
+  return coord.b;
 }
 
-fragment void test_frag_main(const device test_Data& test_coord [[buffer(0)]]) {
-  float test_v = test_sub_func(test_coord, 1.0f);
+fragment void frag_main(const device Data& coord [[buffer(0)]]) {
+  float v = sub_func(coord, 1.0f);
   return;
 }
 
@@ -761,17 +781,36 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_ep_1_out {
-  float test_bar [[color(1)]];
+struct ep_1_out {
+  float bar [[color(1)]];
 };
 
-fragment test_ep_1_out test_ep_1() {
-  test_ep_1_out test_tint_out = {};
-  test_tint_out.test_bar = 1.0f;
+fragment ep_1_out ep_1() {
+  ep_1_out tint_out = {};
+  tint_out.bar = 1.0f;
   if ((1 == 1)) {
-    return test_tint_out;
+    return tint_out;
   }
-  return test_tint_out;
+  return tint_out;
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest,
+       Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
+  auto* func =
+      Func("main", ast::VariableList{}, ty.void_, ast::StatementList{},
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           });
+
+  mod->AddFunction(func);
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+kernel void main_tint_0() {
 }
 
 )");
@@ -793,7 +832,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-  void test_my_func(float test_a[5]) {
+  void my_func(float a[5]) {
     return;
   }
 
@@ -872,17 +911,17 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-struct test_Data {
-  float test_d;
+struct Data {
+  float d;
 };
 
-kernel void test_a(device test_Data& test_data [[buffer(0)]]) {
-  float test_v = test_data.test_d;
+kernel void a(device Data& data [[buffer(0)]]) {
+  float v = data.d;
   return;
 }
 
-kernel void test_b(device test_Data& test_data [[buffer(0)]]) {
-  float test_v = test_data.test_d;
+kernel void b(device Data& data [[buffer(0)]]) {
+  float v = data.d;
   return;
 }
 

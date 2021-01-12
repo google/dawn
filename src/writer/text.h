@@ -28,9 +28,6 @@ class Text : public Writer {
   /// Constructor
   /// @param module the module to convert
   explicit Text(ast::Module module);
-  /// Constructor
-  /// @param module the module to convert
-  explicit Text(ast::Module* module);
   ~Text() override;
 
   /// @returns the result data

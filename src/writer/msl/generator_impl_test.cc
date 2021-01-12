@@ -37,6 +37,7 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/writer/msl/namer.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {
@@ -57,10 +58,25 @@ TEST_F(MslGeneratorImplTest, Generate) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
-kernel void test_my_func() {
+kernel void my_func() {
 }
 
 )");
+}
+
+TEST_F(MslGeneratorImplTest, InputStructName) {
+  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
+}
+
+TEST_F(MslGeneratorImplTest, InputStructName_ConflictWithExisting) {
+  gen.namer_for_testing()->NameFor("func_main_out");
+  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_0");
+}
+
+TEST_F(MslGeneratorImplTest, NameConflictWith_InputStructName) {
+  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
+  ASSERT_TRUE(gen.EmitIdentifier(Expr("func_main_in")));
+  EXPECT_EQ(gen.result(), "func_main_in_0");
 }
 
 struct MslBuiltinData {

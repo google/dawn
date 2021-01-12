@@ -58,12 +58,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   /// @returns true if this identifier is for an intrinsic
   bool IsIntrinsic() const { return intrinsic_ != Intrinsic::kNone; }
 
-  /// Sets the identifier as a swizzle
-  void SetIsSwizzle() { is_swizzle_ = true; }
-
-  /// @returns true if this is a swizzle identifier
-  bool IsSwizzle() const { return is_swizzle_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @note Semantic information such as resolved expression type and intrinsic
@@ -84,9 +78,9 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   IdentifierExpression(const IdentifierExpression&) = delete;
 
   Symbol const sym_;
+
   Intrinsic intrinsic_ = Intrinsic::kNone;               // Semantic info
   std::unique_ptr<intrinsic::Signature> intrinsic_sig_;  // Semantic info
-  bool is_swizzle_ = false;                              // Semantic info
 };
 
 }  // namespace ast

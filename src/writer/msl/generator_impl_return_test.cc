@@ -42,7 +42,7 @@ TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
-  EXPECT_EQ(gen.result(), "  return test_expr;\n");
+  EXPECT_EQ(gen.result(), "  return expr;\n");
 }
 
 }  // namespace
