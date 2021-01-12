@@ -2257,8 +2257,21 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
         return false;
       }
       assert(pidx.level != kNotUsed);
-      image_operands.emplace_back(
-          ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
+      auto level = Operand::Int(0);
+      if (call->params()[pidx.level]->result_type()->Is<ast::type::I32>()) {
+        // Depth textures have i32 parameters for the level, but SPIR-V expects
+        // F32. Cast.
+        auto* f32 = mod_->create<ast::type::F32>();
+        ast::TypeConstructorExpression cast(Source{}, f32,
+                                            {call->params()[pidx.level]});
+        level = Operand::Int(GenerateExpression(&cast));
+        if (level.to_i() == 0) {
+          return false;
+        }
+      } else {
+        level = gen_param(pidx.level);
+      }
+      image_operands.emplace_back(ImageOperand{SpvImageOperandsLodMask, level});
       break;
     }
     case ast::Intrinsic::kTextureSampleGrad: {
