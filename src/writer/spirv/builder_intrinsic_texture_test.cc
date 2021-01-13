@@ -2144,7 +2144,7 @@ OpCapability SampledCubeArray
           R"(
 OpCapability SampledCubeArray
 )"};
-    case ValidTextureOverload::kSampleGradDepth2dF32:
+    case ValidTextureOverload::kSampleCompareDepth2dF32:
       return {
           R"(
 %4 = OpTypeFloat 32
@@ -2170,7 +2170,7 @@ OpCapability SampledCubeArray
 )",
           R"(
 )"};
-    case ValidTextureOverload::kSampleGradDepth2dOffsetF32:
+    case ValidTextureOverload::kSampleCompareDepth2dOffsetF32:
       return {
           R"(
 %4 = OpTypeFloat 32
@@ -2201,7 +2201,7 @@ OpCapability SampledCubeArray
 )",
           R"(
 )"};
-    case ValidTextureOverload::kSampleGradDepth2dArrayF32:
+    case ValidTextureOverload::kSampleCompareDepth2dArrayF32:
       return {
           R"(
 %4 = OpTypeFloat 32
@@ -2230,7 +2230,7 @@ OpCapability SampledCubeArray
 )",
           R"(
 )"};
-    case ValidTextureOverload::kSampleGradDepth2dArrayOffsetF32:
+    case ValidTextureOverload::kSampleCompareDepth2dArrayOffsetF32:
       return {
           R"(
 %4 = OpTypeFloat 32
@@ -2263,7 +2263,7 @@ OpCapability SampledCubeArray
 )",
           R"(
 )"};
-    case ValidTextureOverload::kSampleGradDepthCubeF32:
+    case ValidTextureOverload::kSampleCompareDepthCubeF32:
       return {
           R"(
 %4 = OpTypeFloat 32
@@ -2290,7 +2290,7 @@ OpCapability SampledCubeArray
 )",
           R"(
 )"};
-    case ValidTextureOverload::kSampleGradDepthCubeArrayF32:
+    case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
       return {
           R"(
 %4 = OpTypeFloat 32

@@ -190,7 +190,6 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
 
 ast::Variable* TextureOverloadCase::buildSamplerVariable(
     ast::Builder* b) const {
-
   VariableDecorationList decos = {
       b->create<ast::SetDecoration>(0),
       b->create<ast::BindingDecoration>(1),
@@ -1422,7 +1421,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kSampleGradDepth2dF32,
+          ValidTextureOverload::kSampleCompareDepth2dF32,
           "textureSampleCompare(t         : texture_depth_2d,\n"
           "                     s         : sampler_comparison,\n"
           "                     coords    : vec2<f32>,\n"
@@ -1440,7 +1439,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kSampleGradDepth2dOffsetF32,
+          ValidTextureOverload::kSampleCompareDepth2dOffsetF32,
           "textureSampleCompare(t         : texture_depth_2d,\n"
           "                     s         : sampler_comparison,\n"
           "                     coords    : vec2<f32>,\n"
@@ -1460,7 +1459,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kSampleGradDepth2dArrayF32,
+          ValidTextureOverload::kSampleCompareDepth2dArrayF32,
           "textureSampleCompare(t           : texture_depth_2d_array,\n"
           "                     s           : sampler_comparison,\n"
           "                     coords      : vec2<f32>,\n"
@@ -1480,7 +1479,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kSampleGradDepth2dArrayOffsetF32,
+          ValidTextureOverload::kSampleCompareDepth2dArrayOffsetF32,
           "textureSampleCompare(t           : texture_depth_2d_array,\n"
           "                     s           : sampler_comparison,\n"
           "                     coords      : vec2<f32>,\n"
@@ -1502,7 +1501,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kSampleGradDepthCubeF32,
+          ValidTextureOverload::kSampleCompareDepthCubeF32,
           "textureSampleCompare(t         : texture_depth_cube,\n"
           "                     s         : sampler_comparison,\n"
           "                     coords    : vec3<f32>,\n"
@@ -1520,7 +1519,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kSampleGradDepthCubeArrayF32,
+          ValidTextureOverload::kSampleCompareDepthCubeArrayF32,
           "textureSampleCompare(t           : texture_depth_cube_array,\n"
           "                     s           : sampler_comparison,\n"
           "                     coords      : vec3<f32>,\n"

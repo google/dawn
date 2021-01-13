@@ -3030,17 +3030,17 @@ const char* expected_texture_overload(
       return R"(textureSampleGrad(texture, sampler, coords, ddx, ddy))";
     case ValidTextureOverload::kSampleGradCubeArrayF32:
       return R"(textureSampleGrad(texture, sampler, coords, array_index, ddx, ddy))";
-    case ValidTextureOverload::kSampleGradDepth2dF32:
+    case ValidTextureOverload::kSampleCompareDepth2dF32:
       return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
-    case ValidTextureOverload::kSampleGradDepth2dOffsetF32:
+    case ValidTextureOverload::kSampleCompareDepth2dOffsetF32:
       return R"(textureSampleCompare(texture, sampler, coords, depth_ref, offset))";
-    case ValidTextureOverload::kSampleGradDepth2dArrayF32:
+    case ValidTextureOverload::kSampleCompareDepth2dArrayF32:
       return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
-    case ValidTextureOverload::kSampleGradDepth2dArrayOffsetF32:
+    case ValidTextureOverload::kSampleCompareDepth2dArrayOffsetF32:
       return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref, offset))";
-    case ValidTextureOverload::kSampleGradDepthCubeF32:
+    case ValidTextureOverload::kSampleCompareDepthCubeF32:
       return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
-    case ValidTextureOverload::kSampleGradDepthCubeArrayF32:
+    case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
       return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
     case ValidTextureOverload::kLoad1dF32:
       return R"(textureLoad(texture, coords))";
