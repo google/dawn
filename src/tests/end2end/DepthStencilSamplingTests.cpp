@@ -43,8 +43,7 @@ namespace {
     const std::vector<float> kNormalizedTextureValues = {0.0, 0.3, 0.4, 0.5, 1.0};
 
     // Test the limits, and some values in between.
-    const std::vector<uint8_t> kStencilValues = {uint8_t(0), uint8_t(1), uint8_t(38), uint8_t(255),
-                                                 uint8_t(256)};
+    const std::vector<uint8_t> kStencilValues = {uint8_t(0), uint8_t(1), uint8_t(38), uint8_t(255)};
 
 }  // anonymous namespace
 

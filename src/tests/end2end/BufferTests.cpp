@@ -154,7 +154,7 @@ TEST_P(BufferMappingTests, MapRead_InCallback) {
     wgpu::Buffer buffer = CreateMapReadBuffer(kBufferSize);
 
     uint32_t myData[3] = {0x01020304, 0x05060708, 0x090A0B0C};
-    constexpr size_t kSize = sizeof(myData);
+    static constexpr size_t kSize = sizeof(myData);
     queue.WriteBuffer(buffer, 0, &myData, kSize);
 
     struct UserData {
@@ -355,8 +355,8 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
 TEST_P(BufferMappingTests, MapWrite_InCallbackDefault) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
 
-    constexpr uint32_t myData = 2934875;
-    constexpr size_t kSize = sizeof(myData);
+    static constexpr uint32_t myData = 2934875;
+    static constexpr size_t kSize = sizeof(myData);
 
     struct UserData {
         bool done;
@@ -396,8 +396,8 @@ TEST_P(BufferMappingTests, MapWrite_InCallbackDefault) {
 TEST_P(BufferMappingTests, MapWrite_InCallbackRange) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
 
-    constexpr uint32_t myData = 2934875;
-    constexpr size_t kSize = sizeof(myData);
+    static constexpr uint32_t myData = 2934875;
+    static constexpr size_t kSize = sizeof(myData);
 
     struct UserData {
         bool done;
