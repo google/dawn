@@ -166,6 +166,12 @@ namespace dawn_native {
             });
 
             if (!spirvTools.Validate(code, codeSize)) {
+                std::string disassembly;
+                if (spirvTools.Disassemble(std::vector<uint32_t>(code, code + codeSize),
+                                           &disassembly)) {
+                    errorStream << "disassembly:" << std::endl << disassembly;
+                }
+
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
@@ -180,7 +186,9 @@ namespace dawn_native {
             tint::reader::wgsl::Parser parser(file);
             if (!parser.Parse()) {
                 auto err = tint::diag::Formatter{}.format(parser.diagnostics());
-                errorStream << "Parser: " << err << std::endl;
+                errorStream << "Parser: " << err << std::endl
+                            << "Shader: " << std::endl
+                            << file->content << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
