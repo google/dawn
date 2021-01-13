@@ -1835,6 +1835,20 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
+  std::string access_str = "";
+  if (auto* ac = type->As<ast::type::AccessControl>()) {
+    if (ac->access_control() == ast::AccessControl::kReadOnly) {
+      access_str = "read";
+    } else if (ac->access_control() == ast::AccessControl::kWriteOnly) {
+      access_str = "write";
+    } else {
+      error_ = "Invalid access control for storage texture";
+      return false;
+    }
+
+    type = ac->type();
+  }
+
   if (auto* alias = type->As<ast::type::Alias>()) {
     out_ << namer_.NameFor(module_->SymbolToName(alias->symbol()));
   } else if (auto* ary = type->As<ast::type::Array>()) {
@@ -1923,15 +1937,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       if (!EmitType(storage->type(), "")) {
         return false;
       }
-      out_ << ", access::";
-      if (storage->access() == ast::AccessControl::kReadOnly) {
-        out_ << "read";
-      } else if (storage->access() == ast::AccessControl::kWriteOnly) {
-        out_ << "write";
-      } else {
-        error_ = "Invalid access control for storage texture";
-        return false;
-      }
+      out_ << ", access::" << access_str;
     } else if (auto* ms = tex->As<ast::type::MultisampledTexture>()) {
       if (!EmitType(ms->type(), "")) {
         return false;

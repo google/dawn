@@ -536,8 +536,9 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    return module_.create<ast::type::StorageTexture>(
-        storage->first, storage->second, format.value);
+    return module_.create<ast::type::AccessControl>(
+        storage->second, module_.create<ast::type::StorageTexture>(
+                             storage->first, format.value));
   }
 
   return Failure::kNoMatch;

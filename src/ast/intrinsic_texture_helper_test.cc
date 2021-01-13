@@ -15,6 +15,7 @@
 #include "src/ast/intrinsic_texture_helper_test.h"
 
 #include "src/ast/builder.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/multisampled_texture_type.h"
 #include "src/ast/type/sampled_texture_type.h"
@@ -176,10 +177,12 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
                     nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
-      auto* st = b->create<ast::type::StorageTexture>(
-          texture_dimension, access_control, image_format);
+      auto* st =
+          b->create<ast::type::StorageTexture>(texture_dimension, image_format);
       st->set_type(datatype);
-      return b->Var("texture", ast::StorageClass::kUniformConstant, st, nullptr,
+
+      auto* ac = b->create<ast::type::AccessControl>(access_control, st);
+      return b->Var("texture", ast::StorageClass::kUniformConstant, ac, nullptr,
                     decos);
     }
   }

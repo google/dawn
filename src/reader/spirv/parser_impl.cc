@@ -1898,8 +1898,8 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
       if (format == ast::type::ImageFormat::kNone) {
         return nullptr;
       }
-      ast_store_type =
-          ast_module_.create<ast::type::StorageTexture>(dim, access, format);
+      ast_store_type = ast_module_.create<ast::type::AccessControl>(
+          access, ast_module_.create<ast::type::StorageTexture>(dim, format));
     }
   } else {
     Fail() << "unsupported: UniformConstant variable is not a recognized "

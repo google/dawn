@@ -91,7 +91,8 @@ void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
 bool TypeDeterminer::Determine() {
   std::vector<ast::type::StorageTexture*> storage_textures;
   for (auto& it : mod_->types()) {
-    if (auto* storage = it.second->As<ast::type::StorageTexture>()) {
+    if (auto* storage =
+            it.second->UnwrapIfNeeded()->As<ast::type::StorageTexture>()) {
       storage_textures.emplace_back(storage);
     }
   }
@@ -548,16 +549,13 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     ast::intrinsic::TextureSignature::Parameters param;
 
     auto* texture_param = expr->params()[0];
-    if (!texture_param->result_type()
-             ->UnwrapPtrIfNeeded()
-             ->Is<ast::type::Texture>()) {
+    if (!texture_param->result_type()->UnwrapAll()->Is<ast::type::Texture>()) {
       set_error(expr->source(), "invalid first argument for " +
                                     mod_->SymbolToName(ident->symbol()));
       return false;
     }
-    ast::type::Texture* texture = texture_param->result_type()
-                                      ->UnwrapPtrIfNeeded()
-                                      ->As<ast::type::Texture>();
+    ast::type::Texture* texture =
+        texture_param->result_type()->UnwrapAll()->As<ast::type::Texture>();
 
     bool is_array = ast::type::IsTextureArray(texture->dim());
     bool is_multisampled = texture->Is<ast::type::MultisampledTexture>();

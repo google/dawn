@@ -18,6 +18,7 @@
 #include <functional>
 #include <vector>
 
+#include "src/ast/access_control.h"
 #include "src/ast/builder.h"
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/storage_texture_type.h"

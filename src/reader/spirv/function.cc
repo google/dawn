@@ -4050,7 +4050,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     return Fail();
   }
   ast::type::Texture* texture_type =
-      texture_ptr_type->type()->As<ast::type::Texture>();
+      texture_ptr_type->type()->UnwrapAll()->As<ast::type::Texture>();
   if (!texture_type) {
     return Fail();
   }
@@ -4325,12 +4325,14 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     Fail();
     return {};
   }
-  if (!type || !type->type()->Is<ast::type::Texture>()) {
+  if (!type || !type->type()->UnwrapAll()->Is<ast::type::Texture>()) {
     Fail() << "invalid texture type for " << image->PrettyPrint();
     return {};
   }
+
+  auto* unwrapped_type = type->type()->UnwrapAll();
   ast::type::TextureDimension dim =
-      type->type()->As<ast::type::Texture>()->dim();
+      unwrapped_type->As<ast::type::Texture>()->dim();
   // Number of regular coordinates.
   uint32_t num_axes = 0;
   bool is_arrayed = false;

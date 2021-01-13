@@ -142,10 +142,8 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
   return out;
 }
 
-StorageTexture::StorageTexture(TextureDimension dim,
-                               ast::AccessControl access,
-                               ImageFormat format)
-    : Base(dim), access_(access), image_format_(format) {}
+StorageTexture::StorageTexture(TextureDimension dim, ImageFormat format)
+    : Base(dim), image_format_(format) {}
 
 void StorageTexture::set_type(Type* const type) {
   type_ = type;
@@ -161,13 +159,12 @@ StorageTexture::~StorageTexture() = default;
 
 std::string StorageTexture::type_name() const {
   std::ostringstream out;
-  out << "__storage_texture_" << access_ << "_" << dim() << "_"
-      << image_format_;
+  out << "__storage_texture_" << dim() << "_" << image_format_;
   return out.str();
 }
 
 StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StorageTexture>(dim(), access_, image_format_);
+  return ctx->mod->create<StorageTexture>(dim(), image_format_);
 }
 
 }  // namespace type

@@ -40,8 +40,7 @@ namespace {
 using StorageTextureTest = TestHelper;
 
 TEST_F(StorageTextureTest, Is) {
-  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
-                   ImageFormat::kRgba32Float);
+  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -59,8 +58,7 @@ TEST_F(StorageTextureTest, Is) {
 }
 
 TEST_F(StorageTextureTest, IsTexture) {
-  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
-                   ImageFormat::kRgba32Float);
+  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
   Texture* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTexture>());
   EXPECT_FALSE(ty->Is<SampledTexture>());
@@ -68,32 +66,22 @@ TEST_F(StorageTextureTest, IsTexture) {
 }
 
 TEST_F(StorageTextureTest, Dim) {
-  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
-                   ImageFormat::kRgba32Float);
+  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
   EXPECT_EQ(s.dim(), TextureDimension::k2dArray);
 }
 
-TEST_F(StorageTextureTest, Access) {
-  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
-                   ImageFormat::kRgba32Float);
-  EXPECT_EQ(s.access(), ast::AccessControl::kReadOnly);
-}
-
 TEST_F(StorageTextureTest, Format) {
-  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
-                   ImageFormat::kRgba32Float);
+  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
   EXPECT_EQ(s.image_format(), ImageFormat::kRgba32Float);
 }
 
 TEST_F(StorageTextureTest, TypeName) {
-  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
-                   ImageFormat::kRgba32Float);
-  EXPECT_EQ(s.type_name(), "__storage_texture_read_only_2d_array_rgba32float");
+  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
+  EXPECT_EQ(s.type_name(), "__storage_texture_2d_array_rgba32float");
 }
 
 TEST_F(StorageTextureTest, F32) {
   Type* s = mod->create<StorageTexture>(TextureDimension::k2dArray,
-                                        ast::AccessControl::kReadOnly,
                                         ImageFormat::kRgba32Float);
   TypeDeterminer td(mod);
 
@@ -105,7 +93,6 @@ TEST_F(StorageTextureTest, F32) {
 
 TEST_F(StorageTextureTest, U32) {
   Type* s = mod->create<StorageTexture>(TextureDimension::k2dArray,
-                                        ast::AccessControl::kReadOnly,
                                         ImageFormat::kRg32Uint);
   TypeDeterminer td(mod);
 
@@ -117,7 +104,6 @@ TEST_F(StorageTextureTest, U32) {
 
 TEST_F(StorageTextureTest, I32) {
   Type* s = mod->create<StorageTexture>(TextureDimension::k2dArray,
-                                        ast::AccessControl::kReadOnly,
                                         ImageFormat::kRgba32Sint);
   TypeDeterminer td(mod);
 
@@ -128,8 +114,7 @@ TEST_F(StorageTextureTest, I32) {
 }
 
 TEST_F(StorageTextureTest, MinBufferBindingSize) {
-  StorageTexture s(TextureDimension::k2dArray, ast::AccessControl::kReadOnly,
-                   ImageFormat::kRgba32Sint);
+  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Sint);
   EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 

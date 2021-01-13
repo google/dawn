@@ -1184,7 +1184,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
     }
     x_10
     uniform_constant
-    __storage_texture_read_only_1d_rg32float
+    __access_control_read_only__storage_texture_1d_rg32float
   })"},
                              DeclUnderspecifiedHandleCase{R"(
          OpDecorate %10 NonReadable
@@ -1200,7 +1200,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
     }
     x_10
     uniform_constant
-    __storage_texture_write_only_1d_rg32float
+    __access_control_write_only__storage_texture_1d_rg32float
   })"}));
 
 // Test emission of variables when we have image accesses in executable code.
@@ -2564,13 +2564,13 @@ TEST_P(SpvParserTest_ImageAccessTest, Variable) {
       << "TEXTURE BUILTIN IS BAD " << module << assembly;
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    ImageWrite_OptionalParams,
-    SpvParserTest_ImageAccessTest,
-    ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // OpImageWrite with no extra params
-        {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vf1234",
-         R"(
+INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
+                         SpvParserTest_ImageAccessTest,
+                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
+                             // OpImageWrite with no extra params
+                             {"%float 2D 0 0 0 2 Rgba32f",
+                              "OpImageWrite %im %vi12 %vf1234",
+                              R"(
   Variable{
     Decorations{
       SetDecoration{2}
@@ -2578,9 +2578,9 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rgba32float
+    __access_control_write_only__storage_texture_2d_rgba32float
   })",
-         R"(Call[not set]{
+                              R"(Call[not set]{
       Identifier[not set]{textureStore}
       (
         Identifier[not set]{x_20}
@@ -2606,7 +2606,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_r32float
+    __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2626,7 +2626,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_r32float
+    __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2649,7 +2649,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_r32float
+    __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2672,7 +2672,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_r32float
+    __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2695,7 +2695,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rg32float
+    __access_control_write_only__storage_texture_2d_rg32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2715,7 +2715,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rg32float
+    __access_control_write_only__storage_texture_2d_rg32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2738,7 +2738,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rg32float
+    __access_control_write_only__storage_texture_2d_rg32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2762,7 +2762,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rgba32float
+    __access_control_write_only__storage_texture_2d_rgba32float
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2928,7 +2928,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rgba32uint
+    __access_control_write_only__storage_texture_2d_rgba32uint
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2948,7 +2948,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rgba32uint
+    __access_control_write_only__storage_texture_2d_rgba32uint
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2970,7 +2970,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rgba32sint
+    __access_control_write_only__storage_texture_2d_rgba32sint
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -2992,7 +2992,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_write_only_2d_rgba32sint
+    __access_control_write_only__storage_texture_2d_rgba32sint
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3003,22 +3003,22 @@ INSTANTIATE_TEST_SUITE_P(
       )
     })"}}));
 
-INSTANTIATE_TEST_SUITE_P(
-    ImageRead_OptionalParams,
-    SpvParserTest_ImageAccessTest,
-    ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // OpImageRead with no extra params
-        {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
-         R"(Variable{
+INSTANTIATE_TEST_SUITE_P(ImageRead_OptionalParams,
+                         SpvParserTest_ImageAccessTest,
+                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
+                             // OpImageRead with no extra params
+                             {"%float 2D 0 0 0 2 Rgba32f",
+                              "%99 = OpImageRead %v4float %im %vi12",
+                              R"(Variable{
     Decorations{
       SetDecoration{2}
       BindingDecoration{1}
     }
     x_20
     uniform_constant
-    __storage_texture_read_only_2d_rgba32float
+    __access_control_read_only__storage_texture_2d_rgba32float
   })",
-         R"(VariableDeclStatement{
+                              R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
@@ -3418,7 +3418,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_read_only_2d_rgba32float
+    __access_control_read_only__storage_texture_2d_rgba32float
   })",
          R"(VariableDeclStatement{
       VariableConst{
@@ -3445,7 +3445,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_read_only_2d_rgba32uint
+    __access_control_read_only__storage_texture_2d_rgba32uint
   })",
          R"(VariableDeclStatement{
       VariableConst{
@@ -3472,7 +3472,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_read_only_2d_rgba32uint
+    __access_control_read_only__storage_texture_2d_rgba32uint
   })",
          R"(VariableDeclStatement{
       VariableConst{
@@ -3501,7 +3501,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_read_only_2d_rgba32sint
+    __access_control_read_only__storage_texture_2d_rgba32sint
   })",
          R"(VariableDeclStatement{
       VariableConst{
@@ -3528,7 +3528,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     uniform_constant
-    __storage_texture_read_only_2d_rgba32sint
+    __access_control_read_only__storage_texture_2d_rgba32sint
   })",
          R"(VariableDeclStatement{
       VariableConst{

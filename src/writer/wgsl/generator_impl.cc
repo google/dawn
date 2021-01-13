@@ -399,21 +399,41 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
+  std::string storage_texture_access = "";
   if (auto* ac = type->As<ast::type::AccessControl>()) {
-    out_ << "[[access(";
-    if (ac->IsReadOnly()) {
-      out_ << "read";
-    } else if (ac->IsReadWrite()) {
-      out_ << "read_write";
+    // TODO(dsinclair): Removing the special casing for storage textures when
+    // we've converted over to parsing texture_storage_yy.
+    if (ac->type()->Is<ast::type::StorageTexture>()) {
+      if (ac->access_control() == ast::AccessControl::kReadOnly) {
+        storage_texture_access = "ro_";
+      } else if (ac->access_control() == ast::AccessControl::kWriteOnly) {
+        storage_texture_access = "wo_";
+      } else {
+        error_ = "unknown storage texture access";
+        return false;
+      }
+
+      // We want to generate the wrapped type in this case.
+      type = ac->type();
     } else {
-      error_ = "invalid access control";
-      return false;
+      out_ << "[[access(";
+      if (ac->IsReadOnly()) {
+        out_ << "read";
+      } else if (ac->IsReadWrite()) {
+        out_ << "read_write";
+      } else {
+        error_ = "invalid access control";
+        return false;
+      }
+      out_ << ")]]" << std::endl;
+      if (!EmitType(ac->type())) {
+        return false;
+      }
+      return true;
     }
-    out_ << ")]]" << std::endl;
-    if (!EmitType(ac->type())) {
-      return false;
-    }
-  } else if (auto* alias = type->As<ast::type::Alias>()) {
+  }
+
+  if (auto* alias = type->As<ast::type::Alias>()) {
     out_ << module_.SymbolToName(alias->symbol());
   } else if (auto* ary = type->As<ast::type::Array>()) {
     for (auto* deco : ary->decorations()) {
@@ -468,15 +488,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
     } else if (texture->Is<ast::type::MultisampledTexture>()) {
       out_ << "multisampled_";
     } else if (auto* storage = texture->As<ast::type::StorageTexture>()) {
-      out_ << "storage_";
-      if (storage->access() == ast::AccessControl::kReadOnly) {
-        out_ << "ro_";
-      } else if (storage->access() == ast::AccessControl::kWriteOnly) {
-        out_ << "wo_";
-      } else {
-        error_ = "unknown storage texture access";
-        return false;
-      }
+      out_ << "storage_" << storage_texture_access;
     } else {
       error_ = "unknown texture type";
       return false;

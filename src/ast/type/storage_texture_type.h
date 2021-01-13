@@ -17,7 +17,6 @@
 
 #include <string>
 
-#include "src/ast/access_control.h"
 #include "src/ast/type/texture_type.h"
 
 namespace tint {
@@ -70,10 +69,8 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
-  /// @param access the access type for the texture
   /// @param format the image format of the texture
   StorageTexture(TextureDimension dim,
-                 ast::AccessControl access,
                  ImageFormat format);
 
   /// Move constructor
@@ -85,9 +82,6 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
 
   /// @returns the subtype of the storage texture set with set_type
   Type* type() const;
-
-  /// @returns the storage access
-  ast::AccessControl access() const { return access_; }
 
   /// @returns the image format
   ImageFormat image_format() const { return image_format_; }
@@ -101,7 +95,6 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   StorageTexture* Clone(CloneContext* ctx) const override;
 
  private:
-  ast::AccessControl const access_;
   ImageFormat const image_format_;
 
   Type* type_ = nullptr;  // Semantic info

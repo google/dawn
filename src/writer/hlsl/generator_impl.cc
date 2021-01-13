@@ -693,7 +693,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
   auto* texture = params[pidx.texture];
   auto* texture_type =
-      texture->result_type()->UnwrapPtrIfNeeded()->As<ast::type::Texture>();
+      texture->result_type()->UnwrapAll()->As<ast::type::Texture>();
 
   if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
     // Declare a variable to hold the texture dimensions
@@ -2101,6 +2101,12 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 bool GeneratorImpl::EmitType(std::ostream& out,
                              ast::type::Type* type,
                              const std::string& name) {
+  // HLSL doesn't have the read/write only markings so just unwrap the access
+  // control type.
+  if (auto* ac = type->As<ast::type::AccessControl>()) {
+    return EmitType(out, ac->type(), name);
+  }
+
   if (auto* alias = type->As<ast::type::Alias>()) {
     out << namer_.NameFor(module_->SymbolToName(alias->symbol()));
   } else if (auto* ary = type->As<ast::type::Array>()) {

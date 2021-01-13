@@ -322,9 +322,10 @@ using WgslGenerator_StorageTextureTest = TestParamHelper<StorageTextureData>;
 TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
   auto param = GetParam();
 
-  ast::type::StorageTexture t(param.dim, param.access, param.fmt);
+  ast::type::StorageTexture t(param.dim, param.fmt);
+  ast::type::AccessControl ac(param.access, &t);
 
-  ASSERT_TRUE(gen.EmitType(&t)) << gen.error();
+  ASSERT_TRUE(gen.EmitType(&ac)) << gen.error();
   EXPECT_EQ(gen.result(), param.name);
 }
 INSTANTIATE_TEST_SUITE_P(

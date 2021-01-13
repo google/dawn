@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -295,17 +296,21 @@ TEST_F(ParserImplTest,
 TEST_F(ParserImplTest,
        TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm_Old) {
   auto p = parser("texture_ro_1d<r8unorm>");
-  auto t = p->texture_sampler_types();
+  auto ac = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr);
+  EXPECT_TRUE(ac.matched);
+  EXPECT_FALSE(ac.errored);
+  ASSERT_NE(ac.value, nullptr);
+
+  ASSERT_TRUE(ac->Is<ast::type::AccessControl>());
+  EXPECT_EQ(ac->As<ast::type::AccessControl>()->access_control(),
+            ast::AccessControl::kReadOnly);
+
+  auto* t = ac->As<ast::type::AccessControl>()->type();
   ASSERT_TRUE(t->Is<ast::type::Texture>());
   ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
   EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR8Unorm);
-  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
-            ast::AccessControl::kReadOnly);
   EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k1d);
 }
@@ -313,17 +318,21 @@ TEST_F(ParserImplTest,
 TEST_F(ParserImplTest,
        TextureSamplerTypes_StorageTexture_Writeonly2dR16Float_Old) {
   auto p = parser("texture_wo_2d<r16float>");
-  auto t = p->texture_sampler_types();
+  auto ac = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr);
+  EXPECT_TRUE(ac.matched);
+  EXPECT_FALSE(ac.errored);
+  ASSERT_NE(ac.value, nullptr);
+
+  ASSERT_TRUE(ac->Is<ast::type::AccessControl>());
+  EXPECT_EQ(ac->As<ast::type::AccessControl>()->access_control(),
+            ast::AccessControl::kWriteOnly);
+
+  auto* t = ac->As<ast::type::AccessControl>()->type();
   ASSERT_TRUE(t->Is<ast::type::Texture>());
   ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
   EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR16Float);
-  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
-            ast::AccessControl::kWriteOnly);
   EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }
@@ -367,34 +376,42 @@ TEST_F(ParserImplTest,
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
   auto p = parser("texture_storage_ro_1d<r8unorm>");
-  auto t = p->texture_sampler_types();
+  auto ac = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr);
+  EXPECT_TRUE(ac.matched);
+  EXPECT_FALSE(ac.errored);
+  ASSERT_NE(ac.value, nullptr);
+
+  ASSERT_TRUE(ac->Is<ast::type::AccessControl>());
+  EXPECT_EQ(ac->As<ast::type::AccessControl>()->access_control(),
+            ast::AccessControl::kReadOnly);
+
+  auto* t = ac->As<ast::type::AccessControl>()->type();
   ASSERT_TRUE(t->Is<ast::type::Texture>());
   ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
   EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR8Unorm);
-  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
-            ast::AccessControl::kReadOnly);
   EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k1d);
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
   auto p = parser("texture_storage_wo_2d<r16float>");
-  auto t = p->texture_sampler_types();
+  auto ac = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr);
+  EXPECT_TRUE(ac.matched);
+  EXPECT_FALSE(ac.errored);
+  ASSERT_NE(ac.value, nullptr);
+
+  ASSERT_TRUE(ac->Is<ast::type::AccessControl>());
+  EXPECT_EQ(ac->As<ast::type::AccessControl>()->access_control(),
+            ast::AccessControl::kWriteOnly);
+
+  auto* t = ac->As<ast::type::AccessControl>()->type();
   ASSERT_TRUE(t->Is<ast::type::Texture>());
   ASSERT_TRUE(t->Is<ast::type::StorageTexture>());
   EXPECT_EQ(t->As<ast::type::StorageTexture>()->image_format(),
             ast::type::ImageFormat::kR16Float);
-  EXPECT_EQ(t->As<ast::type::StorageTexture>()->access(),
-            ast::AccessControl::kWriteOnly);
   EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
             ast::type::TextureDimension::k2d);
 }

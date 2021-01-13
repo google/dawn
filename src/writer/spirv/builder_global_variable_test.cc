@@ -501,11 +501,12 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   // var<uniform_constant> a : texture_storage_ro_2d<r32uint>;
 
   ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
-                                 ast::AccessControl::kReadOnly,
                                  ast::type::ImageFormat::kR32Uint);
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
 
-  auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &type);
+  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &type);
+
+  auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
@@ -521,11 +522,12 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : texture_storage_wo_2d<r32uint>;
 
   ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
-                                 ast::AccessControl::kWriteOnly,
                                  ast::type::ImageFormat::kR32Uint);
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
 
-  auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &type);
+  ast::type::AccessControl ac(ast::AccessControl::kWriteOnly, &type);
+
+  auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonReadable

@@ -20,6 +20,7 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/access_control_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/depth_texture_type.h"
@@ -332,12 +333,13 @@ TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
   ast::type::StorageTexture s(params.dim,
-                              params.ro ? ast::AccessControl::kReadOnly
-                                        : ast::AccessControl::kWriteOnly,
                               ast::type::ImageFormat::kR16Float);
+  ast::type::AccessControl ac(params.ro ? ast::AccessControl::kReadOnly
+                                        : ast::AccessControl::kWriteOnly,
+                              &s);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
-  ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(&ac, "")) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

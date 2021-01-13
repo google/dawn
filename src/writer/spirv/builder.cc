@@ -735,16 +735,17 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
              {Operand::Int(var_id),
               Operand::String(mod_->SymbolToName(var->symbol()))});
 
-  auto* type = var->type()->UnwrapAll();
-
   OperandList ops = {Operand::Int(type_id), result,
                      Operand::Int(ConvertStorageClass(sc))};
+
+  // Unwrap after emitting the access control as unwrap all removes access
+  // control types.
+  auto* type = var->type()->UnwrapAll();
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (auto* tex = type->As<ast::type::Texture>()) {
-    // Decorate storage texture variables with NonRead/Writeable if needed.
-    if (auto* storage = tex->As<ast::type::StorageTexture>()) {
-      switch (storage->access()) {
+  } else if (type->Is<ast::type::Texture>()) {
+    if (auto* ac = var->type()->As<ast::type::AccessControl>()) {
+      switch (ac->access_control()) {
         case ast::AccessControl::kWriteOnly:
           push_annot(
               spv::Op::OpDecorate,
@@ -2727,6 +2728,11 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   if (auto* alias = type->As<ast::type::Alias>()) {
     return GenerateTypeIfNeeded(alias->type());
   }
+  if (auto* ac = type->As<ast::type::AccessControl>()) {
+    if (!ac->type()->UnwrapIfNeeded()->Is<ast::type::Struct>()) {
+      return GenerateTypeIfNeeded(ac->type());
+    }
+  }
 
   auto val = type_name_to_id_.find(type->type_name());
   if (val != type_name_to_id_.end()) {
@@ -2735,13 +2741,9 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
 
   auto result = result_op();
   auto id = result.to_i();
-
   if (auto* ac = type->As<ast::type::AccessControl>()) {
+    // The non-struct case was handled above.
     auto* subtype = ac->type()->UnwrapIfNeeded();
-    if (!subtype->Is<ast::type::Struct>()) {
-      error_ = "Access control attached to non-struct type.";
-      return 0;
-    }
     if (!GenerateStructType(subtype->As<ast::type::Struct>(),
                             ac->access_control(), result)) {
       return 0;
