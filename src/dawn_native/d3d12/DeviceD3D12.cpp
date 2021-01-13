@@ -446,13 +446,13 @@ namespace dawn_native { namespace d3d12 {
                                               HANDLE sharedHandle,
                                               ExternalMutexSerial acquireMutexKey,
                                               bool isSwapChainTexture) {
-        Ref<TextureBase> dawnTexture;
+        Ref<Texture> dawnTexture;
         if (ConsumedError(Texture::Create(this, descriptor, sharedHandle, acquireMutexKey,
                                           isSwapChainTexture),
-                          &dawnTexture))
+                          &dawnTexture)) {
             return nullptr;
-
-        return dawnTexture;
+        }
+        return {dawnTexture};
     }
 
     // We use IDXGIKeyedMutexes to synchronize access between D3D11 and D3D12. D3D11/12 fences

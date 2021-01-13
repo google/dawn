@@ -36,16 +36,16 @@ namespace dawn_native { namespace d3d12 {
 
     class Texture final : public TextureBase {
       public:
-        static ResultOrError<Ref<TextureBase>> Create(Device* device,
-                                                      const TextureDescriptor* descriptor);
-        static ResultOrError<Ref<TextureBase>> Create(Device* device,
-                                                      const ExternalImageDescriptor* descriptor,
-                                                      HANDLE sharedHandle,
-                                                      ExternalMutexSerial acquireMutexKey,
-                                                      bool isSwapChainTexture);
-        Texture(Device* device,
-                const TextureDescriptor* descriptor,
-                ComPtr<ID3D12Resource> d3d12Texture);
+        static ResultOrError<Ref<Texture>> Create(Device* device,
+                                                  const TextureDescriptor* descriptor);
+        static ResultOrError<Ref<Texture>> Create(Device* device,
+                                                  const ExternalImageDescriptor* descriptor,
+                                                  HANDLE sharedHandle,
+                                                  ExternalMutexSerial acquireMutexKey,
+                                                  bool isSwapChainTexture);
+        static ResultOrError<Ref<Texture>> Create(Device* device,
+                                                  const TextureDescriptor* descriptor,
+                                                  ComPtr<ID3D12Resource> d3d12Texture);
 
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource() const;
@@ -88,6 +88,7 @@ namespace dawn_native { namespace d3d12 {
                                                HANDLE sharedHandle,
                                                ExternalMutexSerial acquireMutexKey,
                                                bool isSwapChainTexture);
+        MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture);
 
         // Dawn API
         void DestroyImpl() override;

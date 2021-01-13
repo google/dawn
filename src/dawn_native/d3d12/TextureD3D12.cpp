@@ -378,19 +378,21 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    ResultOrError<Ref<TextureBase>> Texture::Create(Device* device,
-                                                    const TextureDescriptor* descriptor) {
+    // static
+    ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                                const TextureDescriptor* descriptor) {
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
         DAWN_TRY(dawnTexture->InitializeAsInternalTexture());
         return std::move(dawnTexture);
     }
 
-    ResultOrError<Ref<TextureBase>> Texture::Create(Device* device,
-                                                    const ExternalImageDescriptor* descriptor,
-                                                    HANDLE sharedHandle,
-                                                    ExternalMutexSerial acquireMutexKey,
-                                                    bool isSwapChainTexture) {
+    // static
+    ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                                const ExternalImageDescriptor* descriptor,
+                                                HANDLE sharedHandle,
+                                                ExternalMutexSerial acquireMutexKey,
+                                                bool isSwapChainTexture) {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
 
@@ -400,6 +402,16 @@ namespace dawn_native { namespace d3d12 {
                                                           acquireMutexKey, isSwapChainTexture));
         dawnTexture->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                         dawnTexture->GetAllSubresources());
+        return std::move(dawnTexture);
+    }
+
+    // static
+    ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                                const TextureDescriptor* descriptor,
+                                                ComPtr<ID3D12Resource> d3d12Texture) {
+        Ref<Texture> dawnTexture =
+            AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
+        DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d12Texture)));
         return std::move(dawnTexture);
     }
 
@@ -485,25 +497,24 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    Texture::Texture(Device* device, const TextureDescriptor* descriptor, TextureState state)
-        : TextureBase(device, descriptor, state),
-          mSubresourceStateAndDecay(
-              GetSubresourceCount(),
-              {D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON, kMaxExecutionSerial, false}) {
-    }
-
-    Texture::Texture(Device* device,
-                     const TextureDescriptor* descriptor,
-                     ComPtr<ID3D12Resource> nativeTexture)
-        : Texture(device, descriptor, TextureState::OwnedExternal) {
+    MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture) {
         AllocationInfo info;
         info.mMethod = AllocationMethod::kExternal;
         // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
         // texture is owned externally. The texture's owning entity must remain responsible for
         // memory management.
-        mResourceAllocation = {info, 0, std::move(nativeTexture), nullptr};
+        mResourceAllocation = { info, 0, std::move(d3d12Texture), nullptr };
 
         SetIsSubresourceContentInitialized(true, GetAllSubresources());
+
+        return {};
+    }
+
+    Texture::Texture(Device* device, const TextureDescriptor* descriptor, TextureState state)
+        : TextureBase(device, descriptor, state),
+          mSubresourceStateAndDecay(
+              GetSubresourceCount(),
+              {D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON, kMaxExecutionSerial, false}) {
     }
 
     Texture::~Texture() {
