@@ -264,6 +264,7 @@ source_set("dawn_end2end_tests_sources") {
 
   sources = [
     "DawnTest.h",
+    "MockCallback.h",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
     "end2end/BufferTests.cpp",

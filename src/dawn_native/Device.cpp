@@ -212,10 +212,15 @@ namespace dawn_native {
     }
 
     void DeviceBase::HandleError(InternalErrorType type, const char* message) {
-        // If we receive an internal error, assume the backend can't recover and proceed with
-        // device destruction. We first wait for all previous commands to be completed so that
-        // backend objects can be freed immediately, before handling the loss.
-        if (type == InternalErrorType::Internal) {
+        if (type == InternalErrorType::DeviceLost) {
+            // A real device lost happened. Set the state to disconnected as the device cannot be
+            // used.
+            mState = State::Disconnected;
+        } else if (type == InternalErrorType::Internal) {
+            // If we receive an internal error, assume the backend can't recover and proceed with
+            // device destruction. We first wait for all previous commands to be completed so that
+            // backend objects can be freed immediately, before handling the loss.
+
             // Move away from the Alive state so that the application cannot use this device
             // anymore.
             // TODO(cwallez@chromium.org): Do we need atomics for this to become visible to other
@@ -240,7 +245,7 @@ namespace dawn_native {
             mDeviceLostCallback = nullptr;
         }
 
-        // Still forward device loss and internal errors to the error scopes so they all reject.
+        // Still forward device loss errors to the error scopes so they all reject.
         mCurrentErrorScope->HandleError(ToWGPUErrorType(type), message);
     }
 
@@ -322,7 +327,7 @@ namespace dawn_native {
         if (DAWN_LIKELY(mState == State::Alive)) {
             return {};
         }
-        return DAWN_DEVICE_LOST_ERROR("Device is lost");
+        return DAWN_VALIDATION_ERROR("Device is lost");
     }
 
     void DeviceBase::LoseForTesting() {

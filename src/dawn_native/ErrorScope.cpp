@@ -87,14 +87,23 @@ namespace dawn_native {
                     consumed = true;
                     break;
 
-                // Unknown and DeviceLost are fatal. All error scopes capture them.
+                // DeviceLost is fatal. All error scopes capture them.
                 // |consumed| is false because these should bubble to all scopes.
-                case wgpu::ErrorType::Unknown:
                 case wgpu::ErrorType::DeviceLost:
                     consumed = false;
+                    if (currentScope->mErrorType != wgpu::ErrorType::DeviceLost) {
+                        // DeviceLost overrides any other error that is not a DeviceLost.
+                        currentScope->mErrorType = type;
+                        currentScope->mErrorMessage = message;
+                    }
                     break;
 
+                case wgpu::ErrorType::Unknown:
+                    // Means the scope was destroyed before contained work finished.
+                    // This happens when you destroy the device while there's pending work.
+                    // That's handled in ErrorScope::UnlinkForShutdownImpl, not here.
                 case wgpu::ErrorType::NoError:
+                    // Not considered an error, and should never be passed to HandleError.
                     UNREACHABLE();
                     return;
             }
@@ -111,8 +120,10 @@ namespace dawn_native {
         }
 
         // The root error scope captures all uncaptured errors.
+        // Except, it should not capture device lost errors since those go to
+        // the device lost callback.
         ASSERT(currentScope->IsRoot());
-        if (currentScope->mCallback) {
+        if (currentScope->mCallback && type != wgpu::ErrorType::DeviceLost) {
             currentScope->mCallback(static_cast<WGPUErrorType>(type), message,
                                     currentScope->mUserdata);
         }

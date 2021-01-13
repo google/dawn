@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include <gmock/gmock.h>
+#include "tests/MockCallback.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -513,6 +514,19 @@ TEST_P(DeviceLostTest, LoseForTestingOnce) {
     // without doing anything when it sees that device has already been lost.
     device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
     EXPECT_CALL(*mockDeviceLostCallback, Call(_, this)).Times(0);
+    device.LoseForTesting();
+}
+
+TEST_P(DeviceLostTest, DeviceLostDoesntCallUncapturedError) {
+    // Set no callback.
+    device.SetDeviceLostCallback(nullptr, nullptr);
+
+    // Set the uncaptured error callback which should not be called on
+    // device lost.
+    MockCallback<WGPUErrorCallback> mockErrorCallback;
+    device.SetUncapturedErrorCallback(mockErrorCallback.Callback(),
+                                      mockErrorCallback.MakeUserdata(nullptr));
+    EXPECT_CALL(mockErrorCallback, Call(_, _, _)).Times(Exactly(0));
     device.LoseForTesting();
 }
 

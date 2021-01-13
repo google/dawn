@@ -26,7 +26,6 @@ namespace dawn_native {
         Validation,
         DeviceLost,
         Internal,
-        Unimplemented,
         OutOfMemory
     };
 
@@ -72,11 +71,23 @@ namespace dawn_native {
 
 #define DAWN_MAKE_ERROR(TYPE, MESSAGE) \
     ::dawn_native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
+
 #define DAWN_VALIDATION_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Validation, MESSAGE)
+
+// DAWN_DEVICE_LOST_ERROR means that there was a real unrecoverable native device lost error.
+// We can't even do a graceful shutdown because the Device is gone.
 #define DAWN_DEVICE_LOST_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::DeviceLost, MESSAGE)
+
+// DAWN_INTERNAL_ERROR means Dawn hit an unexpected error in the backend and should try to
+// gracefully shut down.
 #define DAWN_INTERNAL_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Internal, MESSAGE)
+
 #define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) \
     DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string("Unimplemented: ") + MESSAGE)
+
+// DAWN_OUT_OF_MEMORY_ERROR means we ran out of memory. It may be used as a signal internally in
+// Dawn to free up unused resources. Or, it may bubble up to the application to signal an allocation
+// was too large or they should free some existing resources.
 #define DAWN_OUT_OF_MEMORY_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::OutOfMemory, MESSAGE)
 
 #define DAWN_CONCAT1(x, y) x##y
