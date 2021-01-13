@@ -34,6 +34,7 @@ if ({$TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
   add_tint_fuzzer(tint_bound_array_accessors_fuzzer)
   add_tint_fuzzer(tint_emit_vertex_point_size_fuzzer)
   add_tint_fuzzer(tint_first_index_offset_fuzzer)
+  add_tint_fuzzer(tint_inspector_fuzzer)
   add_tint_fuzzer(tint_wgsl_reader_spv_writer_fuzzer)
 endif()
 

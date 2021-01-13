@@ -1366,6 +1366,11 @@ if (build_with_chromium) {
       sources = [ "fuzzers/tint_first_index_offset_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
+
+    fuzzer_test("tint_inspector_fuzzer") {
+      sources = [ "fuzzers/tint_inspector_fuzzer.cc" ]
+      deps = [ ":tint_fuzzer_common" ]
+    }
   }
 
   if (tint_build_wgsl_reader && tint_build_hlsl_writer) {

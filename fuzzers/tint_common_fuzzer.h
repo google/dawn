@@ -30,6 +30,7 @@ class CommonFuzzer {
   ~CommonFuzzer();
 
   void SetTransformManager(transform::Manager* tm) { transform_manager_ = tm; }
+  void EnableInspector() { inspector_enabled_ = true; }
 
   int Run(const uint8_t* data, size_t size);
 
@@ -37,6 +38,7 @@ class CommonFuzzer {
   InputFormat input_;
   OutputFormat output_;
   transform::Manager* transform_manager_;
+  bool inspector_enabled_;
 };
 
 }  // namespace fuzzers
