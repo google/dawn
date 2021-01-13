@@ -145,9 +145,10 @@ TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
     DeleteClient();
 
     // Expect release on all objects created by the client.
-    EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1);
-    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
-    EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1);
-    EXPECT_CALL(api, SamplerRelease(apiSampler)).Times(1);
+    Sequence s1, s2, s3;
+    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1).InSequence(s1);
+    EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1).InSequence(s2);
+    EXPECT_CALL(api, SamplerRelease(apiSampler)).Times(1).InSequence(s3);
+    EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1).InSequence(s1, s2, s3);
     FlushClient();
 }

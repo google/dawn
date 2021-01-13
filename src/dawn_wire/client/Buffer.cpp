@@ -66,7 +66,7 @@ namespace dawn_wire { namespace client {
         buffer->mSize = descriptor->size;
 
         DeviceCreateBufferCmd cmd;
-        cmd.device = ToAPI(device);
+        cmd.deviceId = device->id;
         cmd.descriptor = descriptor;
         cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->generation};
         cmd.handleCreateInfoLength = writeHandleCreateInfoLength;

@@ -32,8 +32,12 @@ namespace dawn_wire {
         return mImpl->HandleCommands(commands, size);
     }
 
-    bool WireServer::InjectTexture(WGPUTexture texture, uint32_t id, uint32_t generation) {
-        return mImpl->InjectTexture(texture, id, generation);
+    bool WireServer::InjectTexture(WGPUTexture texture,
+                                   uint32_t id,
+                                   uint32_t generation,
+                                   uint32_t deviceId,
+                                   uint32_t deviceGeneration) {
+        return mImpl->InjectTexture(texture, id, generation, deviceId, deviceGeneration);
     }
 
     namespace server {

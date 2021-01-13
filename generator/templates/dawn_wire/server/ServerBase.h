@@ -32,7 +32,7 @@ namespace dawn_wire { namespace server {
       protected:
         void DestroyAllObjects(const DawnProcTable& procs) {
             //* Free all objects when the server is destroyed
-            {% for type in by_category["object"] %}
+            {% for type in by_category["object"] if type.name.get() != "device" %}
                 {
                     std::vector<{{as_cType(type.name)}}> handles = mKnown{{type.name.CamelCase()}}.AcquireAllHandles();
                     for ({{as_cType(type.name)}} handle : handles) {
@@ -40,6 +40,13 @@ namespace dawn_wire { namespace server {
                     }
                 }
             {% endfor %}
+            //* Release devices last because dawn_native requires this.
+            {
+                std::vector<WGPUDevice> handles = mKnownDevice.AcquireAllHandles();
+                for (WGPUDevice handle : handles) {
+                    procs.deviceRelease(handle);
+                }
+            }
         }
 
         {% for type in by_category["object"] %}

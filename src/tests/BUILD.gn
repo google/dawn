@@ -218,6 +218,7 @@ test("dawn_unittests") {
     "unittests/wire/WireBasicTests.cpp",
     "unittests/wire/WireBufferMappingTests.cpp",
     "unittests/wire/WireCreateReadyPipelineTests.cpp",
+    "unittests/wire/WireDestroyObjectTests.cpp",
     "unittests/wire/WireDisconnectTests.cpp",
     "unittests/wire/WireErrorCallbackTests.cpp",
     "unittests/wire/WireExtensionTests.cpp",

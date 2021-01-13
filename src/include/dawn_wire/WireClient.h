@@ -34,6 +34,8 @@ namespace dawn_wire {
         WGPUTexture texture;
         uint32_t id;
         uint32_t generation;
+        uint32_t deviceId;
+        uint32_t deviceGeneration;
     };
 
     struct DAWN_WIRE_EXPORT WireClientDescriptor {

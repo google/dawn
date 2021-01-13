@@ -77,8 +77,27 @@ namespace dawn_wire { namespace server {
                     if (data == nullptr) {
                         return false;
                     }
+                    if (data->device != nullptr) {
+                        auto* device = static_cast<ObjectData<WGPUDevice>*>(data->device);
+                        if (!UntrackDeviceChild(device, objectType, objectId)) {
+                            return false;
+                        }
+                    }
                     {% if type.name.CamelCase() in server_reverse_lookup_objects %}
                         {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
+                    {% endif %}
+                    {% if type.name.get() == "device" %}
+                        //* TODO(crbug.com/dawn/384): This is a hack to make sure that all child objects
+                        //* are destroyed before their device. We should have a solution in
+                        //* Dawn native that makes all child objects internally null if their
+                        //* Device is destroyed.
+                        while (data->childObjectTypesAndIds.size() > 0) {
+                            ObjectType childObjectType;
+                            ObjectId childObjectId;
+                            std::tie(childObjectType, childObjectId) = UnpackObjectTypeAndId(
+                                *data->childObjectTypesAndIds.begin());
+                            DoDestroyObject(childObjectType, childObjectId);
+                        }
                     {% endif %}
                     if (data->handle != nullptr) {
                         mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);

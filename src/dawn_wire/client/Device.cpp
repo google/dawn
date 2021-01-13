@@ -215,7 +215,7 @@ namespace dawn_wire { namespace client {
         }
 
         DeviceCreateReadyComputePipelineCmd cmd;
-        cmd.device = ToAPI(this);
+        cmd.deviceId = this->id;
         cmd.descriptor = descriptor;
 
         uint64_t serial = mCreateReadyPipelineRequestSerial++;
@@ -270,7 +270,7 @@ namespace dawn_wire { namespace client {
                             "GPU device disconnected", userdata);
         }
         DeviceCreateReadyRenderPipelineCmd cmd;
-        cmd.device = ToAPI(this);
+        cmd.deviceId = this->id;
         cmd.descriptor = descriptor;
 
         uint64_t serial = mCreateReadyPipelineRequestSerial++;

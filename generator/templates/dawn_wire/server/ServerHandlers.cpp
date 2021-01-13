@@ -17,7 +17,6 @@
 
 namespace dawn_wire { namespace server {
     {% for command in cmd_records["command"] %}
-        {% set type = command.derived_object %}
         {% set method = command.derived_method %}
         {% set is_method = method != None %}
         {% set returns = is_method and method.return_type.name.canonical_case() != "void" %}
@@ -53,6 +52,24 @@ namespace dawn_wire { namespace server {
                     return false;
                 }
                 {{name}}Data->generation = cmd.{{name}}.generation;
+
+                //* TODO(crbug.com/dawn/384): This is a hack to make sure that all child objects
+                //* are destroyed before their device. The dawn_native device needs to track all child objects so
+                //* it can destroy them if the device is destroyed first.
+                {% if command.derived_object %}
+                    {% set type = command.derived_object %}
+                    {% if type.name.get() == "device" %}
+                        {{name}}Data->device = DeviceObjects().Get(cmd.selfId);
+                    {% else %}
+                        auto* selfData = {{type.name.CamelCase()}}Objects().Get(cmd.selfId);
+                        {{name}}Data->device = selfData->device;
+                    {% endif %}
+                    if ({{name}}Data->device != nullptr) {
+                        if (!TrackDeviceChild({{name}}Data->device, ObjectType::{{Type}}, cmd.{{name}}.id)) {
+                            return false;
+                        }
+                    }
+                {% endif %}
             {% endfor %}
 
             //* Do command

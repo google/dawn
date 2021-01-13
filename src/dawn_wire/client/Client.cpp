@@ -59,6 +59,9 @@ namespace dawn_wire { namespace client {
     void Client::DestroyAllObjects() {
         for (auto& objectList : mObjects) {
             ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.data());
+            if (objectType == ObjectType::Device) {
+                continue;
+            }
             while (!objectList.empty()) {
                 ObjectBase* object = objectList.head()->value();
 
@@ -68,6 +71,16 @@ namespace dawn_wire { namespace client {
                 SerializeCommand(cmd);
                 FreeObject(objectType, object);
             }
+        }
+
+        while (!mObjects[ObjectType::Device].empty()) {
+            ObjectBase* object = mObjects[ObjectType::Device].head()->value();
+
+            DestroyObjectCmd cmd;
+            cmd.objectType = ObjectType::Device;
+            cmd.objectId = object->id;
+            SerializeCommand(cmd);
+            FreeObject(ObjectType::Device, object);
         }
     }
 
@@ -85,6 +98,8 @@ namespace dawn_wire { namespace client {
         result.texture = ToAPI(allocation->object.get());
         result.id = allocation->object->id;
         result.generation = allocation->generation;
+        result.deviceId = FromAPI(device)->id;
+        result.deviceGeneration = DeviceAllocator().GetGeneration(FromAPI(device)->id);
         return result;
     }
 

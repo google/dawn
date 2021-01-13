@@ -59,23 +59,32 @@ namespace dawn_wire { namespace server {
     }
 
     bool Server::DoDeviceCreateReadyComputePipeline(
-        WGPUDevice cDevice,
+        ObjectId deviceId,
         uint64_t requestSerial,
         ObjectHandle pipelineObjectHandle,
         const WGPUComputePipelineDescriptor* descriptor) {
+        auto* device = DeviceObjects().Get(deviceId);
+        if (device == nullptr) {
+            return false;
+        }
+
         auto* resultData = ComputePipelineObjects().Allocate(pipelineObjectHandle.id);
         if (resultData == nullptr) {
             return false;
         }
 
         resultData->generation = pipelineObjectHandle.generation;
+        resultData->device = device;
+        if (!TrackDeviceChild(device, ObjectType::ComputePipeline, pipelineObjectHandle.id)) {
+            return false;
+        }
 
         auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
 
         mProcs.deviceCreateReadyComputePipeline(
-            cDevice, descriptor,
+            device->handle, descriptor,
             ForwardToServer<decltype(&Server::OnCreateReadyComputePipelineCallback)>::Func<
                 &Server::OnCreateReadyComputePipelineCallback>(),
             userdata.release());
@@ -116,23 +125,32 @@ namespace dawn_wire { namespace server {
         SerializeCommand(cmd);
     }
 
-    bool Server::DoDeviceCreateReadyRenderPipeline(WGPUDevice cDevice,
+    bool Server::DoDeviceCreateReadyRenderPipeline(ObjectId deviceId,
                                                    uint64_t requestSerial,
                                                    ObjectHandle pipelineObjectHandle,
                                                    const WGPURenderPipelineDescriptor* descriptor) {
+        auto* device = DeviceObjects().Get(deviceId);
+        if (device == nullptr) {
+            return false;
+        }
+
         auto* resultData = RenderPipelineObjects().Allocate(pipelineObjectHandle.id);
         if (resultData == nullptr) {
             return false;
         }
 
         resultData->generation = pipelineObjectHandle.generation;
+        resultData->device = device;
+        if (!TrackDeviceChild(device, ObjectType::RenderPipeline, pipelineObjectHandle.id)) {
+            return false;
+        }
 
         auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
 
         mProcs.deviceCreateReadyRenderPipeline(
-            cDevice, descriptor,
+            device->handle, descriptor,
             ForwardToServer<decltype(&Server::OnCreateReadyRenderPipelineCallback)>::Func<
                 &Server::OnCreateReadyRenderPipelineCallback>(),
             userdata.release());

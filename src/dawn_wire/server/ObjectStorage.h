@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <map>
+#include <unordered_set>
 
 namespace dawn_wire { namespace server {
 
@@ -32,6 +33,8 @@ namespace dawn_wire { namespace server {
         // Whether this object has been allocated, used by the KnownObjects queries
         // TODO(cwallez@chromium.org): make this an internal bit vector in KnownObjects.
         bool allocated;
+
+        ObjectDataBase<WGPUDevice>* device = nullptr;
     };
 
     // Stores what the backend knows about the type.
@@ -46,6 +49,26 @@ namespace dawn_wire { namespace server {
         std::unique_ptr<MemoryTransferService::ReadHandle> readHandle;
         std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle;
         BufferMapWriteState mapWriteState = BufferMapWriteState::Unmapped;
+    };
+
+    // Pack the ObjectType and ObjectId as a single value for storage in
+    // an std::unordered_set. This lets us avoid providing our own hash and
+    // equality comparison operators.
+    inline uint64_t PackObjectTypeAndId(ObjectType type, ObjectId id) {
+        static_assert(sizeof(ObjectType) * 8 <= 32, "");
+        static_assert(sizeof(ObjectId) * 8 <= 32, "");
+        return (static_cast<uint64_t>(type) << 32) + id;
+    }
+
+    inline std::pair<ObjectType, ObjectId> UnpackObjectTypeAndId(uint64_t payload) {
+        ObjectType type = static_cast<ObjectType>(payload >> 32);
+        ObjectId id = payload & 0xFFFFFFFF;
+        return std::make_pair(type, id);
+    }
+
+    template <>
+    struct ObjectData<WGPUDevice> : public ObjectDataBase<WGPUDevice> {
+        std::unordered_set<uint64_t> childObjectTypesAndIds;
     };
 
     // Keeps track of the mapping between client IDs and backend objects.

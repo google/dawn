@@ -161,7 +161,11 @@ namespace dawn_wire { namespace server {
         const volatile char* HandleCommandsImpl(const volatile char* commands,
                                                 size_t size) override;
 
-        bool InjectTexture(WGPUTexture texture, uint32_t id, uint32_t generation);
+        bool InjectTexture(WGPUTexture texture,
+                           uint32_t id,
+                           uint32_t generation,
+                           uint32_t deviceId,
+                           uint32_t deviceGeneration);
 
         template <typename T,
                   typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>
@@ -214,6 +218,9 @@ namespace dawn_wire { namespace server {
 
         std::shared_ptr<bool> mIsAlive;
     };
+
+    bool TrackDeviceChild(ObjectDataBase<WGPUDevice>* device, ObjectType type, ObjectId id);
+    bool UntrackDeviceChild(ObjectDataBase<WGPUDevice>* device, ObjectType type, ObjectId id);
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 

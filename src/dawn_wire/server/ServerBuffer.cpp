@@ -120,18 +120,27 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoDeviceCreateBuffer(WGPUDevice device,
+    bool Server::DoDeviceCreateBuffer(ObjectId deviceId,
                                       const WGPUBufferDescriptor* descriptor,
                                       ObjectHandle bufferResult,
                                       uint64_t handleCreateInfoLength,
                                       const uint8_t* handleCreateInfo) {
+        auto* device = DeviceObjects().Get(deviceId);
+        if (device == nullptr) {
+            return false;
+        }
+
         // Create and register the buffer object.
         auto* resultData = BufferObjects().Allocate(bufferResult.id);
         if (resultData == nullptr) {
             return false;
         }
         resultData->generation = bufferResult.generation;
-        resultData->handle = mProcs.deviceCreateBuffer(device, descriptor);
+        resultData->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
+        resultData->device = device;
+        if (!TrackDeviceChild(device, ObjectType::Buffer, bufferResult.id)) {
+            return false;
+        }
 
         // If the buffer isn't mapped at creation, we are done.
         if (!descriptor->mappedAtCreation) {

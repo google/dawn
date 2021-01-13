@@ -33,20 +33,20 @@
             { "name": "write flush info", "type": "uint8_t", "annotation": "const*", "length": "write flush info length", "skip_serialize": true}
         ],
         "device create buffer": [
-            { "name": "device", "type": "device" },
+            { "name": "device id", "type": "ObjectId" },
             { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
             { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" },
             { "name": "handle create info length", "type": "uint64_t" },
             { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
         ],
         "device create ready compute pipeline": [
-            { "name": "device", "type": "device" },
+            { "name": "device id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "compute pipeline"},
             { "name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
         ],
         "device create ready render pipeline": [
-            { "name": "device", "type": "device" },
+            { "name": "device id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "render pipeline"},
             { "name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}

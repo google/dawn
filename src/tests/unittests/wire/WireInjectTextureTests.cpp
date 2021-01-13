@@ -34,7 +34,8 @@ TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
-    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation));
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation,
+                                               reservation.deviceId, reservation.deviceGeneration));
 
     wgpuTextureCreateView(reservation.texture, nullptr);
     WGPUTextureView apiDummyView = api.GetNewTextureView();
@@ -57,11 +58,13 @@ TEST_F(WireInjectTextureTests, InjectExistingID) {
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
-    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation));
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation,
+                                               reservation.deviceId, reservation.deviceGeneration));
 
     // ID already in use, call fails.
-    ASSERT_FALSE(
-        GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation));
+    ASSERT_FALSE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation,
+                                                reservation.deviceId,
+                                                reservation.deviceGeneration));
 }
 
 // Test that the server only borrows the texture and does a single reference-release
@@ -71,7 +74,8 @@ TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
     // Injecting the texture adds a reference
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
-    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation));
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id, reservation.generation,
+                                               reservation.deviceId, reservation.deviceGeneration));
 
     // Releasing the texture removes a single reference.
     wgpuTextureRelease(reservation.texture);
