@@ -72,6 +72,7 @@ namespace dawn_native { namespace opengl {
         const OpenGLFunctions& gl = mDevice->gl;
         gl.BindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
         gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        gl.Scissor(0, 0, mWidth, mHeight);
         gl.BlitFramebuffer(0, 0, mWidth, mHeight, 0, mHeight, mWidth, 0, GL_COLOR_BUFFER_BIT,
                            GL_NEAREST);
 
