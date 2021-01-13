@@ -52,32 +52,38 @@ class DepthStencilStateTest : public DawnTest {
 
         depthTextureView = depthTexture.CreateView();
 
-        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                layout(set = 0, binding = 0) uniform myBlock {
-                    vec3 color;
-                    float depth;
-                } myUbo;
-                void main() {
-                    const vec2 pos[6] = vec2[6](
-                        vec2(-1.f, 1.f), vec2(-1.f, -1.f), vec2(1.f, -1.f), // front-facing
-                        vec2(-1.f, 1.f), vec2(1.f, 1.f), vec2(1.f, -1.f)    // back-facing
-                    );
-                    gl_Position = vec4(pos[gl_VertexIndex], myUbo.depth, 1.f);
-                }
-            )");
+        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[block]] struct UBO {
+                [[offset(0)]] color : vec3<f32>;
+                [[offset(12)]] depth : f32;
+            };
+            [[set(0), binding(0)]] var<uniform> ubo : UBO;
+            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(set = 0, binding = 0) uniform myBlock {
-                    vec3 color;
-                    float depth;
-                } myUbo;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = vec4(myUbo.color, 1.f);
-                }
-            )");
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                        vec2<f32>(-1.0,  1.0),
+                        vec2<f32>(-1.0, -1.0),
+                        vec2<f32>( 1.0, -1.0), # front-facing
+                        vec2<f32>(-1.0,  1.0),
+                        vec2<f32>( 1.0,  1.0),
+                        vec2<f32>( 1.0, -1.0)); # back-facing
+                Position = vec4<f32>(pos[VertexIndex], ubo.depth, 1.0);
+            })");
+
+        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[block]] struct UBO {
+                [[offset(0)]] color : vec3<f32>;
+                [[offset(12)]] depth : f32;
+            };
+            [[set(0), binding(0)]] var<uniform> ubo : UBO;
+
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(ubo.color, 1.0);
+            })");
     }
 
     struct TestSpec {
