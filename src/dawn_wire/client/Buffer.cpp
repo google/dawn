@@ -20,15 +20,15 @@
 namespace dawn_wire { namespace client {
 
     // static
-    WGPUBuffer Buffer::Create(Device* device_, const WGPUBufferDescriptor* descriptor) {
-        Client* wireClient = device_->GetClient();
+    WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor) {
+        Client* wireClient = device->client;
 
         bool mappable =
             (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 ||
             descriptor->mappedAtCreation;
         if (mappable && descriptor->size >= std::numeric_limits<size_t>::max()) {
-            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer is too large for map usage");
-            return device_->CreateErrorBuffer();
+            device->InjectError(WGPUErrorType_OutOfMemory, "Buffer is too large for map usage");
+            return device->CreateErrorBuffer();
         }
 
         std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
@@ -42,16 +42,16 @@ namespace dawn_wire { namespace client {
             writeHandle.reset(
                 wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
             if (writeHandle == nullptr) {
-                device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
-                return device_->CreateErrorBuffer();
+                device->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
+                return device->CreateErrorBuffer();
             }
 
             // Open the handle, it may fail by returning a nullptr in writeData.
             size_t writeDataLength = 0;
             std::tie(writeData, writeDataLength) = writeHandle->Open();
             if (writeData == nullptr) {
-                device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
-                return device_->CreateErrorBuffer();
+                device->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
+                return device->CreateErrorBuffer();
             }
             ASSERT(writeDataLength == descriptor->size);
 
@@ -60,12 +60,13 @@ namespace dawn_wire { namespace client {
         }
 
         // Create the buffer and send the creation command.
-        auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device_);
+        auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(wireClient);
         Buffer* buffer = bufferObjectAndSerial->object.get();
+        buffer->mDevice = device;
         buffer->mSize = descriptor->size;
 
         DeviceCreateBufferCmd cmd;
-        cmd.device = ToAPI(device_);
+        cmd.device = ToAPI(device);
         cmd.descriptor = descriptor;
         cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->generation};
         cmd.handleCreateInfoLength = writeHandleCreateInfoLength;
@@ -88,13 +89,14 @@ namespace dawn_wire { namespace client {
     }
 
     // static
-    WGPUBuffer Buffer::CreateError(Device* device_) {
-        auto* allocation = device_->GetClient()->BufferAllocator().New(device_);
+    WGPUBuffer Buffer::CreateError(Device* device) {
+        auto* allocation = device->client->BufferAllocator().New(device->client);
+        allocation->object->mDevice = device;
 
         DeviceCreateErrorBufferCmd cmd;
-        cmd.self = ToAPI(device_);
+        cmd.self = ToAPI(device);
         cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
-        device_->GetClient()->SerializeCommand(cmd);
+        device->client->SerializeCommand(cmd);
 
         return ToAPI(allocation->object.get());
     }
@@ -124,7 +126,7 @@ namespace dawn_wire { namespace client {
                           size_t size,
                           WGPUBufferMapCallback callback,
                           void* userdata) {
-        if (device->GetClient()->IsDisconnected()) {
+        if (client->IsDisconnected()) {
             return callback(WGPUBufferMapAsyncStatus_DeviceLost, userdata);
         }
 
@@ -138,7 +140,8 @@ namespace dawn_wire { namespace client {
 
         // Step 1. Do early validation of READ ^ WRITE because the server rejects mode = 0.
         if (!(isReadMode ^ isWriteMode)) {
-            device->InjectError(WGPUErrorType_Validation, "MapAsync error (you figure out :P)");
+            mDevice->InjectError(WGPUErrorType_Validation,
+                                 "MapAsync mode must be exactly one of Read or Write");
             if (callback != nullptr) {
                 callback(WGPUBufferMapAsyncStatus_Error, userdata);
             }
@@ -158,19 +161,17 @@ namespace dawn_wire { namespace client {
 
         // Step 2a: Create the read / write handles for this request.
         if (isReadMode) {
-            request.readHandle.reset(
-                device->GetClient()->GetMemoryTransferService()->CreateReadHandle(size));
+            request.readHandle.reset(client->GetMemoryTransferService()->CreateReadHandle(size));
             if (request.readHandle == nullptr) {
-                device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+                mDevice->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
                 callback(WGPUBufferMapAsyncStatus_Error, userdata);
                 return;
             }
         } else {
             ASSERT(isWriteMode);
-            request.writeHandle.reset(
-                device->GetClient()->GetMemoryTransferService()->CreateWriteHandle(size));
+            request.writeHandle.reset(client->GetMemoryTransferService()->CreateWriteHandle(size));
             if (request.writeHandle == nullptr) {
-                device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+                mDevice->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
                 callback(WGPUBufferMapAsyncStatus_Error, userdata);
                 return;
             }
@@ -188,15 +189,15 @@ namespace dawn_wire { namespace client {
         // Step 3a. Fill the handle create info in the command.
         if (isReadMode) {
             cmd.handleCreateInfoLength = request.readHandle->SerializeCreateSize();
-            device->GetClient()->SerializeCommand(
-                cmd, cmd.handleCreateInfoLength,
-                [&](char* cmdSpace) { request.readHandle->SerializeCreate(cmdSpace); });
+            client->SerializeCommand(cmd, cmd.handleCreateInfoLength, [&](char* cmdSpace) {
+                request.readHandle->SerializeCreate(cmdSpace);
+            });
         } else {
             ASSERT(isWriteMode);
             cmd.handleCreateInfoLength = request.writeHandle->SerializeCreateSize();
-            device->GetClient()->SerializeCommand(
-                cmd, cmd.handleCreateInfoLength,
-                [&](char* cmdSpace) { request.writeHandle->SerializeCreate(cmdSpace); });
+            client->SerializeCommand(cmd, cmd.handleCreateInfoLength, [&](char* cmdSpace) {
+                request.writeHandle->SerializeCreate(cmdSpace);
+            });
         }
 
         // Step 4. Register this request so that we can retrieve it from its serial when the server
@@ -323,7 +324,7 @@ namespace dawn_wire { namespace client {
             cmd.writeFlushInfoLength = writeFlushInfoLength;
             cmd.writeFlushInfo = nullptr;
 
-            device->GetClient()->SerializeCommand(cmd, writeFlushInfoLength, [&](char* cmdSpace) {
+            client->SerializeCommand(cmd, writeFlushInfoLength, [&](char* cmdSpace) {
                 // Serialize flush metadata into the space after the command.
                 // This closes the handle for writing.
                 mWriteHandle->SerializeFlush(cmdSpace);
@@ -347,7 +348,7 @@ namespace dawn_wire { namespace client {
 
         BufferUnmapCmd cmd;
         cmd.self = ToAPI(this);
-        device->GetClient()->SerializeCommand(cmd);
+        client->SerializeCommand(cmd);
     }
 
     void Buffer::Destroy() {
@@ -365,7 +366,7 @@ namespace dawn_wire { namespace client {
 
         BufferDestroyCmd cmd;
         cmd.self = ToAPI(this);
-        device->GetClient()->SerializeCommand(cmd);
+        client->SerializeCommand(cmd);
     }
 
     bool Buffer::IsMappedForReading() const {

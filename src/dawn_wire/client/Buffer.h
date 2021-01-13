@@ -24,6 +24,8 @@
 
 namespace dawn_wire { namespace client {
 
+    class Device;
+
     class Buffer final : public ObjectBase {
       public:
         using ObjectBase::ObjectBase;
@@ -54,6 +56,8 @@ namespace dawn_wire { namespace client {
         bool IsMappedForReading() const;
         bool IsMappedForWriting() const;
         bool CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const;
+
+        Device* mDevice;
 
         // We want to defer all the validation to the server, which means we could have multiple
         // map request in flight at a single time and need to track them separately.

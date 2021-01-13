@@ -57,10 +57,23 @@ namespace dawn_wire { namespace client {
     }
 
     void Client::DestroyAllObjects() {
-        while (!mDevices.empty()) {
-            // Note: We don't send a DestroyObject command for the device
-            // since freeing a device object is done out of band.
-            DeviceAllocator().Free(static_cast<Device*>(mDevices.head()->value()));
+        for (auto& objectList : mObjects) {
+            ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.data());
+            while (!objectList.empty()) {
+                ObjectBase* object = objectList.head()->value();
+                if (object == mDevice) {
+                    // Note: We don't send a DestroyObject command for the device
+                    // since freeing a device object is done out of band.
+                    DeviceAllocator().Free(mDevice);
+                    continue;
+                }
+
+                DestroyObjectCmd cmd;
+                cmd.objectType = objectType;
+                cmd.objectId = object->id;
+                SerializeCommand(cmd);
+                FreeObject(objectType, object);
+            }
         }
     }
 
@@ -71,9 +84,8 @@ namespace dawn_wire { namespace client {
         return reinterpret_cast<WGPUDeviceImpl*>(mDevice);
     }
 
-    ReservedTexture Client::ReserveTexture(WGPUDevice cDevice) {
-        Device* device = FromAPI(cDevice);
-        auto* allocation = TextureAllocator().New(device);
+    ReservedTexture Client::ReserveTexture(WGPUDevice device) {
+        auto* allocation = TextureAllocator().New(this);
 
         ReservedTexture result;
         result.texture = ToAPI(allocation->object.get());
@@ -87,12 +99,14 @@ namespace dawn_wire { namespace client {
         mSerializer = ChunkedCommandSerializer(NoopCommandSerializer::GetInstance());
         if (mDevice != nullptr) {
             mDevice->HandleDeviceLost("GPU connection lost");
-            mDevice->CancelCallbacksForDisconnect();
         }
-    }
-
-    void Client::TrackObject(Device* device) {
-        mDevices.Append(device);
+        for (auto& objectList : mObjects) {
+            LinkNode<ObjectBase>* object = objectList.head();
+            while (object != objectList.end()) {
+                object->value()->CancelCallbacksForDisconnect();
+                object = object->next();
+            }
+        }
     }
 
     bool Client::IsDisconnected() const {

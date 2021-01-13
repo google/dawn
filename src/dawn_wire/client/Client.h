@@ -62,7 +62,10 @@ namespace dawn_wire { namespace client {
         void Disconnect();
         bool IsDisconnected() const;
 
-        void TrackObject(Device* device);
+        template <typename T>
+        void TrackObject(T* object) {
+            mObjects[ObjectTypeToTypeEnum<T>::value].Append(object);
+        }
 
       private:
         void DestroyAllObjects();
@@ -75,7 +78,7 @@ namespace dawn_wire { namespace client {
         MemoryTransferService* mMemoryTransferService = nullptr;
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
 
-        LinkedList<ObjectBase> mDevices;
+        PerObjectType<LinkedList<ObjectBase>> mObjects;
         bool mDisconnected = false;
     };
 

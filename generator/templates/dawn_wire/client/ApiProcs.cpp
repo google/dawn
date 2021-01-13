@@ -34,14 +34,14 @@ namespace dawn_wire { namespace client {
         {%- endmacro %}
 
         {% for type in by_category["object"] %}
-            DAWN_DECLARE_UNUSED bool DeviceMatches(const Device* device, const {{as_cType(type.name)}} obj) {
-                return device == reinterpret_cast<const {{as_wireType(type)}}>(obj)->device;
+            DAWN_DECLARE_UNUSED bool ClientMatches(const Client* client, const {{as_cType(type.name)}} obj) {
+                return client == reinterpret_cast<const {{as_wireType(type)}}>(obj)->client;
             }
 
-            DAWN_DECLARE_UNUSED bool DeviceMatches(const Device* device, const {{as_cType(type.name)}} *const obj, uint32_t count = 1) {
+            DAWN_DECLARE_UNUSED bool ClientMatches(const Client* client, const {{as_cType(type.name)}} *const obj, uint32_t count = 1) {
                 ASSERT(count == 0 || obj != nullptr);
                 for (uint32_t i = 0; i < count; ++i) {
-                    if (!DeviceMatches(device, obj[i])) {
+                    if (!ClientMatches(client, obj[i])) {
                         return false;
                     }
                 }
@@ -49,12 +49,12 @@ namespace dawn_wire { namespace client {
             }
         {% endfor %}
 
-        bool DeviceMatches(const Device* device, WGPUChainedStruct const* chainedStruct);
+        bool ClientMatches(const Client* client, WGPUChainedStruct const* chainedStruct);
 
         {% for type in by_category["structure"] if type.may_have_dawn_object %}
-            DAWN_DECLARE_UNUSED bool DeviceMatches(const Device* device, const {{as_cType(type.name)}}& obj) {
+            DAWN_DECLARE_UNUSED bool ClientMatches(const Client* client, const {{as_cType(type.name)}}& obj) {
                 {% if type.extensible %}
-                    if (!DeviceMatches(device, obj.nextInChain)) {
+                    if (!ClientMatches(client, obj.nextInChain)) {
                         return false;
                     }
                 {% endif %}
@@ -63,7 +63,7 @@ namespace dawn_wire { namespace client {
                         if (obj.{{as_varName(member.name)}} != nullptr)
                     {% endif %}
                     {
-                        if (!DeviceMatches(device, obj.{{as_varName(member.name)}}
+                        if (!ClientMatches(client, obj.{{as_varName(member.name)}}
                             {%- if member.annotation != "value" and member.length != "strlen" -%}
                                 , {{member_length(member, "obj.")}}
                             {%- endif -%})) {
@@ -74,9 +74,9 @@ namespace dawn_wire { namespace client {
                 return true;
             }
 
-            DAWN_DECLARE_UNUSED bool DeviceMatches(const Device* device, const {{as_cType(type.name)}} *const obj, uint32_t count = 1) {
+            DAWN_DECLARE_UNUSED bool ClientMatches(const Client* client, const {{as_cType(type.name)}} *const obj, uint32_t count = 1) {
                 for (uint32_t i = 0; i < count; ++i) {
-                    if (!DeviceMatches(device, obj[i])) {
+                    if (!ClientMatches(client, obj[i])) {
                         return false;
                     }
                 }
@@ -84,14 +84,14 @@ namespace dawn_wire { namespace client {
             }
         {% endfor %}
 
-        bool DeviceMatches(const Device* device, WGPUChainedStruct const* chainedStruct) {
+        bool ClientMatches(const Client* client, WGPUChainedStruct const* chainedStruct) {
             while (chainedStruct != nullptr) {
                 switch (chainedStruct->sType) {
                     {% for sType in types["s type"].values if sType.valid %}
                         {% set CType = as_cType(sType.name) %}
                         case {{as_cEnum(types["s type"].name, sType.name)}}: {
                             {% if types[sType.name.get()].may_have_dawn_object %}
-                                if (!DeviceMatches(device, reinterpret_cast<const {{CType}}*>(chainedStruct))) {
+                                if (!ClientMatches(client, reinterpret_cast<const {{CType}}*>(chainedStruct))) {
                                     return false;
                                 }
                             {% endif %}
@@ -103,7 +103,7 @@ namespace dawn_wire { namespace client {
                     default:
                         UNREACHABLE();
                         dawn::WarningLog()
-                            << "All objects may not be from the same device. "
+                            << "All objects may not be from the same client. "
                             << "Unknown sType " << chainedStruct->sType << " discarded.";
                         return false;
                 }
@@ -133,10 +133,10 @@ namespace dawn_wire { namespace client {
             ) {
                 {% if len(method.arguments) > 0 %}
                     {
-                        bool sameDevice = true;
+                        bool sameClient = true;
                         auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
-                        Device* device = self->device;
-                        DAWN_UNUSED(device);
+                        Client* client = self->client;
+                        DAWN_UNUSED(client);
 
                         do {
                             {% for arg in method.arguments if arg.type.may_have_dawn_object or arg.type.category == "object" %}
@@ -144,26 +144,26 @@ namespace dawn_wire { namespace client {
                                     if ({{as_varName(arg.name)}} != nullptr)
                                 {% endif %}
                                 {
-                                    if (!DeviceMatches(device, {{as_varName(arg.name)}}
+                                    if (!ClientMatches(client, {{as_varName(arg.name)}}
                                         {%- if arg.annotation != "value" and arg.length != "strlen" -%}
                                             , {{member_length(arg, "")}}
                                         {%- endif -%})) {
-                                        sameDevice = false;
+                                        sameClient = false;
                                         break;
                                     }
                                 }
                             {% endfor %}
                         } while (false);
 
-                        if (DAWN_UNLIKELY(!sameDevice)) {
-                            device->InjectError(WGPUErrorType_Validation,
+                        if (DAWN_UNLIKELY(!sameClient)) {
+                            reinterpret_cast<Device*>(client->GetDevice())->InjectError(WGPUErrorType_Validation,
                                                 "All objects must be from the same device.");
                             {% if method.return_type.category == "object" %}
                                 // Allocate an object without registering it on the server. This is backed by a real allocation on
                                 // the client so commands can be sent with it. But because it's not allocated on the server, it will
                                 // be a fatal error to use it.
                                 auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
-                                auto* allocation = self->device->GetClient()->{{method.return_type.name.CamelCase()}}Allocator().New(self->device);
+                                auto* allocation = self->client->{{method.return_type.name.CamelCase()}}Allocator().New(self->client);
                                 return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
                             {% elif method.return_type.name.canonical_case() == "void" %}
                                 return;
@@ -176,7 +176,6 @@ namespace dawn_wire { namespace client {
 
                 auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
                 {% if Suffix not in client_handwritten_commands %}
-                    Device* device = self->device;
                     {{Suffix}}Cmd cmd;
 
                     //* Create the structure going on the wire on the stack and fill it with the value
@@ -185,7 +184,7 @@ namespace dawn_wire { namespace client {
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
-                        auto* allocation = self->device->GetClient()->{{method.return_type.name.CamelCase()}}Allocator().New(self->device);
+                        auto* allocation = self->client->{{method.return_type.name.CamelCase()}}Allocator().New(self->client);
                         cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
                     {% endif %}
 
@@ -194,7 +193,7 @@ namespace dawn_wire { namespace client {
                     {% endfor %}
 
                     //* Allocate space to send the command and copy the value args over.
-                    device->GetClient()->SerializeCommand(cmd);
+                    self->client->SerializeCommand(cmd);
 
                     {% if method.return_type.category == "object" %}
                         return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
@@ -222,8 +221,8 @@ namespace dawn_wire { namespace client {
                 cmd.objectType = ObjectType::{{type.name.CamelCase()}};
                 cmd.objectId = obj->id;
 
-                obj->device->GetClient()->SerializeCommand(cmd);
-                obj->device->GetClient()->{{type.name.CamelCase()}}Allocator().Free(obj);
+                obj->client->SerializeCommand(cmd);
+                obj->client->{{type.name.CamelCase()}}Allocator().Free(obj);
             }
 
             void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {

@@ -15,7 +15,6 @@
 #include "dawn_wire/client/Fence.h"
 
 #include "dawn_wire/client/Client.h"
-#include "dawn_wire/client/Device.h"
 
 namespace dawn_wire { namespace client {
 
@@ -48,7 +47,7 @@ namespace dawn_wire { namespace client {
     void Fence::OnCompletion(uint64_t value,
                              WGPUFenceOnCompletionCallback callback,
                              void* userdata) {
-        if (device->GetClient()->IsDisconnected()) {
+        if (client->IsDisconnected()) {
             return callback(WGPUFenceCompletionStatus_DeviceLost, userdata);
         }
 
@@ -62,7 +61,7 @@ namespace dawn_wire { namespace client {
 
         mOnCompletionRequests[serial] = {callback, userdata};
 
-        this->device->GetClient()->SerializeCommand(cmd);
+        client->SerializeCommand(cmd);
     }
 
     void Fence::OnUpdateCompletedValueCallback(uint64_t value) {

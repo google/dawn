@@ -20,13 +20,13 @@
 namespace dawn_wire { namespace client {
 
     WGPUFence Queue::CreateFence(WGPUFenceDescriptor const* descriptor) {
-        auto* allocation = device->GetClient()->FenceAllocator().New(device);
+        auto* allocation = client->FenceAllocator().New(client);
 
         QueueCreateFenceCmd cmd;
         cmd.self = ToAPI(this);
         cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
         cmd.descriptor = descriptor;
-        device->GetClient()->SerializeCommand(cmd);
+        client->SerializeCommand(cmd);
 
         Fence* fence = allocation->object.get();
         fence->Initialize(this, descriptor);
@@ -46,7 +46,7 @@ namespace dawn_wire { namespace client {
         cmd.data = static_cast<const uint8_t*>(data);
         cmd.size = size;
 
-        device->GetClient()->SerializeCommand(cmd);
+        client->SerializeCommand(cmd);
     }
 
     void Queue::WriteTexture(const WGPUTextureCopyView* destination,
@@ -62,7 +62,7 @@ namespace dawn_wire { namespace client {
         cmd.dataLayout = dataLayout;
         cmd.writeSize = writeSize;
 
-        device->GetClient()->SerializeCommand(cmd);
+        client->SerializeCommand(cmd);
     }
 
 }}  // namespace dawn_wire::client

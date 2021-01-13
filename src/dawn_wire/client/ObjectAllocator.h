@@ -25,14 +25,8 @@
 
 namespace dawn_wire { namespace client {
 
-    class Client;
-    class Device;
-
     template <typename T>
     class ObjectAllocator {
-        using ObjectOwner =
-            typename std::conditional<std::is_same<T, Device>::value, Client, Device>::type;
-
       public:
         struct ObjectAndSerial {
             ObjectAndSerial(std::unique_ptr<T> object, uint32_t generation)
@@ -47,10 +41,11 @@ namespace dawn_wire { namespace client {
             mObjects.emplace_back(nullptr, 0);
         }
 
-        ObjectAndSerial* New(ObjectOwner* owner) {
+        template <typename Client>
+        ObjectAndSerial* New(Client* client) {
             uint32_t id = GetNewId();
-            auto object = std::make_unique<T>(owner, 1, id);
-            owner->TrackObject(object.get());
+            auto object = std::make_unique<T>(client, 1, id);
+            client->TrackObject(object.get());
 
             if (id >= mObjects.size()) {
                 ASSERT(id == mObjects.size());
@@ -109,7 +104,6 @@ namespace dawn_wire { namespace client {
         uint32_t mCurrentId = 1;
         std::vector<uint32_t> mFreeIds;
         std::vector<ObjectAndSerial> mObjects;
-        Device* mDevice;
     };
 }}  // namespace dawn_wire::client
 

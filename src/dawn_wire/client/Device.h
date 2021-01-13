@@ -34,7 +34,6 @@ namespace dawn_wire { namespace client {
         Device(Client* client, uint32_t refcount, uint32_t id);
         ~Device();
 
-        Client* GetClient();
         void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);
         void SetDeviceLostCallback(WGPUDeviceLostCallback errorCallback, void* errorUserdata);
         void InjectError(WGPUErrorType type, const char* message);
@@ -63,16 +62,9 @@ namespace dawn_wire { namespace client {
 
         WGPUQueue GetDefaultQueue();
 
-        template <typename T>
-        void TrackObject(T* object) {
-            mObjects[ObjectTypeToTypeEnum<T>::value].Append(object);
-        }
-
         void CancelCallbacksForDisconnect() override;
 
       private:
-        void DestroyAllObjects();
-
         struct ErrorScopeData {
             WGPUErrorCallback callback = nullptr;
             void* userdata = nullptr;
@@ -90,7 +82,6 @@ namespace dawn_wire { namespace client {
         std::map<uint64_t, CreateReadyPipelineRequest> mCreateReadyPipelineRequests;
         uint64_t mCreateReadyPipelineRequestSerial = 0;
 
-        Client* mClient = nullptr;
         WGPUErrorCallback mErrorCallback = nullptr;
         WGPUDeviceLostCallback mDeviceLostCallback = nullptr;
         bool mDidRunLostCallback = false;
@@ -98,8 +89,6 @@ namespace dawn_wire { namespace client {
         void* mDeviceLostUserdata = nullptr;
 
         Queue* mDefaultQueue = nullptr;
-
-        PerObjectType<LinkedList<ObjectBase>> mObjects;
     };
 
 }}  // namespace dawn_wire::client
