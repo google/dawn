@@ -85,10 +85,16 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                Affects AST dumping, and text-based output languages.
   -h                        -- This help text)";
 
+#if _MSC_VER
+#pragma warning(disable : 4068; suppress : 4100)
+#endif
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 Format parse_format(const std::string& fmt) {
 #pragma clang diagnostic pop
+#if _MSC_VER
+#pragma warning(default : 4068)
+#endif
 
 #if TINT_BUILD_SPV_WRITER
   if (fmt == "spirv")
@@ -128,10 +134,16 @@ bool ends_with(const std::string& input, const std::string& suffix) {
 
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
+#if _MSC_VER
+#pragma warning(disable : 4068; suppress : 4100)
+#endif
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 Format infer_format(const std::string& filename) {
 #pragma clang diagnostic pop
+#if _MSC_VER
+#pragma warning(default : 4068)
+#endif
 
 #if TINT_BUILD_SPV_WRITER
   if (ends_with(filename, ".spv")) {
@@ -260,12 +272,8 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 /// writes error messages to the standard error stream and returns false.
 /// Assumes the size of a `T` object is divisible by its required alignment.
 /// @returns true if we successfully read the file.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-template"
 template <typename T>
 bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
-#pragma clang diagnostic pop
-
   if (!buffer) {
     std::cerr << "The buffer pointer was null" << std::endl;
     return false;
