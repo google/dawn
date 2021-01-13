@@ -23,6 +23,7 @@ namespace dawn_wire { namespace server {
                    MemoryTransferService* memoryTransferService)
         : mSerializer(serializer),
           mProcs(procs),
+          mDeviceOnCreation(device),
           mMemoryTransferService(memoryTransferService),
           mIsAlive(std::make_shared<bool>(true)) {
         if (mMemoryTransferService == nullptr) {
@@ -33,6 +34,10 @@ namespace dawn_wire { namespace server {
         // The client-server knowledge is bootstrapped with device 1.
         auto* deviceData = DeviceObjects().Allocate(1);
         deviceData->handle = device;
+
+        // Take an extra ref. All objects may be freed by the client, but this
+        // one is externally owned.
+        mProcs.deviceReference(device);
 
         // Note: these callbacks are manually inlined here since they do not acquire and
         // free their userdata.
@@ -55,9 +60,8 @@ namespace dawn_wire { namespace server {
     Server::~Server() {
         // Un-set the error and lost callbacks since we cannot forward them
         // after the server has been destroyed.
-        WGPUDevice device = DeviceObjects().Get(1)->handle;
-        mProcs.deviceSetUncapturedErrorCallback(device, nullptr, nullptr);
-        mProcs.deviceSetDeviceLostCallback(device, nullptr, nullptr);
+        mProcs.deviceSetUncapturedErrorCallback(mDeviceOnCreation, nullptr, nullptr);
+        mProcs.deviceSetDeviceLostCallback(mDeviceOnCreation, nullptr, nullptr);
 
         DestroyAllObjects(mProcs);
     }

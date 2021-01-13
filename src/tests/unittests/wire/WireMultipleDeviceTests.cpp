@@ -58,6 +58,7 @@ class WireMultipleDeviceTests : public testing::Test {
             serverDesc.procs = &mockProcs;
             serverDesc.serializer = mS2cBuf.get();
 
+            EXPECT_CALL(mApi, DeviceReference(mServerDevice));
             mWireServer.reset(new WireServer(serverDesc));
             mC2sBuf->SetHandler(mWireServer.get());
 

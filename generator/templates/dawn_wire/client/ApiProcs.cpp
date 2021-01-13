@@ -207,41 +207,33 @@ namespace dawn_wire { namespace client {
             }
         {% endfor %}
 
-        {% if not type.name.canonical_case() == "device" %}
-            //* When an object's refcount reaches 0, notify the server side of it and delete it.
-            void Client{{as_MethodSuffix(type.name, Name("release"))}}({{cType}} cObj) {
-                {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
-                obj->refcount --;
+        //* When an object's refcount reaches 0, notify the server side of it and delete it.
+        void Client{{as_MethodSuffix(type.name, Name("release"))}}({{cType}} cObj) {
+            {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
+            obj->refcount --;
 
-                if (obj->refcount > 0) {
-                    return;
-                }
-
-                DestroyObjectCmd cmd;
-                cmd.objectType = ObjectType::{{type.name.CamelCase()}};
-                cmd.objectId = obj->id;
-
-                obj->client->SerializeCommand(cmd);
-                obj->client->{{type.name.CamelCase()}}Allocator().Free(obj);
+            if (obj->refcount > 0) {
+                return;
             }
 
-            void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {
-                {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
-                obj->refcount ++;
-            }
-        {% endif %}
+            DestroyObjectCmd cmd;
+            cmd.objectType = ObjectType::{{type.name.CamelCase()}};
+            cmd.objectId = obj->id;
+
+            obj->client->SerializeCommand(cmd);
+            obj->client->{{type.name.CamelCase()}}Allocator().Free(obj);
+        }
+
+        void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {
+            {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
+            obj->refcount ++;
+        }
     {% endfor %}
 
     namespace {
         WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
             UNREACHABLE();
             return nullptr;
-        }
-
-        void ClientDeviceReference(WGPUDevice) {
-        }
-
-        void ClientDeviceRelease(WGPUDevice) {
         }
 
         struct ProcEntry {

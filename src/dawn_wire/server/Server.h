@@ -208,6 +208,7 @@ namespace dawn_wire { namespace server {
         WireDeserializeAllocator mAllocator;
         ChunkedCommandSerializer mSerializer;
         DawnProcTable mProcs;
+        WGPUDevice mDeviceOnCreation;
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
         MemoryTransferService* mMemoryTransferService = nullptr;
 

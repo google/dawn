@@ -73,23 +73,18 @@ namespace dawn_wire { namespace server {
         switch(objectType) {
             {% for type in by_category["object"] %}
                 case ObjectType::{{type.name.CamelCase()}}: {
-                    {% if type.name.CamelCase() == "Device" %}
-                        //* Freeing the device has to be done out of band.
+                    auto* data = {{type.name.CamelCase()}}Objects().Get(objectId);
+                    if (data == nullptr) {
                         return false;
-                    {% else %}
-                        auto* data = {{type.name.CamelCase()}}Objects().Get(objectId);
-                        if (data == nullptr) {
-                            return false;
-                        }
-                        {% if type.name.CamelCase() in server_reverse_lookup_objects %}
-                            {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
-                        {% endif %}
-                        if (data->handle != nullptr) {
-                            mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
-                        }
-                        {{type.name.CamelCase()}}Objects().Free(objectId);
-                        return true;
+                    }
+                    {% if type.name.CamelCase() in server_reverse_lookup_objects %}
+                        {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
                     {% endif %}
+                    if (data->handle != nullptr) {
+                        mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
+                    }
+                    {{type.name.CamelCase()}}Objects().Free(objectId);
+                    return true;
                 }
             {% endfor %}
             default:

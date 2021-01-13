@@ -61,12 +61,6 @@ namespace dawn_wire { namespace client {
             ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.data());
             while (!objectList.empty()) {
                 ObjectBase* object = objectList.head()->value();
-                if (object == mDevice) {
-                    // Note: We don't send a DestroyObject command for the device
-                    // since freeing a device object is done out of band.
-                    DeviceAllocator().Free(mDevice);
-                    continue;
-                }
 
                 DestroyObjectCmd cmd;
                 cmd.objectType = objectType;

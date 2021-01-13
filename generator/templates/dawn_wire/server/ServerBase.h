@@ -32,7 +32,7 @@ namespace dawn_wire { namespace server {
       protected:
         void DestroyAllObjects(const DawnProcTable& procs) {
             //* Free all objects when the server is destroyed
-            {% for type in by_category["object"] if type.name.canonical_case() != "device" %}
+            {% for type in by_category["object"] %}
                 {
                     std::vector<{{as_cType(type.name)}}> handles = mKnown{{type.name.CamelCase()}}.AcquireAllHandles();
                     for ({{as_cType(type.name)}} handle : handles) {

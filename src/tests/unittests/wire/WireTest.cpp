@@ -55,6 +55,7 @@ void WireTest::SetUp() {
     serverDesc.serializer = mS2cBuf.get();
     serverDesc.memoryTransferService = GetServerMemoryTransferService();
 
+    EXPECT_CALL(api, DeviceReference(mockDevice));
     mWireServer.reset(new WireServer(serverDesc));
     mC2sBuf->SetHandler(mWireServer.get());
 
@@ -117,6 +118,7 @@ dawn_wire::WireClient* WireTest::GetWireClient() {
 
 void WireTest::DeleteServer() {
     EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
+    EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1);
 
     if (mWireServer) {
         // These are called on server destruction to clear the callbacks. They must not be
