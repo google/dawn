@@ -616,7 +616,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureCannotHaveDynamicOffsets) {
         bindGroupLayoutBinding.storageTextureFormat = wgpu::TextureFormat::R32Float;
 
         bindGroupLayoutBinding.hasDynamicOffset = true;
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}));
+        ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(
+            utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding})));
     }
 }
 

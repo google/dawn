@@ -158,12 +158,11 @@ namespace dawn_native {
                         "texture, or storageTexture are set");
                 }
             } else if (bindingMemberCount == 0) {
-                // TODO(dawn:527): Raising this warning breaks a ton of validation tests.
                 // Deprecated validation path
-                /*device->EmitDeprecationWarning(
+                device->EmitDeprecationWarning(
                     "The format of BindGroupLayoutEntry has changed, and will soon require the "
                     "buffer, sampler, texture, or storageTexture members be set rather than "
-                    "setting type, etc. on the entry directly.");*/
+                    "setting type, etc. on the entry directly.");
 
                 DAWN_TRY(ValidateBindingType(entry.type));
                 DAWN_TRY(ValidateTextureComponentType(entry.textureComponentType));

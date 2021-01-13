@@ -60,9 +60,8 @@ TEST_P(DeprecationTests, BindGroupLayoutEntryTypeConflict) {
     descriptor.entries = &binding;
 
     // Succeeds with only a type.
-    // Will soon emit a deprecation warning.
     binding.type = wgpu::BindingType::UniformBuffer;
-    device.CreateBindGroupLayout(&descriptor);
+    EXPECT_DEPRECATION_WARNING(device.CreateBindGroupLayout(&descriptor));
 
     binding.type = wgpu::BindingType::Undefined;
 
@@ -117,10 +116,12 @@ TEST_P(DeprecationTests, BindGroupLayoutEntryViewDimensionDefaulting) {
     bglDesc.entryCount = 1;
     bglDesc.entries = &binding;
 
+    wgpu::BindGroupLayout bgl;
+
     // Check that the default viewDimension is 2D.
     {
         binding.viewDimension = wgpu::TextureViewDimension::Undefined;
-        wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+        EXPECT_DEPRECATION_WARNING(bgl = device.CreateBindGroupLayout(&bglDesc));
 
         wgpu::TextureDescriptor desc;
         desc.usage = wgpu::TextureUsage::Sampled;
@@ -136,7 +137,7 @@ TEST_P(DeprecationTests, BindGroupLayoutEntryViewDimensionDefaulting) {
     // Check that setting a non-default viewDimension works.
     {
         binding.viewDimension = wgpu::TextureViewDimension::e2DArray;
-        wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+        EXPECT_DEPRECATION_WARNING(bgl = device.CreateBindGroupLayout(&bglDesc));
 
         wgpu::TextureDescriptor desc;
         desc.usage = wgpu::TextureUsage::Sampled;
