@@ -634,30 +634,30 @@ source_set("libtint_hlsl_writer_src") {
 }
 
 source_set("libtint") {
-  deps = [ ":libtint_core_src" ]
+  public_deps = [ ":libtint_core_src" ]
 
   if (tint_build_spv_reader) {
-    deps += [ ":libtint_spv_reader_src" ]
+    public_deps += [ ":libtint_spv_reader_src" ]
   }
 
   if (tint_build_spv_writer) {
-    deps += [ ":libtint_spv_writer_src" ]
+    public_deps += [ ":libtint_spv_writer_src" ]
   }
 
   if (tint_build_wgsl_reader) {
-    deps += [ ":libtint_wgsl_reader_src" ]
+    public_deps += [ ":libtint_wgsl_reader_src" ]
   }
 
   if (tint_build_wgsl_writer) {
-    deps += [ ":libtint_wgsl_writer_src" ]
+    public_deps += [ ":libtint_wgsl_writer_src" ]
   }
 
   if (tint_build_msl_writer) {
-    deps += [ ":libtint_msl_writer_src" ]
+    public_deps += [ ":libtint_msl_writer_src" ]
   }
 
   if (tint_build_hlsl_writer) {
-    deps += [ ":libtint_hlsl_writer_src" ]
+    public_deps += [ ":libtint_hlsl_writer_src" ]
   }
 
   configs += [ ":tint_common_config" ]
