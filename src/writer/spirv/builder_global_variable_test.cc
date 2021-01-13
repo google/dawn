@@ -539,6 +539,37 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 )");
 }
 
+// Check that multiple texture_storage types with different access modifiers
+// only produces a single OpTypeImage.
+TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
+  // var<uniform_constant> a : texture_storage_ro_2d<r32uint>;
+  // var<uniform_constant> b : texture_storage_wo_2d<r32uint>;
+
+  ast::type::StorageTexture st(ast::type::TextureDimension::k2d,
+                               ast::type::ImageFormat::kR32Uint);
+  ASSERT_TRUE(td.DetermineStorageTextureSubtype(&st)) << td.error();
+
+  ast::type::AccessControl type_a(ast::AccessControl::kReadOnly, &st);
+  auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &type_a);
+  EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
+
+  ast::type::AccessControl type_b(ast::AccessControl::kWriteOnly, &st);
+  auto* var_b = Var("b", ast::StorageClass::kUniformConstant, &type_b);
+  EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
+OpDecorate %5 NonReadable
+)");
+  // There must only be one OpTypeImage declaration with the same arguments
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+%3 = OpTypeImage %4 2D 0 0 0 2 R32ui
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%6 = OpTypePointer UniformConstant %3
+%5 = OpVariable %6 UniformConstant
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer
