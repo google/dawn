@@ -1772,11 +1772,11 @@ TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
 
 TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DShaderFS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d<f32>;
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
         [[stage(fragment)]] fn main() -> void {
         })";
     constexpr char kTexture2DShaderCS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d<f32>;
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
         [[stage(compute)]] fn main() -> void {
         })";
 
@@ -1809,11 +1809,11 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
                                       wgpu::TextureViewDimension::e2DArray}})}));
 
     constexpr char kTexture2DArrayShaderFS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d_array<f32>;
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
         [[stage(fragment)]] fn main() -> void {
         })";
     constexpr char kTexture2DArrayShaderCS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_sampled_2d_array<f32>;
+        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
         [[stage(compute)]] fn main() -> void {
         })";
 
