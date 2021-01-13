@@ -84,7 +84,7 @@ namespace dawn_native {
     // DeviceBase
 
     DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
-        : mAdapter(adapter) {
+        : mInstance(adapter->GetInstance()), mAdapter(adapter) {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
             ApplyExtensions(descriptor);
@@ -94,8 +94,7 @@ namespace dawn_native {
         SetDefaultToggles();
     }
 
-    DeviceBase::~DeviceBase() {
-    }
+    DeviceBase::~DeviceBase() = default;
 
     MaybeError DeviceBase::Initialize(QueueBase* defaultQueue) {
         mDefaultQueue = AcquireRef(defaultQueue);

@@ -287,6 +287,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/DepthStencilSamplingTests.cpp",
     "end2end/DepthStencilStateTests.cpp",
     "end2end/DestroyTests.cpp",
+    "end2end/DeviceInitializationTests.cpp",
     "end2end/DeviceLostTests.cpp",
     "end2end/DrawIndexedIndirectTests.cpp",
     "end2end/DrawIndexedTests.cpp",

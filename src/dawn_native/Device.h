@@ -364,6 +364,11 @@ namespace dawn_native {
         wgpu::DeviceLostCallback mDeviceLostCallback = nullptr;
         void* mDeviceLostUserdata = nullptr;
 
+        // The Device keeps a ref to the Instance so that any live Device keeps the Instance alive.
+        // The Instance shouldn't need to ref child objects so this shouldn't introduce ref cycles.
+        // The Device keeps a simple pointer to the Adapter because the Adapter is owned by the
+        // Instance.
+        Ref<InstanceBase> mInstance;
         AdapterBase* mAdapter = nullptr;
 
         Ref<ErrorScope> mRootErrorScope;
