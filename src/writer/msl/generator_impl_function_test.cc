@@ -119,6 +119,74 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 )");
 }
 
+TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_NoReturn_Void) {
+  auto* func = Func("main", ast::VariableList{}, ty.void_,
+                    ast::StatementList{/* no explicit return */},
+                    ast::FunctionDecorationList{create<ast::StageDecoration>(
+                        ast::PipelineStage::kFragment)});
+
+  mod->AddFunction(func);
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+fragment void main_tint_0() {
+  return;
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest,
+       Emit_FunctionDecoration_EntryPoint_NoReturn_InOut) {
+  auto* foo_var =
+      Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
+          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+
+  auto* bar_var =
+      Var("bar", ast::StorageClass::kOutput, ty.f32, nullptr,
+          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
+
+  td.RegisterVariableForTesting(foo_var);
+  td.RegisterVariableForTesting(bar_var);
+
+  mod->AddGlobalVariable(foo_var);
+  mod->AddGlobalVariable(bar_var);
+
+  auto* func =
+      Func("main", ast::VariableList{}, ty.void_,
+           ast::StatementList{
+               create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
+               /* no explicit return */},
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+
+  mod->AddFunction(func);
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+struct main_in {
+  float foo [[user(locn0)]];
+};
+
+struct main_out {
+  float bar [[color(1)]];
+};
+
+fragment main_out main_tint_0(main_in tint_in [[stage_in]]) {
+  main_out tint_out = {};
+  tint_out.bar = tint_in.foo;
+  return tint_out;
+}
+
+)");
+}
+
 TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   auto* foo_var =
       Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
@@ -811,6 +879,7 @@ TEST_F(MslGeneratorImplTest,
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 kernel void main_tint_0() {
+  return;
 }
 
 )");

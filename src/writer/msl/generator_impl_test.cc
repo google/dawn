@@ -59,6 +59,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 kernel void my_func() {
+  return;
 }
 
 )");
