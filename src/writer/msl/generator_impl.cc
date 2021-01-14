@@ -616,57 +616,71 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
                            ->UnwrapAll()
                            ->As<ast::type::Texture>();
 
-  if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
-    std::vector<const char*> dims;
-    switch (texture_type->dim()) {
-      case ast::type::TextureDimension::kNone:
-        error_ = "texture dimension is kNone";
-        return false;
-      case ast::type::TextureDimension::k1d:
-      case ast::type::TextureDimension::k1dArray:
-        dims = {"width"};
-        break;
-      case ast::type::TextureDimension::k2d:
-      case ast::type::TextureDimension::k2dArray:
-        dims = {"width", "height"};
-        break;
-      case ast::type::TextureDimension::k3d:
-        dims = {"width", "height", "depth"};
-        break;
-      case ast::type::TextureDimension::kCube:
-      case ast::type::TextureDimension::kCubeArray:
-        // width == height == depth for cubes
-        // See https://github.com/gpuweb/gpuweb/issues/1345
-        dims = {"width", "height", "height"};
-        break;
-    }
+  switch (ident->intrinsic()) {
+    case ast::Intrinsic::kTextureDimensions: {
+      std::vector<const char*> dims;
+      switch (texture_type->dim()) {
+        case ast::type::TextureDimension::kNone:
+          error_ = "texture dimension is kNone";
+          return false;
+        case ast::type::TextureDimension::k1d:
+        case ast::type::TextureDimension::k1dArray:
+          dims = {"width"};
+          break;
+        case ast::type::TextureDimension::k2d:
+        case ast::type::TextureDimension::k2dArray:
+          dims = {"width", "height"};
+          break;
+        case ast::type::TextureDimension::k3d:
+          dims = {"width", "height", "depth"};
+          break;
+        case ast::type::TextureDimension::kCube:
+        case ast::type::TextureDimension::kCubeArray:
+          // width == height == depth for cubes
+          // See https://github.com/gpuweb/gpuweb/issues/1345
+          dims = {"width", "height", "height"};
+          break;
+      }
 
-    auto get_dim = [&](const char* name) {
+      auto get_dim = [&](const char* name) {
+        if (!EmitExpression(params[pidx.texture])) {
+          return false;
+        }
+        out_ << ".get_" << name << "(";
+        if (pidx.level != kNotUsed) {
+          out_ << pidx.level;
+        }
+        out_ << ")";
+        return true;
+      };
+
+      if (dims.size() == 1) {
+        out_ << "int(";
+        get_dim(dims[0]);
+        out_ << ")";
+      } else {
+        EmitType(expr->result_type(), "");
+        out_ << "(";
+        for (size_t i = 0; i < dims.size(); i++) {
+          if (i > 0) {
+            out_ << ", ";
+          }
+          get_dim(dims[i]);
+        }
+        out_ << ")";
+      }
+      return true;
+    }
+    case ast::Intrinsic::kTextureNumLayers: {
+      out_ << "int(";
       if (!EmitExpression(params[pidx.texture])) {
         return false;
       }
-      out_ << ".get_" << name << "(";
-      if (pidx.level != kNotUsed) {
-        out_ << pidx.level;
-      }
-      out_ << ")";
+      out_ << ".get_array_size())";
       return true;
-    };
-
-    if (dims.size() == 1) {
-      get_dim(dims[0]);
-    } else {
-      EmitType(expr->result_type(), "");
-      out_ << "(";
-      for (size_t i = 0; i < dims.size(); i++) {
-        if (i > 0) {
-          out_ << ", ";
-        }
-        get_dim(dims[i]);
-      }
-      out_ << ")";
     }
-    return true;
+    default:
+      break;
   }
 
   if (!EmitExpression(params[pidx.texture]))

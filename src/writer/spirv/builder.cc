@@ -2073,6 +2073,49 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     return true;
   };
 
+  // Appends a result type and id to `spirv_params`, by first swizzling the
+  // result of the op with `swizzle`.
+  auto append_result_type_and_id_to_spirv_params_swizzled =
+      [&](uint32_t spirv_result_width, std::vector<uint32_t> swizzle) {
+        if (swizzle.empty()) {
+          append_result_type_and_id_to_spirv_params();
+        } else {
+          // Assign post_emission to swizzle the result of the call to
+          // OpImageQuerySize[Lod].
+          auto* element_type = ElementTypeOf(call->result_type());
+          auto spirv_result = result_op();
+          auto* spirv_result_type =
+              mod_->create<ast::type::Vector>(element_type, spirv_result_width);
+          if (swizzle.size() > 1) {
+            post_emission = [=] {
+              OperandList operands{
+                  result_type,
+                  result_id,
+                  spirv_result,
+                  spirv_result,
+              };
+              for (auto idx : swizzle) {
+                operands.emplace_back(Operand::Int(idx));
+              }
+              return push_function_inst(spv::Op::OpVectorShuffle, operands);
+            };
+          } else {
+            post_emission = [=] {
+              return push_function_inst(spv::Op::OpCompositeExtract,
+                                        {result_type, result_id, spirv_result,
+                                         Operand::Int(swizzle[0])});
+            };
+          }
+          auto spirv_result_type_id = GenerateTypeIfNeeded(spirv_result_type);
+          if (spirv_result_type_id == 0) {
+            return false;
+          }
+          spirv_params.emplace_back(Operand::Int(spirv_result_type_id));
+          spirv_params.emplace_back(spirv_result);
+        }
+        return true;
+      };
+
   auto append_coords_to_spirv_params = [&]() -> bool {
     if (pidx.array_index != kNotUsed) {
       // Array index needs to be appended to the coordinates.
@@ -2147,41 +2190,9 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
           break;
       }
 
-      if (swizzle.empty()) {
-        append_result_type_and_id_to_spirv_params();
-      } else {
-        // Assign post_emission to swizzle the result of the call to
-        // OpImageQuerySize[Lod].
-        auto* element_type = ElementTypeOf(call->result_type());
-        auto spirv_result = result_op();
-        auto* spirv_result_type =
-            mod_->create<ast::type::Vector>(element_type, spirv_dims);
-        if (swizzle.size() > 1) {
-          post_emission = [=] {
-            OperandList operands{
-                result_type,
-                result_id,
-                spirv_result,
-                spirv_result,
-            };
-            for (auto idx : swizzle) {
-              operands.emplace_back(Operand::Int(idx));
-            }
-            return push_function_inst(spv::Op::OpVectorShuffle, operands);
-          };
-        } else {
-          post_emission = [=] {
-            return push_function_inst(spv::Op::OpCompositeExtract,
-                                      {result_type, result_id, spirv_result,
-                                       Operand::Int(swizzle[0])});
-          };
-        }
-        auto spirv_result_type_id = GenerateTypeIfNeeded(spirv_result_type);
-        if (spirv_result_type_id == 0) {
-          return false;
-        }
-        spirv_params.emplace_back(Operand::Int(spirv_result_type_id));
-        spirv_params.emplace_back(spirv_result);
+      if (!append_result_type_and_id_to_spirv_params_swizzled(spirv_dims,
+                                                              swizzle)) {
+        return false;
       }
 
       spirv_params.emplace_back(gen_param(pidx.texture));
@@ -2191,6 +2202,41 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       } else if (pidx.level != kNotUsed) {
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(gen_param(pidx.level));
+      } else {
+        ast::SintLiteral i32_0(Source{}, mod_->create<ast::type::I32>(), 0);
+        op = spv::Op::OpImageQuerySizeLod;
+        spirv_params.emplace_back(
+            Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
+      }
+      break;
+    }
+    case ast::Intrinsic::kTextureNumLayers: {
+      uint32_t spirv_dims = 0;
+      switch (texture_type->dim()) {
+        default:
+          error_ = "texture is not arrayed";
+          return false;
+        case ast::type::TextureDimension::k1dArray:
+          spirv_dims = 2;
+          break;
+        case ast::type::TextureDimension::k2dArray:
+        case ast::type::TextureDimension::kCubeArray:
+          spirv_dims = 3;
+          break;
+      }
+
+      // OpImageQuerySize[Lod] packs the array count as the last element of the
+      // returned vector. Extract this.
+      if (!append_result_type_and_id_to_spirv_params_swizzled(
+              spirv_dims, {spirv_dims - 1})) {
+        return false;
+      }
+
+      spirv_params.emplace_back(gen_param(pidx.texture));
+
+      if (texture_type->Is<ast::type::MultisampledTexture>() ||
+          texture_type->Is<ast::type::StorageTexture>()) {
+        op = spv::Op::OpImageQuerySize;
       } else {
         ast::SintLiteral i32_0(Source{}, mod_->create<ast::type::I32>(), 0);
         op = spv::Op::OpImageQuerySizeLod;

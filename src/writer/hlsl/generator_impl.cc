@@ -695,49 +695,99 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto* texture_type =
       texture->result_type()->UnwrapAll()->As<ast::type::Texture>();
 
-  if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
-    // Declare a variable to hold the texture dimensions
-    auto dims = generate_name(kTempNamePrefix);
-    EmitType(pre, expr->result_type(), "");
-    pre << " " << dims << ";" << std::endl;
+  switch (ident->intrinsic()) {
+    case ast::Intrinsic::kTextureDimensions:
+    case ast::Intrinsic::kTextureNumLayers: {
+      // Declare a variable to hold the queried texture info
+      auto dims = generate_name(kTempNamePrefix);
 
-    // Now call GetDimensions() on the texture object, populating the dims
-    // variable.
-    std::stringstream tex_out;
-    if (!EmitExpression(pre, tex_out, texture)) {
-      return false;
-    }
-    pre << tex_out.str() << ".GetDimensions(";
-    if (pidx.level != kNotUsed) {
-      pre << pidx.level << ", ";
-    }
-    switch (texture_type->dim()) {
-      case ast::type::TextureDimension::kNone:
-        error_ = "texture dimension is kNone";
+      std::stringstream texture_name;
+      if (!EmitExpression(pre, texture_name, texture)) {
         return false;
-      case ast::type::TextureDimension::k1d:
-      case ast::type::TextureDimension::k1dArray:
-        pre << dims << ");";
-        break;
-      case ast::type::TextureDimension::k2d:
-      case ast::type::TextureDimension::k2dArray:
-        pre << dims << "[0], " << dims << "[1]);";
-        break;
-      case ast::type::TextureDimension::k3d:
-        pre << dims << "[0], " << dims << "[1], " << dims << "[2]);";
-        break;
-      case ast::type::TextureDimension::kCube:
-      case ast::type::TextureDimension::kCubeArray:
-        // width == height == depth for cubes
-        // See https://github.com/gpuweb/gpuweb/issues/1345
-        pre << dims << "[0], " << dims << "[1]);\n";
-        pre << dims << "[2] = " << dims << "[1];";  // dims[2] = dims[1]
-        break;
-    }
+      }
 
-    // The result of the textureDimensions() call is now the temporary variable.
-    out << dims;
-    return true;
+      auto get_dimensions = [&](std::initializer_list<const char*>&& suffixes) {
+        pre << texture_name.str() << ".GetDimensions(";
+        if (pidx.level != kNotUsed) {
+          pre << pidx.level << ", ";
+        }
+        bool first = true;
+        for (auto* suffix : suffixes) {
+          if (!first) {
+            pre << ", ";
+          }
+          first = false;
+          pre << dims << suffix;
+        }
+        pre << ");";
+      };
+
+      const char* dims_swizzle = "";
+      const char* num_els_swizzle = "";
+
+      std::stringstream ss;
+      switch (texture_type->dim()) {
+        case ast::type::TextureDimension::kNone:
+          error_ = "texture dimension is kNone";
+          return false;
+        case ast::type::TextureDimension::k1d:
+          pre << "int " << dims << ";\n";
+          get_dimensions({""});
+          break;
+        case ast::type::TextureDimension::k1dArray:
+          pre << "int2 " << dims << ";\n";
+          get_dimensions({".x", ".y"});
+          dims_swizzle = ".x";
+          num_els_swizzle = ".y";
+          break;
+        case ast::type::TextureDimension::k2d:
+          pre << "int2 " << dims << ";\n";
+          get_dimensions({".x", ".y"});
+          break;
+        case ast::type::TextureDimension::k2dArray:
+          pre << "int3 " << dims << ";\n";
+          get_dimensions({".x", ".y", ".z"});
+          dims_swizzle = ".xy";
+          num_els_swizzle = ".z";
+          break;
+        case ast::type::TextureDimension::k3d:
+          pre << "int3 " << dims << ";\n";
+          get_dimensions({".x", ".y", ".z"});
+          break;
+        case ast::type::TextureDimension::kCube:
+          // width == height == depth for cubes
+          // See https://github.com/gpuweb/gpuweb/issues/1345
+          pre << "int2 " << dims << ";\n";
+          get_dimensions({".x", ".y"});
+          dims_swizzle = ".xyy";  // [width, height, height]
+          break;
+        case ast::type::TextureDimension::kCubeArray:
+          // width == height == depth for cubes
+          // See https://github.com/gpuweb/gpuweb/issues/1345
+          pre << "int3 " << dims << ";\n";
+          get_dimensions({".x", ".y", ".z"});
+          dims_swizzle = ".xyy";  // [width, height, height]
+          num_els_swizzle = ".z";
+          break;
+      }
+
+      // The result of the textureDimensions() call is now in temporary
+      // variable. This may be packed with other data, so the final expression
+      // may require a swizzle.
+      switch (ident->intrinsic()) {
+        case ast::Intrinsic::kTextureDimensions:
+          out << dims << dims_swizzle;
+          return true;
+        case ast::Intrinsic::kTextureNumLayers:
+          out << dims << num_els_swizzle;
+          return true;
+        default:
+          error_ = "Unhandled intrinsic";
+          return false;
+      }
+    }
+    default:
+      break;
   }
 
   if (!EmitExpression(pre, out, texture))

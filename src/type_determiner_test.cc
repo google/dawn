@@ -1764,6 +1764,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"tanh", ast::Intrinsic::kTanh},
         IntrinsicData{"textureDimensions", ast::Intrinsic::kTextureDimensions},
         IntrinsicData{"textureLoad", ast::Intrinsic::kTextureLoad},
+        IntrinsicData{"textureNumLayers", ast::Intrinsic::kTextureNumLayers},
         IntrinsicData{"textureSample", ast::Intrinsic::kTextureSample},
         IntrinsicData{"textureSampleBias", ast::Intrinsic::kTextureSampleBias},
         IntrinsicData{"textureSampleCompare",
@@ -2928,6 +2929,15 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO3d:
       return R"(textureDimensions(texture))";
+    case ValidTextureOverload::kNumLayers1dArray:
+    case ValidTextureOverload::kNumLayers2dArray:
+    case ValidTextureOverload::kNumLayersCubeArray:
+    case ValidTextureOverload::kNumLayersMultisampled_2dArray:
+    case ValidTextureOverload::kNumLayersDepth2dArray:
+    case ValidTextureOverload::kNumLayersDepthCubeArray:
+    case ValidTextureOverload::kNumLayersStorageWO1dArray:
+    case ValidTextureOverload::kNumLayersStorageWO2dArray:
+      return R"(textureNumLayers(texture))";
     case ValidTextureOverload::kDimensions2dLevel:
     case ValidTextureOverload::kDimensions2dArrayLevel:
     case ValidTextureOverload::kDimensions3dLevel:
@@ -3181,6 +3191,8 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
                   ty.vec3<i32>()->type_name());
         break;
     }
+  } else if (std::string(param.function) == "textureNumLayers") {
+    EXPECT_EQ(call->result_type(), ty.i32);
   } else if (std::string(param.function) == "textureStore") {
     EXPECT_EQ(call->result_type(), ty.void_);
   } else {

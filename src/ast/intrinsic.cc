@@ -21,211 +21,220 @@ std::ostream& operator<<(std::ostream& out, Intrinsic i) {
   /// The emitted name matches the spelling in the WGSL spec.
   /// including case.
   switch (i) {
+    case Intrinsic::kNone:
+      return out;
     case Intrinsic::kAbs:
       out << "abs";
-      break;
+      return out;
     case Intrinsic::kAcos:
       out << "acos";
-      break;
+      return out;
     case Intrinsic::kAll:
       out << "all";
-      break;
+      return out;
     case Intrinsic::kAny:
       out << "any";
-      break;
+      return out;
     case Intrinsic::kArrayLength:
       out << "arrayLength";
-      break;
+      return out;
     case Intrinsic::kAsin:
       out << "asin";
-      break;
+      return out;
     case Intrinsic::kAtan:
       out << "atan";
-      break;
+      return out;
     case Intrinsic::kAtan2:
       out << "atan2";
-      break;
+      return out;
     case Intrinsic::kCeil:
       out << "ceil";
-      break;
+      return out;
     case Intrinsic::kClamp:
       out << "clamp";
-      break;
+      return out;
     case Intrinsic::kCos:
       out << "cos";
-      break;
+      return out;
     case Intrinsic::kCosh:
       out << "cosh";
-      break;
+      return out;
     case Intrinsic::kCountOneBits:
       out << "countOneBits";
-      break;
+      return out;
     case Intrinsic::kCross:
       out << "cross";
-      break;
+      return out;
     case Intrinsic::kDeterminant:
       out << "determinant";
-      break;
+      return out;
     case Intrinsic::kDistance:
       out << "distance";
-      break;
+      return out;
     case Intrinsic::kDot:
       out << "dot";
-      break;
+      return out;
     case Intrinsic::kDpdx:
       out << "dpdx";
-      break;
+      return out;
     case Intrinsic::kDpdxCoarse:
       out << "dpdxCoarse";
-      break;
+      return out;
     case Intrinsic::kDpdxFine:
       out << "dpdxFine";
-      break;
+      return out;
     case Intrinsic::kDpdy:
       out << "dpdy";
-      break;
+      return out;
     case Intrinsic::kDpdyCoarse:
       out << "dpdyCoarse";
-      break;
+      return out;
     case Intrinsic::kDpdyFine:
       out << "dpdyFine";
-      break;
+      return out;
     case Intrinsic::kExp:
       out << "exp";
-      break;
+      return out;
     case Intrinsic::kExp2:
       out << "exp2";
-      break;
+      return out;
     case Intrinsic::kFaceForward:
       out << "faceForward";
-      break;
+      return out;
     case Intrinsic::kFloor:
       out << "floor";
-      break;
+      return out;
     case Intrinsic::kFma:
       out << "fma";
-      break;
+      return out;
     case Intrinsic::kFract:
       out << "fract";
-      break;
+      return out;
     case Intrinsic::kFrexp:
       out << "frexp";
-      break;
+      return out;
     case Intrinsic::kFwidth:
       out << "fwidth";
-      break;
+      return out;
     case Intrinsic::kFwidthCoarse:
       out << "fwidthCoarse";
-      break;
+      return out;
     case Intrinsic::kFwidthFine:
       out << "fwidthFine";
-      break;
+      return out;
     case Intrinsic::kInverseSqrt:
       out << "inverseSqrt";
-      break;
+      return out;
     case Intrinsic::kIsFinite:
       out << "isFinite";
-      break;
+      return out;
     case Intrinsic::kIsInf:
       out << "isInf";
-      break;
+      return out;
     case Intrinsic::kIsNan:
       out << "isNan";
-      break;
+      return out;
     case Intrinsic::kIsNormal:
       out << "isNormal";
-      break;
+      return out;
     case Intrinsic::kLdexp:
       out << "ldexp";
-      break;
+      return out;
     case Intrinsic::kLength:
       out << "length";
-      break;
+      return out;
     case Intrinsic::kLog:
       out << "log";
-      break;
+      return out;
     case Intrinsic::kLog2:
       out << "log2";
-      break;
+      return out;
     case Intrinsic::kMax:
       out << "max";
-      break;
+      return out;
     case Intrinsic::kMin:
       out << "min";
-      break;
+      return out;
     case Intrinsic::kMix:
       out << "mix";
-      break;
+      return out;
     case Intrinsic::kModf:
       out << "modf";
-      break;
+      return out;
     case Intrinsic::kNormalize:
       out << "normalize";
-      break;
+      return out;
     case Intrinsic::kPow:
       out << "pow";
-      break;
+      return out;
     case Intrinsic::kReflect:
       out << "reflect";
-      break;
+      return out;
     case Intrinsic::kReverseBits:
       out << "reverseBits";
-      break;
+      return out;
     case Intrinsic::kRound:
       out << "round";
-      break;
+      return out;
     case Intrinsic::kSelect:
       out << "select";
-      break;
+      return out;
     case Intrinsic::kSign:
       out << "sign";
-      break;
+      return out;
     case Intrinsic::kSin:
       out << "sin";
-      break;
+      return out;
     case Intrinsic::kSinh:
       out << "sinh";
-      break;
+      return out;
     case Intrinsic::kSmoothStep:
       out << "smoothStep";
-      break;
+      return out;
     case Intrinsic::kSqrt:
       out << "sqrt";
-      break;
+      return out;
     case Intrinsic::kStep:
       out << "step";
-      break;
+      return out;
     case Intrinsic::kTan:
       out << "tan";
-      break;
+      return out;
     case Intrinsic::kTanh:
       out << "tanh";
-      break;
+      return out;
+    case Intrinsic::kTextureDimensions:
+      out << "textureDimensions";
+      return out;
     case Intrinsic::kTextureLoad:
       out << "textureLoad";
-      break;
+      return out;
+    case Intrinsic::kTextureNumLayers:
+      out << "textureNumLayers";
+      return out;
     case Intrinsic::kTextureSample:
       out << "textureSample";
-      break;
+      return out;
     case Intrinsic::kTextureSampleBias:
       out << "textureSampleBias";
-      break;
+      return out;
     case Intrinsic::kTextureSampleCompare:
       out << "textureSampleCompare";
-      break;
+      return out;
     case Intrinsic::kTextureSampleGrad:
       out << "textureSampleGrad";
-      break;
+      return out;
     case Intrinsic::kTextureSampleLevel:
       out << "textureSampleLevel";
-      break;
+      return out;
+    case Intrinsic::kTextureStore:
+      out << "textureStore";
+      return out;
     case Intrinsic::kTrunc:
       out << "trunc";
-      break;
-    default:
-      out << "Unknown";
-      break;
+      return out;
   }
+  out << "Unknown";
   return out;
 }
 
@@ -260,7 +269,7 @@ bool IsFloatClassificationIntrinsic(Intrinsic i) {
 
 bool IsTextureIntrinsic(Intrinsic i) {
   return i == Intrinsic::kTextureDimensions || i == Intrinsic::kTextureLoad ||
-         i == Intrinsic::kTextureSample ||
+         i == Intrinsic::kTextureNumLayers || i == Intrinsic::kTextureSample ||
          i == Intrinsic::kTextureSampleLevel ||
          i == Intrinsic::kTextureSampleBias ||
          i == Intrinsic::kTextureSampleCompare ||
@@ -268,7 +277,8 @@ bool IsTextureIntrinsic(Intrinsic i) {
 }
 
 bool IsImageQueryIntrinsic(Intrinsic i) {
-  return i == ast::Intrinsic::kTextureDimensions;
+  return i == ast::Intrinsic::kTextureDimensions ||
+         i == Intrinsic::kTextureNumLayers;
 }
 
 }  // namespace intrinsic

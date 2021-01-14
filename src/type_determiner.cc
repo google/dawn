@@ -566,6 +566,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           param.idx.level = param.count++;
         }
         break;
+      case ast::Intrinsic::kTextureNumLayers:
+        param.idx.texture = param.count++;
+        break;
       case ast::Intrinsic::kTextureLoad:
         param.idx.texture = param.count++;
         param.idx.coords = param.count++;
@@ -669,46 +672,54 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     // Set the function return type
     ast::type::Type* return_type = nullptr;
-    if (ident->intrinsic() == ast::Intrinsic::kTextureDimensions) {
-      auto* i32 = mod_->create<ast::type::I32>();
-      switch (texture->dim()) {
-        default:
-          set_error(expr->source(), "invalid texture dimensions");
-          break;
-        case ast::type::TextureDimension::k1d:
-        case ast::type::TextureDimension::k1dArray:
-          return_type = i32;
-          break;
-        case ast::type::TextureDimension::k2d:
-        case ast::type::TextureDimension::k2dArray:
-          return_type = mod_->create<ast::type::Vector>(i32, 2);
-          break;
-        case ast::type::TextureDimension::k3d:
-        case ast::type::TextureDimension::kCube:
-        case ast::type::TextureDimension::kCubeArray:
-          return_type = mod_->create<ast::type::Vector>(i32, 3);
-          break;
-      }
-    } else if (ident->intrinsic() == ast::Intrinsic::kTextureStore) {
-      return_type = mod_->create<ast::type::Void>();
-    } else {
-      if (texture->Is<ast::type::DepthTexture>()) {
-        return_type = mod_->create<ast::type::F32>();
-      } else {
-        ast::type::Type* type = nullptr;
-        if (auto* storage = texture->As<ast::type::StorageTexture>()) {
-          type = storage->type();
-        } else if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
-          type = sampled->type();
-        } else if (auto* msampled =
-                       texture->As<ast::type::MultisampledTexture>()) {
-          type = msampled->type();
-        } else {
-          set_error(expr->source(),
-                    "unknown texture type for texture sampling");
-          return false;
+    switch (ident->intrinsic()) {
+      case ast::Intrinsic::kTextureDimensions: {
+        auto* i32 = mod_->create<ast::type::I32>();
+        switch (texture->dim()) {
+          default:
+            set_error(expr->source(), "invalid texture dimensions");
+            break;
+          case ast::type::TextureDimension::k1d:
+          case ast::type::TextureDimension::k1dArray:
+            return_type = i32;
+            break;
+          case ast::type::TextureDimension::k2d:
+          case ast::type::TextureDimension::k2dArray:
+            return_type = mod_->create<ast::type::Vector>(i32, 2);
+            break;
+          case ast::type::TextureDimension::k3d:
+          case ast::type::TextureDimension::kCube:
+          case ast::type::TextureDimension::kCubeArray:
+            return_type = mod_->create<ast::type::Vector>(i32, 3);
+            break;
         }
-        return_type = mod_->create<ast::type::Vector>(type, 4);
+        break;
+      }
+      case ast::Intrinsic::kTextureNumLayers:
+        return_type = mod_->create<ast::type::I32>();
+        break;
+      case ast::Intrinsic::kTextureStore:
+        return_type = mod_->create<ast::type::Void>();
+        break;
+      default: {
+        if (texture->Is<ast::type::DepthTexture>()) {
+          return_type = mod_->create<ast::type::F32>();
+        } else {
+          ast::type::Type* type = nullptr;
+          if (auto* storage = texture->As<ast::type::StorageTexture>()) {
+            type = storage->type();
+          } else if (auto* sampled = texture->As<ast::type::SampledTexture>()) {
+            type = sampled->type();
+          } else if (auto* msampled =
+                         texture->As<ast::type::MultisampledTexture>()) {
+            type = msampled->type();
+          } else {
+            set_error(expr->source(),
+                      "unknown texture type for texture sampling");
+            return false;
+          }
+          return_type = mod_->create<ast::type::Vector>(type, 4);
+        }
       }
     }
     expr->func()->set_result_type(return_type);
@@ -1021,6 +1032,8 @@ bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
     ident->set_intrinsic(ast::Intrinsic::kTanh);
   } else if (name == "textureDimensions") {
     ident->set_intrinsic(ast::Intrinsic::kTextureDimensions);
+  } else if (name == "textureNumLayers") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureNumLayers);
   } else if (name == "textureLoad") {
     ident->set_intrinsic(ast::Intrinsic::kTextureLoad);
   } else if (name == "textureStore") {
