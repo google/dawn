@@ -434,6 +434,23 @@ TEST_F(BindGroupValidationTest, BufferUsageReadonlySSBO) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 256}}));
 }
 
+// Check that a resolve buffer with internal storge usage cannot be used as SSBO
+// TODO(hao.x.li@intel.com): Disable until internal storage usage is implemented
+TEST_F(BindGroupValidationTest, DISABLED_BufferUsageQueryResolve) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
+
+    // Control case: using a buffer with the storage usage works
+    utils::MakeBindGroup(device, layout, {{0, mSSBO, 0, 256}});
+
+    // Using a resolve buffer with the internal storage usage fails
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 1024;
+    descriptor.usage = wgpu::BufferUsage::QueryResolve;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256}}));
+}
+
 // Tests constraints on the buffer offset for bind groups.
 TEST_F(BindGroupValidationTest, BufferOffsetAlignment) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(

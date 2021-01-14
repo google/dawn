@@ -1206,6 +1206,10 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // Skip if timestamp extension is not supported on device
     DAWN_SKIP_TEST_IF(!SupportsExtensions({"timestamp_query"}));
 
+    // TODO(crbug.com/tint/255, crbug.com/tint/256, crbug.com/tint/400, crbug.com/tint/417):
+    // Skip use_tint_generator due to runtime array not supported in WGSL
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr uint64_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =
         wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopyDst;
