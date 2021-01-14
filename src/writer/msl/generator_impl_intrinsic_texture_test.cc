@@ -80,6 +80,16 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kNumLayersStorageWO1dArray:
     case ValidTextureOverload::kNumLayersStorageWO2dArray:
       return R"(int(texture_tint_0.get_array_size()))";
+    case ValidTextureOverload::kNumLevels2d:
+    case ValidTextureOverload::kNumLevels2dArray:
+    case ValidTextureOverload::kNumLevels3d:
+    case ValidTextureOverload::kNumLevelsCube:
+    case ValidTextureOverload::kNumLevelsCubeArray:
+    case ValidTextureOverload::kNumLevelsDepth2d:
+    case ValidTextureOverload::kNumLevelsDepth2dArray:
+    case ValidTextureOverload::kNumLevelsDepthCube:
+    case ValidTextureOverload::kNumLevelsDepthCubeArray:
+      return R"(int(texture_tint_0.get_num_mip_levels()))";
     case ValidTextureOverload::kSample1dF32:
       return R"(texture_tint_0.sample(sampler_tint_0, 1.0f))";
     case ValidTextureOverload::kSample1dArrayF32:

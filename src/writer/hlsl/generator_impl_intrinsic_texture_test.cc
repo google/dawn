@@ -157,6 +157,27 @@ ExpectedResult expected_texture_overload(
           "GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);",
           "_tint_tmp.z",
       };
+    case ValidTextureOverload::kNumLevels2d:
+    case ValidTextureOverload::kNumLevelsCube:
+    case ValidTextureOverload::kNumLevelsDepth2d:
+    case ValidTextureOverload::kNumLevelsDepthCube:
+      return {
+          "int3 _tint_tmp;\n"
+          "texture_tint_0."
+          "GetDimensions(0, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z);",
+          "_tint_tmp.z",
+      };
+    case ValidTextureOverload::kNumLevels2dArray:
+    case ValidTextureOverload::kNumLevels3d:
+    case ValidTextureOverload::kNumLevelsCubeArray:
+    case ValidTextureOverload::kNumLevelsDepth2dArray:
+    case ValidTextureOverload::kNumLevelsDepthCubeArray:
+      return {
+          "int4 _tint_tmp;\n"
+          "texture_tint_0.GetDimensions(0, "
+          "_tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);",
+          "_tint_tmp.w",
+      };
     case ValidTextureOverload::kSample1dF32:
       return R"(texture_tint_0.Sample(sampler_tint_0, 1.0f))";
     case ValidTextureOverload::kSample1dArrayF32:

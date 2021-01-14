@@ -86,6 +86,7 @@ enum class Intrinsic {
   kTextureDimensions,
   kTextureLoad,
   kTextureNumLayers,
+  kTextureNumLevels,
   kTextureSample,
   kTextureSampleBias,
   kTextureSampleCompare,

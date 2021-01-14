@@ -212,6 +212,9 @@ std::ostream& operator<<(std::ostream& out, Intrinsic i) {
     case Intrinsic::kTextureNumLayers:
       out << "textureNumLayers";
       return out;
+    case Intrinsic::kTextureNumLevels:
+      out << "textureNumLevels";
+      return out;
     case Intrinsic::kTextureSample:
       out << "textureSample";
       return out;
@@ -268,8 +271,8 @@ bool IsFloatClassificationIntrinsic(Intrinsic i) {
 }
 
 bool IsTextureIntrinsic(Intrinsic i) {
-  return i == Intrinsic::kTextureDimensions || i == Intrinsic::kTextureLoad ||
-         i == Intrinsic::kTextureNumLayers || i == Intrinsic::kTextureSample ||
+  return IsImageQueryIntrinsic(i) || i == Intrinsic::kTextureLoad ||
+         i == Intrinsic::kTextureSample ||
          i == Intrinsic::kTextureSampleLevel ||
          i == Intrinsic::kTextureSampleBias ||
          i == Intrinsic::kTextureSampleCompare ||
@@ -278,7 +281,7 @@ bool IsTextureIntrinsic(Intrinsic i) {
 
 bool IsImageQueryIntrinsic(Intrinsic i) {
   return i == ast::Intrinsic::kTextureDimensions ||
-         i == Intrinsic::kTextureNumLayers;
+         i == Intrinsic::kTextureNumLayers || i == Intrinsic::kTextureNumLevels;
 }
 
 }  // namespace intrinsic

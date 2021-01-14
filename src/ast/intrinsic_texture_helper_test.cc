@@ -543,7 +543,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kNumLayers1dArray,
-          "textureNumLayers(t : texture_1d_array<T>) -> i32",
+          "textureNumLayers(t : texture_1d_array<f32>) -> i32",
           TextureKind::kRegular,
           type::SamplerKind::kSampler,
           type::TextureDimension::k1dArray,
@@ -553,7 +553,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kNumLayers2dArray,
-          "textureNumLayers(t : texture_2d_array<T>) -> i32",
+          "textureNumLayers(t : texture_2d_array<f32>) -> i32",
           TextureKind::kRegular,
           type::SamplerKind::kSampler,
           type::TextureDimension::k2dArray,
@@ -563,7 +563,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kNumLayersCubeArray,
-          "textureNumLayers(t : texture_cube_array<T>) -> i32",
+          "textureNumLayers(t : texture_cube_array<f32>) -> i32",
           TextureKind::kRegular,
           type::SamplerKind::kSampler,
           type::TextureDimension::kCubeArray,
@@ -573,7 +573,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kNumLayersMultisampled_2dArray,
-          "textureNumLayers(t : texture_multisampled_2d_array<T>) -> i32",
+          "textureNumLayers(t : texture_multisampled_2d_array<f32>) -> i32",
           TextureKind::kMultisampled,
           type::SamplerKind::kSampler,
           type::TextureDimension::k2dArray,
@@ -603,7 +603,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kNumLayersStorageWO1dArray,
-          "textureNumLayers(t : texture_storage_1d_array<F>) -> i32",
+          "textureNumLayers(t : texture_storage_1d_array<rgba32float>) -> i32",
           ast::AccessControl::kWriteOnly,
           ast::type::ImageFormat::kRgba32Float,
           type::TextureDimension::k1dArray,
@@ -613,12 +613,102 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kNumLayersStorageWO2dArray,
-          "textureNumLayers(t : texture_storage_2d_array<F>) -> i32",
+          "textureNumLayers(t : texture_storage_2d_array<rgba32float>) -> i32",
           ast::AccessControl::kWriteOnly,
           ast::type::ImageFormat::kRgba32Float,
           type::TextureDimension::k2dArray,
           TextureDataType::kF32,
           "textureNumLayers",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevels2d,
+          "textureNumLevels(t : texture_2d<f32>) -> i32",
+          TextureKind::kRegular,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevels2dArray,
+          "textureNumLevels(t : texture_2d_array<f32>) -> i32",
+          TextureKind::kRegular,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevels3d,
+          "textureNumLevels(t : texture_3d<f32>) -> i32",
+          TextureKind::kRegular,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::k3d,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevelsCube,
+          "textureNumLevels(t : texture_cube<f32>) -> i32",
+          TextureKind::kRegular,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::kCube,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevelsCubeArray,
+          "textureNumLevels(t : texture_cube_array<f32>) -> i32",
+          TextureKind::kRegular,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::kCubeArray,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevelsDepth2d,
+          "textureNumLevels(t : texture_depth_2d) -> i32",
+          TextureKind::kDepth,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevelsDepth2dArray,
+          "textureNumLevels(t : texture_depth_2d_array) -> i32",
+          TextureKind::kDepth,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::k2dArray,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevelsDepthCube,
+          "textureNumLevels(t : texture_depth_cube) -> i32",
+          TextureKind::kDepth,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::kCube,
+          TextureDataType::kF32,
+          "textureNumLevels",
+          [](Builder* b) { return b->ExprList("texture"); },
+      },
+      {
+          ValidTextureOverload::kNumLevelsDepthCubeArray,
+          "textureNumLevels(t : texture_depth_cube_array) -> i32",
+          TextureKind::kDepth,
+          type::SamplerKind::kSampler,
+          type::TextureDimension::kCubeArray,
+          TextureDataType::kF32,
+          "textureNumLevels",
           [](Builder* b) { return b->ExprList("texture"); },
       },
       {
@@ -2413,7 +2503,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kStoreWO1dRgba32float,
-          "textureStore(t      : texture_storage_1d<F>,\n"
+          "textureStore(t      : texture_storage_1d<rgba32float>,\n"
           "             coords : i32,\n"
           "             value  : vec4<T>) -> void",
           ast::AccessControl::kWriteOnly,
@@ -2429,7 +2519,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kStoreWO1dArrayRgba32float,
-          "textureStore(t           : texture_storage_1d_array<F>,\n"
+          "textureStore(t           : texture_storage_1d_array<rgba32float>,\n"
           "             coords      : i32,\n"
           "             array_index : i32,\n"
           "             value       : vec4<T>) -> void",
@@ -2447,7 +2537,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kStoreWO2dRgba32float,
-          "textureStore(t      : texture_storage_2d<F>,\n"
+          "textureStore(t      : texture_storage_2d<rgba32float>,\n"
           "             coords : vec2<i32>,\n"
           "             value  : vec4<T>) -> void",
           ast::AccessControl::kWriteOnly,
@@ -2463,7 +2553,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kStoreWO2dArrayRgba32float,
-          "textureStore(t           : texture_storage_2d_array<F>,\n"
+          "textureStore(t           : texture_storage_2d_array<rgba32float>,\n"
           "             coords      : vec2<i32>,\n"
           "             array_index : i32,\n"
           "             value       : vec4<T>) -> void",
@@ -2481,7 +2571,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kStoreWO3dRgba32float,
-          "textureStore(t      : texture_storage_3d<F>,\n"
+          "textureStore(t      : texture_storage_3d<rgba32float>,\n"
           "             coords : vec3<i32>,\n"
           "             value  : vec4<T>) -> void",
           ast::AccessControl::kWriteOnly,

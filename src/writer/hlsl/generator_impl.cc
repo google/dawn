@@ -697,7 +697,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureDimensions:
-    case ast::Intrinsic::kTextureNumLayers: {
+    case ast::Intrinsic::kTextureNumLayers:
+    case ast::Intrinsic::kTextureNumLevels: {
       // Declare a variable to hold the queried texture info
       auto dims = generate_name(kTempNamePrefix);
 
@@ -706,85 +707,120 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         return false;
       }
 
-      auto get_dimensions = [&](std::initializer_list<const char*>&& suffixes) {
-        pre << texture_name.str() << ".GetDimensions(";
-        if (pidx.level != kNotUsed) {
-          pre << pidx.level << ", ";
-        }
-        bool first = true;
-        for (auto* suffix : suffixes) {
-          if (!first) {
-            pre << ", ";
-          }
-          first = false;
-          pre << dims << suffix;
-        }
-        pre << ");";
-      };
+      int num_dimensions = 0;
+      const char* swizzle = "";
+      bool add_mip_level_in = false;
 
-      const char* dims_swizzle = "";
-      const char* num_els_swizzle = "";
-
-      std::stringstream ss;
-      switch (texture_type->dim()) {
-        case ast::type::TextureDimension::kNone:
-          error_ = "texture dimension is kNone";
-          return false;
-        case ast::type::TextureDimension::k1d:
-          pre << "int " << dims << ";\n";
-          get_dimensions({""});
-          break;
-        case ast::type::TextureDimension::k1dArray:
-          pre << "int2 " << dims << ";\n";
-          get_dimensions({".x", ".y"});
-          dims_swizzle = ".x";
-          num_els_swizzle = ".y";
-          break;
-        case ast::type::TextureDimension::k2d:
-          pre << "int2 " << dims << ";\n";
-          get_dimensions({".x", ".y"});
-          break;
-        case ast::type::TextureDimension::k2dArray:
-          pre << "int3 " << dims << ";\n";
-          get_dimensions({".x", ".y", ".z"});
-          dims_swizzle = ".xy";
-          num_els_swizzle = ".z";
-          break;
-        case ast::type::TextureDimension::k3d:
-          pre << "int3 " << dims << ";\n";
-          get_dimensions({".x", ".y", ".z"});
-          break;
-        case ast::type::TextureDimension::kCube:
-          // width == height == depth for cubes
-          // See https://github.com/gpuweb/gpuweb/issues/1345
-          pre << "int2 " << dims << ";\n";
-          get_dimensions({".x", ".y"});
-          dims_swizzle = ".xyy";  // [width, height, height]
-          break;
-        case ast::type::TextureDimension::kCubeArray:
-          // width == height == depth for cubes
-          // See https://github.com/gpuweb/gpuweb/issues/1345
-          pre << "int3 " << dims << ";\n";
-          get_dimensions({".x", ".y", ".z"});
-          dims_swizzle = ".xyy";  // [width, height, height]
-          num_els_swizzle = ".z";
-          break;
-      }
-
-      // The result of the textureDimensions() call is now in temporary
-      // variable. This may be packed with other data, so the final expression
-      // may require a swizzle.
       switch (ident->intrinsic()) {
         case ast::Intrinsic::kTextureDimensions:
-          out << dims << dims_swizzle;
-          return true;
+          switch (texture_type->dim()) {
+            case ast::type::TextureDimension::kNone:
+              error_ = "texture dimension is kNone";
+              return false;
+            case ast::type::TextureDimension::k1d:
+              num_dimensions = 1;
+              break;
+            case ast::type::TextureDimension::k1dArray:
+              num_dimensions = 2;
+              swizzle = ".x";
+              break;
+            case ast::type::TextureDimension::k2d:
+              num_dimensions = 2;
+              break;
+            case ast::type::TextureDimension::k2dArray:
+              num_dimensions = 3;
+              swizzle = ".xy";
+              break;
+            case ast::type::TextureDimension::k3d:
+              num_dimensions = 3;
+              break;
+            case ast::type::TextureDimension::kCube:
+              // width == height == depth for cubes
+              // See https://github.com/gpuweb/gpuweb/issues/1345
+              num_dimensions = 2;
+              swizzle = ".xyy";  // [width, height, height]
+              break;
+            case ast::type::TextureDimension::kCubeArray:
+              // width == height == depth for cubes
+              // See https://github.com/gpuweb/gpuweb/issues/1345
+              num_dimensions = 3;
+              swizzle = ".xyy";  // [width, height, height]
+              break;
+          }
+          break;
         case ast::Intrinsic::kTextureNumLayers:
-          out << dims << num_els_swizzle;
-          return true;
+          switch (texture_type->dim()) {
+            default:
+              error_ = "texture dimension is not arrayed";
+              return false;
+            case ast::type::TextureDimension::k1dArray:
+              num_dimensions = 2;
+              swizzle = ".y";
+              break;
+            case ast::type::TextureDimension::k2dArray:
+            case ast::type::TextureDimension::kCubeArray:
+              num_dimensions = 3;
+              swizzle = ".z";
+              break;
+          }
+          break;
+        case ast::Intrinsic::kTextureNumLevels:
+          add_mip_level_in = true;
+          switch (texture_type->dim()) {
+            default:
+              error_ = "texture dimension does not support mips";
+              return false;
+            case ast::type::TextureDimension::k2d:
+            case ast::type::TextureDimension::kCube:
+              num_dimensions = 3;
+              swizzle = ".z";
+              break;
+            case ast::type::TextureDimension::k2dArray:
+            case ast::type::TextureDimension::k3d:
+            case ast::type::TextureDimension::kCubeArray:
+              num_dimensions = 4;
+              swizzle = ".w";
+              break;
+          }
+          break;
         default:
-          error_ = "Unhandled intrinsic";
+          error_ = "unexpected intrinsic";
           return false;
       }
+
+      if (num_dimensions == 1) {
+        pre << "int " << dims << ";\n";
+      } else {
+        pre << "int" << num_dimensions << " " << dims << ";\n";
+      }
+
+      pre << texture_name.str() << ".GetDimensions(";
+      if (pidx.level != kNotUsed) {
+        pre << pidx.level << ", ";
+      } else if (add_mip_level_in) {
+        pre << "0, ";
+      }
+
+      if (num_dimensions == 1) {
+        pre << dims;
+      } else {
+        assert(num_dimensions > 0);
+        assert(num_dimensions <= 4);
+        static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
+        for (int i = 0; i < num_dimensions; i++) {
+          if (i > 0) {
+            pre << ", ";
+          }
+          pre << dims << "." << xyzw[i];
+        }
+      }
+      pre << ");";
+
+      // The out parameters of the GetDimensions() call is now in temporary
+      // `dims` variable. This may be packed with other data, so the final
+      // expression may require a swizzle.
+      out << dims << swizzle;
+      return true;
     }
     default:
       break;
