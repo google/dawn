@@ -63,6 +63,7 @@ namespace dawn_wire { namespace client {
         auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(wireClient);
         Buffer* buffer = bufferObjectAndSerial->object.get();
         buffer->mDevice = device;
+        buffer->mDeviceIsAlive = device->GetAliveWeakPtr();
         buffer->mSize = descriptor->size;
 
         DeviceCreateBufferCmd cmd;
@@ -92,6 +93,7 @@ namespace dawn_wire { namespace client {
     WGPUBuffer Buffer::CreateError(Device* device) {
         auto* allocation = device->client->BufferAllocator().New(device->client);
         allocation->object->mDevice = device;
+        allocation->object->mDeviceIsAlive = device->GetAliveWeakPtr();
 
         DeviceCreateErrorBufferCmd cmd;
         cmd.self = ToAPI(device);
@@ -140,8 +142,10 @@ namespace dawn_wire { namespace client {
 
         // Step 1. Do early validation of READ ^ WRITE because the server rejects mode = 0.
         if (!(isReadMode ^ isWriteMode)) {
-            mDevice->InjectError(WGPUErrorType_Validation,
-                                 "MapAsync mode must be exactly one of Read or Write");
+            if (!mDeviceIsAlive.expired()) {
+                mDevice->InjectError(WGPUErrorType_Validation,
+                                     "MapAsync mode must be exactly one of Read or Write");
+            }
             if (callback != nullptr) {
                 callback(WGPUBufferMapAsyncStatus_Error, userdata);
             }
@@ -163,7 +167,10 @@ namespace dawn_wire { namespace client {
         if (isReadMode) {
             request.readHandle.reset(client->GetMemoryTransferService()->CreateReadHandle(size));
             if (request.readHandle == nullptr) {
-                mDevice->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+                if (!mDeviceIsAlive.expired()) {
+                    mDevice->InjectError(WGPUErrorType_OutOfMemory,
+                                         "Failed to create buffer mapping");
+                }
                 callback(WGPUBufferMapAsyncStatus_Error, userdata);
                 return;
             }
@@ -171,7 +178,10 @@ namespace dawn_wire { namespace client {
             ASSERT(isWriteMode);
             request.writeHandle.reset(client->GetMemoryTransferService()->CreateWriteHandle(size));
             if (request.writeHandle == nullptr) {
-                mDevice->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+                if (!mDeviceIsAlive.expired()) {
+                    mDevice->InjectError(WGPUErrorType_OutOfMemory,
+                                         "Failed to create buffer mapping");
+                }
                 callback(WGPUBufferMapAsyncStatus_Error, userdata);
                 return;
             }

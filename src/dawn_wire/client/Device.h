@@ -64,6 +64,8 @@ namespace dawn_wire { namespace client {
 
         void CancelCallbacksForDisconnect() override;
 
+        std::weak_ptr<bool> GetAliveWeakPtr();
+
       private:
         struct ErrorScopeData {
             WGPUErrorCallback callback = nullptr;
@@ -89,6 +91,8 @@ namespace dawn_wire { namespace client {
         void* mDeviceLostUserdata = nullptr;
 
         Queue* mDefaultQueue = nullptr;
+
+        std::shared_ptr<bool> mIsAlive;
     };
 
 }}  // namespace dawn_wire::client

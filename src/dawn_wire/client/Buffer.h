@@ -89,6 +89,8 @@ namespace dawn_wire { namespace client {
         void* mMappedData = nullptr;
         size_t mMapOffset = 0;
         size_t mMapSize = 0;
+
+        std::weak_ptr<bool> mDeviceIsAlive;
     };
 
 }}  // namespace dawn_wire::client

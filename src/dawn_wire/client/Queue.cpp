@@ -29,7 +29,7 @@ namespace dawn_wire { namespace client {
         client->SerializeCommand(cmd);
 
         Fence* fence = allocation->object.get();
-        fence->Initialize(this, descriptor);
+        fence->Initialize(descriptor);
         return ToAPI(fence);
     }
 

@@ -23,7 +23,7 @@
 namespace dawn_wire { namespace client {
 
     Device::Device(Client* clientIn, uint32_t initialRefcount, uint32_t initialId)
-        : ObjectBase(clientIn, initialRefcount, initialId) {
+        : ObjectBase(clientIn, initialRefcount, initialId), mIsAlive(std::make_shared<bool>()) {
 #if defined(DAWN_ENABLE_ASSERTS)
         mErrorCallback = [](WGPUErrorType, char const*, void*) {
             static bool calledOnce = false;
@@ -112,6 +112,10 @@ namespace dawn_wire { namespace client {
             it.second.callback(WGPUErrorType_DeviceLost, "Device lost", it.second.userdata);
         }
         mErrorScopes.clear();
+    }
+
+    std::weak_ptr<bool> Device::GetAliveWeakPtr() {
+        return mIsAlive;
     }
 
     void Device::SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata) {

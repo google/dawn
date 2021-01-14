@@ -27,7 +27,7 @@ namespace dawn_wire { namespace client {
       public:
         using ObjectBase::ObjectBase;
         ~Fence();
-        void Initialize(Queue* queue, const WGPUFenceDescriptor* descriptor);
+        void Initialize(const WGPUFenceDescriptor* descriptor);
 
         void CheckPassedFences();
         void OnCompletion(uint64_t value, WGPUFenceOnCompletionCallback callback, void* userdata);
@@ -35,7 +35,6 @@ namespace dawn_wire { namespace client {
         bool OnCompletionCallback(uint64_t requestSerial, WGPUFenceCompletionStatus status);
 
         uint64_t GetCompletedValue() const;
-        Queue* GetQueue() const;
 
       private:
         void CancelCallbacksForDisconnect() override;
@@ -44,7 +43,6 @@ namespace dawn_wire { namespace client {
             WGPUFenceOnCompletionCallback callback = nullptr;
             void* userdata = nullptr;
         };
-        Queue* mQueue = nullptr;
         uint64_t mCompletedValue = 0;
         uint64_t mOnCompletionRequestSerial = 0;
         std::map<uint64_t, OnCompletionData> mOnCompletionRequests;

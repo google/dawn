@@ -38,9 +38,7 @@ namespace dawn_wire { namespace client {
         mOnCompletionRequests.clear();
     }
 
-    void Fence::Initialize(Queue* queue, const WGPUFenceDescriptor* descriptor) {
-        mQueue = queue;
-
+    void Fence::Initialize(const WGPUFenceDescriptor* descriptor) {
         mCompletedValue = descriptor != nullptr ? descriptor->initialValue : 0u;
     }
 
@@ -85,10 +83,6 @@ namespace dawn_wire { namespace client {
 
     uint64_t Fence::GetCompletedValue() const {
         return mCompletedValue;
-    }
-
-    Queue* Fence::GetQueue() const {
-        return mQueue;
     }
 
 }}  // namespace dawn_wire::client
