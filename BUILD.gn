@@ -222,6 +222,21 @@ tint_language_header("cldebuginfo100") {
 # use the build flags to control what is included, instead of trying to specify
 # the subsets that they want.
 
+source_set("tint_core_demangler") {
+  sources = [
+    "src/demangler.cc",
+    "src/demangler.h",
+  ]
+
+  configs += [ ":tint_common_config" ]
+  public_configs = [ ":tint_public_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
 source_set("libtint_core_src") {
   sources = [
     "src/ast/access_control.cc",
@@ -397,8 +412,6 @@ source_set("libtint_core_src") {
     "src/ast/workgroup_decoration.h",
     "src/castable.cc",
     "src/castable.h",
-    "src/demangler.cc",
-    "src/demangler.h",
     "src/diagnostic/diagnostic.cc",
     "src/diagnostic/diagnostic.h",
     "src/diagnostic/formatter.cc",
@@ -461,6 +474,8 @@ source_set("libtint_core_src") {
   } else {
     sources += [ "src/diagnostic/printer_other.cc" ]
   }
+
+  deps = [ ":tint_core_demangler" ]
 
   public_deps = [
     ":tint_core_enums_unified1",
@@ -1425,7 +1440,10 @@ if (build_with_chromium) {
   if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
     fuzzer_test("tint_ast_clone_fuzzer") {
       sources = [ "fuzzers/tint_ast_clone_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common" ]
+      deps = [
+        ":tint_fuzzer_common",
+        ":tint_core_demangler",
+      ]
     }
   }
 }
