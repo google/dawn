@@ -1554,7 +1554,7 @@ namespace {
                 })");
 
             wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-                [[set(0), binding(0)]] var<uniform_constant> tex : texture_storage_ro_2d<rgba8unorm>;
+                [[set(0), binding(0)]] var<uniform_constant> tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
                 [[stage(fragment)]] fn main() -> void {
                 })");
             utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
@@ -1580,7 +1580,7 @@ namespace {
         {
             // Create a passthrough compute pipeline with a readonly storage texture
             wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
-                [[set(0), binding(0)]] var<uniform_constant> tex : texture_storage_ro_2d<rgba8unorm>;
+                [[set(0), binding(0)]] var<uniform_constant> tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
                 [[stage(compute)]] fn main() -> void {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;

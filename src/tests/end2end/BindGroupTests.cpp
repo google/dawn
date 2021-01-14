@@ -1237,7 +1237,8 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
         interface << "[[set(0), binding(" << binding++ << ")]] "
-                  << "var<uniform_constant> image" << i << " : texture_storage_ro_2d<r32uint>;\n";
+                  << "var<uniform_constant> image" << i
+                  << " : [[access(read)]] texture_storage_2d<r32uint>;\n";
 
         body << "if (textureLoad(image" << i << ", vec2<i32>(0, 0)).r != " << expectedValue++
              << "u) {\n";
