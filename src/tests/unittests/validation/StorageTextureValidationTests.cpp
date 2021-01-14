@@ -62,7 +62,7 @@ class StorageTextureValidationTests : public ValidationTest {
         wgpu::TextureViewDimension textureViewDimension = wgpu::TextureViewDimension::e2D) {
         const char* glslImageFormatQualifier = utils::GetGLSLImageFormatQualifier(textureFormat);
         const char* textureComponentTypePrefix =
-            utils::GetColorTextureComponentTypePrefix(textureFormat);
+            utils::GetColorTextureComponentGLSLTypePrefix(textureFormat);
         return CreateComputeShaderWithStorageTexture(
             storageTextureBindingType, glslImageFormatQualifier, textureComponentTypePrefix,
             GetGLSLFloatImageTypeDeclaration(textureViewDimension));
