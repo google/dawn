@@ -698,15 +698,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureDimensions:
     case ast::Intrinsic::kTextureNumLayers:
-    case ast::Intrinsic::kTextureNumLevels: {
-      // Declare a variable to hold the queried texture info
-      auto dims = generate_name(kTempNamePrefix);
-
-      std::stringstream texture_name;
-      if (!EmitExpression(pre, texture_name, texture)) {
-        return false;
-      }
-
+    case ast::Intrinsic::kTextureNumLevels:
+    case ast::Intrinsic::kTextureNumSamples: {
+      // All of these intrinsics use the GetDimensions() method on the texture
       int num_dimensions = 0;
       const char* swizzle = "";
       bool add_mip_level_in = false;
@@ -783,10 +777,28 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               break;
           }
           break;
+        case ast::Intrinsic::kTextureNumSamples:
+          switch (texture_type->dim()) {
+            default:
+              error_ = "texture dimension does not support multisampling";
+              return false;
+            case ast::type::TextureDimension::k2d:
+              num_dimensions = 3;
+              swizzle = ".z";
+              break;
+            case ast::type::TextureDimension::k2dArray:
+              num_dimensions = 4;
+              swizzle = ".w";
+              break;
+          }
+          break;
         default:
           error_ = "unexpected intrinsic";
           return false;
       }
+
+      // Declare a variable to hold the queried texture info
+      auto dims = generate_name(kTempNamePrefix);
 
       if (num_dimensions == 1) {
         pre << "int " << dims << ";\n";
@@ -794,7 +806,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         pre << "int" << num_dimensions << " " << dims << ";\n";
       }
 
-      pre << texture_name.str() << ".GetDimensions(";
+      if (!EmitExpression(pre, pre, texture)) {
+        return false;
+      }
+      pre << ".GetDimensions(";
       if (pidx.level != kNotUsed) {
         pre << pidx.level << ", ";
       } else if (add_mip_level_in) {

@@ -86,6 +86,8 @@ enum class ValidTextureOverload {
   kNumLevelsDepth2dArray,
   kNumLevelsDepthCube,
   kNumLevelsDepthCubeArray,
+  kNumSamplesMultisampled2d,
+  kNumSamplesMultisampled2dArray,
   kSample1dF32,
   kSample1dArrayF32,
   kSample2dF32,

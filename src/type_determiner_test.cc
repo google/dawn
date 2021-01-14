@@ -1766,6 +1766,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"textureLoad", ast::Intrinsic::kTextureLoad},
         IntrinsicData{"textureNumLayers", ast::Intrinsic::kTextureNumLayers},
         IntrinsicData{"textureNumLevels", ast::Intrinsic::kTextureNumLevels},
+        IntrinsicData{"textureNumSamples", ast::Intrinsic::kTextureNumSamples},
         IntrinsicData{"textureSample", ast::Intrinsic::kTextureSample},
         IntrinsicData{"textureSampleBias", ast::Intrinsic::kTextureSampleBias},
         IntrinsicData{"textureSampleCompare",
@@ -2949,6 +2950,9 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepthCube:
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return R"(textureNumLevels(texture))";
+    case ValidTextureOverload::kNumSamplesMultisampled2d:
+    case ValidTextureOverload::kNumSamplesMultisampled2dArray:
+      return R"(textureNumSamples(texture))";
     case ValidTextureOverload::kDimensions2dLevel:
     case ValidTextureOverload::kDimensions2dArrayLevel:
     case ValidTextureOverload::kDimensions3dLevel:
@@ -3205,6 +3209,8 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
   } else if (std::string(param.function) == "textureNumLayers") {
     EXPECT_EQ(call->result_type(), ty.i32);
   } else if (std::string(param.function) == "textureNumLevels") {
+    EXPECT_EQ(call->result_type(), ty.i32);
+  } else if (std::string(param.function) == "textureNumSamples") {
     EXPECT_EQ(call->result_type(), ty.i32);
   } else if (std::string(param.function) == "textureStore") {
     EXPECT_EQ(call->result_type(), ty.void_);

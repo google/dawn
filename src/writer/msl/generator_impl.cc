@@ -687,6 +687,14 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
       out_ << ".get_num_mip_levels())";
       return true;
     }
+    case ast::Intrinsic::kTextureNumSamples: {
+      out_ << "int(";
+      if (!EmitExpression(params[pidx.texture])) {
+        return false;
+      }
+      out_ << ".get_num_samples())";
+      return true;
+    }
     default:
       break;
   }

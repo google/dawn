@@ -1074,6 +1074,42 @@ OpCapability ImageQuery
 OpCapability SampledCubeArray
 OpCapability ImageQuery
 )"};
+    case ValidTextureOverload::kNumSamplesMultisampled2d:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 0 1 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeInt 32 1
+)",
+              R"(
+%10 = OpLoad %3 %1
+%8 = OpImageQuerySamples %9 %10
+)",
+              R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kNumSamplesMultisampled2dArray:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 0 1 1 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeInt 32 1
+)",
+              R"(
+%10 = OpLoad %3 %1
+%8 = OpImageQuerySamples %9 %10
+)",
+              R"(
+OpCapability ImageQuery
+)"};
     case ValidTextureOverload::kSample1dF32:
       return {
           R"(

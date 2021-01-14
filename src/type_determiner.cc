@@ -568,6 +568,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         break;
       case ast::Intrinsic::kTextureNumLayers:
       case ast::Intrinsic::kTextureNumLevels:
+      case ast::Intrinsic::kTextureNumSamples:
         param.idx.texture = param.count++;
         break;
       case ast::Intrinsic::kTextureLoad:
@@ -698,6 +699,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       }
       case ast::Intrinsic::kTextureNumLayers:
       case ast::Intrinsic::kTextureNumLevels:
+      case ast::Intrinsic::kTextureNumSamples:
         return_type = mod_->create<ast::type::I32>();
         break;
       case ast::Intrinsic::kTextureStore:
@@ -1038,6 +1040,8 @@ bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
     ident->set_intrinsic(ast::Intrinsic::kTextureNumLayers);
   } else if (name == "textureNumLevels") {
     ident->set_intrinsic(ast::Intrinsic::kTextureNumLevels);
+  } else if (name == "textureNumSamples") {
+    ident->set_intrinsic(ast::Intrinsic::kTextureNumSamples);
   } else if (name == "textureLoad") {
     ident->set_intrinsic(ast::Intrinsic::kTextureLoad);
   } else if (name == "textureStore") {

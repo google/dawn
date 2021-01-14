@@ -178,6 +178,20 @@ ExpectedResult expected_texture_overload(
           "_tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);",
           "_tint_tmp.w",
       };
+    case ValidTextureOverload::kNumSamplesMultisampled2d:
+      return {
+          "int3 _tint_tmp;\n"
+          "texture_tint_0."
+          "GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);",
+          "_tint_tmp.z",
+      };
+    case ValidTextureOverload::kNumSamplesMultisampled2dArray:
+      return {
+          "int4 _tint_tmp;\n"
+          "texture_tint_0."
+          "GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);",
+          "_tint_tmp.w",
+      };
     case ValidTextureOverload::kSample1dF32:
       return R"(texture_tint_0.Sample(sampler_tint_0, 1.0f))";
     case ValidTextureOverload::kSample1dArrayF32:

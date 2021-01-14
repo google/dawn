@@ -90,6 +90,9 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepthCube:
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return R"(int(texture_tint_0.get_num_mip_levels()))";
+    case ValidTextureOverload::kNumSamplesMultisampled2d:
+    case ValidTextureOverload::kNumSamplesMultisampled2dArray:
+      return R"(int(texture_tint_0.get_num_samples()))";
     case ValidTextureOverload::kSample1dF32:
       return R"(texture_tint_0.sample(sampler_tint_0, 1.0f))";
     case ValidTextureOverload::kSample1dArrayF32:

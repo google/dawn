@@ -2251,6 +2251,12 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       spirv_params.emplace_back(gen_param(pidx.texture));
       break;
     }
+    case ast::Intrinsic::kTextureNumSamples: {
+      op = spv::Op::OpImageQuerySamples;
+      append_result_type_and_id_to_spirv_params();
+      spirv_params.emplace_back(gen_param(pidx.texture));
+      break;
+    }
     case ast::Intrinsic::kTextureLoad: {
       op = texture_type->Is<ast::type::StorageTexture>()
                ? spv::Op::OpImageRead
