@@ -498,7 +498,7 @@ OpName %5 "c"
 }
 
 TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
-  // var<uniform_constant> a : texture_storage_ro_2d<r32uint>;
+  // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
 
   ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
                                  ast::type::ImageFormat::kR32Uint);
@@ -519,7 +519,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
 }
 
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
-  // var<uniform_constant> a : texture_storage_wo_2d<r32uint>;
+  // var<uniform_constant> a : [[access(write)]] texture_storage_2d<r32uint>;
 
   ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
                                  ast::type::ImageFormat::kR32Uint);
@@ -542,8 +542,8 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 // Check that multiple texture_storage types with different access modifiers
 // only produces a single OpTypeImage.
 TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
-  // var<uniform_constant> a : texture_storage_ro_2d<r32uint>;
-  // var<uniform_constant> b : texture_storage_wo_2d<r32uint>;
+  // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
+  // var<uniform_constant> b : [[access(write)]] texture_storage_2d<r32uint>;
 
   ast::type::StorageTexture st(ast::type::TextureDimension::k2d,
                                ast::type::ImageFormat::kR32Uint);

@@ -82,6 +82,36 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   ASSERT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 
+TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Read) {
+  auto p = parser("my_var : [[access(read)]] texture_storage_1d<r32float>");
+
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(decl.errored);
+  ASSERT_EQ(decl->name, "my_var");
+  ASSERT_NE(decl->type, nullptr);
+  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsReadOnly());
+  ASSERT_TRUE(decl->type->As<ast::type::AccessControl>()
+                  ->type()
+                  ->Is<ast::type::StorageTexture>());
+}
+
+TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
+  auto p = parser("my_var : [[access(write)]] texture_storage_1d<r32float>");
+
+  auto decl = p->expect_variable_ident_decl("test");
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(decl.errored);
+  ASSERT_EQ(decl->name, "my_var");
+  ASSERT_NE(decl->type, nullptr);
+  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsWriteOnly());
+  ASSERT_TRUE(decl->type->As<ast::type::AccessControl>()
+                  ->type()
+                  ->Is<ast::type::StorageTexture>());
+}
+
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   auto p = parser("my_var : [[access(read)]] S");
 

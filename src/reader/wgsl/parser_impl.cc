@@ -96,6 +96,7 @@ const char kFragmentStage[] = "fragment";
 const char kComputeStage[] = "compute";
 
 const char kReadAccessControl[] = "read";
+const char kWriteAccessControl[] = "write";
 const char kReadWriteAccessControl[] = "read_write";
 
 ast::Builtin ident_to_builtin(const std::string& str) {
@@ -536,9 +537,24 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
+    return module_.create<ast::type::StorageTexture>(storage.value,
+                                                     format.value);
+  }
+
+  // DEPRECATED
+  auto ac_storage = storage_texture_type_access_control();
+  if (ac_storage.matched) {
+    const char* use = "storage texture type";
+
+    auto format =
+        expect_lt_gt_block(use, [&] { return expect_image_storage_type(use); });
+
+    if (format.errored)
+      return Failure::kErrored;
+
     return module_.create<ast::type::AccessControl>(
-        storage->second, module_.create<ast::type::StorageTexture>(
-                             storage->first, format.value));
+        ac_storage->second, module_.create<ast::type::StorageTexture>(
+                                ac_storage->first, format.value));
   }
 
   return Failure::kNoMatch;
@@ -601,7 +617,29 @@ Maybe<ast::type::TextureDimension> ParserImpl::multisampled_texture_type() {
 }
 
 // storage_texture_type
-//  : TEXTURE_RO_1D
+//  : TEXTURE_STORAGE_1D
+//  | TEXTURE_STORAGE_1D_ARRAY
+//  | TEXTURE_STORAGE_2D
+//  | TEXTURE_STORAGE_2D_ARRAY
+//  | TEXTURE_STORAGE_3D
+Maybe<ast::type::TextureDimension> ParserImpl::storage_texture_type() {
+  if (match(Token::Type::kTextureStorage1d))
+    return ast::type::TextureDimension::k1d;
+  if (match(Token::Type::kTextureStorage1dArray))
+    return ast::type::TextureDimension::k1dArray;
+  if (match(Token::Type::kTextureStorage2d))
+    return ast::type::TextureDimension::k2d;
+  if (match(Token::Type::kTextureStorage2dArray))
+    return ast::type::TextureDimension::k2dArray;
+  if (match(Token::Type::kTextureStorage3d))
+    return ast::type::TextureDimension::k3d;
+
+  return Failure::kNoMatch;
+}
+
+// DEPRECATED
+// storage_texture_type
+//  | TEXTURE_RO_1D
 //  | TEXTURE_RO_1D_ARRAY
 //  | TEXTURE_RO_2D
 //  | TEXTURE_RO_2D_ARRAY
@@ -622,7 +660,7 @@ Maybe<ast::type::TextureDimension> ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_STORAGE_WO_2D_ARRAY
 //  | TEXTURE_STORAGE_WO_3D
 Maybe<std::pair<ast::type::TextureDimension, ast::AccessControl>>
-ParserImpl::storage_texture_type() {
+ParserImpl::storage_texture_type_access_control() {
   using Ret = std::pair<ast::type::TextureDimension, ast::AccessControl>;
   if (match(Token::Type::kTextureStorageReadonly1d)) {
     return Ret{ast::type::TextureDimension::k1d, ast::AccessControl::kReadOnly};
@@ -893,6 +931,8 @@ Expect<ast::AccessControl> ParserImpl::expect_access_type() {
 
   if (ident.value == kReadAccessControl)
     return {ast::AccessControl::kReadOnly, ident.source};
+  if (ident.value == kWriteAccessControl)
+    return {ast::AccessControl::kWriteOnly, ident.source};
   if (ident.value == kReadWriteAccessControl)
     return {ast::AccessControl::kReadWrite, ident.source};
 

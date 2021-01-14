@@ -401,39 +401,23 @@ bool GeneratorImpl::EmitImageFormat(const ast::type::ImageFormat fmt) {
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
   std::string storage_texture_access = "";
   if (auto* ac = type->As<ast::type::AccessControl>()) {
-    // TODO(dsinclair): Removing the special casing for storage textures when
-    // we've converted over to parsing texture_storage_yy.
-    if (ac->type()->Is<ast::type::StorageTexture>()) {
-      if (ac->access_control() == ast::AccessControl::kReadOnly) {
-        storage_texture_access = "ro_";
-      } else if (ac->access_control() == ast::AccessControl::kWriteOnly) {
-        storage_texture_access = "wo_";
-      } else {
-        error_ = "unknown storage texture access";
-        return false;
-      }
-
-      // We want to generate the wrapped type in this case.
-      type = ac->type();
+    out_ << "[[access(";
+    if (ac->IsReadOnly()) {
+      out_ << "read";
+    } else if (ac->IsWriteOnly()) {
+      out_ << "write";
+    } else if (ac->IsReadWrite()) {
+      out_ << "read_write";
     } else {
-      out_ << "[[access(";
-      if (ac->IsReadOnly()) {
-        out_ << "read";
-      } else if (ac->IsReadWrite()) {
-        out_ << "read_write";
-      } else {
-        error_ = "invalid access control";
-        return false;
-      }
-      out_ << ")]]" << std::endl;
-      if (!EmitType(ac->type())) {
-        return false;
-      }
-      return true;
+      error_ = "invalid access control";
+      return false;
     }
-  }
-
-  if (auto* alias = type->As<ast::type::Alias>()) {
+    out_ << ")]]" << std::endl;
+    if (!EmitType(ac->type())) {
+      return false;
+    }
+    return true;
+  } else if (auto* alias = type->As<ast::type::Alias>()) {
     out_ << module_.SymbolToName(alias->symbol());
   } else if (auto* ary = type->As<ast::type::Array>()) {
     for (auto* deco : ary->decorations()) {
@@ -487,8 +471,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       /* nothing to emit */
     } else if (texture->Is<ast::type::MultisampledTexture>()) {
       out_ << "multisampled_";
-    } else if (auto* storage = texture->As<ast::type::StorageTexture>()) {
-      out_ << "storage_" << storage_texture_access;
+    } else if (texture->Is<ast::type::StorageTexture>()) {
+      out_ << "storage_";
     } else {
       error_ = "unknown texture type";
       return false;

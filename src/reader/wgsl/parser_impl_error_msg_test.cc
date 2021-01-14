@@ -651,27 +651,55 @@ TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype_Old) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan) {
+  EXPECT("var x : [[access(read)]] texture_storage_2d;",
+         "test.wgsl:1:44 error: expected '<' for storage texture type\n"
+         "var x : [[access(read)]] texture_storage_2d;\n"
+         "                                           ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan) {
+  EXPECT("var x : [[access(read)]] texture_storage_2d<r8uint;",
+         "test.wgsl:1:51 error: expected '>' for storage texture type\n"
+         "var x : [[access(read)]] texture_storage_2d<r8uint;\n"
+         "                                                  ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype) {
+  EXPECT("var x : [[access(read)]] texture_storage_2d<>;",
+         "test.wgsl:1:45 error: invalid format for storage texture type\n"
+         "var x : [[access(read)]] texture_storage_2d<>;\n"
+         "                                            ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype) {
+  EXPECT("var x : [[access(read)]] texture_storage_2d<1>;",
+         "test.wgsl:1:45 error: invalid format for storage texture type\n"
+         "var x : [[access(read)]] texture_storage_2d<1>;\n"
+         "                                            ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan_old) {
   EXPECT("var x : texture_storage_ro_2d;",
          "test.wgsl:1:30 error: expected '<' for storage texture type\n"
          "var x : texture_storage_ro_2d;\n"
          "                             ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan) {
+TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan_old) {
   EXPECT("var x : texture_storage_ro_2d<r8uint;",
          "test.wgsl:1:37 error: expected '>' for storage texture type\n"
          "var x : texture_storage_ro_2d<r8uint;\n"
          "                                    ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype) {
+TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype_old) {
   EXPECT("var x : texture_storage_ro_2d<>;",
          "test.wgsl:1:31 error: invalid format for storage texture type\n"
          "var x : texture_storage_ro_2d<>;\n"
          "                              ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype) {
+TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingInvalidSubtype_old) {
   EXPECT("var x : texture_storage_ro_2d<1>;",
          "test.wgsl:1:31 error: invalid format for storage texture type\n"
          "var x : texture_storage_ro_2d<1>;\n"

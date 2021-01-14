@@ -45,10 +45,10 @@ const c1 : bool = true;
 var<uniform> g0 : u32 = 20u;
 var<out> g1 : f32 = 123.0;
 var<uniform> g2 : texture_2d<f32>;
-var<uniform> g3 : texture_storage_ro_2d<r32uint>;
-var<uniform> g4 : texture_storage_wo_2d<rg32float>;
-var<uniform> g5 : texture_storage_ro_2d<r32uint>;
-var<uniform> g6 : texture_storage_wo_2d<rg32float>;
+var<uniform> g3 : [[access(read)]] texture_storage_2d<r32uint>;
+var<uniform> g4 : [[access(write)]] texture_storage_2d<rg32float>;
+var<uniform> g5 : [[access(read)]] texture_storage_2d<r32uint>;
+var<uniform> g6 : [[access(write)]] texture_storage_2d<rg32float>;
 
 [[builtin(position)]] var<uniform> g7 : vec3<f32>;
 [[set(10), binding(20)]] var<storage_buffer> g7 : S;
@@ -150,7 +150,7 @@ fn main() -> void {
   std::string src_wgsl;
   {
     writer::wgsl::Generator src_gen(std::move(src));
-    ASSERT_TRUE(src_gen.Generate());
+    ASSERT_TRUE(src_gen.Generate()) << src_gen.error();
     src_wgsl = src_gen.result();
   }
 

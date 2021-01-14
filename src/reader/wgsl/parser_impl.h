@@ -427,10 +427,14 @@ class ParserImpl {
   /// @returns returns the sample texture dimension or kNone if none matched.
   Maybe<ast::type::TextureDimension> sampled_texture_type();
   /// Parses a `storage_texture_type` grammar element
+  /// @returns returns the storage texture dimension.
+  /// Returns kNone if none matched.
+  Maybe<ast::type::TextureDimension> storage_texture_type();
+  /// Parses a deprecated `storage_texture_type` grammar element
   /// @returns returns the storage texture dimension and the storage access.
   ///          Returns kNone and kRead if none matched.
   Maybe<std::pair<ast::type::TextureDimension, ast::AccessControl>>
-  storage_texture_type();
+  storage_texture_type_access_control();
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<ast::type::Type*> depth_texture_type();

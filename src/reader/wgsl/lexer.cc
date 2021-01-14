@@ -712,6 +712,43 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kTextureSampledCubeArray, source,
             "texture_sampled_cube_array"};
   }
+  if (str == "texture_storage_1d") {
+    return {Token::Type::kTextureStorage1d, source, "texture_storage_1d"};
+  }
+  if (str == "texture_storage_1d_array") {
+    return {Token::Type::kTextureStorage1dArray, source,
+            "texture_storage_1d_array"};
+  }
+  if (str == "texture_storage_2d") {
+    return {Token::Type::kTextureStorage2d, source, "texture_storage_2d"};
+  }
+  if (str == "texture_storage_2d_array") {
+    return {Token::Type::kTextureStorage2dArray, source,
+            "texture_storage_2d_array"};
+  }
+  if (str == "texture_storage_3d") {
+    return {Token::Type::kTextureStorage3d, source, "texture_storage_3d"};
+  }
+  if (str == "texture_storage_wo_1d") {
+    return {Token::Type::kTextureStorageWriteonly1d, source,
+            "texture_storage_wo_1d"};
+  }
+  if (str == "texture_storage_wo_1d_array") {
+    return {Token::Type::kTextureStorageWriteonly1dArray, source,
+            "texture_storage_wo_1d_array"};
+  }
+  if (str == "texture_storage_wo_2d") {
+    return {Token::Type::kTextureStorageWriteonly2d, source,
+            "texture_storage_wo_2d"};
+  }
+  if (str == "texture_storage_wo_2d_array") {
+    return {Token::Type::kTextureStorageWriteonly2dArray, source,
+            "texture_storage_wo_2d_array"};
+  }
+  if (str == "texture_storage_wo_3d") {
+    return {Token::Type::kTextureStorageWriteonly3d, source,
+            "texture_storage_wo_3d"};
+  }
   if (str == "texture_storage_ro_1d") {
     return {Token::Type::kTextureStorageReadonly1d, source,
             "texture_storage_ro_1d"};
