@@ -85,14 +85,14 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                Affects AST dumping, and text-based output languages.
   -h                        -- This help text)";
 
-#if _MSC_VER
+#ifdef _MSC_VER
 #pragma warning(disable : 4068; suppress : 4100)
 #endif
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 Format parse_format(const std::string& fmt) {
 #pragma clang diagnostic pop
-#if _MSC_VER
+#ifdef _MSC_VER
 #pragma warning(default : 4068)
 #endif
 
@@ -134,14 +134,14 @@ bool ends_with(const std::string& input, const std::string& suffix) {
 
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
-#if _MSC_VER
+#ifdef _MSC_VER
 #pragma warning(disable : 4068; suppress : 4100)
 #endif
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 Format infer_format(const std::string& filename) {
 #pragma clang diagnostic pop
-#if _MSC_VER
+#ifdef _MSC_VER
 #pragma warning(default : 4068)
 #endif
 
