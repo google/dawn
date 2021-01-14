@@ -41,8 +41,8 @@ std::string expected_texture_overload(
       return R"(int(texture_tint_0.get_width()))";
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensions2dArray:
-    case ValidTextureOverload::kDimensionsMultisampled_2d:
-    case ValidTextureOverload::kDimensionsMultisampled_2dArray:
+    case ValidTextureOverload::kDimensionsMultisampled2d:
+    case ValidTextureOverload::kDimensionsMultisampled2dArray:
     case ValidTextureOverload::kDimensionsDepth2d:
     case ValidTextureOverload::kDimensionsDepth2dArray:
     case ValidTextureOverload::kDimensionsStorageRO2d:
@@ -74,7 +74,7 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kNumLayers1dArray:
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
-    case ValidTextureOverload::kNumLayersMultisampled_2dArray:
+    case ValidTextureOverload::kNumLayersMultisampled2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersDepthCubeArray:
     case ValidTextureOverload::kNumLayersStorageWO1dArray:

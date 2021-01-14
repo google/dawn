@@ -310,7 +310,7 @@ OpCapability ImageQuery
 OpCapability SampledCubeArray
 OpCapability ImageQuery
 )"};
-    case ValidTextureOverload::kDimensionsMultisampled_2d:
+    case ValidTextureOverload::kDimensionsMultisampled2d:
       return {
           R"(
 %4 = OpTypeFloat 32
@@ -330,7 +330,7 @@ OpCapability ImageQuery
           R"(
 OpCapability ImageQuery
 )"};
-    case ValidTextureOverload::kDimensionsMultisampled_2dArray:
+    case ValidTextureOverload::kDimensionsMultisampled2dArray:
       return {
           R"(
 %4 = OpTypeFloat 32
@@ -806,7 +806,7 @@ OpCapability ImageQuery
 OpCapability SampledCubeArray
 OpCapability ImageQuery
 )"};
-    case ValidTextureOverload::kNumLayersMultisampled_2dArray:
+    case ValidTextureOverload::kNumLayersMultisampled2dArray:
       return {R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 1 1 1 Unknown

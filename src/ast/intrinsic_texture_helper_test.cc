@@ -329,7 +329,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](Builder* b) { return b->ExprList("texture", 1); },
       },
       {
-          ValidTextureOverload::kDimensionsMultisampled_2d,
+          ValidTextureOverload::kDimensionsMultisampled2d,
           "textureDimensions(t : texture_multisampled_2d<f32>)-> vec2<i32>",
           TextureKind::kMultisampled,
           type::SamplerKind::kSampler,
@@ -339,7 +339,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](Builder* b) { return b->ExprList("texture"); },
       },
       {
-          ValidTextureOverload::kDimensionsMultisampled_2dArray,
+          ValidTextureOverload::kDimensionsMultisampled2dArray,
           "textureDimensions(t : texture_multisampled_2d_array<f32>)-> "
           "vec2<i32>",
           TextureKind::kMultisampled,
@@ -572,7 +572,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](Builder* b) { return b->ExprList("texture"); },
       },
       {
-          ValidTextureOverload::kNumLayersMultisampled_2dArray,
+          ValidTextureOverload::kNumLayersMultisampled2dArray,
           "textureNumLayers(t : texture_multisampled_2d_array<f32>) -> i32",
           TextureKind::kMultisampled,
           type::SamplerKind::kSampler,

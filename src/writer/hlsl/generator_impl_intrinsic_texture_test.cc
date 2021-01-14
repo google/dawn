@@ -57,7 +57,7 @@ ExpectedResult expected_texture_overload(
           "_tint_tmp.x",
       };
     case ValidTextureOverload::kDimensions2d:
-    case ValidTextureOverload::kDimensionsMultisampled_2d:
+    case ValidTextureOverload::kDimensionsMultisampled2d:
     case ValidTextureOverload::kDimensionsDepth2d:
     case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageWO2d:
@@ -67,7 +67,7 @@ ExpectedResult expected_texture_overload(
           "_tint_tmp",
       };
     case ValidTextureOverload::kDimensions2dArray:
-    case ValidTextureOverload::kDimensionsMultisampled_2dArray:
+    case ValidTextureOverload::kDimensionsMultisampled2dArray:
     case ValidTextureOverload::kDimensionsDepth2dArray:
     case ValidTextureOverload::kDimensionsStorageRO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
@@ -146,7 +146,7 @@ ExpectedResult expected_texture_overload(
           "_tint_tmp.y",
       };
     case ValidTextureOverload::kNumLayers2dArray:
-    case ValidTextureOverload::kNumLayersMultisampled_2dArray:
+    case ValidTextureOverload::kNumLayersMultisampled2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
     case ValidTextureOverload::kNumLayersDepthCubeArray:
