@@ -474,7 +474,11 @@ class ParserImpl : Reader {
   /// @returns the instruction, or nullptr on error
   const spvtools::opt::Instruction* GetInstructionForTest(uint32_t id) const;
 
+  /// A map of SPIR-V identifiers to builtins
   using BuiltInsMap = std::unordered_map<uint32_t, SpvBuiltIn>;
+
+  /// @returns a map of builtins that should be ignored as they do not exist in
+  /// WGSL.
   const BuiltInsMap& ignored_builtins() const { return ignored_builtins_; }
 
  private:
