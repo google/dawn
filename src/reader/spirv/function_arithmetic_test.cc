@@ -43,6 +43,7 @@ std::string CommonTypes() {
   %int_40 = OpConstant %int 40
   %float_50 = OpConstant %float 50
   %float_60 = OpConstant %float 60
+  %float_70 = OpConstant %float 70
 
   %ptr_uint = OpTypePointer Function %uint
   %ptr_int = OpTypePointer Function %int
@@ -51,6 +52,7 @@ std::string CommonTypes() {
   %v2uint = OpTypeVector %uint 2
   %v2int = OpTypeVector %int 2
   %v2float = OpTypeVector %float 2
+  %v3float = OpTypeVector %float 3
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
@@ -58,10 +60,12 @@ std::string CommonTypes() {
   %v2int_40_30 = OpConstantComposite %v2int %int_40 %int_30
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
+  %v3float_50_60_70 = OpConstantComposite %v2float %float_50 %float_60 %float_70
 
   %m2v2float = OpTypeMatrix %v2float 2
   %m2v2float_a = OpConstantComposite %m2v2float %v2float_50_60 %v2float_60_50
   %m2v2float_b = OpConstantComposite %m2v2float %v2float_60_50 %v2float_50_60
+  %m2v3float = OpTypeMatrix %v3float 2
 )";
 }
 
@@ -1097,6 +1101,108 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
     }
   })"))
       << ToString(p->get_module(), fe.ast_body());
+}
+
+TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
+  // OpOuterProduct is expanded to basic operations.
+  // The operands, even if used once, are given their own const definitions.
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFAdd %v3float %v3float_50_60_70 %v3float_50_60_70 ; column vector
+     %2 = OpFAdd %v2float %v2float_60_50 %v2float_50_60 ; row vector
+     %3 = OpOuterProduct %m2v3float %1 %2
+     OpReturn
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->get_module(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(R"(VariableConst{
+    x_3
+    none
+    __mat_3_2__f32
+    {
+      TypeConstructor[not set]{
+        __mat_3_2__f32
+        TypeConstructor[not set]{
+          __vec_3__f32
+          Binary[not set]{
+            MemberAccessor[not set]{
+              Identifier[not set]{x_2}
+              Identifier[not set]{x}
+            }
+            multiply
+            MemberAccessor[not set]{
+              Identifier[not set]{x_1}
+              Identifier[not set]{x}
+            }
+          }
+          Binary[not set]{
+            MemberAccessor[not set]{
+              Identifier[not set]{x_2}
+              Identifier[not set]{x}
+            }
+            multiply
+            MemberAccessor[not set]{
+              Identifier[not set]{x_1}
+              Identifier[not set]{y}
+            }
+          }
+          Binary[not set]{
+            MemberAccessor[not set]{
+              Identifier[not set]{x_2}
+              Identifier[not set]{x}
+            }
+            multiply
+            MemberAccessor[not set]{
+              Identifier[not set]{x_1}
+              Identifier[not set]{z}
+            }
+          }
+        }
+        TypeConstructor[not set]{
+          __vec_3__f32
+          Binary[not set]{
+            MemberAccessor[not set]{
+              Identifier[not set]{x_2}
+              Identifier[not set]{y}
+            }
+            multiply
+            MemberAccessor[not set]{
+              Identifier[not set]{x_1}
+              Identifier[not set]{x}
+            }
+          }
+          Binary[not set]{
+            MemberAccessor[not set]{
+              Identifier[not set]{x_2}
+              Identifier[not set]{y}
+            }
+            multiply
+            MemberAccessor[not set]{
+              Identifier[not set]{x_1}
+              Identifier[not set]{y}
+            }
+          }
+          Binary[not set]{
+            MemberAccessor[not set]{
+              Identifier[not set]{x_2}
+              Identifier[not set]{y}
+            }
+            multiply
+            MemberAccessor[not set]{
+              Identifier[not set]{x_1}
+              Identifier[not set]{z}
+            }
+          }
+        }
+      }
+    }
+  })"))
+      << got;
 }
 
 // TODO(dneto): OpSRem. Missing from WGSL

@@ -57,6 +57,7 @@
 #include "src/ast/type/depth_texture_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/storage_texture_type.h"
 #include "src/ast/type/texture_type.h"
@@ -3013,6 +3014,10 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
 
+    case SpvOpOuterProduct:
+      // Synthesize an outer product expression in its own statement.
+      return EmitConstDefOrWriteToHoistedVar(inst, MakeOuterProduct(inst));
+
     case SpvOpFunctionCall:
       return EmitFunctionCall(inst);
 
@@ -3707,7 +3712,8 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
   // but only if they are defined in this function as well.
   for (auto& id_def_info_pair : def_info_) {
     const auto& inst = id_def_info_pair.second->inst;
-    if (inst.opcode() == SpvOpVectorShuffle) {
+    const auto opcode = inst.opcode();
+    if ((opcode == SpvOpVectorShuffle) || (opcode == SpvOpOuterProduct)) {
       // We might access the vector operands multiple times. Make sure they
       // are evaluated only once.
       for (auto vector_arg : std::array<uint32_t, 2>{0, 1}) {
@@ -4576,6 +4582,52 @@ TypedExpression FunctionEmitter::MakeArrayLength(
       create<ast::CallExpression>(Source{}, call_ident, std::move(params));
 
   return {parser_impl_.ConvertType(inst.type_id()), call_expr};
+}
+
+TypedExpression FunctionEmitter::MakeOuterProduct(
+    const spvtools::opt::Instruction& inst) {
+  // Synthesize the result.
+  auto col = MakeOperand(inst, 0);
+  auto row = MakeOperand(inst, 1);
+  auto* col_ty = col.type->As<ast::type::Vector>();
+  auto* row_ty = row.type->As<ast::type::Vector>();
+  auto* result_ty =
+      parser_impl_.ConvertType(inst.type_id())->As<ast::type::Matrix>();
+  if (!col_ty || !col_ty || !result_ty || result_ty->type() != col_ty->type() ||
+      result_ty->type() != row_ty->type() ||
+      result_ty->columns() != row_ty->size() ||
+      result_ty->rows() != col_ty->size()) {
+    Fail() << "invalid outer product instruction: bad types "
+           << inst.PrettyPrint();
+    return {};
+  }
+
+  // Example:
+  //    c : vec3 column vector
+  //    r : vec2 row vector
+  //    OuterProduct c r : mat2x3 (2 columns, 3 rows)
+  //    Result:
+  //      | c.x * r.x   c.x * r.y |
+  //      | c.y * r.x   c.y * r.y |
+  //      | c.z * r.x   c.z * r.y |
+
+  ast::ExpressionList result_columns;
+  for (uint32_t icol = 0; icol < result_ty->columns(); icol++) {
+    ast::ExpressionList result_row;
+    auto* row_factor = create<ast::MemberAccessorExpression>(Source{}, row.expr,
+                                                             Swizzle(icol));
+    for (uint32_t irow = 0; irow < result_ty->rows(); irow++) {
+      auto* column_factor = create<ast::MemberAccessorExpression>(
+          Source{}, col.expr, Swizzle(irow));
+      auto* elem = create<ast::BinaryExpression>(
+          Source{}, ast::BinaryOp::kMultiply, row_factor, column_factor);
+      result_row.push_back(elem);
+    }
+    result_columns.push_back(
+        create<ast::TypeConstructorExpression>(Source{}, col_ty, result_row));
+  }
+  return {result_ty, create<ast::TypeConstructorExpression>(Source{}, result_ty,
+                                                            result_columns)};
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
