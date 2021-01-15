@@ -152,6 +152,10 @@ namespace dawn_native {
             {Toggle::UseTintInspector,
              {"use_tint_inspector", "Use Tint instead of SPRIV-cross for shader reflection.",
               "https://crbug.com/dawn/578"}},
+            {Toggle::FlushBeforeClientWaitSync,
+             {"flush_before_client_wait_sync",
+              "Call glFlush before glClientWaitSync to work around bugs in the latter",
+              "https://crbug.com/dawn/633"}},
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
 

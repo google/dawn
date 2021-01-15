@@ -86,6 +86,7 @@ namespace dawn_native { namespace opengl {
         SetToggle(Toggle::DisableBaseVertex, !supportsBaseVertex);
         SetToggle(Toggle::DisableBaseInstance, !supportsBaseInstance);
         SetToggle(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
+        SetToggle(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
     }
 
     const GLFormat& Device::GetGLFormat(const Format& format) {
@@ -173,6 +174,11 @@ namespace dawn_native { namespace opengl {
 
             // Fence are added in order, so we can stop searching as soon
             // as we see one that's not ready.
+
+            // TODO(crbug.com/dawn/633): Remove this workaround after the deadlock issue is fixed.
+            if (IsToggleEnabled(Toggle::FlushBeforeClientWaitSync)) {
+                gl.Flush();
+            }
             GLenum result = gl.ClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
             if (result == GL_TIMEOUT_EXPIRED) {
                 return fenceSerial;
