@@ -285,12 +285,10 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         return "";
     }
 
-    std::string CommonReadOnlyTestCode(wgpu::TextureFormat format,
-                                       int layerCount = 1,
-                                       bool is2DArray = false) {
-        // TODO(bclayton): Dynamically retrieve layerCount
+    std::string CommonReadOnlyTestCode(wgpu::TextureFormat format, bool is2DArray = false) {
         std::string componentFmt = utils::GetColorTextureComponentWGSLType(format);
         auto texelType = "vec4<" + componentFmt + ">";
+        auto* layerCount = is2DArray ? "textureNumLayers(storageImage0)" : "1";
         auto* textureLoad = is2DArray ? "textureLoad(storageImage0, vec2<i32>(x, y), i32(layer))"
                                       : "textureLoad(storageImage0, vec2<i32>(x, y))";
 
@@ -321,11 +319,10 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     std::string CommonWriteOnlyTestCode(const char* stage,
                                         wgpu::TextureFormat format,
-                                        int layerCount = 1,
                                         bool is2DArray = false) {
-        // TODO(bclayton): Dynamically retrieve layerCount
         std::string componentFmt = utils::GetColorTextureComponentWGSLType(format);
         auto texelType = "vec4<" + componentFmt + ">";
+        auto* layerCount = is2DArray ? "textureNumLayers(storageImage0)" : "1";
         auto* textureStore = is2DArray
                                  ? "textureStore(storageImage0, vec2<i32>(x, y), layer, expected)"
                                  : "textureStore(storageImage0, vec2<i32>(x, y), expected)";
@@ -351,10 +348,8 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         return ostream.str();
     }
 
-    std::string CommonReadWriteTestCode(wgpu::TextureFormat format,
-                                        int layerCount = 1,
-                                        bool is2DArray = false) {
-        // TODO(bclayton): Dynamically retrieve layerCount
+    std::string CommonReadWriteTestCode(wgpu::TextureFormat format, bool is2DArray = false) {
+        auto* layerCount = is2DArray ? "textureNumLayers(storageImage0)" : "1";
         auto* textureStore = is2DArray ? "textureStore(storageImage0, texcoord, layer, "
                                          "textureLoad(storageImage1, texcoord, layer))"
                                        : "textureStore(storageImage0, texcoord, "
@@ -923,7 +918,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
 };
 
 [[set(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
-)" << CommonReadOnlyTestCode(kTextureFormat, kArrayLayerCount, true)
+)" << CommonReadOnlyTestCode(kTextureFormat, true)
              << R"(
 [[stage(compute)]] fn main() -> void {
   if (doTest()) {
@@ -950,8 +945,7 @@ TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
                       kWidth, kHeight, kArrayLayerCount);
 
     // Write the expected pixel values into the write-only storage texture.
-    const std::string computeShader =
-        CommonWriteOnlyTestCode("compute", kTextureFormat, kArrayLayerCount, true);
+    const std::string computeShader = CommonWriteOnlyTestCode("compute", kTextureFormat, true);
     WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
 
     // Verify the pixel data in the write-only storage texture is expected.
