@@ -23,6 +23,7 @@
 #include "dawn_wire/client/ObjectBase.h"
 
 #include <map>
+#include <memory>
 
 namespace dawn_wire { namespace client {
 
