@@ -167,7 +167,8 @@ class StorageTextureTests : public DawnTest {
         std::ostringstream ostream;
         ostream << "[[set(0), binding(" << binding << ")]] "
                 << "var<uniform_constant> storageImage" << binding << " : "
-                << "texture_storage_" << accessQualifier << "_2d";
+                << "[[access(" << accessQualifier << ")]] "
+                << "texture_storage_2d";
         if (is2DArray) {
             ostream << "_array";
         }
@@ -294,7 +295,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
                                       : "textureLoad(storageImage0, vec2<i32>(x, y))";
 
         std::ostringstream ostream;
-        ostream << GetImageDeclaration(format, "ro", is2DArray, 0) << "\n"
+        ostream << GetImageDeclaration(format, "read", is2DArray, 0) << "\n"
                 << GetComparisonFunction(format) << "\n";
         ostream << "fn doTest() -> bool {\n";
         ostream << "  var size : vec2<i32> = textureDimensions(storageImage0);\n";
@@ -330,8 +331,9 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
                                  : "textureStore(storageImage0, vec2<i32>(x, y), expected)";
 
         std::ostringstream ostream;
-        ostream << GetImageDeclaration(format, "wo", is2DArray, 0) << "\n";
-        ostream << "[[stage(" << stage << ")]] fn main() -> void {\n";
+        ostream << GetImageDeclaration(format, "write", is2DArray, 0) << "\n";
+        ostream << "[[stage(" << stage << ")]]\n";
+        ostream << "fn main() -> void {\n";
         ostream << "  var size : vec2<i32> = textureDimensions(storageImage0);\n";
         ostream << "  const layerCount : i32 = " << layerCount << ";\n";
         ostream << "  for (var layer : i32 = 0; layer < layerCount; layer = layer + 1) {\n";
@@ -359,8 +361,8 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
                                          "textureLoad(storageImage1, texcoord))";
 
         std::ostringstream ostream;
-        ostream << GetImageDeclaration(format, "wo", is2DArray, 0) << "\n";
-        ostream << GetImageDeclaration(format, "ro", is2DArray, 1) << "\n";
+        ostream << GetImageDeclaration(format, "write", is2DArray, 0) << "\n";
+        ostream << GetImageDeclaration(format, "read", is2DArray, 1) << "\n";
         ostream << "[[stage(compute)]] fn main() -> void {\n";
         ostream << "  var size : vec2<i32> = textureDimensions(storageImage0);\n";
         ostream << "  const layerCount : i32 = " << layerCount << ";\n";
@@ -968,8 +970,8 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
         kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-[[set(0), binding(0)]] var<uniform_constant> Src : texture_storage_ro_2d<r32uint>;
-[[set(0), binding(1)]] var<uniform_constant> Dst : texture_storage_wo_2d<r32uint>;
+[[set(0), binding(0)]] var<uniform_constant> Src : [[access(read)]]  texture_storage_2d<r32uint>;
+[[set(0), binding(1)]] var<uniform_constant> Dst : [[access(write)]] texture_storage_2d<r32uint>;
 [[stage(compute)]] fn main() -> void {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
   srcValue.x = srcValue.x + 1u;
@@ -1045,7 +1047,7 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
         kTextureFormat, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage, 1u, 1u);
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
 [[set(0), binding(0)]] var<uniform_constant> Src : texture_2d<u32>;
-[[set(0), binding(1)]] var<uniform_constant> Dst : texture_storage_wo_2d<r32uint>;
+[[set(0), binding(1)]] var<uniform_constant> Dst : [[access(write)]] texture_storage_2d<r32uint>;
 [[stage(compute)]] fn main() -> void {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
   srcValue.x = srcValue.x + 1u;
@@ -1143,13 +1145,13 @@ fn doTest() -> bool {
 })";
 
     const char* kCommonWriteOnlyZeroInitTestCodeFragment = R"(
-[[set(0), binding(0)]] var<uniform_constant> dstImage : texture_storage_wo_2d<r32uint>;
+[[set(0), binding(0)]] var<uniform_constant> dstImage : [[access(write)]] texture_storage_2d<r32uint>;
 
 [[stage(fragment)]] fn main() -> void {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
 })";
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
-[[set(0), binding(0)]] var<uniform_constant> dstImage : texture_storage_wo_2d<r32uint>;
+[[set(0), binding(0)]] var<uniform_constant> dstImage : [[access(write)]] texture_storage_2d<r32uint>;
 
 [[stage(compute)]] fn main() -> void {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
@@ -1166,7 +1168,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPa
     // green as the output color, otherwise uses red instead.
     const char* kVertexShader = kSimpleVertexShader;
     const std::string kFragmentShader = std::string(R"(
-[[set(0), binding(0)]] var<uniform_constant> srcImage : texture_storage_ro_2d<r32uint>;
+[[set(0), binding(0)]] var<uniform_constant> srcImage : [[access(read)]] texture_storage_2d<r32uint>;
 [[location(0)]] var<out> o_color : vec4<f32>;
 )") + kCommonReadOnlyZeroInitTestCode +
                                         R"(
@@ -1193,7 +1195,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
   [[offset(0)]] result : u32;
 };
 
-[[set(0), binding(0)]] var<uniform_constant> srcImage : texture_storage_ro_2d<r32uint>;
+[[set(0), binding(0)]] var<uniform_constant> srcImage : [[access(read)]] texture_storage_2d<r32uint>;
 [[set(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
 )") + kCommonReadOnlyZeroInitTestCode + R"(
 [[stage(compute)]] fn main() -> void {
