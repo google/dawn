@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/set_decoration.h"
+#include "src/ast/group_decoration.h"
 
 #include "src/ast/clone_context.h"
 #include "src/ast/module.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::SetDecoration);
+TINT_INSTANTIATE_CLASS_ID(tint::ast::GroupDecoration);
 
 namespace tint {
 namespace ast {
 
-SetDecoration::SetDecoration(const Source& source, uint32_t val)
+GroupDecoration::GroupDecoration(const Source& source, uint32_t val)
     : Base(source), value_(val) {}
 
-SetDecoration::~SetDecoration() = default;
+GroupDecoration::~GroupDecoration() = default;
 
-void SetDecoration::to_str(std::ostream& out, size_t indent) const {
+void GroupDecoration::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "SetDecoration{" << value_ << "}" << std::endl;
+  out << "GroupDecoration{" << value_ << "}" << std::endl;
 }
 
-SetDecoration* SetDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<SetDecoration>(ctx->Clone(source()), value_);
+GroupDecoration* GroupDecoration::Clone(CloneContext* ctx) const {
+  return ctx->mod->create<GroupDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

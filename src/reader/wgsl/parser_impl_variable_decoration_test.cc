@@ -15,8 +15,8 @@
 #include "gtest/gtest.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
-#include "src/ast/set_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -231,6 +231,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
             "1:9: expected signed integer literal for binding decoration");
 }
 
+// DEPRECATED
 TEST_F(ParserImplTest, VariableDecoration_set) {
   auto p = parser("set(4)");
   auto deco = p->decoration();
@@ -240,52 +241,67 @@ TEST_F(ParserImplTest, VariableDecoration_set) {
   auto* var_deco = deco.value->As<ast::VariableDecoration>();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(var_deco, nullptr);
-  ASSERT_TRUE(var_deco->Is<ast::SetDecoration>());
+  ASSERT_TRUE(var_deco->Is<ast::GroupDecoration>());
 
-  auto* set = var_deco->As<ast::SetDecoration>();
-  EXPECT_EQ(set->value(), 4u);
+  auto* group = var_deco->As<ast::GroupDecoration>();
+  EXPECT_EQ(group->value(), 4u);
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Set_MissingLeftParen) {
-  auto p = parser("set 2)");
+TEST_F(ParserImplTest, VariableDecoration_group) {
+  auto p = parser("group(4)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::VariableDecoration>();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_TRUE(var_deco->Is<ast::GroupDecoration>());
+
+  auto* group = var_deco->As<ast::GroupDecoration>();
+  EXPECT_EQ(group->value(), 4u);
+}
+
+TEST_F(ParserImplTest, VariableDecoration_Group_MissingLeftParen) {
+  auto p = parser("group 2)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: expected '(' for set decoration");
+  EXPECT_EQ(p->error(), "1:7: expected '(' for group decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Set_MissingRightParen) {
-  auto p = parser("set(2");
+TEST_F(ParserImplTest, VariableDecoration_Group_MissingRightParen) {
+  auto p = parser("group(2");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:6: expected ')' for set decoration");
+  EXPECT_EQ(p->error(), "1:8: expected ')' for group decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
-  auto p = parser("set()");
+TEST_F(ParserImplTest, VariableDecoration_Group_MissingValue) {
+  auto p = parser("group()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:5: expected signed integer literal for set decoration");
+            "1:7: expected signed integer literal for group decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
-  auto p = parser("set(nan)");
+TEST_F(ParserImplTest, VariableDecoration_Group_MissingInvalid) {
+  auto p = parser("group(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:5: expected signed integer literal for set decoration");
+            "1:7: expected signed integer literal for group decoration");
 }
 
 }  // namespace

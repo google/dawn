@@ -151,8 +151,13 @@ class VertexPulling : public Transform {
 
   /// Sets the "set" we will put all our vertex buffers into (as storage
   /// buffers)
+  /// DEPRECATED
   /// @param number the set number we will use
   void SetPullingBufferBindingSet(uint32_t number);
+  /// Sets the "group" we will put all our vertex buffers into (as storage
+  /// buffers)
+  /// @param number the group number we will use
+  void SetPullingBufferBindingGroup(uint32_t number);
 
   /// Runs the transform on `module`, returning the transformation result.
   /// @note Users of Tint should register the transform with transform manager
@@ -171,8 +176,8 @@ class VertexPulling : public Transform {
     std::string entry_point_name;
     VertexStateDescriptor vertex_state;
     bool vertex_state_set = false;
-    // Default to 4 as it is past the limits of user-accessible sets
-    uint32_t pulling_set = 4u;
+    // Default to 4 as it is past the limits of user-accessible groups
+    uint32_t pulling_group = 4u;
   };
 
   Config cfg;

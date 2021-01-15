@@ -319,17 +319,17 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param name the name of the variable
   /// @param type the type to use
   /// @param storage_class the storage class to use
-  /// @param set the binding group/set to use for the uniform buffer
+  /// @param group the binding and group to use for the uniform buffer
   /// @param binding the binding number to use for the uniform buffer
   void AddBinding(const std::string& name,
                   ast::type::Type* type,
                   ast::StorageClass storage_class,
-                  uint32_t set,
+                  uint32_t group,
                   uint32_t binding) {
     auto* var = Var(name, storage_class, type, nullptr,
                     ast::VariableDecorationList{
                         create<ast::BindingDecoration>(binding),
-                        create<ast::SetDecoration>(set),
+                        create<ast::GroupDecoration>(group),
                     });
 
     mod->AddGlobalVariable(var);
@@ -338,25 +338,25 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// Adds an uniform buffer variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
-  /// @param set the binding group/set to use for the uniform buffer
+  /// @param group the binding/group/ to use for the uniform buffer
   /// @param binding the binding number to use for the uniform buffer
   void AddUniformBuffer(const std::string& name,
                         ast::type::Type* type,
-                        uint32_t set,
+                        uint32_t group,
                         uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniform, set, binding);
+    AddBinding(name, type, ast::StorageClass::kUniform, group, binding);
   }
 
   /// Adds a storage buffer variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
-  /// @param set the binding group/set to use for the storage buffer
+  /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
   void AddStorageBuffer(const std::string& name,
                         ast::type::Type* type,
-                        uint32_t set,
+                        uint32_t group,
                         uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kStorageBuffer, set, binding);
+    AddBinding(name, type, ast::StorageClass::kStorageBuffer, group, binding);
   }
 
   /// Generates a function that references a specific struct variable
@@ -398,22 +398,22 @@ class InspectorHelper : public ast::BuilderWithModule {
 
   /// Adds a regular sampler variable to the module
   /// @param name the name of the variable
-  /// @param set the binding group/set to use for the storage buffer
+  /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
-  void AddSampler(const std::string& name, uint32_t set, uint32_t binding) {
-    AddBinding(name, sampler_type(), ast::StorageClass::kUniformConstant, set,
+  void AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
+    AddBinding(name, sampler_type(), ast::StorageClass::kUniformConstant, group,
                binding);
   }
 
   /// Adds a comparison sampler variable to the module
   /// @param name the name of the variable
-  /// @param set the binding group/set to use for the storage buffer
+  /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
   void AddComparisonSampler(const std::string& name,
-                            uint32_t set,
+                            uint32_t group,
                             uint32_t binding) {
     AddBinding(name, comparison_sampler_type(),
-               ast::StorageClass::kUniformConstant, set, binding);
+               ast::StorageClass::kUniformConstant, group, binding);
   }
 
   /// Generates a SampledTexture appropriate for the params
@@ -447,25 +447,25 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// Adds a sampled texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
-  /// @param set the binding group/set to use for the sampled texture
+  /// @param group the binding/group to use for the sampled texture
   /// @param binding the binding number to use for the sampled texture
   void AddSampledTexture(const std::string& name,
                          ast::type::Type* type,
-                         uint32_t set,
+                         uint32_t group,
                          uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniformConstant, set, binding);
+    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
   }
 
   /// Adds a multi-sampled texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
-  /// @param set the binding group/set to use for the multi-sampled texture
+  /// @param group the binding/group to use for the multi-sampled texture
   /// @param binding the binding number to use for the multi-sampled texture
   void AddMultisampledTexture(const std::string& name,
                               ast::type::Type* type,
-                              uint32_t set,
+                              uint32_t group,
                               uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniformConstant, set, binding);
+    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
   }
 
   void AddGlobalVariable(const std::string& name, ast::type::Type* type) {

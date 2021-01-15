@@ -19,6 +19,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/location_decoration.h"
@@ -27,7 +28,6 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
@@ -287,7 +287,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   auto* coord_var =
       Var("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
-                                      create<ast::SetDecoration>(1)});
+                                      create<ast::GroupDecoration>(1)});
 
   td.RegisterVariableForTesting(coord_var);
 
@@ -336,7 +336,7 @@ TEST_F(MslGeneratorImplTest,
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
-                                      create<ast::SetDecoration>(1)});
+                                      create<ast::GroupDecoration>(1)});
 
   td.RegisterVariableForTesting(coord_var);
 
@@ -388,7 +388,7 @@ TEST_F(MslGeneratorImplTest,
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
-                                      create<ast::SetDecoration>(1)});
+                                      create<ast::GroupDecoration>(1)});
 
   td.RegisterVariableForTesting(coord_var);
   mod->AddGlobalVariable(coord_var);
@@ -629,7 +629,7 @@ TEST_F(MslGeneratorImplTest,
   auto* coord_var =
       Var("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
-                                      create<ast::SetDecoration>(1)});
+                                      create<ast::GroupDecoration>(1)});
 
   td.RegisterVariableForTesting(coord_var);
   mod->AddGlobalVariable(coord_var);
@@ -693,7 +693,7 @@ TEST_F(MslGeneratorImplTest,
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
-                                      create<ast::SetDecoration>(1)});
+                                      create<ast::GroupDecoration>(1)});
 
   td.RegisterVariableForTesting(coord_var);
   mod->AddGlobalVariable(coord_var);
@@ -760,7 +760,7 @@ TEST_F(MslGeneratorImplTest,
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
-                                      create<ast::SetDecoration>(1)});
+                                      create<ast::GroupDecoration>(1)});
 
   td.RegisterVariableForTesting(coord_var);
   mod->AddGlobalVariable(coord_var);
@@ -914,7 +914,7 @@ TEST_F(MslGeneratorImplTest,
   // [[block]] struct Data {
   //   [[offset(0)]] d : f32;
   // };
-  // [[binding(0), set(0)]] var<storage_buffer> data : Data;
+  // [[binding(0), group(0)]] var<storage_buffer> data : Data;
   //
   // [[stage(compute)]]
   // fn a() -> void {
@@ -938,7 +938,7 @@ TEST_F(MslGeneratorImplTest,
   auto* data_var =
       Var("data", ast::StorageClass::kStorageBuffer, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
-                                      create<ast::SetDecoration>(0)});
+                                      create<ast::GroupDecoration>(0)});
 
   mod->AddConstructedType(s);
   td.RegisterVariableForTesting(data_var);

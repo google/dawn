@@ -187,7 +187,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
       continue;
     }
 
-    entry.bind_group = binding_info.set->value();
+    entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
         ast::type::MemoryLayout::kUniformBuffer);
@@ -224,7 +224,7 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rs;
 
-    entry.bind_group = binding_info.set->value();
+    entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
     result.push_back(entry);
@@ -248,7 +248,7 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rcs;
 
-    entry.bind_group = binding_info.set->value();
+    entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
     result.push_back(entry);
@@ -310,7 +310,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    entry.bind_group = binding_info.set->value();
+    entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
         ast::type::MemoryLayout::kStorageBuffer);
@@ -339,7 +339,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = ref;
 
-    entry.bind_group = binding_info.set->value();
+    entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
     auto* texture_type =

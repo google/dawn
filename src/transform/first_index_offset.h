@@ -52,7 +52,7 @@ namespace transform {
 ///     [[offset(4)]] tint_first_instance_index : u32;
 ///   };
 ///   [[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
-///   [[binding(N), set(M)]] var<uniform> tint_first_index_data :
+///   [[binding(N), group(M)]] var<uniform> tint_first_index_data :
 ///                                                    TintFirstIndexOffsetData;
 ///   fn func() -> u32 {
 ///     const vert_idx = (tint_first_index_offset_vert_idx +
@@ -64,8 +64,8 @@ class FirstIndexOffset : public Transform {
  public:
   /// Constructor
   /// @param binding the binding() for firstVertex/Instance uniform
-  /// @param set the set() for firstVertex/Instance uniform
-  FirstIndexOffset(uint32_t binding, uint32_t set);
+  /// @param group the group() for firstVertex/Instance uniform
+  FirstIndexOffset(uint32_t binding, uint32_t group);
   ~FirstIndexOffset() override;
 
   /// Runs the transform on `module`, returning the transformation result.
@@ -104,7 +104,7 @@ class FirstIndexOffset : public Transform {
       ast::Module* module);
 
   uint32_t binding_;
-  uint32_t set_;
+  uint32_t group_;
 
   bool has_vertex_index_ = false;
   bool has_instance_index_ = false;

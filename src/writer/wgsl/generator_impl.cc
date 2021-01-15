@@ -34,6 +34,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/location_decoration.h"
@@ -41,7 +42,6 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/statement.h"
@@ -620,8 +620,8 @@ bool GeneratorImpl::EmitVariableDecorations(ast::Variable* var) {
 
     if (auto* binding = deco->As<ast::BindingDecoration>()) {
       out_ << "binding(" << binding->value() << ")";
-    } else if (auto* set = deco->As<ast::SetDecoration>()) {
-      out_ << "set(" << set->value() << ")";
+    } else if (auto* group = deco->As<ast::GroupDecoration>()) {
+      out_ << "group(" << group->value() << ")";
     } else if (auto* location = deco->As<ast::LocationDecoration>()) {
       out_ << "location(" << location->value() << ")";
     } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {

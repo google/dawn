@@ -153,7 +153,7 @@ TEST_F(WgslGeneratorImplTest,
   // [[block]] struct Data {
   //   [[offset(0)]] d : f32;
   // };
-  // [[binding(0), set(0)]] var<storage_buffer> data : Data;
+  // [[binding(0), group(0)]] var<storage_buffer> data : Data;
   //
   // [[stage(compute)]]
   // fn a() -> void {
@@ -178,7 +178,7 @@ TEST_F(WgslGeneratorImplTest,
                        ast::VariableDecorationList{
                            // decorations
                            create<ast::BindingDecoration>(0),
-                           create<ast::SetDecoration>(0),
+                           create<ast::GroupDecoration>(0),
                        });
 
   mod->AddConstructedType(s);
@@ -233,7 +233,7 @@ struct Data {
   d : f32;
 };
 
-[[binding(0), set(0)]] var<storage_buffer> data : [[access(read_write)]]
+[[binding(0), group(0)]] var<storage_buffer> data : [[access(read_write)]]
 Data;
 
 [[stage(compute)]]

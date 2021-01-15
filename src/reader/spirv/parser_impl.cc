@@ -42,8 +42,8 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
@@ -1295,7 +1295,7 @@ ast::Variable* ParserImpl::MakeVariable(
                << ": has no operand";
         return nullptr;
       }
-      decorations.emplace_back(create<ast::SetDecoration>(Source{}, deco[1]));
+      decorations.emplace_back(create<ast::GroupDecoration>(Source{}, deco[1]));
     }
     if (deco[0] == SpvDecorationBinding) {
       if (deco.size() == 1) {

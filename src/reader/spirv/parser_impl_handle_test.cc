@@ -1145,7 +1145,7 @@ INSTANTIATE_TEST_SUITE_P(Samplers,
                                                           R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1163,7 +1163,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
                                                           R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1179,7 +1179,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
                                                           R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1195,7 +1195,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
                                                           R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1352,7 +1352,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1361,7 +1361,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1385,7 +1385,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1394,7 +1394,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1429,7 +1429,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1438,7 +1438,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1464,7 +1464,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1473,7 +1473,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1508,7 +1508,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1517,7 +1517,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1542,7 +1542,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1551,7 +1551,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1587,7 +1587,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1596,7 +1596,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1624,7 +1624,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1633,7 +1633,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1662,7 +1662,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1671,7 +1671,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1719,7 +1719,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1728,7 +1728,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1737,7 +1737,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{1}
     }
     x_30
@@ -1798,7 +1798,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1807,7 +1807,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1831,7 +1831,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1840,7 +1840,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1875,7 +1875,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1884,7 +1884,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1910,7 +1910,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1919,7 +1919,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1960,7 +1960,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -1969,7 +1969,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -1994,7 +1994,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2003,7 +2003,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2039,7 +2039,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2048,7 +2048,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2076,7 +2076,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2085,7 +2085,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2115,7 +2115,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2124,7 +2124,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2161,7 +2161,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2170,7 +2170,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2197,7 +2197,7 @@ INSTANTIATE_TEST_SUITE_P(
             R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2206,7 +2206,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2243,7 +2243,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2252,7 +2252,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2280,7 +2280,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2289,7 +2289,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2320,7 +2320,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2329,7 +2329,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2368,7 +2368,7 @@ INSTANTIATE_TEST_SUITE_P(
                         R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2377,7 +2377,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2427,7 +2427,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2436,7 +2436,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2460,7 +2460,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -2469,7 +2469,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2573,7 +2573,7 @@ INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
                               R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2601,7 +2601,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2621,7 +2621,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2644,7 +2644,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2667,7 +2667,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2690,7 +2690,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2710,7 +2710,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2733,7 +2733,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2757,7 +2757,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2923,7 +2923,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2943,7 +2943,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2965,7 +2965,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -2987,7 +2987,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3011,7 +3011,7 @@ INSTANTIATE_TEST_SUITE_P(ImageRead_OptionalParams,
                               "%99 = OpImageRead %v4float %im %vi12",
                               R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3043,7 +3043,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3071,7 +3071,7 @@ INSTANTIATE_TEST_SUITE_P(
          "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3108,7 +3108,7 @@ INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
                               "%99 = OpImageFetch %v4float %im %vi12 ",
                               R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3150,7 +3150,7 @@ INSTANTIATE_TEST_SUITE_P(
          "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3179,7 +3179,7 @@ INSTANTIATE_TEST_SUITE_P(
          "%99 = OpImageFetch %v4float %im %vi123 Sample %i1",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3219,7 +3219,7 @@ INSTANTIATE_TEST_SUITE_P(
          "%99 = OpImageFetch %v4float %im %vi12 Sample %u1",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3269,7 +3269,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3296,7 +3296,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3323,7 +3323,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3352,7 +3352,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3379,7 +3379,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3413,7 +3413,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3440,7 +3440,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4uint %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3467,7 +3467,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4int %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3496,7 +3496,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4int %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3523,7 +3523,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4uint %im %vi12",
          R"(Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20
@@ -3561,7 +3561,7 @@ INSTANTIATE_TEST_SUITE_P(
          R"(
   Variable{
     Decorations{
-      SetDecoration{0}
+      GroupDecoration{0}
       BindingDecoration{0}
     }
     x_10
@@ -3570,7 +3570,7 @@ INSTANTIATE_TEST_SUITE_P(
   }
   Variable{
     Decorations{
-      SetDecoration{2}
+      GroupDecoration{2}
       BindingDecoration{1}
     }
     x_20

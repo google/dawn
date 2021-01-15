@@ -1571,7 +1571,7 @@ TEST_F(SpvModuleScopeVarParserTest,
          "instruction, found '4'."));
 }
 
-TEST_F(SpvModuleScopeVarParserTest, DescriptorSetDecoration_Valid) {
+TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
   auto p = parser(test::Assemble(R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 3
@@ -1587,7 +1587,7 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorSetDecoration_Valid) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      SetDecoration{3}
+      GroupDecoration{3}
     }
     myvar
     storage_buffer
@@ -1597,7 +1597,7 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorSetDecoration_Valid) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
-       DescriptorSetDecoration_MissingOperandWontAssemble) {
+       DescriptorGroupDecoration_MissingOperandWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet
@@ -1611,7 +1611,7 @@ TEST_F(SpvModuleScopeVarParserTest,
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
-       DescriptorSetDecoration_TwoOperandsWontAssemble) {
+       DescriptorGroupDecoration_TwoOperandsWontAssemble) {
   const auto assembly = R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 3 4

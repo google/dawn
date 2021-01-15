@@ -34,7 +34,7 @@ TEST_F(BindingDecorationTest, Is) {
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_FALSE(d->Is<ConstantIdDecoration>());
   EXPECT_FALSE(d->Is<LocationDecoration>());
-  EXPECT_FALSE(d->Is<SetDecoration>());
+  EXPECT_FALSE(d->Is<GroupDecoration>());
 }
 
 TEST_F(BindingDecorationTest, ToStr) {

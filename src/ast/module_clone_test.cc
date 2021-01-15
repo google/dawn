@@ -51,10 +51,10 @@ var<uniform> g5 : [[access(read)]] texture_storage_2d<r32uint>;
 var<uniform> g6 : [[access(write)]] texture_storage_2d<rg32float>;
 
 [[builtin(position)]] var<uniform> g7 : vec3<f32>;
-[[set(10), binding(20)]] var<storage_buffer> g7 : S;
-[[set(10), binding(20)]] var<storage_buffer> g8 : [[access(read)]]
+[[group(10), binding(20)]] var<storage_buffer> g7 : S;
+[[group(10), binding(20)]] var<storage_buffer> g8 : [[access(read)]]
 S;
-[[set(10), binding(20)]] var<storage_buffer> g9 : [[access(read_write)]]
+[[group(10), binding(20)]] var<storage_buffer> g9 : [[access(read_write)]]
 S;
 
 fn f0(p0 : bool) -> f32 {

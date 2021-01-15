@@ -37,6 +37,7 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/intrinsic.h"
@@ -46,7 +47,6 @@
 #include "src/ast/null_literal.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -816,10 +816,10 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
                   Operand::Int(binding->value())});
-    } else if (auto* set = deco->As<ast::SetDecoration>()) {
+    } else if (auto* group = deco->As<ast::GroupDecoration>()) {
       push_annot(spv::Op::OpDecorate, {Operand::Int(var_id),
                                        Operand::Int(SpvDecorationDescriptorSet),
-                                       Operand::Int(set->value())});
+                                       Operand::Int(group->value())});
     } else if (deco->Is<ast::ConstantIdDecoration>()) {
       // Spec constants are handled elsewhere
     } else {

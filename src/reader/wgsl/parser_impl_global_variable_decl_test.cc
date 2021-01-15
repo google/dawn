@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
-  auto p = parser("[[binding(2), set(1)]] var<out> a : f32");
+  auto p = parser("[[binding(2), group(1)]] var<out> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -90,20 +90,20 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 33u);
+  EXPECT_EQ(e->source().range.begin.column, 35u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 34u);
+  EXPECT_EQ(e->source().range.end.column, 36u);
 
   ASSERT_EQ(e->constructor(), nullptr);
 
   auto& decorations = e->decorations();
   ASSERT_EQ(decorations.size(), 2u);
   ASSERT_TRUE(decorations[0]->Is<ast::BindingDecoration>());
-  ASSERT_TRUE(decorations[1]->Is<ast::SetDecoration>());
+  ASSERT_TRUE(decorations[1]->Is<ast::GroupDecoration>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
-  auto p = parser("[[binding(2)]] [[set(1)]] var<out> a : f32");
+  auto p = parser("[[binding(2)]] [[group(1)]] var<out> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -120,16 +120,16 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 36u);
+  EXPECT_EQ(e->source().range.begin.column, 38u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 37u);
+  EXPECT_EQ(e->source().range.end.column, 39u);
 
   ASSERT_EQ(e->constructor(), nullptr);
 
   auto& decorations = e->decorations();
   ASSERT_EQ(decorations.size(), 2u);
   ASSERT_TRUE(decorations[0]->Is<ast::BindingDecoration>());
-  ASSERT_TRUE(decorations[1]->Is<ast::SetDecoration>());
+  ASSERT_TRUE(decorations[1]->Is<ast::GroupDecoration>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {

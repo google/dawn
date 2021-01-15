@@ -17,7 +17,7 @@
   [[offset(0)]] modelViewProjectionMatrix : mat4x4<f32>;
 };
 
-[[binding(0), set(0)]] var<uniform> uniforms : [[access(read)]] Uniforms;
+[[binding(0), group(0)]] var<uniform> uniforms : [[access(read)]] Uniforms;
 
 [[location(0)]] var<in> cur_position : vec4<f32>;
 [[location(1)]] var<in> color : vec4<f32>;

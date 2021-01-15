@@ -108,19 +108,19 @@ Function::referenced_uniform_variables() const {
     }
 
     BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
+    GroupDecoration* group = nullptr;
     for (auto* deco : var->decorations()) {
       if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
-      } else if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+      } else if (auto* g = deco->As<GroupDecoration>()) {
+        group = g;
       }
     }
-    if (binding == nullptr || set == nullptr) {
+    if (binding == nullptr || group == nullptr) {
       continue;
     }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -135,19 +135,19 @@ Function::referenced_storagebuffer_variables() const {
     }
 
     BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
+    GroupDecoration* group = nullptr;
     for (auto* deco : var->decorations()) {
       if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
-      } else if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+      } else if (auto* s = deco->As<GroupDecoration>()) {
+        group = s;
       }
     }
-    if (binding == nullptr || set == nullptr) {
+    if (binding == nullptr || group == nullptr) {
       continue;
     }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -305,20 +305,20 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
     }
 
     BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
+    GroupDecoration* group = nullptr;
     for (auto* deco : var->decorations()) {
       if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
       }
-      if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+      if (auto* s = deco->As<GroupDecoration>()) {
+        group = s;
       }
     }
-    if (binding == nullptr || set == nullptr) {
+    if (binding == nullptr || group == nullptr) {
       continue;
     }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -342,19 +342,19 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
     }
 
     BindingDecoration* binding = nullptr;
-    SetDecoration* set = nullptr;
+    GroupDecoration* group = nullptr;
     for (auto* deco : var->decorations()) {
       if (auto* b = deco->As<BindingDecoration>()) {
         binding = b;
-      } else if (auto* s = deco->As<SetDecoration>()) {
-        set = s;
+      } else if (auto* s = deco->As<GroupDecoration>()) {
+        group = s;
       }
     }
-    if (binding == nullptr || set == nullptr) {
+    if (binding == nullptr || group == nullptr) {
       continue;
     }
 
-    ret.push_back({var, BindingInfo{binding, set}});
+    ret.push_back({var, BindingInfo{binding, group}});
   }
 
   return ret;

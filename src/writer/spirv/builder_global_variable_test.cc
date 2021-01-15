@@ -21,10 +21,10 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/struct.h"
 #include "src/ast/type/access_control_type.h"
@@ -194,11 +194,11 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
+TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, nullptr,
                 ast::VariableDecorationList{
                     create<ast::BindingDecoration>(2),
-                    create<ast::SetDecoration>(3),
+                    create<ast::GroupDecoration>(3),
                 });
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();

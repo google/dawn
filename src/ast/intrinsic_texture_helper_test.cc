@@ -155,7 +155,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
   auto* datatype = resultVectorComponentType(b);
 
   VariableDecorationList decos = {
-      b->create<ast::SetDecoration>(0),
+      b->create<ast::GroupDecoration>(0),
       b->create<ast::BindingDecoration>(0),
   };
   switch (texture_kind) {
@@ -194,7 +194,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
 ast::Variable* TextureOverloadCase::buildSamplerVariable(
     ast::Builder* b) const {
   VariableDecorationList decos = {
-      b->create<ast::SetDecoration>(0),
+      b->create<ast::GroupDecoration>(0),
       b->create<ast::BindingDecoration>(1),
   };
   return b->Var("sampler", ast::StorageClass::kUniformConstant,

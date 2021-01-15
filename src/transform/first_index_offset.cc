@@ -76,8 +76,8 @@ ast::Variable* clone_variable_with_new_name(ast::CloneContext* ctx,
 
 }  // namespace
 
-FirstIndexOffset::FirstIndexOffset(uint32_t binding, uint32_t set)
-    : binding_(binding), set_(set) {}
+FirstIndexOffset::FirstIndexOffset(uint32_t binding, uint32_t group)
+    : binding_(binding), group_(group) {}
 
 FirstIndexOffset::~FirstIndexOffset() = default;
 
@@ -237,7 +237,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
       nullptr,                           // constructor
       ast::VariableDecorationList{
           mod->create<ast::BindingDecoration>(Source{}, binding_),
-          mod->create<ast::SetDecoration>(Source{}, set_),
+          mod->create<ast::GroupDecoration>(Source{}, group_),
       });  // decorations
 
   mod->AddGlobalVariable(idx_var);

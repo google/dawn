@@ -96,6 +96,8 @@ set(TINT_LIB_SRCS
   ast/function.h
   ast/function_decoration.cc
   ast/function_decoration.h
+  ast/group_decoration.cc
+  ast/group_decoration.h
   ast/identifier_expression.cc
   ast/identifier_expression.h
   ast/if_statement.cc
@@ -124,8 +126,6 @@ set(TINT_LIB_SRCS
   ast/return_statement.h
   ast/scalar_constructor_expression.cc
   ast/scalar_constructor_expression.h
-  ast/set_decoration.cc
-  ast/set_decoration.h
   ast/sint_literal.cc
   ast/sint_literal.h
   ast/stage_decoration.cc
@@ -409,6 +409,7 @@ if(${TINT_BUILD_TESTS})
     ast/fallthrough_statement_test.cc
     ast/float_literal_test.cc
     ast/function_test.cc
+    ast/group_decoration_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
     ast/intrinsic_texture_helper_test.cc
@@ -423,7 +424,6 @@ if(${TINT_BUILD_TESTS})
     ast/binary_expression_test.cc
     ast/return_statement_test.cc
     ast/scalar_constructor_expression_test.cc
-    ast/set_decoration_test.cc
     ast/sint_literal_test.cc
     ast/stage_decoration_test.cc
     ast/stride_decoration_test.cc

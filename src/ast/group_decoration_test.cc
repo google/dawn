@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/set_decoration.h"
+#include "src/ast/group_decoration.h"
 
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/test_helper.h"
@@ -21,27 +21,27 @@ namespace tint {
 namespace ast {
 namespace {
 
-using SetDecorationTest = TestHelper;
+using GroupDecorationTest = TestHelper;
 
-TEST_F(SetDecorationTest, Creation) {
-  auto* d = create<SetDecoration>(2);
+TEST_F(GroupDecorationTest, Creation) {
+  auto* d = create<GroupDecoration>(2);
   EXPECT_EQ(2u, d->value());
 }
 
-TEST_F(SetDecorationTest, Is) {
-  Decoration* d = create<SetDecoration>(2);
+TEST_F(GroupDecorationTest, Is) {
+  Decoration* d = create<GroupDecoration>(2);
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
   EXPECT_FALSE(d->Is<ConstantIdDecoration>());
   EXPECT_FALSE(d->Is<LocationDecoration>());
-  EXPECT_TRUE(d->Is<SetDecoration>());
+  EXPECT_TRUE(d->Is<GroupDecoration>());
 }
 
-TEST_F(SetDecorationTest, ToStr) {
-  auto* d = create<SetDecoration>(2);
+TEST_F(GroupDecorationTest, ToStr) {
+  auto* d = create<GroupDecoration>(2);
   std::ostringstream out;
   d->to_str(out, 0);
-  EXPECT_EQ(out.str(), R"(SetDecoration{2}
+  EXPECT_EQ(out.str(), R"(GroupDecoration{2}
 )");
 }
 

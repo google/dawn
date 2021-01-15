@@ -27,10 +27,10 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/expression.h"
 #include "src/ast/function_decoration.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/node.h"
 #include "src/ast/pipeline_stage.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/type/sampler_type.h"
 #include "src/ast/type/type.h"
@@ -47,8 +47,8 @@ class Function : public Castable<Function, Node> {
   struct BindingInfo {
     /// The binding decoration
     BindingDecoration* binding = nullptr;
-    /// The set decoration
-    SetDecoration* set = nullptr;
+    /// The group decoration
+    GroupDecoration* group = nullptr;
   };
 
   /// Create a function
@@ -114,32 +114,32 @@ class Function : public Castable<Function, Node> {
   const std::vector<std::pair<Variable*, BuiltinDecoration*>>
   referenced_builtin_variables() const;
   /// Retrieves any referenced uniform variables. Note, the variables must be
-  /// decorated with both binding and set decorations.
+  /// decorated with both binding and group decorations.
   /// @returns the referenced uniforms
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_uniform_variables() const;
   /// Retrieves any referenced storagebuffer variables. Note, the variables
-  /// must be decorated with both binding and set decorations.
+  /// must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_storagebuffer_variables() const;
   /// Retrieves any referenced regular Sampler variables. Note, the
-  /// variables must be decorated with both binding and set decorations.
+  /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_sampler_variables() const;
   /// Retrieves any referenced comparison Sampler variables. Note, the
-  /// variables must be decorated with both binding and set decorations.
+  /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_comparison_sampler_variables() const;
   /// Retrieves any referenced sampled textures variables. Note, the
-  /// variables must be decorated with both binding and set decorations.
+  /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_sampled_texture_variables() const;
   /// Retrieves any referenced multisampled textures variables. Note, the
-  /// variables must be decorated with both binding and set decorations.
+  /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_multisampled_texture_variables() const;

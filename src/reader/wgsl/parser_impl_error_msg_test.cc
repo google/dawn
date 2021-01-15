@@ -941,10 +941,10 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListInvalid) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListMissingComma) {
-  EXPECT("[[location(1) set(2)]] var i : i32;",
+  EXPECT("[[location(1) group(2)]] var i : i32;",
          "test.wgsl:1:15 error: expected ',' for decoration list\n"
-         "[[location(1) set(2)]] var i : i32;\n"
-         "              ^^^\n");
+         "[[location(1) group(2)]] var i : i32;\n"
+         "              ^^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListMissingEnd) {
@@ -1026,26 +1026,26 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingInvalidValue) {
          "          ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoSetMissingLParen) {
-  EXPECT("[[set 1]] var i : i32;",
-         "test.wgsl:1:7 error: expected '(' for set decoration\n"
-         "[[set 1]] var i : i32;\n"
-         "      ^\n");
+TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingLParen) {
+  EXPECT("[[group 1]] var i : i32;",
+         "test.wgsl:1:9 error: expected '(' for group decoration\n"
+         "[[group 1]] var i : i32;\n"
+         "        ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoSetMissingRParen) {
-  EXPECT("[[set(1]] var i : i32;",
-         "test.wgsl:1:8 error: expected ')' for set decoration\n"
-         "[[set(1]] var i : i32;\n"
-         "       ^^\n");
+TEST_F(ParserImplErrorTest, GlobalDeclVarDecoGroupMissingRParen) {
+  EXPECT("[[group(1]] var i : i32;",
+         "test.wgsl:1:10 error: expected ')' for group decoration\n"
+         "[[group(1]] var i : i32;\n"
+         "         ^^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingSetValue) {
-  EXPECT("[[set(x)]] var i : i32;",
-         "test.wgsl:1:7 error: expected signed integer literal for set "
+TEST_F(ParserImplErrorTest, GlobalDeclVarDecoBindingGroupValue) {
+  EXPECT("[[group(x)]] var i : i32;",
+         "test.wgsl:1:9 error: expected signed integer literal for group "
          "decoration\n"
-         "[[set(x)]] var i : i32;\n"
-         "      ^\n");
+         "[[group(x)]] var i : i32;\n"
+         "        ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarInvalidIdentifier) {

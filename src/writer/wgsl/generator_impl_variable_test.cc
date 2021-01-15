@@ -18,8 +18,8 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
@@ -65,7 +65,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
                 ast::VariableDecorationList{
                     create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
                     create<ast::BindingDecoration>(0),
-                    create<ast::SetDecoration>(1),
+                    create<ast::GroupDecoration>(1),
                     create<ast::LocationDecoration>(2),
                     create<ast::ConstantIdDecoration>(42),
                 });
@@ -73,7 +73,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(
       gen.result(),
-      R"([[builtin(position), binding(0), set(1), location(2), constant_id(42)]] var a : f32;
+      R"([[builtin(position), binding(0), group(1), location(2), constant_id(42)]] var a : f32;
 )");
 }
 

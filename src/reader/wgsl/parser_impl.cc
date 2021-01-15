@@ -32,13 +32,13 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/group_decoration.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/stride_decoration.h"
@@ -134,6 +134,7 @@ const char kAccessDecoration[] = "access";
 const char kBindingDecoration[] = "binding";
 const char kBlockDecoration[] = "block";
 const char kBuiltinDecoration[] = "builtin";
+const char kGroupDecoration[] = "group";
 const char kLocationDecoration[] = "location";
 const char kOffsetDecoration[] = "offset";
 const char kSetDecoration[] = "set";
@@ -149,8 +150,9 @@ bool is_decoration(Token t) {
   return s == kAccessDecoration || s == kBindingDecoration ||
          s == kBlockDecoration || s == kBuiltinDecoration ||
          s == kLocationDecoration || s == kOffsetDecoration ||
-         s == kSetDecoration || s == kStageDecoration ||
-         s == kStrideDecoration || s == kWorkgroupSizeDecoration;
+         s == kSetDecoration || s == kGroupDecoration ||
+         s == kStageDecoration || s == kStrideDecoration ||
+         s == kWorkgroupSizeDecoration;
 }
 
 /// Enter-exit counters for block token types.
@@ -2863,7 +2865,7 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
 
       if (is_decoration(peek())) {
         // We have two decorations in a bracket without a separating comma.
-        // e.g. [[location(1) set(2)]]
+        // e.g. [[location(1) group(2)]]
         //                    ^^^ expected comma
         expect(use, Token::Type::kComma);
         return Failure::kErrored;
@@ -2934,14 +2936,14 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kSetDecoration) {
-    const char* use = "set decoration";
+  if (s == kSetDecoration || s == kGroupDecoration) {
+    const char* use = "group decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::SetDecoration>(val.source, val.value);
+      return create<ast::GroupDecoration>(val.source, val.value);
     });
   }
 

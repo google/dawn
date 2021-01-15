@@ -65,8 +65,12 @@ void VertexPulling::SetEntryPoint(std::string entry_point) {
   cfg.entry_point_name = std::move(entry_point);
 }
 
+void VertexPulling::SetPullingBufferBindingGroup(uint32_t number) {
+  cfg.pulling_group = number;
+}
+
 void VertexPulling::SetPullingBufferBindingSet(uint32_t number) {
-  cfg.pulling_set = number;
+  cfg.pulling_group = number;
 }
 
 Transform::Output VertexPulling::Run(ast::Module* in) {
@@ -293,7 +297,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
         ast::VariableDecorationList{
             // decorations
             out->create<ast::BindingDecoration>(Source{}, i),
-            out->create<ast::SetDecoration>(Source{}, cfg.pulling_set),
+            out->create<ast::GroupDecoration>(Source{}, cfg.pulling_group),
         });
     out->AddGlobalVariable(var);
   }

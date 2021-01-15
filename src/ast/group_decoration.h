@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_SET_DECORATION_H_
-#define SRC_AST_SET_DECORATION_H_
+#ifndef SRC_AST_GROUP_DECORATION_H_
+#define SRC_AST_GROUP_DECORATION_H_
 
 #include <stddef.h>
 
@@ -22,16 +22,16 @@
 namespace tint {
 namespace ast {
 
-/// A set decoration
-class SetDecoration : public Castable<SetDecoration, VariableDecoration> {
+/// A group decoration
+class GroupDecoration : public Castable<GroupDecoration, VariableDecoration> {
  public:
   /// constructor
-  /// @param value the set value
+  /// @param value the group value
   /// @param source the source of this decoration
-  SetDecoration(const Source& source, uint32_t value);
-  ~SetDecoration() override;
+  GroupDecoration(const Source& source, uint32_t value);
+  ~GroupDecoration() override;
 
-  /// @returns the set value
+  /// @returns the group value
   uint32_t value() const { return value_; }
 
   /// Outputs the decoration to the given stream
@@ -45,7 +45,7 @@ class SetDecoration : public Castable<SetDecoration, VariableDecoration> {
   /// information is not cloned.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  SetDecoration* Clone(CloneContext* ctx) const override;
+  GroupDecoration* Clone(CloneContext* ctx) const override;
 
  private:
   uint32_t const value_;
@@ -54,4 +54,4 @@ class SetDecoration : public Castable<SetDecoration, VariableDecoration> {
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_SET_DECORATION_H_
+#endif  // SRC_AST_GROUP_DECORATION_H_
