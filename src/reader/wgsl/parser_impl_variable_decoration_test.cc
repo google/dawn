@@ -112,17 +112,22 @@ TEST_P(BuiltinTest, VariableDecoration_Builtin) {
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
     BuiltinTest,
-    testing::Values(
-        BuiltinData{"position", ast::Builtin::kPosition},
-        BuiltinData{"vertex_idx", ast::Builtin::kVertexIdx},
-        BuiltinData{"instance_idx", ast::Builtin::kInstanceIdx},
-        BuiltinData{"front_facing", ast::Builtin::kFrontFacing},
-        BuiltinData{"frag_coord", ast::Builtin::kFragCoord},
-        BuiltinData{"frag_depth", ast::Builtin::kFragDepth},
-        BuiltinData{"local_invocation_id", ast::Builtin::kLocalInvocationId},
-        BuiltinData{"local_invocation_idx", ast::Builtin::kLocalInvocationIdx},
-        BuiltinData{"global_invocation_id",
-                    ast::Builtin::kGlobalInvocationId}));
+    testing::Values(BuiltinData{"position", ast::Builtin::kPosition},
+                    BuiltinData{"vertex_idx", ast::Builtin::kVertexIndex},
+                    BuiltinData{"vertex_index", ast::Builtin::kVertexIndex},
+                    BuiltinData{"instance_idx", ast::Builtin::kInstanceIndex},
+                    BuiltinData{"instance_index", ast::Builtin::kInstanceIndex},
+                    BuiltinData{"front_facing", ast::Builtin::kFrontFacing},
+                    BuiltinData{"frag_coord", ast::Builtin::kFragCoord},
+                    BuiltinData{"frag_depth", ast::Builtin::kFragDepth},
+                    BuiltinData{"local_invocation_id",
+                                ast::Builtin::kLocalInvocationId},
+                    BuiltinData{"local_invocation_idx",
+                                ast::Builtin::kLocalInvocationIndex},
+                    BuiltinData{"local_invocation_index",
+                                ast::Builtin::kLocalInvocationIndex},
+                    BuiltinData{"global_invocation_id",
+                                ast::Builtin::kGlobalInvocationId}));
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
   auto p = parser("builtin position)");

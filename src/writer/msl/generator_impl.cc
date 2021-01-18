@@ -1396,9 +1396,9 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
   switch (builtin) {
     case ast::Builtin::kPosition:
       return "position";
-    case ast::Builtin::kVertexIdx:
+    case ast::Builtin::kVertexIndex:
       return "vertex_id";
-    case ast::Builtin::kInstanceIdx:
+    case ast::Builtin::kInstanceIndex:
       return "instance_id";
     case ast::Builtin::kFrontFacing:
       return "front_facing";
@@ -1408,7 +1408,7 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "depth(any)";
     case ast::Builtin::kLocalInvocationId:
       return "thread_position_in_threadgroup";
-    case ast::Builtin::kLocalInvocationIdx:
+    case ast::Builtin::kLocalInvocationIndex:
       return "thread_index_in_threadgroup";
     case ast::Builtin::kGlobalInvocationId:
       return "thread_position_in_grid";

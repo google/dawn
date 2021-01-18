@@ -103,11 +103,11 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "position") {
     return ast::Builtin::kPosition;
   }
-  if (str == "vertex_idx") {
-    return ast::Builtin::kVertexIdx;
+  if (str == "vertex_idx" || str == "vertex_index") {
+    return ast::Builtin::kVertexIndex;
   }
-  if (str == "instance_idx") {
-    return ast::Builtin::kInstanceIdx;
+  if (str == "instance_idx" || str == "instance_index") {
+    return ast::Builtin::kInstanceIndex;
   }
   if (str == "front_facing") {
     return ast::Builtin::kFrontFacing;
@@ -121,8 +121,8 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "local_invocation_id") {
     return ast::Builtin::kLocalInvocationId;
   }
-  if (str == "local_invocation_idx") {
-    return ast::Builtin::kLocalInvocationIdx;
+  if (str == "local_invocation_idx" || str == "local_invocation_index") {
+    return ast::Builtin::kLocalInvocationIndex;
   }
   if (str == "global_invocation_id") {
     return ast::Builtin::kGlobalInvocationId;

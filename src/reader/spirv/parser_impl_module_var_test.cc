@@ -208,7 +208,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{vertex_idx}
+      BuiltinDecoration{vertex_index}
     }
     x_52
     in

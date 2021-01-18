@@ -133,7 +133,7 @@ struct TintVertexData {
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
 [[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 
@@ -172,7 +172,7 @@ struct TintVertexData {
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[builtin(instance_idx)]] var<in> _tint_pulling_instance_index : i32;
+[[builtin(instance_index)]] var<in> _tint_pulling_instance_index : i32;
 [[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 
@@ -211,7 +211,7 @@ struct TintVertexData {
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
 [[binding(0), group(5)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 
@@ -241,8 +241,8 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
   auto* src = R"(
 [[location(0)]] var<in> var_a : f32;
 [[location(1)]] var<in> var_b : f32;
-[[builtin(vertex_idx)]] var<in> custom_vertex_index : i32;
-[[builtin(instance_idx)]] var<in> custom_instance_index : i32;
+[[builtin(vertex_index)]] var<in> custom_vertex_index : i32;
+[[builtin(instance_index)]] var<in> custom_instance_index : i32;
 
 [[stage(vertex)]]
 fn main() -> void {}
@@ -259,8 +259,8 @@ struct TintVertexData {
 [[binding(1), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_1 : TintVertexData;
 var<private> var_a : f32;
 var<private> var_b : f32;
-[[builtin(vertex_idx)]] var<in> custom_vertex_index : i32;
-[[builtin(instance_idx)]] var<in> custom_instance_index : i32;
+[[builtin(vertex_index)]] var<in> custom_vertex_index : i32;
+[[builtin(instance_index)]] var<in> custom_instance_index : i32;
 
 [[stage(vertex)]]
 fn main() -> void {
@@ -301,7 +301,7 @@ struct TintVertexData {
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
 [[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 var<private> var_b : array<f32, 4>;
@@ -347,7 +347,7 @@ struct TintVertexData {
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[builtin(vertex_idx)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
 [[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
 [[binding(1), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_1 : TintVertexData;
 [[binding(2), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_2 : TintVertexData;

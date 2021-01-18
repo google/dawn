@@ -24,13 +24,13 @@ namespace ast {
 enum class Builtin {
   kNone = -1,
   kPosition,
-  kVertexIdx,
-  kInstanceIdx,
+  kVertexIndex,
+  kInstanceIndex,
   kFrontFacing,
   kFragCoord,
   kFragDepth,
   kLocalInvocationId,
-  kLocalInvocationIdx,
+  kLocalInvocationIndex,
   kGlobalInvocationId,
 
   // Below are not currently WGSL builtins, but are included in this enum as

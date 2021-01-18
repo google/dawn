@@ -26,7 +26,7 @@ namespace tint {
 namespace transform {
 
 /// Adds firstVertex/Instance (injected via root constants) to
-/// vertex/instance_idx builtins.
+/// vertex/instance index builtins.
 ///
 /// This transform assumes that Name transform has been run before.
 ///

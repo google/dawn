@@ -1609,9 +1609,9 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
   switch (builtin) {
     case ast::Builtin::kPosition:
       return "SV_Position";
-    case ast::Builtin::kVertexIdx:
+    case ast::Builtin::kVertexIndex:
       return "SV_VertexID";
-    case ast::Builtin::kInstanceIdx:
+    case ast::Builtin::kInstanceIndex:
       return "SV_InstanceID";
     case ast::Builtin::kFrontFacing:
       return "SV_IsFrontFacing";
@@ -1621,7 +1621,7 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "SV_Depth";
     case ast::Builtin::kLocalInvocationId:
       return "SV_GroupThreadID";
-    case ast::Builtin::kLocalInvocationIdx:
+    case ast::Builtin::kLocalInvocationIndex:
       return "SV_GroupIndex";
     case ast::Builtin::kGlobalInvocationId:
       return "SV_DispatchThreadID";

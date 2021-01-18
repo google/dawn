@@ -121,8 +121,8 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
     }
   };
 
-  // Clone the AST, renaming the kVertexIdx and kInstanceIdx builtins, and add
-  // a CreateFirstIndexOffset() statement to each function that uses one of
+  // Clone the AST, renaming the kVertexIndex and kInstanceIndex builtins, and
+  // add a CreateFirstIndexOffset() statement to each function that uses one of
   // these builtins.
 
   Output out;
@@ -132,13 +132,13 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
             for (ast::VariableDecoration* dec : var->decorations()) {
               if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
                 ast::Builtin blt_type = blt_dec->value();
-                if (blt_type == ast::Builtin::kVertexIdx) {
+                if (blt_type == ast::Builtin::kVertexIndex) {
                   vertex_index_sym = var->symbol();
                   has_vertex_index_ = true;
                   return clone_variable_with_new_name(
                       ctx, var,
                       kIndexOffsetPrefix + in->SymbolToName(var->symbol()));
-                } else if (blt_type == ast::Builtin::kInstanceIdx) {
+                } else if (blt_type == ast::Builtin::kInstanceIndex) {
                   instance_index_sym = var->symbol();
                   has_instance_index_ = true;
                   return clone_variable_with_new_name(
@@ -160,11 +160,11 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
             ast::StatementList statements;
             for (const auto& data :
                  func->local_referenced_builtin_variables()) {
-              if (data.second->value() == ast::Builtin::kVertexIdx) {
+              if (data.second->value() == ast::Builtin::kVertexIndex) {
                 statements.emplace_back(CreateFirstIndexOffset(
                     in->SymbolToName(vertex_index_sym), kFirstVertexName,
                     buffer_var, ctx->mod));
-              } else if (data.second->value() == ast::Builtin::kInstanceIdx) {
+              } else if (data.second->value() == ast::Builtin::kInstanceIndex) {
                 statements.emplace_back(CreateFirstIndexOffset(
                     in->SymbolToName(instance_index_sym), kFirstInstanceName,
                     buffer_var, ctx->mod));

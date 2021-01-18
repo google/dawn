@@ -158,7 +158,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
 
     for (auto* d : v->decorations()) {
       if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
-        if (builtin->value() == ast::Builtin::kVertexIdx) {
+        if (builtin->value() == ast::Builtin::kVertexIndex) {
           vertex_index_name = in->SymbolToName(v->symbol());
           return;
         }
@@ -179,7 +179,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
       ast::VariableDecorationList{
           // decorations
           out->create<ast::BuiltinDecoration>(Source{},
-                                              ast::Builtin::kVertexIdx),
+                                              ast::Builtin::kVertexIndex),
       });
 
   out->AddGlobalVariable(var);
@@ -205,7 +205,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
 
     for (auto* d : v->decorations()) {
       if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
-        if (builtin->value() == ast::Builtin::kInstanceIdx) {
+        if (builtin->value() == ast::Builtin::kInstanceIndex) {
           instance_index_name = in->SymbolToName(v->symbol());
           return;
         }
@@ -226,7 +226,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
       ast::VariableDecorationList{
           // decorations
           out->create<ast::BuiltinDecoration>(Source{},
-                                              ast::Builtin::kInstanceIdx),
+                                              ast::Builtin::kInstanceIndex),
       });
   out->AddGlobalVariable(var);
 }

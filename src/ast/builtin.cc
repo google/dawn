@@ -27,12 +27,12 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
       out << "position";
       break;
     }
-    case Builtin::kVertexIdx: {
-      out << "vertex_idx";
+    case Builtin::kVertexIndex: {
+      out << "vertex_index";
       break;
     }
-    case Builtin::kInstanceIdx: {
-      out << "instance_idx";
+    case Builtin::kInstanceIndex: {
+      out << "instance_index";
       break;
     }
     case Builtin::kFrontFacing: {
@@ -51,8 +51,8 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
       out << "local_invocation_id";
       break;
     }
-    case Builtin::kLocalInvocationIdx: {
-      out << "local_invocation_idx";
+    case Builtin::kLocalInvocationIndex: {
+      out << "local_invocation_index";
       break;
     }
     case Builtin::kGlobalInvocationId: {

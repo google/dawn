@@ -3132,9 +3132,9 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
   switch (builtin) {
     case ast::Builtin::kPosition:
       return SpvBuiltInPosition;
-    case ast::Builtin::kVertexIdx:
+    case ast::Builtin::kVertexIndex:
       return SpvBuiltInVertexIndex;
-    case ast::Builtin::kInstanceIdx:
+    case ast::Builtin::kInstanceIndex:
       return SpvBuiltInInstanceIndex;
     case ast::Builtin::kFrontFacing:
       return SpvBuiltInFrontFacing;
@@ -3144,7 +3144,7 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
       return SpvBuiltInFragDepth;
     case ast::Builtin::kLocalInvocationId:
       return SpvBuiltInLocalInvocationId;
-    case ast::Builtin::kLocalInvocationIdx:
+    case ast::Builtin::kLocalInvocationIndex:
       return SpvBuiltInLocalInvocationIndex;
     case ast::Builtin::kGlobalInvocationId:
       return SpvBuiltInGlobalInvocationId;

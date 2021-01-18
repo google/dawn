@@ -210,15 +210,16 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBuiltinTest,
     testing::Values(
         BuiltinCase{SpvBuiltInPosition, true, ast::Builtin::kPosition},
-        BuiltinCase{SpvBuiltInVertexIndex, true, ast::Builtin::kVertexIdx},
-        BuiltinCase{SpvBuiltInInstanceIndex, true, ast::Builtin::kInstanceIdx},
+        BuiltinCase{SpvBuiltInVertexIndex, true, ast::Builtin::kVertexIndex},
+        BuiltinCase{SpvBuiltInInstanceIndex, true,
+                    ast::Builtin::kInstanceIndex},
         BuiltinCase{SpvBuiltInFrontFacing, true, ast::Builtin::kFrontFacing},
         BuiltinCase{SpvBuiltInFragCoord, true, ast::Builtin::kFragCoord},
         BuiltinCase{SpvBuiltInFragDepth, true, ast::Builtin::kFragDepth},
         BuiltinCase{SpvBuiltInLocalInvocationId, true,
                     ast::Builtin::kLocalInvocationId},
         BuiltinCase{SpvBuiltInLocalInvocationIndex, true,
-                    ast::Builtin::kLocalInvocationIdx},
+                    ast::Builtin::kLocalInvocationIndex},
         BuiltinCase{SpvBuiltInGlobalInvocationId, true,
                     ast::Builtin::kGlobalInvocationId}));
 

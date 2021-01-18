@@ -71,9 +71,9 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
     case SpvBuiltInPosition:
       return ast::Builtin::kPosition;
     case SpvBuiltInVertexIndex:
-      return ast::Builtin::kVertexIdx;
+      return ast::Builtin::kVertexIndex;
     case SpvBuiltInInstanceIndex:
-      return ast::Builtin::kInstanceIdx;
+      return ast::Builtin::kInstanceIndex;
     case SpvBuiltInFrontFacing:
       return ast::Builtin::kFrontFacing;
     case SpvBuiltInFragCoord:
@@ -83,7 +83,7 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
     case SpvBuiltInLocalInvocationId:
       return ast::Builtin::kLocalInvocationId;
     case SpvBuiltInLocalInvocationIndex:
-      return ast::Builtin::kLocalInvocationIdx;
+      return ast::Builtin::kLocalInvocationIndex;
     case SpvBuiltInGlobalInvocationId:
       return ast::Builtin::kGlobalInvocationId;
     default:

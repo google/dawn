@@ -191,10 +191,10 @@ class VertexPulling : public Transform {
     /// @param index index to append to buffer name
     std::string GetVertexBufferName(uint32_t index) const;
 
-    /// Inserts vertex_idx binding, or finds the existing one
+    /// Inserts vertex_index binding, or finds the existing one
     void FindOrInsertVertexIndexIfUsed();
 
-    /// Inserts instance_idx binding, or finds the existing one
+    /// Inserts instance_index binding, or finds the existing one
     void FindOrInsertInstanceIndexIfUsed();
 
     /// Converts var<in> with a location decoration to var<private>

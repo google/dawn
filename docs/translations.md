@@ -28,13 +28,13 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 | Name | SPIR-V | MSL | HLSL |
 |------|--------|-----|------|
 | position | SpvBuiltInPosition |position | SV_Position |
-| vertex_idx | SpvBuiltInVertexIndex |vertex_id | SV_VertexID |
-| instance_idx | SpvBuiltInInstanceIndex | instance_id| SV_InstanceID |
+| vertex_index | SpvBuiltInVertexIndex |vertex_id | SV_VertexID |
+| instance_index | SpvBuiltInInstanceIndex | instance_id| SV_InstanceID |
 | front_facing | SpvBuiltInFrontFacing | front_facing | SV_IsFrontFacing |
 | frag_coord | SpvBuiltInFragCoord | position | SV_Position |
 | frag_depth | SpvBuiltInFragDepth | depth(any) | SV_Depth |
 | local_invocation_id | SpvBuiltInLocalInvocationId | thread_position_in_threadgroup | SV_GroupThreadID |
-| local_invocation_idx | SpvBuiltInLocalInvocationIndex | thread_index_in_threadgroup | SV_GroupIndex |
+| local_invocation_index | SpvBuiltInLocalInvocationIndex | thread_index_in_threadgroup | SV_GroupIndex |
 | global_invocation_id | SpvBuiltInGlobalInvocationId | thread_position_in_grid | SV_DispatchThreadID |
 
 

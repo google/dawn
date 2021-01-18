@@ -28,7 +28,7 @@ using FirstIndexOffsetTest = TransformTest;
 
 TEST_F(FirstIndexOffsetTest, Error_AlreadyTransformed) {
   auto* src = R"(
-[[builtin(vertex_idx)]] var<in> vert_idx : u32;
+[[builtin(vertex_index)]] var<in> vert_idx : u32;
 
 fn test() -> u32 {
   return vert_idx;
@@ -63,7 +63,7 @@ TEST_F(FirstIndexOffsetTest, EmptyModule) {
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
   auto* src = R"(
-[[builtin(vertex_idx)]] var<in> vert_idx : u32;
+[[builtin(vertex_index)]] var<in> vert_idx : u32;
 
 fn test() -> u32 {
   return vert_idx;
@@ -82,7 +82,7 @@ struct TintFirstIndexOffsetData {
   tint_first_vertex_index : u32;
 };
 
-[[builtin(vertex_idx)]] var<in> tint_first_index_offset_vert_idx : u32;
+[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
 [[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn test() -> u32 {
@@ -103,7 +103,7 @@ fn entry() -> void {
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
   auto* src = R"(
-[[builtin(instance_idx)]] var<in> inst_idx : u32;
+[[builtin(instance_index)]] var<in> inst_idx : u32;
 
 fn test() -> u32 {
   return inst_idx;
@@ -122,7 +122,7 @@ struct TintFirstIndexOffsetData {
   tint_first_instance_index : u32;
 };
 
-[[builtin(instance_idx)]] var<in> tint_first_index_offset_inst_idx : u32;
+[[builtin(instance_index)]] var<in> tint_first_index_offset_inst_idx : u32;
 [[binding(1), group(7)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn test() -> u32 {
@@ -143,8 +143,8 @@ fn entry() -> void {
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
   auto* src = R"(
-[[builtin(instance_idx)]] var<in> instance_idx : u32;
-[[builtin(vertex_idx)]] var<in> vert_idx : u32;
+[[builtin(instance_index)]] var<in> instance_idx : u32;
+[[builtin(vertex_index)]] var<in> vert_idx : u32;
 
 fn test() -> u32 {
   return instance_idx + vert_idx;
@@ -165,8 +165,8 @@ struct TintFirstIndexOffsetData {
   tint_first_instance_index : u32;
 };
 
-[[builtin(instance_idx)]] var<in> tint_first_index_offset_instance_idx : u32;
-[[builtin(vertex_idx)]] var<in> tint_first_index_offset_vert_idx : u32;
+[[builtin(instance_index)]] var<in> tint_first_index_offset_instance_idx : u32;
+[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
 [[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn test() -> u32 {
@@ -188,7 +188,7 @@ fn entry() -> void {
 
 TEST_F(FirstIndexOffsetTest, NestedCalls) {
   auto* src = R"(
-[[builtin(vertex_idx)]] var<in> vert_idx : u32;
+[[builtin(vertex_index)]] var<in> vert_idx : u32;
 
 fn func1() -> u32 {
   return vert_idx;
@@ -211,7 +211,7 @@ struct TintFirstIndexOffsetData {
   tint_first_vertex_index : u32;
 };
 
-[[builtin(vertex_idx)]] var<in> tint_first_index_offset_vert_idx : u32;
+[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
 [[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn func1() -> u32 {
