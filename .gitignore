@@ -4,8 +4,10 @@
 .gclient_entries
 .vs
 .vscode
+.idea
 build
 buildtools
+cmake-build-*/
 coverage.summary
 lcov.info
 out

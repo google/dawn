@@ -21,15 +21,15 @@ function(add_tint_fuzzer NAME)
   target_compile_options(${NAME} PRIVATE -Wno-missing-prototypes)
 endfunction()
 
-if ({$TINT_BUILD_WGSL_READER})
+if (${TINT_BUILD_WGSL_READER})
   add_tint_fuzzer(tint_wgsl_reader_fuzzer)
 endif()
 
-if ({$TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
+if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
   add_tint_fuzzer(tint_wgsl_reader_wgsl_writer_fuzzer)
 endif()
 
-if ({$TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
+if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
   add_tint_fuzzer(tint_all_transforms_fuzzer)
   add_tint_fuzzer(tint_bound_array_accessors_fuzzer)
   add_tint_fuzzer(tint_emit_vertex_point_size_fuzzer)
@@ -38,11 +38,11 @@ if ({$TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
   add_tint_fuzzer(tint_wgsl_reader_spv_writer_fuzzer)
 endif()
 
-if ({$TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_HLSL_WRITER})
+if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_HLSL_WRITER})
   add_tint_fuzzer(tint_wgsl_reader_hlsl_writer_fuzzer)
 endif()
 
-if ({$TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_MSL_WRITER})
+if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_MSL_WRITER})
   add_tint_fuzzer(tint_wgsl_reader_msl_writer_fuzzer)
 endif()
 
