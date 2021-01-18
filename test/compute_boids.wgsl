@@ -57,8 +57,8 @@ fn frag_main() -> void {
 };
 
 [[binding(0), group(0)]] var<uniform> params : [[access(read)]] SimParams;
-[[binding(1), group(0)]] var<storage_buffer> particlesA : [[access(read_write)]] Particles;
-[[binding(2), group(0)]] var<storage_buffer> particlesB : [[access(read_write)]] Particles;
+[[binding(1), group(0)]] var<storage> particlesA : [[access(read_write)]] Particles;
+[[binding(2), group(0)]] var<storage> particlesB : [[access(read_write)]] Particles;
 
 [[builtin(global_invocation_id)]] var<in> gl_GlobalInvocationID : vec3<u32>;
 

@@ -63,7 +63,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] a : i32;
   //   [[offset(4)]] b : f32;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.b;
   //
   // -> asfloat(data.Load(4));
@@ -74,7 +74,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
   auto* expr = MemberAccessor("data", "b");
 
   td.RegisterVariableForTesting(coord_var);
@@ -94,7 +94,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] a : i32;
   //   [[offset(4)]] b : f32;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a;
   //
   // -> asint(data.Load(0));
@@ -104,7 +104,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.f32, {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
   auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -123,7 +123,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] z : f32;
   //   [[offset(4)]] a : mat2x3<f32>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // mat2x3<f32> b;
   // data.a = b;
   //
@@ -138,7 +138,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* b_var = Var("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr("b");
@@ -168,7 +168,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] z : f32;
   //   [[offset(4)]] a : mat2x3<f32>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a = mat2x3<f32>();
   //
   // -> float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f,
@@ -182,7 +182,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
@@ -211,7 +211,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] z : f32;
   //   [[offset(4)]] a : mat3x2<f32>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a;
   //
   // -> asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8),
@@ -223,7 +223,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   auto* expr = MemberAccessor("data", "a");
 
@@ -250,7 +250,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] c : f32;
   //   [[offset(4)]] b : Data;
   // };
-  // var<storage_buffer> data : Outer;
+  // var<storage> data : Outer;
   // data.b.a;
   //
   // -> asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)));
@@ -263,7 +263,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
   auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -284,7 +284,7 @@ TEST_F(
   // struct Data {
   //   [[offset(4)]] a : mat3x3<f32;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a;
   //
   // -> asfloat(uint3x3(data.Load3(0), data.Load3(16),
@@ -295,7 +295,7 @@ TEST_F(
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
   auto* expr = MemberAccessor("data", "a");
 
   td.RegisterVariableForTesting(coord_var);
@@ -317,7 +317,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] z : f32;
   //   [[offset(16)]] a : mat4x3<f32>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a[2][1];
   //
   // -> asfloat(data.Load((2 * 16) + (1 * 4) + 16)))
@@ -328,7 +328,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
   auto* expr = IndexAccessor(
       IndexAccessor(MemberAccessor("data", "a"), Expr(2)), Expr(1));
 
@@ -348,7 +348,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // struct Data {
   //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a[2];
   //
   // -> asint(data.Load((2 * 4));
@@ -361,7 +361,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
   auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
 
   td.RegisterVariableForTesting(coord_var);
@@ -380,7 +380,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // struct Data {
   //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a[(2 + 4) - 3];
   //
   // -> asint(data.Load((4 * ((2 + 4) - 3)));
@@ -393,7 +393,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
   auto* expr = IndexAccessor(MemberAccessor("data", "a"),
                              Sub(Add(Expr(2), Expr(4)), Expr(3)));
 
@@ -414,7 +414,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] a : i32;
   //   [[offset(4)]] b : f32;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.b = 2.3f;
   //
   // -> data.Store(0, asuint(2.0f));
@@ -425,7 +425,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -448,7 +448,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // struct Data {
   //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a[2] = 2;
   //
   // -> data.Store((2 * 4), asuint(2.3f));
@@ -463,7 +463,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -487,7 +487,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] a : i32;
   //   [[offset(4)]] b : f32;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.a = 2;
   //
   // -> data.Store(0, asuint(2));
@@ -498,7 +498,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -522,7 +522,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] a : vec3<i32>;
   //   [[offset(16)]] b : vec3<f32>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.b;
   //
   // -> asfloat(data.Load(16));
@@ -533,7 +533,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -554,7 +554,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   [[offset(0)]] a : vec3<i32>;
   //   [[offset(16)]] b : vec3<f32>;
   // };
-  // var<storage_buffer> data : Data;
+  // var<storage> data : Data;
   // data.b = vec3<f32>(2.3f, 1.2f, 0.2f);
   //
   // -> data.Store(16, asuint(float3(2.3f, 1.2f, 0.2f)));
@@ -565,7 +565,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, s);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -595,7 +595,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
-  // var<storage_buffer> data : Pre;
+  // var<storage> data : Pre;
   // data.c[2].b
   //
   // -> asfloat(data.Load3(16 + (2 * 32)))
@@ -618,7 +618,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -644,7 +644,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
-  // var<storage_buffer> data : Pre;
+  // var<storage> data : Pre;
   // data.c[2].b.xy
   //
   // -> asfloat(data.Load3(16 + (2 * 32))).xy
@@ -665,7 +665,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -693,7 +693,7 @@ TEST_F(
   //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
-  // var<storage_buffer> data : Pre;
+  // var<storage> data : Pre;
   // data.c[2].b.g
   //
   // -> asfloat(data.Load((4 * 1) + 16 + (2 * 32) + 0))
@@ -716,7 +716,7 @@ TEST_F(
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -743,7 +743,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
-  // var<storage_buffer> data : Pre;
+  // var<storage> data : Pre;
   // data.c[2].b[1]
   //
   // -> asfloat(data.Load(4 + 16 + (2 * 32)))
@@ -766,7 +766,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -793,7 +793,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
-  // var<storage_buffer> data : Pre;
+  // var<storage> data : Pre;
   // data.c[2].b = vec3<f32>(1.f, 2.f, 3.f);
   //
   // -> data.Store3(16 + (2 * 32), asuint(float3(1.0f, 2.0f, 3.0f)));
@@ -816,7 +816,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);
@@ -847,7 +847,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //   var c : [[stride(32)]] array<Data, 4>;
   // };
   //
-  // var<storage_buffer> data : Pre;
+  // var<storage> data : Pre;
   // data.c[2].b.y = 1.f;
   //
   // -> data.Store((4 * 1) + 16 + (2 * 32) + 0, asuint(1.0f));
@@ -870,7 +870,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorageBuffer, pre_struct);
+  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
 
   td.RegisterVariableForTesting(coord_var);
   gen.register_global(coord_var);

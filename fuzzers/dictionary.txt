@@ -76,7 +76,7 @@
 "sampler"
 "sampler_comparison"
 "set"
-"storage_buffer"
+"storage"
 "stage"
 "stride"
 "struct"

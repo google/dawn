@@ -35,9 +35,9 @@ using PointerTest = TestHelper;
 
 TEST_F(PointerTest, Creation) {
   I32 i32;
-  Pointer p{&i32, StorageClass::kStorageBuffer};
+  Pointer p{&i32, StorageClass::kStorage};
   EXPECT_EQ(p.type(), &i32);
-  EXPECT_EQ(p.storage_class(), StorageClass::kStorageBuffer);
+  EXPECT_EQ(p.storage_class(), StorageClass::kStorage);
 }
 
 TEST_F(PointerTest, Is) {

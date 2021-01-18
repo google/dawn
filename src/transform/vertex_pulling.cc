@@ -288,12 +288,12 @@ void VertexPulling::State::AddVertexStorageBuffers() {
     // The decorated variable with struct type
     std::string name = GetVertexBufferName(i);
     auto* var = out->create<ast::Variable>(
-        Source{},                           // source
-        out->RegisterSymbol(name),          // symbol
-        ast::StorageClass::kStorageBuffer,  // storage_class
-        struct_type,                        // type
-        false,                              // is_const
-        nullptr,                            // constructor
+        Source{},                     // source
+        out->RegisterSymbol(name),    // symbol
+        ast::StorageClass::kStorage,  // storage_class
+        struct_type,                  // type
+        false,                        // is_const
+        nullptr,                      // constructor
         ast::VariableDecorationList{
             // decorations
             out->create<ast::BindingDecoration>(Source{}, i),

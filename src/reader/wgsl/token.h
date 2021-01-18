@@ -262,8 +262,8 @@ class Token {
     kSampler,
     /// A 'sampler_comparison'
     kComparisonSampler,
-    /// A 'storage_buffer'
-    kStorageBuffer,
+    /// A 'storage'
+    kStorage,
     /// A 'struct'
     kStruct,
     /// A 'switch'
@@ -629,8 +629,8 @@ class Token {
   bool IsReturn() const { return type_ == Type::kReturn; }
   /// @returns true if token is a 'sampler'
   bool IsSampler() const { return type_ == Type::kSampler; }
-  /// @returns true if token is a 'storage_buffer'
-  bool IsStorageBuffer() const { return type_ == Type::kStorageBuffer; }
+  /// @returns true if token is a 'storage'
+  bool IsStorage() const { return type_ == Type::kStorage; }
   /// @returns true if token is a 'struct'
   bool IsStruct() const { return type_ == Type::kStruct; }
   /// @returns true if token is a 'switch'

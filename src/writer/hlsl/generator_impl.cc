@@ -2067,7 +2067,7 @@ bool GeneratorImpl::is_storage_buffer_access(
     if (!global_variables_.get(ident->symbol(), &var)) {
       return false;
     }
-    return var->storage_class() == ast::StorageClass::kStorageBuffer;
+    return var->storage_class() == ast::StorageClass::kStorage;
   } else if (auto* member = structure->As<ast::MemberAccessorExpression>()) {
     return is_storage_buffer_access(member);
   } else if (auto* array = structure->As<ast::ArrayAccessorExpression>()) {

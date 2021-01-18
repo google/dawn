@@ -57,8 +57,8 @@ INSTANTIATE_TEST_SUITE_P(
         VariableStorageData{"workgroup", ast::StorageClass::kWorkgroup},
         VariableStorageData{"uniform_constant",
                             ast::StorageClass::kUniformConstant},
-        VariableStorageData{"storage_buffer",
-                            ast::StorageClass::kStorageBuffer},
+        VariableStorageData{"storage", ast::StorageClass::kStorage},
+        VariableStorageData{"storage_buffer", ast::StorageClass::kStorage},
         VariableStorageData{"image", ast::StorageClass::kImage},
         VariableStorageData{"private", ast::StorageClass::kPrivate},
         VariableStorageData{"function", ast::StorageClass::kFunction}));

@@ -356,7 +356,7 @@ class InspectorHelper : public ast::BuilderWithModule {
                         ast::type::Type* type,
                         uint32_t group,
                         uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kStorageBuffer, group, binding);
+    AddBinding(name, type, ast::StorageClass::kStorage, group, binding);
   }
 
   /// Generates a function that references a specific struct variable

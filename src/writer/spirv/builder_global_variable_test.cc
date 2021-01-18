@@ -386,7 +386,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                ast::StructDecorationList{}));
   ast::type::AccessControl ac{ast::AccessControl::kReadOnly, A};
 
-  auto* var = Var("b", ast::StorageClass::kStorageBuffer, &ac);
+  auto* var = Var("b", ast::StorageClass::kStorage, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -416,7 +416,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
                                ast::StructDecorationList{}));
   auto* B = ty.alias("B", A);
   ast::type::AccessControl ac{ast::AccessControl::kReadOnly, B};
-  auto* var = Var("b", ast::StorageClass::kStorageBuffer, &ac);
+  auto* var = Var("b", ast::StorageClass::kStorage, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -444,7 +444,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
                                ast::StructDecorationList{}));
   ast::type::AccessControl ac{ast::AccessControl::kReadOnly, A};
   auto* B = ty.alias("B", &ac);
-  auto* var = Var("b", ast::StorageClass::kStorageBuffer, B);
+  auto* var = Var("b", ast::StorageClass::kStorage, B);
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -473,8 +473,8 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   ast::type::AccessControl read{ast::AccessControl::kReadOnly, A};
   ast::type::AccessControl rw{ast::AccessControl::kReadWrite, A};
 
-  auto* var_b = Var("b", ast::StorageClass::kStorageBuffer, &read);
-  auto* var_c = Var("c", ast::StorageClass::kStorageBuffer, &rw);
+  auto* var_b = Var("b", ast::StorageClass::kStorage, &read);
+  auto* var_c = Var("c", ast::StorageClass::kStorage, &rw);
   EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(var_c)) << b.error();
 

@@ -1002,7 +1002,7 @@ ast::type::Type* ParserImpl::ConvertType(
   }
   if (ast_storage_class == ast::StorageClass::kUniform &&
       remap_buffer_block_type_.count(pointee_type_id)) {
-    ast_storage_class = ast::StorageClass::kStorageBuffer;
+    ast_storage_class = ast::StorageClass::kStorage;
     remap_buffer_block_type_.insert(type_id);
   }
   return ast_module_.create<ast::type::Pointer>(ast_elem_ty, ast_storage_class);
@@ -1163,7 +1163,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
       case ast::StorageClass::kOutput:
       case ast::StorageClass::kUniform:
       case ast::StorageClass::kUniformConstant:
-      case ast::StorageClass::kStorageBuffer:
+      case ast::StorageClass::kStorage:
       case ast::StorageClass::kImage:
       case ast::StorageClass::kWorkgroup:
       case ast::StorageClass::kPrivate:
@@ -1246,7 +1246,7 @@ ast::Variable* ParserImpl::MakeVariable(
     return nullptr;
   }
 
-  if (sc == ast::StorageClass::kStorageBuffer) {
+  if (sc == ast::StorageClass::kStorage) {
     // Apply the access(read) or access(read_write) modifier.
     auto access = read_only_struct_types_.count(type)
                       ? ast::AccessControl::kReadOnly

@@ -1590,7 +1590,7 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
       GroupDecoration{3}
     }
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   })"))
       << module_str;
@@ -1645,7 +1645,7 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
       BindingDecoration{3}
     }
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   })"))
       << module_str;
@@ -1703,7 +1703,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   }
   Variable{
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   }
 )")) << module_str;
@@ -1733,7 +1733,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   }
   Variable{
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   }
 })")) << module_str;
@@ -1763,7 +1763,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   }
   Variable{
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   }
 })")) << module_str;
@@ -1814,7 +1814,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   }
   Variable{
     myvar
-    storage_buffer
+    storage
     __access_control_read_only__struct_S
   }
 })")) << module_str;
@@ -1844,7 +1844,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   }
   Variable{
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   }
 })")) << module_str;
@@ -1877,7 +1877,7 @@ TEST_F(
   }
   Variable{
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   }
 })")) << module_str;

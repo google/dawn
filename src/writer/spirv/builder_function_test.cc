@@ -198,7 +198,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // [[block]] struct Data {
   //   [[offset(0)]] d : f32;
   // };
-  // [[binding(0), group(0)]] var<storage_buffer> data : Data;
+  // [[binding(0), group(0)]] var<storage> data : Data;
   //
   // [[stage(compute)]]
   // fn a() -> void {
@@ -219,7 +219,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   auto* s = ty.struct_("Data", str);
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  auto* data_var = Var("data", ast::StorageClass::kStorageBuffer, &ac, nullptr,
+  auto* data_var = Var("data", ast::StorageClass::kStorage, &ac, nullptr,
                        ast::VariableDecorationList{
                            create<ast::BindingDecoration>(0),
                            create<ast::GroupDecoration>(0),

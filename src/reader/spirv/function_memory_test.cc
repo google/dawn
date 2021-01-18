@@ -811,7 +811,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   }
   Variable{
     myvar
-    storage_buffer
+    storage
     __access_control_read_write__struct_S
   })"));
 }
@@ -913,7 +913,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
   VariableConst{
     x_2
     none
-    __ptr_storage_buffer__u32
+    __ptr_storage__u32
     {
       ArrayAccessor[not set]{
         MemberAccessor[not set]{
@@ -969,7 +969,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
   Variable{
     x_2
     function
-    __ptr_storage_buffer__u32
+    __ptr_storage__u32
   }
 }
 If{

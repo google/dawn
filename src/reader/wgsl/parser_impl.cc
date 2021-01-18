@@ -1177,7 +1177,7 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
 //  | UNIFORM
 //  | WORKGROUP
 //  | UNIFORM_CONSTANT
-//  | STORAGE_BUFFER
+//  | STORAGE
 //  | IMAGE
 //  | PRIVATE
 //  | FUNCTION
@@ -1198,8 +1198,8 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
   if (match(Token::Type::kUniformConstant))
     return ast::StorageClass::kUniformConstant;
 
-  if (match(Token::Type::kStorageBuffer))
-    return ast::StorageClass::kStorageBuffer;
+  if (match(Token::Type::kStorage))
+    return ast::StorageClass::kStorage;
 
   if (match(Token::Type::kImage))
     return ast::StorageClass::kImage;

@@ -43,8 +43,8 @@ std::ostream& operator<<(std::ostream& out, StorageClass sc) {
       out << "uniform_constant";
       break;
     }
-    case StorageClass::kStorageBuffer: {
-      out << "storage_buffer";
+    case StorageClass::kStorage: {
+      out << "storage";
       break;
     }
     case StorageClass::kImage: {

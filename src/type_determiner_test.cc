@@ -650,7 +650,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   auto* in_var = Var("in_var", ast::StorageClass::kInput, ty.f32);
   auto* out_var = Var("out_var", ast::StorageClass::kOutput, ty.f32);
-  auto* sb_var = Var("sb_var", ast::StorageClass::kStorageBuffer, ty.f32);
+  auto* sb_var = Var("sb_var", ast::StorageClass::kStorage, ty.f32);
   auto* wg_var = Var("wg_var", ast::StorageClass::kWorkgroup, ty.f32);
   auto* priv_var = Var("priv_var", ast::StorageClass::kPrivate, ty.f32);
 
@@ -687,7 +687,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   auto* in_var = Var("in_var", ast::StorageClass::kInput, ty.f32);
   auto* out_var = Var("out_var", ast::StorageClass::kOutput, ty.f32);
-  auto* sb_var = Var("sb_var", ast::StorageClass::kStorageBuffer, ty.f32);
+  auto* sb_var = Var("sb_var", ast::StorageClass::kStorage, ty.f32);
   auto* wg_var = Var("wg_var", ast::StorageClass::kWorkgroup, ty.f32);
   auto* priv_var = Var("priv_var", ast::StorageClass::kPrivate, ty.f32);
 

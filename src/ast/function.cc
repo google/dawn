@@ -130,7 +130,7 @@ Function::referenced_storagebuffer_variables() const {
   std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
 
   for (auto* var : referenced_module_variables()) {
-    if (var->storage_class() != StorageClass::kStorageBuffer) {
+    if (var->storage_class() != StorageClass::kStorage) {
       continue;
     }
 

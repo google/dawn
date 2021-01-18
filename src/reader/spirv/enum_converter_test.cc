@@ -148,7 +148,7 @@ INSTANTIATE_TEST_SUITE_P(
         StorageClassCase{SpvStorageClassUniformConstant, true,
                          ast::StorageClass::kUniformConstant},
         StorageClassCase{SpvStorageClassStorageBuffer, true,
-                         ast::StorageClass::kStorageBuffer},
+                         ast::StorageClass::kStorage},
         StorageClassCase{SpvStorageClassImage, true, ast::StorageClass::kImage},
         StorageClassCase{SpvStorageClassPrivate, true,
                          ast::StorageClass::kPrivate},

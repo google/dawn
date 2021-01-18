@@ -134,7 +134,7 @@ struct TintVertexData {
 };
 
 [[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
-[[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 
 [[stage(vertex)]]
@@ -173,7 +173,7 @@ struct TintVertexData {
 };
 
 [[builtin(instance_index)]] var<in> _tint_pulling_instance_index : i32;
-[[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 
 [[stage(vertex)]]
@@ -212,7 +212,7 @@ struct TintVertexData {
 };
 
 [[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
-[[binding(0), group(5)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(5)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 
 [[stage(vertex)]]
@@ -255,8 +255,8 @@ struct TintVertexData {
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
-[[binding(1), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_1 : TintVertexData;
+[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(1), group(4)]] var<storage> _tint_pulling_vertex_buffer_1 : TintVertexData;
 var<private> var_a : f32;
 var<private> var_b : f32;
 [[builtin(vertex_index)]] var<in> custom_vertex_index : i32;
@@ -302,7 +302,7 @@ struct TintVertexData {
 };
 
 [[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
-[[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 var<private> var_a : f32;
 var<private> var_b : array<f32, 4>;
 
@@ -348,9 +348,9 @@ struct TintVertexData {
 };
 
 [[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
-[[binding(0), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_0 : TintVertexData;
-[[binding(1), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_1 : TintVertexData;
-[[binding(2), group(4)]] var<storage_buffer> _tint_pulling_vertex_buffer_2 : TintVertexData;
+[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(1), group(4)]] var<storage> _tint_pulling_vertex_buffer_1 : TintVertexData;
+[[binding(2), group(4)]] var<storage> _tint_pulling_vertex_buffer_2 : TintVertexData;
 var<private> var_a : array<f32, 2>;
 var<private> var_b : array<f32, 3>;
 var<private> var_c : array<f32, 4>;

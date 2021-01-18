@@ -251,8 +251,8 @@ std::string Token::TypeToName(Type type) {
       return "sampler";
     case Token::Type::kComparisonSampler:
       return "sampler_comparison";
-    case Token::Type::kStorageBuffer:
-      return "storage_buffer";
+    case Token::Type::kStorage:
+      return "storage";
     case Token::Type::kStruct:
       return "struct";
     case Token::Type::kSwitch:

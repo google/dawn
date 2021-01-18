@@ -742,7 +742,7 @@ TEST_F(SpvParserTest, ConvertType_PointerStorageBuffer) {
   auto* ptr_ty = type->As<ast::type::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::type::F32>());
-  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kStorageBuffer);
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kStorage);
   EXPECT_TRUE(p->error().empty());
 }
 

@@ -640,8 +640,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kSampler, source, "sampler"};
   if (str == "sampler_comparison")
     return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
-  if (str == "storage_buffer")
-    return {Token::Type::kStorageBuffer, source, "storage_buffer"};
+  if (str == "storage_buffer" || str == "storage")
+    return {Token::Type::kStorage, source, "storage"};
   if (str == "struct")
     return {Token::Type::kStruct, source, "struct"};
   if (str == "switch")
@@ -821,6 +821,8 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "f16"};
   if (str == "f64")
     return {Token::Type::kReservedKeyword, source, "f64"};
+  if (str == "handle")
+    return {Token::Type::kReservedKeyword, source, "handle"};
   if (str == "i8")
     return {Token::Type::kReservedKeyword, source, "i8"};
   if (str == "i16")

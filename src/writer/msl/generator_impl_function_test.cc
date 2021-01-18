@@ -334,7 +334,7 @@ TEST_F(MslGeneratorImplTest,
   mod->AddConstructedType(s);
 
   auto* coord_var =
-      Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
+      Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                       create<ast::GroupDecoration>(1)});
 
@@ -386,7 +386,7 @@ TEST_F(MslGeneratorImplTest,
   mod->AddConstructedType(s);
 
   auto* coord_var =
-      Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
+      Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                       create<ast::GroupDecoration>(1)});
 
@@ -691,7 +691,7 @@ TEST_F(MslGeneratorImplTest,
   mod->AddConstructedType(s);
 
   auto* coord_var =
-      Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
+      Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                       create<ast::GroupDecoration>(1)});
 
@@ -758,7 +758,7 @@ TEST_F(MslGeneratorImplTest,
   mod->AddConstructedType(s);
 
   auto* coord_var =
-      Var("coord", ast::StorageClass::kStorageBuffer, &ac, nullptr,
+      Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                       create<ast::GroupDecoration>(1)});
 
@@ -914,7 +914,7 @@ TEST_F(MslGeneratorImplTest,
   // [[block]] struct Data {
   //   [[offset(0)]] d : f32;
   // };
-  // [[binding(0), group(0)]] var<storage_buffer> data : Data;
+  // [[binding(0), group(0)]] var<storage> data : Data;
   //
   // [[stage(compute)]]
   // fn a() -> void {
@@ -936,7 +936,7 @@ TEST_F(MslGeneratorImplTest,
   ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* data_var =
-      Var("data", ast::StorageClass::kStorageBuffer, &ac, nullptr,
+      Var("data", ast::StorageClass::kStorage, &ac, nullptr,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                       create<ast::GroupDecoration>(0)});
 
