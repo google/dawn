@@ -100,6 +100,12 @@ class ValidatorImpl {
   /// @param assign the assignment to check
   /// @returns true if the validation was successful
   bool ValidateAssign(const ast::AssignmentStatement* assign);
+  /// Validates a bad assignment to an identifier. Issues an error
+  /// and returns false if the left hand side is an identifier.
+  /// @param assign the assignment to check
+  /// @returns true if the LHS of theassignment is not an identifier expression
+  bool ValidateBadAssignmentToIdentifier(
+      const ast::AssignmentStatement* assign);
   /// Validates an expression
   /// @param expr the expression to check
   /// @return true if the expression is valid
@@ -108,14 +114,6 @@ class ValidatorImpl {
   /// @param ident the identifer to check if its in the scope
   /// @return true if idnet was defined
   bool ValidateIdentifier(const ast::IdentifierExpression* ident);
-  /// Validates if the input follows type checking rules
-  /// @param assign the assignment to check
-  /// @returns ture if successful
-  bool ValidateResultTypes(const ast::AssignmentStatement* assign);
-  /// Validate v-0021: Cannot re-assign a constant
-  /// @param assign is the assigment to check if its lhs is a const
-  /// @returns false if lhs of assign is a constant identifier
-  bool ValidateConstant(const ast::AssignmentStatement* assign);
   /// Validates declaration name uniqueness
   /// @param decl is the new declaration to be added
   /// @returns true if no previous declaration with the `decl` 's name
@@ -153,6 +151,11 @@ class ValidatorImpl {
   /// @param type the given type
   /// @returns true if the given type is storable.
   bool IsStorable(ast::type::Type* type);
+
+  /// Testing method to inserting a given variable into the current scope.
+  void RegisterVariableForTesting(ast::Variable* var) {
+    variable_stack_.set(var->symbol(), var);
+  }
 
  private:
   const ast::Module& module_;

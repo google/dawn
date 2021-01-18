@@ -39,6 +39,13 @@ class ValidatorTestHelper : public ast::BuilderWithModule {
   /// @returns a pointer to the type_determiner object
   TypeDeterminer* td() const { return td_.get(); }
 
+  /// Inserts a variable into the current scope.
+  /// @param var the variable to register.
+  void RegisterVariable(ast::Variable* var) {
+    v_->RegisterVariableForTesting(var);
+    td_->RegisterVariableForTesting(var);
+  }
+
  private:
   std::unique_ptr<ValidatorImpl> v_;
   std::unique_ptr<TypeDeterminer> td_;

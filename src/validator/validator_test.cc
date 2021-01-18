@@ -60,18 +60,27 @@ namespace {
 
 class ValidatorTest : public ValidatorTestHelper, public testing::Test {};
 
-TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
+TEST_F(ValidatorTest, AssignToScalar_Fail) {
+  // var my_var : i32 = 2;
   // 1 = my_var;
+
+  auto* var = Var("my_var", ast::StorageClass::kNone, ty.i32, Expr(2),
+                  ast::VariableDecorationList{});
 
   auto* lhs = Expr(1);
   auto* rhs = Expr("my_var");
   SetSource(Source{Source::Location{12, 34}});
-  create<ast::AssignmentStatement>(lhs, rhs);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  RegisterVariable(var);
 
+  EXPECT_TRUE(td()->DetermineResultType(assign));
   // TODO(sarahM0): Invalidate assignment to scalar.
+  EXPECT_FALSE(v()->ValidateAssign(assign));
   ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
-  EXPECT_EQ(v()->error(), "12:34 v-000x: invalid assignment");
+  EXPECT_EQ(v()->error(),
+            "12:34 v-000x: invalid assignment: left-hand-side does not "
+            "reference storage: __i32");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
@@ -116,11 +125,75 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  td()->RegisterVariableForTesting(var);
+  RegisterVariable(var);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
-  EXPECT_TRUE(v()->ValidateResultTypes(assign));
+  EXPECT_TRUE(v()->ValidateAssign(assign)) << v()->error();
+}
+
+TEST_F(ValidatorTest, AssignCompatibleTypesThroughAlias_Pass) {
+  // alias myint = i32;
+  // var a :myint = 2;
+  // a = 2
+  auto* myint = ty.alias("myint", ty.i32);
+  auto* var = Var("a", ast::StorageClass::kNone, myint, Expr(2),
+                  ast::VariableDecorationList{});
+
+  auto* lhs = Expr("a");
+  auto* rhs = Expr(2);
+
+  auto* assign = create<ast::AssignmentStatement>(
+      Source{Source::Location{12, 34}}, lhs, rhs);
+  RegisterVariable(var);
+  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
+  EXPECT_TRUE(v()->ValidateAssign(assign)) << v()->error();
+}
+
+TEST_F(ValidatorTest, AssignCompatibleTypesInferRHSLoad_Pass) {
+  // var a :i32 = 2;
+  // var b :i32 = 3;
+  // a = b;
+  auto* var_a = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+                    ast::VariableDecorationList{});
+  auto* var_b = Var("b", ast::StorageClass::kNone, ty.i32, Expr(3),
+                    ast::VariableDecorationList{});
+
+  auto* lhs = Expr("a");
+  auto* rhs = Expr("b");
+
+  auto* assign = create<ast::AssignmentStatement>(
+      Source{Source::Location{12, 34}}, lhs, rhs);
+  RegisterVariable(var_a);
+  RegisterVariable(var_b);
+  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
+  EXPECT_TRUE(v()->ValidateAssign(assign)) << v()->error();
+}
+
+TEST_F(ValidatorTest, AssignThroughPointer_Pass) {
+  // var a :i32;
+  // const b : ptr<function,i32> = a;
+  // b = 2;
+  const auto func = ast::StorageClass::kFunction;
+  auto* var_a = Var("a", func, ty.i32, Expr(2), {});
+  auto* var_b = Const("b", ast::StorageClass::kNone, ty.pointer<int>(func),
+                      Expr("a"), {});
+
+  auto* lhs = Expr("b");
+  auto* rhs = Expr(2);
+
+  auto* assign = create<ast::AssignmentStatement>(
+      Source{Source::Location{12, 34}}, lhs, rhs);
+  RegisterVariable(var_a);
+  RegisterVariable(var_b);
+  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
+  EXPECT_TRUE(v()->ValidateAssign(assign)) << v()->error();
 }
 
 TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
@@ -137,16 +210,42 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  td()->RegisterVariableForTesting(var);
+  RegisterVariable(var);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
 
-  EXPECT_FALSE(v()->ValidateResultTypes(assign));
+  EXPECT_FALSE(v()->ValidateAssign(assign));
   ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
   EXPECT_EQ(v()->error(),
-            "12:34 v-000x: invalid assignment of '__i32' to '__f32'");
+            "12:34 v-000x: invalid assignment: can't assign value of type "
+            "'__f32' to '__i32'");
+}
+
+TEST_F(ValidatorTest, AssignThroughPointerWrongeStoreType_Fail) {
+  // var a :f32;
+  // const b : ptr<function,f32> = a;
+  // b = 2;
+  const auto priv = ast::StorageClass::kFunction;
+  auto* var_a = Var("a", priv, ty.f32, Expr(2), {});
+  auto* var_b = Const("b", ast::StorageClass::kNone, ty.pointer<float>(priv),
+                      Expr("a"), {});
+
+  auto* lhs = Expr("a");
+  auto* rhs = Expr(2);
+
+  auto* assign = create<ast::AssignmentStatement>(
+      Source{Source::Location{12, 34}}, lhs, rhs);
+  RegisterVariable(var_a);
+  RegisterVariable(var_b);
+  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
+  ASSERT_NE(lhs->result_type(), nullptr);
+  ASSERT_NE(rhs->result_type(), nullptr);
+  EXPECT_FALSE(v()->ValidateAssign(assign));
+  EXPECT_EQ(v()->error(),
+            "12:34 v-000x: invalid assignment: can't assign value of type "
+            "'__i32' to '__f32'");
 }
 
 TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
@@ -199,7 +298,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   ASSERT_TRUE(v()->has_error());
   // TODO(sarahM0): figure out what should be the error number.
   EXPECT_EQ(v()->error(),
-            "12:34 v-000x: invalid assignment of '__i32' to '__f32'");
+            "12:34 v-000x: invalid assignment: can't assign value of type "
+            "'__f32' to '__i32'");
 }
 
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {

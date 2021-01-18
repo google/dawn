@@ -30,6 +30,7 @@
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -277,6 +278,10 @@ bool ValidatorImpl::ValidateDeclStatement(
               "redeclared identifier '" + module_.SymbolToName(symbol) + "'");
     return false;
   }
+  // TODO(dneto): Check type compatibility of the initializer.
+  //  - if it's non-constant, then is storable or can be dereferenced to be
+  //    storable.
+  //  - types match or the RHS can be dereferenced to equal the LHS type.
   variable_stack_.set(symbol, decl->variable());
   if (auto* arr =
           decl->variable()->type()->UnwrapAll()->As<ast::type::Array>()) {
@@ -429,57 +434,78 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
   return true;
 }
 
-bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* a) {
-  if (!a) {
+bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
+    const ast::AssignmentStatement* assign) {
+  auto* ident = assign->lhs()->As<ast::IdentifierExpression>();
+  if (!ident) {
+    // It wasn't an identifier in the first place.
+    return true;
+  }
+  ast::Variable* var;
+  if (variable_stack_.get(ident->symbol(), &var)) {
+    // Give a nicer message if the LHS of the assignment is a const identifier.
+    // It's likely to be a common programmer error.
+    if (var->is_const()) {
+      add_error(assign->source(), "v-0021",
+                "cannot re-assign a constant: '" +
+                    module_.SymbolToName(ident->symbol()) + "'");
+      return false;
+    }
+  } else {
+    // The identifier is not defined. This should already have been caught
+    // when validating the subexpression.
+    add_error(
+        ident->source(), "v-0006",
+        "'" + module_.SymbolToName(ident->symbol()) + "' is not declared");
     return false;
   }
-  if (!(ValidateConstant(a))) {
-    return false;
-  }
-  if (!(ValidateExpression(a->lhs()) && ValidateExpression(a->rhs()))) {
-    return false;
-  }
-  if (!ValidateResultTypes(a)) {
-    return false;
-  }
-
   return true;
 }
 
-bool ValidatorImpl::ValidateConstant(const ast::AssignmentStatement* assign) {
+bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
   if (!assign) {
     return false;
   }
-
-  if (auto* ident = assign->lhs()->As<ast::IdentifierExpression>()) {
-    ast::Variable* var;
-    if (variable_stack_.get(ident->symbol(), &var)) {
-      if (var->is_const()) {
-        add_error(assign->source(), "v-0021",
-                  "cannot re-assign a constant: '" +
-                      module_.SymbolToName(ident->symbol()) + "'");
-        return false;
-      }
+  auto* lhs = assign->lhs();
+  auto* rhs = assign->rhs();
+  if (!ValidateExpression(lhs)) {
+    return false;
+  }
+  if (!ValidateExpression(rhs)) {
+    return false;
+  }
+  // Pointers are not storable in WGSL, but the right-hand side must be
+  // storable. The raw right-hand side might be a pointer value which must be
+  // loaded (dereferenced) to provide the value to be stored.
+  auto* rhs_result_type = rhs->result_type()->UnwrapAll();
+  if (!IsStorable(rhs_result_type)) {
+    add_error(assign->source(), "v-000x",
+              "invalid assignment: right-hand-side is not storable: " +
+                  rhs->result_type()->type_name());
+    return false;
+  }
+  auto* lhs_result_type = lhs->result_type()->UnwrapIfNeeded();
+  if (auto* lhs_reference_type = As<ast::type::Pointer>(lhs_result_type)) {
+    auto* lhs_store_type = lhs_reference_type->type()->UnwrapIfNeeded();
+    if (lhs_store_type != rhs_result_type) {
+      add_error(assign->source(), "v-000x",
+                "invalid assignment: can't assign value of type '" +
+                    rhs_result_type->type_name() + "' to '" +
+                    lhs_store_type->type_name() + "'");
+      return false;
     }
-  }
-  return true;
-}
-
-bool ValidatorImpl::ValidateResultTypes(const ast::AssignmentStatement* a) {
-  if (!a->lhs()->result_type() || !a->rhs()->result_type()) {
-    add_error(a->source(), "result_type() is nullptr");
+  } else {
+    if (!ValidateBadAssignmentToIdentifier(assign)) {
+      return false;
+    }
+    // Issue a generic error.
+    add_error(
+        assign->source(), "v-000x",
+        "invalid assignment: left-hand-side does not reference storage: " +
+            lhs->result_type()->type_name());
     return false;
   }
 
-  auto* lhs_result_type = a->lhs()->result_type()->UnwrapAll();
-  auto* rhs_result_type = a->rhs()->result_type()->UnwrapAll();
-  if (lhs_result_type != rhs_result_type) {
-    // TODO(sarahM0): figur out what should be the error number.
-    add_error(a->source(), "v-000x",
-              "invalid assignment of '" + lhs_result_type->type_name() +
-                  "' to '" + rhs_result_type->type_name() + "'");
-    return false;
-  }
   return true;
 }
 
