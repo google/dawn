@@ -234,7 +234,7 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
     dawn_platform::Platform* platform = gTestEnv->GetPlatform();
 
     mNumStepsPerformed = 0;
-    cpuTime = 0;
+    mCpuTime = 0;
     mRunning = true;
 
     wgpu::FenceDescriptor desc = {};
@@ -252,7 +252,7 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
         TRACE_EVENT0(platform, General, "Step");
         double stepStart = mTimer->GetElapsedTime();
         Step();
-        cpuTime += mTimer->GetElapsedTime() - stepStart;
+        mCpuTime += mTimer->GetElapsedTime() - stepStart;
 
         mTest->queue.Signal(fence, ++signaledFenceValue);
 
@@ -340,7 +340,7 @@ void DawnPerfTestBase::OutputResults() {
     }
 
     PrintPerIterationResultFromSeconds("wall_time", mTimer->GetElapsedTime(), true);
-    PrintPerIterationResultFromSeconds("cpu_time", cpuTime, true);
+    PrintPerIterationResultFromSeconds("cpu_time", mCpuTime, true);
     PrintPerIterationResultFromSeconds("validation_time", totalValidationTime, true);
     PrintPerIterationResultFromSeconds("recording_time", totalRecordingTime, true);
 

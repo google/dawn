@@ -104,7 +104,7 @@ class DawnPerfTestBase {
     const unsigned int mMaxStepsInFlight;
     unsigned int mStepsToRun = 0;
     unsigned int mNumStepsPerformed = 0;
-    double cpuTime;
+    double mCpuTime;
     std::unique_ptr<utils::Timer> mTimer;
 };
 
