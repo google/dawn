@@ -29,8 +29,10 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
@@ -504,6 +506,31 @@ bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
     return false;
   }
   return true;
+}
+
+bool ValidatorImpl::IsStorable(ast::type::Type* type) {
+  if (type == nullptr) {
+    return false;
+  }
+  if (type->is_scalar() || type->Is<ast::type::Vector>() ||
+      type->Is<ast::type::Matrix>()) {
+    return true;
+  }
+  if (ast::type::Array* array_type = type->As<ast::type::Array>()) {
+    return IsStorable(array_type->type());
+  }
+  if (ast::type::Struct* struct_type = type->As<ast::type::Struct>()) {
+    for (const auto* member : struct_type->impl()->members()) {
+      if (!IsStorable(member->type())) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (ast::type::Alias* alias_type = type->As<ast::type::Alias>()) {
+    return IsStorable(alias_type->type());
+  }
+  return false;
 }
 
 }  // namespace tint

@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "src/ast/assignment_statement.h"
@@ -146,6 +147,12 @@ class ValidatorImpl {
   /// @returns true if the valdiation was successful
   bool ValidateConstructedTypes(
       const std::vector<ast::type::Type*>& constructed_types);
+
+  /// Returns true if the given type is storable. This uses and
+  /// updates `storable_` and `not_storable_`.
+  /// @param type the given type
+  /// @returns true if the given type is storable.
+  bool IsStorable(ast::type::Type* type);
 
  private:
   const ast::Module& module_;

@@ -579,5 +579,86 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   EXPECT_TRUE(v()->ValidateStatements(body)) << v()->error();
 }
 
+TEST_F(ValidatorTest, IsStorable_Void) {
+  EXPECT_FALSE(v()->IsStorable(ty.void_));
+}
+
+TEST_F(ValidatorTest, IsStorable_Scalar) {
+  EXPECT_TRUE(v()->IsStorable(ty.bool_));
+  EXPECT_TRUE(v()->IsStorable(ty.i32));
+  EXPECT_TRUE(v()->IsStorable(ty.u32));
+  EXPECT_TRUE(v()->IsStorable(ty.f32));
+}
+
+TEST_F(ValidatorTest, IsStorable_Vector) {
+  EXPECT_TRUE(v()->IsStorable(ty.vec2<int>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec3<int>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec4<int>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec2<unsigned>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec3<unsigned>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec4<unsigned>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec2<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec3<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.vec4<float>()));
+}
+
+TEST_F(ValidatorTest, IsStorable_Matrix) {
+  EXPECT_TRUE(v()->IsStorable(ty.mat2x2<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat2x3<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat2x4<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat3x2<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat3x3<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat3x4<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat4x2<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat4x3<float>()));
+  EXPECT_TRUE(v()->IsStorable(ty.mat4x4<float>()));
+}
+
+TEST_F(ValidatorTest, IsStorable_Pointer) {
+  auto* ptr_ty = ty.pointer<int>(ast::StorageClass::kPrivate);
+  EXPECT_FALSE(v()->IsStorable(ptr_ty));
+}
+
+TEST_F(ValidatorTest, IsStorable_AliasVoid) {
+  auto* alias = ty.alias("myalias", ty.void_);
+  EXPECT_FALSE(v()->IsStorable(alias));
+}
+
+TEST_F(ValidatorTest, IsStorable_AliasI32) {
+  auto* alias = ty.alias("myalias", ty.i32);
+  EXPECT_TRUE(v()->IsStorable(alias));
+}
+
+TEST_F(ValidatorTest, IsStorable_ArraySizedOfStorable) {
+  EXPECT_TRUE(v()->IsStorable(ty.array(ty.i32, 5)));
+}
+
+TEST_F(ValidatorTest, IsStorable_ArraySizedOfNonStorable) {
+  EXPECT_FALSE(v()->IsStorable(ty.array(ty.void_, 5)));
+}
+
+TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfStorable) {
+  EXPECT_TRUE(v()->IsStorable(ty.array<int>()));
+}
+
+TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfNonStorable) {
+  EXPECT_FALSE(v()->IsStorable(ty.array<void>()));
+}
+
+TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
+  ast::StructMemberList members{Member("a", ty.i32), Member("b", ty.f32)};
+  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s_ty = ty.struct_("mystruct", s);
+  EXPECT_TRUE(v()->IsStorable(s_ty));
+}
+
+TEST_F(ValidatorTest, IsStorable_Struct_SomeMembersNonStorable) {
+  auto* ptr_ty = ty.pointer<int>(ast::StorageClass::kPrivate);
+  ast::StructMemberList members{Member("a", ty.i32), Member("b", ptr_ty)};
+  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s_ty = ty.struct_("mystruct", s);
+  EXPECT_FALSE(v()->IsStorable(s_ty));
+}
+
 }  // namespace
 }  // namespace tint
