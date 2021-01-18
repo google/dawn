@@ -23,7 +23,11 @@ namespace tint {
 namespace fuzzers {
 
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
-    : input_(input), output_(output), inspector_enabled_(false) {}
+    : input_(input),
+      output_(output),
+      transform_manager_(nullptr),
+      inspector_enabled_(false) {}
+
 CommonFuzzer::~CommonFuzzer() = default;
 
 int CommonFuzzer::Run(const uint8_t* data, size_t size) {
