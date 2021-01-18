@@ -330,6 +330,9 @@ TEST_P(DepthStencilCopyTests, FromDepthAspect) {
 
 // Test copying the stencil-only aspect into a buffer.
 TEST_P(DepthStencilCopyTests, FromStencilAspect) {
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -354,6 +357,9 @@ TEST_P(DepthStencilCopyTests, FromNonZeroMipStencilAspect) {
     // TODO(enga): Figure out why this fails on MacOS Intel Iris.
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
 
     wgpu::Texture depthStencilTexture = CreateDepthStencilTexture(
         9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);
@@ -397,6 +403,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
     // T2TBothAspectsThenCopyNonRenderableStencil does not use RenderAttachment and works correctly.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -418,6 +427,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
 // Test that part of a non-renderable stencil aspect can be copied. Notably,
 // this test has different behavior on some platforms than T2TBothAspectsThenCopyStencil.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableStencil) {
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -444,6 +456,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStenc
     // T2TBothAspectsThenCopyNonRenderableStencil works correctly.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, 9, 9, wgpu::TextureUsage::CopySrc, 1);
 
@@ -460,6 +475,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStenc
 
 // Test copying both aspects in a T2T copy, then copying only depth.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -478,6 +496,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
 
 // Test copying both aspects in a T2T copy, then copying only depth at a nonzero mip.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonZeroMipDepth) {
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, 8, 8, wgpu::TextureUsage::RenderAttachment, 1);
 
@@ -493,6 +514,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonZeroMipDepth) {
 
 // Test copying both aspects in a T2T copy, then copying stencil, then copying depth
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencilThenDepth) {
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -528,6 +552,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
     // test T2TBothAspectsThenCopyStencil passes.
     // T2TBothAspectsThenCopyStencilThenDepth which checks stencil first also passes.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+
+    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
 
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;

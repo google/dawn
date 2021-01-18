@@ -266,6 +266,7 @@ class DawnTestBase {
     bool IsNvidia() const;
     bool IsQualcomm() const;
     bool IsSwiftshader() const;
+    bool IsANGLE() const;
     bool IsWARP() const;
 
     bool IsWindows() const;

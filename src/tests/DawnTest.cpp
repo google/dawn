@@ -684,6 +684,10 @@ bool DawnTestBase::IsSwiftshader() const {
                                    mParam.adapterProperties.deviceID);
 }
 
+bool DawnTestBase::IsANGLE() const {
+    return !mParam.adapterProperties.adapterName.find("ANGLE");
+}
+
 bool DawnTestBase::IsWARP() const {
     return gpu_info::IsWARP(mParam.adapterProperties.vendorID, mParam.adapterProperties.deviceID);
 }
