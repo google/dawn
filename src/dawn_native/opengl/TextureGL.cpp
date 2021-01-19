@@ -329,9 +329,17 @@ namespace dawn_native { namespace opengl {
                                                 mipSize.height, 1, glFormat.format, glFormat.type,
                                                 clearColorData.data());
                         } else {
-                            // TODO(crbug.com/dawn/581): Implement a fallback path on OpenGL ES
-                            // because it doesn't support glClearTexSubImage.
-                            ASSERT(false);
+                            GLuint framebuffer = 0;
+                            gl.GenFramebuffers(1, &framebuffer);
+                            gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+                            gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR, GetHandle(),
+                                                       static_cast<int>(level),
+                                                       static_cast<int>(layer));
+                            gl.Disable(GL_SCISSOR_TEST);
+                            gl.ClearBufferiv(GL_COLOR, 0,
+                                             reinterpret_cast<const GLint*>(clearColorData.data()));
+                            gl.Enable(GL_SCISSOR_TEST);
+                            gl.DeleteFramebuffers(1, &framebuffer);
                         }
                     }
                 }

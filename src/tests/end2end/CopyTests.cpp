@@ -888,6 +888,7 @@ DAWN_INSTANTIATE_TEST(CopyTests_T2B,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 // Test that copying an entire texture with 256-byte aligned dimensions works
@@ -1358,6 +1359,7 @@ DAWN_INSTANTIATE_TEST(CopyTests_B2T,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 TEST_P(CopyTests_T2T, Texture) {
@@ -1584,6 +1586,7 @@ DAWN_INSTANTIATE_TEST(CopyTests_T2T,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 static constexpr uint64_t kSmallBufferSize = 4;
