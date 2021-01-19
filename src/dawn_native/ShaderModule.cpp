@@ -711,6 +711,10 @@ namespace dawn_native {
 
                 auto metadata = std::make_unique<EntryPointMetadata>();
                 metadata->stage = PipelineStateToShaderStage(entryPoint.stage);
+                metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
+                metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
+                metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
+
                 result[entryPoint.name] = std::move(metadata);
             }
             return std::move(result);
@@ -770,13 +774,19 @@ namespace dawn_native {
                         "Tint and SPIRV-Cross returned different stages for entry point");
                 }
 
+                if (tintEntry->localWorkgroupSize.x != tintEntry->localWorkgroupSize.x ||
+                    tintEntry->localWorkgroupSize.y != tintEntry->localWorkgroupSize.y ||
+                    tintEntry->localWorkgroupSize.z != tintEntry->localWorkgroupSize.z) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Tint and SPIRV-Cross returned different values for local workgroup size");
+                }
+
                 // TODO(rharrison): Use the Inspector to get this data.
                 tintEntry->bindings = crossEntry->bindings;
                 tintEntry->usedVertexAttributes = crossEntry->usedVertexAttributes;
                 tintEntry->fragmentOutputFormatBaseTypes =
                     crossEntry->fragmentOutputFormatBaseTypes;
                 tintEntry->fragmentOutputsWritten = crossEntry->fragmentOutputsWritten;
-                tintEntry->localWorkgroupSize = crossEntry->localWorkgroupSize;
             }
             return {};
         }
