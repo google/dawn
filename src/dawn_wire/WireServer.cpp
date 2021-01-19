@@ -40,6 +40,14 @@ namespace dawn_wire {
         return mImpl->InjectTexture(texture, id, generation, deviceId, deviceGeneration);
     }
 
+    bool WireServer::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
+        return mImpl->InjectDevice(device, id, generation);
+    }
+
+    WGPUDevice WireServer::GetDevice(uint32_t id, uint32_t generation) {
+        return mImpl->GetDevice(id, generation);
+    }
+
     namespace server {
         MemoryTransferService::MemoryTransferService() = default;
 

@@ -85,8 +85,13 @@ namespace dawn_wire { namespace client {
     }
 
     WGPUDevice Client::GetDevice() {
+        // This function is deprecated. The concept of a "default" device on the wire
+        // will be removed in favor of ReserveDevice/InjectDevice.
         if (mDevice == nullptr) {
-            mDevice = DeviceAllocator().New(this)->object.get();
+            ReservedDevice reservation = ReserveDevice();
+            mDevice = FromAPI(reservation.device);
+            ASSERT(reservation.id == 1);
+            ASSERT(reservation.generation == 0);
         }
         return reinterpret_cast<WGPUDeviceImpl*>(mDevice);
     }
@@ -100,6 +105,16 @@ namespace dawn_wire { namespace client {
         result.generation = allocation->generation;
         result.deviceId = FromAPI(device)->id;
         result.deviceGeneration = DeviceAllocator().GetGeneration(FromAPI(device)->id);
+        return result;
+    }
+
+    ReservedDevice Client::ReserveDevice() {
+        auto* allocation = DeviceAllocator().New(this);
+
+        ReservedDevice result;
+        result.device = ToAPI(allocation->object.get());
+        result.id = allocation->object->id;
+        result.generation = allocation->generation;
         return result;
     }
 

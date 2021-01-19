@@ -98,6 +98,11 @@ namespace dawn_wire { namespace server {
                                 *data->childObjectTypesAndIds.begin());
                             DoDestroyObject(childObjectType, childObjectId);
                         }
+                        if (data->handle != nullptr) {
+                            //* Deregisters uncaptured error and device lost callbacks since
+                            //* they should not be forwarded if the device no longer exists on the wire.
+                            ClearDeviceCallbacks(data->handle);
+                        }
                     {% endif %}
                     if (data->handle != nullptr) {
                         mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);

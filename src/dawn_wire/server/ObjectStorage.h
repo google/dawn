@@ -160,6 +160,17 @@ namespace dawn_wire { namespace server {
             return objects;
         }
 
+        std::vector<T> GetAllHandles() {
+            std::vector<T> objects;
+            for (Data& data : mKnown) {
+                if (data.allocated && data.handle != nullptr) {
+                    objects.push_back(data.handle);
+                }
+            }
+
+            return objects;
+        }
+
       private:
         std::vector<Data> mKnown;
     };

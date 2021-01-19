@@ -37,6 +37,10 @@ namespace dawn_wire {
         return mImpl->ReserveTexture(device);
     }
 
+    ReservedDevice WireClient::ReserveDevice() {
+        return mImpl->ReserveDevice();
+    }
+
     void WireClient::Disconnect() {
         mImpl->Disconnect();
     }

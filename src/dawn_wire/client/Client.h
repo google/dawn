@@ -46,6 +46,7 @@ namespace dawn_wire { namespace client {
         }
 
         ReservedTexture ReserveTexture(WGPUDevice device);
+        ReservedDevice ReserveDevice();
 
         template <typename Cmd>
         void SerializeCommand(const Cmd& cmd) {

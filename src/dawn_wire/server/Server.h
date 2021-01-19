@@ -167,6 +167,10 @@ namespace dawn_wire { namespace server {
                            uint32_t deviceId,
                            uint32_t deviceGeneration);
 
+        bool InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation);
+
+        WGPUDevice GetDevice(uint32_t id, uint32_t generation);
+
         template <typename T,
                   typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>
         std::unique_ptr<T> MakeUserdata() {
@@ -186,6 +190,7 @@ namespace dawn_wire { namespace server {
             mSerializer.SerializeCommand(cmd, extraSize, SerializeExtraSize);
         }
 
+        void ClearDeviceCallbacks(WGPUDevice device);
 
         // Error callbacks
         void OnUncapturedError(WGPUErrorType type, const char* message);
@@ -212,7 +217,6 @@ namespace dawn_wire { namespace server {
         WireDeserializeAllocator mAllocator;
         ChunkedCommandSerializer mSerializer;
         DawnProcTable mProcs;
-        WGPUDevice mDeviceOnCreation;
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
         MemoryTransferService* mMemoryTransferService = nullptr;
 

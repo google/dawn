@@ -123,6 +123,8 @@ class WireTest : public testing::Test {
     void FlushClient(bool success = true);
     void FlushServer(bool success = true);
 
+    void DefaultApiDeviceWasReleased();
+
     testing::StrictMock<MockProcTable> api;
     WGPUDevice apiDevice;
     WGPUQueue apiQueue;

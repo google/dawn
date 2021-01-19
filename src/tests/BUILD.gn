@@ -223,6 +223,7 @@ test("dawn_unittests") {
     "unittests/wire/WireErrorCallbackTests.cpp",
     "unittests/wire/WireExtensionTests.cpp",
     "unittests/wire/WireFenceTests.cpp",
+    "unittests/wire/WireInjectDeviceTests.cpp",
     "unittests/wire/WireInjectTextureTests.cpp",
     "unittests/wire/WireMemoryTransferServiceTests.cpp",
     "unittests/wire/WireMultipleDeviceTests.cpp",

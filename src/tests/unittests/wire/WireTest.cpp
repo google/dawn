@@ -88,13 +88,21 @@ void WireTest::TearDown() {
     api.IgnoreAllReleaseCalls();
     mWireClient = nullptr;
 
-    if (mWireServer) {
+    if (mWireServer && apiDevice) {
         // These are called on server destruction to clear the callbacks. They must not be
         // called after the server is destroyed.
-        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(_, nullptr, nullptr)).Times(Exactly(1));
-        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(_, nullptr, nullptr)).Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
+            .Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
+            .Times(Exactly(1));
     }
     mWireServer = nullptr;
+}
+
+// This should be called if |apiDevice| is no longer exists on the wire.
+// This signals that expectations in |TearDowb| shouldn't be added.
+void WireTest::DefaultApiDeviceWasReleased() {
+    apiDevice = nullptr;
 }
 
 void WireTest::FlushClient(bool success) {
@@ -123,8 +131,10 @@ void WireTest::DeleteServer() {
     if (mWireServer) {
         // These are called on server destruction to clear the callbacks. They must not be
         // called after the server is destroyed.
-        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(_, nullptr, nullptr)).Times(Exactly(1));
-        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(_, nullptr, nullptr)).Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
+            .Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
+            .Times(Exactly(1));
     }
     mWireServer = nullptr;
 }
