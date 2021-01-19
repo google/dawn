@@ -446,6 +446,7 @@ if(${TINT_BUILD_TESTS})
     ast/type/sampler_type_test.cc
     ast/type/storage_texture_type_test.cc
     ast/type/struct_type_test.cc
+    ast/type/texture_type_test.cc
     ast/type/u32_type_test.cc
     ast/type/vector_type_test.cc
     ast/traits_test.cc

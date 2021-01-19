@@ -4340,41 +4340,12 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   ast::type::TextureDimension dim =
       unwrapped_type->As<ast::type::Texture>()->dim();
   // Number of regular coordinates.
-  uint32_t num_axes = 0;
-  bool is_arrayed = false;
-  switch (dim) {
-    case ast::type::TextureDimension::k1d:
-      num_axes = 1;
-      break;
-    case ast::type::TextureDimension::k1dArray:
-      num_axes = 1;
-      is_arrayed = true;
-      break;
-    case ast::type::TextureDimension::k2d:
-      num_axes = 2;
-      break;
-    case ast::type::TextureDimension::k2dArray:
-      num_axes = 2;
-      is_arrayed = true;
-      break;
-    case ast::type::TextureDimension::k3d:
-      num_axes = 3;
-      break;
-    case ast::type::TextureDimension::kCube:
-      // For cubes, 3 coordinates form a direction vector.
-      num_axes = 3;
-      break;
-    case ast::type::TextureDimension::kCubeArray:
-      // For cubes, 3 coordinates form a direction vector.
-      num_axes = 3;
-      is_arrayed = true;
-      break;
-    default:
-      Fail() << "unsupported image dimensionality for " << type->type_name()
-             << " prompted by " << inst.PrettyPrint();
-      return {};
+  uint32_t num_axes = ast::type::NumCoordinateAxes(dim);
+  bool is_arrayed = ast::type::IsTextureArray(dim);
+  if ((num_axes == 0) || (num_axes > 3)) {
+    Fail() << "unsupported image dimensionality for " << type->type_name()
+           << " prompted by " << inst.PrettyPrint();
   }
-  assert(num_axes <= 3);
   const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
   uint32_t num_coords_supplied = 0;
   auto* component_type = raw_coords.type;

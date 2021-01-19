@@ -817,6 +817,7 @@ source_set("tint_unittests_core_src") {
     "src/ast/type/sampler_type_test.cc",
     "src/ast/type/storage_texture_type_test.cc",
     "src/ast/type/struct_type_test.cc",
+    "src/ast/type/texture_type_test.cc",
     "src/ast/type/u32_type_test.cc",
     "src/ast/type/vector_type_test.cc",
     "src/ast/type_constructor_expression_test.cc",

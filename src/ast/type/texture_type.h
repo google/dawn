@@ -46,6 +46,15 @@ std::ostream& operator<<(std::ostream& out, TextureDimension dim);
 /// @return true if the given TextureDimension is an array texture
 bool IsTextureArray(TextureDimension dim);
 
+/// Returns the number of axes in the coordinate for a dimensionality.
+///  None -> 0
+///  1D, 1DArray -> 1
+///  2D, 2DArray -> 2
+///  3D, Cube, CubeArray -> 3
+/// @param dim the TextureDimension to query
+/// @return number of dimensions in a coordinate for the dimensionality
+int NumCoordinateAxes(TextureDimension dim);
+
 /// A texture type.
 class Texture : public Castable<Texture, Type> {
  public:

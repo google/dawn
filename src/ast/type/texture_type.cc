@@ -72,6 +72,24 @@ bool IsTextureArray(TextureDimension dim) {
   return false;
 }
 
+int NumCoordinateAxes(TextureDimension dim) {
+  switch (dim) {
+    case TextureDimension::kNone:
+      return 0;
+    case TextureDimension::k1d:
+    case TextureDimension::k1dArray:
+      return 1;
+    case TextureDimension::k2d:
+    case TextureDimension::k2dArray:
+      return 2;
+    case TextureDimension::k3d:
+    case TextureDimension::kCube:
+    case TextureDimension::kCubeArray:
+      return 3;
+  }
+  return 0;
+}
+
 Texture::Texture(TextureDimension dim) : dim_(dim) {}
 
 Texture::Texture(Texture&&) = default;
