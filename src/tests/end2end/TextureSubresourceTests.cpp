@@ -106,8 +106,8 @@ class TextureSubresourceTest : public DawnTest {
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> samp : sampler;
-            [[set(0), binding(1)]] var<uniform_constant> tex : texture_2d<f32>;
+            [[group(0), binding(0)]] var<uniform_constant> samp : sampler;
+            [[group(0), binding(1)]] var<uniform_constant> tex : texture_2d<f32>;
 
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 

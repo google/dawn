@@ -36,7 +36,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
         };
 
-        [[set(0), binding(0)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
+        [[group(0), binding(0)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
@@ -92,8 +92,8 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
         };
 
-        [[set(0), binding(0)]] var<storage_buffer> src : [[access(read_write)]] Src;
-        [[set(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
+        [[group(0), binding(0)]] var<storage_buffer> src : [[access(read_write)]] Src;
+        [[group(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         [[stage(compute)]] fn main() -> void {
@@ -163,8 +163,8 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
         };
 
-        [[set(0), binding(0)]] var<storage_buffer> src : [[access(read)]] Src;
-        [[set(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
+        [[group(0), binding(0)]] var<storage_buffer> src : [[access(read)]] Src;
+        [[group(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
@@ -232,8 +232,8 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
             [[offset(0)]] data : [[stride(16)]] array<vec4<u32>, 25>;
         };
 
-        [[set(0), binding(0)]] var<uniform> src : Buf;
-        [[set(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Buf;
+        [[group(0), binding(0)]] var<uniform> src : Buf;
+        [[group(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Buf;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         [[stage(compute)]] fn main() -> void {
@@ -300,8 +300,8 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
             [[offset(0)]] data : [[stride(16)]] array<vec4<u32>, 25>;
         };
 
-        [[set(0), binding(0)]] var<uniform> src : Buf;
-        [[set(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Buf;
+        [[group(0), binding(0)]] var<uniform> src : Buf;
+        [[group(0), binding(1)]] var<storage_buffer> dst : [[access(read_write)]] Buf;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         [[stage(compute)]] fn main() -> void {

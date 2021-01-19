@@ -33,7 +33,7 @@ namespace {
                 [[block]] struct S {
                     [[offset(0)]] transform : mat2x2<f32>;
                 };
-                [[set(0), binding(0)]] var<uniform> uniforms : S;
+                [[group(0), binding(0)]] var<uniform> uniforms : S;
 
                 [[stage(vertex)]] fn main() -> void {
                 })");
@@ -42,12 +42,12 @@ namespace {
                 [[block]] struct Uniforms {
                     [[offset(0)]] color : vec4<f32>;
                 };
-                [[set(1), binding(0)]] var<uniform> uniforms : Uniforms;
+                [[group(1), binding(0)]] var<uniform> uniforms : Uniforms;
 
                 [[block]] struct Storage {
                     [[offset(0)]] dummy : [[stride(4)]] array<f32>;
                 };
-                [[set(1), binding(1)]] var<storage_buffer> ssbo : [[access(read_write)]] Storage;
+                [[group(1), binding(1)]] var<storage_buffer> ssbo : [[access(read_write)]] Storage;
 
                 [[stage(fragment)]] fn main() -> void {
                 })");

@@ -125,10 +125,10 @@ class DynamicBufferOffsetTests : public DawnTest {
                 [[offset(0)]] value : vec2<u32>;
             };
 
-            [[set(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
-            [[set(0), binding(1)]] var<storage_buffer> sBufferNotDynamic : [[access(read_write)]] Buffer2;
-            [[set(0), binding(3)]] var<uniform> uBuffer : Buffer3;
-            [[set(0), binding(4)]] var<storage_buffer> sBuffer : [[access(read_write)]] Buffer4;
+            [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
+            [[group(0), binding(1)]] var<storage_buffer> sBufferNotDynamic : [[access(read_write)]] Buffer2;
+            [[group(0), binding(3)]] var<uniform> uBuffer : Buffer3;
+            [[group(0), binding(4)]] var<storage_buffer> sBuffer : [[access(read_write)]] Buffer4;
         )";
 
         if (isInheritedPipeline) {
@@ -137,7 +137,7 @@ class DynamicBufferOffsetTests : public DawnTest {
                     [[offset(0)]] value : vec2<u32>;
                 };
 
-                [[set(1), binding(0)]] var<uniform> paddingBlock : Buffer5;
+                [[group(1), binding(0)]] var<uniform> paddingBlock : Buffer5;
             )";
         }
 
@@ -194,10 +194,10 @@ class DynamicBufferOffsetTests : public DawnTest {
                 [[offset(0)]] value : vec2<u32>;
             };
 
-            [[set(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
-            [[set(0), binding(1)]] var<storage_buffer> sBufferNotDynamic : [[access(read_write)]] Buffer2;
-            [[set(0), binding(3)]] var<uniform> uBuffer : Buffer3;
-            [[set(0), binding(4)]] var<storage_buffer> sBuffer : [[access(read_write)]] Buffer4;
+            [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
+            [[group(0), binding(1)]] var<storage_buffer> sBufferNotDynamic : [[access(read_write)]] Buffer2;
+            [[group(0), binding(3)]] var<uniform> uBuffer : Buffer3;
+            [[group(0), binding(4)]] var<storage_buffer> sBuffer : [[access(read_write)]] Buffer4;
         )";
 
         if (isInheritedPipeline) {
@@ -206,7 +206,7 @@ class DynamicBufferOffsetTests : public DawnTest {
                     [[offset(0)]] value : vec2<u32>;
                 };
 
-                [[set(1), binding(0)]] var<uniform> paddingBlock : Buffer5;
+                [[group(1), binding(0)]] var<uniform> paddingBlock : Buffer5;
             )";
         }
 

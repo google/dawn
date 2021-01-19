@@ -397,7 +397,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<)"
+                [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<)"
                    << kScalarTypes[i] << R"(>;
 
                 [[stage(fragment)]] fn main() -> void {
@@ -446,7 +446,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                [[set(0), binding(0)]] var<uniform_constant> myTexture : )"
+                [[group(0), binding(0)]] var<uniform_constant> myTexture : )"
                    << kTextureKeywords[i] << R"(<f32>;
                 [[stage(fragment)]] fn main() -> void {
                 })";
@@ -474,7 +474,7 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
         [[block]] struct Dst {
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
         };
-        [[set(0), binding(0)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
+        [[group(0), binding(0)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
         [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
         [[stage(vertex)]] fn main() -> void {
             dst.data[VertexIndex] = 0x1234u;

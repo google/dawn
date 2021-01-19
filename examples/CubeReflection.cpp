@@ -106,12 +106,12 @@ void init() {
             [[offset(0)]] view : mat4x4<f32>;
             [[offset(64)]] proj : mat4x4<f32>;
         };
-        [[set(0), binding(0)]] var<uniform> camera : Camera;
+        [[group(0), binding(0)]] var<uniform> camera : Camera;
 
         [[block]] struct Model {
             [[offset(0)]] matrix : mat4x4<f32>;
         };
-        [[set(0), binding(1)]] var<uniform> model : Model;
+        [[group(0), binding(1)]] var<uniform> model : Model;
 
         [[location(0)]] var<in> pos : vec3<f32>;
         [[location(1)]] var<in> col : vec3<f32>;

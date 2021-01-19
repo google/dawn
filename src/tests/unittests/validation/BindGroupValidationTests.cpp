@@ -1094,10 +1094,10 @@ class SetBindGroupValidationTest : public ValidationTest {
                     [[offset(0)]] value : vec2<f32>;
                 };
 
-                [[set(0), binding(0)]] var<uniform> uBufferDynamic : S;
-                [[set(0), binding(1)]] var<uniform> uBuffer : S;
-                [[set(0), binding(2)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
-                [[set(0), binding(3)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+                [[group(0), binding(0)]] var<uniform> uBufferDynamic : S;
+                [[group(0), binding(1)]] var<uniform> uBuffer : S;
+                [[group(0), binding(2)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+                [[group(0), binding(3)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
 
                 [[stage(fragment)]] fn main() -> void {
                 })");
@@ -1117,10 +1117,10 @@ class SetBindGroupValidationTest : public ValidationTest {
                     [[offset(0)]] value : vec2<f32>;
                 };
 
-                [[set(0), binding(0)]] var<uniform> uBufferDynamic : S;
-                [[set(0), binding(1)]] var<uniform> uBuffer : S;
-                [[set(0), binding(2)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
-                [[set(0), binding(3)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+                [[group(0), binding(0)]] var<uniform> uBufferDynamic : S;
+                [[group(0), binding(1)]] var<uniform> uBuffer : S;
+                [[group(0), binding(2)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+                [[group(0), binding(3)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
 
                 [[stage(compute), workgroup_size(4, 4, 1)]] fn main() -> void {
                 })");
@@ -1542,7 +1542,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
 
             for (uint32_t b = 0; b < layout.size(); ++b) {
                 wgpu::BufferBindingType binding = layout[b];
-                ss << "[[set(" << l << "), binding(" << b << ")]] ";
+                ss << "[[group(" << l << "), binding(" << b << ")]] ";
                 switch (binding) {
                     case wgpu::BufferBindingType::Storage:
                         ss << "var<storage_buffer> set" << l << "_binding" << b
@@ -1713,8 +1713,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
                 [[offset(0)]] value : vec2<f32>;
             };
 
-            [[set(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
-            [[set(1), binding(0)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+            [[group(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+            [[group(1), binding(0)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
 
             [[stage(fragment)]] fn main() -> void {
             })",
@@ -1746,8 +1746,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
                 [[offset(0)]] value : vec2<f32>;
             };
 
-            [[set(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
-            [[set(1), binding(0)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
+            [[group(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
+            [[group(1), binding(0)]] var<storage_buffer> sReadonlyBufferDynamic : [[access(read)]] S;
 
             [[stage(compute), workgroup_size(4, 4, 1)]] fn main() -> void {
             })",
@@ -1789,11 +1789,11 @@ TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
 
 TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DShaderFS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
         [[stage(fragment)]] fn main() -> void {
         })";
     constexpr char kTexture2DShaderCS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
         [[stage(compute)]] fn main() -> void {
         })";
 
@@ -1826,11 +1826,11 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
                                       wgpu::TextureViewDimension::e2DArray}})}));
 
     constexpr char kTexture2DArrayShaderFS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
+        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
         [[stage(fragment)]] fn main() -> void {
         })";
     constexpr char kTexture2DArrayShaderCS[] = R"(
-        [[set(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
+        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
         [[stage(compute)]] fn main() -> void {
         })";
 
@@ -2079,7 +2079,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
 
         CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler;
             [[stage(fragment)]] fn main() -> void {
             })");
     }
@@ -2090,7 +2090,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison}});
 
         CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
+            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() -> void {
             })");
     }
@@ -2101,7 +2101,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
 
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
+            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() -> void {
             })"));
     }
@@ -2112,7 +2112,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison}});
 
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[set(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler;
             [[stage(fragment)]] fn main() -> void {
             })"));
     }

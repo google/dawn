@@ -72,11 +72,11 @@ class BindGroupTests : public DawnTest {
 
             switch (bindingTypes[i]) {
                 case wgpu::BufferBindingType::Uniform:
-                    fs << "\n[[set(" << i << "), binding(0)]] var<uniform> buffer" << i
+                    fs << "\n[[group(" << i << "), binding(0)]] var<uniform> buffer" << i
                        << " : Buffer" << i << ";";
                     break;
                 case wgpu::BufferBindingType::Storage:
-                    fs << "\n[[set(" << i << "), binding(0)]] var<storage_buffer> buffer" << i
+                    fs << "\n[[group(" << i << "), binding(0)]] var<storage_buffer> buffer" << i
                        << " : [[access(read)]] Buffer" << i << ";";
                     break;
                 default:
@@ -123,7 +123,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
         [[block]] struct Contents {
             [[offset(0)]] f : f32;
         };
-        [[set(0), binding(0)]] var <uniform> contents: Contents;
+        [[group(0), binding(0)]] var <uniform> contents: Contents;
 
         [[stage(compute)]] fn main() -> void {
         })");
@@ -162,7 +162,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
             [[offset(0)]] transform : vec4<f32>;
         };
 
-        [[set(0), binding(0)]] var <uniform> vertexUbo : VertexUniformBuffer;
+        [[group(0), binding(0)]] var <uniform> vertexUbo : VertexUniformBuffer;
 
         [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
@@ -183,7 +183,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
         [[block]] struct FragmentUniformBuffer {
             [[offset(0)]] color : vec4<f32>;
         };
-        [[set(0), binding(1)]] var <uniform> fragmentUbo : FragmentUniformBuffer;
+        [[group(0), binding(1)]] var <uniform> fragmentUbo : FragmentUniformBuffer;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
@@ -249,7 +249,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         [[block]] struct VertexUniformBuffer {
             [[offset(0)]] transform : vec4<f32>;
         };
-        [[set(0), binding(0)]] var <uniform> vertexUbo : VertexUniformBuffer;
+        [[group(0), binding(0)]] var <uniform> vertexUbo : VertexUniformBuffer;
 
         [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
@@ -267,8 +267,8 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[set(0), binding(1)]] var <uniform_constant> samp : sampler;
-        [[set(0), binding(2)]] var <uniform_constant> tex : texture_2d<f32>;
+        [[group(0), binding(1)]] var <uniform_constant> samp : sampler;
+        [[group(0), binding(2)]] var <uniform_constant> tex : texture_2d<f32>;
         [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
@@ -371,8 +371,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         };
 
         // TODO(crbug.com/tint/386): Use the same struct definition.
-        [[set(0), binding(0)]] var <uniform> vertexUbo1 : VertexUniformBuffer1;
-        [[set(1), binding(0)]] var <uniform> vertexUbo2 : VertexUniformBuffer2;
+        [[group(0), binding(0)]] var <uniform> vertexUbo1 : VertexUniformBuffer1;
+        [[group(1), binding(0)]] var <uniform> vertexUbo2 : VertexUniformBuffer2;
 
         [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
@@ -400,8 +400,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         };
 
         // TODO(crbug.com/tint/386): Use the same struct definition.
-        [[set(0), binding(1)]] var <uniform> fragmentUbo1 : FragmentUniformBuffer1;
-        [[set(1), binding(1)]] var <uniform> fragmentUbo2 : FragmentUniformBuffer2;
+        [[group(0), binding(1)]] var <uniform> fragmentUbo1 : FragmentUniformBuffer1;
+        [[group(1), binding(1)]] var <uniform> fragmentUbo2 : FragmentUniformBuffer2;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
@@ -863,10 +863,10 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
             [[offset(0)]] value : vec3<u32>;
         };
 
-        [[set(0), binding(2)]] var<uniform> buffer2 : Buffer2;
-        [[set(0), binding(3)]] var<storage_buffer> buffer3 : [[access(read)]] Buffer3;
-        [[set(0), binding(0)]] var<storage_buffer> buffer0 : [[access(read)]] Buffer0;
-        [[set(0), binding(4)]] var<storage_buffer> outputBuffer : [[access(read_write)]] OutputBuffer;
+        [[group(0), binding(2)]] var<uniform> buffer2 : Buffer2;
+        [[group(0), binding(3)]] var<storage_buffer> buffer3 : [[access(read)]] Buffer3;
+        [[group(0), binding(0)]] var<storage_buffer> buffer0 : [[access(read)]] Buffer0;
+        [[group(0), binding(4)]] var<storage_buffer> outputBuffer : [[access(read_write)]] OutputBuffer;
 
         [[stage(compute)]] fn main() -> void {
             outputBuffer.value = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
@@ -988,9 +988,9 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
         };
 
         // TODO(crbug.com/tint/386): Use the same struct definition.
-        [[set(0), binding(953)]] var <uniform> ubo1 : Ubo1;
-        [[set(0), binding(47)]] var <uniform> ubo2 : Ubo2;
-        [[set(0), binding(111)]] var <uniform> ubo3 : Ubo3;
+        [[group(0), binding(953)]] var <uniform> ubo1 : Ubo1;
+        [[group(0), binding(47)]] var <uniform> ubo2 : Ubo2;
+        [[group(0), binding(111)]] var <uniform> ubo3 : Ubo3;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
@@ -1133,7 +1133,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
         [[block]] struct Buffer0 {
             [[offset(0)]] color : vec4<f32>;
         };
-        [[set(0), binding(0)]] var<storage_buffer> buffer0 : [[access(read)]] Buffer0;
+        [[group(0), binding(0)]] var<storage_buffer> buffer0 : [[access(read)]] Buffer0;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
@@ -1216,13 +1216,13 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
             wgpu::TextureFormat::R8Unorm, expectedValue, wgpu::TextureUsage::Sampled);
         bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
-        interface << "[[set(0), binding(" << binding++ << ")]] "
+        interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var<uniform_constant> tex" << i << " : texture_2d<f32>;\n";
 
         wgpu::SamplerDescriptor samplerDesc = {};
         bgEntries.push_back({binding, nullptr, 0, 0, device.CreateSampler(&samplerDesc), nullptr});
 
-        interface << "[[set(0), binding(" << binding++ << ")]]"
+        interface << "[[group(0), binding(" << binding++ << ")]]"
                   << "var<uniform_constant> samp" << i << " : sampler;\n";
 
         body << "if (abs(textureSampleLevel(tex" << i << ", samp" << i
@@ -1236,7 +1236,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
             wgpu::TextureFormat::R32Uint, expectedValue, wgpu::TextureUsage::Storage);
         bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
-        interface << "[[set(0), binding(" << binding++ << ")]] "
+        interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var<uniform_constant> image" << i
                   << " : [[access(read)]] texture_storage_2d<r32uint>;\n";
 
@@ -1255,7 +1255,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
                 [[offset(0)]] value : u32;
             };
         )";
-        interface << "[[set(0), binding(" << binding++ << ")]] "
+        interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var<uniform> ubuf" << i << " : UniformBuffer" << i << ";\n";
 
         body << "if (ubuf" << i << ".value != " << expectedValue++ << "u) {\n";
@@ -1272,7 +1272,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
                 [[offset(0)]] value : u32;
             };
         )";
-        interface << "[[set(0), binding(" << binding++ << ")]] "
+        interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var<storage_buffer> sbuf" << i << " : [[access(read)]] ReadOnlyStorageBuffer"
                   << i << ";\n";
 
@@ -1289,7 +1289,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
             [[offset(0)]] value : u32;
         };
     )";
-    interface << "[[set(0), binding(" << binding++ << ")]] "
+    interface << "[[group(0), binding(" << binding++ << ")]] "
               << "var<storage_buffer> result : [[access(read_write)]] ReadWriteStorageBuffer;\n";
 
     body << "result.value = 1u;\n";

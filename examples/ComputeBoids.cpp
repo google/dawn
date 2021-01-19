@@ -167,9 +167,9 @@ void initSim() {
         [[block]] struct Particles {
             [[offset(0)]] particles : [[stride(16)]] array<Particle>;
         };
-        [[binding(0), set(0)]] var<uniform> params : SimParams;
-        [[binding(1), set(0)]] var<storage_buffer> particlesA : [[access(read)]] Particles;
-        [[binding(2), set(0)]] var<storage_buffer> particlesB : [[access(read_write)]] Particles;
+        [[binding(0), group(0)]] var<uniform> params : SimParams;
+        [[binding(1), group(0)]] var<storage_buffer> particlesA : [[access(read)]] Particles;
+        [[binding(2), group(0)]] var<storage_buffer> particlesB : [[access(read_write)]] Particles;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp

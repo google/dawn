@@ -78,7 +78,7 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
         )");
         pipelineDesc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[location(0)]] var<out> FragColor : vec4<f32>;
-            [[set(0), binding(0)]] var<uniform_constant> materials : texture_sampled_2d<f32>;
+            [[group(0), binding(0)]] var<uniform_constant> materials : texture_sampled_2d<f32>;
             [[stage(fragment)]] fn main() -> void {
                 FragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }

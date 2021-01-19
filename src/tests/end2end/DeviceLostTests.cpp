@@ -116,7 +116,7 @@ TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
         [[block]] struct UniformBuffer {
             [[offset(0)]] pos : vec4<f32>;
         };
-        [[set(0), binding(0)]] var<uniform> ubo : UniformBuffer;
+        [[group(0), binding(0)]] var<uniform> ubo : UniformBuffer;
         [[stage(compute)]] fn main() -> void {
         })");
 

@@ -60,7 +60,7 @@ class ColorStateTest : public DawnTest {
                     [[offset(0)]] color : vec4<f32>;
                 };
 
-                [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
+                [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
                 [[location(0)]] var<out> fragColor : vec4<f32>;
 
@@ -777,7 +777,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
             [[offset(48)]] color3 : vec4<f32>;
         };
 
-        [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
+        [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
         [[location(0)]] var<out> fragColor0 : vec4<f32>;
         [[location(1)]] var<out> fragColor1 : vec4<f32>;
@@ -884,7 +884,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
             [[offset(0)]] color : vec4<f32>;
         };
 
-        [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
+        [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
@@ -1007,7 +1007,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
             [[offset(0)]] color : vec4<f32>;
         };
 
-        [[set(0), binding(0)]] var<uniform> myUbo : MyBlock;
+        [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 

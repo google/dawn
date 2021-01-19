@@ -38,7 +38,7 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
         [[block]] struct SSBO {
             [[offset(0)]] value : u32;
         };
-        [[set(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
+        [[group(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
 
         [[stage(compute)]] fn main() -> void {
             ssbo.value = 1u;
@@ -105,7 +105,7 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
         [[block]] struct SSBO {
             [[offset(0)]] value : u32;
         };
-        [[set(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
+        [[group(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
 
         [[stage(compute)]] fn main() -> void {
             ssbo.value = 1u;

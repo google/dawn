@@ -90,14 +90,14 @@ class MultisampledSamplingTest : public DawnTest {
             wgpu::ComputePipelineDescriptor desc = {};
             desc.computeStage.entryPoint = "main";
             desc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-                [[set(0), binding(0)]] var<uniform_constant> texture0 : texture_multisampled_2d<f32>;
-                [[set(0), binding(1)]] var<uniform_constant> texture1 : texture_multisampled_2d<f32>;
+                [[group(0), binding(0)]] var<uniform_constant> texture0 : texture_multisampled_2d<f32>;
+                [[group(0), binding(1)]] var<uniform_constant> texture1 : texture_multisampled_2d<f32>;
 
                 [[block]] struct Results {
                     [[offset(0)]] colorSamples : [[stride(4)]] array<f32, 4>;
                     [[offset(16)]] depthSamples : [[stride(4)]] array<f32, 4>;
                 };
-                [[set(0), binding(2)]] var<storage_buffer> results : [[access(read_write)]] Results;
+                [[group(0), binding(2)]] var<storage_buffer> results : [[access(read_write)]] Results;
 
                 [[stage(compute)]] fn main() -> void {
                     for (var i : i32 = 0; i < 4; i = i + 1) {

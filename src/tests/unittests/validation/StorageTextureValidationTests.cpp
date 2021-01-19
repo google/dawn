@@ -125,7 +125,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     // Readonly storage texture can be declared in a vertex shader.
     {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
@@ -142,7 +142,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     // Read-only storage textures can be declared in a fragment shader.
     {
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
@@ -197,13 +197,13 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
     // Read-only storage textures can be declared in a compute shader.
     {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(local_invocation_id)]] var<in> LocalInvocationID : vec3<u32>;
 
             [[block]] struct Buf {
                 [[offset(0)]] data : f32;
             };
-            [[set(0), binding(1)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
+            [[group(0), binding(1)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
 
             [[stage(compute)]] fn main() -> void {
                  buf.data = textureLoad(image0, vec2<i32>(LocalInvocationID.xy)).x;

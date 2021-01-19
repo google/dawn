@@ -66,10 +66,10 @@ class OpArrayLengthTest : public DawnTest {
             };
 
             // The length should be 1 because the buffer is 4-byte long.
-            [[set(0), binding(0)]] var<storage_buffer> buffer1 : [[access(read)]] DataBuffer1;
+            [[group(0), binding(0)]] var<storage_buffer> buffer1 : [[access(read)]] DataBuffer1;
 
             // The length should be 64 because the buffer is 256 bytes long.
-            [[set(0), binding(1)]] var<storage_buffer> buffer2 : [[access(read)]] DataBuffer2;
+            [[group(0), binding(1)]] var<storage_buffer> buffer2 : [[access(read)]] DataBuffer2;
 
             // The length should be (512 - 16*4) / 8 = 56 because the buffer is 512 bytes long
             // and the structure is 8 bytes big.
@@ -82,7 +82,7 @@ class OpArrayLengthTest : public DawnTest {
                 [[offset(0)]] garbage : mat4x4<f32>;
                 [[offset(64)]] data : [[stride(8)]] array<Buffer3Data>;
             };
-            [[set(0), binding(2)]] var<storage_buffer> buffer3 : [[access(read)]] Buffer3;
+            [[group(0), binding(2)]] var<storage_buffer> buffer3 : [[access(read)]] Buffer3;
         )";
 
         // See comments in the shader for an explanation of these values
@@ -132,7 +132,7 @@ TEST_P(OpArrayLengthTest, Compute) {
         [[block]] struct ResultBuffer {
             [[offset(0)]] data : [[stride(4)]] array<u32, 3>;
         };
-        [[set(1), binding(0)]] var<storage_buffer> result : [[access(read_write)]] ResultBuffer;
+        [[group(1), binding(0)]] var<storage_buffer> result : [[access(read_write)]] ResultBuffer;
         )" + mShaderInterface + R"(
         [[stage(compute)]] fn main() -> void {
             result.data[0] = arrayLength(buffer1.data);

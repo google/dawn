@@ -57,7 +57,7 @@ class DepthStencilStateTest : public DawnTest {
                 [[offset(0)]] color : vec3<f32>;
                 [[offset(12)]] depth : f32;
             };
-            [[set(0), binding(0)]] var<uniform> ubo : UBO;
+            [[group(0), binding(0)]] var<uniform> ubo : UBO;
             [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -77,7 +77,7 @@ class DepthStencilStateTest : public DawnTest {
                 [[offset(0)]] color : vec3<f32>;
                 [[offset(12)]] depth : f32;
             };
-            [[set(0), binding(0)]] var<uniform> ubo : UBO;
+            [[group(0), binding(0)]] var<uniform> ubo : UBO;
 
             [[location(0)]] var<out> fragColor : vec4<f32>;
 

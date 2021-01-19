@@ -38,8 +38,8 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
             [[offset(0)]] workGroups : vec3<u32>;
         };
 
-        [[set(0), binding(0)]] var<uniform> input : InputBuf;
-        [[set(0), binding(1)]] var<storage_buffer> output : OutputBuf;
+        [[group(0), binding(0)]] var<uniform> input : InputBuf;
+        [[group(0), binding(1)]] var<storage_buffer> output : OutputBuf;
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 

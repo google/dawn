@@ -45,7 +45,7 @@ namespace dawn_native {
             [[location(0)]] var<out> v_texcoord: vec2<f32>;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
-            [[binding(0), set(0)]] var<uniform> uniforms : Uniforms;
+            [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
 
@@ -57,8 +57,8 @@ namespace dawn_native {
         )";
 
         static const char sPassthrough2D4ChannelFrag[] = R"(
-            [[binding(1), set(0)]] var<uniform_constant> mySampler: sampler;
-            [[binding(2), set(0)]] var<uniform_constant> myTexture: texture_2d<f32>;
+            [[binding(1), group(0)]] var<uniform_constant> mySampler: sampler;
+            [[binding(2), group(0)]] var<uniform_constant> myTexture: texture_2d<f32>;
             [[location(0)]] var<in> v_texcoord : vec2<f32>;
             [[location(0)]] var<out> rgbaColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {

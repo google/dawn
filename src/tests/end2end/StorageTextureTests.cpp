@@ -165,7 +165,7 @@ class StorageTextureTests : public DawnTest {
                                     bool is2DArray,
                                     uint32_t binding) {
         std::ostringstream ostream;
-        ostream << "[[set(0), binding(" << binding << ")]] "
+        ostream << "[[group(0), binding(" << binding << ")]] "
                 << "var<uniform_constant> storageImage" << binding << " : "
                 << "[[access(" << accessQualifier << ")]] "
                 << "texture_storage_2d";
@@ -712,7 +712,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
   [[offset(0)]] result : u32;
 };
 
-[[set(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
+[[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
 )" << CommonReadOnlyTestCode(format)
                  << R"(
 [[stage(compute)]] fn main() -> void {
@@ -917,7 +917,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
   [[offset(0)]] result : u32;
 };
 
-[[set(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
+[[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
 )" << CommonReadOnlyTestCode(kTextureFormat, true)
              << R"(
 [[stage(compute)]] fn main() -> void {
@@ -964,8 +964,8 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
         kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-[[set(0), binding(0)]] var<uniform_constant> Src : [[access(read)]]  texture_storage_2d<r32uint>;
-[[set(0), binding(1)]] var<uniform_constant> Dst : [[access(write)]] texture_storage_2d<r32uint>;
+[[group(0), binding(0)]] var<uniform_constant> Src : [[access(read)]]  texture_storage_2d<r32uint>;
+[[group(0), binding(1)]] var<uniform_constant> Dst : [[access(write)]] texture_storage_2d<r32uint>;
 [[stage(compute)]] fn main() -> void {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
   srcValue.x = srcValue.x + 1u;
@@ -1040,8 +1040,8 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     wgpu::Texture storageTexture2 = CreateTexture(
         kTextureFormat, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage, 1u, 1u);
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-[[set(0), binding(0)]] var<uniform_constant> Src : texture_2d<u32>;
-[[set(0), binding(1)]] var<uniform_constant> Dst : [[access(write)]] texture_storage_2d<r32uint>;
+[[group(0), binding(0)]] var<uniform_constant> Src : texture_2d<u32>;
+[[group(0), binding(1)]] var<uniform_constant> Dst : [[access(write)]] texture_storage_2d<r32uint>;
 [[stage(compute)]] fn main() -> void {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
   srcValue.x = srcValue.x + 1u;
@@ -1139,13 +1139,13 @@ fn doTest() -> bool {
 })";
 
     const char* kCommonWriteOnlyZeroInitTestCodeFragment = R"(
-[[set(0), binding(0)]] var<uniform_constant> dstImage : [[access(write)]] texture_storage_2d<r32uint>;
+[[group(0), binding(0)]] var<uniform_constant> dstImage : [[access(write)]] texture_storage_2d<r32uint>;
 
 [[stage(fragment)]] fn main() -> void {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
 })";
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
-[[set(0), binding(0)]] var<uniform_constant> dstImage : [[access(write)]] texture_storage_2d<r32uint>;
+[[group(0), binding(0)]] var<uniform_constant> dstImage : [[access(write)]] texture_storage_2d<r32uint>;
 
 [[stage(compute)]] fn main() -> void {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
@@ -1162,7 +1162,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPa
     // green as the output color, otherwise uses red instead.
     const char* kVertexShader = kSimpleVertexShader;
     const std::string kFragmentShader = std::string(R"(
-[[set(0), binding(0)]] var<uniform_constant> srcImage : [[access(read)]] texture_storage_2d<r32uint>;
+[[group(0), binding(0)]] var<uniform_constant> srcImage : [[access(read)]] texture_storage_2d<r32uint>;
 [[location(0)]] var<out> o_color : vec4<f32>;
 )") + kCommonReadOnlyZeroInitTestCode +
                                         R"(
@@ -1189,8 +1189,8 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
   [[offset(0)]] result : u32;
 };
 
-[[set(0), binding(0)]] var<uniform_constant> srcImage : [[access(read)]] texture_storage_2d<r32uint>;
-[[set(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
+[[group(0), binding(0)]] var<uniform_constant> srcImage : [[access(read)]] texture_storage_2d<r32uint>;
+[[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
 )") + kCommonReadOnlyZeroInitTestCode + R"(
 [[stage(compute)]] fn main() -> void {
   if (doTest()) {

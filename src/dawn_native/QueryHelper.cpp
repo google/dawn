@@ -52,11 +52,11 @@ namespace dawn_native {
                 [[offset(8)]]  period : f32;
             };
 
-            [[set(0), binding(0)]]
+            [[group(0), binding(0)]]
                 var<storage_buffer> timestamps : [[access(read_write)]] TimestampArr;
-            [[set(0), binding(1)]]
+            [[group(0), binding(1)]]
                 var<storage_buffer> availability : [[access(read)]] AvailabilityArr;
-            [[set(0), binding(2)]] var<uniform> params : TimestampParams;
+            [[group(0), binding(2)]] var<uniform> params : TimestampParams;
 
             [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 

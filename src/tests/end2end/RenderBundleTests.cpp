@@ -43,7 +43,7 @@ class RenderBundleTest : public DawnTest {
             [[block]] struct Ubo {
                 [[offset(0)]] color : vec4<f32>;
             };
-            [[set(0), binding(0)]] var<uniform> fragmentUniformBuffer : Ubo;
+            [[group(0), binding(0)]] var<uniform> fragmentUniformBuffer : Ubo;
 
             [[stage(fragment)]] fn main() -> void {
                 fragColor = fragmentUniformBuffer.color;

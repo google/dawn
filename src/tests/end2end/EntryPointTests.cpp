@@ -78,7 +78,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
         [[block]] struct Data {
             [[offset(0)]] data : u32;
         };
-        [[binding(0), set(0)]] var<storage_buffer> data : Data;
+        [[binding(0), group(0)]] var<storage_buffer> data : Data;
 
         [[stage(compute)]] fn write1() -> void {
             data.data = 1u;

@@ -253,7 +253,7 @@ class DepthStencilCopyTests : public DawnTest {
         // Sample the input texture and write out depth. |result| will only be set to 1 if we
         // pass the depth test.
         pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> texture0 : texture_2d<f32>;
+            [[group(0), binding(0)]] var<uniform_constant> texture0 : texture_2d<f32>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
             [[location(0)]] var<out> result : u32;

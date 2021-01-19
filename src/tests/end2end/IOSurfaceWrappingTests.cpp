@@ -274,8 +274,8 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                 }
             )");
             wgpu::ShaderModule fs = utils::CreateShaderModuleFromWGSL(device, R"(
-                [[set(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
-                [[set(0), binding(1)]] var<uniform_constant> texture0 : texture_2d<f32>;
+                [[group(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
+                [[group(0), binding(1)]] var<uniform_constant> texture0 : texture_2d<f32>;
 
                 [[location(0)]] var<in> texCoord : vec2<f32>;
                 [[location(0)]] var<out> fragColor : vec4<f32>;
