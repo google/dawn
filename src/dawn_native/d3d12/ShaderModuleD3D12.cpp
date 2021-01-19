@@ -197,7 +197,8 @@ namespace dawn_native { namespace d3d12 {
         const char* entryPointName,
         SingleShaderStage stage,
         PipelineLayout* layout,
-        std::string* remappedEntryPointName) const {
+        std::string* remappedEntryPointName,
+        FirstOffsetInfo* firstOffsetInfo) const {
         ASSERT(!IsError());
 
 #ifdef DAWN_ENABLE_WGSL
@@ -207,8 +208,31 @@ namespace dawn_native { namespace d3d12 {
         tint::transform::Manager transformManager;
         transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
 
+        tint::transform::FirstIndexOffset* firstOffsetTransform = nullptr;
+        if (stage == SingleShaderStage::Vertex) {
+            auto transformer = std::make_unique<tint::transform::FirstIndexOffset>(
+                layout->GetFirstIndexOffsetShaderRegister(),
+                layout->GetFirstIndexOffsetRegisterSpace());
+            firstOffsetTransform = transformer.get();
+            transformManager.append(std::move(transformer));
+        }
+
         tint::ast::Module module;
         DAWN_TRY_ASSIGN(module, RunTransforms(&transformManager, mTintModule.get()));
+
+        if (firstOffsetTransform != nullptr) {
+            // Functions are only available after transform has been performed
+            firstOffsetInfo->usesVertexIndex = firstOffsetTransform->HasVertexIndex();
+            if (firstOffsetInfo->usesVertexIndex) {
+                firstOffsetInfo->vertexIndexOffset = firstOffsetTransform->GetFirstVertexOffset();
+            }
+
+            firstOffsetInfo->usesInstanceIndex = firstOffsetTransform->HasInstanceIndex();
+            if (firstOffsetInfo->usesInstanceIndex) {
+                firstOffsetInfo->instanceIndexOffset =
+                    firstOffsetTransform->GetFirstInstanceOffset();
+            }
+        }
 
         ASSERT(remappedEntryPointName != nullptr);
         tint::inspector::Inspector inspector(module);
@@ -302,9 +326,11 @@ namespace dawn_native { namespace d3d12 {
         // Compile the source shader to HLSL.
         std::string hlslSource;
         std::string remappedEntryPoint;
+        CompiledShader compiledShader = {};
         if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
             DAWN_TRY_ASSIGN(hlslSource, TranslateToHLSLWithTint(entryPointName, stage, layout,
-                                                                &remappedEntryPoint));
+                                                                &remappedEntryPoint,
+                                                                &compiledShader.firstOffsetInfo));
             entryPointName = remappedEntryPoint.c_str();
         } else {
             DAWN_TRY_ASSIGN(hlslSource,
@@ -326,7 +352,6 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(shaderCacheKey,
                         CreateHLSLKey(entryPointName, stage, hlslSource, compileFlags));
 
-        CompiledShader compiledShader = {};
         DAWN_TRY_ASSIGN(compiledShader.cachedShader,
                         device->GetPersistentCache()->GetOrCreate(
                             shaderCacheKey, [&](auto doCache) -> MaybeError {

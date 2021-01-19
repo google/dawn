@@ -17,6 +17,7 @@
 
 #include "dawn_native/RenderPipeline.h"
 
+#include "dawn_native/d3d12/ShaderModuleD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -32,6 +33,8 @@ namespace dawn_native { namespace d3d12 {
         D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
         ID3D12PipelineState* GetPipelineState() const;
 
+        const FirstOffsetInfo& GetFirstOffsetInfo() const;
+
       private:
         ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
@@ -41,6 +44,7 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
         ComPtr<ID3D12PipelineState> mPipelineState;
+        FirstOffsetInfo mFirstOffsetInfo;
     };
 
 }}  // namespace dawn_native::d3d12

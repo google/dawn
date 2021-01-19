@@ -151,6 +151,39 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
+        // Since Tint's HLSL writer doesn't currently map sets to spaces, we use the default space
+        // (0).
+        mFirstIndexOffsetRegisterSpace = 0;
+        BindGroupIndex firstOffsetGroup{mFirstIndexOffsetRegisterSpace};
+        if (GetBindGroupLayoutsMask()[firstOffsetGroup]) {
+            // Find the last register used on firstOffsetGroup.
+            uint32_t maxRegister = 0;
+            for (uint32_t shaderRegister :
+                 ToBackend(GetBindGroupLayout(firstOffsetGroup))->GetBindingOffsets()) {
+                if (shaderRegister > maxRegister) {
+                    maxRegister = shaderRegister;
+                }
+            }
+            mFirstIndexOffsetShaderRegister = maxRegister + 1;
+        } else {
+            // firstOffsetGroup is not in use, we can use the first register.
+            mFirstIndexOffsetShaderRegister = 0;
+        }
+
+        D3D12_ROOT_PARAMETER indexOffsetConstants{};
+        indexOffsetConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+        indexOffsetConstants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        // Always allocate 2 constants for vertex_index and instance_index
+        // NOTE: We should consider delaying root signature creation until we know how many values
+        // we need
+        indexOffsetConstants.Constants.Num32BitValues = 2;
+        indexOffsetConstants.Constants.RegisterSpace = mFirstIndexOffsetRegisterSpace;
+        indexOffsetConstants.Constants.ShaderRegister = mFirstIndexOffsetShaderRegister;
+        mFirstIndexOffsetParameterIndex = rootParameters.size();
+        // NOTE: We should consider moving this entry to earlier in the root signature since offsets
+        // would need to be updated often
+        rootParameters.emplace_back(indexOffsetConstants);
+
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
         rootSignatureDescriptor.NumParameters = rootParameters.size();
         rootSignatureDescriptor.pParameters = rootParameters.data();
@@ -194,5 +227,17 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).visibility !=
                wgpu::ShaderStage::None);
         return mDynamicRootParameterIndices[group][bindingIndex];
+    }
+
+    uint32_t PipelineLayout::GetFirstIndexOffsetRegisterSpace() const {
+        return mFirstIndexOffsetRegisterSpace;
+    }
+
+    uint32_t PipelineLayout::GetFirstIndexOffsetShaderRegister() const {
+        return mFirstIndexOffsetShaderRegister;
+    }
+
+    uint32_t PipelineLayout::GetFirstIndexOffsetParameterIndex() const {
+        return mFirstIndexOffsetParameterIndex;
     }
 }}  // namespace dawn_native::d3d12

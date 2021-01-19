@@ -36,6 +36,10 @@ namespace dawn_native { namespace d3d12 {
         uint32_t GetDynamicRootParameterIndex(BindGroupIndex group,
                                               BindingIndex bindingIndex) const;
 
+        uint32_t GetFirstIndexOffsetRegisterSpace() const;
+        uint32_t GetFirstIndexOffsetShaderRegister() const;
+        uint32_t GetFirstIndexOffsetParameterIndex() const;
+
         ID3D12RootSignature* GetRootSignature() const;
 
       private:
@@ -48,6 +52,9 @@ namespace dawn_native { namespace d3d12 {
                     ityp::array<BindingIndex, uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
                     kMaxBindGroups>
             mDynamicRootParameterIndices;
+        uint32_t mFirstIndexOffsetRegisterSpace;
+        uint32_t mFirstIndexOffsetShaderRegister;
+        uint32_t mFirstIndexOffsetParameterIndex;
         ComPtr<ID3D12RootSignature> mRootSignature;
     };
 

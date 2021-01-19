@@ -25,12 +25,22 @@ namespace dawn_native { namespace d3d12 {
     class Device;
     class PipelineLayout;
 
-    // Manages a ref to one of the various representations of shader blobs.
+    struct FirstOffsetInfo {
+        bool usesVertexIndex;
+        uint32_t vertexIndexOffset;
+        bool usesInstanceIndex;
+        uint32_t instanceIndexOffset;
+    };
+
+    // Manages a ref to one of the various representations of shader blobs and information used to
+    // emulate vertex/instance index starts
     struct CompiledShader {
         ScopedCachedBlob cachedShader;
         ComPtr<ID3DBlob> compiledFXCShader;
         ComPtr<IDxcBlob> compiledDXCShader;
         D3D12_SHADER_BYTECODE GetD3D12ShaderBytecode() const;
+
+        FirstOffsetInfo firstOffsetInfo;
     };
 
     class ShaderModule final : public ShaderModuleBase {
@@ -49,11 +59,11 @@ namespace dawn_native { namespace d3d12 {
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
-        ResultOrError<std::string> TranslateToHLSLWithTint(
-            const char* entryPointName,
-            SingleShaderStage stage,
-            PipelineLayout* layout,
-            std::string* remappedEntryPointName) const;
+        ResultOrError<std::string> TranslateToHLSLWithTint(const char* entryPointName,
+                                                           SingleShaderStage stage,
+                                                           PipelineLayout* layout,
+                                                           std::string* remappedEntryPointName,
+                                                           FirstOffsetInfo* firstOffsetInfo) const;
 
         ResultOrError<std::string> TranslateToHLSLWithSPIRVCross(const char* entryPointName,
                                                                  SingleShaderStage stage,

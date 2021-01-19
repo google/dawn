@@ -137,6 +137,29 @@ namespace dawn_native { namespace d3d12 {
             commandList->EndQuery(querySet->GetQueryHeap(), D3D12_QUERY_TYPE_TIMESTAMP,
                                   cmd->queryIndex);
         }
+
+        void RecordFirstIndexOffset(ID3D12GraphicsCommandList* commandList,
+                                    RenderPipeline* pipeline,
+                                    uint32_t firstVertex,
+                                    uint32_t firstInstance) {
+            const FirstOffsetInfo& firstOffsetInfo = pipeline->GetFirstOffsetInfo();
+            if (!firstOffsetInfo.usesVertexIndex && !firstOffsetInfo.usesInstanceIndex) {
+                return;
+            }
+            std::array<uint32_t, 2> offsets{};
+            uint32_t count = 0;
+            if (firstOffsetInfo.usesVertexIndex) {
+                offsets[firstOffsetInfo.vertexIndexOffset / sizeof(uint32_t)] = firstVertex;
+                ++count;
+            }
+            if (firstOffsetInfo.usesInstanceIndex) {
+                offsets[firstOffsetInfo.instanceIndexOffset / sizeof(uint32_t)] = firstInstance;
+                ++count;
+            }
+            PipelineLayout* layout = ToBackend(pipeline->GetLayout());
+            commandList->SetGraphicsRoot32BitConstants(layout->GetFirstIndexOffsetParameterIndex(),
+                                                       count, offsets.data(), 0);
+        }
     }  // anonymous namespace
 
     class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
@@ -1227,6 +1250,8 @@ namespace dawn_native { namespace d3d12 {
 
                     DAWN_TRY(bindingTracker->Apply(commandContext));
                     vertexBufferTracker.Apply(commandList, lastPipeline);
+                    RecordFirstIndexOffset(commandList, lastPipeline, draw->firstVertex,
+                                           draw->firstInstance);
                     commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
                                                draw->firstVertex, draw->firstInstance);
                     break;
@@ -1237,6 +1262,8 @@ namespace dawn_native { namespace d3d12 {
 
                     DAWN_TRY(bindingTracker->Apply(commandContext));
                     vertexBufferTracker.Apply(commandList, lastPipeline);
+                    RecordFirstIndexOffset(commandList, lastPipeline, draw->baseVertex,
+                                           draw->firstInstance);
                     commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
                                                       draw->firstIndex, draw->baseVertex,
                                                       draw->firstInstance);
