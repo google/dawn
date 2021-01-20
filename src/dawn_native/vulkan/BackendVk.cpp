@@ -20,6 +20,7 @@
 #include "dawn_native/Instance.h"
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 // TODO(crbug.com/dawn/283): Link against the Vulkan Loader and remove this.
@@ -53,14 +54,41 @@ constexpr char kVulkanLibName[] = "libvulkan.so";
 
 namespace dawn_native { namespace vulkan {
 
+    namespace {
+
+        VKAPI_ATTR VkBool32 VKAPI_CALL
+        OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                             VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
+                             const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                             void* /* pUserData */) {
+            dawn::WarningLog() << pCallbackData->pMessage;
+            ASSERT((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) == 0);
+
+            return VK_FALSE;
+        }
+
+        // A debug callback specifically for instance creation so that we don't fire an ASSERT when
+        // the instance fails creation in an expected manner (for example the system not having
+        // Vulkan drivers).
+        VKAPI_ATTR VkBool32 VKAPI_CALL OnInstanceCreationDebugUtilsCallback(
+            VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+            VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
+            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+            void* /* pUserData */) {
+            dawn::WarningLog() << pCallbackData->pMessage;
+            return VK_FALSE;
+        }
+
+    }  // anonymous namespace
+
     Backend::Backend(InstanceBase* instance)
         : BackendConnection(instance, wgpu::BackendType::Vulkan) {
     }
 
     Backend::~Backend() {
-        if (mDebugReportCallback != VK_NULL_HANDLE) {
-            mFunctions.DestroyDebugReportCallbackEXT(mInstance, mDebugReportCallback, nullptr);
-            mDebugReportCallback = VK_NULL_HANDLE;
+        if (mDebugUtilsMessenger != VK_NULL_HANDLE) {
+            mFunctions.DestroyDebugUtilsMessengerEXT(mInstance, mDebugUtilsMessenger, nullptr);
+            mDebugUtilsMessenger = VK_NULL_HANDLE;
         }
 
         // VkPhysicalDevices are destroyed when the VkInstance is destroyed
@@ -150,8 +178,8 @@ namespace dawn_native { namespace vulkan {
 
         DAWN_TRY(mFunctions.LoadInstanceProcs(mInstance, mGlobalInfo));
 
-        if (usedGlobalKnobs.HasExt(InstanceExt::DebugReport)) {
-            DAWN_TRY(RegisterDebugReport());
+        if (usedGlobalKnobs.HasExt(InstanceExt::DebugUtils)) {
+            DAWN_TRY(RegisterDebugUtils());
         }
 
         DAWN_TRY_ASSIGN(mPhysicalDevices, GetPhysicalDevices(*this));
@@ -209,10 +237,6 @@ namespace dawn_native { namespace vulkan {
         // Available and known instance extensions default to being requested, but some special
         // cases are removed.
         InstanceExtSet extensionsToRequest = mGlobalInfo.extensions;
-
-        if (!GetInstance()->IsBackendValidationEnabled()) {
-            extensionsToRequest.Set(InstanceExt::DebugReport, false);
-        }
         usedKnobs.extensions = extensionsToRequest;
 
         std::vector<const char*> extensionNames;
@@ -253,38 +277,46 @@ namespace dawn_native { namespace vulkan {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
         createInfo.ppEnabledExtensionNames = extensionNames.data();
 
+        PNextChainBuilder createInfoChain(&createInfo);
+
+        // Register the debug callback for instance creation so we receive message for any errors
+        // (validation or other).
+        VkDebugUtilsMessengerCreateInfoEXT utilsMessengerCreateInfo;
+        if (mGlobalInfo.HasExt(InstanceExt::DebugUtils)) {
+            utilsMessengerCreateInfo.flags = 0;
+            utilsMessengerCreateInfo.messageSeverity =
+                VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
+                VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT;
+            utilsMessengerCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                                   VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+            utilsMessengerCreateInfo.pfnUserCallback = OnInstanceCreationDebugUtilsCallback;
+            utilsMessengerCreateInfo.pUserData = nullptr;
+
+            createInfoChain.Add(&utilsMessengerCreateInfo,
+                                VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT);
+        }
+
         DAWN_TRY(CheckVkSuccess(mFunctions.CreateInstance(&createInfo, nullptr, &mInstance),
                                 "vkCreateInstance"));
 
         return usedKnobs;
     }
 
-    MaybeError Backend::RegisterDebugReport() {
-        VkDebugReportCallbackCreateInfoEXT createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    MaybeError Backend::RegisterDebugUtils() {
+        VkDebugUtilsMessengerCreateInfoEXT createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.pNext = nullptr;
-        createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
-        createInfo.pfnCallback = Backend::OnDebugReportCallback;
-        createInfo.pUserData = this;
+        createInfo.flags = 0;
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
+                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT;
+        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+        createInfo.pfnUserCallback = OnDebugUtilsCallback;
+        createInfo.pUserData = nullptr;
 
-        return CheckVkSuccess(mFunctions.CreateDebugReportCallbackEXT(
-                                  mInstance, &createInfo, nullptr, &*mDebugReportCallback),
-                              "vkCreateDebugReportcallback");
-    }
-
-    VKAPI_ATTR VkBool32 VKAPI_CALL
-    Backend::OnDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                   VkDebugReportObjectTypeEXT /*objectType*/,
-                                   uint64_t /*object*/,
-                                   size_t /*location*/,
-                                   int32_t /*messageCode*/,
-                                   const char* /*pLayerPrefix*/,
-                                   const char* pMessage,
-                                   void* /*pUserdata*/) {
-        dawn::WarningLog() << pMessage;
-        ASSERT((flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) == 0);
-
-        return VK_FALSE;
+        return CheckVkSuccess(mFunctions.CreateDebugUtilsMessengerEXT(
+                                  mInstance, &createInfo, nullptr, &*mDebugUtilsMessenger),
+                              "vkCreateDebugUtilsMessengerEXT");
     }
 
     BackendConnection* Connect(InstanceBase* instance, bool useSwiftshader) {

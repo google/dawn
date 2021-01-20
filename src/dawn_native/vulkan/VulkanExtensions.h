@@ -38,7 +38,7 @@ namespace dawn_native { namespace vulkan {
         XlibSurface,
 
         // Others
-        DebugReport,
+        DebugUtils,
 
         EnumCount,
     };
@@ -99,7 +99,6 @@ namespace dawn_native { namespace vulkan {
         ExternalSemaphoreZirconHandle,
 
         // Others
-        DebugMarker,
         ImageDrmFormatModifier,
         Swapchain,
         SubgroupSizeControl,

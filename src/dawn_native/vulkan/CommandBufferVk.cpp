@@ -743,18 +743,19 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::InsertDebugMarker: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
                         const char* label = mCommands.NextData<char>(cmd->length + 1);
-                        VkDebugMarkerMarkerInfoEXT markerInfo{};
-                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-                        markerInfo.pMarkerName = label;
+                        VkDebugUtilsLabelEXT utilsLabel;
+                        utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+                        utilsLabel.pNext = nullptr;
+                        utilsLabel.pLabelName = label;
                         // Default color to black
-                        markerInfo.color[0] = 0.0;
-                        markerInfo.color[1] = 0.0;
-                        markerInfo.color[2] = 0.0;
-                        markerInfo.color[3] = 1.0;
-                        device->fn.CmdDebugMarkerInsertEXT(commands, &markerInfo);
+                        utilsLabel.color[0] = 0.0;
+                        utilsLabel.color[1] = 0.0;
+                        utilsLabel.color[2] = 0.0;
+                        utilsLabel.color[3] = 1.0;
+                        device->fn.CmdInsertDebugUtilsLabelEXT(commands, &utilsLabel);
                     } else {
                         SkipCommand(&mCommands, Command::InsertDebugMarker);
                     }
@@ -762,9 +763,9 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PopDebugGroup: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         mCommands.NextCommand<PopDebugGroupCmd>();
-                        device->fn.CmdDebugMarkerEndEXT(commands);
+                        device->fn.CmdEndDebugUtilsLabelEXT(commands);
                     } else {
                         SkipCommand(&mCommands, Command::PopDebugGroup);
                     }
@@ -772,18 +773,19 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PushDebugGroup: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
                         const char* label = mCommands.NextData<char>(cmd->length + 1);
-                        VkDebugMarkerMarkerInfoEXT markerInfo{};
-                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-                        markerInfo.pMarkerName = label;
+                        VkDebugUtilsLabelEXT utilsLabel;
+                        utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+                        utilsLabel.pNext = nullptr;
+                        utilsLabel.pLabelName = label;
                         // Default color to black
-                        markerInfo.color[0] = 0.0;
-                        markerInfo.color[1] = 0.0;
-                        markerInfo.color[2] = 0.0;
-                        markerInfo.color[3] = 1.0;
-                        device->fn.CmdDebugMarkerBeginEXT(commands, &markerInfo);
+                        utilsLabel.color[0] = 0.0;
+                        utilsLabel.color[1] = 0.0;
+                        utilsLabel.color[2] = 0.0;
+                        utilsLabel.color[3] = 1.0;
+                        device->fn.CmdBeginDebugUtilsLabelEXT(commands, &utilsLabel);
                     } else {
                         SkipCommand(&mCommands, Command::PushDebugGroup);
                     }
@@ -858,19 +860,19 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::InsertDebugMarker: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
                         const char* label = mCommands.NextData<char>(cmd->length + 1);
-                        VkDebugMarkerMarkerInfoEXT markerInfo;
-                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-                        markerInfo.pNext = nullptr;
-                        markerInfo.pMarkerName = label;
+                        VkDebugUtilsLabelEXT utilsLabel;
+                        utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+                        utilsLabel.pNext = nullptr;
+                        utilsLabel.pLabelName = label;
                         // Default color to black
-                        markerInfo.color[0] = 0.0;
-                        markerInfo.color[1] = 0.0;
-                        markerInfo.color[2] = 0.0;
-                        markerInfo.color[3] = 1.0;
-                        device->fn.CmdDebugMarkerInsertEXT(commands, &markerInfo);
+                        utilsLabel.color[0] = 0.0;
+                        utilsLabel.color[1] = 0.0;
+                        utilsLabel.color[2] = 0.0;
+                        utilsLabel.color[3] = 1.0;
+                        device->fn.CmdInsertDebugUtilsLabelEXT(commands, &utilsLabel);
                     } else {
                         SkipCommand(&mCommands, Command::InsertDebugMarker);
                     }
@@ -878,9 +880,9 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PopDebugGroup: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         mCommands.NextCommand<PopDebugGroupCmd>();
-                        device->fn.CmdDebugMarkerEndEXT(commands);
+                        device->fn.CmdEndDebugUtilsLabelEXT(commands);
                     } else {
                         SkipCommand(&mCommands, Command::PopDebugGroup);
                     }
@@ -888,19 +890,19 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PushDebugGroup: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
                         const char* label = mCommands.NextData<char>(cmd->length + 1);
-                        VkDebugMarkerMarkerInfoEXT markerInfo;
-                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-                        markerInfo.pNext = nullptr;
-                        markerInfo.pMarkerName = label;
+                        VkDebugUtilsLabelEXT utilsLabel;
+                        utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+                        utilsLabel.pNext = nullptr;
+                        utilsLabel.pLabelName = label;
                         // Default color to black
-                        markerInfo.color[0] = 0.0;
-                        markerInfo.color[1] = 0.0;
-                        markerInfo.color[2] = 0.0;
-                        markerInfo.color[3] = 1.0;
-                        device->fn.CmdDebugMarkerBeginEXT(commands, &markerInfo);
+                        utilsLabel.color[0] = 0.0;
+                        utilsLabel.color[1] = 0.0;
+                        utilsLabel.color[2] = 0.0;
+                        utilsLabel.color[3] = 1.0;
+                        device->fn.CmdBeginDebugUtilsLabelEXT(commands, &utilsLabel);
                     } else {
                         SkipCommand(&mCommands, Command::PushDebugGroup);
                     }
@@ -1010,19 +1012,19 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::InsertDebugMarker: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
                         const char* label = iter->NextData<char>(cmd->length + 1);
-                        VkDebugMarkerMarkerInfoEXT markerInfo;
-                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-                        markerInfo.pNext = nullptr;
-                        markerInfo.pMarkerName = label;
+                        VkDebugUtilsLabelEXT utilsLabel;
+                        utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+                        utilsLabel.pNext = nullptr;
+                        utilsLabel.pLabelName = label;
                         // Default color to black
-                        markerInfo.color[0] = 0.0;
-                        markerInfo.color[1] = 0.0;
-                        markerInfo.color[2] = 0.0;
-                        markerInfo.color[3] = 1.0;
-                        device->fn.CmdDebugMarkerInsertEXT(commands, &markerInfo);
+                        utilsLabel.color[0] = 0.0;
+                        utilsLabel.color[1] = 0.0;
+                        utilsLabel.color[2] = 0.0;
+                        utilsLabel.color[3] = 1.0;
+                        device->fn.CmdInsertDebugUtilsLabelEXT(commands, &utilsLabel);
                     } else {
                         SkipCommand(iter, Command::InsertDebugMarker);
                     }
@@ -1030,9 +1032,9 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PopDebugGroup: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         iter->NextCommand<PopDebugGroupCmd>();
-                        device->fn.CmdDebugMarkerEndEXT(commands);
+                        device->fn.CmdEndDebugUtilsLabelEXT(commands);
                     } else {
                         SkipCommand(iter, Command::PopDebugGroup);
                     }
@@ -1040,19 +1042,19 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PushDebugGroup: {
-                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
+                    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                         PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
                         const char* label = iter->NextData<char>(cmd->length + 1);
-                        VkDebugMarkerMarkerInfoEXT markerInfo;
-                        markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-                        markerInfo.pNext = nullptr;
-                        markerInfo.pMarkerName = label;
+                        VkDebugUtilsLabelEXT utilsLabel;
+                        utilsLabel.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+                        utilsLabel.pNext = nullptr;
+                        utilsLabel.pLabelName = label;
                         // Default color to black
-                        markerInfo.color[0] = 0.0;
-                        markerInfo.color[1] = 0.0;
-                        markerInfo.color[2] = 0.0;
-                        markerInfo.color[3] = 1.0;
-                        device->fn.CmdDebugMarkerBeginEXT(commands, &markerInfo);
+                        utilsLabel.color[0] = 0.0;
+                        utilsLabel.color[1] = 0.0;
+                        utilsLabel.color[2] = 0.0;
+                        utilsLabel.color[3] = 1.0;
+                        device->fn.CmdBeginDebugUtilsLabelEXT(commands, &utilsLabel);
                     } else {
                         SkipCommand(iter, Command::PushDebugGroup);
                     }

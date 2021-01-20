@@ -74,10 +74,18 @@ namespace dawn_native { namespace vulkan {
         GET_INSTANCE_PROC(GetPhysicalDeviceQueueFamilyProperties);
         GET_INSTANCE_PROC(GetPhysicalDeviceSparseImageFormatProperties);
 
-        if (globalInfo.HasExt(InstanceExt::DebugReport)) {
-            GET_INSTANCE_PROC(CreateDebugReportCallbackEXT);
-            GET_INSTANCE_PROC(DebugReportMessageEXT);
-            GET_INSTANCE_PROC(DestroyDebugReportCallbackEXT);
+        if (globalInfo.HasExt(InstanceExt::DebugUtils)) {
+            GET_INSTANCE_PROC(CmdBeginDebugUtilsLabelEXT);
+            GET_INSTANCE_PROC(CmdEndDebugUtilsLabelEXT);
+            GET_INSTANCE_PROC(CmdInsertDebugUtilsLabelEXT);
+            GET_INSTANCE_PROC(CreateDebugUtilsMessengerEXT);
+            GET_INSTANCE_PROC(DestroyDebugUtilsMessengerEXT);
+            GET_INSTANCE_PROC(QueueBeginDebugUtilsLabelEXT);
+            GET_INSTANCE_PROC(QueueEndDebugUtilsLabelEXT);
+            GET_INSTANCE_PROC(QueueInsertDebugUtilsLabelEXT);
+            GET_INSTANCE_PROC(SetDebugUtilsObjectNameEXT);
+            GET_INSTANCE_PROC(SetDebugUtilsObjectTagEXT);
+            GET_INSTANCE_PROC(SubmitDebugUtilsMessageEXT);
         }
 
         // Vulkan 1.1 is not required to report promoted extensions from 1.0 and is not required to
@@ -277,12 +285,6 @@ namespace dawn_native { namespace vulkan {
         GET_DEVICE_PROC(UnmapMemory);
         GET_DEVICE_PROC(UpdateDescriptorSets);
         GET_DEVICE_PROC(WaitForFences);
-
-        if (deviceInfo.HasExt(DeviceExt::DebugMarker)) {
-            GET_DEVICE_PROC(CmdDebugMarkerBeginEXT);
-            GET_DEVICE_PROC(CmdDebugMarkerEndEXT);
-            GET_DEVICE_PROC(CmdDebugMarkerInsertEXT);
-        }
 
         if (deviceInfo.HasExt(DeviceExt::ExternalMemoryFD)) {
             GET_DEVICE_PROC(GetMemoryFdKHR);

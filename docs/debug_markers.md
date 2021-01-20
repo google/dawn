@@ -33,7 +33,7 @@ Unfortunately, PIX's UI does does not lend itself to capturing single frame appl
 
 ## Vulkan
 
-Debug markers on Vulkan are implemented with [VK_EXT_debug_marker](https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#VK_EXT_debug_marker).
+Debug markers on Vulkan are implemented with [VK_EXT_debug_utils](https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_EXT_debug_utils.html).
 
 To enable marker functionality, you must launch your application from your debugging tool. Attaching to an already running application is not supported.
 

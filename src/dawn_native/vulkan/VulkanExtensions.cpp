@@ -47,7 +47,7 @@ namespace dawn_native { namespace vulkan {
         {InstanceExt::XcbSurface, "VK_KHR_xcb_surface", NeverPromoted},
         {InstanceExt::XlibSurface, "VK_KHR_xlib_surface", NeverPromoted},
 
-        {InstanceExt::DebugReport, "VK_EXT_debug_report", NeverPromoted}
+        {InstanceExt::DebugUtils, "VK_EXT_debug_utils", NeverPromoted},
         //
     }};
 
@@ -95,7 +95,7 @@ namespace dawn_native { namespace vulkan {
             switch (ext) {
                 case InstanceExt::GetPhysicalDeviceProperties2:
                 case InstanceExt::Surface:
-                case InstanceExt::DebugReport:
+                case InstanceExt::DebugUtils:
                     hasDependencies = true;
                     break;
 
@@ -161,7 +161,6 @@ namespace dawn_native { namespace vulkan {
         {DeviceExt::ExternalSemaphoreFD, "VK_KHR_external_semaphore_fd", NeverPromoted},
         {DeviceExt::ExternalSemaphoreZirconHandle, "VK_FUCHSIA_external_semaphore", NeverPromoted},
 
-        {DeviceExt::DebugMarker, "VK_EXT_debug_marker", NeverPromoted},
         {DeviceExt::ImageDrmFormatModifier, "VK_EXT_image_drm_format_modifier", NeverPromoted},
         {DeviceExt::Swapchain, "VK_KHR_swapchain", NeverPromoted},
         {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", NeverPromoted},
@@ -233,12 +232,6 @@ namespace dawn_native { namespace vulkan {
                     hasDependencies =
                         instanceExts.Has(InstanceExt::ExternalSemaphoreCapabilities) &&
                         HasDep(DeviceExt::GetPhysicalDeviceProperties2);
-                    break;
-
-                case DeviceExt::DebugMarker:
-                    // TODO(cwallez@chromium.org): VK_KHR_debug_report is deprecated, switch to
-                    // using VK_KHR_debug_utils instead.
-                    hasDependencies = instanceExts.Has(InstanceExt::DebugReport);
                     break;
 
                 case DeviceExt::ImageDrmFormatModifier:

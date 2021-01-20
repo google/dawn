@@ -40,23 +40,14 @@ namespace dawn_native { namespace vulkan {
         MaybeError LoadVulkan(bool useSwiftshader);
         ResultOrError<VulkanGlobalKnobs> CreateInstance();
 
-        MaybeError RegisterDebugReport();
-        static VKAPI_ATTR VkBool32 VKAPI_CALL
-        OnDebugReportCallback(VkDebugReportFlagsEXT flags,
-                              VkDebugReportObjectTypeEXT objectType,
-                              uint64_t object,
-                              size_t location,
-                              int32_t messageCode,
-                              const char* pLayerPrefix,
-                              const char* pMessage,
-                              void* pUserdata);
+        MaybeError RegisterDebugUtils();
 
         DynamicLib mVulkanLib;
         VulkanGlobalInfo mGlobalInfo = {};
         VkInstance mInstance = VK_NULL_HANDLE;
         VulkanFunctions mFunctions;
 
-        VkDebugReportCallbackEXT mDebugReportCallback = VK_NULL_HANDLE;
+        VkDebugUtilsMessengerEXT mDebugUtilsMessenger = VK_NULL_HANDLE;
 
         std::vector<VkPhysicalDevice> mPhysicalDevices;
     };

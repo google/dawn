@@ -70,10 +70,18 @@ namespace dawn_native { namespace vulkan {
         // device is created.
         PFN_vkDestroyDevice DestroyDevice = nullptr;
 
-        // VK_EXT_debug_report
-        PFN_vkCreateDebugReportCallbackEXT CreateDebugReportCallbackEXT = nullptr;
-        PFN_vkDebugReportMessageEXT DebugReportMessageEXT = nullptr;
-        PFN_vkDestroyDebugReportCallbackEXT DestroyDebugReportCallbackEXT = nullptr;
+        // VK_EXT_debug_utils
+        PFN_vkCmdBeginDebugUtilsLabelEXT CmdBeginDebugUtilsLabelEXT = nullptr;
+        PFN_vkCmdEndDebugUtilsLabelEXT CmdEndDebugUtilsLabelEXT = nullptr;
+        PFN_vkCmdInsertDebugUtilsLabelEXT CmdInsertDebugUtilsLabelEXT = nullptr;
+        PFN_vkCreateDebugUtilsMessengerEXT CreateDebugUtilsMessengerEXT = nullptr;
+        PFN_vkDestroyDebugUtilsMessengerEXT DestroyDebugUtilsMessengerEXT = nullptr;
+        PFN_vkQueueBeginDebugUtilsLabelEXT QueueBeginDebugUtilsLabelEXT = nullptr;
+        PFN_vkQueueEndDebugUtilsLabelEXT QueueEndDebugUtilsLabelEXT = nullptr;
+        PFN_vkQueueInsertDebugUtilsLabelEXT QueueInsertDebugUtilsLabelEXT = nullptr;
+        PFN_vkSetDebugUtilsObjectNameEXT SetDebugUtilsObjectNameEXT = nullptr;
+        PFN_vkSetDebugUtilsObjectTagEXT SetDebugUtilsObjectTagEXT = nullptr;
+        PFN_vkSubmitDebugUtilsMessageEXT SubmitDebugUtilsMessageEXT = nullptr;
 
         // VK_KHR_surface
         PFN_vkDestroySurfaceKHR DestroySurfaceKHR = nullptr;
@@ -253,11 +261,6 @@ namespace dawn_native { namespace vulkan {
         PFN_vkUnmapMemory UnmapMemory = nullptr;
         PFN_vkUpdateDescriptorSets UpdateDescriptorSets = nullptr;
         PFN_vkWaitForFences WaitForFences = nullptr;
-
-        // VK_EXT_debug_marker
-        PFN_vkCmdDebugMarkerBeginEXT CmdDebugMarkerBeginEXT = nullptr;
-        PFN_vkCmdDebugMarkerEndEXT CmdDebugMarkerEndEXT = nullptr;
-        PFN_vkCmdDebugMarkerInsertEXT CmdDebugMarkerInsertEXT = nullptr;
 
         // VK_KHR_swapchain
         PFN_vkCreateSwapchainKHR CreateSwapchainKHR = nullptr;

@@ -187,6 +187,10 @@ namespace dawn_native { namespace vulkan {
         return mDeviceInfo;
     }
 
+    const VulkanGlobalInfo& Device::GetGlobalInfo() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetGlobalInfo();
+    }
+
     VkDevice Device::GetVkDevice() const {
         return mVkDevice;
     }

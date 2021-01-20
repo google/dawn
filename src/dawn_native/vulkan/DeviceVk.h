@@ -52,6 +52,7 @@ namespace dawn_native { namespace vulkan {
 
         VkInstance GetVkInstance() const;
         const VulkanDeviceInfo& GetDeviceInfo() const;
+        const VulkanGlobalInfo& GetGlobalInfo() const;
         VkDevice GetVkDevice() const;
         uint32_t GetGraphicsQueueFamily() const;
         VkQueue GetQueue() const;
