@@ -105,6 +105,61 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
   EXPECT_EQ(p->error(), "1:11: expected '}' for case statement");
 }
 
+TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectors) {
+  auto p = parser("case 1, 2: { }");
+  auto e = p->switch_body();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::CaseStatement>());
+  EXPECT_FALSE(e->IsDefault());
+  ASSERT_EQ(e->body()->size(), 0u);
+  ASSERT_EQ(e->selectors().size(), 2u);
+  ASSERT_EQ(e->selectors()[0]->to_str(), "1");
+  ASSERT_EQ(e->selectors()[1]->to_str(), "2");
+}
+
+TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsMissingColon) {
+  auto p = parser("case 1, 2 { }");
+  auto e = p->switch_body();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_EQ(p->error(), "1:11: expected ':' for case statement");
+}
+
+TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsMissingComma) {
+  auto p = parser("case 1 2: { }");
+  auto e = p->switch_body();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_EQ(p->error(), "1:8: expected a comma after the previous selector");
+}
+
+TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsEndsWithComma) {
+  auto p = parser("case 1, 2,: { }");
+  auto e = p->switch_body();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_EQ(p->error(), "1:11: a selector is expected after the comma");
+}
+
+TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsStartsWithComma) {
+  auto p = parser("case , 1, 2: { }");
+  auto e = p->switch_body();
+  EXPECT_TRUE(p->has_error());
+  EXPECT_TRUE(e.errored);
+  EXPECT_FALSE(e.matched);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_EQ(p->error(), "1:6: a selector is expected before the comma");
+}
+
 TEST_F(ParserImplTest, SwitchBody_Default) {
   auto p = parser("default: { a = 4; }");
   auto e = p->switch_body();

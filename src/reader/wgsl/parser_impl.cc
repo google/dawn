@@ -1856,13 +1856,26 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 
   for (;;) {
     auto t = peek();
+    auto matched_comma = match(Token::Type::kComma);
+
+    if (selectors.empty() && matched_comma)
+      return add_error(t, "a selector is expected before the comma");
+    if (matched_comma)
+      t = peek();
+
     auto cond = const_literal();
     if (cond.errored)
       return Failure::kErrored;
-    if (!cond.matched)
+    if (!cond.matched) {
+      if (matched_comma) {
+        return add_error(t, "a selector is expected after the comma");
+      }
       break;
+    }
     if (!cond->Is<ast::IntLiteral>())
       return add_error(t, "invalid case selector must be an integer value");
+    if (!selectors.empty() && !matched_comma)
+      return add_error(t, "expected a comma after the previous selector");
 
     selectors.push_back(cond.value->As<ast::IntLiteral>());
   }
