@@ -30,6 +30,8 @@
 namespace tint {
 namespace ast {
 
+class LocationDecoration;
+
 /// A Variable statement.
 ///
 /// An instance of this class represents one of three constructs in WGSL: "var"
@@ -128,6 +130,9 @@ class Variable : public Castable<Variable, Node> {
   bool HasBuiltinDecoration() const;
   /// @returns true if the decorations include a ConstantIdDecoration
   bool HasConstantIdDecoration() const;
+
+  /// @returns pointer to LocationDecoration in decorations, otherwise NULL.
+  LocationDecoration* GetLocationDecoration() const;
 
   /// @returns the constant_id value for the variable. Assumes that
   /// HasConstantIdDecoration() has been called first.

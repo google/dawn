@@ -24,7 +24,18 @@
 namespace tint {
 namespace inspector {
 
-/// Container of reflection data for an entry point in the shader.
+/// Reflection data about an entry point input or output.
+typedef struct {
+  /// Name of the variable in the shader.
+  std::string name;
+  /// Is Location Decoration present
+  bool has_location_decoration;
+  /// Value of Location Decoration, only valid if |has_location_decoration| is
+  /// true.
+  uint32_t location_decoration;
+} StageVariable;
+
+/// Reflection data for an entry point in the shader.
 typedef struct EntryPoint {
   /// Constructors
   EntryPoint();
@@ -47,9 +58,9 @@ typedef struct EntryPoint {
   /// The workgroup z size
   uint32_t workgroup_size_z;
   /// List of the input variable accessed via this entry point.
-  std::vector<std::string> input_variables;
+  std::vector<StageVariable> input_variables;
   /// List of the output variable accessed via this entry point.
-  std::vector<std::string> output_variables;
+  std::vector<StageVariable> output_variables;
 
   /// @returns the size of the workgroup in {x,y,z} format
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {

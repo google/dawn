@@ -123,6 +123,10 @@ TEST_F(VariableTest, WithDecorations) {
   EXPECT_TRUE(var->HasLocationDecoration());
   EXPECT_TRUE(var->HasBuiltinDecoration());
   EXPECT_TRUE(var->HasConstantIdDecoration());
+
+  auto* location = var->GetLocationDecoration();
+  ASSERT_NE(nullptr, location);
+  EXPECT_EQ(1u, location->value());
 }
 
 TEST_F(VariableTest, ConstantId) {

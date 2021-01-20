@@ -109,12 +109,19 @@ class InspectorHelper : public ast::BuilderWithModule {
   ///                   global variables
   void AddInOutVariables(
       std::vector<std::tuple<std::string, std::string>> inout_vars) {
+    uint32_t location = 0;
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
 
-      mod->AddGlobalVariable(Var(in, ast::StorageClass::kInput, ty.u32));
-      mod->AddGlobalVariable(Var(out, ast::StorageClass::kOutput, ty.u32));
+      mod->AddGlobalVariable(
+          Var(in, ast::StorageClass::kInput, ty.u32, nullptr,
+              ast::VariableDecorationList{
+                  create<ast::LocationDecoration>(location++)}));
+      mod->AddGlobalVariable(
+          Var(out, ast::StorageClass::kOutput, ty.u32, nullptr,
+              ast::VariableDecorationList{
+                  create<ast::LocationDecoration>(location++)}));
     }
   }
 
@@ -214,13 +221,13 @@ class InspectorHelper : public ast::BuilderWithModule {
     return create<ast::FloatLiteral>(type, *val);
   }
 
-  /// @param vec Vector of strings to be searched
-  /// @param str String to be searching for
-  /// @returns true if str is in vec, otherwise false
-  bool ContainsString(const std::vector<std::string>& vec,
-                      const std::string& str) {
+  /// @param vec Vector of StageVariable to be searched
+  /// @param name Name to be searching for
+  /// @returns true if name is in vec, otherwise false
+  bool ContainsName(const std::vector<StageVariable>& vec,
+                    const std::string& name) {
     for (auto& s : vec) {
-      if (s == str) {
+      if (s.name == name) {
         return true;
       }
     }
@@ -865,9 +872,13 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("out_var", result[0].output_variables[0]);
+  EXPECT_EQ("out_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
 }
 
 TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
@@ -892,9 +903,13 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("out_var", result[0].output_variables[0]);
+  EXPECT_EQ("out_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
 }
 
 TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
@@ -919,9 +934,13 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("out_var", result[0].output_variables[0]);
+  EXPECT_EQ("out_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
 }
 
 TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
@@ -942,11 +961,19 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(2u, result[0].input_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "in_var"));
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(2u, result[0].input_variables[1].location_decoration);
   ASSERT_EQ(2u, result[0].output_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "out_var"));
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[1].location_decoration);
 }
 
 TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
@@ -971,11 +998,20 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
   ASSERT_EQ(1u, result.size());
 
   ASSERT_EQ(2u, result[0].input_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "in_var"));
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(2u, result[0].input_variables[1].location_decoration);
   ASSERT_EQ(2u, result[0].output_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "out_var"));
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "out2_var"));
+  ASSERT_EQ(2u, result[0].output_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[1].location_decoration);
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
@@ -1007,16 +1043,24 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   ASSERT_EQ("foo", result[0].name);
   ASSERT_EQ("foo", result[0].remapped_name);
   ASSERT_EQ(1u, result[0].input_variables.size());
-  EXPECT_EQ("in_var", result[0].input_variables[0]);
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
   ASSERT_EQ(1u, result[0].output_variables.size());
-  EXPECT_EQ("out2_var", result[0].output_variables[0]);
+  EXPECT_EQ("out2_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[0].location_decoration);
 
   ASSERT_EQ("bar", result[1].name);
   ASSERT_EQ("bar", result[1].remapped_name);
   ASSERT_EQ(1u, result[1].input_variables.size());
-  EXPECT_EQ("in2_var", result[1].input_variables[0]);
+  EXPECT_EQ("in2_var", result[1].input_variables[0].name);
+  EXPECT_TRUE(result[1].input_variables[0].has_location_decoration);
+  EXPECT_EQ(2u, result[1].input_variables[0].location_decoration);
   ASSERT_EQ(1u, result[1].output_variables.size());
-  EXPECT_EQ("out_var", result[1].output_variables[0]);
+  EXPECT_EQ("out_var", result[1].output_variables[0].name);
+  EXPECT_TRUE(result[1].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[1].output_variables[0].location_decoration);
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
@@ -1052,18 +1096,32 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
   ASSERT_EQ("foo", result[0].name);
   ASSERT_EQ("foo", result[0].remapped_name);
   EXPECT_EQ(2u, result[0].input_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "in_var"));
-  EXPECT_TRUE(ContainsString(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(2u, result[0].input_variables[1].location_decoration);
+
   EXPECT_EQ(2u, result[0].output_variables.size());
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "out_var"));
-  EXPECT_TRUE(ContainsString(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[1].location_decoration);
 
   ASSERT_EQ("bar", result[1].name);
   ASSERT_EQ("bar", result[1].remapped_name);
   EXPECT_EQ(1u, result[1].input_variables.size());
-  EXPECT_EQ("in2_var", result[1].input_variables[0]);
+  EXPECT_EQ("in2_var", result[1].input_variables[0].name);
+  EXPECT_TRUE(result[1].input_variables[0].has_location_decoration);
+  EXPECT_EQ(2u, result[1].input_variables[0].location_decoration);
+
   EXPECT_EQ(1u, result[1].output_variables.size());
-  EXPECT_EQ("out2_var", result[1].output_variables[0]);
+  EXPECT_EQ("out2_var", result[1].output_variables[0].name);
+  EXPECT_TRUE(result[1].output_variables[0].has_location_decoration);
+  EXPECT_EQ(3u, result[1].output_variables[0].location_decoration);
 }
 
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass

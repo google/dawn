@@ -64,10 +64,20 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
     for (auto* var : func->referenced_module_variables()) {
       auto name = module_.SymbolToName(var->symbol());
-      if (var->storage_class() == ast::StorageClass::kInput) {
-        entry_point.input_variables.push_back(name);
+      StageVariable stage_variable;
+      stage_variable.name = name;
+      auto* location_decoration = var->GetLocationDecoration();
+      if (location_decoration) {
+        stage_variable.has_location_decoration = true;
+        stage_variable.location_decoration = location_decoration->value();
       } else {
-        entry_point.output_variables.push_back(name);
+        stage_variable.has_location_decoration = false;
+      }
+
+      if (var->storage_class() == ast::StorageClass::kInput) {
+        entry_point.input_variables.push_back(stage_variable);
+      } else if (var->storage_class() == ast::StorageClass::kOutput) {
+        entry_point.output_variables.push_back(stage_variable);
       }
     }
     result.push_back(std::move(entry_point));

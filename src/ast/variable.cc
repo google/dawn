@@ -71,6 +71,15 @@ bool Variable::HasConstantIdDecoration() const {
   return false;
 }
 
+LocationDecoration* Variable::GetLocationDecoration() const {
+  for (auto* deco : decorations_) {
+    if (deco->Is<LocationDecoration>()) {
+      return deco->As<LocationDecoration>();
+    }
+  }
+  return nullptr;
+}
+
 uint32_t Variable::constant_id() const {
   assert(HasConstantIdDecoration());
   for (auto* deco : decorations_) {
