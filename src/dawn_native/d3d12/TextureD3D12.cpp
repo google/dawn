@@ -49,7 +49,7 @@ namespace dawn_native { namespace d3d12 {
             if (usage & wgpu::TextureUsage::CopyDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
-            if (usage & (wgpu::TextureUsage::Sampled | kReadonlyStorageTexture)) {
+            if (usage & (wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture)) {
                 resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                                   D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
             }

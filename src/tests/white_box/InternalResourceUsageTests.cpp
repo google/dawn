@@ -38,7 +38,7 @@ TEST_P(InternalResourceUsageTests, InternalTextureUsage) {
     wgpu::TextureDescriptor descriptor;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.size = {1, 1, 1};
-    descriptor.usage = dawn_native::kReadonlyStorageTexture;
+    descriptor.usage = dawn_native::kReadOnlyStorageTexture;
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
 }
 

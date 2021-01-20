@@ -27,7 +27,7 @@ namespace dawn_native {
     // (readonly storage texture usage) for render pass resource tracking
     static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
         static_cast<wgpu::BufferUsage>(0x80000000);
-    static constexpr wgpu::TextureUsage kReadonlyStorageTexture =
+    static constexpr wgpu::TextureUsage kReadOnlyStorageTexture =
         static_cast<wgpu::TextureUsage>(0x80000000);
 
     // Add an extra texture usage for textures that will be presented, for use in backends

@@ -63,7 +63,7 @@ namespace dawn_native {
                         TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
                         switch (bindingInfo.storageTexture.access) {
                             case wgpu::StorageTextureAccess::ReadOnly:
-                                usageTracker->TextureViewUsedAs(view, kReadonlyStorageTexture);
+                                usageTracker->TextureViewUsedAs(view, kReadOnlyStorageTexture);
                                 break;
                             case wgpu::StorageTextureAccess::WriteOnly:
                                 usageTracker->TextureViewUsedAs(view, wgpu::TextureUsage::Storage);

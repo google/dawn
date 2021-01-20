@@ -365,7 +365,7 @@ namespace dawn_native {
         // Add readonly storage usage if the texture has a storage usage. The validation rules in
         // ValidatePassResourceUsage will make sure we don't use both at the same time.
         if (mUsage & wgpu::TextureUsage::Storage) {
-            mUsage |= kReadonlyStorageTexture;
+            mUsage |= kReadOnlyStorageTexture;
         }
     }
 

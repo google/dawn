@@ -71,6 +71,9 @@ namespace dawn_native { namespace vulkan {
             if (usage & wgpu::TextureUsage::Storage) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
+            if (usage & kReadOnlyStorageTexture) {
+                flags |= VK_ACCESS_SHADER_READ_BIT;
+            }
             if (usage & wgpu::TextureUsage::RenderAttachment) {
                 if (format.HasDepthOrStencil()) {
                     flags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
@@ -128,7 +131,7 @@ namespace dawn_native { namespace vulkan {
                 // and store operations on storage images can only be done on the images in
                 // VK_IMAGE_LAYOUT_GENERAL layout.
                 case wgpu::TextureUsage::Storage:
-                case kReadonlyStorageTexture:
+                case kReadOnlyStorageTexture:
                     return VK_IMAGE_LAYOUT_GENERAL;
                 case wgpu::TextureUsage::RenderAttachment:
                     if (format.HasDepthOrStencil()) {
@@ -156,7 +159,7 @@ namespace dawn_native { namespace vulkan {
             if (usage & (wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
-            if (usage & (wgpu::TextureUsage::Sampled | kReadonlyStorageTexture)) {
+            if (usage & (wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture)) {
                 // TODO(cwallez@chromium.org): Only transition to the usage we care about to avoid
                 // introducing FS -> VS dependencies that would prevent parallelization on tiler
                 // GPUs
@@ -392,7 +395,7 @@ namespace dawn_native { namespace vulkan {
         if (usage & wgpu::TextureUsage::Sampled) {
             flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
         }
-        if (usage & wgpu::TextureUsage::Storage) {
+        if (usage & (wgpu::TextureUsage::Storage | kReadOnlyStorageTexture)) {
             flags |= VK_IMAGE_USAGE_STORAGE_BIT;
         }
         if (usage & wgpu::TextureUsage::RenderAttachment) {

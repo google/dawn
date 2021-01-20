@@ -280,7 +280,7 @@ namespace dawn_native { namespace d3d12 {
                                 wgpu::TextureUsage usage;
                                 switch (bindingInfo.storageTexture.access) {
                                     case wgpu::StorageTextureAccess::ReadOnly:
-                                        usage = kReadonlyStorageTexture;
+                                        usage = kReadOnlyStorageTexture;
                                         break;
                                     case wgpu::StorageTextureAccess::WriteOnly:
                                         usage = wgpu::TextureUsage::Storage;
