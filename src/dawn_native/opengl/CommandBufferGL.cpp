@@ -780,11 +780,50 @@ namespace dawn_native { namespace opengl {
                     } else {
                         dstTexture->EnsureSubresourceContentInitialized(dstRange);
                     }
-                    gl.CopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
-                                        src.mipLevel, src.origin.x, src.origin.y, src.origin.z,
-                                        dstTexture->GetHandle(), dstTexture->GetGLTarget(),
-                                        dst.mipLevel, dst.origin.x, dst.origin.y, dst.origin.z,
-                                        copySize.width, copySize.height, copy->copySize.depth);
+                    if (gl.IsAtLeastGL(4, 3) || gl.IsAtLeastGLES(3, 2)) {
+                        gl.CopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
+                                            src.mipLevel, src.origin.x, src.origin.y, src.origin.z,
+                                            dstTexture->GetHandle(), dstTexture->GetGLTarget(),
+                                            dst.mipLevel, dst.origin.x, dst.origin.y, dst.origin.z,
+                                            copySize.width, copySize.height, copy->copySize.depth);
+                    } else {
+                        GLuint readFBO = 0, drawFBO = 0;
+                        gl.GenFramebuffers(1, &readFBO);
+                        gl.GenFramebuffers(1, &drawFBO);
+                        gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
+                        gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFBO);
+                        gl.Disable(GL_SCISSOR_TEST);
+                        for (uint32_t layer = 0; layer < copy->copySize.depth; ++layer) {
+                            if (srcTexture->GetArrayLayers() == 1) {
+                                gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                                        srcTexture->GetGLTarget(),
+                                                        srcTexture->GetHandle(), src.mipLevel);
+                            } else {
+                                gl.FramebufferTextureLayer(
+                                    GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                    srcTexture->GetHandle(), static_cast<GLint>(src.mipLevel),
+                                    static_cast<GLint>(src.origin.z + layer));
+                            }
+                            if (dstTexture->GetArrayLayers() == 1) {
+                                gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                                        dstTexture->GetGLTarget(),
+                                                        dstTexture->GetHandle(), dst.mipLevel);
+                            } else {
+                                gl.FramebufferTextureLayer(
+                                    GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                    dstTexture->GetHandle(), static_cast<GLint>(dst.mipLevel),
+                                    static_cast<GLint>(dst.origin.z + layer));
+                            }
+                            gl.BlitFramebuffer(
+                                src.origin.x, src.origin.y, src.origin.x + copySize.width,
+                                src.origin.y + copySize.height, dst.origin.x, dst.origin.y,
+                                dst.origin.x + copySize.width, dst.origin.y + copySize.height,
+                                GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                        }
+                        gl.Enable(GL_SCISSOR_TEST);
+                        gl.DeleteFramebuffers(1, &readFBO);
+                        gl.DeleteFramebuffers(1, &drawFBO);
+                    }
                     break;
                 }
 
