@@ -44,25 +44,25 @@ namespace ityp {
 
         Value& operator[](Index i) {
             I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < Size);
+            ASSERT(index >= 0 && index < I(Size));
             return Base::operator[](index);
         }
 
         constexpr const Value& operator[](Index i) const {
             I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < Size);
+            ASSERT(index >= 0 && index < I(Size));
             return Base::operator[](index);
         }
 
         Value& at(Index i) {
             I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < Size);
+            ASSERT(index >= 0 && index < I(Size));
             return Base::at(index);
         }
 
         constexpr const Value& at(Index i) const {
             I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < Size);
+            ASSERT(index >= 0 && index < I(Size));
             return Base::at(index);
         }
 
@@ -83,7 +83,7 @@ namespace ityp {
         }
 
         constexpr Index size() const {
-            return Index(static_cast<I>(Size));
+            return Index(I(Size));
         }
 
         using Base::back;
