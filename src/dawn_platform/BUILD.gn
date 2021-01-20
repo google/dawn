@@ -25,6 +25,8 @@ dawn_component("dawn_platform") {
     "${dawn_root}/src/include/dawn_platform/DawnPlatform.h",
     "${dawn_root}/src/include/dawn_platform/dawn_platform_export.h",
     "DawnPlatform.cpp",
+    "WorkerThread.cpp",
+    "WorkerThread.h",
     "tracing/EventTracer.cpp",
     "tracing/EventTracer.h",
     "tracing/TraceEvent.h",
