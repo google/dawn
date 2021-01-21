@@ -27,7 +27,7 @@ class RenderPassTest : public DawnTest {
 
         // Shaders to draw a bottom-left triangle in blue.
         mVSModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             [[stage(vertex)]] fn main() -> void {

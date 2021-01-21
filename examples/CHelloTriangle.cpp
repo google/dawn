@@ -37,7 +37,7 @@ void init() {
     wgpuSwapChainConfigure(swapchain, swapChainFormat, WGPUTextureUsage_RenderAttachment, 640, 480);
 
     const char* vs =
-        "[[builtin(vertex_idx)]] var<in> VertexIndex : u32;\n"
+        "[[builtin(vertex_index)]] var<in> VertexIndex : u32;\n"
         "[[builtin(position)]] var<out> Position : vec4<f32>;\n"
         "const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
         "    vec2<f32>( 0.0,  0.5),\n"

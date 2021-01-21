@@ -44,7 +44,7 @@ namespace dawn_native {
                 vec2<f32>( 0.5, 2.0));
             [[location(0)]] var<out> v_texcoord: vec2<f32>;
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);

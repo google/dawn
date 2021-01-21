@@ -34,7 +34,7 @@ class IndexFormatTest : public DawnTest {
         wgpu::PrimitiveTopology primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[location(0)]] var<in> pos : vec4<f32>;
-            [[builtin(vertex_idx)]] var<in> idx : u32;
+            [[builtin(vertex_index)]] var<in> idx : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
                 // 0xFFFFFFFE is a designated invalid index used by some tests.

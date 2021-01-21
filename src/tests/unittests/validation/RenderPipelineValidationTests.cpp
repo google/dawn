@@ -475,7 +475,7 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
             [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
         };
         [[group(0), binding(0)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[stage(vertex)]] fn main() -> void {
             dst.data[VertexIndex] = 0x1234u;
         })");

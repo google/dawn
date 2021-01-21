@@ -31,7 +31,7 @@ class ColorStateTest : public DawnTest {
         DawnTest::SetUp();
 
         vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-                [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+                [[builtin(vertex_index)]] var<in> VertexIndex : u32;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 
                 [[stage(vertex)]] fn main() -> void {

@@ -91,7 +91,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
 
     if ((checkIndex & CheckIndex::Vertex) != 0) {
         vertexShader << R"(
-        [[builtin(vertex_idx)]] var<in> vertex_index : u32;
+        [[builtin(vertex_index)]] var<in> vertex_index : u32;
         [[location(1)]] var<out> out_vertex_index : u32;
         )";
         fragmentShader << R"(
@@ -100,7 +100,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
     }
     if ((checkIndex & CheckIndex::Instance) != 0) {
         vertexShader << R"(
-            [[builtin(instance_idx)]] var<in> instance_index : u32;
+            [[builtin(instance_index)]] var<in> instance_index : u32;
             [[location(2)]] var<out> out_instance_index : u32;
             )";
         fragmentShader << R"(

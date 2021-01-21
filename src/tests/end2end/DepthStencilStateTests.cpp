@@ -58,7 +58,7 @@ class DepthStencilStateTest : public DawnTest {
                 [[offset(12)]] depth : f32;
             };
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             [[stage(vertex)]] fn main() -> void {

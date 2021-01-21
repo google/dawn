@@ -23,7 +23,7 @@ class ViewportTest : public DawnTest {
         DawnTest::SetUp();
 
         mQuadVS = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
@@ -96,7 +96,7 @@ class ViewportTest : public DawnTest {
         // Create a pipeline drawing 3 points at depth 1.0, 0.5 and 0.0.
         utils::ComboRenderPipelineDescriptor pipelineDesc(device);
         pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             const points : array<vec3<f32>, 3> = array<vec3<f32>, 3>(

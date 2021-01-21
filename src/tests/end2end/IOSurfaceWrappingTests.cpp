@@ -248,7 +248,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         wgpu::RenderPipeline pipeline;
         {
             wgpu::ShaderModule vs = utils::CreateShaderModuleFromWGSL(device, R"(
-                [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+                [[builtin(vertex_index)]] var<in> VertexIndex : u32;
                 [[location(0)]] var<out> o_texCoord : vec2<f32>;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 

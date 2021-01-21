@@ -36,7 +36,7 @@ class DepthBiasTests : public DawnTest {
             case QuadAngle::Flat:
                 // Draw a square at z = 0.25
                 vertexSource = R"(
-    [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+    [[builtin(vertex_index)]] var<in> VertexIndex : u32;
     [[builtin(position)]] var<out> Position : vec4<f32>;
     [[stage(vertex)]] fn main() -> void {
         const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
@@ -54,7 +54,7 @@ class DepthBiasTests : public DawnTest {
             case QuadAngle::TiltedX:
                 // Draw a square ranging from 0 to 0.5, bottom to top
                 vertexSource = R"(
-    [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+    [[builtin(vertex_index)]] var<in> VertexIndex : u32;
     [[builtin(position)]] var<out> Position : vec4<f32>;
     [[stage(vertex)]] fn main() -> void {
         const pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(

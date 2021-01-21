@@ -34,7 +34,7 @@ class ClipSpaceTest : public DawnTest {
                 vec3<f32>(-1.0, -1.0, 0.5),
                 vec3<f32>( 1.0, -1.0, 0.0));
 
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             [[stage(vertex)]] fn main() -> void {

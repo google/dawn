@@ -313,7 +313,7 @@ int main(int argc, const char* argv[]) {
     // The hacky pipeline to render a triangle.
     utils::ComboRenderPipelineDescriptor pipelineDesc(device);
     pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
         const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
             vec2<f32>( 0.0,  0.5),

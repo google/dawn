@@ -50,7 +50,7 @@ class TextureSubresourceTest : public DawnTest {
 
     void DrawTriangle(const wgpu::TextureView& view) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             [[stage(vertex)]] fn main() -> void {
@@ -90,7 +90,7 @@ class TextureSubresourceTest : public DawnTest {
 
     void SampleAndDraw(const wgpu::TextureView& samplerView, const wgpu::TextureView& renderView) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             [[stage(vertex)]] fn main() -> void {

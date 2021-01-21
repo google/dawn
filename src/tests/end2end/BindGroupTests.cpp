@@ -46,7 +46,7 @@ class BindGroupTests : public DawnTest {
 
     wgpu::ShaderModule MakeSimpleVSModule() const {
         return utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
         [[stage(vertex)]] fn main() -> void {
@@ -164,7 +164,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
         [[group(0), binding(0)]] var <uniform> vertexUbo : VertexUniformBuffer;
 
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
         [[stage(vertex)]] fn main() -> void {
@@ -251,7 +251,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         };
         [[group(0), binding(0)]] var <uniform> vertexUbo : VertexUniformBuffer;
 
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
         [[stage(vertex)]] fn main() -> void {
@@ -374,7 +374,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         [[group(0), binding(0)]] var <uniform> vertexUbo1 : VertexUniformBuffer1;
         [[group(1), binding(0)]] var <uniform> vertexUbo2 : VertexUniformBuffer2;
 
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
         [[stage(vertex)]] fn main() -> void {
@@ -961,7 +961,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
         [[stage(vertex)]] fn main() -> void {
@@ -1117,7 +1117,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
     utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
 
     pipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
         [[stage(vertex)]] fn main() -> void {

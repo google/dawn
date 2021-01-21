@@ -21,9 +21,9 @@ class ScissorTest : public DawnTest {
   protected:
     wgpu::RenderPipeline CreateQuadPipeline(wgpu::TextureFormat format) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            
+
             const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                 vec2<f32>(-1.0, -1.0),
                 vec2<f32>(-1.0,  1.0),

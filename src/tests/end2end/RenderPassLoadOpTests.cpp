@@ -77,7 +77,7 @@ class RenderPassLoadOpTests : public DawnTest {
 
         // draws a blue quad on the right half of the screen
         const char* vsSource = R"(
-            [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
             [[stage(vertex)]] fn main() -> void {
