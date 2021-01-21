@@ -53,18 +53,6 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/depth_texture_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/texture_type.h"
-#include "src/ast/type/type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
@@ -74,6 +62,18 @@
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/parser_impl.h"
+#include "src/type/bool_type.h"
+#include "src/type/depth_texture_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/texture_type.h"
+#include "src/type/type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 
 // Terms:
 //    CFG: the control flow graph of the function, where basic blocks are the
@@ -725,7 +725,7 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       fail_stream_(pi->fail_stream()),
       namer_(pi->namer()),
       function_(function),
-      i32_(ast_module_.create<ast::type::I32>()),
+      i32_(ast_module_.create<type::I32>()),
       ep_info_(ep_info) {
   PushNewStatementBlock(nullptr, 0, nullptr);
 }
@@ -929,7 +929,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
   return success();
 }
 
-ast::type::Type* FunctionEmitter::GetVariableStoreType(
+type::Type* FunctionEmitter::GetVariableStoreType(
     const spvtools::opt::Instruction& var_decl_inst) {
   const auto type_id = var_decl_inst.type_id();
   auto* var_ref_type = type_mgr_->GetType(type_id);
@@ -1998,7 +1998,7 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
              << id;
       return {};
     case SkipReason::kPointSizeBuiltinValue: {
-      auto* f32 = create<ast::type::F32>();
+      auto* f32 = create<type::F32>();
       return {f32,
               create<ast::ScalarConstructorExpression>(
                   Source{}, create<ast::FloatLiteral>(Source{}, f32, 1.0f))};
@@ -2985,8 +2985,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       }
       auto expr = MakeExpression(ptr_id);
       // The load result type is the pointee type of its operand.
-      assert(expr.type->Is<ast::type::Pointer>());
-      expr.type = expr.type->As<ast::type::Pointer>()->type();
+      assert(expr.type->Is<type::Pointer>());
+      expr.type = expr.type->As<type::Pointer>()->type();
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
 
@@ -3043,7 +3043,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
   const auto opcode = inst.opcode();
 
-  ast::type::Type* ast_type =
+  type::Type* ast_type =
       inst.type_id() != 0 ? parser_impl_.ConvertType(inst.type_id()) : nullptr;
 
   auto binary_op = ConvertBinaryOp(opcode);
@@ -3181,7 +3181,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
   auto* func = create<ast::IdentifierExpression>(
       Source{}, ast_module_.RegisterSymbol(name));
   ast::ExpressionList operands;
-  ast::type::Type* first_operand_type = nullptr;
+  type::Type* first_operand_type = nullptr;
   // All parameters to GLSL.std.450 extended instructions are IDs.
   for (uint32_t iarg = 2; iarg < inst.NumInOperands(); ++iarg) {
     TypedExpression operand = MakeOperand(inst, iarg);
@@ -3423,7 +3423,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         type_mgr_->FindPointerToType(pointee_type_id, storage_class);
     auto* ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
     assert(ast_pointer_type);
-    assert(ast_pointer_type->Is<ast::type::Pointer>());
+    assert(ast_pointer_type->Is<type::Pointer>());
     current_expr = TypedExpression{ast_pointer_type, next_expr};
   }
   return current_expr;
@@ -3443,7 +3443,7 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   TypedExpression current_expr(MakeOperand(inst, 0));
 
   auto make_index = [this, source](uint32_t literal) {
-    auto* type = create<ast::type::U32>();
+    auto* type = create<type::U32>();
     return create<ast::ScalarConstructorExpression>(
         source, create<ast::UintLiteral>(source, type, literal));
   };
@@ -3551,7 +3551,7 @@ ast::Expression* FunctionEmitter::MakeTrue(const Source& source) const {
 }
 
 ast::Expression* FunctionEmitter::MakeFalse(const Source& source) const {
-  ast::type::Bool bool_type;
+  type::Bool bool_type;
   return create<ast::ScalarConstructorExpression>(
       source, create<ast::BoolLiteral>(source, parser_impl_.Bool(), false));
 }
@@ -3572,8 +3572,8 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
   // Generate an ast::TypeConstructor expression.
   // Assume the literal indices are valid, and there is a valid number of them.
   auto source = GetSourceForInst(inst);
-  ast::type::Vector* result_type =
-      parser_impl_.ConvertType(inst.type_id())->As<ast::type::Vector>();
+  type::Vector* result_type =
+      parser_impl_.ConvertType(inst.type_id())->As<type::Vector>();
   ast::ExpressionList values;
   for (uint32_t i = 2; i < inst.NumInOperands(); ++i) {
     const auto index = inst.GetSingleWordInOperand(i);
@@ -3642,7 +3642,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
       if (type) {
         if (type->AsPointer()) {
           if (const auto* ast_type = parser_impl_.ConvertType(inst.type_id())) {
-            if (auto* ptr = ast_type->As<ast::type::Pointer>()) {
+            if (auto* ptr = ast_type->As<type::Pointer>()) {
               info->storage_class = ptr->storage_class();
             }
           }
@@ -3686,21 +3686,21 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
   const auto type_id = def_use_mgr_->GetDef(id)->type_id();
   if (type_id) {
     auto* ast_type = parser_impl_.ConvertType(type_id);
-    if (ast_type && ast_type->Is<ast::type::Pointer>()) {
-      return ast_type->As<ast::type::Pointer>()->storage_class();
+    if (ast_type && ast_type->Is<type::Pointer>()) {
+      return ast_type->As<type::Pointer>()->storage_class();
     }
   }
   return ast::StorageClass::kNone;
 }
 
-ast::type::Type* FunctionEmitter::RemapStorageClass(ast::type::Type* type,
-                                                    uint32_t result_id) {
-  if (const auto* ast_ptr_type = type->As<ast::type::Pointer>()) {
+type::Type* FunctionEmitter::RemapStorageClass(type::Type* type,
+                                               uint32_t result_id) {
+  if (const auto* ast_ptr_type = type->As<type::Pointer>()) {
     // Remap an old-style storage buffer pointer to a new-style storage
     // buffer pointer.
     const auto sc = GetStorageClassForPointerValue(result_id);
     if (ast_ptr_type->storage_class() != sc) {
-      return parser_impl_.get_module().create<ast::type::Pointer>(
+      return parser_impl_.get_module().create<type::Pointer>(
           ast_ptr_type->type(), sc);
     }
   }
@@ -3884,7 +3884,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
     return {};
   }
 
-  ast::type::Type* expr_type = nullptr;
+  type::Type* expr_type = nullptr;
   if ((opcode == SpvOpConvertSToF) || (opcode == SpvOpConvertUToF)) {
     if (arg_expr.type->is_integer_scalar_or_vector()) {
       expr_type = requested_type;
@@ -3946,7 +3946,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
                   << inst.PrettyPrint();
   }
 
-  if (result_type->Is<ast::type::Void>()) {
+  if (result_type->Is<type::Void>()) {
     return nullptr !=
            AddStatement(create<ast::CallStatement>(Source{}, call_expr));
   }
@@ -3965,7 +3965,7 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
   ident->set_intrinsic(intrinsic);
 
   ast::ExpressionList params;
-  ast::type::Type* first_operand_type = nullptr;
+  type::Type* first_operand_type = nullptr;
   for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
     TypedExpression operand = MakeOperand(inst, iarg);
     if (first_operand_type == nullptr) {
@@ -3997,8 +3997,8 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(
   // - you can't select over pointers or pointer vectors, unless you also have
   //   a VariablePointers* capability, which is not allowed in by WebGPU.
   auto* op_ty = operand1.type;
-  if (op_ty->Is<ast::type::Vector>() || op_ty->is_float_scalar() ||
-      op_ty->is_integer_scalar() || op_ty->Is<ast::type::Bool>()) {
+  if (op_ty->Is<type::Vector>() || op_ty->is_float_scalar() ||
+      op_ty->is_integer_scalar() || op_ty->Is<type::Bool>()) {
     ast::ExpressionList params;
     params.push_back(operand1.expr);
     params.push_back(operand2.expr);
@@ -4050,13 +4050,12 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         Source{}, ast_module_.RegisterSymbol(param_name)));
   }
 
-  ast::type::Pointer* texture_ptr_type =
-      parser_impl_.GetTypeForHandleVar(*image);
+  type::Pointer* texture_ptr_type = parser_impl_.GetTypeForHandleVar(*image);
   if (!texture_ptr_type) {
     return Fail();
   }
-  ast::type::Texture* texture_type =
-      texture_ptr_type->type()->UnwrapAll()->As<ast::type::Texture>();
+  type::Texture* texture_type =
+      texture_ptr_type->type()->UnwrapAll()->As<type::Texture>();
   if (!texture_type) {
     return Fail();
   }
@@ -4160,7 +4159,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     }
     TypedExpression lod = MakeOperand(inst, arg_index);
     // When sampling from a depth texture, the Lod operand must be an I32.
-    if (texture_type->Is<ast::type::DepthTexture>()) {
+    if (texture_type->Is<type::DepthTexture>()) {
       // Convert it to a signed integer type.
       lod = ToI32(lod);
     }
@@ -4188,9 +4187,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                     << inst.PrettyPrint();
     }
     switch (texture_type->dim()) {
-      case ast::type::TextureDimension::k2d:
-      case ast::type::TextureDimension::k2dArray:
-      case ast::type::TextureDimension::k3d:
+      case type::TextureDimension::k2d:
+      case type::TextureDimension::k2dArray:
+      case type::TextureDimension::k3d:
         break;
       default:
         return Fail() << "ConstOffset is only permitted for 2D, 2D Arrayed, "
@@ -4226,7 +4225,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     // The result type, derived from the SPIR-V instruction.
     auto* result_type = parser_impl_.ConvertType(inst.type_id());
     auto* result_component_type = result_type;
-    if (auto* result_vector_type = result_type->As<ast::type::Vector>()) {
+    if (auto* result_vector_type = result_type->As<type::Vector>()) {
       result_component_type = result_vector_type->type();
     }
 
@@ -4241,7 +4240,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     //   dref gather         vec4  ImageFetch           vec4 TODO(dneto)
     // Construct a 4-element vector with the result from the builtin in the
     // first component.
-    if (texture_type->Is<ast::type::DepthTexture>()) {
+    if (texture_type->Is<type::DepthTexture>()) {
       if (is_non_dref_sample || (opcode == SpvOpImageFetch)) {
         value = create<ast::TypeConstructorExpression>(
             Source{},
@@ -4269,7 +4268,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       // or vice versa. Perform a bitcast.
       value = create<ast::BitcastExpression>(Source{}, result_type, call_expr);
     }
-    if (!expected_component_type->Is<ast::type::F32>() &&
+    if (!expected_component_type->Is<type::F32>() &&
         IsSampledImageAccess(opcode)) {
       // WGSL permits sampled image access only on float textures.
       // Reject this case in the SPIR-V reader, at least until SPIR-V validation
@@ -4326,22 +4325,21 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   if (!raw_coords.type) {
     return {};
   }
-  ast::type::Pointer* type = parser_impl_.GetTypeForHandleVar(*image);
+  type::Pointer* type = parser_impl_.GetTypeForHandleVar(*image);
   if (!parser_impl_.success()) {
     Fail();
     return {};
   }
-  if (!type || !type->type()->UnwrapAll()->Is<ast::type::Texture>()) {
+  if (!type || !type->type()->UnwrapAll()->Is<type::Texture>()) {
     Fail() << "invalid texture type for " << image->PrettyPrint();
     return {};
   }
 
   auto* unwrapped_type = type->type()->UnwrapAll();
-  ast::type::TextureDimension dim =
-      unwrapped_type->As<ast::type::Texture>()->dim();
+  type::TextureDimension dim = unwrapped_type->As<type::Texture>()->dim();
   // Number of regular coordinates.
-  uint32_t num_axes = ast::type::NumCoordinateAxes(dim);
-  bool is_arrayed = ast::type::IsTextureArray(dim);
+  uint32_t num_axes = type::NumCoordinateAxes(dim);
+  bool is_arrayed = type::IsTextureArray(dim);
   if ((num_axes == 0) || (num_axes > 3)) {
     Fail() << "unsupported image dimensionality for " << type->type_name()
            << " prompted by " << inst.PrettyPrint();
@@ -4352,7 +4350,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   if (component_type->is_float_scalar() ||
       component_type->is_integer_scalar()) {
     num_coords_supplied = 1;
-  } else if (auto* vec_type = raw_coords.type->As<ast::type::Vector>()) {
+  } else if (auto* vec_type = raw_coords.type->As<type::Vector>()) {
     component_type = vec_type->type();
     num_coords_supplied = vec_type->size();
   }
@@ -4377,9 +4375,9 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   // will actually use them.
   auto prefix_swizzle_expr = [this, num_axes, component_type,
                               raw_coords]() -> ast::Expression* {
-    auto* swizzle_type =
-        (num_axes == 1) ? component_type
-                        : create<ast::type::Vector>(component_type, num_axes);
+    auto* swizzle_type = (num_axes == 1)
+                             ? component_type
+                             : create<type::Vector>(component_type, num_axes);
     auto* swizzle = create<ast::MemberAccessorExpression>(
         Source{}, raw_coords.expr, PrefixSwizzle(num_axes));
     return ToSignedIfUnsigned({swizzle_type, swizzle}).expr;
@@ -4413,8 +4411,8 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
 ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     const spvtools::opt::Instruction& inst,
     TypedExpression texel,
-    ast::type::Texture* texture_type) {
-  auto* storage_texture_type = texture_type->As<ast::type::StorageTexture>();
+    type::Texture* texture_type) {
+  auto* storage_texture_type = texture_type->As<type::StorageTexture>();
   auto* src_type = texel.type;
   if (!storage_texture_type) {
     Fail() << "writing to other than storage texture: " << inst.PrettyPrint();
@@ -4431,14 +4429,14 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
   }
 
   const uint32_t dest_count =
-      dest_type->is_scalar() ? 1 : dest_type->As<ast::type::Vector>()->size();
+      dest_type->is_scalar() ? 1 : dest_type->As<type::Vector>()->size();
   if (dest_count == 3) {
     Fail() << "3-channel storage textures are not supported: "
            << inst.PrettyPrint();
     return nullptr;
   }
   const uint32_t src_count =
-      src_type->is_scalar() ? 1 : src_type->As<ast::type::Vector>()->size();
+      src_type->is_scalar() ? 1 : src_type->As<type::Vector>()->size();
   if (src_count < dest_count) {
     Fail() << "texel has too few components for storage texture: " << src_count
            << " provided but " << dest_count
@@ -4508,8 +4506,8 @@ TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
   if (!value.type || !value.type->is_unsigned_scalar_or_vector()) {
     return value;
   }
-  if (auto* vec_type = value.type->As<ast::type::Vector>()) {
-    auto* new_type = create<ast::type::Vector>(i32_, vec_type->size());
+  if (auto* vec_type = value.type->As<type::Vector>()) {
+    auto* new_type = create<type::Vector>(i32_, vec_type->size());
     return {new_type, create<ast::TypeConstructorExpression>(
                           Source{}, new_type, ast::ExpressionList{value.expr})};
   }
@@ -4560,10 +4558,10 @@ TypedExpression FunctionEmitter::MakeOuterProduct(
   // Synthesize the result.
   auto col = MakeOperand(inst, 0);
   auto row = MakeOperand(inst, 1);
-  auto* col_ty = col.type->As<ast::type::Vector>();
-  auto* row_ty = row.type->As<ast::type::Vector>();
+  auto* col_ty = col.type->As<type::Vector>();
+  auto* row_ty = row.type->As<type::Vector>();
   auto* result_ty =
-      parser_impl_.ConvertType(inst.type_id())->As<ast::type::Matrix>();
+      parser_impl_.ConvertType(inst.type_id())->As<type::Matrix>();
   if (!col_ty || !col_ty || !result_ty || result_ty->type() != col_ty->type() ||
       result_ty->type() != row_ty->type() ||
       result_ty->columns() != row_ty->size() ||

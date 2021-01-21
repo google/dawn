@@ -27,16 +27,16 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/array_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 
 namespace tint {
 
@@ -83,11 +83,11 @@ bool ValidatorImpl::Validate() {
 }
 
 bool ValidatorImpl::ValidateConstructedTypes(
-    const std::vector<ast::type::Type*>& constructed_types) {
+    const std::vector<type::Type*>& constructed_types) {
   for (auto* const ct : constructed_types) {
-    if (auto* st = ct->As<ast::type::Struct>()) {
+    if (auto* st = ct->As<type::Struct>()) {
       for (auto* member : st->impl()->members()) {
-        if (auto* r = member->type()->UnwrapAll()->As<ast::type::Array>()) {
+        if (auto* r = member->type()->UnwrapAll()->As<type::Array>()) {
           if (r->IsRuntimeArray()) {
             if (member != st->impl()->members().back()) {
               add_error(member->source(), "v-0015",
@@ -167,7 +167,7 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
         return false;
       }
 
-      if (!func->return_type()->Is<ast::type::Void>()) {
+      if (!func->return_type()->Is<type::Void>()) {
         add_error(func->source(), "v-0024",
                   "Entry point function must return void: '" +
                       module_.SymbolToName(func->symbol()) + "'");
@@ -209,7 +209,7 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   }
   variable_stack_.pop_scope();
 
-  if (!current_function_->return_type()->Is<ast::type::Void>()) {
+  if (!current_function_->return_type()->Is<type::Void>()) {
     if (!func->get_last_statement() ||
         !func->get_last_statement()->Is<ast::ReturnStatement>()) {
       add_error(func->source(), "v-0002",
@@ -221,7 +221,7 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
 }
 
 bool ValidatorImpl::ValidateParameter(const ast::Variable* param) {
-  if (auto* r = param->type()->UnwrapAll()->As<ast::type::Array>()) {
+  if (auto* r = param->type()->UnwrapAll()->As<type::Array>()) {
     if (r->IsRuntimeArray()) {
       add_error(
           param->source(), "v-0015",
@@ -235,9 +235,9 @@ bool ValidatorImpl::ValidateParameter(const ast::Variable* param) {
 bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
   // TODO(sarahM0): update this when this issue resolves:
   // https://github.com/gpuweb/gpuweb/issues/996
-  ast::type::Type* func_type = current_function_->return_type();
+  type::Type* func_type = current_function_->return_type();
 
-  ast::type::Void void_type;
+  type::Void void_type;
   auto* ret_type =
       ret->has_value() ? ret->value()->result_type()->UnwrapAll() : &void_type;
 
@@ -283,8 +283,7 @@ bool ValidatorImpl::ValidateDeclStatement(
   //    storable.
   //  - types match or the RHS can be dereferenced to equal the LHS type.
   variable_stack_.set(symbol, decl->variable());
-  if (auto* arr =
-          decl->variable()->type()->UnwrapAll()->As<ast::type::Array>()) {
+  if (auto* arr = decl->variable()->type()->UnwrapAll()->As<type::Array>()) {
     if (arr->IsRuntimeArray()) {
       add_error(
           decl->source(), "v-0015",
@@ -358,11 +357,11 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
       }
 
       auto v =
-          static_cast<int32_t>(selector->type()->Is<ast::type::U32>()
+          static_cast<int32_t>(selector->type()->Is<type::U32>()
                                    ? selector->As<ast::UintLiteral>()->value()
                                    : selector->As<ast::SintLiteral>()->value());
       if (selector_set.count(v)) {
-        auto v_str = selector->type()->Is<ast::type::U32>()
+        auto v_str = selector->type()->Is<type::U32>()
                          ? selector->As<ast::UintLiteral>()->to_str()
                          : selector->As<ast::SintLiteral>()->to_str();
         add_error(case_stmt->source(), "v-0027",
@@ -485,7 +484,7 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
     return false;
   }
   auto* lhs_result_type = lhs->result_type()->UnwrapIfNeeded();
-  if (auto* lhs_reference_type = As<ast::type::Pointer>(lhs_result_type)) {
+  if (auto* lhs_reference_type = As<type::Pointer>(lhs_result_type)) {
     auto* lhs_store_type = lhs_reference_type->type()->UnwrapIfNeeded();
     if (lhs_store_type != rhs_result_type) {
       add_error(assign->source(), "v-000x",
@@ -534,18 +533,18 @@ bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
   return true;
 }
 
-bool ValidatorImpl::IsStorable(ast::type::Type* type) {
+bool ValidatorImpl::IsStorable(type::Type* type) {
   if (type == nullptr) {
     return false;
   }
-  if (type->is_scalar() || type->Is<ast::type::Vector>() ||
-      type->Is<ast::type::Matrix>()) {
+  if (type->is_scalar() || type->Is<type::Vector>() ||
+      type->Is<type::Matrix>()) {
     return true;
   }
-  if (ast::type::Array* array_type = type->As<ast::type::Array>()) {
+  if (type::Array* array_type = type->As<type::Array>()) {
     return IsStorable(array_type->type());
   }
-  if (ast::type::Struct* struct_type = type->As<ast::type::Struct>()) {
+  if (type::Struct* struct_type = type->As<type::Struct>()) {
     for (const auto* member : struct_type->impl()->members()) {
       if (!IsStorable(member->type())) {
         return false;
@@ -553,7 +552,7 @@ bool ValidatorImpl::IsStorable(ast::type::Type* type) {
     }
     return true;
   }
-  if (ast::type::Alias* alias_type = type->As<ast::type::Alias>()) {
+  if (type::Alias* alias_type = type->As<type::Alias>()) {
     return IsStorable(alias_type->type());
   }
   return false;

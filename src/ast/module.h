@@ -25,11 +25,11 @@
 
 #include "src/ast/function.h"
 #include "src/ast/traits.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type_manager.h"
 #include "src/ast/variable.h"
 #include "src/block_allocator.h"
 #include "src/symbol_table.h"
+#include "src/type/alias_type.h"
+#include "src/type/type_manager.h"
 
 namespace tint {
 namespace ast {
@@ -181,7 +181,7 @@ class Module {
   std::vector<type::Type*> constructed_types_;
   FunctionList functions_;
   BlockAllocator<Node> ast_nodes_;
-  TypeManager type_mgr_;
+  type::Manager type_mgr_;
 };
 
 }  // namespace ast

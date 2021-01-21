@@ -29,16 +29,16 @@
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/array_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace transform {
@@ -261,7 +261,7 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
 void VertexPulling::State::AddVertexStorageBuffers() {
   // TODO(idanr): Make this readonly https://github.com/gpuweb/gpuweb/issues/935
   // The array inside the struct definition
-  auto* internal_array_type = out->create<ast::type::Array>(
+  auto* internal_array_type = out->create<type::Array>(
       GetU32Type(), 0,
       ast::ArrayDecorationList{
           out->create<ast::StrideDecoration>(Source{}, 4u),
@@ -280,7 +280,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
   ast::StructDecorationList decos;
   decos.push_back(out->create<ast::StructBlockDecoration>(Source{}));
 
-  auto* struct_type = out->create<ast::type::Struct>(
+  auto* struct_type = out->create<type::Struct>(
       out->RegisterSymbol(kStructName),
       out->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
@@ -463,7 +463,7 @@ ast::Expression* VertexPulling::State::AccessPrimitive(
 
 ast::Expression* VertexPulling::State::AccessVec(uint32_t buffer,
                                                  uint32_t element_stride,
-                                                 ast::type::Type* base_type,
+                                                 type::Type* base_type,
                                                  VertexFormat base_format,
                                                  uint32_t count) const {
   ast::ExpressionList expr_list;
@@ -476,20 +476,20 @@ ast::Expression* VertexPulling::State::AccessVec(uint32_t buffer,
   }
 
   return out->create<ast::TypeConstructorExpression>(
-      Source{}, out->create<ast::type::Vector>(base_type, count),
+      Source{}, out->create<type::Vector>(base_type, count),
       std::move(expr_list));
 }
 
-ast::type::Type* VertexPulling::State::GetU32Type() const {
-  return out->create<ast::type::U32>();
+type::Type* VertexPulling::State::GetU32Type() const {
+  return out->create<type::U32>();
 }
 
-ast::type::Type* VertexPulling::State::GetI32Type() const {
-  return out->create<ast::type::I32>();
+type::Type* VertexPulling::State::GetI32Type() const {
+  return out->create<type::I32>();
 }
 
-ast::type::Type* VertexPulling::State::GetF32Type() const {
-  return out->create<ast::type::F32>();
+type::Type* VertexPulling::State::GetF32Type() const {
+  return out->create<type::F32>();
 }
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;

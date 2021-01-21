@@ -15,12 +15,12 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/variable.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace reader {
@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, ParamList_Single) {
   auto p = parser("a : i32");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32>();
+  auto* i32 = mod.create<type::I32>();
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -52,9 +52,9 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   auto p = parser("a : i32, b: f32, c: vec2<f32>");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32>();
-  auto* f32 = mod.create<ast::type::F32>();
-  auto* vec2 = mod.create<ast::type::Vector>(f32, 2);
+  auto* i32 = mod.create<type::I32>();
+  auto* f32 = mod.create<type::F32>();
+  auto* vec2 = mod.create<type::Vector>(f32, 2);
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();

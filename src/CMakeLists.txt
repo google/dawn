@@ -56,16 +56,16 @@ set(TINT_LIB_SRCS
   ast/bitcast_expression.h
   ast/block_statement.cc
   ast/block_statement.h
-  ast/bool_literal.h
   ast/bool_literal.cc
+  ast/bool_literal.h
   ast/break_statement.cc
   ast/break_statement.h
   ast/builder.cc
   ast/builder.h
-  ast/builtin.cc
-  ast/builtin.h
   ast/builtin_decoration.cc
   ast/builtin_decoration.h
+  ast/builtin.cc
+  ast/builtin.h
   ast/call_expression.cc
   ast/call_expression.h
   ast/call_statement.cc
@@ -106,8 +106,8 @@ set(TINT_LIB_SRCS
   ast/int_literal.h
   ast/intrinsic.cc
   ast/intrinsic.h
-  ast/literal.h
   ast/literal.cc
+  ast/literal.h
   ast/location_decoration.cc
   ast/location_decoration.h
   ast/loop_statement.cc
@@ -151,50 +151,10 @@ set(TINT_LIB_SRCS
   ast/switch_statement.cc
   ast/switch_statement.h
   ast/traits.h
-  ast/type_constructor_expression.h
   ast/type_constructor_expression.cc
+  ast/type_constructor_expression.h
   ast/type_decoration.cc
   ast/type_decoration.h
-  ast/type/access_control_type.cc
-  ast/type/access_control_type.h
-  ast/type/alias_type.cc
-  ast/type/alias_type.h
-  ast/type/array_type.cc
-  ast/type/array_type.h
-  ast/type/bool_type.cc
-  ast/type/bool_type.h
-  ast/type/depth_texture_type.cc
-  ast/type/depth_texture_type.h
-  ast/type/f32_type.cc
-  ast/type/f32_type.h
-  ast/type/i32_type.cc
-  ast/type/i32_type.h
-  ast/type/matrix_type.cc
-  ast/type/matrix_type.h
-  ast/type/multisampled_texture_type.cc
-  ast/type/multisampled_texture_type.h
-  ast/type/pointer_type.cc
-  ast/type/pointer_type.h
-  ast/type/sampled_texture_type.cc
-  ast/type/sampled_texture_type.h
-  ast/type/sampler_type.cc
-  ast/type/sampler_type.h
-  ast/type/storage_texture_type.cc
-  ast/type/storage_texture_type.h
-  ast/type/struct_type.cc
-  ast/type/struct_type.h
-  ast/type/texture_type.cc
-  ast/type/texture_type.h
-  ast/type/type.cc
-  ast/type/type.h
-  ast/type/u32_type.cc
-  ast/type/u32_type.h
-  ast/type/vector_type.cc
-  ast/type/vector_type.h
-  ast/type/void_type.cc
-  ast/type/void_type.h
-  ast/type_manager.cc
-  ast/type_manager.h
   ast/uint_literal.cc
   ast/uint_literal.h
   ast/unary_op.cc
@@ -251,6 +211,46 @@ set(TINT_LIB_SRCS
   transform/vertex_pulling.h
   type_determiner.cc
   type_determiner.h
+  type/access_control_type.cc
+  type/access_control_type.h
+  type/alias_type.cc
+  type/alias_type.h
+  type/array_type.cc
+  type/array_type.h
+  type/bool_type.cc
+  type/bool_type.h
+  type/depth_texture_type.cc
+  type/depth_texture_type.h
+  type/f32_type.cc
+  type/f32_type.h
+  type/i32_type.cc
+  type/i32_type.h
+  type/matrix_type.cc
+  type/matrix_type.h
+  type/multisampled_texture_type.cc
+  type/multisampled_texture_type.h
+  type/pointer_type.cc
+  type/pointer_type.h
+  type/sampled_texture_type.cc
+  type/sampled_texture_type.h
+  type/sampler_type.cc
+  type/sampler_type.h
+  type/storage_texture_type.cc
+  type/storage_texture_type.h
+  type/struct_type.cc
+  type/struct_type.h
+  type/texture_type.cc
+  type/texture_type.h
+  type/type.cc
+  type/type.h
+  type/type_manager.cc
+  type/type_manager.h
+  type/u32_type.cc
+  type/u32_type.h
+  type/vector_type.cc
+  type/vector_type.h
+  type/void_type.cc
+  type/void_type.h
   validator/validator.cc
   validator/validator.h
   validator/validator_impl.cc
@@ -391,6 +391,7 @@ if(${TINT_BUILD_TESTS})
     ast/access_decoration_test.cc
     ast/array_accessor_expression_test.cc
     ast/assignment_statement_test.cc
+    ast/binary_expression_test.cc
     ast/binding_decoration_test.cc
     ast/bitcast_expression_test.cc
     ast/block_statement_test.cc
@@ -403,8 +404,8 @@ if(${TINT_BUILD_TESTS})
     ast/clone_context_test.cc
     ast/constant_id_decoration_test.cc
     ast/continue_statement_test.cc
-    ast/discard_statement_test.cc
     ast/decoration_test.cc
+    ast/discard_statement_test.cc
     ast/else_statement_test.cc
     ast/expression_test.cc
     ast/fallthrough_statement_test.cc
@@ -413,53 +414,34 @@ if(${TINT_BUILD_TESTS})
     ast/group_decoration_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
+    ast/int_literal_test.cc
     ast/intrinsic_texture_helper_test.cc
     ast/intrinsic_texture_helper_test.h
-    ast/int_literal_test.cc
     ast/location_decoration_test.cc
     ast/loop_statement_test.cc
     ast/member_accessor_expression_test.cc
-    ast/module_test.cc
     ast/module_clone_test.cc
+    ast/module_test.cc
     ast/null_literal_test.cc
-    ast/binary_expression_test.cc
     ast/return_statement_test.cc
     ast/scalar_constructor_expression_test.cc
     ast/sint_literal_test.cc
     ast/stage_decoration_test.cc
     ast/stride_decoration_test.cc
-    ast/struct_member_test.cc
     ast/struct_member_offset_decoration_test.cc
+    ast/struct_member_test.cc
     ast/struct_test.cc
     ast/switch_statement_test.cc
     ast/test_helper.h
-    ast/type/access_control_type_test.cc
-    ast/type/alias_type_test.cc
-    ast/type/array_type_test.cc
-    ast/type/bool_type_test.cc
-    ast/type/depth_texture_type_test.cc
-    ast/type/f32_type_test.cc
-    ast/type/i32_type_test.cc
-    ast/type/matrix_type_test.cc
-    ast/type/multisampled_texture_type_test.cc
-    ast/type/pointer_type_test.cc
-    ast/type/sampled_texture_type_test.cc
-    ast/type/sampler_type_test.cc
-    ast/type/storage_texture_type_test.cc
-    ast/type/struct_type_test.cc
-    ast/type/texture_type_test.cc
-    ast/type/u32_type_test.cc
-    ast/type/vector_type_test.cc
     ast/traits_test.cc
     ast/type_constructor_expression_test.cc
-    ast/type_manager_test.cc
     ast/uint_literal_test.cc
     ast/unary_op_expression_test.cc
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc
     ast/workgroup_decoration_test.cc
-    castable_test.cc
     block_allocator_test.cc
+    castable_test.cc
     demangler_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
@@ -469,6 +451,24 @@ if(${TINT_BUILD_TESTS})
     symbol_table_test.cc
     symbol_test.cc
     type_determiner_test.cc
+    type/access_control_type_test.cc
+    type/alias_type_test.cc
+    type/array_type_test.cc
+    type/bool_type_test.cc
+    type/depth_texture_type_test.cc
+    type/f32_type_test.cc
+    type/i32_type_test.cc
+    type/matrix_type_test.cc
+    type/multisampled_texture_type_test.cc
+    type/pointer_type_test.cc
+    type/sampled_texture_type_test.cc
+    type/sampler_type_test.cc
+    type/storage_texture_type_test.cc
+    type/struct_type_test.cc
+    type/texture_type_test.cc
+    type/type_manager_test.cc
+    type/u32_type_test.cc
+    type/vector_type_test.cc
     validator/validator_control_block_test.cc
     validator/validator_function_test.cc
     validator/validator_test.cc

@@ -16,7 +16,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
-#include "src/ast/type/struct_type.h"
+#include "src/type/struct_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"
 

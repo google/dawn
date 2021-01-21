@@ -254,14 +254,14 @@ class VertexPulling : public Transform {
     /// @param count how many elements the vector has
     ast::Expression* AccessVec(uint32_t buffer,
                                uint32_t element_stride,
-                               ast::type::Type* base_type,
+                               type::Type* base_type,
                                VertexFormat base_format,
                                uint32_t count) const;
 
     // Used to grab corresponding types from the type manager
-    ast::type::Type* GetU32Type() const;
-    ast::type::Type* GetI32Type() const;
-    ast::type::Type* GetF32Type() const;
+    type::Type* GetU32Type() const;
+    type::Type* GetI32Type() const;
+    type::Type* GetF32Type() const;
 
     ast::Module* const in;
     ast::Module* const out;

@@ -14,9 +14,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/i32_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/i32_type.h"
 
 namespace tint {
 namespace reader {
@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   auto p = parser("a : i32;");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32>();
+  auto* i32 = mod.create<type::I32>();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   auto p = parser("[[offset(2)]] a : i32;");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32>();
+  auto* i32 = mod.create<type::I32>();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -84,7 +84,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
 [[offset(4)]] a : i32;)");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32>();
+  auto* i32 = mod.create<type::I32>();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);

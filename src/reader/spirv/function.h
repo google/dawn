@@ -36,12 +36,12 @@
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/ast/storage_class.h"
-#include "src/ast/type/i32_type.h"
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/entry_point_info.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/parser_impl.h"
+#include "src/type/i32_type.h"
 
 namespace tint {
 namespace reader {
@@ -485,7 +485,7 @@ class FunctionEmitter {
   /// @param type the AST type
   /// @param result_id the SPIR-V ID for the locally defined value
   /// @returns an possibly updated type
-  ast::type::Type* RemapStorageClass(ast::type::Type* type, uint32_t result_id);
+  type::Type* RemapStorageClass(type::Type* type, uint32_t result_id);
 
   /// Marks locally defined values when they should get a 'const'
   /// definition in WGSL, or a 'var' definition at an outer scope.
@@ -804,7 +804,7 @@ class FunctionEmitter {
     /// Function parameters
     ast::VariableList params;
     /// Function return type
-    ast::type::Type* return_type;
+    type::Type* return_type;
     /// Function decorations
     ast::FunctionDecorationList decorations;
   };
@@ -817,7 +817,7 @@ class FunctionEmitter {
 
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
-  ast::type::Type* GetVariableStoreType(
+  type::Type* GetVariableStoreType(
       const spvtools::opt::Instruction& var_decl_inst);
 
   /// Returns an expression for an instruction operand. Signedness conversion is
@@ -874,7 +874,7 @@ class FunctionEmitter {
   ast::Expression* ConvertTexelForStorage(
       const spvtools::opt::Instruction& inst,
       TypedExpression texel,
-      ast::type::Texture* texture_type);
+      type::Texture* texture_type);
 
   /// Returns an expression for an OpSelect, if its operands are scalars
   /// or vectors. These translate directly to WGSL select.  Otherwise, return
@@ -1037,7 +1037,7 @@ class FunctionEmitter {
   FailStream& fail_stream_;
   Namer& namer_;
   const spvtools::opt::Function& function_;
-  ast::type::I32* const i32_;  // The unique I32 type object.
+  type::I32* const i32_;  // The unique I32 type object.
 
   // A stack of statement lists. Each list is contained in a construct in
   // the next deeper element of stack. The 0th entry represents the statements

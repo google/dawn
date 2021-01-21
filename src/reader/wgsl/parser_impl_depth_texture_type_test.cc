@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/type/depth_texture_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/depth_texture_type.h"
 
 namespace tint {
 namespace reader {
@@ -36,10 +36,9 @@ TEST_F(ParserImplTest, DepthTextureType_2d) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Texture>());
-  ASSERT_TRUE(t->Is<ast::type::DepthTexture>());
-  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
-            ast::type::TextureDimension::k2d);
+  ASSERT_TRUE(t->Is<type::Texture>());
+  ASSERT_TRUE(t->Is<type::DepthTexture>());
+  EXPECT_EQ(t->As<type::Texture>()->dim(), type::TextureDimension::k2d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -49,10 +48,9 @@ TEST_F(ParserImplTest, DepthTextureType_2dArray) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Texture>());
-  ASSERT_TRUE(t->Is<ast::type::DepthTexture>());
-  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
-            ast::type::TextureDimension::k2dArray);
+  ASSERT_TRUE(t->Is<type::Texture>());
+  ASSERT_TRUE(t->Is<type::DepthTexture>());
+  EXPECT_EQ(t->As<type::Texture>()->dim(), type::TextureDimension::k2dArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -62,10 +60,9 @@ TEST_F(ParserImplTest, DepthTextureType_Cube) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Texture>());
-  ASSERT_TRUE(t->Is<ast::type::DepthTexture>());
-  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
-            ast::type::TextureDimension::kCube);
+  ASSERT_TRUE(t->Is<type::Texture>());
+  ASSERT_TRUE(t->Is<type::DepthTexture>());
+  EXPECT_EQ(t->As<type::Texture>()->dim(), type::TextureDimension::kCube);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -75,10 +72,9 @@ TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Texture>());
-  ASSERT_TRUE(t->Is<ast::type::DepthTexture>());
-  EXPECT_EQ(t->As<ast::type::Texture>()->dim(),
-            ast::type::TextureDimension::kCubeArray);
+  ASSERT_TRUE(t->Is<type::Texture>());
+  ASSERT_TRUE(t->Is<type::DepthTexture>());
+  EXPECT_EQ(t->As<type::Texture>()->dim(), type::TextureDimension::kCubeArray);
   EXPECT_FALSE(p->has_error());
 }
 

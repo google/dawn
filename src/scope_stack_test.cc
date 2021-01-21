@@ -15,9 +15,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/builder.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/symbol.h"
+#include "src/type/f32_type.h"
 
 namespace tint {
 namespace {

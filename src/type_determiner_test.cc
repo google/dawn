@@ -47,26 +47,26 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/depth_texture_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/texture_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/depth_texture_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/texture_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace {
@@ -133,8 +133,8 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
 
-  EXPECT_TRUE(lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(rhs->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Case) {
@@ -151,8 +151,8 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   EXPECT_TRUE(td()->DetermineResultType(cse));
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
-  EXPECT_TRUE(lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(rhs->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Block) {
@@ -166,8 +166,8 @@ TEST_F(TypeDeterminerTest, Stmt_Block) {
   EXPECT_TRUE(td()->DetermineResultType(block));
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
-  EXPECT_TRUE(lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(rhs->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Else) {
@@ -183,9 +183,9 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   ASSERT_NE(stmt->condition()->result_type(), nullptr);
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
-  EXPECT_TRUE(stmt->condition()->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(stmt->condition()->result_type()->Is<type::I32>());
+  EXPECT_TRUE(lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(rhs->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_If) {
@@ -213,11 +213,11 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   ASSERT_NE(else_rhs->result_type(), nullptr);
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
-  EXPECT_TRUE(stmt->condition()->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(else_lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(else_rhs->result_type()->Is<ast::type::F32>());
-  EXPECT_TRUE(lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(stmt->condition()->result_type()->Is<type::I32>());
+  EXPECT_TRUE(else_lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(else_rhs->result_type()->Is<type::F32>());
+  EXPECT_TRUE(lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(rhs->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Loop) {
@@ -242,10 +242,10 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
   ASSERT_NE(body_rhs->result_type(), nullptr);
   ASSERT_NE(continuing_lhs->result_type(), nullptr);
   ASSERT_NE(continuing_rhs->result_type(), nullptr);
-  EXPECT_TRUE(body_lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(body_rhs->result_type()->Is<ast::type::F32>());
-  EXPECT_TRUE(continuing_lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(continuing_rhs->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(body_lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(body_rhs->result_type()->Is<type::F32>());
+  EXPECT_TRUE(continuing_lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(continuing_rhs->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Return) {
@@ -255,7 +255,7 @@ TEST_F(TypeDeterminerTest, Stmt_Return) {
 
   EXPECT_TRUE(td()->DetermineResultType(ret));
   ASSERT_NE(cond->result_type(), nullptr);
-  EXPECT_TRUE(cond->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(cond->result_type()->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Return_WithoutValue) {
@@ -283,9 +283,9 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
 
-  EXPECT_TRUE(stmt->condition()->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(lhs->result_type()->Is<ast::type::I32>());
-  EXPECT_TRUE(rhs->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(stmt->condition()->result_type()->Is<type::I32>());
+  EXPECT_TRUE(lhs->result_type()->Is<type::I32>());
+  EXPECT_TRUE(rhs->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Call) {
@@ -302,7 +302,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   auto* call = create<ast::CallStatement>(expr);
   EXPECT_TRUE(td()->DetermineResultType(call));
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(expr->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
@@ -342,7 +342,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
 
   EXPECT_TRUE(td()->DetermineResultType(decl));
   ASSERT_NE(init->result_type(), nullptr);
-  EXPECT_TRUE(init->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(init->result_type()->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
@@ -354,7 +354,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
 
   EXPECT_TRUE(td()->Determine());
   ASSERT_NE(init->result_type(), nullptr);
-  EXPECT_TRUE(init->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(init->result_type()->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
@@ -374,10 +374,10 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   auto* acc = IndexAccessor("my_var", idx);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
-  ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(acc->result_type()->Is<type::Pointer>());
 
-  auto* ptr = acc->result_type()->As<ast::type::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = acc->result_type()->As<type::Pointer>();
+  EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
@@ -390,10 +390,10 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
-  ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(acc->result_type()->Is<type::Pointer>());
 
-  auto* ptr = acc->result_type()->As<ast::type::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = acc->result_type()->As<type::Pointer>();
+  EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
@@ -405,7 +405,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
   auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
-  EXPECT_TRUE(acc->result_type()->Is<ast::type::F32>())
+  EXPECT_TRUE(acc->result_type()->Is<type::F32>())
       << acc->result_type()->type_name();
 }
 
@@ -418,11 +418,11 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
-  ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(acc->result_type()->Is<type::Pointer>());
 
-  auto* ptr = acc->result_type()->As<ast::type::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<ast::type::Vector>());
-  EXPECT_EQ(ptr->type()->As<ast::type::Vector>()->size(), 3u);
+  auto* ptr = acc->result_type()->As<type::Pointer>();
+  ASSERT_TRUE(ptr->type()->Is<type::Vector>());
+  EXPECT_EQ(ptr->type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
@@ -435,10 +435,10 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
-  ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(acc->result_type()->Is<type::Pointer>());
 
-  auto* ptr = acc->result_type()->As<ast::type::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = acc->result_type()->As<type::Pointer>();
+  EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
@@ -450,10 +450,10 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   auto* acc = IndexAccessor("my_var", 2);
   EXPECT_TRUE(td()->DetermineResultType(acc));
   ASSERT_NE(acc->result_type(), nullptr);
-  ASSERT_TRUE(acc->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(acc->result_type()->Is<type::Pointer>());
 
-  auto* ptr = acc->result_type()->As<ast::type::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = acc->result_type()->As<type::Pointer>();
+  EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Bitcast) {
@@ -464,7 +464,7 @@ TEST_F(TypeDeterminerTest, Expr_Bitcast) {
 
   EXPECT_TRUE(td()->DetermineResultType(bitcast));
   ASSERT_NE(bitcast->result_type(), nullptr);
-  EXPECT_TRUE(bitcast->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(bitcast->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call) {
@@ -479,7 +479,7 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   auto* call = Call("my_func");
   EXPECT_TRUE(td()->DetermineResultType(call));
   ASSERT_NE(call->result_type(), nullptr);
-  EXPECT_TRUE(call->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(call->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
@@ -496,7 +496,7 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   auto* call = Call("my_func", param);
   EXPECT_TRUE(td()->DetermineResultType(call));
   ASSERT_NE(param->result_type(), nullptr);
-  EXPECT_TRUE(param->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(param->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
@@ -507,7 +507,7 @@ TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
 
   EXPECT_TRUE(td()->DetermineResultType(call));
   ASSERT_NE(call->result_type(), nullptr);
-  EXPECT_TRUE(call->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(call->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Cast) {
@@ -518,14 +518,14 @@ TEST_F(TypeDeterminerTest, Expr_Cast) {
 
   EXPECT_TRUE(td()->DetermineResultType(cast));
   ASSERT_NE(cast->result_type(), nullptr);
-  EXPECT_TRUE(cast->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(cast->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
   auto* s = Expr(1.0f);
   EXPECT_TRUE(td()->DetermineResultType(s));
   ASSERT_NE(s->result_type(), nullptr);
-  EXPECT_TRUE(s->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(s->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
@@ -533,10 +533,9 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
 
   EXPECT_TRUE(td()->DetermineResultType(tc));
   ASSERT_NE(tc->result_type(), nullptr);
-  ASSERT_TRUE(tc->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(
-      tc->result_type()->As<ast::type::Vector>()->type()->Is<ast::type::F32>());
-  EXPECT_EQ(tc->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(tc->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(tc->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(tc->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
@@ -548,11 +547,9 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   auto* ident = Expr("my_var");
   EXPECT_TRUE(td()->DetermineResultType(ident));
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::Pointer>());
-  EXPECT_TRUE(ident->result_type()
-                  ->As<ast::type::Pointer>()
-                  ->type()
-                  ->Is<ast::type::F32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::Pointer>());
+  EXPECT_TRUE(
+      ident->result_type()->As<type::Pointer>()->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
@@ -563,7 +560,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
   auto* ident = Expr("my_var");
   EXPECT_TRUE(td()->DetermineResultType(ident));
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
@@ -581,7 +578,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   EXPECT_TRUE(td()->DetermineFunction(f));
 
   ASSERT_NE(my_var->result_type(), nullptr);
-  EXPECT_TRUE(my_var->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(my_var->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
@@ -598,15 +595,13 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   EXPECT_TRUE(td()->DetermineFunction(f));
 
   ASSERT_NE(my_var->result_type(), nullptr);
-  EXPECT_TRUE(my_var->result_type()->Is<ast::type::Pointer>());
-  EXPECT_TRUE(my_var->result_type()
-                  ->As<ast::type::Pointer>()
-                  ->type()
-                  ->Is<ast::type::F32>());
+  EXPECT_TRUE(my_var->result_type()->Is<type::Pointer>());
+  EXPECT_TRUE(
+      my_var->result_type()->As<type::Pointer>()->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
-  ast::type::Pointer ptr(ty.f32, ast::StorageClass::kFunction);
+  type::Pointer ptr(ty.f32, ast::StorageClass::kFunction);
 
   auto* my_var = Expr("my_var");
 
@@ -621,11 +616,9 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   EXPECT_TRUE(td()->DetermineFunction(f));
 
   ASSERT_NE(my_var->result_type(), nullptr);
-  EXPECT_TRUE(my_var->result_type()->Is<ast::type::Pointer>());
-  EXPECT_TRUE(my_var->result_type()
-                  ->As<ast::type::Pointer>()
-                  ->type()
-                  ->Is<ast::type::F32>());
+  EXPECT_TRUE(my_var->result_type()->Is<type::Pointer>());
+  EXPECT_TRUE(
+      my_var->result_type()->As<type::Pointer>()->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
@@ -639,7 +632,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   auto* ident = Expr("my_func");
   EXPECT_TRUE(td()->DetermineResultType(ident));
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
@@ -768,10 +761,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   auto* mem = MemberAccessor("my_struct", "second_member");
   EXPECT_TRUE(td()->DetermineResultType(mem));
   ASSERT_NE(mem->result_type(), nullptr);
-  ASSERT_TRUE(mem->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(mem->result_type()->Is<type::Pointer>());
 
-  auto* ptr = mem->result_type()->As<ast::type::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = mem->result_type()->As<type::Pointer>();
+  EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
@@ -791,10 +784,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   auto* mem = MemberAccessor("my_struct", "second_member");
   EXPECT_TRUE(td()->DetermineResultType(mem));
   ASSERT_NE(mem->result_type(), nullptr);
-  ASSERT_TRUE(mem->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(mem->result_type()->Is<type::Pointer>());
 
-  auto* ptr = mem->result_type()->As<ast::type::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = mem->result_type()->As<type::Pointer>();
+  EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
@@ -806,12 +799,9 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   auto* mem = MemberAccessor("my_vec", "xy");
   EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
   ASSERT_NE(mem->result_type(), nullptr);
-  ASSERT_TRUE(mem->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(mem->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(mem->result_type()->As<ast::type::Vector>()->size(), 2u);
+  ASSERT_TRUE(mem->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(mem->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(mem->result_type()->As<type::Vector>()->size(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
@@ -823,10 +813,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   auto* mem = MemberAccessor("my_vec", "x");
   EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
   ASSERT_NE(mem->result_type(), nullptr);
-  ASSERT_TRUE(mem->result_type()->Is<ast::type::Pointer>());
+  ASSERT_TRUE(mem->result_type()->Is<type::Pointer>());
 
-  auto* ptr = mem->result_type()->As<ast::type::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = mem->result_type()->As<type::Pointer>();
+  ASSERT_TRUE(ptr->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
@@ -860,7 +850,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
                           ast::StructDecorationList{});
   auto* stB = ty.struct_("B", strctB);
 
-  ast::type::Vector vecB(stB, 3);
+  type::Vector vecB(stB, 3);
   auto* strctA = create<ast::Struct>(
       ast::StructMemberList{Member("mem", &vecB)}, ast::StructDecorationList{});
 
@@ -875,12 +865,9 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
 
   ASSERT_NE(mem->result_type(), nullptr);
-  ASSERT_TRUE(mem->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(mem->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(mem->result_type()->As<ast::type::Vector>()->size(), 2u);
+  ASSERT_TRUE(mem->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(mem->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(mem->result_type()->As<type::Vector>()->size(), 2u);
 }
 
 using Expr_Binary_BitwiseTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
@@ -897,7 +884,7 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(expr->result_type()->Is<type::I32>());
 }
 
 TEST_P(Expr_Binary_BitwiseTest, Vector) {
@@ -913,12 +900,9 @@ TEST_P(Expr_Binary_BitwiseTest, Vector) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::I32>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::I32>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Expr_Binary_BitwiseTest,
@@ -946,7 +930,7 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::Bool>());
+  EXPECT_TRUE(expr->result_type()->Is<type::Bool>());
 }
 
 TEST_P(Expr_Binary_LogicalTest, Vector) {
@@ -962,12 +946,10 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::Bool>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(
+      expr->result_type()->As<type::Vector>()->type()->Is<type::Bool>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Expr_Binary_LogicalTest,
@@ -988,7 +970,7 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::Bool>());
+  EXPECT_TRUE(expr->result_type()->Is<type::Bool>());
 }
 
 TEST_P(Expr_Binary_CompareTest, Vector) {
@@ -1004,12 +986,10 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::Bool>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(
+      expr->result_type()->As<type::Vector>()->type()->Is<type::Bool>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Expr_Binary_CompareTest,
@@ -1031,7 +1011,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(expr->result_type()->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
@@ -1046,12 +1026,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
@@ -1066,12 +1043,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
@@ -1084,12 +1058,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
@@ -1104,10 +1075,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Matrix>());
+  ASSERT_TRUE(expr->result_type()->Is<type::Matrix>());
 
-  auto* mat = expr->result_type()->As<ast::type::Matrix>();
-  EXPECT_TRUE(mat->type()->Is<ast::type::F32>());
+  auto* mat = expr->result_type()->As<type::Matrix>();
+  EXPECT_TRUE(mat->type()->Is<type::F32>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
 }
@@ -1124,10 +1095,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Matrix>());
+  ASSERT_TRUE(expr->result_type()->Is<type::Matrix>());
 
-  auto* mat = expr->result_type()->As<ast::type::Matrix>();
-  EXPECT_TRUE(mat->type()->Is<ast::type::F32>());
+  auto* mat = expr->result_type()->As<type::Matrix>();
+  EXPECT_TRUE(mat->type()->Is<type::F32>());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
 }
@@ -1144,12 +1115,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
@@ -1164,12 +1132,9 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 2u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
@@ -1184,10 +1149,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
 
   ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Matrix>());
+  ASSERT_TRUE(expr->result_type()->Is<type::Matrix>());
 
-  auto* mat = expr->result_type()->As<ast::type::Matrix>();
-  EXPECT_TRUE(mat->type()->Is<ast::type::F32>());
+  auto* mat = expr->result_type()->As<type::Matrix>();
+  EXPECT_TRUE(mat->type()->Is<type::F32>());
   EXPECT_EQ(mat->rows(), 4u);
   EXPECT_EQ(mat->columns(), 4u);
 }
@@ -1206,7 +1171,7 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
   EXPECT_TRUE(td()->DetermineResultType(expr));
 
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::F32>());
+  ASSERT_TRUE(expr->result_type()->Is<type::F32>());
 }
 
 TEST_P(IntrinsicDerivativeTest, Vector) {
@@ -1222,12 +1187,9 @@ TEST_P(IntrinsicDerivativeTest, Vector) {
   EXPECT_TRUE(td()->DetermineResultType(expr));
 
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 4u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 4u);
 }
 
 TEST_P(IntrinsicDerivativeTest, MissingParam) {
@@ -1281,7 +1243,7 @@ TEST_P(Intrinsic, Test) {
 
   EXPECT_TRUE(td()->DetermineResultType(expr));
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::Bool>());
+  EXPECT_TRUE(expr->result_type()->Is<type::Bool>());
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Intrinsic,
@@ -1302,12 +1264,10 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
   EXPECT_TRUE(td()->DetermineResultType(expr));
 
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::Bool>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(
+      expr->result_type()->As<type::Vector>()->type()->Is<type::Bool>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(Intrinsic_FloatMethod, Scalar) {
@@ -1323,7 +1283,7 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
   EXPECT_TRUE(td()->Determine());
   EXPECT_TRUE(td()->DetermineResultType(expr));
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::Bool>());
+  EXPECT_TRUE(expr->result_type()->Is<type::Bool>());
 }
 
 TEST_P(Intrinsic_FloatMethod, MissingParam) {
@@ -1373,9 +1333,9 @@ inline std::ostream& operator<<(std::ostream& out, Texture data) {
 }
 
 struct TextureTestParams {
-  ast::type::TextureDimension dim;
+  type::TextureDimension dim;
   Texture type = Texture::kF32;
-  ast::type::ImageFormat format = ast::type::ImageFormat::kR16Float;
+  type::ImageFormat format = type::ImageFormat::kR16Float;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
   out << data.dim << "_" << data.type;
@@ -1385,43 +1345,42 @@ inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
 class Intrinsic_TextureOperation
     : public TypeDeterminerTestWithParam<TextureTestParams> {
  public:
-  std::unique_ptr<ast::type::Type> get_coords_type(
-      ast::type::TextureDimension dim,
-      ast::type::Type* type) {
-    if (dim == ast::type::TextureDimension::k1d) {
-      if (type->Is<ast::type::I32>()) {
-        return std::make_unique<ast::type::I32>();
-      } else if (type->Is<ast::type::U32>()) {
-        return std::make_unique<ast::type::U32>();
+  std::unique_ptr<type::Type> get_coords_type(type::TextureDimension dim,
+                                              type::Type* type) {
+    if (dim == type::TextureDimension::k1d) {
+      if (type->Is<type::I32>()) {
+        return std::make_unique<type::I32>();
+      } else if (type->Is<type::U32>()) {
+        return std::make_unique<type::U32>();
       } else {
-        return std::make_unique<ast::type::F32>();
+        return std::make_unique<type::F32>();
       }
-    } else if (dim == ast::type::TextureDimension::k1dArray ||
-               dim == ast::type::TextureDimension::k2d) {
-      return std::make_unique<ast::type::Vector>(type, 2);
-    } else if (dim == ast::type::TextureDimension::kCubeArray) {
-      return std::make_unique<ast::type::Vector>(type, 4);
+    } else if (dim == type::TextureDimension::k1dArray ||
+               dim == type::TextureDimension::k2d) {
+      return std::make_unique<type::Vector>(type, 2);
+    } else if (dim == type::TextureDimension::kCubeArray) {
+      return std::make_unique<type::Vector>(type, 4);
     } else {
-      return std::make_unique<ast::type::Vector>(type, 3);
+      return std::make_unique<type::Vector>(type, 3);
     }
   }
 
   void add_call_param(std::string name,
-                      ast::type::Type* type,
+                      type::Type* type,
                       ast::ExpressionList* call_params) {
     auto* var = Var(name, ast::StorageClass::kNone, type);
     mod->AddGlobalVariable(var);
     call_params->push_back(Expr(name));
   }
 
-  std::unique_ptr<ast::type::Type> subtype(Texture type) {
+  std::unique_ptr<type::Type> subtype(Texture type) {
     if (type == Texture::kF32) {
-      return std::make_unique<ast::type::F32>();
+      return std::make_unique<type::F32>();
     }
     if (type == Texture::kI32) {
-      return std::make_unique<ast::type::I32>();
+      return std::make_unique<type::I32>();
     }
-    return std::make_unique<ast::type::U32>();
+    return std::make_unique<type::U32>();
   }
 };
 
@@ -1433,8 +1392,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
 
   auto coords_type = get_coords_type(dim, ty.i32);
 
-  ast::type::Type* texture_type =
-      mod->create<ast::type::StorageTexture>(dim, format);
+  type::Type* texture_type = mod->create<type::StorageTexture>(dim, format);
 
   ast::ExpressionList call_params;
 
@@ -1448,69 +1406,63 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   EXPECT_TRUE(td()->DetermineResultType(expr));
 
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
   if (type == Texture::kF32) {
-    EXPECT_TRUE(expr->result_type()
-                    ->As<ast::type::Vector>()
-                    ->type()
-                    ->Is<ast::type::F32>());
+    EXPECT_TRUE(
+        expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
   } else if (type == Texture::kI32) {
-    EXPECT_TRUE(expr->result_type()
-                    ->As<ast::type::Vector>()
-                    ->type()
-                    ->Is<ast::type::I32>());
+    EXPECT_TRUE(
+        expr->result_type()->As<type::Vector>()->type()->Is<type::I32>());
   } else {
-    EXPECT_TRUE(expr->result_type()
-                    ->As<ast::type::Vector>()
-                    ->type()
-                    ->Is<ast::type::U32>());
+    EXPECT_TRUE(
+        expr->result_type()->As<type::Vector>()->type()->Is<type::U32>());
   }
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 4u);
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 4u);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     Intrinsic_StorageTextureOperation,
     testing::Values(
-        TextureTestParams{ast::type::TextureDimension::k1d, Texture::kF32,
-                          ast::type::ImageFormat::kR16Float},
-        TextureTestParams{ast::type::TextureDimension::k1d, Texture::kI32,
-                          ast::type::ImageFormat::kR16Sint},
-        TextureTestParams{ast::type::TextureDimension::k1d, Texture::kF32,
-                          ast::type::ImageFormat::kR8Unorm},
-        TextureTestParams{ast::type::TextureDimension::k1dArray, Texture::kF32,
-                          ast::type::ImageFormat::kR16Float},
-        TextureTestParams{ast::type::TextureDimension::k1dArray, Texture::kI32,
-                          ast::type::ImageFormat::kR16Sint},
-        TextureTestParams{ast::type::TextureDimension::k1dArray, Texture::kF32,
-                          ast::type::ImageFormat::kR8Unorm},
-        TextureTestParams{ast::type::TextureDimension::k2d, Texture::kF32,
-                          ast::type::ImageFormat::kR16Float},
-        TextureTestParams{ast::type::TextureDimension::k2d, Texture::kI32,
-                          ast::type::ImageFormat::kR16Sint},
-        TextureTestParams{ast::type::TextureDimension::k2d, Texture::kF32,
-                          ast::type::ImageFormat::kR8Unorm},
-        TextureTestParams{ast::type::TextureDimension::k2dArray, Texture::kF32,
-                          ast::type::ImageFormat::kR16Float},
-        TextureTestParams{ast::type::TextureDimension::k2dArray, Texture::kI32,
-                          ast::type::ImageFormat::kR16Sint},
-        TextureTestParams{ast::type::TextureDimension::k2dArray, Texture::kF32,
-                          ast::type::ImageFormat::kR8Unorm},
-        TextureTestParams{ast::type::TextureDimension::k3d, Texture::kF32,
-                          ast::type::ImageFormat::kR16Float},
-        TextureTestParams{ast::type::TextureDimension::k3d, Texture::kI32,
-                          ast::type::ImageFormat::kR16Sint},
-        TextureTestParams{ast::type::TextureDimension::k3d, Texture::kF32,
-                          ast::type::ImageFormat::kR8Unorm}));
+        TextureTestParams{type::TextureDimension::k1d, Texture::kF32,
+                          type::ImageFormat::kR16Float},
+        TextureTestParams{type::TextureDimension::k1d, Texture::kI32,
+                          type::ImageFormat::kR16Sint},
+        TextureTestParams{type::TextureDimension::k1d, Texture::kF32,
+                          type::ImageFormat::kR8Unorm},
+        TextureTestParams{type::TextureDimension::k1dArray, Texture::kF32,
+                          type::ImageFormat::kR16Float},
+        TextureTestParams{type::TextureDimension::k1dArray, Texture::kI32,
+                          type::ImageFormat::kR16Sint},
+        TextureTestParams{type::TextureDimension::k1dArray, Texture::kF32,
+                          type::ImageFormat::kR8Unorm},
+        TextureTestParams{type::TextureDimension::k2d, Texture::kF32,
+                          type::ImageFormat::kR16Float},
+        TextureTestParams{type::TextureDimension::k2d, Texture::kI32,
+                          type::ImageFormat::kR16Sint},
+        TextureTestParams{type::TextureDimension::k2d, Texture::kF32,
+                          type::ImageFormat::kR8Unorm},
+        TextureTestParams{type::TextureDimension::k2dArray, Texture::kF32,
+                          type::ImageFormat::kR16Float},
+        TextureTestParams{type::TextureDimension::k2dArray, Texture::kI32,
+                          type::ImageFormat::kR16Sint},
+        TextureTestParams{type::TextureDimension::k2dArray, Texture::kF32,
+                          type::ImageFormat::kR8Unorm},
+        TextureTestParams{type::TextureDimension::k3d, Texture::kF32,
+                          type::ImageFormat::kR16Float},
+        TextureTestParams{type::TextureDimension::k3d, Texture::kI32,
+                          type::ImageFormat::kR16Sint},
+        TextureTestParams{type::TextureDimension::k3d, Texture::kF32,
+                          type::ImageFormat::kR8Unorm}));
 
 using Intrinsic_SampledTextureOperation = Intrinsic_TextureOperation;
 TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   auto dim = GetParam().dim;
   auto type = GetParam().type;
 
-  std::unique_ptr<ast::type::Type> s = subtype(type);
+  std::unique_ptr<type::Type> s = subtype(type);
   auto coords_type = get_coords_type(dim, ty.i32);
-  auto texture_type = std::make_unique<ast::type::SampledTexture>(dim, s.get());
+  auto texture_type = std::make_unique<type::SampledTexture>(dim, s.get());
 
   ast::ExpressionList call_params;
 
@@ -1524,34 +1476,27 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   EXPECT_TRUE(td()->DetermineResultType(expr));
 
   ASSERT_NE(expr->result_type(), nullptr);
-  ASSERT_TRUE(expr->result_type()->Is<ast::type::Vector>());
+  ASSERT_TRUE(expr->result_type()->Is<type::Vector>());
   if (type == Texture::kF32) {
-    EXPECT_TRUE(expr->result_type()
-                    ->As<ast::type::Vector>()
-                    ->type()
-                    ->Is<ast::type::F32>());
+    EXPECT_TRUE(
+        expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
   } else if (type == Texture::kI32) {
-    EXPECT_TRUE(expr->result_type()
-                    ->As<ast::type::Vector>()
-                    ->type()
-                    ->Is<ast::type::I32>());
+    EXPECT_TRUE(
+        expr->result_type()->As<type::Vector>()->type()->Is<type::I32>());
   } else {
-    EXPECT_TRUE(expr->result_type()
-                    ->As<ast::type::Vector>()
-                    ->type()
-                    ->Is<ast::type::U32>());
+    EXPECT_TRUE(
+        expr->result_type()->As<type::Vector>()->type()->Is<type::U32>());
   }
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 4u);
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 4u);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     Intrinsic_SampledTextureOperation,
-    testing::Values(TextureTestParams{ast::type::TextureDimension::k2d},
-                    TextureTestParams{ast::type::TextureDimension::k2dArray},
-                    TextureTestParams{ast::type::TextureDimension::kCube},
-                    TextureTestParams{
-                        ast::type::TextureDimension::kCubeArray}));
+    testing::Values(TextureTestParams{type::TextureDimension::k2d},
+                    TextureTestParams{type::TextureDimension::k2dArray},
+                    TextureTestParams{type::TextureDimension::kCube},
+                    TextureTestParams{type::TextureDimension::kCubeArray}));
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   auto* var = Var("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
@@ -1564,7 +1509,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   EXPECT_TRUE(td()->Determine());
   EXPECT_TRUE(td()->DetermineResultType(expr));
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(expr->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Select) {
@@ -1581,12 +1526,9 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   EXPECT_TRUE(td()->Determine());
   EXPECT_TRUE(td()->DetermineResultType(expr)) << td()->error();
   ASSERT_NE(expr->result_type(), nullptr);
-  EXPECT_TRUE(expr->result_type()->Is<ast::type::Vector>());
-  EXPECT_EQ(expr->result_type()->As<ast::type::Vector>()->size(), 3u);
-  EXPECT_TRUE(expr->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
+  EXPECT_TRUE(expr->result_type()->Is<type::Vector>());
+  EXPECT_EQ(expr->result_type()->As<type::Vector>()->size(), 3u);
+  EXPECT_TRUE(expr->result_type()->As<type::Vector>()->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Select_TooFewParams) {
@@ -1630,12 +1572,9 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
   EXPECT_TRUE(td()->DetermineResultType(der));
   ASSERT_NE(der->result_type(), nullptr);
-  ASSERT_TRUE(der->result_type()->Is<ast::type::Vector>());
-  EXPECT_TRUE(der->result_type()
-                  ->As<ast::type::Vector>()
-                  ->type()
-                  ->Is<ast::type::F32>());
-  EXPECT_EQ(der->result_type()->As<ast::type::Vector>()->size(), 4u);
+  ASSERT_TRUE(der->result_type()->Is<type::Vector>());
+  EXPECT_TRUE(der->result_type()->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(der->result_type()->As<type::Vector>()->size(), 4u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          UnaryOpExpressionTest,
@@ -1804,7 +1743,7 @@ TEST_P(ImportData_SingleParamTest, Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_float_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParamTest, Error_Integer) {
@@ -1886,7 +1825,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_float_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Scalar) {
@@ -1897,7 +1836,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Scalar) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::I32>());
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Vector) {
@@ -1917,7 +1856,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_signed_integer_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
@@ -1931,7 +1870,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::U32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::U32>());
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
@@ -1943,7 +1882,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_unsigned_integer_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_Bool) {
@@ -2057,7 +1996,7 @@ TEST_P(ImportData_TwoParamTest, Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_float_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_TwoParamTest, Error_Integer) {
@@ -2148,7 +2087,7 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
@@ -2208,7 +2147,7 @@ TEST_F(TypeDeterminerTest, ImportData_Cross) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_float_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Cross_Error_Scalar) {
@@ -2274,7 +2213,7 @@ TEST_P(ImportData_ThreeParamTest, Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_float_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_ThreeParamTest, Error_Integer) {
@@ -2381,7 +2320,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_float_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
@@ -2392,7 +2331,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::I32>());
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
@@ -2405,7 +2344,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_signed_integer_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
@@ -2416,7 +2355,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::U32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::U32>());
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
@@ -2429,7 +2368,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_unsigned_integer_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_Bool) {
@@ -2531,7 +2470,7 @@ TEST_P(ImportData_Int_SingleParamTest, Vector) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_signed_integer_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_Int_SingleParamTest, Error_Float) {
@@ -2582,7 +2521,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Signed) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::I32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::I32>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
@@ -2593,7 +2532,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::U32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::U32>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
@@ -2604,7 +2543,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::F32>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
@@ -2616,7 +2555,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_signed_integer_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
@@ -2628,7 +2567,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_unsigned_integer_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
@@ -2640,7 +2579,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
   EXPECT_TRUE(ident->result_type()->is_float_vector());
-  EXPECT_EQ(ident->result_type()->As<ast::type::Vector>()->size(), 3u);
+  EXPECT_EQ(ident->result_type()->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_Bool) {
@@ -2722,7 +2661,7 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
 
   EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
   ASSERT_NE(ident->result_type(), nullptr);
-  EXPECT_TRUE(ident->result_type()->Is<ast::type::F32>());
+  EXPECT_TRUE(ident->result_type()->Is<type::F32>());
 }
 
 using ImportData_Matrix_OneParam_Test =
@@ -3190,18 +3129,18 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
     switch (param.texture_dimension) {
       default:
         FAIL() << "invalid texture dimensions: " << param.texture_dimension;
-      case ast::type::TextureDimension::k1d:
-      case ast::type::TextureDimension::k1dArray:
+      case type::TextureDimension::k1d:
+      case type::TextureDimension::k1dArray:
         EXPECT_EQ(call->result_type()->type_name(), ty.i32->type_name());
         break;
-      case ast::type::TextureDimension::k2d:
-      case ast::type::TextureDimension::k2dArray:
+      case type::TextureDimension::k2d:
+      case type::TextureDimension::k2dArray:
         EXPECT_EQ(call->result_type()->type_name(),
                   ty.vec2<i32>()->type_name());
         break;
-      case ast::type::TextureDimension::k3d:
-      case ast::type::TextureDimension::kCube:
-      case ast::type::TextureDimension::kCubeArray:
+      case type::TextureDimension::k3d:
+      case type::TextureDimension::kCube:
+      case type::TextureDimension::kCubeArray:
         EXPECT_EQ(call->result_type()->type_name(),
                   ty.vec3<i32>()->type_name());
         break;
@@ -3220,9 +3159,8 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
       case ast::intrinsic::test::TextureKind::kMultisampled:
       case ast::intrinsic::test::TextureKind::kStorage: {
         auto* datatype = param.resultVectorComponentType(this);
-        ASSERT_TRUE(call->result_type()->Is<ast::type::Vector>());
-        EXPECT_EQ(call->result_type()->As<ast::type::Vector>()->type(),
-                  datatype);
+        ASSERT_TRUE(call->result_type()->Is<type::Vector>());
+        EXPECT_EQ(call->result_type()->As<type::Vector>()->type(), datatype);
         break;
       }
       case ast::intrinsic::test::TextureKind::kDepth: {

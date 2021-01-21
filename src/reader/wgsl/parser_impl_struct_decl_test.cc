@@ -14,7 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/type/struct_type.h"
+#include "src/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 

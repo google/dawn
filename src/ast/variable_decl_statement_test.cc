@@ -15,8 +15,8 @@
 #include "src/ast/variable_decl_statement.h"
 
 #include "src/ast/test_helper.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
+#include "src/type/f32_type.h"
 
 namespace tint {
 namespace ast {

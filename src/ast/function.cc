@@ -19,11 +19,11 @@
 #include "src/ast/clone_context.h"
 #include "src/ast/module.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/texture_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/texture_type.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::ast::Function);
 

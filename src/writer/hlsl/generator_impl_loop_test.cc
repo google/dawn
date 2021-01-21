@@ -21,9 +21,9 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/f32_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

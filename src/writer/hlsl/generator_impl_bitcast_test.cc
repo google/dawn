@@ -17,9 +17,9 @@
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/u32_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/u32_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

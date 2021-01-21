@@ -32,10 +32,10 @@
 #include "src/ast/node.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/statement.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/type.h"
 #include "src/ast/variable.h"
 #include "src/symbol.h"
+#include "src/type/sampler_type.h"
+#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

@@ -42,13 +42,13 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -196,7 +196,7 @@ uint32_t FirstIndexOffset::GetFirstInstanceOffset() {
 }
 
 ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
-  auto* u32_type = mod->create<ast::type::U32>();
+  auto* u32_type = mod->create<type::U32>();
   ast::StructMemberList members;
   uint32_t offset = 0;
   if (has_vertex_index_) {
@@ -224,7 +224,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
   ast::StructDecorationList decos;
   decos.push_back(mod->create<ast::StructBlockDecoration>(Source{}));
 
-  auto* struct_type = mod->create<ast::type::Struct>(
+  auto* struct_type = mod->create<type::Struct>(
       mod->RegisterSymbol(kStructName),
       mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
@@ -268,9 +268,9 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
       mod->create<ast::Variable>(Source{},                            // source
                                  mod->RegisterSymbol(original_name),  // symbol
                                  ast::StorageClass::kNone,  // storage_class
-                                 mod->create<ast::type::U32>(),   // type
-                                 true,                            // is_const
-                                 constructor,                     // constructor
+                                 mod->create<type::U32>(),  // type
+                                 true,                      // is_const
+                                 constructor,               // constructor
                                  ast::VariableDecorationList{});  // decorations
   return mod->create<ast::VariableDeclStatement>(Source{}, var);
 }

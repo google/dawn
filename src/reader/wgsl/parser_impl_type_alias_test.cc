@@ -13,12 +13,12 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/struct_type.h"
 
 namespace tint {
 namespace reader {
@@ -29,23 +29,23 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto p = parser("type a = i32");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32>();
+  auto* i32 = mod.create<type::I32>();
 
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Alias>());
-  auto* alias = t->As<ast::type::Alias>();
-  ASSERT_TRUE(alias->type()->Is<ast::type::I32>());
+  ASSERT_TRUE(t->Is<type::Alias>());
+  auto* alias = t->As<type::Alias>();
+  ASSERT_TRUE(alias->type()->Is<type::I32>());
   ASSERT_EQ(alias->type(), i32);
 }
 
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  ast::type::Struct str(p->get_module().RegisterSymbol("B"), {});
+  type::Struct str(p->get_module().RegisterSymbol("B"), {});
   p->register_constructed("B", &str);
 
   auto t = p->type_alias();
@@ -53,12 +53,12 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Alias>());
-  auto* alias = t->As<ast::type::Alias>();
+  ASSERT_TRUE(t->Is<type::Alias>());
+  auto* alias = t->As<type::Alias>();
   EXPECT_EQ(p->get_module().SymbolToName(alias->symbol()), "a");
-  ASSERT_TRUE(alias->type()->Is<ast::type::Struct>());
+  ASSERT_TRUE(alias->type()->Is<type::Struct>());
 
-  auto* s = alias->type()->As<ast::type::Struct>();
+  auto* s = alias->type()->As<type::Struct>();
   EXPECT_EQ(s->symbol(), p->get_module().RegisterSymbol("B"));
   EXPECT_EQ(s->symbol(), p->get_module().RegisterSymbol("B"));
 }

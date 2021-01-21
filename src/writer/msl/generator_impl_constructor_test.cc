@@ -18,15 +18,15 @@
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 
@@ -117,7 +117,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
-  ast::type::Array ary(ty.vec3<f32>(), 3, ast::ArrayDecorationList{});
+  type::Array ary(ty.vec3<f32>(), 3, ast::ArrayDecorationList{});
 
   ast::ExpressionList ary_values;
 

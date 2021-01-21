@@ -21,24 +21,24 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/depth_texture_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/texture_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
+#include "src/type/access_control_type.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/depth_texture_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/texture_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -76,7 +76,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
 }
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
-  ast::type::Array ary(ty.i32, 0, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32, 0, ast::ArrayDecorationList{});
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -87,7 +87,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
-  ast::type::Array ary(ty.i32, 0, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32, 0, ast::ArrayDecorationList{});
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
@@ -99,7 +99,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray) {
-  ast::type::Array ary(ty.i32, 4, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32, 4, ast::ArrayDecorationList{});
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -112,10 +112,10 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
-  ast::type::Array ary(ty.i32, 4,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(16u),
-                       });
+  type::Array ary(ty.i32, 4,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(16u),
+                  });
 
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -132,7 +132,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
-  ast::type::Array ary(ty.i32, 4, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32, 4, ast::ArrayDecorationList{});
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
@@ -225,7 +225,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
 }
 
 TEST_F(BuilderTest_Type, GeneratePtr) {
-  ast::type::Pointer ptr(ty.i32, ast::StorageClass::kOutput);
+  type::Pointer ptr(ty.i32, ast::StorageClass::kOutput);
   auto id = b.GenerateTypeIfNeeded(&ptr);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -236,7 +236,7 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
-  ast::type::Pointer ptr(ty.i32, ast::StorageClass::kOutput);
+  type::Pointer ptr(ty.i32, ast::StorageClass::kOutput);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
 }
@@ -391,15 +391,15 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   // We have to infer layout for matrix when it also has an offset.
   // The decoration goes on the struct member, even if the matrix is buried
   // in levels of arrays.
-  ast::type::Array arr_mat2x2(
-      ty.mat2x2<f32>(), 1, ast::ArrayDecorationList{});  // Singly nested array
+  type::Array arr_mat2x2(ty.mat2x2<f32>(), 1,
+                         ast::ArrayDecorationList{});  // Singly nested array
 
-  ast::type::Array arr_mat2x3(ty.mat2x3<f32>(), 1, ast::ArrayDecorationList{});
-  ast::type::Array arr_arr_mat2x3(
+  type::Array arr_mat2x3(ty.mat2x3<f32>(), 1, ast::ArrayDecorationList{});
+  type::Array arr_arr_mat2x3(
       ty.mat2x3<f32>(), 1, ast::ArrayDecorationList{});  // Doubly nested array
 
-  ast::type::Array rtarr_mat4x4(ty.mat4x4<f32>(), 0,
-                                ast::ArrayDecorationList{});  // Runtime array
+  type::Array rtarr_mat4x4(ty.mat4x4<f32>(), 0,
+                           ast::ArrayDecorationList{});  // Runtime array
 
   auto* s = create<ast::Struct>(
       ast::StructMemberList{Member("a", &arr_mat2x2, {MemberOffset(0)}),
@@ -533,7 +533,7 @@ INSTANTIATE_TEST_SUITE_P(
         PtrData{ast::StorageClass::kFunction, SpvStorageClassFunction}));
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_2d) {
-  ast::type::DepthTexture two_d(ast::type::TextureDimension::k2d);
+  type::DepthTexture two_d(type::TextureDimension::k2d);
 
   auto id_two_d = b.GenerateTypeIfNeeded(&two_d);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -545,7 +545,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_2d) {
 }
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_2dArray) {
-  ast::type::DepthTexture two_d_array(ast::type::TextureDimension::k2dArray);
+  type::DepthTexture two_d_array(type::TextureDimension::k2dArray);
 
   auto id_two_d_array = b.GenerateTypeIfNeeded(&two_d_array);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -557,7 +557,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_2dArray) {
 }
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_Cube) {
-  ast::type::DepthTexture cube(ast::type::TextureDimension::kCube);
+  type::DepthTexture cube(type::TextureDimension::kCube);
 
   auto id_cube = b.GenerateTypeIfNeeded(&cube);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -570,7 +570,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_Cube) {
 }
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
-  ast::type::DepthTexture cube_array(ast::type::TextureDimension::kCubeArray);
+  type::DepthTexture cube_array(type::TextureDimension::kCubeArray);
 
   auto id_cube_array = b.GenerateTypeIfNeeded(&cube_array);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -585,7 +585,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_i32) {
-  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, ty.i32);
+  type::MultisampledTexture ms(type::TextureDimension::k2d, ty.i32);
 
   EXPECT_EQ(1u, b.GenerateTypeIfNeeded(&ms));
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -595,7 +595,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_i32) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_u32) {
-  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, ty.u32);
+  type::MultisampledTexture ms(type::TextureDimension::k2d, ty.u32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ms), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -606,7 +606,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_u32) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
-  ast::type::MultisampledTexture ms(ast::type::TextureDimension::k2d, ty.f32);
+  type::MultisampledTexture ms(type::TextureDimension::k2d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ms), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -617,7 +617,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, ty.i32);
+  type::SampledTexture s(type::TextureDimension::k1d, ty.i32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -632,7 +632,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, ty.u32);
+  type::SampledTexture s(type::TextureDimension::k1d, ty.u32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -647,7 +647,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1d, ty.f32);
+  type::SampledTexture s(type::TextureDimension::k1d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -662,7 +662,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1dArray) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::k1dArray, ty.f32);
+  type::SampledTexture s(type::TextureDimension::k1dArray, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -677,7 +677,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1dArray) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::k2d, ty.f32);
+  type::SampledTexture s(type::TextureDimension::k2d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -688,7 +688,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::k2dArray, ty.f32);
+  type::SampledTexture s(type::TextureDimension::k2dArray, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -699,7 +699,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::k3d, ty.f32);
+  type::SampledTexture s(type::TextureDimension::k3d, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -710,7 +710,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::kCube, ty.f32);
+  type::SampledTexture s(type::TextureDimension::kCube, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -722,7 +722,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
-  ast::type::SampledTexture s(ast::type::TextureDimension::kCubeArray, ty.f32);
+  type::SampledTexture s(type::TextureDimension::kCubeArray, ty.f32);
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -736,8 +736,8 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R16Float) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k1d,
-                              ast::type::ImageFormat::kR16Float);
+  type::StorageTexture s(type::TextureDimension::k1d,
+                         type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -753,8 +753,8 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8SNorm) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k1d,
-                              ast::type::ImageFormat::kR8Snorm);
+  type::StorageTexture s(type::TextureDimension::k1d,
+                         type::ImageFormat::kR8Snorm);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -770,8 +770,8 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8UNorm) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k1d,
-                              ast::type::ImageFormat::kR8Unorm);
+  type::StorageTexture s(type::TextureDimension::k1d,
+                         type::ImageFormat::kR8Unorm);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -787,8 +787,8 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Uint) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k1d,
-                              ast::type::ImageFormat::kR8Uint);
+  type::StorageTexture s(type::TextureDimension::k1d,
+                         type::ImageFormat::kR8Uint);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -799,8 +799,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Uint) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Sint) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k1d,
-                              ast::type::ImageFormat::kR8Sint);
+  type::StorageTexture s(type::TextureDimension::k1d,
+                         type::ImageFormat::kR8Sint);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -811,8 +811,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Sint) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_array) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k1dArray,
-                              ast::type::ImageFormat::kR16Float);
+  type::StorageTexture s(type::TextureDimension::k1dArray,
+                         type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -828,8 +828,8 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k2d,
-                              ast::type::ImageFormat::kR16Float);
+  type::StorageTexture s(type::TextureDimension::k2d,
+                         type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -840,8 +840,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k2dArray,
-                              ast::type::ImageFormat::kR16Float);
+  type::StorageTexture s(type::TextureDimension::k2dArray,
+                         type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -852,8 +852,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k3d,
-                              ast::type::ImageFormat::kR16Float);
+  type::StorageTexture s(type::TextureDimension::k3d,
+                         type::ImageFormat::kR16Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -865,8 +865,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
 
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeFloat_Format_r32float) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k2d,
-                              ast::type::ImageFormat::kR32Float);
+  type::StorageTexture s(type::TextureDimension::k2d,
+                         type::ImageFormat::kR32Float);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -878,8 +878,8 @@ TEST_F(BuilderTest_Type,
 
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeSint_Format_r32sint) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k2d,
-                              ast::type::ImageFormat::kR32Sint);
+  type::StorageTexture s(type::TextureDimension::k2d,
+                         type::ImageFormat::kR32Sint);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -891,8 +891,8 @@ TEST_F(BuilderTest_Type,
 
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeUint_Format_r32uint) {
-  ast::type::StorageTexture s(ast::type::TextureDimension::k2d,
-                              ast::type::ImageFormat::kR32Uint);
+  type::StorageTexture s(type::TextureDimension::k2d,
+                         type::ImageFormat::kR32Uint);
 
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&s), 1u);
@@ -903,24 +903,24 @@ TEST_F(BuilderTest_Type,
 }
 
 TEST_F(BuilderTest_Type, Sampler) {
-  ast::type::Sampler sampler(ast::type::SamplerKind::kSampler);
+  type::Sampler sampler(type::SamplerKind::kSampler);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
 }
 
 TEST_F(BuilderTest_Type, ComparisonSampler) {
-  ast::type::Sampler sampler(ast::type::SamplerKind::kComparisonSampler);
+  type::Sampler sampler(type::SamplerKind::kComparisonSampler);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), "%1 = OpTypeSampler\n");
 }
 
 TEST_F(BuilderTest_Type, Dedup_Sampler_And_ComparisonSampler) {
-  ast::type::Sampler comp_sampler(ast::type::SamplerKind::kComparisonSampler);
+  type::Sampler comp_sampler(type::SamplerKind::kComparisonSampler);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&comp_sampler), 1u);
 
-  ast::type::Sampler sampler(ast::type::SamplerKind::kSampler);
+  type::Sampler sampler(type::SamplerKind::kSampler);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&sampler), 1u);
 
   ASSERT_FALSE(b.has_error()) << b.error();

@@ -14,11 +14,11 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/f32_type.h"
 
 namespace tint {
 namespace reader {
@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_EQ(e->symbol(), p->get_module().RegisterSymbol("a"));
-  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
+  EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
@@ -60,7 +60,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_EQ(e->symbol(), p->get_module().RegisterSymbol("a"));
-  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
+  EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 
   EXPECT_EQ(e->symbol(), p->get_module().RegisterSymbol("a"));
   ASSERT_NE(e->type(), nullptr);
-  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
+  EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
@@ -116,7 +116,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 
   EXPECT_EQ(e->symbol(), p->get_module().RegisterSymbol("a"));
   ASSERT_NE(e->type(), nullptr);
-  EXPECT_TRUE(e->type()->Is<ast::type::F32>());
+  EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);

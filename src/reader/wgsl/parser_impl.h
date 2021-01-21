@@ -48,10 +48,6 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/texture_type.h"
-#include "src/ast/type/type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
@@ -59,6 +55,10 @@
 #include "src/diagnostic/formatter.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/texture_type.h"
+#include "src/type/type.h"
 
 namespace tint {
 namespace reader {
@@ -222,7 +222,7 @@ class ParserImpl {
   /// variable_ident_decl().
   struct TypedIdentifier {
     /// Parsed type.
-    ast::type::Type* type = nullptr;
+    type::Type* type = nullptr;
     /// Parsed identifier.
     std::string name;
     /// Source to the identifier.
@@ -244,7 +244,7 @@ class ParserImpl {
     FunctionHeader(Source src,
                    std::string n,
                    ast::VariableList p,
-                   ast::type::Type* ret_ty);
+                   type::Type* ret_ty);
     /// Destructor
     ~FunctionHeader();
     /// Assignment operator
@@ -259,7 +259,7 @@ class ParserImpl {
     /// Function parameters
     ast::VariableList params;
     /// Function return type
-    ast::type::Type* return_type;
+    type::Type* return_type;
   };
 
   /// VarDeclInfo contains the parsed information for variable declaration.
@@ -271,7 +271,7 @@ class ParserImpl {
     /// Variable storage class
     ast::StorageClass storage_class;
     /// Variable type
-    ast::type::Type* type;
+    type::Type* type;
   };
 
   /// Creates a new parser using the given file
@@ -348,11 +348,11 @@ class ParserImpl {
   /// Registers a constructed type into the parser
   /// @param name the constructed name
   /// @param type the constructed type
-  void register_constructed(const std::string& name, ast::type::Type* type);
+  void register_constructed(const std::string& name, type::Type* type);
   /// Retrieves a constructed type
   /// @param name The name to lookup
   /// @returns the constructed type for `name` or `nullptr` if not found
-  ast::type::Type* get_constructed(const std::string& name);
+  type::Type* get_constructed(const std::string& name);
 
   /// Parses the `translation_unit` grammar element
   void translation_unit();
@@ -380,15 +380,15 @@ class ParserImpl {
   Maybe<ast::StorageClass> variable_storage_decoration();
   /// Parses a `type_alias` grammar element
   /// @returns the type alias or nullptr on error
-  Maybe<ast::type::Type*> type_alias();
+  Maybe<type::Type*> type_alias();
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<ast::type::Type*> type_decl();
+  Maybe<type::Type*> type_decl();
   /// Parses a `type_decl` grammar element with the given pre-parsed
   /// decorations.
   /// @param decos the list of decorations for the type.
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<ast::type::Type*> type_decl(ast::DecorationList& decos);
+  Maybe<type::Type*> type_decl(ast::DecorationList& decos);
   /// Parses a `storage_class` grammar element, erroring on parse failure.
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
@@ -397,8 +397,7 @@ class ParserImpl {
   /// `struct_decoration_decl*` provided as `decos`.
   /// @returns the struct type or nullptr on error
   /// @param decos the list of decorations for the struct declaration.
-  Maybe<std::unique_ptr<ast::type::Struct>> struct_decl(
-      ast::DecorationList& decos);
+  Maybe<std::unique_ptr<type::Struct>> struct_decl(ast::DecorationList& decos);
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
   Expect<ast::StructMemberList> expect_struct_body_decl();
@@ -415,37 +414,36 @@ class ParserImpl {
   Maybe<ast::Function*> function_decl(ast::DecorationList& decos);
   /// Parses a `texture_sampler_types` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<ast::type::Type*> texture_sampler_types();
+  Maybe<type::Type*> texture_sampler_types();
   /// Parses a `sampler_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<ast::type::Type*> sampler_type();
+  Maybe<type::Type*> sampler_type();
   /// Parses a `multisampled_texture_type` grammar element
   /// @returns returns the multisample texture dimension or kNone if none
   /// matched.
-  Maybe<ast::type::TextureDimension> multisampled_texture_type();
+  Maybe<type::TextureDimension> multisampled_texture_type();
   /// Parses a `sampled_texture_type` grammar element
   /// @returns returns the sample texture dimension or kNone if none matched.
-  Maybe<ast::type::TextureDimension> sampled_texture_type();
+  Maybe<type::TextureDimension> sampled_texture_type();
   /// Parses a `storage_texture_type` grammar element
   /// @returns returns the storage texture dimension.
   /// Returns kNone if none matched.
-  Maybe<ast::type::TextureDimension> storage_texture_type();
+  Maybe<type::TextureDimension> storage_texture_type();
   /// Parses a deprecated `storage_texture_type` grammar element
   /// @returns returns the storage texture dimension and the storage access.
   ///          Returns kNone and kRead if none matched.
-  Maybe<std::pair<ast::type::TextureDimension, ast::AccessControl>>
+  Maybe<std::pair<type::TextureDimension, ast::AccessControl>>
   storage_texture_type_access_control();
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<ast::type::Type*> depth_texture_type();
+  Maybe<type::Type*> depth_texture_type();
   /// Parses a `image_storage_type` grammar element
   /// @param use a description of what was being parsed if an error was raised
   /// @returns returns the image format or kNone if none matched.
-  Expect<ast::type::ImageFormat> expect_image_storage_type(
-      const std::string& use);
+  Expect<type::ImageFormat> expect_image_storage_type(const std::string& use);
   /// Parses a `function_type_decl` grammar element
   /// @returns the parsed type or nullptr otherwise
-  Maybe<ast::type::Type*> function_type_decl();
+  Maybe<type::Type*> function_type_decl();
   /// Parses a `function_header` grammar element
   /// @returns the parsed function header
   Maybe<FunctionHeader> function_header();
@@ -811,16 +809,15 @@ class ParserImpl {
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
-  Expect<ast::type::Type*> expect_type_decl_pointer();
-  Expect<ast::type::Type*> expect_type_decl_vector(Token t);
-  Expect<ast::type::Type*> expect_type_decl_array(
-      ast::ArrayDecorationList decos);
-  Expect<ast::type::Type*> expect_type_decl_matrix(Token t);
+  Expect<type::Type*> expect_type_decl_pointer();
+  Expect<type::Type*> expect_type_decl_vector(Token t);
+  Expect<type::Type*> expect_type_decl_array(ast::ArrayDecorationList decos);
+  Expect<type::Type*> expect_type_decl_matrix(Token t);
 
   Expect<ast::ConstructorExpression*> expect_const_expr_internal(
       uint32_t depth);
 
-  Expect<ast::type::Type*> expect_type(const std::string& use);
+  Expect<type::Type*> expect_type(const std::string& use);
 
   Maybe<ast::Statement*> non_block_statement();
   Maybe<ast::Statement*> for_header_initializer();
@@ -841,7 +838,7 @@ class ParserImpl {
   bool synchronized_ = true;
   std::vector<Token::Type> sync_tokens_;
   int silence_errors_ = 0;
-  std::unordered_map<std::string, ast::type::Type*> registered_constructs_;
+  std::unordered_map<std::string, type::Type*> registered_constructs_;
   ast::Module module_;
   size_t max_errors_ = 25;
 };

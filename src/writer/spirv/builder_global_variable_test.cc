@@ -27,16 +27,16 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/struct.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
+#include "src/type/access_control_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -384,7 +384,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
       "A", create<ast::Struct>(
                ast::StructMemberList{Member("a", ty.i32), Member("b", ty.i32)},
                ast::StructDecorationList{}));
-  ast::type::AccessControl ac{ast::AccessControl::kReadOnly, A};
+  type::AccessControl ac{ast::AccessControl::kReadOnly, A};
 
   auto* var = Var("b", ast::StorageClass::kStorage, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -415,7 +415,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
       "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)},
                                ast::StructDecorationList{}));
   auto* B = ty.alias("B", A);
-  ast::type::AccessControl ac{ast::AccessControl::kReadOnly, B};
+  type::AccessControl ac{ast::AccessControl::kReadOnly, B};
   auto* var = Var("b", ast::StorageClass::kStorage, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
@@ -442,7 +442,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   auto* A = ty.struct_(
       "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)},
                                ast::StructDecorationList{}));
-  ast::type::AccessControl ac{ast::AccessControl::kReadOnly, A};
+  type::AccessControl ac{ast::AccessControl::kReadOnly, A};
   auto* B = ty.alias("B", &ac);
   auto* var = Var("b", ast::StorageClass::kStorage, B);
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -470,8 +470,8 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   auto* A = ty.struct_(
       "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)},
                                ast::StructDecorationList{}));
-  ast::type::AccessControl read{ast::AccessControl::kReadOnly, A};
-  ast::type::AccessControl rw{ast::AccessControl::kReadWrite, A};
+  type::AccessControl read{ast::AccessControl::kReadOnly, A};
+  type::AccessControl rw{ast::AccessControl::kReadWrite, A};
 
   auto* var_b = Var("b", ast::StorageClass::kStorage, &read);
   auto* var_c = Var("c", ast::StorageClass::kStorage, &rw);
@@ -500,11 +500,11 @@ OpName %5 "c"
 TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
 
-  ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
-                                 ast::type::ImageFormat::kR32Uint);
+  type::StorageTexture type(type::TextureDimension::k2d,
+                            type::ImageFormat::kR32Uint);
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
 
-  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, &type);
+  type::AccessControl ac(ast::AccessControl::kReadOnly, &type);
 
   auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
@@ -521,11 +521,11 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : [[access(write)]] texture_storage_2d<r32uint>;
 
-  ast::type::StorageTexture type(ast::type::TextureDimension::k2d,
-                                 ast::type::ImageFormat::kR32Uint);
+  type::StorageTexture type(type::TextureDimension::k2d,
+                            type::ImageFormat::kR32Uint);
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&type)) << td.error();
 
-  ast::type::AccessControl ac(ast::AccessControl::kWriteOnly, &type);
+  type::AccessControl ac(ast::AccessControl::kWriteOnly, &type);
 
   auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &ac);
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
@@ -545,15 +545,15 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
   // var<uniform_constant> b : [[access(write)]] texture_storage_2d<r32uint>;
 
-  ast::type::StorageTexture st(ast::type::TextureDimension::k2d,
-                               ast::type::ImageFormat::kR32Uint);
+  type::StorageTexture st(type::TextureDimension::k2d,
+                          type::ImageFormat::kR32Uint);
   ASSERT_TRUE(td.DetermineStorageTextureSubtype(&st)) << td.error();
 
-  ast::type::AccessControl type_a(ast::AccessControl::kReadOnly, &st);
+  type::AccessControl type_a(ast::AccessControl::kReadOnly, &st);
   auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &type_a);
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
-  ast::type::AccessControl type_b(ast::AccessControl::kWriteOnly, &st);
+  type::AccessControl type_b(ast::AccessControl::kWriteOnly, &st);
   auto* var_b = Var("b", ast::StorageClass::kUniformConstant, &type_b);
   EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
 

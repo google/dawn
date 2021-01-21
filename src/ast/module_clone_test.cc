@@ -126,7 +126,7 @@ fn main() -> void {
   for (auto* src_node : src.nodes()) {
     src_nodes.emplace(src_node);
   }
-  std::unordered_set<ast::type::Type*> src_types;
+  std::unordered_set<type::Type*> src_types;
   for (auto& src_type : src.types()) {
     src_types.emplace(src_type.second.get());
   }

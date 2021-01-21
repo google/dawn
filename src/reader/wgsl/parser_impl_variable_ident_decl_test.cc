@@ -15,12 +15,12 @@
 #include "gtest/gtest.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/access_control_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/struct_type.h"
 
 namespace tint {
 namespace reader {
@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::F32>());
+  ASSERT_TRUE(decl->type->Is<type::F32>());
 
   ASSERT_EQ(decl->source.range.begin.line, 1u);
   ASSERT_EQ(decl->source.range.begin.column, 1u);
@@ -90,11 +90,11 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Read) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsReadOnly());
-  ASSERT_TRUE(decl->type->As<ast::type::AccessControl>()
+  ASSERT_TRUE(decl->type->Is<type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<type::AccessControl>()->IsReadOnly());
+  ASSERT_TRUE(decl->type->As<type::AccessControl>()
                   ->type()
-                  ->Is<ast::type::StorageTexture>());
+                  ->Is<type::StorageTexture>());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
@@ -105,11 +105,11 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsWriteOnly());
-  ASSERT_TRUE(decl->type->As<ast::type::AccessControl>()
+  ASSERT_TRUE(decl->type->Is<type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<type::AccessControl>()->IsWriteOnly());
+  ASSERT_TRUE(decl->type->As<type::AccessControl>()
                   ->type()
-                  ->Is<ast::type::StorageTexture>());
+                  ->Is<type::StorageTexture>());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
@@ -133,8 +133,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsReadOnly());
+  ASSERT_TRUE(decl->type->Is<type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<type::AccessControl>()->IsReadOnly());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
@@ -158,8 +158,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::type::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::type::AccessControl>()->IsReadWrite());
+  ASSERT_TRUE(decl->type->Is<type::AccessControl>());
+  EXPECT_TRUE(decl->type->As<type::AccessControl>()->IsReadWrite());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {

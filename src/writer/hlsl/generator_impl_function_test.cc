@@ -32,16 +32,16 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/type/access_control_type.h"
+#include "src/type/array_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 
@@ -380,7 +380,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
                         ast::VariableDecorationList{
@@ -426,7 +426,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, s);
+  type::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
   auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
                         ast::VariableDecorationList{
@@ -473,7 +473,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
                         ast::VariableDecorationList{
@@ -773,7 +773,7 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_StorageBuffer) {
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, ty.vec4<f32>());
+  type::AccessControl ac(ast::AccessControl::kReadWrite, ty.vec4<f32>());
   auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
                         ast::VariableDecorationList{
                             create<ast::BindingDecoration>(0),
@@ -982,7 +982,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::StructDecorationList{create<ast::StructBlockDecoration>()});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* data_var = Var("data", ast::StorageClass::kStorage, &ac, nullptr,
                        ast::VariableDecorationList{

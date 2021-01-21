@@ -35,15 +35,15 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/access_control_type.h"
+#include "src/type/array_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
@@ -329,7 +329,7 @@ TEST_F(MslGeneratorImplTest,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   mod->AddConstructedType(s);
 
@@ -382,7 +382,7 @@ TEST_F(MslGeneratorImplTest,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, s);
+  type::AccessControl ac(ast::AccessControl::kReadOnly, s);
   mod->AddConstructedType(s);
 
   auto* coord_var =
@@ -687,7 +687,7 @@ TEST_F(MslGeneratorImplTest,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
   mod->AddConstructedType(s);
 
   auto* coord_var =
@@ -754,7 +754,7 @@ TEST_F(MslGeneratorImplTest,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadOnly, s);
+  type::AccessControl ac(ast::AccessControl::kReadOnly, s);
   mod->AddConstructedType(s);
 
   auto* coord_var =
@@ -933,7 +933,7 @@ TEST_F(MslGeneratorImplTest,
       ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* data_var =
       Var("data", ast::StorageClass::kStorage, &ac, nullptr,

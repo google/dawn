@@ -39,15 +39,15 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/array_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace transform {
@@ -71,8 +71,8 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     ast::CloneContext* ctx,
     diag::List* diags) {
   auto* ret_type = expr->array()->result_type()->UnwrapAll();
-  if (!ret_type->Is<ast::type::Array>() && !ret_type->Is<ast::type::Matrix>() &&
-      !ret_type->Is<ast::type::Vector>()) {
+  if (!ret_type->Is<type::Array>() && !ret_type->Is<type::Matrix>() &&
+      !ret_type->Is<type::Vector>()) {
     return nullptr;
   }
 
@@ -80,15 +80,15 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
   using u32 = ast::Builder::u32;
 
   uint32_t size = 0;
-  bool is_vec = ret_type->Is<ast::type::Vector>();
-  bool is_arr = ret_type->Is<ast::type::Array>();
+  bool is_vec = ret_type->Is<type::Vector>();
+  bool is_arr = ret_type->Is<type::Array>();
   if (is_vec || is_arr) {
-    size = is_vec ? ret_type->As<ast::type::Vector>()->size()
-                  : ret_type->As<ast::type::Array>()->size();
+    size = is_vec ? ret_type->As<type::Vector>()->size()
+                  : ret_type->As<type::Array>()->size();
   } else {
     // The row accessor would have been an embedded array accessor and already
     // handled, so we just need to do columns here.
-    size = ret_type->As<ast::type::Matrix>()->columns();
+    size = ret_type->As<type::Matrix>()->columns();
   }
 
   auto* const old_idx = expr->idx_expr();

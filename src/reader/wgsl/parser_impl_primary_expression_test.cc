@@ -20,12 +20,12 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
 
 namespace tint {
 namespace reader {
@@ -194,7 +194,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto p = parser("f32(1)");
 
   auto& mod = p->get_module();
-  auto* f32 = mod.create<ast::type::F32>();
+  auto* f32 = mod.create<type::F32>();
 
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
@@ -216,7 +216,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   auto p = parser("bitcast<f32>(1)");
 
   auto& mod = p->get_module();
-  auto* f32 = mod.create<ast::type::F32>();
+  auto* f32 = mod.create<type::F32>();
 
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);

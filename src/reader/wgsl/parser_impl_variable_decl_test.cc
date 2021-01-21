@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/f32_type.h"
 
 namespace tint {
 namespace reader {
@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   EXPECT_FALSE(v.errored);
   EXPECT_EQ(v->name, "my_var");
   EXPECT_NE(v->type, nullptr);
-  EXPECT_TRUE(v->type->Is<ast::type::F32>());
+  EXPECT_TRUE(v->type->Is<type::F32>());
 
   EXPECT_EQ(v->source.range.begin.line, 1u);
   EXPECT_EQ(v->source.range.begin.column, 5u);
@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
   EXPECT_FALSE(v.errored);
   EXPECT_FALSE(p->has_error());
   EXPECT_EQ(v->name, "my_var");
-  EXPECT_TRUE(v->type->Is<ast::type::F32>());
+  EXPECT_TRUE(v->type->Is<type::F32>());
   EXPECT_EQ(v->storage_class, ast::StorageClass::kPrivate);
 
   EXPECT_EQ(v->source.range.begin.line, 1u);

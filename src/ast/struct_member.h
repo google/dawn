@@ -22,8 +22,8 @@
 
 #include "src/ast/node.h"
 #include "src/ast/struct_member_decoration.h"
-#include "src/ast/type/type.h"
 #include "src/symbol.h"
+#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

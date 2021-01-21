@@ -16,7 +16,7 @@
 
 #include "src/ast/bool_literal.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/type/bool_type.h"
+#include "src/type/bool_type.h"
 
 namespace tint {
 namespace ast {

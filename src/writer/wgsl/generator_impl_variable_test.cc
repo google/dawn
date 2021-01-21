@@ -20,9 +20,9 @@
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
+#include "src/type/f32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"
 

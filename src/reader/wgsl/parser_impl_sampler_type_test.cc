@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/type/sampler_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/sampler_type.h"
 
 namespace tint {
 namespace reader {
@@ -37,8 +37,8 @@ TEST_F(ParserImplTest, SamplerType_Sampler) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Sampler>());
-  EXPECT_FALSE(t->As<ast::type::Sampler>()->IsComparison());
+  ASSERT_TRUE(t->Is<type::Sampler>());
+  EXPECT_FALSE(t->As<type::Sampler>()->IsComparison());
   EXPECT_FALSE(p->has_error());
 }
 
@@ -48,8 +48,8 @@ TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Sampler>());
-  EXPECT_TRUE(t->As<ast::type::Sampler>()->IsComparison());
+  ASSERT_TRUE(t->Is<type::Sampler>());
+  EXPECT_TRUE(t->As<type::Sampler>()->IsComparison());
   EXPECT_FALSE(p->has_error());
 }
 

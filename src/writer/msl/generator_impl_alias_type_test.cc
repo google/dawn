@@ -16,7 +16,7 @@
 #include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
-#include "src/ast/type/struct_type.h"
+#include "src/type/struct_type.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 

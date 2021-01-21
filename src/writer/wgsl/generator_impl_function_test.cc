@@ -22,13 +22,13 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/type/access_control_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"
@@ -172,7 +172,7 @@ TEST_F(WgslGeneratorImplTest,
       ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
 
   auto* s = ty.struct_("Data", str);
-  ast::type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   auto* data_var = Var("data", ast::StorageClass::kStorage, &ac, nullptr,
                        ast::VariableDecorationList{

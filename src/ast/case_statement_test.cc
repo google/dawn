@@ -18,9 +18,9 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/u32_type.h"
 #include "src/ast/uint_literal.h"
+#include "src/type/i32_type.h"
+#include "src/type/u32_type.h"
 
 namespace tint {
 namespace ast {

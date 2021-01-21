@@ -14,11 +14,11 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/function.h"
-#include "src/ast/type/type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/type.h"
+#include "src/type/void_type.h"
 
 namespace tint {
 namespace reader {
@@ -39,14 +39,14 @@ TEST_F(ParserImplTest, FunctionDecl) {
 
   EXPECT_EQ(f->symbol(), p->get_module().RegisterSymbol("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
 
   ASSERT_EQ(f->params().size(), 2u);
   EXPECT_EQ(f->params()[0]->symbol(), p->get_module().RegisterSymbol("a"));
   EXPECT_EQ(f->params()[1]->symbol(), p->get_module().RegisterSymbol("b"));
 
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
 
   auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
@@ -67,10 +67,10 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 
   EXPECT_EQ(f->symbol(), p->get_module().RegisterSymbol("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
 
   auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 1u);
@@ -105,10 +105,10 @@ fn main() -> void { return; })");
 
   EXPECT_EQ(f->symbol(), p->get_module().RegisterSymbol("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
 
   auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 2u);
@@ -150,10 +150,10 @@ fn main() -> void { return; })");
 
   EXPECT_EQ(f->symbol(), p->get_module().RegisterSymbol("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<ast::type::Void>());
+  EXPECT_TRUE(f->return_type()->Is<type::Void>());
 
   auto& decos = f->decorations();
   ASSERT_EQ(decos.size(), 2u);

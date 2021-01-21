@@ -16,7 +16,7 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/struct_type.h"
+#include "src/type/struct_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

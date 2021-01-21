@@ -39,25 +39,25 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/texture_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/access_control_type.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/texture_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
 
@@ -97,27 +97,26 @@ uint32_t convert_swizzle_to_index(const std::string& swizzle) {
   return 0;
 }
 
-const char* image_format_to_rwtexture_type(
-    ast::type::ImageFormat image_format) {
+const char* image_format_to_rwtexture_type(type::ImageFormat image_format) {
   switch (image_format) {
-    case ast::type::ImageFormat::kRgba8Unorm:
-    case ast::type::ImageFormat::kRgba8Snorm:
-    case ast::type::ImageFormat::kRgba16Float:
-    case ast::type::ImageFormat::kR32Float:
-    case ast::type::ImageFormat::kRg32Float:
-    case ast::type::ImageFormat::kRgba32Float:
+    case type::ImageFormat::kRgba8Unorm:
+    case type::ImageFormat::kRgba8Snorm:
+    case type::ImageFormat::kRgba16Float:
+    case type::ImageFormat::kR32Float:
+    case type::ImageFormat::kRg32Float:
+    case type::ImageFormat::kRgba32Float:
       return "float4";
-    case ast::type::ImageFormat::kRgba8Uint:
-    case ast::type::ImageFormat::kRgba16Uint:
-    case ast::type::ImageFormat::kR32Uint:
-    case ast::type::ImageFormat::kRg32Uint:
-    case ast::type::ImageFormat::kRgba32Uint:
+    case type::ImageFormat::kRgba8Uint:
+    case type::ImageFormat::kRgba16Uint:
+    case type::ImageFormat::kR32Uint:
+    case type::ImageFormat::kRg32Uint:
+    case type::ImageFormat::kRgba32Uint:
       return "uint4";
-    case ast::type::ImageFormat::kRgba8Sint:
-    case ast::type::ImageFormat::kRgba16Sint:
-    case ast::type::ImageFormat::kR32Sint:
-    case ast::type::ImageFormat::kRg32Sint:
-    case ast::type::ImageFormat::kRgba32Sint:
+    case type::ImageFormat::kRgba8Sint:
+    case type::ImageFormat::kRgba16Sint:
+    case type::ImageFormat::kR32Sint:
+    case type::ImageFormat::kRg32Sint:
+    case type::ImageFormat::kRgba32Sint:
       return "int4";
     default:
       return nullptr;
@@ -226,13 +225,13 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
 }
 
 bool GeneratorImpl::EmitConstructedType(std::ostream& out,
-                                        const ast::type::Type* ty) {
+                                        const type::Type* ty) {
   make_indent(out);
 
-  if (auto* alias = ty->As<ast::type::Alias>()) {
+  if (auto* alias = ty->As<type::Alias>()) {
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
-    if (auto* str = alias->type()->As<ast::type::Struct>()) {
+    if (auto* str = alias->type()->As<type::Struct>()) {
       if (!EmitStructType(out, str, module_->SymbolToName(alias->symbol()))) {
         return false;
       }
@@ -244,7 +243,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     }
     out << " " << namer_.NameFor(module_->SymbolToName(alias->symbol())) << ";"
         << std::endl;
-  } else if (auto* str = ty->As<ast::type::Struct>()) {
+  } else if (auto* str = ty->As<type::Struct>()) {
     if (!EmitStructType(out, str, module_->SymbolToName(str->symbol()))) {
       return false;
     }
@@ -385,12 +384,9 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
   // Multiplying by a matrix requires the use of `mul` in order to get the
   // type of multiply we desire.
   if (expr->op() == ast::BinaryOp::kMultiply &&
-      ((lhs_type->Is<ast::type::Vector>() &&
-        rhs_type->Is<ast::type::Matrix>()) ||
-       (lhs_type->Is<ast::type::Matrix>() &&
-        rhs_type->Is<ast::type::Vector>()) ||
-       (lhs_type->Is<ast::type::Matrix>() &&
-        rhs_type->Is<ast::type::Matrix>()))) {
+      ((lhs_type->Is<type::Vector>() && rhs_type->Is<type::Matrix>()) ||
+       (lhs_type->Is<type::Matrix>() && rhs_type->Is<type::Vector>()) ||
+       (lhs_type->Is<type::Matrix>() && rhs_type->Is<type::Matrix>()))) {
     out << "mul(";
     if (!EmitExpression(pre, out, expr->lhs())) {
       return false;
@@ -692,8 +688,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
   auto* texture = params[pidx.texture];
-  auto* texture_type =
-      texture->result_type()->UnwrapAll()->As<ast::type::Texture>();
+  auto* texture_type = texture->result_type()->UnwrapAll()->As<type::Texture>();
 
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureDimensions:
@@ -708,33 +703,33 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       switch (ident->intrinsic()) {
         case ast::Intrinsic::kTextureDimensions:
           switch (texture_type->dim()) {
-            case ast::type::TextureDimension::kNone:
+            case type::TextureDimension::kNone:
               error_ = "texture dimension is kNone";
               return false;
-            case ast::type::TextureDimension::k1d:
+            case type::TextureDimension::k1d:
               num_dimensions = 1;
               break;
-            case ast::type::TextureDimension::k1dArray:
+            case type::TextureDimension::k1dArray:
               num_dimensions = 2;
               swizzle = ".x";
               break;
-            case ast::type::TextureDimension::k2d:
+            case type::TextureDimension::k2d:
               num_dimensions = 2;
               break;
-            case ast::type::TextureDimension::k2dArray:
+            case type::TextureDimension::k2dArray:
               num_dimensions = 3;
               swizzle = ".xy";
               break;
-            case ast::type::TextureDimension::k3d:
+            case type::TextureDimension::k3d:
               num_dimensions = 3;
               break;
-            case ast::type::TextureDimension::kCube:
+            case type::TextureDimension::kCube:
               // width == height == depth for cubes
               // See https://github.com/gpuweb/gpuweb/issues/1345
               num_dimensions = 2;
               swizzle = ".xyy";  // [width, height, height]
               break;
-            case ast::type::TextureDimension::kCubeArray:
+            case type::TextureDimension::kCubeArray:
               // width == height == depth for cubes
               // See https://github.com/gpuweb/gpuweb/issues/1345
               num_dimensions = 3;
@@ -747,12 +742,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
             default:
               error_ = "texture dimension is not arrayed";
               return false;
-            case ast::type::TextureDimension::k1dArray:
+            case type::TextureDimension::k1dArray:
               num_dimensions = 2;
               swizzle = ".y";
               break;
-            case ast::type::TextureDimension::k2dArray:
-            case ast::type::TextureDimension::kCubeArray:
+            case type::TextureDimension::k2dArray:
+            case type::TextureDimension::kCubeArray:
               num_dimensions = 3;
               swizzle = ".z";
               break;
@@ -764,14 +759,14 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
             default:
               error_ = "texture dimension does not support mips";
               return false;
-            case ast::type::TextureDimension::k2d:
-            case ast::type::TextureDimension::kCube:
+            case type::TextureDimension::k2d:
+            case type::TextureDimension::kCube:
               num_dimensions = 3;
               swizzle = ".z";
               break;
-            case ast::type::TextureDimension::k2dArray:
-            case ast::type::TextureDimension::k3d:
-            case ast::type::TextureDimension::kCubeArray:
+            case type::TextureDimension::k2dArray:
+            case type::TextureDimension::k3d:
+            case type::TextureDimension::kCubeArray:
               num_dimensions = 4;
               swizzle = ".w";
               break;
@@ -782,11 +777,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
             default:
               error_ = "texture dimension does not support multisampling";
               return false;
-            case ast::type::TextureDimension::k2d:
+            case type::TextureDimension::k2d:
               num_dimensions = 3;
               swizzle = ".z";
               break;
-            case ast::type::TextureDimension::k2dArray:
+            case type::TextureDimension::k2dArray:
               num_dimensions = 4;
               swizzle = ".w";
               break;
@@ -864,7 +859,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       break;
     case ast::Intrinsic::kTextureLoad:
       out << ".Load(";
-      if (!texture_type->Is<ast::type::StorageTexture>()) {
+      if (!texture_type->Is<type::StorageTexture>()) {
         pack_mip_in_coords = true;
       }
       break;
@@ -886,7 +881,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto* param_coords = params[pidx.coords];
 
   auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
-    auto* i32 = module_->create<ast::type::I32>();
+    auto* i32 = module_->create<type::I32>();
     ast::SintLiteral zero_lit(Source{}, i32, 0);
     ast::ScalarConstructorExpression zero(Source{}, &zero_lit);
     zero.set_result_type(i32);
@@ -1063,7 +1058,7 @@ bool GeneratorImpl::EmitScalarConstructor(
 bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
                                         std::ostream& out,
                                         ast::TypeConstructorExpression* expr) {
-  if (expr->type()->Is<ast::type::Array>()) {
+  if (expr->type()->Is<type::Array>()) {
     out << "{";
   } else {
     if (!EmitType(out, expr->type(), "")) {
@@ -1092,7 +1087,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     }
   }
 
-  if (expr->type()->Is<ast::type::Array>()) {
+  if (expr->type()->Is<type::Array>()) {
     out << "}";
   } else {
     out << ")";
@@ -1379,7 +1374,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
       return false;
     }
     // Array name is output as part of the type
-    if (!v->type()->Is<ast::type::Array>()) {
+    if (!v->type()->Is<type::Array>()) {
       out << " " << module_->SymbolToName(v->symbol());
     }
   }
@@ -1447,7 +1442,7 @@ bool GeneratorImpl::EmitEntryPointData(
     emitted_globals.insert(var->symbol());
 
     auto* type = var->type()->UnwrapIfNeeded();
-    if (auto* strct = type->As<ast::type::Struct>()) {
+    if (auto* strct = type->As<type::Struct>()) {
       out << "ConstantBuffer<" << module_->SymbolToName(strct->symbol()) << "> "
           << module_->SymbolToName(var->symbol()) << " : register(b"
           << binding->value() << ");" << std::endl;
@@ -1490,7 +1485,7 @@ bool GeneratorImpl::EmitEntryPointData(
     }
     emitted_globals.insert(var->symbol());
 
-    auto* ac = var->type()->As<ast::type::AccessControl>();
+    auto* ac = var->type()->As<type::AccessControl>();
     if (ac == nullptr) {
       error_ = "access control type required for storage buffer";
       return false;
@@ -1712,18 +1707,18 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
   return true;
 }
 
-bool GeneratorImpl::EmitZeroValue(std::ostream& out, ast::type::Type* type) {
-  if (type->Is<ast::type::Bool>()) {
+bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
+  if (type->Is<type::Bool>()) {
     out << "false";
-  } else if (type->Is<ast::type::F32>()) {
+  } else if (type->Is<type::F32>()) {
     out << "0.0f";
-  } else if (type->Is<ast::type::I32>()) {
+  } else if (type->Is<type::I32>()) {
     out << "0";
-  } else if (type->Is<ast::type::U32>()) {
+  } else if (type->Is<type::U32>()) {
     out << "0u";
-  } else if (auto* vec = type->As<ast::type::Vector>()) {
+  } else if (auto* vec = type->As<type::Vector>()) {
     return EmitZeroValue(out, vec->type());
-  } else if (auto* mat = type->As<ast::type::Matrix>()) {
+  } else if (auto* mat = type->As<type::Matrix>()) {
     for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
       if (i != 0) {
         out << ", ";
@@ -1851,7 +1846,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
     first = false;
     if (auto* mem = expr->As<ast::MemberAccessorExpression>()) {
       auto* res_type = mem->structure()->result_type()->UnwrapAll();
-      if (auto* str = res_type->As<ast::type::Struct>()) {
+      if (auto* str = res_type->As<type::Struct>()) {
         auto* str_type = str->impl();
         auto* str_member = str_type->get_member(mem->member()->symbol());
 
@@ -1861,7 +1856,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         }
         out << str_member->offset();
 
-      } else if (res_type->Is<ast::type::Vector>()) {
+      } else if (res_type->Is<type::Vector>()) {
         // TODO(dsinclair): Swizzle stuff
         //
         // This must be a single element swizzle if we've got a vector at this
@@ -1891,14 +1886,14 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
       auto* ary_type = ary->array()->result_type()->UnwrapAll();
 
       out << "(";
-      if (auto* arr = ary_type->As<ast::type::Array>()) {
+      if (auto* arr = ary_type->As<type::Array>()) {
         out << arr->array_stride();
-      } else if (ary_type->Is<ast::type::Vector>()) {
+      } else if (ary_type->Is<type::Vector>()) {
         // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
         // or u32 which are all 4 bytes. When we get f16 or other types we'll
         // have to ask the type for the byte size.
         out << "4";
-      } else if (auto* mat = ary_type->As<ast::type::Matrix>()) {
+      } else if (auto* mat = ary_type->As<type::Matrix>()) {
         if (mat->columns() == 2) {
           out << "8";
         } else {
@@ -1939,16 +1934,16 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
   bool is_store = rhs != nullptr;
 
   std::string access_method = is_store ? "Store" : "Load";
-  if (auto* vec = result_type->As<ast::type::Vector>()) {
+  if (auto* vec = result_type->As<type::Vector>()) {
     access_method += std::to_string(vec->size());
-  } else if (auto* mat = result_type->As<ast::type::Matrix>()) {
+  } else if (auto* mat = result_type->As<type::Matrix>()) {
     access_method += std::to_string(mat->rows());
   }
 
   // If we aren't storing then we need to put in the outer cast.
   if (!is_store) {
     if (result_type->is_float_scalar_or_vector() ||
-        result_type->Is<ast::type::Matrix>()) {
+        result_type->Is<type::Matrix>()) {
       out << "asfloat(";
     } else if (result_type->is_signed_scalar_or_vector()) {
       out << "asint(";
@@ -1968,7 +1963,7 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
     return false;
   }
 
-  if (auto* mat = result_type->As<ast::type::Matrix>()) {
+  if (auto* mat = result_type->As<type::Matrix>()) {
     // TODO(dsinclair): This is assuming 4 byte elements. Will need to be fixed
     // if we get matrixes of f16 or f64.
     uint32_t stride = mat->rows() == 2 ? 8 : 16;
@@ -2056,7 +2051,7 @@ bool GeneratorImpl::is_storage_buffer_access(
   //
   // If the data is a multi-element swizzle then we will not load the swizzle
   // portion through the Load command.
-  if (data_type->Is<ast::type::Vector>() &&
+  if (data_type->Is<type::Vector>() &&
       module_->SymbolToName(expr->member()->symbol()).size() > 1) {
     return false;
   }
@@ -2200,20 +2195,20 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitType(std::ostream& out,
-                             ast::type::Type* type,
+                             type::Type* type,
                              const std::string& name) {
   // HLSL doesn't have the read/write only markings so just unwrap the access
   // control type.
-  if (auto* ac = type->As<ast::type::AccessControl>()) {
+  if (auto* ac = type->As<type::AccessControl>()) {
     return EmitType(out, ac->type(), name);
   }
 
-  if (auto* alias = type->As<ast::type::Alias>()) {
+  if (auto* alias = type->As<type::Alias>()) {
     out << namer_.NameFor(module_->SymbolToName(alias->symbol()));
-  } else if (auto* ary = type->As<ast::type::Array>()) {
-    ast::type::Type* base_type = ary;
+  } else if (auto* ary = type->As<type::Array>()) {
+    type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (auto* arr = base_type->As<ast::type::Array>()) {
+    while (auto* arr = base_type->As<type::Array>()) {
       if (arr->IsRuntimeArray()) {
         // TODO(dsinclair): Support runtime arrays
         // https://bugs.chromium.org/p/tint/issues/detail?id=185
@@ -2233,56 +2228,56 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     for (uint32_t size : sizes) {
       out << "[" << size << "]";
     }
-  } else if (type->Is<ast::type::Bool>()) {
+  } else if (type->Is<type::Bool>()) {
     out << "bool";
-  } else if (type->Is<ast::type::F32>()) {
+  } else if (type->Is<type::F32>()) {
     out << "float";
-  } else if (type->Is<ast::type::I32>()) {
+  } else if (type->Is<type::I32>()) {
     out << "int";
-  } else if (auto* mat = type->As<ast::type::Matrix>()) {
+  } else if (auto* mat = type->As<type::Matrix>()) {
     if (!EmitType(out, mat->type(), "")) {
       return false;
     }
     out << mat->rows() << "x" << mat->columns();
-  } else if (type->Is<ast::type::Pointer>()) {
+  } else if (type->Is<type::Pointer>()) {
     // TODO(dsinclair): What do we do with pointers in HLSL?
     // https://bugs.chromium.org/p/tint/issues/detail?id=183
     error_ = "pointers not supported in HLSL";
     return false;
-  } else if (auto* sampler = type->As<ast::type::Sampler>()) {
+  } else if (auto* sampler = type->As<type::Sampler>()) {
     out << "Sampler";
     if (sampler->IsComparison()) {
       out << "Comparison";
     }
     out << "State";
-  } else if (auto* str = type->As<ast::type::Struct>()) {
+  } else if (auto* str = type->As<type::Struct>()) {
     out << module_->SymbolToName(str->symbol());
-  } else if (auto* tex = type->As<ast::type::Texture>()) {
-    if (tex->Is<ast::type::StorageTexture>()) {
+  } else if (auto* tex = type->As<type::Texture>()) {
+    if (tex->Is<type::StorageTexture>()) {
       out << "RW";
     }
     out << "Texture";
 
     switch (tex->dim()) {
-      case ast::type::TextureDimension::k1d:
+      case type::TextureDimension::k1d:
         out << "1D";
         break;
-      case ast::type::TextureDimension::k1dArray:
+      case type::TextureDimension::k1dArray:
         out << "1DArray";
         break;
-      case ast::type::TextureDimension::k2d:
+      case type::TextureDimension::k2d:
         out << "2D";
         break;
-      case ast::type::TextureDimension::k2dArray:
+      case type::TextureDimension::k2dArray:
         out << "2DArray";
         break;
-      case ast::type::TextureDimension::k3d:
+      case type::TextureDimension::k3d:
         out << "3D";
         break;
-      case ast::type::TextureDimension::kCube:
+      case type::TextureDimension::kCube:
         out << "Cube";
         break;
-      case ast::type::TextureDimension::kCubeArray:
+      case type::TextureDimension::kCubeArray:
         out << "CubeArray";
         break;
       default:
@@ -2290,7 +2285,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
     }
 
-    if (auto* st = tex->As<ast::type::StorageTexture>()) {
+    if (auto* st = tex->As<type::StorageTexture>()) {
       auto* component = image_format_to_rwtexture_type(st->image_format());
       if (component == nullptr) {
         error_ = "Unsupported StorageTexture ImageFormat: " +
@@ -2299,15 +2294,15 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       }
       out << "<" << component << ">";
     }
-  } else if (type->Is<ast::type::U32>()) {
+  } else if (type->Is<type::U32>()) {
     out << "uint";
-  } else if (auto* vec = type->As<ast::type::Vector>()) {
+  } else if (auto* vec = type->As<type::Vector>()) {
     auto size = vec->size();
-    if (vec->type()->Is<ast::type::F32>() && size >= 1 && size <= 4) {
+    if (vec->type()->Is<type::F32>() && size >= 1 && size <= 4) {
       out << "float" << size;
-    } else if (vec->type()->Is<ast::type::I32>() && size >= 1 && size <= 4) {
+    } else if (vec->type()->Is<type::I32>() && size >= 1 && size <= 4) {
       out << "int" << size;
-    } else if (vec->type()->Is<ast::type::U32>() && size >= 1 && size <= 4) {
+    } else if (vec->type()->Is<type::U32>() && size >= 1 && size <= 4) {
       out << "uint" << size;
     } else {
       out << "vector<";
@@ -2316,7 +2311,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       }
       out << ", " << size << ">";
     }
-  } else if (type->Is<ast::type::Void>()) {
+  } else if (type->Is<type::Void>()) {
     out << "void";
   } else {
     error_ = "unknown type in EmitType";
@@ -2327,7 +2322,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitStructType(std::ostream& out,
-                                   const ast::type::Struct* str,
+                                   const type::Struct* str,
                                    const std::string& name) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
@@ -2344,7 +2339,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
       return false;
     }
     // Array member name will be output with the type
-    if (!mem->type()->Is<ast::type::Array>()) {
+    if (!mem->type()->Is<type::Array>()) {
       out << " " << namer_.NameFor(module_->SymbolToName(mem->symbol()));
     }
     out << ";" << std::endl;
@@ -2407,7 +2402,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   if (!EmitType(out, var->type(), module_->SymbolToName(var->symbol()))) {
     return false;
   }
-  if (!var->type()->Is<ast::type::Array>()) {
+  if (!var->type()->Is<type::Array>()) {
     out << " " << module_->SymbolToName(var->symbol());
   }
   out << constructor_out.str() << ";" << std::endl;
@@ -2464,7 +2459,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     if (!EmitType(out, var->type(), module_->SymbolToName(var->symbol()))) {
       return false;
     }
-    if (!var->type()->Is<ast::type::Array>()) {
+    if (!var->type()->Is<type::Array>()) {
       out << " " << module_->SymbolToName(var->symbol());
     }
 

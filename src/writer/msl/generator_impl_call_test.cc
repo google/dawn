@@ -20,7 +20,7 @@
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
-#include "src/ast/type/void_type.h"
+#include "src/type/void_type.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 

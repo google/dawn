@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/type/i32_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/i32_type.h"
 
 namespace tint {
 namespace reader {
@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   auto p = parser("{a : i32;}");
 
   auto& mod = p->get_module();
-  auto* i32 = mod.create<ast::type::I32>();
+  auto* i32 = mod.create<type::I32>();
 
   auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());

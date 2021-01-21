@@ -20,9 +20,9 @@
 
 #include "src/ast/access_control.h"
 #include "src/ast/builder.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/texture_type.h"
 
 namespace tint {
 namespace ast {
@@ -240,7 +240,7 @@ struct TextureOverloadCase {
 
   /// @param builder the AST builder used for the test
   /// @returns the vector component type of the texture function return value
-  ast::type::Type* resultVectorComponentType(ast::Builder* builder) const;
+  type::Type* resultVectorComponentType(ast::Builder* builder) const;
   /// @param builder the AST builder used for the test
   /// @returns a Variable holding the test texture
   ast::Variable* buildTextureVariable(ast::Builder* builder) const;

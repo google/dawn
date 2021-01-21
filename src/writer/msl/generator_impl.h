@@ -39,10 +39,10 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/scope_stack.h"
+#include "src/type/struct_type.h"
 #include "src/writer/msl/namer.h"
 #include "src/writer/text_generator.h"
 
@@ -65,16 +65,16 @@ class GeneratorImpl : public TextGenerator {
   /// for pointers as the size is unknown.
   /// @param type the type to calculate the alignment size for
   /// @returns the number of bytes used to align `type` or 0 on error
-  uint32_t calculate_alignment_size(ast::type::Type* type);
+  uint32_t calculate_alignment_size(type::Type* type);
   /// Calculates the largest alignment seen within a struct
   /// @param type the struct to calculate
   /// @returns the largest alignment value
-  uint32_t calculate_largest_alignment(ast::type::Struct* type);
+  uint32_t calculate_largest_alignment(type::Struct* type);
 
   /// Handles generating a constructed
   /// @param ty the constructed type to generate
   /// @returns true if the constructed type was emitted
-  bool EmitConstructedType(const ast::type::Type* ty);
+  bool EmitConstructedType(const type::Type* ty);
   /// Handles an array accessor expression
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
@@ -204,11 +204,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(ast::type::Type* type, const std::string& name);
+  bool EmitType(type::Type* type, const std::string& name);
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
-  bool EmitStructType(const ast::type::Struct* str);
+  bool EmitStructType(const type::Struct* str);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
@@ -229,7 +229,7 @@ class GeneratorImpl : public TextGenerator {
   /// Emits the zero value for the given type
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
-  bool EmitZeroValue(ast::type::Type* type);
+  bool EmitZeroValue(type::Type* type);
 
   /// Determines if the function needs the input struct passed to it.
   /// @param func the function to check

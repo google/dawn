@@ -23,9 +23,9 @@
 #include "src/ast/expression.h"
 #include "src/ast/node.h"
 #include "src/ast/storage_class.h"
-#include "src/ast/type/type.h"
 #include "src/ast/variable_decoration.h"
 #include "src/symbol.h"
+#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

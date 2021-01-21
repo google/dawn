@@ -24,15 +24,15 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
+#include "src/type/array_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -159,7 +159,7 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 }
 
 TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
-  ast::type::Array ary4(ty.vec3<f32>(), 4, ast::ArrayDecorationList{});
+  type::Array ary4(ty.vec3<f32>(), 4, ast::ArrayDecorationList{});
 
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
@@ -197,7 +197,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 }
 
 TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
-  ast::type::Array ary4(ty.vec3<f32>(), 4, ast::ArrayDecorationList{});
+  type::Array ary4(ty.vec3<f32>(), 4, ast::ArrayDecorationList{});
 
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
@@ -658,12 +658,12 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   s = create<ast::Struct>(ast::StructMemberList{Member("bar", c_type)},
                           ast::StructDecorationList{});
   auto* b_type = ty.struct_("B", s);
-  ast::type::Array b_ary_type(b_type, 3, ast::ArrayDecorationList{});
+  type::Array b_ary_type(b_type, 3, ast::ArrayDecorationList{});
   s = create<ast::Struct>(ast::StructMemberList{Member("foo", &b_ary_type)},
                           ast::StructDecorationList{});
   auto* a_type = ty.struct_("A", s);
 
-  ast::type::Array a_ary_type(a_type, 2, ast::ArrayDecorationList{});
+  type::Array a_ary_type(a_type, 2, ast::ArrayDecorationList{});
   auto* var = Var("index", ast::StorageClass::kFunction, &a_ary_type);
   auto* expr = MemberAccessor(
       MemberAccessor(
@@ -718,7 +718,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   //   vec2<f32>(0.5, -0.5));
   // pos[1]
 
-  ast::type::Array arr(ty.vec2<f32>(), 3, ast::ArrayDecorationList{});
+  type::Array arr(ty.vec2<f32>(), 3, ast::ArrayDecorationList{});
 
   auto* var = Const("pos", ast::StorageClass::kPrivate, &arr,
                     Construct(&arr, vec2<f32>(0.0f, 0.5f),

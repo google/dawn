@@ -22,9 +22,9 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/f32_type.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 

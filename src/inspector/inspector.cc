@@ -25,20 +25,20 @@
 #include "src/ast/null_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/texture_type.h"
-#include "src/ast/type/type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
+#include "src/type/access_control_type.h"
+#include "src/type/array_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/texture_type.h"
+#include "src/type/type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace inspector {
@@ -183,12 +183,12 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     ast::Variable* var = nullptr;
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = ruv;
-    if (!var->type()->Is<ast::type::AccessControl>()) {
+    if (!var->type()->Is<type::AccessControl>()) {
       continue;
     }
     auto* unwrapped_type = var->type()->UnwrapIfNeeded();
 
-    auto* str = unwrapped_type->As<ast::type::Struct>();
+    auto* str = unwrapped_type->As<type::Struct>();
     if (str == nullptr) {
       continue;
     }
@@ -199,8 +199,8 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
 
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
-    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
-        ast::type::MemoryLayout::kUniformBuffer);
+    entry.min_buffer_binding_size =
+        var->type()->MinBufferBindingSize(type::MemoryLayout::kUniformBuffer);
 
     result.push_back(entry);
   }
@@ -307,7 +307,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     ast::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rsv;
 
-    auto* ac_type = var->type()->As<ast::type::AccessControl>();
+    auto* ac_type = var->type()->As<type::AccessControl>();
     if (ac_type == nullptr) {
       continue;
     }
@@ -316,14 +316,14 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    if (!var->type()->UnwrapIfNeeded()->Is<ast::type::Struct>()) {
+    if (!var->type()->UnwrapIfNeeded()->Is<type::Struct>()) {
       continue;
     }
 
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
-    entry.min_buffer_binding_size = var->type()->MinBufferBindingSize(
-        ast::type::MemoryLayout::kStorageBuffer);
+    entry.min_buffer_binding_size =
+        var->type()->MinBufferBindingSize(type::MemoryLayout::kStorageBuffer);
 
     result.push_back(entry);
   }
@@ -352,28 +352,27 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type =
-        var->type()->UnwrapIfNeeded()->As<ast::type::Texture>();
+    auto* texture_type = var->type()->UnwrapIfNeeded()->As<type::Texture>();
     switch (texture_type->dim()) {
-      case ast::type::TextureDimension::k1d:
+      case type::TextureDimension::k1d:
         entry.dim = ResourceBinding::TextureDimension::k1d;
         break;
-      case ast::type::TextureDimension::k1dArray:
+      case type::TextureDimension::k1dArray:
         entry.dim = ResourceBinding::TextureDimension::k1dArray;
         break;
-      case ast::type::TextureDimension::k2d:
+      case type::TextureDimension::k2d:
         entry.dim = ResourceBinding::TextureDimension::k2d;
         break;
-      case ast::type::TextureDimension::k2dArray:
+      case type::TextureDimension::k2dArray:
         entry.dim = ResourceBinding::TextureDimension::k2dArray;
         break;
-      case ast::type::TextureDimension::k3d:
+      case type::TextureDimension::k3d:
         entry.dim = ResourceBinding::TextureDimension::k3d;
         break;
-      case ast::type::TextureDimension::kCube:
+      case type::TextureDimension::kCube:
         entry.dim = ResourceBinding::TextureDimension::kCube;
         break;
-      case ast::type::TextureDimension::kCubeArray:
+      case type::TextureDimension::kCubeArray:
         entry.dim = ResourceBinding::TextureDimension::kCubeArray;
         break;
       default:
@@ -381,30 +380,29 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
         break;
     }
 
-    ast::type::Type* base_type = nullptr;
+    type::Type* base_type = nullptr;
     if (multisampled_only) {
-      base_type = texture_type->As<ast::type::MultisampledTexture>()
+      base_type = texture_type->As<type::MultisampledTexture>()
                       ->type()
                       ->UnwrapIfNeeded();
     } else {
-      base_type = texture_type->As<ast::type::SampledTexture>()
-                      ->type()
-                      ->UnwrapIfNeeded();
+      base_type =
+          texture_type->As<type::SampledTexture>()->type()->UnwrapIfNeeded();
     }
 
-    if (auto* at = base_type->As<ast::type::Array>()) {
+    if (auto* at = base_type->As<type::Array>()) {
       base_type = at->type();
-    } else if (auto* mt = base_type->As<ast::type::Matrix>()) {
+    } else if (auto* mt = base_type->As<type::Matrix>()) {
       base_type = mt->type();
-    } else if (auto* vt = base_type->As<ast::type::Vector>()) {
+    } else if (auto* vt = base_type->As<type::Vector>()) {
       base_type = vt->type();
     }
 
-    if (base_type->Is<ast::type::F32>()) {
+    if (base_type->Is<type::F32>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kFloat;
-    } else if (base_type->Is<ast::type::U32>()) {
+    } else if (base_type->Is<type::U32>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kUInt;
-    } else if (base_type->Is<ast::type::I32>()) {
+    } else if (base_type->Is<type::I32>()) {
       entry.sampled_kind = ResourceBinding::SampledKind::kSInt;
     } else {
       entry.sampled_kind = ResourceBinding::SampledKind::kUnknown;

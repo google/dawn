@@ -19,22 +19,22 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/depth_texture_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
+#include "src/type/access_control_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/depth_texture_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -126,7 +126,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
 
 // TODO(dsinclair): How to annotate as workgroup?
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
-  ast::type::Pointer p(ty.f32, ast::StorageClass::kWorkgroup);
+  type::Pointer p(ty.f32, ast::StorageClass::kWorkgroup);
 
   ASSERT_TRUE(gen.EmitType(out, &p, "")) << gen.error();
   EXPECT_EQ(result(), "float*");
@@ -225,21 +225,21 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
-  ast::type::Sampler sampler(ast::type::SamplerKind::kSampler);
+  type::Sampler sampler(type::SamplerKind::kSampler);
 
   ASSERT_TRUE(gen.EmitType(out, &sampler, "")) << gen.error();
   EXPECT_EQ(result(), "SamplerState");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
-  ast::type::Sampler sampler(ast::type::SamplerKind::kComparisonSampler);
+  type::Sampler sampler(type::SamplerKind::kComparisonSampler);
 
   ASSERT_TRUE(gen.EmitType(out, &sampler, "")) << gen.error();
   EXPECT_EQ(result(), "SamplerComparisonState");
 }
 
 struct HlslDepthTextureData {
-  ast::type::TextureDimension dim;
+  type::TextureDimension dim;
   std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslDepthTextureData data) {
@@ -250,7 +250,7 @@ using HlslDepthtexturesTest = TestParamHelper<HlslDepthTextureData>;
 TEST_P(HlslDepthtexturesTest, Emit) {
   auto params = GetParam();
 
-  ast::type::DepthTexture s(params.dim);
+  type::DepthTexture s(params.dim);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
@@ -259,15 +259,15 @@ INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
     HlslDepthtexturesTest,
     testing::Values(
-        HlslDepthTextureData{ast::type::TextureDimension::k2d, "Texture2D"},
-        HlslDepthTextureData{ast::type::TextureDimension::k2dArray,
+        HlslDepthTextureData{type::TextureDimension::k2d, "Texture2D"},
+        HlslDepthTextureData{type::TextureDimension::k2dArray,
                              "Texture2DArray"},
-        HlslDepthTextureData{ast::type::TextureDimension::kCube, "TextureCube"},
-        HlslDepthTextureData{ast::type::TextureDimension::kCubeArray,
+        HlslDepthTextureData{type::TextureDimension::kCube, "TextureCube"},
+        HlslDepthTextureData{type::TextureDimension::kCubeArray,
                              "TextureCubeArray"}));
 
 struct HlslTextureData {
-  ast::type::TextureDimension dim;
+  type::TextureDimension dim;
   std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslTextureData data) {
@@ -278,7 +278,7 @@ using HlslSampledtexturesTest = TestParamHelper<HlslTextureData>;
 TEST_P(HlslSampledtexturesTest, Emit) {
   auto params = GetParam();
 
-  ast::type::SampledTexture s(params.dim, ty.f32);
+  type::SampledTexture s(params.dim, ty.f32);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
@@ -287,27 +287,25 @@ INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
     HlslSampledtexturesTest,
     testing::Values(
-        HlslTextureData{ast::type::TextureDimension::k1d, "Texture1D"},
-        HlslTextureData{ast::type::TextureDimension::k1dArray,
-                        "Texture1DArray"},
-        HlslTextureData{ast::type::TextureDimension::k2d, "Texture2D"},
-        HlslTextureData{ast::type::TextureDimension::k2dArray,
-                        "Texture2DArray"},
-        HlslTextureData{ast::type::TextureDimension::k3d, "Texture3D"},
-        HlslTextureData{ast::type::TextureDimension::kCube, "TextureCube"},
-        HlslTextureData{ast::type::TextureDimension::kCubeArray,
+        HlslTextureData{type::TextureDimension::k1d, "Texture1D"},
+        HlslTextureData{type::TextureDimension::k1dArray, "Texture1DArray"},
+        HlslTextureData{type::TextureDimension::k2d, "Texture2D"},
+        HlslTextureData{type::TextureDimension::k2dArray, "Texture2DArray"},
+        HlslTextureData{type::TextureDimension::k3d, "Texture3D"},
+        HlslTextureData{type::TextureDimension::kCube, "TextureCube"},
+        HlslTextureData{type::TextureDimension::kCubeArray,
                         "TextureCubeArray"}));
 
 TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
-  ast::type::MultisampledTexture s(ast::type::TextureDimension::k2d, ty.f32);
+  type::MultisampledTexture s(type::TextureDimension::k2d, ty.f32);
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
   EXPECT_EQ(result(), "Texture2D");
 }
 
 struct HlslStorageTextureData {
-  ast::type::TextureDimension dim;
-  ast::type::ImageFormat imgfmt;
+  type::TextureDimension dim;
+  type::ImageFormat imgfmt;
   bool ro;
   std::string result;
 };
@@ -320,11 +318,10 @@ using HlslStoragetexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStoragetexturesTest, Emit) {
   auto params = GetParam();
 
-  ast::type::StorageTexture s(params.dim,
-                              params.imgfmt);
-  ast::type::AccessControl ac(params.ro ? ast::AccessControl::kReadOnly
-                                        : ast::AccessControl::kWriteOnly,
-                              &s);
+  type::StorageTexture s(params.dim, params.imgfmt);
+  type::AccessControl ac(params.ro ? ast::AccessControl::kReadOnly
+                                   : ast::AccessControl::kWriteOnly,
+                         &s);
 
   ASSERT_TRUE(gen.EmitType(out, &ac, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
@@ -332,55 +329,54 @@ TEST_P(HlslStoragetexturesTest, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
     HlslStoragetexturesTest,
-    testing::Values(
-        HlslStorageTextureData{ast::type::TextureDimension::k1d,
-                               ast::type::ImageFormat::kRgba8Unorm, true,
-                               "RWTexture1D<float4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1dArray,
-                               ast::type::ImageFormat::kRgba8Snorm, true,
-                               "RWTexture1DArray<float4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2d,
-                               ast::type::ImageFormat::kRgba16Float, true,
-                               "RWTexture2D<float4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2dArray,
-                               ast::type::ImageFormat::kR32Float, true,
-                               "RWTexture2DArray<float4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k3d,
-                               ast::type::ImageFormat::kRg32Float, true,
-                               "RWTexture3D<float4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1d,
-                               ast::type::ImageFormat::kRgba32Float, false,
-                               "RWTexture1D<float4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1dArray,
-                               ast::type::ImageFormat::kRgba8Uint, false,
-                               "RWTexture1DArray<uint4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2d,
-                               ast::type::ImageFormat::kRgba16Uint, false,
-                               "RWTexture2D<uint4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2dArray,
-                               ast::type::ImageFormat::kR32Uint, false,
-                               "RWTexture2DArray<uint4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k3d,
-                               ast::type::ImageFormat::kRg32Uint, false,
-                               "RWTexture3D<uint4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1d,
-                               ast::type::ImageFormat::kRgba32Uint, true,
-                               "RWTexture1D<uint4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1dArray,
-                               ast::type::ImageFormat::kRgba8Sint, true,
-                               "RWTexture1DArray<int4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2d,
-                               ast::type::ImageFormat::kRgba16Sint, true,
-                               "RWTexture2D<int4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k2dArray,
-                               ast::type::ImageFormat::kR32Sint, true,
-                               "RWTexture2DArray<int4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k3d,
-                               ast::type::ImageFormat::kRg32Sint, true,
-                               "RWTexture3D<int4>"},
-        HlslStorageTextureData{ast::type::TextureDimension::k1d,
-                               ast::type::ImageFormat::kRgba32Sint, false,
-                               "RWTexture1D<int4>"}));
+    testing::Values(HlslStorageTextureData{type::TextureDimension::k1d,
+                                           type::ImageFormat::kRgba8Unorm, true,
+                                           "RWTexture1D<float4>"},
+                    HlslStorageTextureData{type::TextureDimension::k1dArray,
+                                           type::ImageFormat::kRgba8Snorm, true,
+                                           "RWTexture1DArray<float4>"},
+                    HlslStorageTextureData{type::TextureDimension::k2d,
+                                           type::ImageFormat::kRgba16Float,
+                                           true, "RWTexture2D<float4>"},
+                    HlslStorageTextureData{type::TextureDimension::k2dArray,
+                                           type::ImageFormat::kR32Float, true,
+                                           "RWTexture2DArray<float4>"},
+                    HlslStorageTextureData{type::TextureDimension::k3d,
+                                           type::ImageFormat::kRg32Float, true,
+                                           "RWTexture3D<float4>"},
+                    HlslStorageTextureData{type::TextureDimension::k1d,
+                                           type::ImageFormat::kRgba32Float,
+                                           false, "RWTexture1D<float4>"},
+                    HlslStorageTextureData{type::TextureDimension::k1dArray,
+                                           type::ImageFormat::kRgba8Uint, false,
+                                           "RWTexture1DArray<uint4>"},
+                    HlslStorageTextureData{type::TextureDimension::k2d,
+                                           type::ImageFormat::kRgba16Uint,
+                                           false, "RWTexture2D<uint4>"},
+                    HlslStorageTextureData{type::TextureDimension::k2dArray,
+                                           type::ImageFormat::kR32Uint, false,
+                                           "RWTexture2DArray<uint4>"},
+                    HlslStorageTextureData{type::TextureDimension::k3d,
+                                           type::ImageFormat::kRg32Uint, false,
+                                           "RWTexture3D<uint4>"},
+                    HlslStorageTextureData{type::TextureDimension::k1d,
+                                           type::ImageFormat::kRgba32Uint, true,
+                                           "RWTexture1D<uint4>"},
+                    HlslStorageTextureData{type::TextureDimension::k1dArray,
+                                           type::ImageFormat::kRgba8Sint, true,
+                                           "RWTexture1DArray<int4>"},
+                    HlslStorageTextureData{type::TextureDimension::k2d,
+                                           type::ImageFormat::kRgba16Sint, true,
+                                           "RWTexture2D<int4>"},
+                    HlslStorageTextureData{type::TextureDimension::k2dArray,
+                                           type::ImageFormat::kR32Sint, true,
+                                           "RWTexture2DArray<int4>"},
+                    HlslStorageTextureData{type::TextureDimension::k3d,
+                                           type::ImageFormat::kRg32Sint, true,
+                                           "RWTexture3D<int4>"},
+                    HlslStorageTextureData{type::TextureDimension::k1d,
+                                           type::ImageFormat::kRgba32Sint,
+                                           false, "RWTexture1D<int4>"}));
 
 }  // namespace
 }  // namespace hlsl

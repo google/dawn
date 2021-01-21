@@ -14,20 +14,20 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/stride_decoration.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace reader {
@@ -48,9 +48,8 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
 
   auto& mod = p->get_module();
 
-  auto* int_type = mod.create<ast::type::I32>();
-  auto* alias_type =
-      mod.create<ast::type::Alias>(mod.RegisterSymbol("A"), int_type);
+  auto* int_type = mod.create<type::I32>();
+  auto* alias_type = mod.create<type::Alias>(mod.RegisterSymbol("A"), int_type);
 
   p->register_constructed("A", alias_type);
 
@@ -59,9 +58,9 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, alias_type);
-  ASSERT_TRUE(t->Is<ast::type::Alias>());
+  ASSERT_TRUE(t->Is<type::Alias>());
 
-  auto* alias = t->As<ast::type::Alias>();
+  auto* alias = t->As<type::Alias>();
   EXPECT_EQ(p->get_module().SymbolToName(alias->symbol()), "A");
   EXPECT_EQ(alias->type(), int_type);
 }
@@ -81,56 +80,56 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   auto p = parser("bool");
 
   auto& mod = p->get_module();
-  auto* bool_type = mod.create<ast::type::Bool>();
+  auto* bool_type = mod.create<type::Bool>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, bool_type);
-  ASSERT_TRUE(t->Is<ast::type::Bool>());
+  ASSERT_TRUE(t->Is<type::Bool>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_F32) {
   auto p = parser("f32");
 
   auto& mod = p->get_module();
-  auto* float_type = mod.create<ast::type::F32>();
+  auto* float_type = mod.create<type::F32>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, float_type);
-  ASSERT_TRUE(t->Is<ast::type::F32>());
+  ASSERT_TRUE(t->Is<type::F32>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_I32) {
   auto p = parser("i32");
 
   auto& mod = p->get_module();
-  auto* int_type = mod.create<ast::type::I32>();
+  auto* int_type = mod.create<type::I32>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, int_type);
-  ASSERT_TRUE(t->Is<ast::type::I32>());
+  ASSERT_TRUE(t->Is<type::I32>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_U32) {
   auto p = parser("u32");
 
   auto& mod = p->get_module();
-  auto* uint_type = mod.create<ast::type::U32>();
+  auto* uint_type = mod.create<type::U32>();
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, uint_type);
-  ASSERT_TRUE(t->Is<ast::type::U32>());
+  ASSERT_TRUE(t->Is<type::U32>());
 }
 
 struct VecData {
@@ -152,8 +151,8 @@ TEST_P(VecTest, Parse) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t->Is<ast::type::Vector>());
-  EXPECT_EQ(t->As<ast::type::Vector>()->size(), params.count);
+  EXPECT_TRUE(t->Is<type::Vector>());
+  EXPECT_EQ(t->As<type::Vector>()->size(), params.count);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecTest,
@@ -240,10 +239,10 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Pointer>());
+  ASSERT_TRUE(t->Is<type::Pointer>());
 
-  auto* ptr = t->As<ast::type::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<ast::type::F32>());
+  auto* ptr = t->As<type::Pointer>();
+  ASSERT_TRUE(ptr->type()->Is<type::F32>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 }
 
@@ -254,15 +253,15 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Pointer>());
+  ASSERT_TRUE(t->Is<type::Pointer>());
 
-  auto* ptr = t->As<ast::type::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<ast::type::Vector>());
+  auto* ptr = t->As<type::Pointer>();
+  ASSERT_TRUE(ptr->type()->Is<type::Vector>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 
-  auto* vec = ptr->type()->As<ast::type::Vector>();
+  auto* vec = ptr->type()->As<type::Vector>();
   ASSERT_EQ(vec->size(), 2u);
-  ASSERT_TRUE(vec->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(vec->type()->Is<type::F32>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
@@ -352,12 +351,12 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Array>());
+  ASSERT_TRUE(t->Is<type::Array>());
 
-  auto* a = t->As<ast::type::Array>();
+  auto* a = t->As<type::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
-  ASSERT_TRUE(a->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(a->type()->Is<type::F32>());
   ASSERT_FALSE(a->has_array_stride());
 }
 
@@ -368,12 +367,12 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Array>());
+  ASSERT_TRUE(t->Is<type::Array>());
 
-  auto* a = t->As<ast::type::Array>();
+  auto* a = t->As<type::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
-  ASSERT_TRUE(a->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(a->type()->Is<type::F32>());
   ASSERT_TRUE(a->has_array_stride());
   EXPECT_EQ(a->array_stride(), 16u);
 }
@@ -385,11 +384,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Array>());
+  ASSERT_TRUE(t->Is<type::Array>());
 
-  auto* a = t->As<ast::type::Array>();
+  auto* a = t->As<type::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(a->type()->Is<type::F32>());
   ASSERT_TRUE(a->has_array_stride());
   EXPECT_EQ(a->array_stride(), 16u);
 }
@@ -401,11 +400,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Array>());
+  ASSERT_TRUE(t->Is<type::Array>());
 
-  auto* a = t->As<ast::type::Array>();
+  auto* a = t->As<type::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(a->type()->Is<type::F32>());
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
@@ -422,11 +421,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Array>());
+  ASSERT_TRUE(t->Is<type::Array>());
 
-  auto* a = t->As<ast::type::Array>();
+  auto* a = t->As<type::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(a->type()->Is<type::F32>());
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
@@ -525,11 +524,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<ast::type::Array>());
+  ASSERT_TRUE(t->Is<type::Array>());
 
-  auto* a = t->As<ast::type::Array>();
+  auto* a = t->As<type::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<ast::type::U32>());
+  ASSERT_TRUE(a->type()->Is<type::U32>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
@@ -622,8 +621,8 @@ TEST_P(MatrixTest, Parse) {
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t->Is<ast::type::Matrix>());
-  auto* mat = t->As<ast::type::Matrix>();
+  EXPECT_TRUE(t->Is<type::Matrix>());
+  auto* mat = t->As<type::Matrix>();
   EXPECT_EQ(mat->rows(), params.rows);
   EXPECT_EQ(mat->columns(), params.columns);
 }
@@ -740,49 +739,49 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto p = parser("sampler");
 
   auto& mod = p->get_module();
-  auto* type = mod.create<ast::type::Sampler>(ast::type::SamplerKind::kSampler);
+  auto* type = mod.create<type::Sampler>(type::SamplerKind::kSampler);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t->Is<ast::type::Sampler>());
-  ASSERT_FALSE(t->As<ast::type::Sampler>()->IsComparison());
+  ASSERT_TRUE(t->Is<type::Sampler>());
+  ASSERT_FALSE(t->As<type::Sampler>()->IsComparison());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
   auto p = parser("texture_sampled_cube<f32>");
 
   auto& mod = p->get_module();
-  auto* type = mod.create<ast::type::SampledTexture>(
-      ast::type::TextureDimension::kCube, ty.f32);
+  auto* type =
+      mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t->Is<ast::type::Texture>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
-  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(t->Is<type::Texture>());
+  ASSERT_TRUE(t->Is<type::SampledTexture>());
+  ASSERT_TRUE(t->As<type::SampledTexture>()->type()->Is<type::F32>());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture) {
   auto p = parser("texture_cube<f32>");
 
   auto& mod = p->get_module();
-  auto* type = mod.create<ast::type::SampledTexture>(
-      ast::type::TextureDimension::kCube, ty.f32);
+  auto* type =
+      mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t->Is<ast::type::Texture>());
-  ASSERT_TRUE(t->Is<ast::type::SampledTexture>());
-  ASSERT_TRUE(t->As<ast::type::SampledTexture>()->type()->Is<ast::type::F32>());
+  ASSERT_TRUE(t->Is<type::Texture>());
+  ASSERT_TRUE(t->Is<type::SampledTexture>());
+  ASSERT_TRUE(t->As<type::SampledTexture>()->type()->Is<type::F32>());
 }
 
 }  // namespace

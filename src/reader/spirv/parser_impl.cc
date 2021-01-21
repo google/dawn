@@ -52,24 +52,6 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/depth_texture_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/storage_texture_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
@@ -79,6 +61,24 @@
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/usage.h"
+#include "src/type/access_control_type.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/depth_texture_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/storage_texture_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 
 namespace tint {
 namespace reader {
@@ -255,7 +255,7 @@ ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
     : Reader(),
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
-      bool_type_(ast_module_.create<ast::type::Bool>()),
+      bool_type_(ast_module_.create<type::Bool>()),
       namer_(fail_stream_),
       enum_converter_(fail_stream_),
       tools_context_(kInputEnv) {
@@ -313,7 +313,7 @@ ast::Module ParserImpl::module() {
   return std::move(ast_module_);
 }
 
-ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
+type::Type* ParserImpl::ConvertType(uint32_t type_id) {
   if (!success_) {
     return nullptr;
   }
@@ -334,7 +334,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     return nullptr;
   }
 
-  auto save = [this, type_id, spirv_type](ast::type::Type* type) {
+  auto save = [this, type_id, spirv_type](type::Type* type) {
     if (type != nullptr) {
       id_to_type_[type_id] = type;
       MaybeGenerateAlias(type_id, spirv_type);
@@ -344,7 +344,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
 
   switch (spirv_type->kind()) {
     case spvtools::opt::analysis::Type::kVoid:
-      return save(ast_module_.create<ast::type::Void>());
+      return save(ast_module_.create<type::Void>());
     case spvtools::opt::analysis::Type::kBool:
       return save(bool_type_);
     case spvtools::opt::analysis::Type::kInteger:
@@ -374,7 +374,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     case spvtools::opt::analysis::Type::kImage:
       // Fake it for sampler and texture types.  These are handled in an
       // entirely different way.
-      return save(ast_module_.create<ast::type::Void>());
+      return save(ast_module_.create<type::Void>());
     default:
       break;
   }
@@ -710,11 +710,11 @@ bool ParserImpl::RegisterEntryPoints() {
   return success_;
 }
 
-ast::type::Type* ParserImpl::ConvertType(
+type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Integer* int_ty) {
   if (int_ty->width() == 32) {
-    ast::type::Type* signed_ty = ast_module_.create<ast::type::I32>();
-    ast::type::Type* unsigned_ty = ast_module_.create<ast::type::U32>();
+    type::Type* signed_ty = ast_module_.create<type::I32>();
+    type::Type* unsigned_ty = ast_module_.create<type::U32>();
     signed_type_for_[unsigned_ty] = signed_ty;
     unsigned_type_for_[signed_ty] = unsigned_ty;
     return int_ty->IsSigned() ? signed_ty : unsigned_ty;
@@ -723,31 +723,31 @@ ast::type::Type* ParserImpl::ConvertType(
   return nullptr;
 }
 
-ast::type::Type* ParserImpl::ConvertType(
+type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Float* float_ty) {
   if (float_ty->width() == 32) {
-    return ast_module_.create<ast::type::F32>();
+    return ast_module_.create<type::F32>();
   }
   Fail() << "unhandled float width: " << float_ty->width();
   return nullptr;
 }
 
-ast::type::Type* ParserImpl::ConvertType(
+type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Vector* vec_ty) {
   const auto num_elem = vec_ty->element_count();
   auto* ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
   if (ast_elem_ty == nullptr) {
     return nullptr;
   }
-  auto* this_ty = ast_module_.create<ast::type::Vector>(ast_elem_ty, num_elem);
+  auto* this_ty = ast_module_.create<type::Vector>(ast_elem_ty, num_elem);
   // Generate the opposite-signedness vector type, if this type is integral.
   if (unsigned_type_for_.count(ast_elem_ty)) {
-    auto* other_ty = ast_module_.create<ast::type::Vector>(
+    auto* other_ty = ast_module_.create<type::Vector>(
         unsigned_type_for_[ast_elem_ty], num_elem);
     signed_type_for_[other_ty] = this_ty;
     unsigned_type_for_[this_ty] = other_ty;
   } else if (signed_type_for_.count(ast_elem_ty)) {
-    auto* other_ty = ast_module_.create<ast::type::Vector>(
+    auto* other_ty = ast_module_.create<type::Vector>(
         signed_type_for_[ast_elem_ty], num_elem);
     unsigned_type_for_[other_ty] = this_ty;
     signed_type_for_[this_ty] = other_ty;
@@ -755,7 +755,7 @@ ast::type::Type* ParserImpl::ConvertType(
   return this_ty;
 }
 
-ast::type::Type* ParserImpl::ConvertType(
+type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Matrix* mat_ty) {
   const auto* vec_ty = mat_ty->element_type()->AsVector();
   const auto* scalar_ty = vec_ty->element_type();
@@ -765,11 +765,10 @@ ast::type::Type* ParserImpl::ConvertType(
   if (ast_scalar_ty == nullptr) {
     return nullptr;
   }
-  return ast_module_.create<ast::type::Matrix>(ast_scalar_ty, num_rows,
-                                               num_columns);
+  return ast_module_.create<type::Matrix>(ast_scalar_ty, num_rows, num_columns);
 }
 
-ast::type::Type* ParserImpl::ConvertType(
+type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::RuntimeArray* rtarr_ty) {
   auto* ast_elem_ty = ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
   if (ast_elem_ty == nullptr) {
@@ -779,10 +778,10 @@ ast::type::Type* ParserImpl::ConvertType(
   if (!ParseArrayDecorations(rtarr_ty, &decorations)) {
     return nullptr;
   }
-  return create<ast::type::Array>(ast_elem_ty, 0, std::move(decorations));
+  return create<type::Array>(ast_elem_ty, 0, std::move(decorations));
 }
 
-ast::type::Type* ParserImpl::ConvertType(
+type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Array* arr_ty) {
   const auto elem_type_id = type_mgr_->GetId(arr_ty->element_type());
   auto* ast_elem_ty = ConvertType(elem_type_id);
@@ -824,8 +823,8 @@ ast::type::Type* ParserImpl::ConvertType(
   if (remap_buffer_block_type_.count(elem_type_id)) {
     remap_buffer_block_type_.insert(type_mgr_->GetId(arr_ty));
   }
-  return create<ast::type::Array>(ast_elem_ty, static_cast<uint32_t>(num_elem),
-                                  std::move(decorations));
+  return create<type::Array>(ast_elem_ty, static_cast<uint32_t>(num_elem),
+                             std::move(decorations));
 }
 
 bool ParserImpl::ParseArrayDecorations(
@@ -857,7 +856,7 @@ bool ParserImpl::ParseArrayDecorations(
   return true;
 }
 
-ast::type::Type* ParserImpl::ConvertType(
+type::Type* ParserImpl::ConvertType(
     uint32_t type_id,
     const spvtools::opt::analysis::Struct* struct_ty) {
   // Compute the struct decoration.
@@ -964,7 +963,7 @@ ast::type::Type* ParserImpl::ConvertType(
   namer_.SuggestSanitizedName(type_id, "S");
 
   auto name = namer_.GetName(type_id);
-  auto* result = ast_module_.create<ast::type::Struct>(
+  auto* result = ast_module_.create<type::Struct>(
       ast_module_.RegisterSymbol(name), ast_struct);
   id_to_type_[type_id] = result;
   if (num_non_writable_members == members.size()) {
@@ -974,9 +973,8 @@ ast::type::Type* ParserImpl::ConvertType(
   return result;
 }
 
-ast::type::Type* ParserImpl::ConvertType(
-    uint32_t type_id,
-    const spvtools::opt::analysis::Pointer*) {
+type::Type* ParserImpl::ConvertType(uint32_t type_id,
+                                    const spvtools::opt::analysis::Pointer*) {
   const auto* inst = def_use_mgr_->GetDef(type_id);
   const auto pointee_type_id = inst->GetSingleWordInOperand(1);
   const auto storage_class = SpvStorageClass(inst->GetSingleWordInOperand(0));
@@ -1005,7 +1003,7 @@ ast::type::Type* ParserImpl::ConvertType(
     ast_storage_class = ast::StorageClass::kStorage;
     remap_buffer_block_type_.insert(type_id);
   }
-  return ast_module_.create<ast::type::Pointer>(ast_elem_ty, ast_storage_class);
+  return ast_module_.create<type::Pointer>(ast_elem_ty, ast_storage_class);
 }
 
 bool ParserImpl::RegisterTypes() {
@@ -1038,7 +1036,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
   // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
   for (auto& inst : module_->types_values()) {
     // These will be populated for a valid scalar spec constant.
-    ast::type::Type* ast_type = nullptr;
+    type::Type* ast_type = nullptr;
     ast::ScalarConstructorExpression* ast_expr = nullptr;
 
     switch (inst.opcode()) {
@@ -1054,17 +1052,17 @@ bool ParserImpl::EmitScalarSpecConstants() {
       case SpvOpSpecConstant: {
         ast_type = ConvertType(inst.type_id());
         const uint32_t literal_value = inst.GetSingleWordInOperand(0);
-        if (ast_type->Is<ast::type::I32>()) {
+        if (ast_type->Is<type::I32>()) {
           ast_expr = create<ast::ScalarConstructorExpression>(
               Source{},
               create<ast::SintLiteral>(Source{}, ast_type,
                                        static_cast<int32_t>(literal_value)));
-        } else if (ast_type->Is<ast::type::U32>()) {
+        } else if (ast_type->Is<type::U32>()) {
           ast_expr = create<ast::ScalarConstructorExpression>(
               Source{},
               create<ast::UintLiteral>(Source{}, ast_type,
                                        static_cast<uint32_t>(literal_value)));
-        } else if (ast_type->Is<ast::type::F32>()) {
+        } else if (ast_type->Is<type::F32>()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
@@ -1131,7 +1129,7 @@ void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
     return;
   }
   const auto name = namer_.GetName(type_id);
-  auto* ast_alias_type = ast_module_.create<ast::type::Alias>(
+  auto* ast_alias_type = ast_module_.create<type::Alias>(
       ast_module_.RegisterSymbol(name), ast_underlying_type);
   // Record this new alias as the AST type for this SPIR-V ID.
   id_to_type_[type_id] = ast_alias_type;
@@ -1176,7 +1174,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     if (!success_) {
       return false;
     }
-    ast::type::Type* ast_type = nullptr;
+    type::Type* ast_type = nullptr;
     if (spirv_storage_class == SpvStorageClassUniformConstant) {
       // These are opaque handles: samplers or textures
       ast_type = GetTypeForHandleVar(var);
@@ -1190,15 +1188,14 @@ bool ParserImpl::EmitModuleScopeVariables() {
                          "SPIR-V type with ID: "
                       << var.type_id();
       }
-      if (!ast_type->Is<ast::type::Pointer>()) {
+      if (!ast_type->Is<type::Pointer>()) {
         return Fail() << "variable with ID " << var.result_id()
                       << " has non-pointer type " << var.type_id();
       }
     }
 
-    auto* ast_store_type = ast_type->As<ast::type::Pointer>()->type();
-    auto ast_storage_class =
-        ast_type->As<ast::type::Pointer>()->storage_class();
+    auto* ast_store_type = ast_type->As<type::Pointer>()->type();
+    auto ast_storage_class = ast_type->As<type::Pointer>()->storage_class();
     ast::Expression* ast_constructor = nullptr;
     if (var.NumInOperands() > 1) {
       // SPIR-V initializers are always constants.
@@ -1237,7 +1234,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
 ast::Variable* ParserImpl::MakeVariable(
     uint32_t id,
     ast::StorageClass sc,
-    ast::type::Type* type,
+    type::Type* type,
     bool is_const,
     ast::Expression* constructor,
     ast::VariableDecorationList decorations) {
@@ -1251,7 +1248,7 @@ ast::Variable* ParserImpl::MakeVariable(
     auto access = read_only_struct_types_.count(type)
                       ? ast::AccessControl::kReadOnly
                       : ast::AccessControl::kReadWrite;
-    type = ast_module_.create<ast::type::AccessControl>(access, type);
+    type = ast_module_.create<type::AccessControl>(access, type);
   }
 
   for (auto& deco : GetDecorationsFor(id)) {
@@ -1351,25 +1348,25 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   // So canonicalization should map that way too.
   // Currently "null<type>" is missing from the WGSL parser.
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
-  if (ast_type->Is<ast::type::U32>()) {
+  if (ast_type->Is<type::U32>()) {
     return {ast_type,
             create<ast::ScalarConstructorExpression>(
                 Source{}, create<ast::UintLiteral>(source, ast_type,
                                                    spirv_const->GetU32()))};
   }
-  if (ast_type->Is<ast::type::I32>()) {
+  if (ast_type->Is<type::I32>()) {
     return {ast_type,
             create<ast::ScalarConstructorExpression>(
                 Source{}, create<ast::SintLiteral>(source, ast_type,
                                                    spirv_const->GetS32()))};
   }
-  if (ast_type->Is<ast::type::F32>()) {
+  if (ast_type->Is<type::F32>()) {
     return {ast_type,
             create<ast::ScalarConstructorExpression>(
                 Source{}, create<ast::FloatLiteral>(source, ast_type,
                                                     spirv_const->GetFloat()))};
   }
-  if (ast_type->Is<ast::type::Bool>()) {
+  if (ast_type->Is<type::Bool>()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
@@ -1413,7 +1410,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   return {};
 }
 
-ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
+ast::Expression* ParserImpl::MakeNullValue(type::Type* type) {
   // TODO(dneto): Use the no-operands constructor syntax when it becomes
   // available in Tint.
   // https://github.com/gpuweb/gpuweb/issues/685
@@ -1427,23 +1424,23 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
   auto* original_type = type;
   type = type->UnwrapIfNeeded();
 
-  if (type->Is<ast::type::Bool>()) {
+  if (type->Is<type::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::BoolLiteral>(Source{}, type, false));
   }
-  if (type->Is<ast::type::U32>()) {
+  if (type->Is<type::U32>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::UintLiteral>(Source{}, type, 0u));
   }
-  if (type->Is<ast::type::I32>()) {
+  if (type->Is<type::I32>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::SintLiteral>(Source{}, type, 0));
   }
-  if (type->Is<ast::type::F32>()) {
+  if (type->Is<type::F32>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::FloatLiteral>(Source{}, type, 0.0f));
   }
-  if (const auto* vec_ty = type->As<ast::type::Vector>()) {
+  if (const auto* vec_ty = type->As<type::Vector>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < vec_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(vec_ty->type()));
@@ -1451,10 +1448,10 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(Source{}, type,
                                                   std::move(ast_components));
   }
-  if (const auto* mat_ty = type->As<ast::type::Matrix>()) {
+  if (const auto* mat_ty = type->As<type::Matrix>()) {
     // Matrix components are columns
     auto* column_ty =
-        ast_module_.create<ast::type::Vector>(mat_ty->type(), mat_ty->rows());
+        ast_module_.create<type::Vector>(mat_ty->type(), mat_ty->rows());
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < mat_ty->columns(); ++i) {
       ast_components.emplace_back(MakeNullValue(column_ty));
@@ -1462,7 +1459,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(Source{}, type,
                                                   std::move(ast_components));
   }
-  if (auto* arr_ty = type->As<ast::type::Array>()) {
+  if (auto* arr_ty = type->As<type::Array>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < arr_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(arr_ty->type()));
@@ -1470,7 +1467,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::type::Type* type) {
     return create<ast::TypeConstructorExpression>(Source{}, original_type,
                                                   std::move(ast_components));
   }
-  if (auto* struct_ty = type->As<ast::type::Struct>()) {
+  if (auto* struct_ty = type->As<type::Struct>()) {
     ast::ExpressionList ast_components;
     for (auto* member : struct_ty->impl()->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));
@@ -1529,9 +1526,8 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
   return std::move(expr);
 }
 
-ast::type::Type* ParserImpl::ForcedResultType(
-    const spvtools::opt::Instruction& inst,
-    ast::type::Type* first_operand_type) {
+type::Type* ParserImpl::ForcedResultType(const spvtools::opt::Instruction& inst,
+                                         type::Type* first_operand_type) {
   const auto opcode = inst.opcode();
   if (AssumesResultSignednessMatchesFirstOperand(opcode)) {
     return first_operand_type;
@@ -1546,37 +1542,36 @@ ast::type::Type* ParserImpl::ForcedResultType(
   return nullptr;
 }
 
-ast::type::Type* ParserImpl::GetSignedIntMatchingShape(ast::type::Type* other) {
+type::Type* ParserImpl::GetSignedIntMatchingShape(type::Type* other) {
   if (other == nullptr) {
     Fail() << "no type provided";
   }
-  auto* i32 = ast_module_.create<ast::type::I32>();
-  if (other->Is<ast::type::F32>() || other->Is<ast::type::U32>() ||
-      other->Is<ast::type::I32>()) {
+  auto* i32 = ast_module_.create<type::I32>();
+  if (other->Is<type::F32>() || other->Is<type::U32>() ||
+      other->Is<type::I32>()) {
     return i32;
   }
-  auto* vec_ty = other->As<ast::type::Vector>();
+  auto* vec_ty = other->As<type::Vector>();
   if (vec_ty) {
-    return ast_module_.create<ast::type::Vector>(i32, vec_ty->size());
+    return ast_module_.create<type::Vector>(i32, vec_ty->size());
   }
   Fail() << "required numeric scalar or vector, but got " << other->type_name();
   return nullptr;
 }
 
-ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
-    ast::type::Type* other) {
+type::Type* ParserImpl::GetUnsignedIntMatchingShape(type::Type* other) {
   if (other == nullptr) {
     Fail() << "no type provided";
     return nullptr;
   }
-  auto* u32 = ast_module_.create<ast::type::U32>();
-  if (other->Is<ast::type::F32>() || other->Is<ast::type::U32>() ||
-      other->Is<ast::type::I32>()) {
+  auto* u32 = ast_module_.create<type::U32>();
+  if (other->Is<type::F32>() || other->Is<type::U32>() ||
+      other->Is<type::I32>()) {
     return u32;
   }
-  auto* vec_ty = other->As<ast::type::Vector>();
+  auto* vec_ty = other->As<type::Vector>();
   if (vec_ty) {
-    return ast_module_.create<ast::type::Vector>(u32, vec_ty->size());
+    return ast_module_.create<type::Vector>(u32, vec_ty->size());
   }
   Fail() << "required numeric scalar or vector, but got " << other->type_name();
   return nullptr;
@@ -1585,7 +1580,7 @@ ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
 TypedExpression ParserImpl::RectifyForcedResultType(
     TypedExpression expr,
     const spvtools::opt::Instruction& inst,
-    ast::type::Type* first_operand_type) {
+    type::Type* first_operand_type) {
   auto* forced_result_ty = ForcedResultType(inst, first_operand_type);
   if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
     return expr;
@@ -1764,7 +1759,7 @@ ParserImpl::GetSpirvTypeForHandleMemoryObjectDeclaration(
   return raw_handle_type;
 }
 
-ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
+type::Pointer* ParserImpl::GetTypeForHandleVar(
     const spvtools::opt::Instruction& var) {
   auto where = handle_type_.find(&var);
   if (where != handle_type_.end()) {
@@ -1848,11 +1843,11 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
   }
 
   // Construct the Tint handle type.
-  ast::type::Type* ast_store_type = nullptr;
+  type::Type* ast_store_type = nullptr;
   if (usage.IsSampler()) {
-    ast_store_type = ast_module_.create<ast::type::Sampler>(
-        usage.IsComparisonSampler() ? ast::type::SamplerKind::kComparisonSampler
-                                    : ast::type::SamplerKind::kSampler);
+    ast_store_type = ast_module_.create<type::Sampler>(
+        usage.IsComparisonSampler() ? type::SamplerKind::kComparisonSampler
+                                    : type::SamplerKind::kSampler);
   } else if (usage.IsTexture()) {
     const spvtools::opt::analysis::Image* image_type =
         type_mgr_->GetType(raw_handle_type->result_id())->AsImage();
@@ -1862,9 +1857,9 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
       return nullptr;
     }
 
-    const ast::type::TextureDimension dim =
+    const type::TextureDimension dim =
         enum_converter_.ToDim(image_type->dim(), image_type->is_arrayed());
-    if (dim == ast::type::TextureDimension::kNone) {
+    if (dim == type::TextureDimension::kNone) {
       return nullptr;
     }
 
@@ -1881,13 +1876,13 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
       // OpImage variable with an OpImage*Dref* instruction.  In WGSL we must
       // treat that as a depth texture.
       if (image_type->depth() || usage.IsDepthTexture()) {
-        ast_store_type = ast_module_.create<ast::type::DepthTexture>(dim);
+        ast_store_type = ast_module_.create<type::DepthTexture>(dim);
       } else if (image_type->is_multisampled()) {
         // Multisampled textures are never depth textures.
-        ast_store_type = ast_module_.create<ast::type::MultisampledTexture>(
+        ast_store_type = ast_module_.create<type::MultisampledTexture>(
             dim, ast_sampled_component_type);
       } else {
-        ast_store_type = ast_module_.create<ast::type::SampledTexture>(
+        ast_store_type = ast_module_.create<type::SampledTexture>(
             dim, ast_sampled_component_type);
       }
     } else {
@@ -1895,11 +1890,11 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
                               ? ast::AccessControl::kReadOnly
                               : ast::AccessControl::kWriteOnly;
       const auto format = enum_converter_.ToImageFormat(image_type->format());
-      if (format == ast::type::ImageFormat::kNone) {
+      if (format == type::ImageFormat::kNone) {
         return nullptr;
       }
-      ast_store_type = ast_module_.create<ast::type::AccessControl>(
-          access, ast_module_.create<ast::type::StorageTexture>(dim, format));
+      ast_store_type = ast_module_.create<type::AccessControl>(
+          access, ast_module_.create<type::StorageTexture>(dim, format));
     }
   } else {
     Fail() << "unsupported: UniformConstant variable is not a recognized "
@@ -1909,56 +1904,55 @@ ast::type::Pointer* ParserImpl::GetTypeForHandleVar(
   }
 
   // Form the pointer type.
-  auto* result = ast_module_.create<ast::type::Pointer>(
+  auto* result = ast_module_.create<type::Pointer>(
       ast_store_type, ast::StorageClass::kUniformConstant);
   // Remember it for later.
   handle_type_[&var] = result;
   return result;
 }
 
-ast::type::Type* ParserImpl::GetComponentTypeForFormat(
-    ast::type::ImageFormat format) {
+type::Type* ParserImpl::GetComponentTypeForFormat(type::ImageFormat format) {
   switch (format) {
-    case ast::type::ImageFormat::kR8Uint:
-    case ast::type::ImageFormat::kR16Uint:
-    case ast::type::ImageFormat::kRg8Uint:
-    case ast::type::ImageFormat::kR32Uint:
-    case ast::type::ImageFormat::kRg16Uint:
-    case ast::type::ImageFormat::kRgba8Uint:
-    case ast::type::ImageFormat::kRg32Uint:
-    case ast::type::ImageFormat::kRgba16Uint:
-    case ast::type::ImageFormat::kRgba32Uint:
-      return ast_module_.create<ast::type::U32>();
+    case type::ImageFormat::kR8Uint:
+    case type::ImageFormat::kR16Uint:
+    case type::ImageFormat::kRg8Uint:
+    case type::ImageFormat::kR32Uint:
+    case type::ImageFormat::kRg16Uint:
+    case type::ImageFormat::kRgba8Uint:
+    case type::ImageFormat::kRg32Uint:
+    case type::ImageFormat::kRgba16Uint:
+    case type::ImageFormat::kRgba32Uint:
+      return ast_module_.create<type::U32>();
 
-    case ast::type::ImageFormat::kR8Sint:
-    case ast::type::ImageFormat::kR16Sint:
-    case ast::type::ImageFormat::kRg8Sint:
-    case ast::type::ImageFormat::kR32Sint:
-    case ast::type::ImageFormat::kRg16Sint:
-    case ast::type::ImageFormat::kRgba8Sint:
-    case ast::type::ImageFormat::kRg32Sint:
-    case ast::type::ImageFormat::kRgba16Sint:
-    case ast::type::ImageFormat::kRgba32Sint:
-      return ast_module_.create<ast::type::I32>();
+    case type::ImageFormat::kR8Sint:
+    case type::ImageFormat::kR16Sint:
+    case type::ImageFormat::kRg8Sint:
+    case type::ImageFormat::kR32Sint:
+    case type::ImageFormat::kRg16Sint:
+    case type::ImageFormat::kRgba8Sint:
+    case type::ImageFormat::kRg32Sint:
+    case type::ImageFormat::kRgba16Sint:
+    case type::ImageFormat::kRgba32Sint:
+      return ast_module_.create<type::I32>();
 
-    case ast::type::ImageFormat::kR8Unorm:
-    case ast::type::ImageFormat::kRg8Unorm:
-    case ast::type::ImageFormat::kRgba8Unorm:
-    case ast::type::ImageFormat::kRgba8UnormSrgb:
-    case ast::type::ImageFormat::kBgra8Unorm:
-    case ast::type::ImageFormat::kBgra8UnormSrgb:
-    case ast::type::ImageFormat::kRgb10A2Unorm:
-    case ast::type::ImageFormat::kR8Snorm:
-    case ast::type::ImageFormat::kRg8Snorm:
-    case ast::type::ImageFormat::kRgba8Snorm:
-    case ast::type::ImageFormat::kR16Float:
-    case ast::type::ImageFormat::kR32Float:
-    case ast::type::ImageFormat::kRg16Float:
-    case ast::type::ImageFormat::kRg11B10Float:
-    case ast::type::ImageFormat::kRg32Float:
-    case ast::type::ImageFormat::kRgba16Float:
-    case ast::type::ImageFormat::kRgba32Float:
-      return ast_module_.create<ast::type::F32>();
+    case type::ImageFormat::kR8Unorm:
+    case type::ImageFormat::kRg8Unorm:
+    case type::ImageFormat::kRgba8Unorm:
+    case type::ImageFormat::kRgba8UnormSrgb:
+    case type::ImageFormat::kBgra8Unorm:
+    case type::ImageFormat::kBgra8UnormSrgb:
+    case type::ImageFormat::kRgb10A2Unorm:
+    case type::ImageFormat::kR8Snorm:
+    case type::ImageFormat::kRg8Snorm:
+    case type::ImageFormat::kRgba8Snorm:
+    case type::ImageFormat::kR16Float:
+    case type::ImageFormat::kR32Float:
+    case type::ImageFormat::kRg16Float:
+    case type::ImageFormat::kRg11B10Float:
+    case type::ImageFormat::kRg32Float:
+    case type::ImageFormat::kRgba16Float:
+    case type::ImageFormat::kRgba32Float:
+      return ast_module_.create<type::F32>();
     default:
       break;
   }
@@ -1966,57 +1960,56 @@ ast::type::Type* ParserImpl::GetComponentTypeForFormat(
   return nullptr;
 }
 
-ast::type::Type* ParserImpl::GetTexelTypeForFormat(
-    ast::type::ImageFormat format) {
+type::Type* ParserImpl::GetTexelTypeForFormat(type::ImageFormat format) {
   auto* component_type = GetComponentTypeForFormat(format);
   if (!component_type) {
     return nullptr;
   }
 
   switch (format) {
-    case ast::type::ImageFormat::kR16Float:
-    case ast::type::ImageFormat::kR16Sint:
-    case ast::type::ImageFormat::kR16Uint:
-    case ast::type::ImageFormat::kR32Float:
-    case ast::type::ImageFormat::kR32Sint:
-    case ast::type::ImageFormat::kR32Uint:
-    case ast::type::ImageFormat::kR8Sint:
-    case ast::type::ImageFormat::kR8Snorm:
-    case ast::type::ImageFormat::kR8Uint:
-    case ast::type::ImageFormat::kR8Unorm:
+    case type::ImageFormat::kR16Float:
+    case type::ImageFormat::kR16Sint:
+    case type::ImageFormat::kR16Uint:
+    case type::ImageFormat::kR32Float:
+    case type::ImageFormat::kR32Sint:
+    case type::ImageFormat::kR32Uint:
+    case type::ImageFormat::kR8Sint:
+    case type::ImageFormat::kR8Snorm:
+    case type::ImageFormat::kR8Uint:
+    case type::ImageFormat::kR8Unorm:
       // One channel
       return component_type;
 
-    case ast::type::ImageFormat::kRg11B10Float:
-    case ast::type::ImageFormat::kRg16Float:
-    case ast::type::ImageFormat::kRg16Sint:
-    case ast::type::ImageFormat::kRg16Uint:
-    case ast::type::ImageFormat::kRg32Float:
-    case ast::type::ImageFormat::kRg32Sint:
-    case ast::type::ImageFormat::kRg32Uint:
-    case ast::type::ImageFormat::kRg8Sint:
-    case ast::type::ImageFormat::kRg8Snorm:
-    case ast::type::ImageFormat::kRg8Uint:
-    case ast::type::ImageFormat::kRg8Unorm:
+    case type::ImageFormat::kRg11B10Float:
+    case type::ImageFormat::kRg16Float:
+    case type::ImageFormat::kRg16Sint:
+    case type::ImageFormat::kRg16Uint:
+    case type::ImageFormat::kRg32Float:
+    case type::ImageFormat::kRg32Sint:
+    case type::ImageFormat::kRg32Uint:
+    case type::ImageFormat::kRg8Sint:
+    case type::ImageFormat::kRg8Snorm:
+    case type::ImageFormat::kRg8Uint:
+    case type::ImageFormat::kRg8Unorm:
       // Two channels
-      return ast_module_.create<ast::type::Vector>(component_type, 2);
+      return ast_module_.create<type::Vector>(component_type, 2);
 
-    case ast::type::ImageFormat::kBgra8Unorm:
-    case ast::type::ImageFormat::kBgra8UnormSrgb:
-    case ast::type::ImageFormat::kRgb10A2Unorm:
-    case ast::type::ImageFormat::kRgba16Float:
-    case ast::type::ImageFormat::kRgba16Sint:
-    case ast::type::ImageFormat::kRgba16Uint:
-    case ast::type::ImageFormat::kRgba32Float:
-    case ast::type::ImageFormat::kRgba32Sint:
-    case ast::type::ImageFormat::kRgba32Uint:
-    case ast::type::ImageFormat::kRgba8Sint:
-    case ast::type::ImageFormat::kRgba8Snorm:
-    case ast::type::ImageFormat::kRgba8Uint:
-    case ast::type::ImageFormat::kRgba8Unorm:
-    case ast::type::ImageFormat::kRgba8UnormSrgb:
+    case type::ImageFormat::kBgra8Unorm:
+    case type::ImageFormat::kBgra8UnormSrgb:
+    case type::ImageFormat::kRgb10A2Unorm:
+    case type::ImageFormat::kRgba16Float:
+    case type::ImageFormat::kRgba16Sint:
+    case type::ImageFormat::kRgba16Uint:
+    case type::ImageFormat::kRgba32Float:
+    case type::ImageFormat::kRgba32Sint:
+    case type::ImageFormat::kRgba32Uint:
+    case type::ImageFormat::kRgba8Sint:
+    case type::ImageFormat::kRgba8Snorm:
+    case type::ImageFormat::kRgba8Uint:
+    case type::ImageFormat::kRgba8Unorm:
+    case type::ImageFormat::kRgba8UnormSrgb:
       // Four channels
-      return ast_module_.create<ast::type::Vector>(component_type, 4);
+      return ast_module_.create<type::Vector>(component_type, 4);
 
     default:
       break;

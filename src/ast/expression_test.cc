@@ -15,8 +15,8 @@
 #include "src/ast/expression.h"
 
 #include "src/ast/test_helper.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/i32_type.h"
+#include "src/type/alias_type.h"
+#include "src/type/i32_type.h"
 
 namespace tint {
 namespace ast {

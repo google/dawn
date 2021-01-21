@@ -20,7 +20,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/type/i32_type.h"
+#include "src/type/i32_type.h"
 
 namespace tint {
 namespace ast {

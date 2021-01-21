@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "src/ast/node.h"
-#include "src/ast/type/type.h"
+#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

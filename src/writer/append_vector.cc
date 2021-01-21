@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "src/ast/expression.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace writer {
@@ -27,7 +27,7 @@ namespace {
 
 ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
   if (auto* constructor = expr->As<ast::TypeConstructorExpression>()) {
-    if (constructor->type()->Is<ast::type::Vector>()) {
+    if (constructor->type()->Is<type::Vector>()) {
       return constructor;
     }
   }
@@ -41,8 +41,8 @@ bool AppendVector(
     ast::Expression* scalar,
     std::function<bool(ast::TypeConstructorExpression*)> callback) {
   uint32_t packed_size;
-  ast::type::Type* packed_el_ty;  // Currently must be f32.
-  if (auto* vec = vector->result_type()->As<ast::type::Vector>()) {
+  type::Type* packed_el_ty;  // Currently must be f32.
+  if (auto* vec = vector->result_type()->As<type::Vector>()) {
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
   } else {
@@ -58,7 +58,7 @@ bool AppendVector(
   ast::TypeConstructorExpression scalar_cast(Source{}, packed_el_ty, {scalar});
   scalar_cast.set_result_type(packed_el_ty);
 
-  ast::type::Vector packed_ty(packed_el_ty, packed_size);
+  type::Vector packed_ty(packed_el_ty, packed_size);
 
   // If the coordinates are already passed in a vector constructor, extract
   // the elements into the new vector instead of nesting a vector-in-vector.

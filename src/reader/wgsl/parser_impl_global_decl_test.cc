@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/array_type.h"
+#include "src/type/struct_type.h"
 
 namespace tint {
 namespace reader {
@@ -88,10 +88,10 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
 
   auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 1u);
-  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::Alias>());
-  EXPECT_EQ(m.SymbolToName(
-                m.constructed_types()[0]->As<ast::type::Alias>()->symbol()),
-            "A");
+  ASSERT_TRUE(m.constructed_types()[0]->Is<type::Alias>());
+  EXPECT_EQ(
+      m.SymbolToName(m.constructed_types()[0]->As<type::Alias>()->symbol()),
+      "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -105,12 +105,12 @@ type B = A;)");
 
   auto& m = p->get_module();
   ASSERT_EQ(m.constructed_types().size(), 2u);
-  ASSERT_TRUE(m.constructed_types()[0]->Is<ast::type::Struct>());
-  auto* str = m.constructed_types()[0]->As<ast::type::Struct>();
+  ASSERT_TRUE(m.constructed_types()[0]->Is<type::Struct>());
+  auto* str = m.constructed_types()[0]->As<type::Struct>();
   EXPECT_EQ(str->symbol(), p->get_module().RegisterSymbol("A"));
 
-  ASSERT_TRUE(m.constructed_types()[1]->Is<ast::type::Alias>());
-  auto* alias = m.constructed_types()[1]->As<ast::type::Alias>();
+  ASSERT_TRUE(m.constructed_types()[1]->Is<type::Alias>());
+  auto* alias = m.constructed_types()[1]->As<type::Alias>();
   EXPECT_EQ(alias->symbol(), p->get_module().RegisterSymbol("B"));
   EXPECT_EQ(alias->type(), str);
 }
@@ -166,9 +166,9 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Struct>());
+  ASSERT_TRUE(t->Is<type::Struct>());
 
-  auto* str = t->As<ast::type::Struct>();
+  auto* str = t->As<type::Struct>();
   EXPECT_EQ(str->symbol(), p->get_module().RegisterSymbol("A"));
   EXPECT_EQ(str->impl()->members().size(), 2u);
 }
@@ -185,16 +185,16 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Struct>());
+  ASSERT_TRUE(t->Is<type::Struct>());
 
-  auto* str = t->As<ast::type::Struct>();
+  auto* str = t->As<type::Struct>();
   EXPECT_EQ(str->symbol(), p->get_module().RegisterSymbol("A"));
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
 
   const auto* ty = str->impl()->members()[0]->type();
-  ASSERT_TRUE(ty->Is<ast::type::Array>());
-  const auto* arr = ty->As<ast::type::Array>();
+  ASSERT_TRUE(ty->Is<type::Array>());
+  const auto* arr = ty->As<type::Array>();
   EXPECT_TRUE(arr->has_array_stride());
   EXPECT_EQ(arr->array_stride(), 4u);
 }
@@ -209,9 +209,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
 
   auto* t = m.constructed_types()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<ast::type::Struct>());
+  ASSERT_TRUE(t->Is<type::Struct>());
 
-  auto* str = t->As<ast::type::Struct>();
+  auto* str = t->As<type::Struct>();
   EXPECT_EQ(str->symbol(), p->get_module().RegisterSymbol("A"));
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_TRUE(str->IsBlockDecorated());

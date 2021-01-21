@@ -15,11 +15,11 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/f32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 
 namespace tint {
 namespace reader {
@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
   auto p = parser("void");
 
   auto& mod = p->get_module();
-  auto* v = mod.create<ast::type::Void>();
+  auto* v = mod.create<type::Void>();
 
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);
@@ -43,8 +43,8 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
   auto p = parser("vec2<f32>");
 
   auto& mod = p->get_module();
-  auto* f32 = mod.create<ast::type::F32>();
-  auto* vec2 = mod.create<ast::type::Vector>(f32, 2);
+  auto* f32 = mod.create<type::F32>();
+  auto* vec2 = mod.create<type::Vector>(f32, 2);
 
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);

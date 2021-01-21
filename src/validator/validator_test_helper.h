@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "src/ast/builder.h"
-#include "src/ast/type/void_type.h"
+#include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/validator/validator_impl.h"
 

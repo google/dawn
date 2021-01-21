@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/type/texture_type.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/texture_type.h"
 
 namespace tint {
 namespace reader {
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, SampledTextureType_1d_Old) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k1d);
+  EXPECT_EQ(t.value, type::TextureDimension::k1d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -44,7 +44,7 @@ TEST_F(ParserImplTest, SampledTextureType_1dArray_Old) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k1dArray);
+  EXPECT_EQ(t.value, type::TextureDimension::k1dArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, SampledTextureType_2d_Old) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k2d);
+  EXPECT_EQ(t.value, type::TextureDimension::k2d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, SampledTextureType_2dArray_Old) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k2dArray);
+  EXPECT_EQ(t.value, type::TextureDimension::k2dArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, SampledTextureType_3d_Old) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k3d);
+  EXPECT_EQ(t.value, type::TextureDimension::k3d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, SampledTextureType_Cube_Old) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::kCube);
+  EXPECT_EQ(t.value, type::TextureDimension::kCube);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, SampledTextureType_kCubeArray_Old) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::kCubeArray);
+  EXPECT_EQ(t.value, type::TextureDimension::kCubeArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, SampledTextureType_1d) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k1d);
+  EXPECT_EQ(t.value, type::TextureDimension::k1d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -107,7 +107,7 @@ TEST_F(ParserImplTest, SampledTextureType_1dArray) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k1dArray);
+  EXPECT_EQ(t.value, type::TextureDimension::k1dArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -116,7 +116,7 @@ TEST_F(ParserImplTest, SampledTextureType_2d) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k2d);
+  EXPECT_EQ(t.value, type::TextureDimension::k2d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -125,7 +125,7 @@ TEST_F(ParserImplTest, SampledTextureType_2dArray) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k2dArray);
+  EXPECT_EQ(t.value, type::TextureDimension::k2dArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -134,7 +134,7 @@ TEST_F(ParserImplTest, SampledTextureType_3d) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::k3d);
+  EXPECT_EQ(t.value, type::TextureDimension::k3d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -143,7 +143,7 @@ TEST_F(ParserImplTest, SampledTextureType_Cube) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::kCube);
+  EXPECT_EQ(t.value, type::TextureDimension::kCube);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -152,7 +152,7 @@ TEST_F(ParserImplTest, SampledTextureType_kCubeArray) {
   auto t = p->sampled_texture_type();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::type::TextureDimension::kCubeArray);
+  EXPECT_EQ(t.value, type::TextureDimension::kCubeArray);
   EXPECT_FALSE(p->has_error());
 }
 

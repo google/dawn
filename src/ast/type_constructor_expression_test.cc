@@ -20,8 +20,8 @@
 #include "src/ast/constructor_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/vector_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace ast {

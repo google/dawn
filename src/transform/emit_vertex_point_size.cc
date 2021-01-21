@@ -23,9 +23,9 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type_manager.h"
 #include "src/ast/variable.h"
+#include "src/type/f32_type.h"
+#include "src/type/type_manager.h"
 
 namespace tint {
 namespace transform {
@@ -47,7 +47,7 @@ Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
     return out;
   }
 
-  auto* f32 = out.module.create<ast::type::F32>();
+  auto* f32 = out.module.create<type::F32>();
 
   // Declare the pointsize builtin output variable.
   auto* pointsize_var = out.module.create<ast::Variable>(

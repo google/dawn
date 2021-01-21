@@ -144,15 +144,16 @@ class ValidatorImpl {
   /// @param constructed_types the types to check
   /// @returns true if the valdiation was successful
   bool ValidateConstructedTypes(
-      const std::vector<ast::type::Type*>& constructed_types);
+      const std::vector<type::Type*>& constructed_types);
 
   /// Returns true if the given type is storable. This uses and
   /// updates `storable_` and `not_storable_`.
   /// @param type the given type
   /// @returns true if the given type is storable.
-  bool IsStorable(ast::type::Type* type);
+  bool IsStorable(type::Type* type);
 
   /// Testing method to inserting a given variable into the current scope.
+  /// @param var the variable to register
   void RegisterVariableForTesting(ast::Variable* var) {
     variable_stack_.set(var->symbol(), var);
   }

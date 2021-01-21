@@ -19,7 +19,7 @@
 #include "src/ast/null_literal.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/type/u32_type.h"
+#include "src/type/u32_type.h"
 
 namespace tint {
 namespace ast {

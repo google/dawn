@@ -20,7 +20,7 @@
 
 #include "src/ast/expression.h"
 #include "src/ast/literal.h"
-#include "src/ast/type/type.h"
+#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

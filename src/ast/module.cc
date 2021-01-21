@@ -17,7 +17,7 @@
 #include <sstream>
 
 #include "src/ast/clone_context.h"
-#include "src/ast/type/struct_type.h"
+#include "src/type/struct_type.h"
 
 namespace tint {
 namespace ast {

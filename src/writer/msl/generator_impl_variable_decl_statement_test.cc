@@ -23,13 +23,13 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/array_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/vector_type.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 
@@ -61,7 +61,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
-  ast::type::Array ary(ty.f32, 5, ast::ArrayDecorationList{});
+  type::Array ary(ty.f32, 5, ast::ArrayDecorationList{});
 
   auto* var = Var("a", ast::StorageClass::kNone, &ary);
   auto* stmt = create<ast::VariableDeclStatement>(var);

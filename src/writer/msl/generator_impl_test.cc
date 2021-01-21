@@ -26,17 +26,17 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 #include "src/writer/msl/namer.h"
 #include "src/writer/msl/test_helper.h"
 
@@ -137,7 +137,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_matrix) {
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_pointer) {
-  ast::type::Pointer ptr(ty.bool_, ast::StorageClass::kPrivate);
+  type::Pointer ptr(ty.bool_, ast::StorageClass::kPrivate);
   EXPECT_EQ(0u, gen.calculate_alignment_size(&ptr));
 }
 
@@ -187,7 +187,7 @@ using MslVectorSizeBoolTest = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeBoolTest, calculate) {
   auto param = GetParam();
 
-  ast::type::Vector vec(ty.bool_, param.elements);
+  type::Vector vec(ty.bool_, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -200,7 +200,7 @@ using MslVectorSizeI32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeI32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::Vector vec(ty.i32, param.elements);
+  type::Vector vec(ty.i32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -213,7 +213,7 @@ using MslVectorSizeU32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeU32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::Vector vec(ty.u32, param.elements);
+  type::Vector vec(ty.u32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -226,7 +226,7 @@ using MslVectorSizeF32Test = TestParamHelper<MslVectorSizeData>;
 TEST_P(MslVectorSizeF32Test, calculate) {
   auto param = GetParam();
 
-  ast::type::Vector vec(ty.f32, param.elements);
+  type::Vector vec(ty.f32, param.elements);
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,

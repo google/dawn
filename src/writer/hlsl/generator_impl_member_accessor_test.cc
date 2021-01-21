@@ -25,10 +25,10 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
+#include "src/type/struct_type.h"
+#include "src/type/vector_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 
@@ -352,10 +352,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[2];
   //
   // -> asint(data.Load((2 * 4));
-  ast::type::Array ary(ty.i32, 5,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(4),
-                       });
+  type::Array ary(ty.i32, 5,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(4),
+                  });
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
@@ -384,10 +384,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[(2 + 4) - 3];
   //
   // -> asint(data.Load((4 * ((2 + 4) - 3)));
-  ast::type::Array ary(ty.i32, 5,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(4),
-                       });
+  type::Array ary(ty.i32, 5,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(4),
+                  });
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
@@ -453,10 +453,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store((2 * 4), asuint(2.3f));
 
-  ast::type::Array ary(ty.i32, 5,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(4),
-                       });
+  type::Array ary(ty.i32, 5,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(4),
+                  });
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
@@ -608,10 +608,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* data = ty.struct_("Data", data_str);
-  ast::type::Array ary(data, 4,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(32),
-                       });
+  type::Array ary(data, 4,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(32),
+                  });
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
@@ -657,8 +657,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* data = ty.struct_("Data", data_str);
-  ast::type::Array ary(
-      data, 4, ast::ArrayDecorationList{create<ast::StrideDecoration>(32)});
+  type::Array ary(data, 4,
+                  ast::ArrayDecorationList{create<ast::StrideDecoration>(32)});
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
@@ -706,10 +706,10 @@ TEST_F(
       ast::StructDecorationList{});
 
   auto* data = ty.struct_("Data", data_str);
-  ast::type::Array ary(data, 4,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(32),
-                       });
+  type::Array ary(data, 4,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(32),
+                  });
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
@@ -756,10 +756,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* data = ty.struct_("Data", data_str);
-  ast::type::Array ary(data, 4,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(32),
-                       });
+  type::Array ary(data, 4,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(32),
+                  });
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
@@ -806,10 +806,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* data = ty.struct_("Data", data_str);
-  ast::type::Array ary(data, 4,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(32),
-                       });
+  type::Array ary(data, 4,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(32),
+                  });
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
@@ -860,10 +860,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* data = ty.struct_("Data", data_str);
-  ast::type::Array ary(data, 4,
-                       ast::ArrayDecorationList{
-                           create<ast::StrideDecoration>(32),
-                       });
+  type::Array ary(data, 4,
+                  ast::ArrayDecorationList{
+                      create<ast::StrideDecoration>(32),
+                  });
 
   auto* pre_str = create<ast::Struct>(
       ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},

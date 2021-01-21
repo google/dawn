@@ -15,7 +15,7 @@
 #include "src/reader/wgsl/parser_impl.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/type/i32_type.h"
+#include "src/type/i32_type.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {

@@ -39,27 +39,27 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/depth_texture_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/type/access_control_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/depth_texture_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "tint/tint.h"
 
@@ -72,8 +72,8 @@ class InspectorHelper : public ast::BuilderWithModule {
   InspectorHelper()
       : td_(std::make_unique<TypeDeterminer>(mod)),
         inspector_(std::make_unique<Inspector>(*mod)),
-        sampler_type_(ast::type::SamplerKind::kSampler),
-        comparison_sampler_type_(ast::type::SamplerKind::kComparisonSampler) {}
+        sampler_type_(type::SamplerKind::kSampler),
+        comparison_sampler_type_(type::SamplerKind::kComparisonSampler) {}
 
   /// Generates an empty function
   /// @param name name of the function created
@@ -177,10 +177,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param val value to initialize the variable with, if NULL no initializer
   ///            will be added.
   template <class T>
-  void AddConstantID(std::string name,
-                     uint32_t id,
-                     ast::type::Type* type,
-                     T* val) {
+  void AddConstantID(std::string name, uint32_t id, type::Type* type, T* val) {
     ast::Expression* constructor = nullptr;
     if (val) {
       constructor =
@@ -196,28 +193,28 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param type AST type of the literal, must resolve to BoolLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(ast::type::Type* type, bool* val) {
+  ast::Literal* MakeLiteral(type::Type* type, bool* val) {
     return create<ast::BoolLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to UIntLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(ast::type::Type* type, uint32_t* val) {
+  ast::Literal* MakeLiteral(type::Type* type, uint32_t* val) {
     return create<ast::UintLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to IntLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(ast::type::Type* type, int32_t* val) {
+  ast::Literal* MakeLiteral(type::Type* type, int32_t* val) {
     return create<ast::SintLiteral>(type, *val);
   }
 
   /// @param type AST type of the literal, must resolve to FloattLiteral
   /// @param val scalar value for the literal to contain
   /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(ast::type::Type* type, float* val) {
+  ast::Literal* MakeLiteral(type::Type* type, float* val) {
     return create<ast::FloatLiteral>(type, *val);
   }
 
@@ -238,7 +235,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param idx index of member
   /// @param type type of member
   /// @returns a string for the member
-  std::string StructMemberName(size_t idx, ast::type::Type* type) {
+  std::string StructMemberName(size_t idx, type::Type* type) {
     return std::to_string(idx) + type->type_name();
   }
 
@@ -248,13 +245,13 @@ class InspectorHelper : public ast::BuilderWithModule {
   ///                     type and offset of a member of the struct
   /// @param is_block whether or not to decorate as a Block
   /// @returns a struct type
-  ast::type::Struct* MakeStructType(
+  type::Struct* MakeStructType(
       const std::string& name,
-      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info,
+      std::vector<std::tuple<type::Type*, uint32_t>> members_info,
       bool is_block) {
     ast::StructMemberList members;
     for (auto& member_info : members_info) {
-      ast::type::Type* type;
+      type::Type* type;
       uint32_t offset;
       std::tie(type, offset) = member_info;
 
@@ -278,12 +275,12 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for an uniform buffer, and the control type wraps the
   ///          struct.
-  std::tuple<ast::type::Struct*, std::unique_ptr<ast::type::AccessControl>>
+  std::tuple<type::Struct*, std::unique_ptr<type::AccessControl>>
   MakeUniformBufferTypes(
       const std::string& name,
-      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
+      std::vector<std::tuple<type::Type*, uint32_t>> members_info) {
     auto* struct_type = MakeStructType(name, members_info, true);
-    auto access_type = std::make_unique<ast::type::AccessControl>(
+    auto access_type = std::make_unique<type::AccessControl>(
         ast::AccessControl::kReadOnly, struct_type);
     return {struct_type, std::move(access_type)};
   }
@@ -295,12 +292,12 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for a storage buffer, and the control type wraps the
   ///          struct.
-  std::tuple<ast::type::Struct*, std::unique_ptr<ast::type::AccessControl>>
+  std::tuple<type::Struct*, std::unique_ptr<type::AccessControl>>
   MakeStorageBufferTypes(
       const std::string& name,
-      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
+      std::vector<std::tuple<type::Type*, uint32_t>> members_info) {
     auto* struct_type = MakeStructType(name, members_info, false);
-    auto access_type = std::make_unique<ast::type::AccessControl>(
+    auto access_type = std::make_unique<type::AccessControl>(
         ast::AccessControl::kReadWrite, struct_type);
     return {struct_type, std::move(access_type)};
   }
@@ -312,12 +309,12 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for a read-only storage buffer, and the control type
   ///          wraps the struct.
-  std::tuple<ast::type::Struct*, std::unique_ptr<ast::type::AccessControl>>
+  std::tuple<type::Struct*, std::unique_ptr<type::AccessControl>>
   MakeReadOnlyStorageBufferTypes(
       const std::string& name,
-      std::vector<std::tuple<ast::type::Type*, uint32_t>> members_info) {
+      std::vector<std::tuple<type::Type*, uint32_t>> members_info) {
     auto* struct_type = MakeStructType(name, members_info, false);
-    auto access_type = std::make_unique<ast::type::AccessControl>(
+    auto access_type = std::make_unique<type::AccessControl>(
         ast::AccessControl::kReadOnly, struct_type);
     return {struct_type, std::move(access_type)};
   }
@@ -329,7 +326,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param group the binding and group to use for the uniform buffer
   /// @param binding the binding number to use for the uniform buffer
   void AddBinding(const std::string& name,
-                  ast::type::Type* type,
+                  type::Type* type,
                   ast::StorageClass storage_class,
                   uint32_t group,
                   uint32_t binding) {
@@ -348,7 +345,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param group the binding/group/ to use for the uniform buffer
   /// @param binding the binding number to use for the uniform buffer
   void AddUniformBuffer(const std::string& name,
-                        ast::type::Type* type,
+                        type::Type* type,
                         uint32_t group,
                         uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kUniform, group, binding);
@@ -360,7 +357,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
   void AddStorageBuffer(const std::string& name,
-                        ast::type::Type* type,
+                        type::Type* type,
                         uint32_t group,
                         uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kStorage, group, binding);
@@ -374,11 +371,11 @@ class InspectorHelper : public ast::BuilderWithModule {
   ast::Function* MakeStructVariableReferenceBodyFunction(
       std::string func_name,
       std::string struct_name,
-      std::vector<std::tuple<size_t, ast::type::Type*>> members) {
+      std::vector<std::tuple<size_t, type::Type*>> members) {
     ast::StatementList stmts;
     for (auto member : members) {
       size_t member_idx;
-      ast::type::Type* member_type;
+      type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
 
@@ -388,7 +385,7 @@ class InspectorHelper : public ast::BuilderWithModule {
 
     for (auto member : members) {
       size_t member_idx;
-      ast::type::Type* member_type;
+      type::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
 
@@ -427,28 +424,28 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param dim the dimensions of the texture
   /// @param type the data type of the sampled texture
   /// @returns the generated SampleTextureType
-  std::unique_ptr<ast::type::SampledTexture> MakeSampledTextureType(
-      ast::type::TextureDimension dim,
-      ast::type::Type* type) {
-    return std::make_unique<ast::type::SampledTexture>(dim, type);
+  std::unique_ptr<type::SampledTexture> MakeSampledTextureType(
+      type::TextureDimension dim,
+      type::Type* type) {
+    return std::make_unique<type::SampledTexture>(dim, type);
   }
 
   /// Generates a DepthTexture appropriate for the params
   /// @param dim the dimensions of the texture
   /// @returns the generated DepthTexture
-  std::unique_ptr<ast::type::DepthTexture> MakeDepthTextureType(
-      ast::type::TextureDimension dim) {
-    return std::make_unique<ast::type::DepthTexture>(dim);
+  std::unique_ptr<type::DepthTexture> MakeDepthTextureType(
+      type::TextureDimension dim) {
+    return std::make_unique<type::DepthTexture>(dim);
   }
 
   /// Generates a MultisampledTexture appropriate for the params
   /// @param dim the dimensions of the texture
   /// @param type the data type of the sampled texture
   /// @returns the generated SampleTextureType
-  std::unique_ptr<ast::type::MultisampledTexture> MakeMultisampledTextureType(
-      ast::type::TextureDimension dim,
-      ast::type::Type* type) {
-    return std::make_unique<ast::type::MultisampledTexture>(dim, type);
+  std::unique_ptr<type::MultisampledTexture> MakeMultisampledTextureType(
+      type::TextureDimension dim,
+      type::Type* type) {
+    return std::make_unique<type::MultisampledTexture>(dim, type);
   }
 
   /// Adds a sampled texture variable to the module
@@ -457,7 +454,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param group the binding/group to use for the sampled texture
   /// @param binding the binding number to use for the sampled texture
   void AddSampledTexture(const std::string& name,
-                         ast::type::Type* type,
+                         type::Type* type,
                          uint32_t group,
                          uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
@@ -469,13 +466,13 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param group the binding/group to use for the multi-sampled texture
   /// @param binding the binding number to use for the multi-sampled texture
   void AddMultisampledTexture(const std::string& name,
-                              ast::type::Type* type,
+                              type::Type* type,
                               uint32_t group,
                               uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
   }
 
-  void AddGlobalVariable(const std::string& name, ast::type::Type* type) {
+  void AddGlobalVariable(const std::string& name, type::Type* type) {
     mod->AddGlobalVariable(
         Var(name, ast::StorageClass::kUniformConstant, type));
   }
@@ -483,7 +480,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// Adds a depth texture variable to the module
   /// @param name the name of the variable
   /// @param type the type to use
-  void AddDepthTexture(const std::string& name, ast::type::Type* type) {
+  void AddDepthTexture(const std::string& name, type::Type* type) {
     mod->AddGlobalVariable(
         Var(name, ast::StorageClass::kUniformConstant, type));
   }
@@ -501,7 +498,7 @@ class InspectorHelper : public ast::BuilderWithModule {
       const std::string& texture_name,
       const std::string& sampler_name,
       const std::string& coords_name,
-      ast::type::Type* base_type,
+      type::Type* base_type,
       ast::FunctionDecorationList decorations) {
     std::string result_name = "sampler_result";
 
@@ -533,7 +530,7 @@ class InspectorHelper : public ast::BuilderWithModule {
       const std::string& sampler_name,
       const std::string& coords_name,
       const std::string& array_index,
-      ast::type::Type* base_type,
+      type::Type* base_type,
       ast::FunctionDecorationList decorations) {
     std::string result_name = "sampler_result";
 
@@ -567,7 +564,7 @@ class InspectorHelper : public ast::BuilderWithModule {
       const std::string& sampler_name,
       const std::string& coords_name,
       const std::string& depth_name,
-      ast::type::Type* base_type,
+      type::Type* base_type,
       ast::FunctionDecorationList decorations) {
     std::string result_name = "sampler_result";
 
@@ -586,7 +583,7 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// Gets an appropriate type for the data in a given texture type.
   /// @param sampled_kind type of in the texture
   /// @returns a pointer to a type appropriate for the coord param
-  ast::type::Type* GetBaseType(ResourceBinding::SampledKind sampled_kind) {
+  type::Type* GetBaseType(ResourceBinding::SampledKind sampled_kind) {
     switch (sampled_kind) {
       case ResourceBinding::SampledKind::kFloat:
         return ty.f32;
@@ -604,15 +601,15 @@ class InspectorHelper : public ast::BuilderWithModule {
   /// @param dim dimensionality of the texture being sampled
   /// @param sampled_kind type of data in the texture
   /// @returns a pointer to a type appropriate for the coord param
-  ast::type::Type* GetCoordsType(ast::type::TextureDimension dim,
-                                 ResourceBinding::SampledKind sampled_kind) {
-    ast::type::Type* base_type = GetBaseType(sampled_kind);
-    if (dim == ast::type::TextureDimension::k1d) {
+  type::Type* GetCoordsType(type::TextureDimension dim,
+                            ResourceBinding::SampledKind sampled_kind) {
+    type::Type* base_type = GetBaseType(sampled_kind);
+    if (dim == type::TextureDimension::k1d) {
       return base_type;
-    } else if (dim == ast::type::TextureDimension::k1dArray ||
-               dim == ast::type::TextureDimension::k2d) {
+    } else if (dim == type::TextureDimension::k1dArray ||
+               dim == type::TextureDimension::k2d) {
       return vec_type(base_type, 2);
-    } else if (dim == ast::type::TextureDimension::kCubeArray) {
+    } else if (dim == type::TextureDimension::kCubeArray) {
       return vec_type(base_type, 4);
     }
     return vec_type(base_type, 3);
@@ -621,38 +618,35 @@ class InspectorHelper : public ast::BuilderWithModule {
   TypeDeterminer* td() { return td_.get(); }
   Inspector* inspector() { return inspector_.get(); }
 
-  ast::type::Array* u32_array_type(uint32_t count) {
+  type::Array* u32_array_type(uint32_t count) {
     if (array_type_memo_.find(count) == array_type_memo_.end()) {
       array_type_memo_[count] =
-          create<ast::type::Array>(ty.u32, count,
-                                   ast::ArrayDecorationList{
-                                       create<ast::StrideDecoration>(4),
-                                   });
+          create<type::Array>(ty.u32, count,
+                              ast::ArrayDecorationList{
+                                  create<ast::StrideDecoration>(4),
+                              });
     }
     return array_type_memo_[count];
   }
-  ast::type::Vector* vec_type(ast::type::Type* type, uint32_t count) {
+  type::Vector* vec_type(type::Type* type, uint32_t count) {
     if (vector_type_memo_.find(std::tie(type, count)) ==
         vector_type_memo_.end()) {
       vector_type_memo_[std::tie(type, count)] =
-          std::make_unique<ast::type::Vector>(ty.u32, count);
+          std::make_unique<type::Vector>(ty.u32, count);
     }
     return vector_type_memo_[std::tie(type, count)].get();
   }
-  ast::type::Sampler* sampler_type() { return &sampler_type_; }
-  ast::type::Sampler* comparison_sampler_type() {
-    return &comparison_sampler_type_;
-  }
+  type::Sampler* sampler_type() { return &sampler_type_; }
+  type::Sampler* comparison_sampler_type() { return &comparison_sampler_type_; }
 
  private:
   std::unique_ptr<TypeDeterminer> td_;
   std::unique_ptr<Inspector> inspector_;
 
-  ast::type::Sampler sampler_type_;
-  ast::type::Sampler comparison_sampler_type_;
-  std::map<uint32_t, ast::type::Array*> array_type_memo_;
-  std::map<std::tuple<ast::type::Type*, uint32_t>,
-           std::unique_ptr<ast::type::Vector>>
+  type::Sampler sampler_type_;
+  type::Sampler comparison_sampler_type_;
+  std::map<uint32_t, type::Array*> array_type_memo_;
+  std::map<std::tuple<type::Type*, uint32_t>, std::unique_ptr<type::Vector>>
       vector_type_memo_;
 };
 
@@ -680,7 +674,7 @@ class InspectorGetSampledArrayTextureResourceBindingsTest
     : public InspectorHelper,
       public testing::Test {};
 struct GetSampledTextureTestParams {
-  ast::type::TextureDimension type_dim;
+  type::TextureDimension type_dim;
   inspector::ResourceBinding::TextureDimension inspector_dim;
   inspector::ResourceBinding::SampledKind sampled_kind;
 };
@@ -1287,8 +1281,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeUniformBufferTypes("foo_type", {{ty.i32, 0}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1340,8 +1334,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeUniformBufferTypes("foo_type", {{ty.i32, 0}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1369,8 +1363,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeUniformBufferTypes(
       "foo_type", {{ty.i32, 0}, {ty.u32, 4}, {ty.f32, 8}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1398,8 +1392,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-  ast::type::Struct* ub_struct_type;
-  std::unique_ptr<ast::type::AccessControl> ub_control_type;
+  type::Struct* ub_struct_type;
+  std::unique_ptr<type::AccessControl> ub_control_type;
   std::tie(ub_struct_type, ub_control_type) = MakeUniformBufferTypes(
       "ub_type", {{ty.i32, 0}, {ty.u32, 4}, {ty.f32, 8}});
   AddUniformBuffer("ub_foo", ub_control_type.get(), 0, 0);
@@ -1450,8 +1444,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeUniformBufferTypes("foo_type", {{ty.i32, 0}, {u32_array_type(4), 4}});
   AddUniformBuffer("foo_ub", foo_control_type.get(), 0, 0);
@@ -1479,8 +1473,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {{ty.i32, 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1508,8 +1502,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeStorageBufferTypes(
       "foo_type", {{ty.i32, 0}, {ty.u32, 4}, {ty.f32, 8}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1537,8 +1531,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
-  ast::type::Struct* sb_struct_type;
-  std::unique_ptr<ast::type::AccessControl> sb_control_type;
+  type::Struct* sb_struct_type;
+  std::unique_ptr<type::AccessControl> sb_control_type;
   std::tie(sb_struct_type, sb_control_type) = MakeStorageBufferTypes(
       "sb_type", {{ty.i32, 0}, {ty.u32, 4}, {ty.f32, 8}});
   AddStorageBuffer("sb_foo", sb_control_type.get(), 0, 0);
@@ -1592,8 +1586,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {{ty.i32, 0}, {u32_array_type(4), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1621,8 +1615,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {{ty.i32, 0}, {u32_array_type(0), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1650,8 +1644,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {{ty.i32, 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1675,8 +1669,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {{ty.i32, 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1706,8 +1700,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        MultipleStorageBuffers) {
-  ast::type::Struct* sb_struct_type;
-  std::unique_ptr<ast::type::AccessControl> sb_control_type;
+  type::Struct* sb_struct_type;
+  std::unique_ptr<type::AccessControl> sb_control_type;
   std::tie(sb_struct_type, sb_control_type) = MakeReadOnlyStorageBufferTypes(
       "sb_type", {{ty.i32, 0}, {ty.u32, 4}, {ty.f32, 8}});
   AddStorageBuffer("sb_foo", sb_control_type.get(), 0, 0);
@@ -1762,8 +1756,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeReadOnlyStorageBufferTypes(
       "foo_type", {{ty.i32, 0}, {u32_array_type(4), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1793,8 +1787,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        ContainingRuntimeArray) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) = MakeReadOnlyStorageBufferTypes(
       "foo_type", {{ty.i32, 0}, {u32_array_type(0), 4}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1823,8 +1817,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
-  ast::type::Struct* foo_struct_type;
-  std::unique_ptr<ast::type::AccessControl> foo_control_type;
+  type::Struct* foo_struct_type;
+  std::unique_ptr<type::AccessControl> foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {{ty.i32, 0}});
   AddStorageBuffer("foo_sb", foo_control_type.get(), 0, 0);
@@ -1850,7 +1844,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
   auto sampled_texture_type =
-      MakeSampledTextureType(ast::type::TextureDimension::k1d, ty.f32);
+      MakeSampledTextureType(type::TextureDimension::k1d, ty.f32);
   AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
   AddSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -1889,7 +1883,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
   auto sampled_texture_type =
-      MakeSampledTextureType(ast::type::TextureDimension::k1d, ty.f32);
+      MakeSampledTextureType(type::TextureDimension::k1d, ty.f32);
   AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
   AddSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -1917,7 +1911,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
   auto sampled_texture_type =
-      MakeSampledTextureType(ast::type::TextureDimension::k1d, ty.f32);
+      MakeSampledTextureType(type::TextureDimension::k1d, ty.f32);
   AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
   AddSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -1936,8 +1930,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
-  auto depth_texture_type =
-      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  auto depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type.get());
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -1959,8 +1952,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
-  auto depth_texture_type =
-      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  auto depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type.get());
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -1999,8 +1991,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
-  auto depth_texture_type =
-      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  auto depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type.get());
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -2029,8 +2020,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
-  auto depth_texture_type =
-      MakeDepthTextureType(ast::type::TextureDimension::k2d);
+  auto depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type.get());
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -2051,7 +2041,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
   auto sampled_texture_type =
-      MakeSampledTextureType(ast::type::TextureDimension::k1d, ty.f32);
+      MakeSampledTextureType(type::TextureDimension::k1d, ty.f32);
   AddSampledTexture("foo_texture", sampled_texture_type.get(), 0, 0);
   AddSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32);
@@ -2125,51 +2115,51 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetSampledTextureResourceBindingsTestWithParam,
     testing::Values(
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1d,
+            type::TextureDimension::k1d,
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1d,
+            type::TextureDimension::k1d,
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1d,
+            type::TextureDimension::k1d,
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2d,
+            type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2d,
+            type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2d,
+            type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k3d,
+            type::TextureDimension::k3d,
             inspector::ResourceBinding::TextureDimension::k3d,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k3d,
+            type::TextureDimension::k3d,
             inspector::ResourceBinding::TextureDimension::k3d,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k3d,
+            type::TextureDimension::k3d,
             inspector::ResourceBinding::TextureDimension::k3d,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::kCube,
+            type::TextureDimension::kCube,
             inspector::ResourceBinding::TextureDimension::kCube,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::kCube,
+            type::TextureDimension::kCube,
             inspector::ResourceBinding::TextureDimension::kCube,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::kCube,
+            type::TextureDimension::kCube,
             inspector::ResourceBinding::TextureDimension::kCube,
             inspector::ResourceBinding::SampledKind::kUInt}));
 
@@ -2209,39 +2199,39 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
     testing::Values(
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
+            type::TextureDimension::k1dArray,
             inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
+            type::TextureDimension::k1dArray,
             inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
+            type::TextureDimension::k1dArray,
             inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
+            type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
+            type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
+            type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::kCubeArray,
+            type::TextureDimension::kCubeArray,
             inspector::ResourceBinding::TextureDimension::kCubeArray,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::kCubeArray,
+            type::TextureDimension::kCubeArray,
             inspector::ResourceBinding::TextureDimension::kCubeArray,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetSampledTextureTestParams{
-            ast::type::TextureDimension::kCubeArray,
+            type::TextureDimension::kCubeArray,
             inspector::ResourceBinding::TextureDimension::kCubeArray,
             inspector::ResourceBinding::SampledKind::kUInt}));
 
@@ -2287,27 +2277,27 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetMultisampledTextureResourceBindingsTestWithParam,
     testing::Values(
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1d,
+            type::TextureDimension::k1d,
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1d,
+            type::TextureDimension::k1d,
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1d,
+            type::TextureDimension::k1d,
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k2d,
+            type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k2d,
+            type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k2d,
+            type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kUInt}));
 
@@ -2360,27 +2350,27 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
     testing::Values(
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
+            type::TextureDimension::k1dArray,
             inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
+            type::TextureDimension::k1dArray,
             inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k1dArray,
+            type::TextureDimension::k1dArray,
             inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kUInt},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
+            type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
+            type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kSInt},
         GetMultisampledTextureTestParams{
-            ast::type::TextureDimension::k2dArray,
+            type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kUInt}));
 

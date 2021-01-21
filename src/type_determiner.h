@@ -20,8 +20,8 @@
 #include <vector>
 
 #include "src/ast/module.h"
-#include "src/ast/type/storage_texture_type.h"
 #include "src/scope_stack.h"
+#include "src/type/storage_texture_type.h"
 
 namespace tint {
 namespace ast {
@@ -84,7 +84,7 @@ class TypeDeterminer {
   /// Determines the result type based off a storage texture format
   /// @param tex the storage texture
   /// @returns false on error
-  bool DetermineStorageTextureSubtype(ast::type::StorageTexture* tex);
+  bool DetermineStorageTextureSubtype(type::StorageTexture* tex);
 
   /// Testing method to set a given variable into the type stack
   /// @param var the variable to set
@@ -99,11 +99,11 @@ class TypeDeterminer {
   /// @param params the parameters to the method call
   /// @param id out parameter for the external call ID. Must not be a nullptr.
   /// @returns the return type of `name` in `path` or nullptr on error.
-  ast::type::Type* GetImportData(const Source& src,
-                                 const std::string& path,
-                                 const std::string& name,
-                                 const ast::ExpressionList& params,
-                                 uint32_t* id);
+  type::Type* GetImportData(const Source& src,
+                            const std::string& path,
+                            const std::string& name,
+                            const ast::ExpressionList& params,
+                            uint32_t* id);
 
   /// Sets the intrinsic data information for the identifier if needed
   /// @param ident the identifier expression

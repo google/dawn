@@ -45,22 +45,6 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type/access_control_type.h"
-#include "src/ast/type/alias_type.h"
-#include "src/ast/type/array_type.h"
-#include "src/ast/type/bool_type.h"
-#include "src/ast/type/depth_texture_type.h"
-#include "src/ast/type/f32_type.h"
-#include "src/ast/type/i32_type.h"
-#include "src/ast/type/matrix_type.h"
-#include "src/ast/type/multisampled_texture_type.h"
-#include "src/ast/type/pointer_type.h"
-#include "src/ast/type/sampled_texture_type.h"
-#include "src/ast/type/sampler_type.h"
-#include "src/ast/type/struct_type.h"
-#include "src/ast/type/u32_type.h"
-#include "src/ast/type/vector_type.h"
-#include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/type_decoration.h"
 #include "src/ast/uint_literal.h"
@@ -70,6 +54,22 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/lexer.h"
+#include "src/type/access_control_type.h"
+#include "src/type/alias_type.h"
+#include "src/type/array_type.h"
+#include "src/type/bool_type.h"
+#include "src/type/depth_texture_type.h"
+#include "src/type/f32_type.h"
+#include "src/type/i32_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/sampler_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/u32_type.h"
+#include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 
 namespace tint {
 namespace reader {
@@ -196,7 +196,7 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            ast::VariableList p,
-                                           ast::type::Type* ret_ty)
+                                           type::Type* ret_ty)
     : source(src), name(n), params(p), return_type(ret_ty) {}
 
 ParserImpl::FunctionHeader::~FunctionHeader() = default;
@@ -260,12 +260,12 @@ Token ParserImpl::peek() {
 }
 
 void ParserImpl::register_constructed(const std::string& name,
-                                      ast::type::Type* type) {
+                                      type::Type* type) {
   assert(type);
   registered_constructs_[name] = type;
 }
 
-ast::type::Type* ParserImpl::get_constructed(const std::string& name) {
+type::Type* ParserImpl::get_constructed(const std::string& name) {
   if (registered_constructs_.find(name) == registered_constructs_.end()) {
     return nullptr;
   }
@@ -361,7 +361,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
 
       auto* type = module_.unique_type(std::move(str.value));
       register_constructed(
-          module_.SymbolToName(type->As<ast::type::Struct>()->symbol()), type);
+          module_.SymbolToName(type->As<type::Struct>()->symbol()), type);
       module_.AddConstructedType(type);
       return true;
     }
@@ -497,7 +497,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 //  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type GREATER_THAN
-Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
+Maybe<type::Type*> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
   if (type.matched)
     return type;
@@ -514,7 +514,7 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return module_.create<ast::type::SampledTexture>(dim.value, subtype.value);
+    return module_.create<type::SampledTexture>(dim.value, subtype.value);
   }
 
   auto ms_dim = multisampled_texture_type();
@@ -525,8 +525,8 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return module_.create<ast::type::MultisampledTexture>(ms_dim.value,
-                                                          subtype.value);
+    return module_.create<type::MultisampledTexture>(ms_dim.value,
+                                                     subtype.value);
   }
 
   auto storage = storage_texture_type();
@@ -539,8 +539,7 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    return module_.create<ast::type::StorageTexture>(storage.value,
-                                                     format.value);
+    return module_.create<type::StorageTexture>(storage.value, format.value);
   }
 
   // DEPRECATED
@@ -554,9 +553,9 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    return module_.create<ast::type::AccessControl>(
-        ac_storage->second, module_.create<ast::type::StorageTexture>(
-                                ac_storage->first, format.value));
+    return module_.create<type::AccessControl>(
+        ac_storage->second,
+        module_.create<type::StorageTexture>(ac_storage->first, format.value));
   }
 
   return Failure::kNoMatch;
@@ -565,13 +564,12 @@ Maybe<ast::type::Type*> ParserImpl::texture_sampler_types() {
 // sampler_type
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
-Maybe<ast::type::Type*> ParserImpl::sampler_type() {
+Maybe<type::Type*> ParserImpl::sampler_type() {
   if (match(Token::Type::kSampler))
-    return module_.create<ast::type::Sampler>(ast::type::SamplerKind::kSampler);
+    return module_.create<type::Sampler>(type::SamplerKind::kSampler);
 
   if (match(Token::Type::kComparisonSampler))
-    return module_.create<ast::type::Sampler>(
-        ast::type::SamplerKind::kComparisonSampler);
+    return module_.create<type::Sampler>(type::SamplerKind::kComparisonSampler);
 
   return Failure::kNoMatch;
 }
@@ -584,36 +582,36 @@ Maybe<ast::type::Type*> ParserImpl::sampler_type() {
 //  | TEXTURE_SAMPLED_3D
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
-Maybe<ast::type::TextureDimension> ParserImpl::sampled_texture_type() {
+Maybe<type::TextureDimension> ParserImpl::sampled_texture_type() {
   if (match(Token::Type::kTextureSampled1d))
-    return ast::type::TextureDimension::k1d;
+    return type::TextureDimension::k1d;
 
   if (match(Token::Type::kTextureSampled1dArray))
-    return ast::type::TextureDimension::k1dArray;
+    return type::TextureDimension::k1dArray;
 
   if (match(Token::Type::kTextureSampled2d))
-    return ast::type::TextureDimension::k2d;
+    return type::TextureDimension::k2d;
 
   if (match(Token::Type::kTextureSampled2dArray))
-    return ast::type::TextureDimension::k2dArray;
+    return type::TextureDimension::k2dArray;
 
   if (match(Token::Type::kTextureSampled3d))
-    return ast::type::TextureDimension::k3d;
+    return type::TextureDimension::k3d;
 
   if (match(Token::Type::kTextureSampledCube))
-    return ast::type::TextureDimension::kCube;
+    return type::TextureDimension::kCube;
 
   if (match(Token::Type::kTextureSampledCubeArray))
-    return ast::type::TextureDimension::kCubeArray;
+    return type::TextureDimension::kCubeArray;
 
   return Failure::kNoMatch;
 }
 
 // multisampled_texture_type
 //  : TEXTURE_MULTISAMPLED_2D
-Maybe<ast::type::TextureDimension> ParserImpl::multisampled_texture_type() {
+Maybe<type::TextureDimension> ParserImpl::multisampled_texture_type() {
   if (match(Token::Type::kTextureMultisampled2d))
-    return ast::type::TextureDimension::k2d;
+    return type::TextureDimension::k2d;
 
   return Failure::kNoMatch;
 }
@@ -624,17 +622,17 @@ Maybe<ast::type::TextureDimension> ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_STORAGE_2D
 //  | TEXTURE_STORAGE_2D_ARRAY
 //  | TEXTURE_STORAGE_3D
-Maybe<ast::type::TextureDimension> ParserImpl::storage_texture_type() {
+Maybe<type::TextureDimension> ParserImpl::storage_texture_type() {
   if (match(Token::Type::kTextureStorage1d))
-    return ast::type::TextureDimension::k1d;
+    return type::TextureDimension::k1d;
   if (match(Token::Type::kTextureStorage1dArray))
-    return ast::type::TextureDimension::k1dArray;
+    return type::TextureDimension::k1dArray;
   if (match(Token::Type::kTextureStorage2d))
-    return ast::type::TextureDimension::k2d;
+    return type::TextureDimension::k2d;
   if (match(Token::Type::kTextureStorage2dArray))
-    return ast::type::TextureDimension::k2dArray;
+    return type::TextureDimension::k2dArray;
   if (match(Token::Type::kTextureStorage3d))
-    return ast::type::TextureDimension::k3d;
+    return type::TextureDimension::k3d;
 
   return Failure::kNoMatch;
 }
@@ -661,54 +659,49 @@ Maybe<ast::type::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_STORAGE_WO_2D
 //  | TEXTURE_STORAGE_WO_2D_ARRAY
 //  | TEXTURE_STORAGE_WO_3D
-Maybe<std::pair<ast::type::TextureDimension, ast::AccessControl>>
+Maybe<std::pair<type::TextureDimension, ast::AccessControl>>
 ParserImpl::storage_texture_type_access_control() {
-  using Ret = std::pair<ast::type::TextureDimension, ast::AccessControl>;
+  using Ret = std::pair<type::TextureDimension, ast::AccessControl>;
   if (match(Token::Type::kTextureStorageReadonly1d)) {
-    return Ret{ast::type::TextureDimension::k1d, ast::AccessControl::kReadOnly};
+    return Ret{type::TextureDimension::k1d, ast::AccessControl::kReadOnly};
   }
 
   if (match(Token::Type::kTextureStorageReadonly1dArray)) {
-    return Ret{ast::type::TextureDimension::k1dArray,
-               ast::AccessControl::kReadOnly};
+    return Ret{type::TextureDimension::k1dArray, ast::AccessControl::kReadOnly};
   }
 
   if (match(Token::Type::kTextureStorageReadonly2d)) {
-    return Ret{ast::type::TextureDimension::k2d, ast::AccessControl::kReadOnly};
+    return Ret{type::TextureDimension::k2d, ast::AccessControl::kReadOnly};
   }
 
   if (match(Token::Type::kTextureStorageReadonly2dArray)) {
-    return Ret{ast::type::TextureDimension::k2dArray,
-               ast::AccessControl::kReadOnly};
+    return Ret{type::TextureDimension::k2dArray, ast::AccessControl::kReadOnly};
   }
 
   if (match(Token::Type::kTextureStorageReadonly3d)) {
-    return Ret{ast::type::TextureDimension::k3d, ast::AccessControl::kReadOnly};
+    return Ret{type::TextureDimension::k3d, ast::AccessControl::kReadOnly};
   }
 
   if (match(Token::Type::kTextureStorageWriteonly1d)) {
-    return Ret{ast::type::TextureDimension::k1d,
-               ast::AccessControl::kWriteOnly};
+    return Ret{type::TextureDimension::k1d, ast::AccessControl::kWriteOnly};
   }
 
   if (match(Token::Type::kTextureStorageWriteonly1dArray)) {
-    return Ret{ast::type::TextureDimension::k1dArray,
+    return Ret{type::TextureDimension::k1dArray,
                ast::AccessControl::kWriteOnly};
   }
 
   if (match(Token::Type::kTextureStorageWriteonly2d)) {
-    return Ret{ast::type::TextureDimension::k2d,
-               ast::AccessControl::kWriteOnly};
+    return Ret{type::TextureDimension::k2d, ast::AccessControl::kWriteOnly};
   }
 
   if (match(Token::Type::kTextureStorageWriteonly2dArray)) {
-    return Ret{ast::type::TextureDimension::k2dArray,
+    return Ret{type::TextureDimension::k2dArray,
                ast::AccessControl::kWriteOnly};
   }
 
   if (match(Token::Type::kTextureStorageWriteonly3d)) {
-    return Ret{ast::type::TextureDimension::k3d,
-               ast::AccessControl::kWriteOnly};
+    return Ret{type::TextureDimension::k3d, ast::AccessControl::kWriteOnly};
   }
 
   return Failure::kNoMatch;
@@ -719,22 +712,19 @@ ParserImpl::storage_texture_type_access_control() {
 //  | TEXTURE_DEPTH_2D_ARRAY
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
-Maybe<ast::type::Type*> ParserImpl::depth_texture_type() {
+Maybe<type::Type*> ParserImpl::depth_texture_type() {
   if (match(Token::Type::kTextureDepth2d))
-    return module_.create<ast::type::DepthTexture>(
-        ast::type::TextureDimension::k2d);
+    return module_.create<type::DepthTexture>(type::TextureDimension::k2d);
 
   if (match(Token::Type::kTextureDepth2dArray))
-    return module_.create<ast::type::DepthTexture>(
-        ast::type::TextureDimension::k2dArray);
+    return module_.create<type::DepthTexture>(type::TextureDimension::k2dArray);
 
   if (match(Token::Type::kTextureDepthCube))
-    return module_.create<ast::type::DepthTexture>(
-        ast::type::TextureDimension::kCube);
+    return module_.create<type::DepthTexture>(type::TextureDimension::kCube);
 
   if (match(Token::Type::kTextureDepthCubeArray))
-    return module_.create<ast::type::DepthTexture>(
-        ast::type::TextureDimension::kCubeArray);
+    return module_.create<type::DepthTexture>(
+        type::TextureDimension::kCubeArray);
 
   return Failure::kNoMatch;
 }
@@ -775,112 +765,112 @@ Maybe<ast::type::Type*> ParserImpl::depth_texture_type() {
 //  | RGBA32UINT
 //  | RGBA32SINT
 //  | RGBA32FLOAT
-Expect<ast::type::ImageFormat> ParserImpl::expect_image_storage_type(
+Expect<type::ImageFormat> ParserImpl::expect_image_storage_type(
     const std::string& use) {
   if (match(Token::Type::kFormatR8Unorm))
-    return ast::type::ImageFormat::kR8Unorm;
+    return type::ImageFormat::kR8Unorm;
 
   if (match(Token::Type::kFormatR8Snorm))
-    return ast::type::ImageFormat::kR8Snorm;
+    return type::ImageFormat::kR8Snorm;
 
   if (match(Token::Type::kFormatR8Uint))
-    return ast::type::ImageFormat::kR8Uint;
+    return type::ImageFormat::kR8Uint;
 
   if (match(Token::Type::kFormatR8Sint))
-    return ast::type::ImageFormat::kR8Sint;
+    return type::ImageFormat::kR8Sint;
 
   if (match(Token::Type::kFormatR16Uint))
-    return ast::type::ImageFormat::kR16Uint;
+    return type::ImageFormat::kR16Uint;
 
   if (match(Token::Type::kFormatR16Sint))
-    return ast::type::ImageFormat::kR16Sint;
+    return type::ImageFormat::kR16Sint;
 
   if (match(Token::Type::kFormatR16Float))
-    return ast::type::ImageFormat::kR16Float;
+    return type::ImageFormat::kR16Float;
 
   if (match(Token::Type::kFormatRg8Unorm))
-    return ast::type::ImageFormat::kRg8Unorm;
+    return type::ImageFormat::kRg8Unorm;
 
   if (match(Token::Type::kFormatRg8Snorm))
-    return ast::type::ImageFormat::kRg8Snorm;
+    return type::ImageFormat::kRg8Snorm;
 
   if (match(Token::Type::kFormatRg8Uint))
-    return ast::type::ImageFormat::kRg8Uint;
+    return type::ImageFormat::kRg8Uint;
 
   if (match(Token::Type::kFormatRg8Sint))
-    return ast::type::ImageFormat::kRg8Sint;
+    return type::ImageFormat::kRg8Sint;
 
   if (match(Token::Type::kFormatR32Uint))
-    return ast::type::ImageFormat::kR32Uint;
+    return type::ImageFormat::kR32Uint;
 
   if (match(Token::Type::kFormatR32Sint))
-    return ast::type::ImageFormat::kR32Sint;
+    return type::ImageFormat::kR32Sint;
 
   if (match(Token::Type::kFormatR32Float))
-    return ast::type::ImageFormat::kR32Float;
+    return type::ImageFormat::kR32Float;
 
   if (match(Token::Type::kFormatRg16Uint))
-    return ast::type::ImageFormat::kRg16Uint;
+    return type::ImageFormat::kRg16Uint;
 
   if (match(Token::Type::kFormatRg16Sint))
-    return ast::type::ImageFormat::kRg16Sint;
+    return type::ImageFormat::kRg16Sint;
 
   if (match(Token::Type::kFormatRg16Float))
-    return ast::type::ImageFormat::kRg16Float;
+    return type::ImageFormat::kRg16Float;
 
   if (match(Token::Type::kFormatRgba8Unorm))
-    return ast::type::ImageFormat::kRgba8Unorm;
+    return type::ImageFormat::kRgba8Unorm;
 
   if (match(Token::Type::kFormatRgba8UnormSrgb))
-    return ast::type::ImageFormat::kRgba8UnormSrgb;
+    return type::ImageFormat::kRgba8UnormSrgb;
 
   if (match(Token::Type::kFormatRgba8Snorm))
-    return ast::type::ImageFormat::kRgba8Snorm;
+    return type::ImageFormat::kRgba8Snorm;
 
   if (match(Token::Type::kFormatRgba8Uint))
-    return ast::type::ImageFormat::kRgba8Uint;
+    return type::ImageFormat::kRgba8Uint;
 
   if (match(Token::Type::kFormatRgba8Sint))
-    return ast::type::ImageFormat::kRgba8Sint;
+    return type::ImageFormat::kRgba8Sint;
 
   if (match(Token::Type::kFormatBgra8Unorm))
-    return ast::type::ImageFormat::kBgra8Unorm;
+    return type::ImageFormat::kBgra8Unorm;
 
   if (match(Token::Type::kFormatBgra8UnormSrgb))
-    return ast::type::ImageFormat::kBgra8UnormSrgb;
+    return type::ImageFormat::kBgra8UnormSrgb;
 
   if (match(Token::Type::kFormatRgb10A2Unorm))
-    return ast::type::ImageFormat::kRgb10A2Unorm;
+    return type::ImageFormat::kRgb10A2Unorm;
 
   if (match(Token::Type::kFormatRg11B10Float))
-    return ast::type::ImageFormat::kRg11B10Float;
+    return type::ImageFormat::kRg11B10Float;
 
   if (match(Token::Type::kFormatRg32Uint))
-    return ast::type::ImageFormat::kRg32Uint;
+    return type::ImageFormat::kRg32Uint;
 
   if (match(Token::Type::kFormatRg32Sint))
-    return ast::type::ImageFormat::kRg32Sint;
+    return type::ImageFormat::kRg32Sint;
 
   if (match(Token::Type::kFormatRg32Float))
-    return ast::type::ImageFormat::kRg32Float;
+    return type::ImageFormat::kRg32Float;
 
   if (match(Token::Type::kFormatRgba16Uint))
-    return ast::type::ImageFormat::kRgba16Uint;
+    return type::ImageFormat::kRgba16Uint;
 
   if (match(Token::Type::kFormatRgba16Sint))
-    return ast::type::ImageFormat::kRgba16Sint;
+    return type::ImageFormat::kRgba16Sint;
 
   if (match(Token::Type::kFormatRgba16Float))
-    return ast::type::ImageFormat::kRgba16Float;
+    return type::ImageFormat::kRgba16Float;
 
   if (match(Token::Type::kFormatRgba32Uint))
-    return ast::type::ImageFormat::kRgba32Uint;
+    return type::ImageFormat::kRgba32Uint;
 
   if (match(Token::Type::kFormatRgba32Sint))
-    return ast::type::ImageFormat::kRgba32Sint;
+    return type::ImageFormat::kRgba32Sint;
 
   if (match(Token::Type::kFormatRgba32Float))
-    return ast::type::ImageFormat::kRgba32Float;
+    return type::ImageFormat::kRgba32Float;
 
   return add_error(peek().source(), "invalid format", use);
 }
@@ -919,7 +909,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
     // type up with that decoration
-    ty = module_.create<ast::type::AccessControl>(
+    ty = module_.create<type::AccessControl>(
         deco->As<ast::AccessDecoration>()->value(), ty);
   }
 
@@ -959,7 +949,7 @@ Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
 
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
-Maybe<ast::type::Type*> ParserImpl::type_alias() {
+Maybe<type::Type*> ParserImpl::type_alias() {
   auto t = peek();
   if (!t.IsType())
     return Failure::kNoMatch;
@@ -981,8 +971,8 @@ Maybe<ast::type::Type*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  auto* alias = module_.create<ast::type::Alias>(
-      module_.RegisterSymbol(name.value), type.value);
+  auto* alias = module_.create<type::Alias>(module_.RegisterSymbol(name.value),
+                                            type.value);
   register_constructed(name.value, alias);
 
   return alias;
@@ -1012,7 +1002,7 @@ Maybe<ast::type::Type*> ParserImpl::type_alias() {
 //   | MAT4x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
-Maybe<ast::type::Type*> ParserImpl::type_decl() {
+Maybe<type::Type*> ParserImpl::type_decl() {
   auto decos = decoration_list();
   if (decos.errored)
     return Failure::kErrored;
@@ -1029,7 +1019,7 @@ Maybe<ast::type::Type*> ParserImpl::type_decl() {
   return type.value;
 }
 
-Maybe<ast::type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
+Maybe<type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   if (match(Token::Type::kIdentifier)) {
     auto* ty = get_constructed(t.to_str());
@@ -1040,16 +1030,16 @@ Maybe<ast::type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   }
 
   if (match(Token::Type::kBool))
-    return module_.create<ast::type::Bool>();
+    return module_.create<type::Bool>();
 
   if (match(Token::Type::kF32))
-    return module_.create<ast::type::F32>();
+    return module_.create<type::F32>();
 
   if (match(Token::Type::kI32))
-    return module_.create<ast::type::I32>();
+    return module_.create<type::I32>();
 
   if (match(Token::Type::kU32))
-    return module_.create<ast::type::U32>();
+    return module_.create<type::U32>();
 
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     next();  // Consume the peek
@@ -1083,7 +1073,7 @@ Maybe<ast::type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   return Failure::kNoMatch;
 }
 
-Expect<ast::type::Type*> ParserImpl::expect_type(const std::string& use) {
+Expect<type::Type*> ParserImpl::expect_type(const std::string& use) {
   auto type = type_decl();
   if (type.errored)
     return Failure::kErrored;
@@ -1092,10 +1082,10 @@ Expect<ast::type::Type*> ParserImpl::expect_type(const std::string& use) {
   return type.value;
 }
 
-Expect<ast::type::Type*> ParserImpl::expect_type_decl_pointer() {
+Expect<type::Type*> ParserImpl::expect_type_decl_pointer() {
   const char* use = "ptr declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<ast::type::Type*> {
+  return expect_lt_gt_block(use, [&]() -> Expect<type::Type*> {
     auto sc = expect_storage_class(use);
     if (sc.errored)
       return Failure::kErrored;
@@ -1107,11 +1097,11 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_pointer() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return module_.create<ast::type::Pointer>(subtype.value, sc.value);
+    return module_.create<type::Pointer>(subtype.value, sc.value);
   });
 }
 
-Expect<ast::type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
+Expect<type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   uint32_t count = 2;
   if (t.IsVec3())
     count = 3;
@@ -1124,14 +1114,14 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return module_.create<ast::type::Vector>(subtype.value, count);
+  return module_.create<type::Vector>(subtype.value, count);
 }
 
-Expect<ast::type::Type*> ParserImpl::expect_type_decl_array(
+Expect<type::Type*> ParserImpl::expect_type_decl_array(
     ast::ArrayDecorationList decos) {
   const char* use = "array declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<ast::type::Type*> {
+  return expect_lt_gt_block(use, [&]() -> Expect<type::Type*> {
     auto subtype = expect_type(use);
     if (subtype.errored)
       return Failure::kErrored;
@@ -1144,11 +1134,11 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_array(
       size = val.value;
     }
 
-    return create<ast::type::Array>(subtype.value, size, std::move(decos));
+    return create<type::Array>(subtype.value, size, std::move(decos));
   });
 }
 
-Expect<ast::type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
+Expect<type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   uint32_t rows = 2;
   uint32_t columns = 2;
   if (t.IsMat3x2() || t.IsMat3x3() || t.IsMat3x4()) {
@@ -1168,7 +1158,7 @@ Expect<ast::type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return module_.create<ast::type::Matrix>(subtype.value, rows, columns);
+  return module_.create<type::Matrix>(subtype.value, rows, columns);
 }
 
 // storage_class
@@ -1215,7 +1205,7 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<std::unique_ptr<ast::type::Struct>> ParserImpl::struct_decl(
+Maybe<std::unique_ptr<type::Struct>> ParserImpl::struct_decl(
     ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
@@ -1235,7 +1225,7 @@ Maybe<std::unique_ptr<ast::type::Struct>> ParserImpl::struct_decl(
   if (struct_decos.errored)
     return Failure::kErrored;
 
-  return std::make_unique<ast::type::Struct>(
+  return std::make_unique<type::Struct>(
       module_.RegisterSymbol(name.value),
       create<ast::Struct>(source, std::move(body.value),
                           std::move(struct_decos.value)));
@@ -1335,9 +1325,9 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 // function_type_decl
 //   : type_decl
 //   | VOID
-Maybe<ast::type::Type*> ParserImpl::function_type_decl() {
+Maybe<type::Type*> ParserImpl::function_type_decl() {
   if (match(Token::Type::kVoid))
-    return module_.create<ast::type::Void>();
+    return module_.create<type::Void>();
 
   return type_decl();
 }
@@ -2749,19 +2739,19 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
-    auto* type = module_.create<ast::type::Bool>();
+    auto* type = module_.create<type::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, true);
   }
   if (match(Token::Type::kFalse)) {
-    auto* type = module_.create<ast::type::Bool>();
+    auto* type = module_.create<type::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, false);
   }
   if (match(Token::Type::kSintLiteral)) {
-    auto* type = module_.create<ast::type::I32>();
+    auto* type = module_.create<type::I32>();
     return create<ast::SintLiteral>(Source{}, type, t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
-    auto* type = module_.create<ast::type::U32>();
+    auto* type = module_.create<type::U32>();
     return create<ast::UintLiteral>(Source{}, type, t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
@@ -2770,7 +2760,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
       next();  // Consume 'f'
       add_error(p.source(), "float literals must not be suffixed with 'f'");
     }
-    auto* type = module_.create<ast::type::F32>();
+    auto* type = module_.create<type::F32>();
     return create<ast::FloatLiteral>(Source{}, type, t.to_f32());
   }
   return Failure::kNoMatch;

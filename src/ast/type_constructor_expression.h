@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "src/ast/constructor_expression.h"
-#include "src/ast/type/type.h"
+#include "src/type/type.h"
 
 namespace tint {
 namespace ast {
