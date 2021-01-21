@@ -329,7 +329,7 @@ namespace dawn_native {
             return std::move(result);
         }
 
-        MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
+        MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase*,
                                                             BindGroupIndex group,
                                                             const EntryPointMetadata& entryPoint,
                                                             const BindGroupLayoutBase* layout) {
@@ -691,7 +691,7 @@ namespace dawn_native {
         // this function is complete, ReflectShaderUsingSPIRVCross and
         // PopulateMetadataUsingSPIRVCross will be removed.
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
-            DeviceBase* device,
+            DeviceBase*,
             const tint::ast::Module& module) {
             ASSERT(module.IsValid());
 
@@ -710,10 +710,35 @@ namespace dawn_native {
                 ASSERT(result.count(entryPoint.name) == 0);
 
                 auto metadata = std::make_unique<EntryPointMetadata>();
+
                 metadata->stage = PipelineStateToShaderStage(entryPoint.stage);
-                metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
-                metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
-                metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
+
+                if (metadata->stage == SingleShaderStage::Vertex) {
+                    for (auto& stage_input : entryPoint.input_variables) {
+                        if (!stage_input.has_location_decoration) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Need Location decoration on Vertex input");
+                        }
+                        uint32_t location = stage_input.location_decoration;
+                        if (location >= kMaxVertexAttributes) {
+                            return DAWN_VALIDATION_ERROR("Attribute location over limits");
+                        }
+                        metadata->usedVertexAttributes.set(location);
+                    }
+
+                    for (auto& stage_output : entryPoint.output_variables) {
+                        if (!stage_output.has_location_decoration) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Need Location decoration on Vertex output");
+                        }
+                    }
+                }
+
+                if (metadata->stage == SingleShaderStage::Compute) {
+                    metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
+                    metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
+                    metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
+                }
 
                 result[entryPoint.name] = std::move(metadata);
             }
@@ -774,16 +799,26 @@ namespace dawn_native {
                         "Tint and SPIRV-Cross returned different stages for entry point");
                 }
 
-                if (tintEntry->localWorkgroupSize.x != tintEntry->localWorkgroupSize.x ||
-                    tintEntry->localWorkgroupSize.y != tintEntry->localWorkgroupSize.y ||
-                    tintEntry->localWorkgroupSize.z != tintEntry->localWorkgroupSize.z) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Tint and SPIRV-Cross returned different values for local workgroup size");
+                if (tintEntry->stage == SingleShaderStage::Vertex) {
+                    if (tintEntry->usedVertexAttributes != crossEntry->usedVertexAttributes) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Tint and SPIRV-Cross returned different used vertex attributes for "
+                            "entry point");
+                    }
+                }
+
+                if (tintEntry->stage == SingleShaderStage::Compute) {
+                    if (tintEntry->localWorkgroupSize.x != crossEntry->localWorkgroupSize.x ||
+                        tintEntry->localWorkgroupSize.y != crossEntry->localWorkgroupSize.y ||
+                        tintEntry->localWorkgroupSize.z != crossEntry->localWorkgroupSize.z) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Tint and SPIRV-Cross returned different values for local workgroup "
+                            "size");
+                    }
                 }
 
                 // TODO(rharrison): Use the Inspector to get this data.
                 tintEntry->bindings = crossEntry->bindings;
-                tintEntry->usedVertexAttributes = crossEntry->usedVertexAttributes;
                 tintEntry->fragmentOutputFormatBaseTypes =
                     crossEntry->fragmentOutputFormatBaseTypes;
                 tintEntry->fragmentOutputsWritten = crossEntry->fragmentOutputsWritten;
