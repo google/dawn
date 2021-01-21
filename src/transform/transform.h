@@ -57,7 +57,7 @@ class Transform {
   /// @param statements the statements to prepend to `in`'s body
   /// @return the cloned function
   static ast::Function* CloneWithStatementsAtStart(
-      ast::CloneContext* ctx,
+      CloneContext* ctx,
       ast::Function* in,
       ast::StatementList statements);
 };

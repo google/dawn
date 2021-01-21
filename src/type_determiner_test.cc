@@ -74,7 +74,7 @@ namespace {
 class FakeStmt : public ast::Statement {
  public:
   explicit FakeStmt(Source source) : ast::Statement(source) {}
-  FakeStmt* Clone(ast::CloneContext*) const override { return nullptr; }
+  FakeStmt* Clone(CloneContext*) const override { return nullptr; }
   bool IsValid() const override { return true; }
   void to_str(std::ostream& out, size_t) const override { out << "Fake"; }
 };
@@ -82,7 +82,7 @@ class FakeStmt : public ast::Statement {
 class FakeExpr : public ast::Expression {
  public:
   explicit FakeExpr(Source source) : ast::Expression(source) {}
-  FakeExpr* Clone(ast::CloneContext*) const override { return nullptr; }
+  FakeExpr* Clone(CloneContext*) const override { return nullptr; }
   bool IsValid() const override { return true; }
   void to_str(std::ostream&, size_t) const override {}
 };

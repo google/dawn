@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/clone_context.h"
+#include "src/clone_context.h"
 
 #include "gtest/gtest.h"
 
 #include "src/ast/module.h"
 
 namespace tint {
-namespace ast {
 namespace {
 
-struct Cloneable : public Castable<Cloneable, Node> {
+struct Cloneable : public Castable<Cloneable, ast::Node> {
   Cloneable() : Base(Source{}) {}
 
   Cloneable* a = nullptr;
@@ -162,10 +161,9 @@ TEST(CloneContext, CloneWithReplacements) {
 }
 
 }  // namespace
-}  // namespace ast
 
-TINT_INSTANTIATE_CLASS_ID(ast::Cloneable);
-TINT_INSTANTIATE_CLASS_ID(ast::Replaceable);
-TINT_INSTANTIATE_CLASS_ID(ast::Replacement);
+TINT_INSTANTIATE_CLASS_ID(Cloneable);
+TINT_INSTANTIATE_CLASS_ID(Replaceable);
+TINT_INSTANTIATE_CLASS_ID(Replacement);
 
 }  // namespace tint

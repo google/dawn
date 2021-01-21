@@ -24,10 +24,10 @@
 #include <vector>
 
 #include "src/ast/function.h"
-#include "src/ast/traits.h"
 #include "src/ast/variable.h"
 #include "src/block_allocator.h"
 #include "src/symbol_table.h"
+#include "src/traits.h"
 #include "src/type/alias_type.h"
 #include "src/type/type_manager.h"
 

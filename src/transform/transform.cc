@@ -15,8 +15,8 @@
 #include "src/transform/transform.h"
 
 #include "src/ast/block_statement.h"
-#include "src/ast/clone_context.h"
 #include "src/ast/function.h"
+#include "src/clone_context.h"
 
 namespace tint {
 namespace transform {
@@ -25,7 +25,7 @@ Transform::Transform() = default;
 Transform::~Transform() = default;
 
 ast::Function* Transform::CloneWithStatementsAtStart(
-    ast::CloneContext* ctx,
+    CloneContext* ctx,
     ast::Function* in,
     ast::StatementList statements) {
   for (auto* s : *in->body()) {

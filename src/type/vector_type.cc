@@ -17,8 +17,8 @@
 #include <assert.h>
 #include <cmath>
 
-#include "src/ast/clone_context.h"
 #include "src/ast/module.h"
+#include "src/clone_context.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::type::Vector);
 

@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_CLONE_CONTEXT_H_
-#define SRC_AST_CLONE_CONTEXT_H_
+#ifndef SRC_CLONE_CONTEXT_H_
+#define SRC_CLONE_CONTEXT_H_
 
 #include <functional>
 #include <unordered_map>
 #include <vector>
 
-#include "src/ast/traits.h"
 #include "src/castable.h"
 #include "src/source.h"
 #include "src/symbol.h"
+#include "src/traits.h"
 
 namespace tint {
-namespace ast {
 
+// Forward declarations
+namespace ast {
 class Module;
+}  // namespace ast
 
 /// CloneContext holds the state used while cloning AST nodes and types.
 class CloneContext {
@@ -35,7 +37,7 @@ class CloneContext {
   /// Constructor
   /// @param to the target module to clone into
   /// @param from the source module to clone from
-  CloneContext(Module* to, Module const* from);
+  CloneContext(ast::Module* to, ast::Module const* from);
 
   /// Destructor
   ~CloneContext();
@@ -149,10 +151,10 @@ class CloneContext {
   void Clone();
 
   /// The target module to clone into.
-  Module* const mod;
+  ast::Module* const mod;
 
   /// The source module to clone from.
-  Module const* const src;
+  ast::Module const* const src;
 
  private:
   using Transform = std::function<CastableBase*(CastableBase*)>;
@@ -187,7 +189,6 @@ class CloneContext {
   std::vector<Transform> transforms_;
 };
 
-}  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_CLONE_CONTEXT_H_
+#endif  // SRC_CLONE_CONTEXT_H_

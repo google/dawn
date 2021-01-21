@@ -27,7 +27,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/clone_context.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
@@ -44,6 +43,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/clone_context.h"
 #include "src/type/array_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/u32_type.h"
@@ -57,18 +57,17 @@ BoundArrayAccessors::~BoundArrayAccessors() = default;
 
 Transform::Output BoundArrayAccessors::Run(ast::Module* in) {
   Output out;
-  ast::CloneContext(&out.module, in)
-      .ReplaceAll(
-          [&](ast::CloneContext* ctx, ast::ArrayAccessorExpression* expr) {
-            return Transform(expr, ctx, &out.diagnostics);
-          })
+  CloneContext(&out.module, in)
+      .ReplaceAll([&](CloneContext* ctx, ast::ArrayAccessorExpression* expr) {
+        return Transform(expr, ctx, &out.diagnostics);
+      })
       .Clone();
   return out;
 }
 
 ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     ast::ArrayAccessorExpression* expr,
-    ast::CloneContext* ctx,
+    CloneContext* ctx,
     diag::List* diags) {
   auto* ret_type = expr->array()->result_type()->UnwrapAll();
   if (!ret_type->Is<type::Array>() && !ret_type->Is<type::Matrix>() &&

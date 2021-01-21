@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_TRAITS_H_
-#define SRC_AST_TRAITS_H_
+#ifndef SRC_TRAITS_H_
+#define SRC_TRAITS_H_
 
 #include <tuple>
 #include <type_traits>
 
 namespace tint {
-namespace ast {
 namespace traits {
 
 /// NthTypeOf returns the `N`th type in `Types`
@@ -72,7 +71,6 @@ using EnableIfIsType =
     typename std::enable_if<std::is_base_of<BASE, T>::value, T>::type;
 
 }  // namespace traits
-}  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_TRAITS_H_
+#endif  // SRC_TRAITS_H_

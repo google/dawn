@@ -23,13 +23,16 @@
 #include "src/source.h"
 
 namespace tint {
+
+// Forward declarations
+class CloneContext;
 namespace type {
 class Type;
 }
+
 namespace ast {
 
 class Module;
-class CloneContext;
 
 /// AST base class node
 class Node : public Castable<Node> {

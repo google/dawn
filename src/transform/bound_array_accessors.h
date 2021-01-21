@@ -48,7 +48,7 @@ class BoundArrayAccessors : public Transform {
 
  private:
   ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr,
-                                          ast::CloneContext* ctx,
+                                          CloneContext* ctx,
                                           diag::List* diags);
 };
 

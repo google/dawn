@@ -20,7 +20,6 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/clone_context.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/stride_decoration.h"
@@ -33,6 +32,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/clone_context.h"
 #include "src/type/array_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
@@ -109,15 +109,14 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
   state.ConvertVertexInputVariablesToPrivate();
   state.AddVertexStorageBuffers();
 
-  ast::CloneContext(&out.module, in)
-      .ReplaceAll(
-          [&](ast::CloneContext* ctx, ast::Function* f) -> ast::Function* {
-            if (f == func) {
-              return CloneWithStatementsAtStart(
-                  ctx, f, {state.CreateVertexPullingPreamble()});
-            }
-            return nullptr;  // Just clone func
-          })
+  CloneContext(&out.module, in)
+      .ReplaceAll([&](CloneContext* ctx, ast::Function* f) -> ast::Function* {
+        if (f == func) {
+          return CloneWithStatementsAtStart(
+              ctx, f, {state.CreateVertexPullingPreamble()});
+        }
+        return nullptr;  // Just clone func
+      })
       .Clone();
 
   return out;

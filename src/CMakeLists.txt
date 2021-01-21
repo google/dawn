@@ -72,8 +72,6 @@ set(TINT_LIB_SRCS
   ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
-  ast/clone_context.cc
-  ast/clone_context.h
   ast/constant_id_decoration.cc
   ast/constant_id_decoration.h
   ast/constructor_expression.cc
@@ -150,7 +148,6 @@ set(TINT_LIB_SRCS
   ast/struct_member_offset_decoration.h
   ast/switch_statement.cc
   ast/switch_statement.h
-  ast/traits.h
   ast/type_constructor_expression.cc
   ast/type_constructor_expression.h
   ast/type_decoration.cc
@@ -172,6 +169,8 @@ set(TINT_LIB_SRCS
   block_allocator.h
   castable.cc
   castable.h
+  clone_context.cc
+  clone_context.h
   demangler.cc
   demangler.h;
   diagnostic/diagnostic.cc
@@ -197,6 +196,7 @@ set(TINT_LIB_SRCS
   symbol.h
   symbol_table.cc
   symbol_table.h
+  traits.h
   transform/emit_vertex_point_size.cc
   transform/emit_vertex_point_size.h
   transform/bound_array_accessors.cc
@@ -401,7 +401,6 @@ if(${TINT_BUILD_TESTS})
     ast/call_expression_test.cc
     ast/call_statement_test.cc
     ast/case_statement_test.cc
-    ast/clone_context_test.cc
     ast/constant_id_decoration_test.cc
     ast/continue_statement_test.cc
     ast/decoration_test.cc
@@ -433,7 +432,6 @@ if(${TINT_BUILD_TESTS})
     ast/struct_test.cc
     ast/switch_statement_test.cc
     ast/test_helper.h
-    ast/traits_test.cc
     ast/type_constructor_expression_test.cc
     ast/uint_literal_test.cc
     ast/unary_op_expression_test.cc
@@ -442,6 +440,7 @@ if(${TINT_BUILD_TESTS})
     ast/workgroup_decoration_test.cc
     block_allocator_test.cc
     castable_test.cc
+    clone_context_test.cc
     demangler_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
@@ -450,6 +449,7 @@ if(${TINT_BUILD_TESTS})
     scope_stack_test.cc
     symbol_table_test.cc
     symbol_test.cc
+    traits_test.cc
     type_determiner_test.cc
     type/access_control_type_test.cc
     type/alias_type_test.cc

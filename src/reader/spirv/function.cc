@@ -705,7 +705,7 @@ DefInfo::~DefInfo() = default;
 bool StatementBuilder::IsValid() const {
   return true;
 }
-ast::Node* StatementBuilder::Clone(ast::CloneContext*) const {
+ast::Node* StatementBuilder::Clone(CloneContext*) const {
   return nullptr;
 }
 void StatementBuilder::to_str(std::ostream& out, size_t indent) const {

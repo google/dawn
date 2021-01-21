@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/clone_context.h"
+#include "src/clone_context.h"
 
 #include "src/ast/module.h"
 
 namespace tint {
-namespace ast {
 
-CloneContext::CloneContext(Module* to, Module const* from)
+CloneContext::CloneContext(ast::Module* to, ast::Module const* from)
     : mod(to), src(from) {}
 CloneContext::~CloneContext() = default;
 
@@ -31,5 +30,4 @@ void CloneContext::Clone() {
   src->Clone(this);
 }
 
-}  // namespace ast
 }  // namespace tint

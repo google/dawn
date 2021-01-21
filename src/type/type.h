@@ -21,14 +21,13 @@
 
 namespace tint {
 
+// Forward declarations
+class CloneContext;
 namespace ast {
 class Module;
-class CloneContext;
 }  // namespace ast
 
 namespace type {
-
-using CloneContext = ast::CloneContext;  // TEMP
 
 /// Supported memory layouts for calculating sizes
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
@@ -43,7 +42,7 @@ class Type : public Castable<Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  virtual Type* Clone(ast::CloneContext* ctx) const = 0;
+  virtual Type* Clone(CloneContext* ctx) const = 0;
 
   /// @returns the name for this type. The type name is unique over all types.
   virtual std::string type_name() const = 0;

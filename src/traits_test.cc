@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/traits.h"
+#include "src/traits.h"
 
 #include <functional>
 
 #include "gtest/gtest.h"
 
 namespace tint {
-namespace ast {
 namespace traits {
 
 namespace {
@@ -101,5 +100,4 @@ TEST(ParamType, Lambda) {
 }
 
 }  // namespace traits
-}  // namespace ast
 }  // namespace tint

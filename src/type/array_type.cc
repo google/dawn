@@ -17,9 +17,9 @@
 #include <cmath>
 #include <memory>
 
-#include "src/ast/clone_context.h"
 #include "src/ast/module.h"
 #include "src/ast/stride_decoration.h"
+#include "src/clone_context.h"
 #include "src/type/vector_type.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::type::Array);

@@ -19,11 +19,11 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/block_statement.h"
-#include "src/ast/clone_context.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/variable.h"
+#include "src/clone_context.h"
 #include "src/type/f32_type.h"
 #include "src/type/type_manager.h"
 
@@ -73,9 +73,9 @@ Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
       Source{}, pointsize_ident, one);
 
   // Add the pointsize assignment statement to the front of all vertex stages.
-  ast::CloneContext(&out.module, in)
+  CloneContext(&out.module, in)
       .ReplaceAll(
-          [&](ast::CloneContext* ctx, ast::Function* func) -> ast::Function* {
+          [&](CloneContext* ctx, ast::Function* func) -> ast::Function* {
             if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
               return nullptr;  // Just clone func
             }

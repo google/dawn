@@ -25,7 +25,6 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
-#include "src/ast/clone_context.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/expression.h"
@@ -47,6 +46,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
+#include "src/clone_context.h"
 #include "src/type/struct_type.h"
 #include "src/type/u32_type.h"
 #include "src/type_determiner.h"
@@ -61,7 +61,7 @@ constexpr char kFirstVertexName[] = "tint_first_vertex_index";
 constexpr char kFirstInstanceName[] = "tint_first_instance_index";
 constexpr char kIndexOffsetPrefix[] = "tint_first_index_offset_";
 
-ast::Variable* clone_variable_with_new_name(ast::CloneContext* ctx,
+ast::Variable* clone_variable_with_new_name(CloneContext* ctx,
                                             ast::Variable* in,
                                             std::string new_name) {
   return ctx->mod->create<ast::Variable>(
@@ -126,33 +126,32 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // these builtins.
 
   Output out;
-  ast::CloneContext(&out.module, in)
-      .ReplaceAll(
-          [&](ast::CloneContext* ctx, ast::Variable* var) -> ast::Variable* {
-            for (ast::VariableDecoration* dec : var->decorations()) {
-              if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
-                ast::Builtin blt_type = blt_dec->value();
-                if (blt_type == ast::Builtin::kVertexIndex) {
-                  vertex_index_sym = var->symbol();
-                  has_vertex_index_ = true;
-                  return clone_variable_with_new_name(
-                      ctx, var,
-                      kIndexOffsetPrefix + in->SymbolToName(var->symbol()));
-                } else if (blt_type == ast::Builtin::kInstanceIndex) {
-                  instance_index_sym = var->symbol();
-                  has_instance_index_ = true;
-                  return clone_variable_with_new_name(
-                      ctx, var,
-                      kIndexOffsetPrefix + in->SymbolToName(var->symbol()));
-                }
-              }
+  CloneContext(&out.module, in)
+      .ReplaceAll([&](CloneContext* ctx, ast::Variable* var) -> ast::Variable* {
+        for (ast::VariableDecoration* dec : var->decorations()) {
+          if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
+            ast::Builtin blt_type = blt_dec->value();
+            if (blt_type == ast::Builtin::kVertexIndex) {
+              vertex_index_sym = var->symbol();
+              has_vertex_index_ = true;
+              return clone_variable_with_new_name(
+                  ctx, var,
+                  kIndexOffsetPrefix + in->SymbolToName(var->symbol()));
+            } else if (blt_type == ast::Builtin::kInstanceIndex) {
+              instance_index_sym = var->symbol();
+              has_instance_index_ = true;
+              return clone_variable_with_new_name(
+                  ctx, var,
+                  kIndexOffsetPrefix + in->SymbolToName(var->symbol()));
             }
-            return nullptr;  // Just clone var
-          })
+          }
+        }
+        return nullptr;  // Just clone var
+      })
       .ReplaceAll(  // Note: This happens in the same pass as the rename above
                     // which determines the original builtin variable names,
                     // but this should be fine, as variables are cloned first.
-          [&](ast::CloneContext* ctx, ast::Function* func) -> ast::Function* {
+          [&](CloneContext* ctx, ast::Function* func) -> ast::Function* {
             maybe_create_buffer_var(ctx->mod);
             if (buffer_var == nullptr) {
               return nullptr;  // no transform need, just clone func

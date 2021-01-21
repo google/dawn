@@ -350,7 +350,7 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
 
  private:
   bool IsValid() const override;
-  Node* Clone(ast::CloneContext*) const override;
+  Node* Clone(CloneContext*) const override;
   void to_str(std::ostream& out, size_t indent) const override;
 };
 
