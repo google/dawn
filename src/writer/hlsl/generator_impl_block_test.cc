@@ -29,6 +29,9 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
   auto* b = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, b)) << gen.error();
@@ -42,6 +45,9 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block_WithoutNewline) {
   auto* b = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitBlock(out, b)) << gen.error();

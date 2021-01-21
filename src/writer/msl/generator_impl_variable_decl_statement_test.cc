@@ -44,6 +44,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32);
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
@@ -53,6 +55,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   auto* var = Const("a", ast::StorageClass::kNone, ty.f32);
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -65,6 +69,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 
   auto* var = Var("a", ast::StorageClass::kNone, &ary);
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -82,6 +88,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   auto* var = Var("a", ast::StorageClass::kNone, s);
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
@@ -92,6 +100,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
   auto* var = Var("a", ast::StorageClass::kFunction, ty.vec2<f32>());
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -104,6 +114,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
@@ -113,6 +125,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -125,6 +139,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
                   ast::VariableDecorationList{});
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float a = initializer;
 )");
@@ -136,6 +152,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.vec3<f32>(), zero_vec,
                   ast::VariableDecorationList{});
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);

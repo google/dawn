@@ -72,6 +72,9 @@ TEST_P(HlslBinaryTest, Emit_f32) {
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
@@ -90,6 +93,9 @@ TEST_P(HlslBinaryTest, Emit_u32) {
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
@@ -108,6 +114,9 @@ TEST_P(HlslBinaryTest, Emit_i32) {
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
@@ -140,6 +149,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             "(float3(1.0f, 1.0f, 1.0f) * "
@@ -154,6 +166,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             "(1.0f * float3(1.0f, 1.0f, "
@@ -171,6 +186,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(mat * 1.0f)");
 }
@@ -186,6 +204,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(1.0f * mat)");
 }
@@ -201,6 +222,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "mul(mat, float3(1.0f, 1.0f, 1.0f))");
 }
@@ -216,6 +240,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "mul(float3(1.0f, 1.0f, 1.0f), mat)");
 }
@@ -231,6 +258,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "mul(mat, mat)");
 }
@@ -241,6 +271,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
 
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, left, right);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
@@ -262,6 +294,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
       ast::BinaryOp::kLogicalOr,
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b),
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, c, d));
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp_0)");
@@ -286,6 +320,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
 
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, left, right);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(_tint_tmp)");
@@ -331,6 +367,8 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
           else_stmt,
       });
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
@@ -362,6 +400,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
       ast::BinaryOp::kLogicalOr,
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b), c));
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;
 if (_tint_tmp) {
@@ -387,6 +427,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalAnd,
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c), d));
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
@@ -417,6 +459,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
 
   auto* expr = create<ast::VariableDeclStatement>(var);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (_tint_tmp) {
@@ -442,6 +486,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalAnd, a,
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c)));
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
@@ -476,6 +522,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
                                     Expr("d"))));
 
   auto* expr = create<ast::CallStatement>(Call("foo", params));
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = a;

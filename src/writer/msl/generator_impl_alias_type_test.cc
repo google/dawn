@@ -30,6 +30,8 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
   auto* alias = ty.alias("a", ty.f32);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float a;
 )");
@@ -37,6 +39,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
   auto* alias = ty.alias("float", ty.f32);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef float float_tint_0;
@@ -50,6 +54,9 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("a", str);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructedType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct a {
   float a;
@@ -66,6 +73,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
 
   auto* s = ty.struct_("b", str);
   auto* alias = ty.alias("a", s);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
   EXPECT_EQ(gen.result(), R"(typedef b a;

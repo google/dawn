@@ -31,6 +31,8 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
   auto* expr = MemberAccessor("str", "mem");
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "str.mem");
 }

@@ -31,6 +31,8 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
   auto* cast = Construct<f32>("id");
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
   EXPECT_EQ(gen.result(), "f32(id)");
 }

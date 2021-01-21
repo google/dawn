@@ -29,6 +29,8 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Discard) {
   auto* expr = create<ast::DiscardStatement>();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateStatement(expr), 1u) << b.error();
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpKill

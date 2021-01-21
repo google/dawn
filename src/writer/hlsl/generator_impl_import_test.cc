@@ -54,6 +54,9 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
   auto* expr = Call(ident, 1.f);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.0f)");
 }
@@ -92,6 +95,9 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   auto* expr = Call(param.name, Expr(1));
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1)");
 }
@@ -106,6 +112,9 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   auto* expr = Call(param.name, 1.f, 2.f);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.0f, 2.0f)");
 }
@@ -127,6 +136,9 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
       Call(param.name, vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(4.f, 5.f, 6.f));
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
             std::string(param.hlsl_name) +
@@ -143,6 +155,9 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   auto* expr = Call(param.name, 1, 2);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2)");
 }
@@ -158,6 +173,9 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   auto* expr = Call(param.name, 1.f, 2.f, 3.f);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.0f, 2.0f, 3.0f)");
 }
@@ -180,6 +198,9 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   auto* expr = Call(param.name, 1, 2, 3);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2, 3)");
 }
@@ -197,6 +218,9 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
   // Register the global
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), std::string("determinant(var)"));
 }

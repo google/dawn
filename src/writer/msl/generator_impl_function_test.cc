@@ -63,6 +63,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
@@ -83,6 +86,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
@@ -107,6 +113,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
@@ -128,6 +137,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_NoReturn_Void) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -166,6 +177,8 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -213,6 +226,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -267,6 +282,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -309,6 +326,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -358,6 +377,9 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -409,6 +431,8 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -475,6 +499,8 @@ TEST_F(
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -537,6 +563,8 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -603,6 +631,9 @@ TEST_F(
   mod->AddFunction(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -664,6 +695,9 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -725,6 +759,8 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -796,6 +832,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -846,6 +884,9 @@ TEST_F(MslGeneratorImplTest,
   mod->AddFunction(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -875,6 +916,8 @@ TEST_F(MslGeneratorImplTest,
 
   mod->AddFunction(func);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -896,6 +939,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
@@ -976,6 +1022,8 @@ TEST_F(MslGeneratorImplTest,
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>

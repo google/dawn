@@ -32,8 +32,10 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
       create<ast::ReturnStatement>(),
   });
   auto* i = create<ast::IfStatement>(cond, body, ast::ElseStatementList{});
-  gen.increment_indent();
 
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
   EXPECT_EQ(result(), R"(  if (cond) {
     return;
@@ -54,6 +56,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
   auto* i = create<ast::IfStatement>(
       cond, body,
       ast::ElseStatementList{create<ast::ElseStatement>(else_cond, else_body)});
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -80,6 +84,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
   auto* i = create<ast::IfStatement>(
       cond, body,
       ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -113,6 +119,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
           create<ast::ElseStatement>(else_cond, else_body),
           create<ast::ElseStatement>(nullptr, else_body_2),
       });
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 

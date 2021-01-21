@@ -57,6 +57,8 @@ TEST_F(BuilderTest, Expression_Call) {
   ASSERT_TRUE(td.DetermineFunction(a_func)) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -105,6 +107,8 @@ TEST_F(BuilderTest, Statement_Call) {
   ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
   ASSERT_TRUE(td.DetermineFunction(a_func)) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();

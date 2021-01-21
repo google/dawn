@@ -33,6 +33,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
 
   auto* expr = create<ast::MemberAccessorExpression>(str, mem);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "str.mem");
 }

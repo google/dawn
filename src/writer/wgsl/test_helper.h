@@ -31,14 +31,27 @@ namespace wgsl {
 template <typename BASE>
 class TestHelperBase : public BASE, public ast::BuilderWithModule {
  public:
-  TestHelperBase() : td(mod), gen(mod) {}
+  TestHelperBase() : td(mod) {}
 
   ~TestHelperBase() = default;
 
+  /// Builds and returns a GeneratorImpl from the module.
+  /// @note The generator is only built once. Multiple calls to Build() will
+  /// return the same GeneratorImpl without rebuilding.
+  /// @return the built generator
+  GeneratorImpl& Build() {
+    if (gen_) {
+      return *gen_;
+    }
+    gen_ = std::make_unique<GeneratorImpl>(mod);
+    return *gen_;
+  }
+
   /// The type determiner
   TypeDeterminer td;
-  /// The generator
-  GeneratorImpl gen;
+
+ private:
+  std::unique_ptr<GeneratorImpl> gen_;
 };
 using TestHelper = TestHelperBase<testing::Test>;
 

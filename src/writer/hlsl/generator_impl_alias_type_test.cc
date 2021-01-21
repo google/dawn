@@ -29,6 +29,8 @@ using HlslGeneratorImplTest_Alias = TestHelper;
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
   auto* alias = ty.alias("a", ty.f32);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float a;
 )");
@@ -36,6 +38,8 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
   auto* alias = ty.alias("float", ty.f32);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
   EXPECT_EQ(result(), R"(typedef float float_tint_0;
@@ -50,6 +54,8 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
 
   auto* s = ty.struct_("A", str);
   auto* alias = ty.alias("B", s);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
   EXPECT_EQ(result(), R"(struct B {

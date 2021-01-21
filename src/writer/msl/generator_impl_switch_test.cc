@@ -52,6 +52,9 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
   body.push_back(def);
 
   auto* s = create<ast::SwitchStatement>(Expr("cond"), body);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();

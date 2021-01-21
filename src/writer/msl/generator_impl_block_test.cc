@@ -31,6 +31,9 @@ TEST_F(MslGeneratorImplTest, Emit_Block) {
   auto* b = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
@@ -44,6 +47,9 @@ TEST_F(MslGeneratorImplTest, Emit_Block_WithoutNewline) {
   auto* b = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitBlock(b)) << gen.error();

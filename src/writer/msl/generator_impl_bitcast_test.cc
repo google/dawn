@@ -31,6 +31,9 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
   auto* bitcast = create<ast::BitcastExpression>(ty.f32, Expr("id"));
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(bitcast)) << gen.error();
   EXPECT_EQ(gen.result(), "as_type<float>(id)");
 }

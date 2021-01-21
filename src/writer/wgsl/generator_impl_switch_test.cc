@@ -53,6 +53,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Switch) {
   auto* cond = Expr("cond");
   auto* s = create<ast::SwitchStatement>(cond, body);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();

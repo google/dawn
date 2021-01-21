@@ -22,6 +22,7 @@
 #include "src/type/sampled_texture_type.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -305,17 +306,11 @@ std::string expected_texture_overload(
 }  // NOLINT - Ignore the length of this function
 
 class MslGeneratorIntrinsicTextureTest
-    : public ast::BuilderWithModule,
-      public testing::TestWithParam<ast::intrinsic::test::TextureOverloadCase> {
+    : public TestParamHelper<ast::intrinsic::test::TextureOverloadCase> {
  protected:
   void OnVariableBuilt(ast::Variable* var) override {
     td.RegisterVariableForTesting(var);
   }
-
-  /// The type determiner
-  TypeDeterminer td{mod};
-  /// The generator
-  GeneratorImpl gen{mod};
 };
 
 TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
@@ -329,6 +324,8 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
 

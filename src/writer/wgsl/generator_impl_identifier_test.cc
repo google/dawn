@@ -26,6 +26,8 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
   auto* i = Expr("glsl");
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
   EXPECT_EQ(gen.result(), "glsl");
 }

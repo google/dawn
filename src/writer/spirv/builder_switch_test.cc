@@ -46,6 +46,8 @@ TEST_F(BuilderTest, Switch_Empty) {
   auto* expr = create<ast::SwitchStatement>(Expr(1), ast::CaseStatementList{});
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
@@ -96,6 +98,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -157,6 +161,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -231,6 +237,8 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
@@ -315,6 +323,8 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
@@ -382,6 +392,8 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
@@ -424,6 +436,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
 
   auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
                     ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();

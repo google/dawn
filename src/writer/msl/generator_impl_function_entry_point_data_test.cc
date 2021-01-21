@@ -75,6 +75,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct vtx_main_in {
   float foo [[attribute(0)]];
@@ -120,6 +122,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct vtx_main_out {
@@ -167,6 +171,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_in {
   float foo [[user(locn0)]];
@@ -213,6 +219,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_out {
   float foo [[color(0)]];
@@ -256,6 +264,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -293,6 +303,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
@@ -336,6 +348,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_out {

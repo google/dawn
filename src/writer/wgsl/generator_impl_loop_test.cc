@@ -33,6 +33,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
   });
   auto* l = create<ast::LoopStatement>(body, nullptr);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
@@ -50,6 +52,8 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
       create<ast::DiscardStatement>(),
   });
   auto* l = create<ast::LoopStatement>(body, continuing);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 

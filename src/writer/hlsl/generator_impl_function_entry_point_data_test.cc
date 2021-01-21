@@ -75,6 +75,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct vtx_main_in {
   float foo : TEXCOORD0;
@@ -125,6 +128,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct vtx_main_out {
   float foo : TEXCOORD0;
@@ -175,6 +181,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_in {
   float foo : TEXCOORD0;
@@ -225,6 +234,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_out {
   float foo : SV_Target0;
@@ -272,6 +284,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_FALSE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -314,6 +329,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_FALSE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -364,6 +382,9 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   std::unordered_set<Symbol> globals;
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_in {
   float4 coord : SV_Position;

@@ -45,6 +45,11 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -55,14 +60,17 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
   td.RegisterVariableForTesting(v);
+
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -74,8 +82,6 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 %1 = OpVariable %2 Output %4
 )");
 
-  auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
 }
 
@@ -87,6 +93,11 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -97,14 +108,17 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
   auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
   td.RegisterVariableForTesting(v);
+
+  auto* expr = Expr("var");
+  ASSERT_TRUE(td.DetermineResultType(expr));
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
@@ -120,8 +134,6 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
             R"(%1 = OpVariable %2 Function %4
 )");
 
-  auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
 }
 
@@ -131,6 +143,8 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   auto* expr = Add("var", "var");
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -156,6 +170,8 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   auto* expr = Add("var", "var");
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();

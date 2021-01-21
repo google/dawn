@@ -31,6 +31,9 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Assign) {
   auto* assign = create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs"));
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();

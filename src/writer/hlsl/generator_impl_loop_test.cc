@@ -38,6 +38,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
       create<ast::DiscardStatement>(),
   });
   auto* l = create<ast::LoopStatement>(body, nullptr);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, l)) << gen.error();
@@ -55,6 +58,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
       create<ast::ReturnStatement>(),
   });
   auto* l = create<ast::LoopStatement>(body, continuing);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, l)) << gen.error();
@@ -93,6 +99,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   });
 
   auto* outer = create<ast::LoopStatement>(body, continuing);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, outer)) << gen.error();
@@ -158,6 +167,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
       create<ast::AssignmentStatement>(lhs, rhs),
   });
   auto* outer = create<ast::LoopStatement>(body, continuing);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, outer)) << gen.error();

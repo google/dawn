@@ -39,18 +39,27 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Bool) {
   auto* expr = Expr(false);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "false");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Int) {
   auto* expr = Expr(-12345);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "-12345");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_UInt) {
   auto* expr = Expr(56779u);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "56779u");
 }
@@ -58,42 +67,63 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_UInt) {
 TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
   // Use a number close to 1<<30 but whose decimal representation ends in 0.
   auto* expr = Expr(static_cast<float>((1 << 30) - 4));
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "1073741824.0f");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
   auto* expr = Construct<f32>(-1.2e-5f);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "float(-0.000012f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Bool) {
   auto* expr = Construct<bool>(true);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "bool(true)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Int) {
   auto* expr = Construct<i32>(-12345);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "int(-12345)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Uint) {
   auto* expr = Construct<u32>(12345u);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "uint(12345u)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
   auto* expr = vec3<f32>(1.f, 2.f, 3.f);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "float3(1.0f, 2.0f, 3.0f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
   auto* expr = vec3<f32>();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "float3(0.0f)");
 }
@@ -108,6 +138,9 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
   }
 
   auto* expr = Construct(ty.mat2x3<f32>(), mat_values);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
 
   // A matrix of type T with n columns and m rows can also be constructed from
@@ -128,6 +161,9 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
   }
 
   auto* expr = Construct(&ary, ary_values);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
   EXPECT_EQ(gen.result(),
             "{float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), "

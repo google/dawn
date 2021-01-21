@@ -52,7 +52,10 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate());
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate());
 }
 
 TEST_F(ValidateFunctionTest,
@@ -68,7 +71,10 @@ TEST_F(ValidateFunctionTest,
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate());
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate());
 }
 
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
@@ -86,8 +92,11 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(v.error(),
             "12:34 v-0002: non-void function must end with a return statement");
 }
 
@@ -99,8 +108,11 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(v.error(),
             "12:34 v-0002: non-void function must end with a return statement");
 }
 
@@ -118,7 +130,10 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->DetermineFunctions(mod->functions())) << td()->error();
-  EXPECT_TRUE(v()->ValidateFunctions(mod->functions())) << v()->error();
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.ValidateFunctions(mod->functions())) << v.error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
@@ -132,9 +147,12 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
   // TODO(sarahM0): replace 000y with a rule number
-  EXPECT_EQ(v()->error(),
+  EXPECT_EQ(v.error(),
             "12:34 v-000y: return statement type must match its function "
             "return type, returned '__i32', expected '__void'");
 }
@@ -150,9 +168,12 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
   // TODO(sarahM0): replace 000y with a rule number
-  EXPECT_EQ(v()->error(),
+  EXPECT_EQ(v.error(),
             "12:34 v-000y: return statement type must match its function "
             "return type, returned '__i32', expected '__f32'");
 }
@@ -177,8 +198,11 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   mod->AddFunction(func_copy);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
-  EXPECT_EQ(v()->error(), "12:34 v-0016: function names must be unique 'func'");
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(v.error(), "12:34 v-0016: function names must be unique 'func'");
 }
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
@@ -196,8 +220,11 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   mod->AddFunction(func0);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate()) << v()->error();
-  EXPECT_EQ(v()->error(), "12:34 v-0004: recursion is not allowed: 'func'");
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate()) << v.error();
+  EXPECT_EQ(v.error(), "12:34 v-0004: recursion is not allowed: 'func'");
 }
 
 TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
@@ -217,8 +244,11 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   mod->AddFunction(func0);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate()) << v()->error();
-  EXPECT_EQ(v()->error(), "12:34 v-0004: recursion is not allowed: 'func'");
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate()) << v.error();
+  EXPECT_EQ(v.error(), "12:34 v-0004: recursion is not allowed: 'func'");
 }
 
 TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
@@ -235,8 +265,11 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
 
   mod->AddFunction(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(v.error(),
             "12:34 v-0024: Entry point function must return void: 'vtx_main'");
 }
 
@@ -257,8 +290,11 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
 
   mod->AddFunction(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(v.error(),
             "12:34 v-0023: Entry point function must accept no parameters: "
             "'vtx_func'");
 }
@@ -279,9 +315,12 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
 
   mod->AddFunction(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
   EXPECT_EQ(
-      v()->error(),
+      v.error(),
       "12:34 v-0020: only one stage decoration permitted per entry point");
 }
 
@@ -299,7 +338,10 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(v()->Validate()) << v()->error();
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate()) << v.error();
 }
 
 TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
@@ -312,8 +354,11 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   mod->AddFunction(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_FALSE(v()->Validate());
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(v.error(),
             "v-0003: At least one of vertex, fragment or compute shader must "
             "be present");
 }

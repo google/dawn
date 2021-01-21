@@ -27,6 +27,8 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
   auto* f = create<ast::FallthroughStatement>();
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();

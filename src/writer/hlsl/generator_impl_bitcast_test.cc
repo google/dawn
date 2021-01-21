@@ -33,6 +33,8 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
   auto* id = Expr("id");
   auto* bitcast = create<ast::BitcastExpression>(ty.f32, id);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
   EXPECT_EQ(result(), "asfloat(id)");
 }
@@ -41,6 +43,8 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
   auto* id = Expr("id");
   auto* bitcast = create<ast::BitcastExpression>(ty.i32, id);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
   EXPECT_EQ(result(), "asint(id)");
 }
@@ -48,6 +52,8 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
   auto* id = Expr("id");
   auto* bitcast = create<ast::BitcastExpression>(ty.u32, id);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
   EXPECT_EQ(result(), "asuint(id)");

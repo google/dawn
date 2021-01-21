@@ -26,6 +26,8 @@ using HlslGeneratorImplTest_Discard = TestHelper;
 TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
   auto* stmt = create<ast::DiscardStatement>();
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();

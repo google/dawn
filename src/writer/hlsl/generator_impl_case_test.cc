@@ -38,6 +38,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
   lit.push_back(Literal(5));
   auto* c = create<ast::CaseStatement>(lit, body);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitCase(out, c)) << gen.error();
@@ -52,6 +54,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
   lit.push_back(Literal(5));
   auto* c = create<ast::CaseStatement>(
       lit, create<ast::BlockStatement>(ast::StatementList{}));
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -69,6 +73,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
   ast::CaseSelectorList lit;
   lit.push_back(Literal(5));
   auto* c = create<ast::CaseStatement>(lit, body);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -88,6 +94,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
   lit.push_back(Literal(6));
   auto* c = create<ast::CaseStatement>(lit, body);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitCase(out, c)) << gen.error();
@@ -103,6 +111,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
       create<ast::BreakStatement>(),
   });
   auto* c = create<ast::CaseStatement>(ast::CaseSelectorList{}, body);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 

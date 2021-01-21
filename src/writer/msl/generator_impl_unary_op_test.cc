@@ -39,6 +39,9 @@ using MslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(MslUnaryOpTest, Emit) {
   auto params = GetParam();
   auto* op = create<ast::UnaryOpExpression>(params.op, Expr("expr"));
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(op)) << gen.error();
   EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");
 }

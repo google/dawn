@@ -48,6 +48,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
                     },
                     ast::FunctionDecorationList{});
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
@@ -70,6 +72,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
            },
            ast::FunctionDecorationList{});
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
@@ -89,6 +93,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
                     ast::FunctionDecorationList{
                         create<ast::WorkgroupDecoration>(2u, 4u, 6u),
                     });
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -112,6 +118,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
@@ -134,6 +142,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
                create<ast::WorkgroupDecoration>(2u, 4u, 6u),
            });
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -225,6 +235,8 @@ TEST_F(WgslGeneratorImplTest,
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]

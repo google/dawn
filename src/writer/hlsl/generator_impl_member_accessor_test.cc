@@ -46,13 +46,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
   auto* s = ty.struct_("Str", strct);
   auto* str_var = Var("str", ast::StorageClass::kPrivate, s);
+  mod->AddGlobalVariable(str_var);
+
   auto* expr = MemberAccessor("str", "mem");
 
   td.RegisterVariableForTesting(str_var);
-  gen.register_global(str_var);
-  mod->AddGlobalVariable(str_var);
-
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(str_var);
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "str.mem");
 }
@@ -75,14 +79,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  auto* expr = MemberAccessor("data", "b");
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
+
+  auto* expr = MemberAccessor("data", "b");
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load(4))");
@@ -105,18 +112,22 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  auto* expr = MemberAccessor("data", "a");
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
+
+  auto* expr = MemberAccessor("data", "a");
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
 
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asint(data.Load(0))");
 }
+
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix) {
   // struct Data {
@@ -138,7 +149,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* b_var = Var("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
+  mod->AddGlobalVariable(b_var);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
+  mod->AddGlobalVariable(coord_var);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr("b");
@@ -147,13 +160,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(b_var);
-  gen.register_global(coord_var);
-  gen.register_global(b_var);
-  mod->AddGlobalVariable(coord_var);
-  mod->AddGlobalVariable(b_var);
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+  gen.register_global(b_var);
 
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(float3x2 _tint_tmp = b;
@@ -183,18 +197,20 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
+  mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
-  mod->AddGlobalVariable(coord_var);
-
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(
@@ -224,15 +240,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
+  mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "a");
 
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
-  mod->AddGlobalVariable(coord_var);
-
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
@@ -264,14 +282,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  auto* expr = MemberAccessor("data", "a");
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
+
+  auto* expr = MemberAccessor("data", "a");
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
@@ -296,14 +317,17 @@ TEST_F(
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  auto* expr = MemberAccessor("data", "a");
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
+
+  auto* expr = MemberAccessor("data", "a");
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
@@ -329,15 +353,18 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
+  mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
+
   auto* expr = IndexAccessor(
       IndexAccessor(MemberAccessor("data", "a"), Expr(2)), Expr(1));
 
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
-  mod->AddGlobalVariable(coord_var);
-
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + (16 * 2) + 16))");
@@ -362,14 +389,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
+
+  auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
 
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asint(data.Load((4 * 2) + 0))");
@@ -394,15 +424,18 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
+  mod->AddGlobalVariable(coord_var);
+  td.RegisterVariableForTesting(coord_var);
+
   auto* expr = IndexAccessor(MemberAccessor("data", "a"),
                              Sub(Add(Expr(2), Expr(4)), Expr(3)));
 
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
-  mod->AddGlobalVariable(coord_var);
-
   ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asint(data.Load((4 * ((2 + 4) - 3)) + 0))");
@@ -426,18 +459,20 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "b");
   auto* rhs = Expr(2.0f);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(data.Store(4, asuint(2.0f));
 )");
@@ -464,18 +499,20 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(data.Store((4 * 2) + 0, asuint(2));
 )");
@@ -499,18 +536,20 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(data.Store(0, asuint(2));
 )");
@@ -534,16 +573,18 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "b");
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16))");
 }
@@ -566,19 +607,21 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "b");
   auto* rhs = vec3<f32>(1.f, 2.f, 3.f);
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(),
             R"(data.Store3(16, asuint(float3(1.0f, 2.0f, 3.0f)));
@@ -619,17 +662,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* expr =
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0))");
 }
@@ -666,18 +711,21 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
 
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
       "xy");
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0)).xy");
 }
@@ -717,18 +765,20 @@ TEST_F(
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
       "g");
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
@@ -767,18 +817,20 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* expr = IndexAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
       Expr(1));
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
 }
@@ -817,12 +869,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* lhs =
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
@@ -830,7 +878,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* assign =
       create<ast::AssignmentStatement>(lhs, vec3<f32>(1.f, 2.f, 3.f));
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(),
             R"(data.Store3(16 + (32 * 2) + 0, asuint(float3(1.0f, 2.0f, 3.0f)));
@@ -871,12 +925,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-
-  td.RegisterVariableForTesting(coord_var);
-  gen.register_global(coord_var);
   mod->AddGlobalVariable(coord_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
@@ -885,7 +935,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
+  ASSERT_TRUE(td.Determine()) << td.error();
   ASSERT_TRUE(td.DetermineResultType(assign));
+
+  GeneratorImpl& gen = Build();
+
+  gen.register_global(coord_var);
+
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(),
             R"(data.Store((4 * 1) + 16 + (32 * 2) + 0, asuint(1.0f));

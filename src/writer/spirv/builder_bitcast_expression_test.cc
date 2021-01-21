@@ -36,6 +36,8 @@ TEST_F(BuilderTest, Bitcast) {
 
   ASSERT_TRUE(td.DetermineResultType(bitcast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateBitcastExpression(bitcast), 1u);
 
@@ -52,6 +54,8 @@ TEST_F(BuilderTest, Bitcast_DuplicateType) {
   auto* bitcast = create<ast::BitcastExpression>(ty.f32, Expr(2.4f));
 
   ASSERT_TRUE(td.DetermineResultType(bitcast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateBitcastExpression(bitcast), 1u);

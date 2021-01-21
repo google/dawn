@@ -31,6 +31,8 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_Return) {
   auto* r = create<ast::ReturnStatement>();
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
@@ -40,6 +42,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Return) {
 TEST_F(WgslGeneratorImplTest, Emit_ReturnWithValue) {
   auto* expr = Expr("expr");
   auto* r = create<ast::ReturnStatement>(expr);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 

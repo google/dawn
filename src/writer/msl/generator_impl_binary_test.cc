@@ -40,6 +40,9 @@ TEST_P(MslBinaryTest, Emit) {
 
   auto* expr =
       create<ast::BinaryExpression>(params.op, Expr("left"), Expr("right"));
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }

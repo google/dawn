@@ -37,6 +37,8 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Return) {
   auto* ret = create<ast::ReturnStatement>();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(ret));
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -51,6 +53,8 @@ TEST_F(BuilderTest, Return_WithValue) {
   auto* ret = create<ast::ReturnStatement>(val);
 
   EXPECT_TRUE(td.DetermineResultType(ret)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(ret));
@@ -74,6 +78,8 @@ TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
 
   td.RegisterVariableForTesting(var);
   EXPECT_TRUE(td.DetermineResultType(ret)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();

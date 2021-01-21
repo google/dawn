@@ -52,6 +52,8 @@ using SpvBuilderConstructorTest = TestHelper;
 TEST_F(SpvBuilderConstructorTest, Const) {
   auto* c = Expr(42.2f);
 
+  spirv::Builder& b = Build();
+
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, c, true), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -65,6 +67,8 @@ TEST_F(SpvBuilderConstructorTest, Type_WithCasts_OutsideFunction_IsError) {
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_EQ(b.GenerateExpression(t), 0u);
   EXPECT_TRUE(b.has_error()) << b.error();
   EXPECT_EQ(b.error(),
@@ -76,6 +80,8 @@ TEST_F(SpvBuilderConstructorTest, Type) {
   auto* t = vec3<f32>(1.0f, 1.0f, 3.0f);
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -92,6 +98,8 @@ TEST_F(SpvBuilderConstructorTest, Type_WithCasts) {
   auto* t = vec2<f32>(Construct<f32>(1), Construct<f32>(1));
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -119,6 +127,8 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
@@ -137,6 +147,8 @@ TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
   auto* t = vec2<f32>(1.0f, "ident");
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -165,6 +177,8 @@ TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(t), 7u);
@@ -191,6 +205,8 @@ TEST_F(SpvBuilderConstructorTest, Type_NonConst_Value_Fails) {
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, t, true), 0u);
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");
@@ -200,6 +216,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
   auto* cast = Construct<bool>(true);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -217,6 +235,8 @@ TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 3u);
 
@@ -230,6 +250,8 @@ TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
   auto* cast = Construct<u32>(2u);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 3u);
@@ -245,6 +267,8 @@ TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 3u);
 
@@ -258,6 +282,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
   auto* cast = vec2<f32>(2.0f, 2.0f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 4u);
@@ -275,6 +301,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Vec2) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 5u);
 
@@ -291,6 +319,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 4u);
 
@@ -305,6 +335,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2) {
   auto* cast = vec3<f32>(2.0f, vec2<f32>(2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 8u);
@@ -326,6 +358,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32) {
   auto* cast = vec3<f32>(vec2<f32>(2.0f, 2.0f), 2.0f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 8u);
@@ -349,6 +383,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec3) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 5u);
 
@@ -365,6 +401,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 4u);
 
@@ -379,6 +417,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2) {
   auto* cast = vec4<f32>(2.0f, 2.0f, vec2<f32>(2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 8u);
@@ -401,6 +441,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
@@ -422,6 +464,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 8u);
 
@@ -442,6 +486,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_Vec2) {
   auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 10u);
@@ -466,6 +512,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 9u);
 
@@ -487,6 +535,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32) {
   auto* cast = vec4<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), 2.0f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 9u);
@@ -511,6 +561,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec4) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 5u);
 
@@ -527,6 +579,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_Vec2) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 5u);
 
@@ -541,6 +595,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec3) {
   auto* cast = vec3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 5u);
@@ -557,6 +613,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec4) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 5u);
 
@@ -571,6 +629,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32_Vec2) {
   auto* cast = vec3<f32>(2.0f, vec2<f32>(2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
@@ -594,6 +654,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec2_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
@@ -615,6 +677,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
   auto* cast = vec4<f32>(2.0f, 2.0f, vec2<f32>(2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
@@ -638,6 +702,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
@@ -660,6 +726,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 11u);
 
@@ -681,6 +749,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_Vec2) {
   auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 13u);
@@ -706,6 +776,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec3) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 13u);
 
@@ -729,6 +801,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec3_F32) {
   auto* cast = vec4<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), 2.0f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 13u);
@@ -754,6 +828,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_With_Vec2_Vec2) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
@@ -771,6 +847,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_With_Vec2_Vec2_Vec2) {
                            vec2<f32>(2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
@@ -790,6 +868,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
@@ -807,6 +887,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_With_Vec3_Vec3) {
       mat2x3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
@@ -827,6 +909,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_With_Vec3_Vec3_Vec3) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
@@ -846,6 +930,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
@@ -863,6 +949,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_With_Vec4_Vec4) {
                            vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
@@ -883,6 +971,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_With_Vec4_Vec4_Vec4) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
@@ -902,6 +992,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
 
@@ -918,6 +1010,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
   auto* cast = array<f32, 5>(2.0f, 2.0f, 2.0f, 2.0f, 2.0f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 6u);
@@ -936,6 +1030,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
       array<f32, 2>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 8u);
@@ -963,6 +1059,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
   auto* t = Construct(s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(t), 6u);
@@ -982,6 +1080,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(t), 2u);
@@ -996,6 +1096,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_I32) {
   auto* t = Construct<i32>();
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -1012,6 +1114,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_U32) {
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(t), 2u);
@@ -1027,6 +1131,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Bool) {
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(t), 2u);
@@ -1041,6 +1147,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Vector) {
   auto* t = vec2<i32>();
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -1058,6 +1166,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix) {
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(t), 4u);
@@ -1074,6 +1184,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
   auto* t = array<i32, 2>();
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -1098,6 +1210,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   auto* t = Construct(s_type);
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateExpression(t), 3u);
@@ -1113,6 +1227,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
   auto* cast = Construct<i32>(2u);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 1u);
@@ -1131,6 +1247,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
@@ -1147,6 +1265,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
   auto* cast = Construct<i32>(2.4f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 1u);
@@ -1165,6 +1285,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
@@ -1182,6 +1304,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 1u);
 
@@ -1198,6 +1322,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
   auto* cast = Construct<f32>(2u);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(cast), 1u);
@@ -1217,6 +1343,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
   auto* cast = vec3<i32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -1243,6 +1371,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
@@ -1267,6 +1397,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
   auto* cast = vec3<u32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -1293,6 +1425,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
@@ -1317,6 +1451,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
   auto* cast = vec3<f32>("i");
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -1343,6 +1479,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
@@ -1368,6 +1506,8 @@ TEST_F(SpvBuilderConstructorTest,
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
 }
@@ -1381,6 +1521,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVector_WithIdent) {
   Var("c", ast::StorageClass::kPrivate, ty.f32);
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_FALSE(b.is_constructor_const(t, true));
   EXPECT_TRUE(b.has_error());
@@ -1396,6 +1538,8 @@ TEST_F(SpvBuilderConstructorTest,
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
 }
@@ -1407,6 +1551,8 @@ TEST_F(SpvBuilderConstructorTest,
   auto* t = vec2<f32>(Construct<f32>(1.f), Construct<f32>(2.f));
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_FALSE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
@@ -1420,6 +1566,8 @@ TEST_F(SpvBuilderConstructorTest,
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_FALSE(b.is_constructor_const(t, true));
   EXPECT_FALSE(b.has_error());
 }
@@ -1431,6 +1579,8 @@ TEST_F(SpvBuilderConstructorTest,
   auto* t = vec3<f32>(1.f, 2.f, 3.f);
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
@@ -1446,6 +1596,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
   Var("c", ast::StorageClass::kPrivate, ty.f32);
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
@@ -1463,6 +1615,8 @@ TEST_F(SpvBuilderConstructorTest,
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -1475,6 +1629,8 @@ TEST_F(SpvBuilderConstructorTest,
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -1486,6 +1642,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_WithTypeCastConstructor) {
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
 }
@@ -1494,6 +1652,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
   auto* t = vec2<u32>(1, 1);
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
@@ -1509,6 +1669,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
   auto* s_type = ty.struct_("my_struct", s);
   auto* t = Construct(s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());
@@ -1530,6 +1692,8 @@ TEST_F(SpvBuilderConstructorTest,
   Var("b", ast::StorageClass::kPrivate, ty.f32);
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
+
+  spirv::Builder& b = Build();
 
   EXPECT_FALSE(b.is_constructor_const(t, false));
   EXPECT_FALSE(b.has_error());

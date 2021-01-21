@@ -61,6 +61,8 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
@@ -71,6 +73,7 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             "%4 = " + param.name + " %1 %2 %3\n");
 }
+
 TEST_P(BinaryArithSignedIntegerTest, Vector) {
   auto param = GetParam();
 
@@ -80,6 +83,8 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -101,6 +106,8 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
 
   td.RegisterVariableForTesting(var);
   EXPECT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -147,6 +154,8 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
@@ -166,6 +175,8 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -203,6 +214,8 @@ TEST_P(BinaryArithFloatTest, Scalar) {
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
@@ -223,6 +236,8 @@ TEST_P(BinaryArithFloatTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -255,6 +270,8 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
@@ -276,6 +293,8 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -312,6 +331,8 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
@@ -333,6 +354,8 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -369,6 +392,8 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
@@ -390,6 +415,8 @@ TEST_P(BinaryCompareFloatTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 
@@ -424,10 +451,13 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 5u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstantComposite %1 %3 %3 %3
@@ -445,10 +475,13 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 5u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 1
 %3 = OpTypeVector %1 3
 %4 = OpConstantComposite %3 %2 %2 %2
@@ -465,11 +498,14 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
                                              Expr("mat"), Expr(1.f));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
@@ -491,11 +527,14 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
@@ -519,11 +558,14 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
@@ -548,11 +590,14 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
@@ -575,11 +620,14 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
@@ -604,11 +652,14 @@ TEST_F(BuilderTest, Binary_LogicalAnd) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 12u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 %4 = OpConstant %2 2
 %6 = OpTypeBool
@@ -641,6 +692,8 @@ TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
                                              Expr("a"), Expr("b"));
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());
@@ -682,6 +735,8 @@ TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());
 
@@ -720,6 +775,8 @@ TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());
 
@@ -757,11 +814,14 @@ TEST_F(BuilderTest, Binary_LogicalOr) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());
 
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 12u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 %4 = OpConstant %2 2
 %6 = OpTypeBool
@@ -794,6 +854,8 @@ TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
                                              Expr("a"), Expr("b"));
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   b.GenerateLabel(b.next_id());

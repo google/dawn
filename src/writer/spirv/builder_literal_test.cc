@@ -36,6 +36,8 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Literal_Bool_True) {
   auto* b_true = create<ast::BoolLiteral>(ty.bool_, true);
 
+  spirv::Builder& b = Build();
+
   auto id = b.GenerateLiteralIfNeeded(nullptr, b_true);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(2u, id);
@@ -47,6 +49,8 @@ TEST_F(BuilderTest, Literal_Bool_True) {
 
 TEST_F(BuilderTest, Literal_Bool_False) {
   auto* b_false = create<ast::BoolLiteral>(ty.bool_, false);
+
+  spirv::Builder& b = Build();
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, b_false);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -60,6 +64,8 @@ TEST_F(BuilderTest, Literal_Bool_False) {
 TEST_F(BuilderTest, Literal_Bool_Dedup) {
   auto* b_true = create<ast::BoolLiteral>(ty.bool_, true);
   auto* b_false = create<ast::BoolLiteral>(ty.bool_, false);
+
+  spirv::Builder& b = Build();
 
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, b_true), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -77,6 +83,8 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 TEST_F(BuilderTest, Literal_I32) {
   auto* i = create<ast::SintLiteral>(ty.i32, -23);
 
+  spirv::Builder& b = Build();
+
   auto id = b.GenerateLiteralIfNeeded(nullptr, i);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(2u, id);
@@ -90,6 +98,8 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
   auto* i1 = create<ast::SintLiteral>(ty.i32, -23);
   auto* i2 = create<ast::SintLiteral>(ty.i32, -23);
 
+  spirv::Builder& b = Build();
+
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -101,6 +111,8 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
 
 TEST_F(BuilderTest, Literal_U32) {
   auto* i = create<ast::UintLiteral>(ty.u32, 23);
+
+  spirv::Builder& b = Build();
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, i);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -115,6 +127,8 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
   auto* i1 = create<ast::UintLiteral>(ty.u32, 23);
   auto* i2 = create<ast::UintLiteral>(ty.u32, 23);
 
+  spirv::Builder& b = Build();
+
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -126,6 +140,8 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
 
 TEST_F(BuilderTest, Literal_F32) {
   auto* i = create<ast::FloatLiteral>(ty.f32, 23.245f);
+
+  spirv::Builder& b = Build();
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, i);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -139,6 +155,8 @@ TEST_F(BuilderTest, Literal_F32) {
 TEST_F(BuilderTest, Literal_F32_Dedup) {
   auto* i1 = create<ast::FloatLiteral>(ty.f32, 23.245f);
   auto* i2 = create<ast::FloatLiteral>(ty.f32, 23.245f);
+
+  spirv::Builder& b = Build();
 
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
   ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);

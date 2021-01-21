@@ -44,6 +44,9 @@ TEST_F(BuilderTest, Loop_Empty) {
       create<ast::BlockStatement>(ast::StatementList{}));
 
   ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
@@ -74,6 +77,8 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -118,6 +123,8 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
@@ -156,6 +163,8 @@ TEST_F(BuilderTest, Loop_WithContinue) {
 
   ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
@@ -183,6 +192,8 @@ TEST_F(BuilderTest, Loop_WithBreak) {
       body, create<ast::BlockStatement>(ast::StatementList{}));
 
   ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
 

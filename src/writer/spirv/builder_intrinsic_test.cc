@@ -45,26 +45,17 @@
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 namespace {
 
-class IntrinsicBuilderTest : public ast::BuilderWithModule,
-                             public testing::Test {
- protected:
-  void OnVariableBuilt(ast::Variable* var) override {
-    td.RegisterVariableForTesting(var);
-  }
-
-  TypeDeterminer td{mod};
-  spirv::Builder b{mod};
-};
+using IntrinsicBuilderTest = TestHelper;
 
 template <typename T>
-class IntrinsicBuilderTestWithParam : public IntrinsicBuilderTest,
-                                      public testing::WithParamInterface<T> {};
+using IntrinsicBuilderTestWithParam = TestParamHelper<T>;
 
 struct IntrinsicData {
   std::string name;
@@ -83,6 +74,8 @@ TEST_P(IntrinsicBoolTest, Call_Bool) {
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -113,6 +106,8 @@ TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
@@ -136,6 +131,8 @@ TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -168,6 +165,8 @@ TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
@@ -190,6 +189,8 @@ TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -215,6 +216,8 @@ TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
@@ -237,6 +240,8 @@ TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -265,6 +270,8 @@ TEST_F(IntrinsicBuilderTest, Call_Dot) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
@@ -291,6 +298,8 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
@@ -313,6 +322,8 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
@@ -356,6 +367,8 @@ TEST_F(IntrinsicBuilderTest, Call_Select) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.error();
@@ -386,22 +399,22 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   type::Sampler s(type::SamplerKind::kComparisonSampler);
   type::DepthTexture t(type::TextureDimension::k2d);
 
-  b.push_function(Function{});
-
   auto* tex = Var("texture", ast::StorageClass::kNone, &t);
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
-
   auto* sampler = Var("sampler", ast::StorageClass::kNone, &s);
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
-
   auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);
-
   auto* expr2 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);
 
   EXPECT_TRUE(td.DetermineResultType(expr1)) << td.error();
   EXPECT_TRUE(td.DetermineResultType(expr2)) << td.error();
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.error();
   EXPECT_EQ(b.GenerateExpression(expr2), 18u) << b.error();
@@ -442,6 +455,8 @@ TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -475,6 +490,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -501,6 +518,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -555,6 +574,8 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -578,6 +599,8 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -604,6 +627,8 @@ TEST_F(IntrinsicBuilderTest, Call_Normalize) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -636,6 +661,8 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -663,6 +690,8 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -700,6 +729,8 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -724,6 +755,8 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -752,6 +785,8 @@ TEST_F(IntrinsicBuilderTest, Call_Cross) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -783,6 +818,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -811,6 +848,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -852,6 +891,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -878,6 +919,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -913,6 +956,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -939,6 +984,8 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -974,6 +1021,8 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -1000,6 +1049,8 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -1036,6 +1087,8 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -1062,6 +1115,8 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -1098,6 +1153,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -1126,6 +1183,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -1161,6 +1220,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
@@ -1189,6 +1250,8 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -1221,6 +1284,8 @@ TEST_F(IntrinsicBuilderTest, Call_Determinant) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -1260,6 +1325,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateExpression(expr), 11u) << b.error();
@@ -1294,6 +1361,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();

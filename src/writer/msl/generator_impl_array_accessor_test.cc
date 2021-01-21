@@ -34,12 +34,16 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
   auto* expr = IndexAccessor(Expr("ary"), 5);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "ary[5]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitArrayAccessor) {
   auto* expr = IndexAccessor(Expr("ary"), Expr("idx"));
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitArrayAccessor(expr->As<ast::ArrayAccessorExpression>()))
       << gen.error();

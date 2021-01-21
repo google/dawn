@@ -33,8 +33,20 @@ namespace hlsl {
 template <typename BODY>
 class TestHelperBase : public BODY, public ast::BuilderWithModule {
  public:
-  TestHelperBase() : td(mod), gen(mod) {}
+  TestHelperBase() : td(mod) {}
   ~TestHelperBase() = default;
+
+  /// Builds and returns a GeneratorImpl from the module.
+  /// @note The generator is only built once. Multiple calls to Build() will
+  /// return the same GeneratorImpl without rebuilding.
+  /// @return the built generator
+  GeneratorImpl& Build() {
+    if (gen_) {
+      return *gen_;
+    }
+    gen_ = std::make_unique<GeneratorImpl>(mod);
+    return *gen_;
+  }
 
   /// @returns the result string
   std::string result() const { return out.str(); }
@@ -44,13 +56,14 @@ class TestHelperBase : public BODY, public ast::BuilderWithModule {
 
   /// The type determiner
   TypeDeterminer td;
-  /// The generator
-  GeneratorImpl gen;
 
   /// The output stream
   std::ostringstream out;
   /// The pre-output stream
   std::ostringstream pre;
+
+ private:
+  std::unique_ptr<GeneratorImpl> gen_;
 };
 using TestHelper = TestHelperBase<testing::Test>;
 

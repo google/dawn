@@ -55,9 +55,10 @@ TEST_F(BuilderTest, ArrayAccessor) {
   auto* idx_expr = Expr(1);
 
   auto* expr = IndexAccessor(ary, idx_expr);
-
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -97,6 +98,8 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   td.RegisterVariableForTesting(idx);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
   ASSERT_TRUE(b.GenerateFunctionVariable(idx)) << b.error();
@@ -135,6 +138,8 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
@@ -170,6 +175,8 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -208,6 +215,8 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -255,6 +264,8 @@ TEST_F(BuilderTest, MemberAccessor) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
@@ -301,6 +312,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -352,6 +365,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
@@ -400,6 +415,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -456,6 +473,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   td.RegisterVariableForTesting(store);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
   ASSERT_TRUE(b.GenerateFunctionVariable(store)) << b.error();
@@ -493,6 +512,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
@@ -524,6 +545,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
@@ -553,6 +576,8 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -585,6 +610,8 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
@@ -614,6 +641,8 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
@@ -677,6 +706,8 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
@@ -731,6 +762,8 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateAccessorExpression(expr), 18u) << b.error();
@@ -773,6 +806,8 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   td.RegisterVariableForTesting(var);
   ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();

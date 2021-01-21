@@ -33,6 +33,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Assign) {
   auto* rhs = Expr("rhs");
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();

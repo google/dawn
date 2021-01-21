@@ -36,6 +36,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
@@ -46,6 +49,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   auto* var = Const("a", ast::StorageClass::kNone, ty.f32);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
@@ -56,6 +62,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.array<f32, 5>());
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
@@ -67,6 +76,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   auto* var = Var("a", ast::StorageClass::kFunction, ty.f32);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
@@ -77,6 +89,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
   auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
@@ -89,6 +104,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
                   ast::VariableDecorationList{});
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float a = initializer;
 )");
@@ -100,6 +118,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
                   ast::VariableDecorationList{});
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(), R"(float3 a = float3(0.0f);
 )");
@@ -111,6 +132,9 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
                   mat2x3<f32>(), ast::VariableDecorationList{});
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(),
             R"(float3x2 a = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);

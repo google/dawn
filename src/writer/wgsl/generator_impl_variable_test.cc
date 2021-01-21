@@ -36,6 +36,8 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
   auto* v = Var("a", ast::StorageClass::kNone, ty.f32);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var a : f32;
 )");
@@ -43,6 +45,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
   auto* v = Var("a", ast::StorageClass::kInput, ty.f32);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var<in> a : f32;
@@ -54,6 +58,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
                 ast::VariableDecorationList{
                     create<ast::LocationDecoration>(2),
                 });
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[location(2)]] var a : f32;
@@ -70,6 +76,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
                     create<ast::ConstantIdDecoration>(42),
                 });
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(
       gen.result(),
@@ -81,6 +89,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   auto* v = Var("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
                 ast::VariableDecorationList{});
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(var a : f32 = initializer;
 )");
@@ -89,6 +99,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   auto* v = Const("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
                   ast::VariableDecorationList{});
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(), R"(const a : f32 = initializer;

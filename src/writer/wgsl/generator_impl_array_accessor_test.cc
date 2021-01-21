@@ -36,6 +36,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_ArrayAccessor) {
 
   auto* expr = create<ast::ArrayAccessorExpression>(ary, idx);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "ary[5]");
 }
@@ -45,6 +47,8 @@ TEST_F(WgslGeneratorImplTest, EmitArrayAccessor) {
   auto* idx = Expr("idx");
 
   auto* expr = create<ast::ArrayAccessorExpression>(ary, idx);
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitArrayAccessor(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "ary[idx]");

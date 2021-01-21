@@ -32,6 +32,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
   auto* id = Expr("id");
   auto* bitcast = create<ast::BitcastExpression>(ty.f32, id);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(bitcast)) << gen.error();
   EXPECT_EQ(gen.result(), "bitcast<f32>(id)");
 }

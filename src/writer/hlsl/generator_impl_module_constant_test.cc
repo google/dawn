@@ -19,10 +19,10 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/type/array_type.h"
-#include "src/type/f32_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
+#include "src/type/array_type.h"
+#include "src/type/f32_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -37,6 +37,8 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
       Const("pos", ast::StorageClass::kNone, ty.array<f32, 3>(),
             array<f32, 3>(1.f, 2.f, 3.f), ast::VariableDecorationList{});
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), "static const float pos[3] = {1.0f, 2.0f, 3.0f};\n");
 }
@@ -46,6 +48,8 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
                     ast::VariableDecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
@@ -61,6 +65,8 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
                     ast::VariableDecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(out, var)) << gen.error();
   EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_23

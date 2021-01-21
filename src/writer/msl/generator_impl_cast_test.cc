@@ -33,12 +33,16 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
   auto* cast = Construct<f32>("id");
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
   EXPECT_EQ(gen.result(), "float(id)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
   auto* cast = vec3<f32>("id");
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
   EXPECT_EQ(gen.result(), "float3(id)");

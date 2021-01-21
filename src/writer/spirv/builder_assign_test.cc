@@ -49,6 +49,8 @@ TEST_F(BuilderTest, Assign_Var) {
 
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -63,7 +65,8 @@ TEST_F(BuilderTest, Assign_Var) {
 %5 = OpConstant %3 1
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %5
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %1 %5
 )");
 }
 
@@ -75,14 +78,16 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_FALSE(b.GenerateAssignStatement(assign)) << b.error();
   EXPECT_TRUE(b.has_error());
-  EXPECT_EQ(
-      b.error(),
-      "Internal error: trying to add SPIR-V instruction 62 outside a function");
+  EXPECT_EQ(b.error(),
+            "Internal error: trying to add SPIR-V instruction 62 outside a "
+            "function");
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
@@ -94,6 +99,8 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
   td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -109,7 +116,8 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 %1 = OpVariable %2 Output %5
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %5
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %1 %5
 )");
 }
 
@@ -121,6 +129,8 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
 
   td.RegisterVariableForTesting(v);
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -157,6 +167,8 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   td.RegisterVariableForTesting(v);
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -174,7 +186,8 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 %8 = OpConstant %4 3
 %9 = OpConstantComposite %3 %6 %7 %8
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %9
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %1 %9
 )");
 }
 
@@ -198,6 +211,8 @@ TEST_F(BuilderTest, Assign_StructMember) {
   td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -232,6 +247,8 @@ TEST_F(BuilderTest, Assign_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -249,7 +266,8 @@ TEST_F(BuilderTest, Assign_Vector) {
 %8 = OpConstantComposite %3 %6 %6 %7
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %8
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %1 %8
 )");
 }
 
@@ -263,6 +281,8 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
   td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
@@ -298,6 +318,8 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
   td.RegisterVariableForTesting(v);
 
   ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();

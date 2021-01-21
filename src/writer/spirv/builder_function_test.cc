@@ -49,6 +49,8 @@ TEST_F(BuilderTest, Function_Empty) {
   auto* func = Func("a_func", {}, ty.void_, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -66,6 +68,8 @@ TEST_F(BuilderTest, Function_Terminator_Return) {
                         create<ast::ReturnStatement>(),
                     },
                     ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
@@ -87,6 +91,9 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
                     ast::FunctionDecorationList{});
 
   ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
+
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
@@ -112,6 +119,8 @@ TEST_F(BuilderTest, Function_Terminator_Discard) {
                     },
                     ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -134,6 +143,8 @@ TEST_F(BuilderTest, Function_WithParams) {
   td.RegisterVariableForTesting(func->params()[0]);
   td.RegisterVariableForTesting(func->params()[1]);
   EXPECT_TRUE(td.DetermineFunction(func));
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
@@ -159,6 +170,8 @@ TEST_F(BuilderTest, Function_WithBody) {
                     },
                     ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -174,6 +187,8 @@ TEST_F(BuilderTest, FunctionType) {
   auto* func = Func("a_func", {}, ty.void_, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -185,6 +200,8 @@ TEST_F(BuilderTest, FunctionType_DeDuplicate) {
                      ast::FunctionDecorationList{});
   auto* func2 = Func("b_func", {}, ty.void_, ast::StatementList{},
                      ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func1));
   ASSERT_TRUE(b.GenerateFunction(func2));
@@ -265,6 +282,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader

@@ -43,6 +43,8 @@ TEST_F(BuilderTest, FunctionDecoration_Stage) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.entry_points()),
             R"(OpEntryPoint Vertex %3 "main"
@@ -65,6 +67,8 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
                     ast::FunctionDecorationList{
                         create<ast::StageDecoration>(params.stage),
                     });
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
@@ -96,13 +100,15 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32);
   auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32);
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
-
   mod->AddGlobalVariable(v_in);
   mod->AddGlobalVariable(v_out);
   mod->AddGlobalVariable(v_wg);
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
@@ -143,19 +149,21 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32);
   auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32);
 
+  mod->AddGlobalVariable(v_in);
+  mod->AddGlobalVariable(v_out);
+  mod->AddGlobalVariable(v_wg);
+
   td.RegisterVariableForTesting(v_in);
   td.RegisterVariableForTesting(v_out);
   td.RegisterVariableForTesting(v_wg);
 
   ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
-
-  mod->AddGlobalVariable(v_in);
-  mod->AddGlobalVariable(v_out);
-  mod->AddGlobalVariable(v_wg);
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
@@ -186,6 +194,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 OriginUpperLeft
@@ -198,6 +208,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize_Default) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
@@ -212,6 +224,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize) {
                create<ast::WorkgroupDecoration>(2u, 4u, 6u),
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
@@ -231,6 +245,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func1)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func2)) << b.error();
@@ -270,6 +286,8 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
            ast::FunctionDecorationList{});
 
   func->add_referenced_module_variable(fragdepth);
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),

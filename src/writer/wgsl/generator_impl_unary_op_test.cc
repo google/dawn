@@ -41,6 +41,8 @@ TEST_P(WgslUnaryOpTest, Emit) {
   auto* expr = Expr("expr");
   auto* op = create<ast::UnaryOpExpression>(params.op, expr);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(op)) << gen.error();
   EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");
 }

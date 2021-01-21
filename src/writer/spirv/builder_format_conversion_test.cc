@@ -36,6 +36,8 @@ using ImageFormatConversionTest = TestParamHelper<TestData>;
 TEST_P(ImageFormatConversionTest, ImageFormatConversion) {
   auto param = GetParam();
 
+  spirv::Builder& b = Build();
+
   EXPECT_EQ(b.convert_image_format_to_spv(param.ast_format), param.spv_format);
 
   if (param.extended_format) {

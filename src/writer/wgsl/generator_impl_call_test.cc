@@ -32,6 +32,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   auto* id = Expr("my_func");
   auto* call = create<ast::CallExpression>(id, ast::ExpressionList{});
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func()");
 }
@@ -40,6 +42,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
   auto* id = Expr("my_func");
   auto* call = create<ast::CallExpression>(
       id, ast::ExpressionList{Expr("param1"), Expr("param2")});
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
   EXPECT_EQ(gen.result(), "my_func(param1, param2)");
@@ -50,6 +54,8 @@ TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
 
   auto* call = create<ast::CallStatement>(create<ast::CallExpression>(
       id, ast::ExpressionList{Expr("param1"), Expr("param2")}));
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(call)) << gen.error();

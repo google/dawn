@@ -57,8 +57,11 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0025: switch statement selector expression must be "
             "of a scalar integer type");
 }
@@ -85,8 +88,11 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0008: switch statement must have exactly one default "
             "clause");
 }
@@ -124,8 +130,11 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0008: switch statement must have exactly one default "
             "clause");
 }
@@ -156,8 +165,11 @@ TEST_F(ValidateControlBlockTest,
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0026: the case selector values must have the same "
             "type as the selector expression.");
 }
@@ -188,8 +200,11 @@ TEST_F(ValidateControlBlockTest,
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0026: the case selector values must have the same "
             "type as the selector expression.");
 }
@@ -226,8 +241,11 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0027: a literal value must not appear more than once "
             "in the case selectors for a switch statement: '2'");
 }
@@ -266,8 +284,11 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0027: a literal value must not appear more than once in "
             "the case selectors for a switch statement: '10'");
 }
@@ -294,8 +315,11 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
       create<ast::SwitchStatement>(Expr("a"), body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_FALSE(v()->ValidateStatements(block));
-  EXPECT_EQ(v()->error(),
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(block));
+  EXPECT_EQ(v.error(),
             "12:34 v-0028: a fallthrough statement must not appear as the "
             "last statement in last clause of a switch");
 }
@@ -324,7 +348,10 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
       create<ast::SwitchStatement>(Expr("a"), body),
   });
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_TRUE(v()->ValidateStatements(block)) << v()->error();
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.ValidateStatements(block)) << v.error();
 }
 
 TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
@@ -351,7 +378,10 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   mod->AddConstructedType(my_int);
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  EXPECT_TRUE(v()->ValidateStatements(block)) << v()->error();
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.ValidateStatements(block)) << v.error();
 }
 
 }  // namespace

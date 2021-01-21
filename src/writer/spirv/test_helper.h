@@ -32,13 +32,23 @@ namespace spirv {
 template <typename BASE>
 class TestHelperBase : public ast::BuilderWithModule, public BASE {
  public:
-  TestHelperBase() : td(mod), b(mod) {}
+  TestHelperBase() : td(mod) {}
   ~TestHelperBase() override = default;
+
+  /// Builds and returns a spirv::Builder from the module.
+  /// @note The spirv::Builder is only built once. Multiple calls to Build()
+  /// will return the same spirv::Builder without rebuilding.
+  /// @return the built spirv::Builder
+  spirv::Builder& Build() {
+    if (spirv_builder) {
+      return *spirv_builder;
+    }
+    spirv_builder = std::make_unique<spirv::Builder>(mod);
+    return *spirv_builder;
+  }
 
   /// The type determiner
   TypeDeterminer td;
-  /// The generator
-  spirv::Builder b;
 
  protected:
   /// Called whenever a new variable is built with `Var()`.
@@ -46,6 +56,9 @@ class TestHelperBase : public ast::BuilderWithModule, public BASE {
   void OnVariableBuilt(ast::Variable* var) override {
     td.RegisterVariableForTesting(var);
   }
+
+ private:
+  std::unique_ptr<spirv::Builder> spirv_builder;
 };
 using TestHelper = TestHelperBase<testing::Test>;
 

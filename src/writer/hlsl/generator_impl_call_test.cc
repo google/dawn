@@ -36,6 +36,8 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_EQ(result(), "my_func()");
 }
@@ -47,6 +49,8 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_EQ(result(), "my_func(param1, param2)");
 }
@@ -57,6 +61,9 @@ TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   auto* func = Func("my_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitStatement(out, call)) << gen.error();
   EXPECT_EQ(result(), "  my_func(param1, param2);\n");

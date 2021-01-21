@@ -60,6 +60,9 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
@@ -78,6 +81,9 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
                     ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
@@ -100,6 +106,9 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
            ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
@@ -122,6 +131,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(void main() {
   return;
@@ -160,6 +172,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_in {
   float foo : TEXCOORD0;
@@ -209,6 +224,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct frag_main_in {
   float foo : TEXCOORD0;
@@ -261,6 +279,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct frag_main_in {
   float4 coord : SV_Position;
@@ -307,6 +328,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
   float4 coord;
@@ -357,6 +381,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct Uniforms {
   float4 coord;
@@ -407,6 +434,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
@@ -454,6 +484,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(ByteAddressBuffer coord : register(u0);
 
@@ -498,6 +531,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
@@ -512,7 +548,6 @@ void frag_main() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-
   auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(0),
@@ -562,6 +597,9 @@ TEST_F(
   mod->AddFunction(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_in {
   float foo : TEXCOORD0;
@@ -624,6 +662,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_out {
   float depth : SV_Depth;
@@ -645,7 +686,6 @@ ep_1_out ep_1() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-
   auto* coord_var =
       Var("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
           ast::VariableDecorationList{
@@ -691,6 +731,9 @@ TEST_F(
   mod->AddFunction(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_in {
   float4 coord : SV_Position;
@@ -754,6 +797,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
   float4 coord;
@@ -811,6 +857,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
 
@@ -856,6 +905,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct ep_1_out {
   float bar : SV_Target1;
@@ -883,6 +935,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   mod->AddFunction(func);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(void GeometryShader_tint_0() {
   return;
@@ -905,6 +959,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
 void main() {
@@ -929,6 +986,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddFunction(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"([numthreads(2, 4, 6)]
 void main() {
@@ -949,6 +1009,9 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
       ast::FunctionDecorationList{});
 
   mod->AddFunction(func);
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
@@ -1029,6 +1092,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct Data {
   float d;

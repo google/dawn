@@ -20,11 +20,11 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/type/bool_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/vector_type.h"
-#include "src/ast/unary_op_expression.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -41,6 +41,8 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
   auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
@@ -56,6 +58,8 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
       create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1.f));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -69,6 +73,8 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 TEST_F(BuilderTest, UnaryOp_Not) {
   auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(false));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
@@ -88,6 +94,8 @@ TEST_F(BuilderTest, UnaryOp_LoadRequired) {
 
   td.RegisterVariableForTesting(var);
   EXPECT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();

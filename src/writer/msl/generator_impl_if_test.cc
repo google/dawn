@@ -35,6 +35,8 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
   });
   auto* i = create<ast::IfStatement>(cond, body, ast::ElseStatementList{});
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
@@ -59,6 +61,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
       ast::ElseStatementList{
           create<ast::ElseStatement>(else_cond, else_body),
       });
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -85,6 +89,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
       ast::ElseStatementList{
           create<ast::ElseStatement>(nullptr, else_body),
       });
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
@@ -118,6 +124,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
           create<ast::ElseStatement>(else_cond, else_body),
           create<ast::ElseStatement>(nullptr, else_body_2),
       });
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 

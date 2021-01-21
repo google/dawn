@@ -49,6 +49,8 @@ TEST_F(BuilderTest, Block) {
 
   ASSERT_TRUE(td.DetermineResultType(outer)) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -68,7 +70,8 @@ TEST_F(BuilderTest, Block) {
 %6 = OpVariable %2 Function %4
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %5
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %1 %5
 OpStore %6 %7
 OpStore %1 %8
 )");

@@ -25,13 +25,13 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/struct.h"
+#include "src/ast/type_constructor_expression.h"
+#include "src/ast/variable.h"
+#include "src/ast/variable_decoration.h"
 #include "src/type/access_control_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/struct_type.h"
 #include "src/type/vector_type.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decoration.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -46,6 +46,8 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
   auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
@@ -70,6 +72,8 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
                 ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -87,7 +91,8 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
             R"(%6 = OpVariable %7 Function %8
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %6 %5
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %6 %5
 )");
 }
 
@@ -99,6 +104,8 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
                 ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(v);
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -136,6 +143,8 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
 
   ASSERT_TRUE(td.DetermineResultType(v->constructor())) << td.error();
   ASSERT_TRUE(td.DetermineResultType(v2->constructor())) << td.error();
+
+  spirv::Builder& b = Build();
 
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
@@ -176,6 +185,8 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   ASSERT_TRUE(td.DetermineResultType(v->constructor())) << td.error();
   ASSERT_TRUE(td.DetermineResultType(v2->constructor())) << td.error();
 
+  spirv::Builder& b = Build();
+
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.error();
@@ -208,6 +219,8 @@ TEST_F(BuilderTest, FunctionVar_Const) {
                   ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(v);
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();

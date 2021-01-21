@@ -32,12 +32,16 @@ using HlslGeneratorImplTest_Expression = TestHelper;
 TEST_F(HlslGeneratorImplTest_Expression, EmitExpression_ArrayAccessor) {
   auto* expr = IndexAccessor("ary", 5);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "ary[5]");
 }
 
 TEST_F(HlslGeneratorImplTest_Expression, EmitArrayAccessor) {
   auto* expr = IndexAccessor("ary", "idx");
+
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "ary[idx]");

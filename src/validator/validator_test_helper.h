@@ -15,8 +15,10 @@
 #ifndef SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_
 #define SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_
 
+#include <functional>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "src/ast/builder.h"
 #include "src/type/void_type.h"
@@ -32,9 +34,21 @@ class ValidatorTestHelper : public ast::BuilderWithModule {
   ValidatorTestHelper();
   ~ValidatorTestHelper() override;
 
-  /// A handle to validator
-  /// @returns a pointer to the validator
-  ValidatorImpl* v() const { return v_.get(); }
+  /// Builds and returns a validator from the module.
+  /// @note The validator is only built once. Multiple calls to Build() will
+  /// return the same ValidatorImpl without rebuilding.
+  /// @return the built validator
+  ValidatorImpl& Build() {
+    if (val_) {
+      return *val_;
+    }
+    val_ = std::make_unique<ValidatorImpl>(mod);
+    for (auto* var : vars_for_testing_) {
+      val_->RegisterVariableForTesting(var);
+    }
+    return *val_;
+  }
+
   /// A handle to type_determiner
   /// @returns a pointer to the type_determiner object
   TypeDeterminer* td() const { return td_.get(); }
@@ -42,13 +56,14 @@ class ValidatorTestHelper : public ast::BuilderWithModule {
   /// Inserts a variable into the current scope.
   /// @param var the variable to register.
   void RegisterVariable(ast::Variable* var) {
-    v_->RegisterVariableForTesting(var);
+    vars_for_testing_.emplace_back(var);
     td_->RegisterVariableForTesting(var);
   }
 
  private:
-  std::unique_ptr<ValidatorImpl> v_;
   std::unique_ptr<TypeDeterminer> td_;
+  std::unique_ptr<ValidatorImpl> val_;
+  std::vector<ast::Variable*> vars_for_testing_;
 };
 
 }  // namespace tint

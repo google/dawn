@@ -35,6 +35,8 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
@@ -50,6 +52,8 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
@@ -60,6 +64,8 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 

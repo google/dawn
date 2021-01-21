@@ -31,6 +31,8 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, InsertsPreamble) {
+  spirv::Builder& b = Build();
+
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
@@ -38,6 +40,8 @@ OpMemoryModel Logical GLSL450
 }
 
 TEST_F(BuilderTest, TracksIdBounds) {
+  spirv::Builder& b = Build();
+
   for (size_t i = 0; i < 5; i++) {
     EXPECT_EQ(b.next_id(), i + 1);
   }
@@ -46,6 +50,8 @@ TEST_F(BuilderTest, TracksIdBounds) {
 }
 
 TEST_F(BuilderTest, Capabilities_Dedup) {
+  spirv::Builder& b = Build();
+
   b.push_capability(SpvCapabilityShader);
   b.push_capability(SpvCapabilityShader);
   b.push_capability(SpvCapabilityShader);

@@ -32,6 +32,8 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
   auto* rhs = Expr("rhs");
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();

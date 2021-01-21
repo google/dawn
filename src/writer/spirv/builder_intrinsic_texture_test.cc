@@ -28,6 +28,7 @@
 #include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/writer/spirv/test_helper.h"
 
 namespace tint {
 namespace writer {
@@ -4110,17 +4111,8 @@ OpImageWrite %10 %16 %22
           "<unmatched texture overload>"};
 }  // NOLINT - Ignore the length of this function
 
-class IntrinsicTextureTest
-    : public ast::BuilderWithModule,
-      public testing::TestWithParam<ast::intrinsic::test::TextureOverloadCase> {
- protected:
-  void OnVariableBuilt(ast::Variable* var) override {
-    td.RegisterVariableForTesting(var);
-  }
-
-  TypeDeterminer td{mod};
-  spirv::Builder b{mod};
-};
+using IntrinsicTextureTest =
+    TestParamHelper<ast::intrinsic::test::TextureOverloadCase>;
 
 INSTANTIATE_TEST_SUITE_P(
     IntrinsicTextureTest,
@@ -4129,8 +4121,6 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(IntrinsicTextureTest, Call) {
   auto param = GetParam();
-
-  b.push_function(Function{});
 
   auto* texture = param.buildTextureVariable(this);
   auto* sampler = param.buildSamplerVariable(this);
@@ -4141,6 +4131,9 @@ TEST_P(IntrinsicTextureTest, Call) {
   EXPECT_TRUE(td.Determine()) << td.error();
   EXPECT_TRUE(td.DetermineResultType(call)) << td.error();
 
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.error();
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
@@ -4175,6 +4168,8 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
   mod->AddFunction(main);
 
   ASSERT_TRUE(td.Determine()) << td.error();
+
+  spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.Build()) << td.error();
 
@@ -4221,13 +4216,15 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
   auto* texture = param.buildTextureVariable(this);
   auto* sampler = param.buildSamplerVariable(this);
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
-
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
 
   EXPECT_TRUE(td.DetermineResultType(call)) << td.error();
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
   EXPECT_EQ(b.GenerateExpression(call), 0u);
   EXPECT_THAT(b.error(),
               ::testing::StartsWith(

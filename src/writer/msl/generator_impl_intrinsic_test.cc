@@ -40,6 +40,9 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
 using MslIntrinsicTest = TestParamHelper<IntrinsicData>;
 TEST_P(MslIntrinsicTest, Emit) {
   auto param = GetParam();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_EQ(gen.generate_intrinsic_name(param.intrinsic), param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -66,6 +69,8 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{ast::Intrinsic::kSelect, "select"}));
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Bad_Name) {
+  GeneratorImpl& gen = Build();
+
   EXPECT_EQ(gen.generate_intrinsic_name(ast::Intrinsic::kNone), "");
 }
 
@@ -79,6 +84,8 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   td.RegisterVariableForTesting(v2);
 
   ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();

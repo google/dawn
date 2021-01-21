@@ -42,6 +42,8 @@ TEST_P(WgslBinaryTest, Emit) {
 
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }

@@ -29,6 +29,8 @@ using HlslGeneratorImplTest_Break = TestHelper;
 TEST_F(HlslGeneratorImplTest_Break, Emit_Break) {
   auto* b = create<ast::BreakStatement>();
 
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, b)) << gen.error();

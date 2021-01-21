@@ -29,6 +29,9 @@ using HlslGeneratorImplTest_Return = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
   auto* r = create<ast::ReturnStatement>();
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, r)) << gen.error();
@@ -37,6 +40,9 @@ TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
   auto* r = create<ast::ReturnStatement>(Expr("expr"));
+
+  GeneratorImpl& gen = Build();
+
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, r)) << gen.error();

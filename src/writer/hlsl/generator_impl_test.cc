@@ -32,6 +32,8 @@ TEST_F(HlslGeneratorImplTest, Generate) {
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AddFunction(func);
 
+  GeneratorImpl& gen = Build();
+
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(void my_func() {
 }
@@ -40,11 +42,15 @@ TEST_F(HlslGeneratorImplTest, Generate) {
 }
 
 TEST_F(HlslGeneratorImplTest, InputStructName) {
+  GeneratorImpl& gen = Build();
+
   ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
 }
 
 TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
   // Register the struct name as existing.
+  GeneratorImpl& gen = Build();
+
   auto* namer = gen.namer_for_testing();
   namer->NameFor("func_main_out");
 
@@ -52,9 +58,12 @@ TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
 }
 
 TEST_F(HlslGeneratorImplTest, NameConflictWith_InputStructName) {
-  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
+  auto* expr = Expr("func_main_in");
 
-  ASSERT_TRUE(gen.EmitIdentifier(pre, out, Expr("func_main_in")));
+  GeneratorImpl& gen = Build();
+
+  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
+  ASSERT_TRUE(gen.EmitIdentifier(pre, out, expr));
   EXPECT_EQ(result(), "func_main_in_0");
 }
 
@@ -69,6 +78,8 @@ inline std::ostream& operator<<(std::ostream& out, HlslBuiltinData data) {
 using HlslBuiltinConversionTest = TestParamHelper<HlslBuiltinData>;
 TEST_P(HlslBuiltinConversionTest, Emit) {
   auto params = GetParam();
+  GeneratorImpl& gen = Build();
+
   EXPECT_EQ(gen.builtin_to_attribute(params.builtin),
             std::string(params.attribute_name));
 }

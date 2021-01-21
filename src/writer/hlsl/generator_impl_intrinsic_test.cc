@@ -38,6 +38,9 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
 using HlslIntrinsicTest = TestParamHelper<IntrinsicData>;
 TEST_P(HlslIntrinsicTest, Emit) {
   auto param = GetParam();
+
+  GeneratorImpl& gen = Build();
+
   EXPECT_EQ(gen.generate_intrinsic_name(param.intrinsic), param.hlsl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -71,6 +74,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_Select) {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Bad_Name) {
+  GeneratorImpl& gen = Build();
+
   EXPECT_EQ(gen.generate_intrinsic_name(ast::Intrinsic::kNone), "");
 }
 
@@ -84,6 +89,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   td.RegisterVariableForTesting(v2);
 
   ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+
+  GeneratorImpl& gen = Build();
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();

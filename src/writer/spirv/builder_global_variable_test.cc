@@ -51,6 +51,9 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
   auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -63,6 +66,9 @@ TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
 
 TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -75,6 +81,9 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
 
 TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
   auto* v = Var("var", ast::StorageClass::kInput, ty.f32);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -91,6 +100,8 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, init,
                 ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -115,6 +126,8 @@ TEST_F(BuilderTest, GlobalVar_Const) {
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -136,6 +149,8 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -156,6 +171,8 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
   auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -182,6 +199,8 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
                     create<ast::LocationDecoration>(5),
                 });
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -200,6 +219,8 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
                     create<ast::BindingDecoration>(2),
                     create<ast::GroupDecoration>(3),
                 });
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
@@ -220,6 +241,8 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
                     create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
                 });
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -237,6 +260,8 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(1200),
                 });
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
@@ -256,6 +281,8 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
                     create<ast::ConstantIdDecoration>(1200),
                 });
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -273,6 +300,8 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(0),
                 });
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
@@ -292,6 +321,8 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
                     create<ast::ConstantIdDecoration>(0),
                 });
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -310,6 +341,8 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
                     create<ast::ConstantIdDecoration>(0),
                 });
 
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -327,6 +360,8 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(0),
                 });
+
+  spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
@@ -351,6 +386,8 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
 using BuiltinDataTest = TestParamHelper<BuiltinData>;
 TEST_P(BuiltinDataTest, Convert) {
   auto params = GetParam();
+  spirv::Builder& b = Build();
+
   EXPECT_EQ(b.ConvertBuiltin(params.builtin), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -387,6 +424,9 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   type::AccessControl ac{ast::AccessControl::kReadOnly, A};
 
   auto* var = Var("b", ast::StorageClass::kStorage, &ac);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -417,6 +457,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   auto* B = ty.alias("B", A);
   type::AccessControl ac{ast::AccessControl::kReadOnly, B};
   auto* var = Var("b", ast::StorageClass::kStorage, &ac);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -445,6 +488,9 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   type::AccessControl ac{ast::AccessControl::kReadOnly, A};
   auto* B = ty.alias("B", &ac);
   auto* var = Var("b", ast::StorageClass::kStorage, B);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
@@ -475,10 +521,14 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   auto* var_b = Var("b", ast::StorageClass::kStorage, &read);
   auto* var_c = Var("c", ast::StorageClass::kStorage, &rw);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(var_c)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 NonWritable
+  EXPECT_EQ(DumpInstructions(b.annots()),
+            R"(OpMemberDecorate %3 0 NonWritable
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
@@ -507,6 +557,9 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   type::AccessControl ac(ast::AccessControl::kReadOnly, &type);
 
   auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &ac);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
@@ -528,6 +581,9 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   type::AccessControl ac(ast::AccessControl::kWriteOnly, &type);
 
   auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &ac);
+
+  spirv::Builder& b = Build();
+
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonReadable
@@ -551,16 +607,20 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
 
   type::AccessControl type_a(ast::AccessControl::kReadOnly, &st);
   auto* var_a = Var("a", ast::StorageClass::kUniformConstant, &type_a);
-  EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
   type::AccessControl type_b(ast::AccessControl::kWriteOnly, &st);
   auto* var_b = Var("b", ast::StorageClass::kUniformConstant, &type_b);
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
   EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
 OpDecorate %5 NonReadable
 )");
-  // There must only be one OpTypeImage declaration with the same arguments
+  // There must only be one OpTypeImage declaration with the same
+  // arguments
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 R32ui
 %2 = OpTypePointer UniformConstant %3
