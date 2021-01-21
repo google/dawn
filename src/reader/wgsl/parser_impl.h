@@ -397,7 +397,7 @@ class ParserImpl {
   /// `struct_decoration_decl*` provided as `decos`.
   /// @returns the struct type or nullptr on error
   /// @param decos the list of decorations for the struct declaration.
-  Maybe<std::unique_ptr<type::Struct>> struct_decl(ast::DecorationList& decos);
+  Maybe<type::Struct*> struct_decl(ast::DecorationList& decos);
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
   Expect<ast::StructMemberList> expect_struct_body_decl();

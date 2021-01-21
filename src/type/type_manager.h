@@ -15,11 +15,11 @@
 #ifndef SRC_TYPE_TYPE_MANAGER_H_
 #define SRC_TYPE_TYPE_MANAGER_H_
 
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
 
+#include "src/block_allocator.h"
 #include "src/type/type.h"
 
 namespace tint {
@@ -28,6 +28,9 @@ namespace type {
 /// The type manager holds all the pointers to the known types.
 class Manager {
  public:
+  /// Iterator is the type returned by begin() and end()
+  using Iterator = BlockAllocator<type::Type>::ConstIterator;
+
   /// Constructor
   Manager();
 
@@ -42,31 +45,38 @@ class Manager {
   /// Destructor
   ~Manager();
 
-  /// Clears all registered types.
-  void Reset();
-
-  /// Get the given type from the type manager
-  /// @param type The type to register
-  /// @return the pointer to the registered type
-  type::Type* Get(std::unique_ptr<type::Type> type);
-
   /// Get the given type `T` from the type manager
   /// @param args the arguments to pass to the type constructor
   /// @return the pointer to the registered type
   template <typename T, typename... ARGS>
   T* Get(ARGS&&... args) {
-    auto ty = Get(std::make_unique<T>(std::forward<ARGS>(args)...));
-    return static_cast<T*>(ty);
+    // Note: We do not use std::forward here, as we may need to use the
+    // arguments again for the call to Create<T>() below.
+    auto name = T(args...).type_name();
+    auto it = by_name_.find(name);
+    if (it != by_name_.end()) {
+      return static_cast<T*>(it->second);
+    }
+
+    auto* type = types_.Create<T>(std::forward<ARGS>(args)...);
+    by_name_.emplace(name, type);
+    return type;
   }
 
   /// Returns the type map
   /// @returns the mapping from name string to type.
-  const std::unordered_map<std::string, std::unique_ptr<type::Type>>& types() {
-    return types_;
+  const std::unordered_map<std::string, type::Type*>& types() {
+    return by_name_;
   }
 
+  /// @returns an iterator to the beginning of the types
+  Iterator begin() const { return types_.Objects().begin(); }
+  /// @returns an iterator to the end of the types
+  Iterator end() const { return types_.Objects().end(); }
+
  private:
-  std::unordered_map<std::string, std::unique_ptr<type::Type>> types_;
+  std::unordered_map<std::string, type::Type*> by_name_;
+  BlockAllocator<type::Type> types_;
 };
 
 }  // namespace type

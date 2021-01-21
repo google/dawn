@@ -1345,23 +1345,22 @@ inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
 class Intrinsic_TextureOperation
     : public TypeDeterminerTestWithParam<TextureTestParams> {
  public:
-  std::unique_ptr<type::Type> get_coords_type(type::TextureDimension dim,
-                                              type::Type* type) {
+  type::Type* get_coords_type(type::TextureDimension dim, type::Type* type) {
     if (dim == type::TextureDimension::k1d) {
       if (type->Is<type::I32>()) {
-        return std::make_unique<type::I32>();
+        return create<type::I32>();
       } else if (type->Is<type::U32>()) {
-        return std::make_unique<type::U32>();
+        return create<type::U32>();
       } else {
-        return std::make_unique<type::F32>();
+        return create<type::F32>();
       }
     } else if (dim == type::TextureDimension::k1dArray ||
                dim == type::TextureDimension::k2d) {
-      return std::make_unique<type::Vector>(type, 2);
+      return create<type::Vector>(type, 2);
     } else if (dim == type::TextureDimension::kCubeArray) {
-      return std::make_unique<type::Vector>(type, 4);
+      return create<type::Vector>(type, 4);
     } else {
-      return std::make_unique<type::Vector>(type, 3);
+      return create<type::Vector>(type, 3);
     }
   }
 
@@ -1373,14 +1372,14 @@ class Intrinsic_TextureOperation
     call_params->push_back(Expr(name));
   }
 
-  std::unique_ptr<type::Type> subtype(Texture type) {
+  type::Type* subtype(Texture type) {
     if (type == Texture::kF32) {
-      return std::make_unique<type::F32>();
+      return create<type::F32>();
     }
     if (type == Texture::kI32) {
-      return std::make_unique<type::I32>();
+      return create<type::I32>();
     }
-    return std::make_unique<type::U32>();
+    return create<type::U32>();
   }
 };
 
@@ -1390,14 +1389,14 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   auto type = GetParam().type;
   auto format = GetParam().format;
 
-  auto coords_type = get_coords_type(dim, ty.i32);
+  auto* coords_type = get_coords_type(dim, ty.i32);
 
   type::Type* texture_type = mod->create<type::StorageTexture>(dim, format);
 
   ast::ExpressionList call_params;
 
   add_call_param("texture", texture_type, &call_params);
-  add_call_param("coords", coords_type.get(), &call_params);
+  add_call_param("coords", coords_type, &call_params);
   add_call_param("lod", ty.i32, &call_params);
 
   auto* expr = Call("textureLoad", call_params);
@@ -1460,14 +1459,14 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   auto dim = GetParam().dim;
   auto type = GetParam().type;
 
-  std::unique_ptr<type::Type> s = subtype(type);
-  auto coords_type = get_coords_type(dim, ty.i32);
-  auto texture_type = std::make_unique<type::SampledTexture>(dim, s.get());
+  type::Type* s = subtype(type);
+  auto* coords_type = get_coords_type(dim, ty.i32);
+  auto* texture_type = create<type::SampledTexture>(dim, s);
 
   ast::ExpressionList call_params;
 
-  add_call_param("texture", texture_type.get(), &call_params);
-  add_call_param("coords", coords_type.get(), &call_params);
+  add_call_param("texture", texture_type, &call_params);
+  add_call_param("coords", coords_type, &call_params);
   add_call_param("lod", ty.i32, &call_params);
 
   auto* expr = Call("textureLoad", call_params);

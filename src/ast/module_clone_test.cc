@@ -128,13 +128,13 @@ fn main() -> void {
   }
   std::unordered_set<type::Type*> src_types;
   for (auto& src_type : src.types()) {
-    src_types.emplace(src_type.second.get());
+    src_types.emplace(src_type.second);
   }
   for (auto* dst_node : dst.nodes()) {
     ASSERT_EQ(src_nodes.count(dst_node), 0u) << dst_node->str();
   }
   for (auto& dst_type : dst.types()) {
-    ASSERT_EQ(src_types.count(dst_type.second.get()), 0u)
+    ASSERT_EQ(src_types.count(dst_type.second), 0u)
         << dst_type.second->type_name();
   }
 

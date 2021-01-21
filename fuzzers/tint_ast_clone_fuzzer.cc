@@ -69,13 +69,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   }
   std::unordered_set<tint::type::Type*> src_types;
   for (auto& src_type : src.types()) {
-    src_types.emplace(src_type.second.get());
+    src_types.emplace(src_type.second);
   }
   for (auto* dst_node : dst.nodes()) {
     ASSERT_EQ(src_nodes.count(dst_node), 0u);
   }
   for (auto& dst_type : dst.types()) {
-    ASSERT_EQ(src_types.count(dst_type.second.get()), 0u);
+    ASSERT_EQ(src_types.count(dst_type.second), 0u);
   }
 
   // Regenerate the wgsl for the src module. We use this instead of the original

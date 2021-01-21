@@ -359,7 +359,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("struct declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      auto* type = module_.unique_type(std::move(str.value));
+      auto* type = str.value;
       register_constructed(
           module_.SymbolToName(type->As<type::Struct>()->symbol()), type);
       module_.AddConstructedType(type);
@@ -1205,8 +1205,7 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<std::unique_ptr<type::Struct>> ParserImpl::struct_decl(
-    ast::DecorationList& decos) {
+Maybe<type::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
 
@@ -1225,7 +1224,7 @@ Maybe<std::unique_ptr<type::Struct>> ParserImpl::struct_decl(
   if (struct_decos.errored)
     return Failure::kErrored;
 
-  return std::make_unique<type::Struct>(
+  return create<type::Struct>(
       module_.RegisterSymbol(name.value),
       create<ast::Struct>(source, std::move(body.value),
                           std::move(struct_decos.value)));

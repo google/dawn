@@ -1109,7 +1109,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
       // The vector will have a number of components equal to the length of the
       // swizzle. This assumes the validator will check that the swizzle
       // is correct.
-      ret = mod_->create<type::Vector>(vec->type(), size);
+      ret =
+          mod_->create<type::Vector>(vec->type(), static_cast<uint32_t>(size));
     }
   } else {
     set_error(

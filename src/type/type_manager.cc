@@ -24,18 +24,5 @@ Manager::Manager(Manager&&) = default;
 Manager& Manager::operator=(Manager&& rhs) = default;
 Manager::~Manager() = default;
 
-void Manager::Reset() {
-  types_.clear();
-}
-
-type::Type* Manager::Get(std::unique_ptr<type::Type> type) {
-  auto name = type->type_name();
-
-  if (types_.find(name) == types_.end()) {
-    types_[name] = std::move(type);
-  }
-  return types_.find(name)->second.get();
-}
-
 }  // namespace type
 }  // namespace tint

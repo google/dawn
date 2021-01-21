@@ -135,21 +135,9 @@ class Module {
     return type_mgr_.Get<T>(std::forward<ARGS>(args)...);
   }
 
-  /// Moves the type `ty` to the Module, returning a pointer to the unique
-  /// (de-aliased) type.
-  /// When the Module is destructed, the returned `Type` will also be
-  /// destructed.
-  /// @see create()
-  /// @param ty the type to add to the module
-  /// @returns the de-aliased type pointer
-  template <typename T>
-  traits::EnableIfIsType<T, type::Type>* unique_type(std::unique_ptr<T> ty) {
-    return static_cast<T*>(type_mgr_.Get(std::move(ty)));
-  }
-
   /// Returns all the declared types in the module
   /// @returns the mapping from name string to type.
-  const std::unordered_map<std::string, std::unique_ptr<type::Type>>& types() {
+  const std::unordered_map<std::string, type::Type*>& types() {
     return type_mgr_.types();
   }
 
