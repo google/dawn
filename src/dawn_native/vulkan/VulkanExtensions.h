@@ -40,6 +40,7 @@ namespace dawn_native { namespace vulkan {
 
         // Others
         DebugUtils,
+        ValidationFeatures,
 
         EnumCount,
     };

@@ -48,6 +48,7 @@ namespace dawn_native { namespace vulkan {
         {InstanceExt::XlibSurface, "VK_KHR_xlib_surface", NeverPromoted},
 
         {InstanceExt::DebugUtils, "VK_EXT_debug_utils", NeverPromoted},
+        {InstanceExt::ValidationFeatures, "VK_EXT_validation_features", NeverPromoted},
         //
     }};
 
@@ -88,6 +89,7 @@ namespace dawn_native { namespace vulkan {
                 case InstanceExt::GetPhysicalDeviceProperties2:
                 case InstanceExt::Surface:
                 case InstanceExt::DebugUtils:
+                case InstanceExt::ValidationFeatures:
                     hasDependencies = true;
                     break;
 

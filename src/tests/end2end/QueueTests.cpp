@@ -118,6 +118,11 @@ TEST_P(QueueWriteBufferTests, ManyWriteBuffer) {
     // once the issue with Metal on 10.14.6 is fixed.
     DAWN_SKIP_TEST_IF(IsMacOS() && IsIntel() && IsMetal());
 
+    // The Vulkan Validation Layers' memory barrier validation keeps track of every range written
+    // to independently which causes validation of each WriteBuffer to take increasing time, and
+    // this test to take forever. Skip it when VVLs are enabled.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     constexpr uint64_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 250 * 250;
     wgpu::BufferDescriptor descriptor;

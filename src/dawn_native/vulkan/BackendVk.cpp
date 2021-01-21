@@ -298,6 +298,21 @@ namespace dawn_native { namespace vulkan {
                                 VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT);
         }
 
+        // Try to turn on synchronization validation if the instance was created with backend
+        // validation enabled.
+        VkValidationFeaturesEXT validationFeatures;
+        VkValidationFeatureEnableEXT kEnableSynchronizationValidation =
+            VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT;
+        if (GetInstance()->IsBackendValidationEnabled() &&
+            usedKnobs.HasExt(InstanceExt::ValidationFeatures)) {
+            validationFeatures.enabledValidationFeatureCount = 1;
+            validationFeatures.pEnabledValidationFeatures = &kEnableSynchronizationValidation;
+            validationFeatures.disabledValidationFeatureCount = 0;
+            validationFeatures.pDisabledValidationFeatures = nullptr;
+
+            createInfoChain.Add(&validationFeatures, VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT);
+        }
+
         DAWN_TRY(CheckVkSuccess(mFunctions.CreateInstance(&createInfo, nullptr, &mInstance),
                                 "vkCreateInstance"));
 
