@@ -123,15 +123,15 @@ fn main() -> void {
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<ast::Node*> src_nodes;
-  for (auto& src_node : src.nodes()) {
-    src_nodes.emplace(src_node.get());
+  for (auto* src_node : src.nodes()) {
+    src_nodes.emplace(src_node);
   }
   std::unordered_set<ast::type::Type*> src_types;
   for (auto& src_type : src.types()) {
     src_types.emplace(src_type.second.get());
   }
-  for (auto& dst_node : dst.nodes()) {
-    ASSERT_EQ(src_nodes.count(dst_node.get()), 0u) << dst_node->str();
+  for (auto* dst_node : dst.nodes()) {
+    ASSERT_EQ(src_nodes.count(dst_node), 0u) << dst_node->str();
   }
   for (auto& dst_type : dst.types()) {
     ASSERT_EQ(src_types.count(dst_type.second.get()), 0u)

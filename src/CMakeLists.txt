@@ -209,6 +209,7 @@ set(TINT_LIB_SRCS
   ast/variable_decl_statement.h
   ast/workgroup_decoration.cc
   ast/workgroup_decoration.h
+  block_allocator.h
   castable.cc
   castable.h
   demangler.cc
@@ -458,6 +459,7 @@ if(${TINT_BUILD_TESTS})
     ast/variable_test.cc
     ast/workgroup_decoration_test.cc
     castable_test.cc
+    block_allocator_test.cc
     demangler_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc

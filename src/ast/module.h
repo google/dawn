@@ -28,6 +28,7 @@
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type_manager.h"
 #include "src/ast/variable.h"
+#include "src/block_allocator.h"
 #include "src/symbol_table.h"
 
 namespace tint {
@@ -112,12 +113,7 @@ class Module {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   traits::EnableIfIsType<T, Node>* create(ARGS&&... args) {
-    static_assert(std::is_base_of<Node, T>::value,
-                  "T does not derive from Node");
-    auto uptr = std::make_unique<T>(std::forward<ARGS>(args)...);
-    auto ptr = uptr.get();
-    ast_nodes_.emplace_back(std::move(uptr));
-    return ptr;
+    return ast_nodes_.Create<T>(std::forward<ARGS>(args)...);
   }
 
   /// Creates a new type::Type owned by the Module.
@@ -158,7 +154,7 @@ class Module {
   }
 
   /// @returns all the declared nodes in the module
-  const std::vector<std::unique_ptr<ast::Node>>& nodes() { return ast_nodes_; }
+  BlockAllocator<Node>::View nodes() { return ast_nodes_.Objects(); }
 
   /// Registers `name` as a symbol
   /// @param name the name to register
@@ -184,7 +180,7 @@ class Module {
   // The constructed types are owned by the type manager
   std::vector<type::Type*> constructed_types_;
   FunctionList functions_;
-  std::vector<std::unique_ptr<Node>> ast_nodes_;
+  BlockAllocator<Node> ast_nodes_;
   TypeManager type_mgr_;
 };
 
