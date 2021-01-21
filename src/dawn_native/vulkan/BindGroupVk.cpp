@@ -84,10 +84,10 @@ namespace dawn_native { namespace vulkan {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();
-                    // TODO(cwallez@chromium.org): This isn't true in general: if the image has
-                    // two read-only usages one of which is Sampled. Works for now though :)
-                    writeImageInfo[numWrites].imageLayout =
-                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    // The layout may be GENERAL here because of interactions between the Sampled
+                    // and ReadOnlyStorage usages. See the logic in VulkanImageLayout.
+                    writeImageInfo[numWrites].imageLayout = VulkanImageLayout(
+                        ToBackend(view->GetTexture()), wgpu::TextureUsage::Sampled);
 
                     write.pImageInfo = &writeImageInfo[numWrites];
                     break;

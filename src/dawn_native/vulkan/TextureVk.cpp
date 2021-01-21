@@ -105,48 +105,6 @@ namespace dawn_native { namespace vulkan {
             return flags;
         }
 
-        // Chooses which Vulkan image layout should be used for the given Dawn usage
-        VkImageLayout VulkanImageLayout(wgpu::TextureUsage usage, const Format& format) {
-            if (usage == wgpu::TextureUsage::None) {
-                return VK_IMAGE_LAYOUT_UNDEFINED;
-            }
-
-            if (!wgpu::HasZeroOrOneBits(usage)) {
-                return VK_IMAGE_LAYOUT_GENERAL;
-            }
-
-            // Usage has a single bit so we can switch on its value directly.
-            switch (usage) {
-                case wgpu::TextureUsage::CopyDst:
-                    return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                case wgpu::TextureUsage::Sampled:
-                    return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                // Vulkan texture copy functions require the image to be in _one_  known layout.
-                // Depending on whether parts of the texture have been transitioned to only
-                // CopySrc or a combination with something else, the texture could be in a
-                // combination of GENERAL and TRANSFER_SRC_OPTIMAL. This would be a problem, so we
-                // make CopySrc use GENERAL.
-                case wgpu::TextureUsage::CopySrc:
-                // Read-only and write-only storage textures must use general layout because load
-                // and store operations on storage images can only be done on the images in
-                // VK_IMAGE_LAYOUT_GENERAL layout.
-                case wgpu::TextureUsage::Storage:
-                case kReadOnlyStorageTexture:
-                    return VK_IMAGE_LAYOUT_GENERAL;
-                case wgpu::TextureUsage::RenderAttachment:
-                    if (format.HasDepthOrStencil()) {
-                        return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-                    } else {
-                        return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                    }
-                case kPresentTextureUsage:
-                    return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-                case wgpu::TextureUsage::None:
-                    UNREACHABLE();
-            }
-        }
-
         // Computes which Vulkan pipeline stage can access a texture in the given Dawn usage
         VkPipelineStageFlags VulkanPipelineStage(wgpu::TextureUsage usage, const Format& format) {
             VkPipelineStageFlags flags = 0;
@@ -205,19 +163,18 @@ namespace dawn_native { namespace vulkan {
             return flags;
         }
 
-        VkImageMemoryBarrier BuildMemoryBarrier(const Format& format,
-                                                const VkImage& image,
+        VkImageMemoryBarrier BuildMemoryBarrier(const Texture* texture,
                                                 wgpu::TextureUsage lastUsage,
                                                 wgpu::TextureUsage usage,
                                                 const SubresourceRange& range) {
             VkImageMemoryBarrier barrier;
             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
             barrier.pNext = nullptr;
-            barrier.srcAccessMask = VulkanAccessFlags(lastUsage, format);
-            barrier.dstAccessMask = VulkanAccessFlags(usage, format);
-            barrier.oldLayout = VulkanImageLayout(lastUsage, format);
-            barrier.newLayout = VulkanImageLayout(usage, format);
-            barrier.image = image;
+            barrier.srcAccessMask = VulkanAccessFlags(lastUsage, texture->GetFormat());
+            barrier.dstAccessMask = VulkanAccessFlags(usage, texture->GetFormat());
+            barrier.oldLayout = VulkanImageLayout(texture, lastUsage);
+            barrier.newLayout = VulkanImageLayout(texture, usage);
+            barrier.image = texture->GetHandle();
             barrier.subresourceRange.aspectMask = VulkanAspectMask(range.aspects);
             barrier.subresourceRange.baseMipLevel = range.baseMipLevel;
             barrier.subresourceRange.levelCount = range.levelCount;
@@ -407,6 +364,68 @@ namespace dawn_native { namespace vulkan {
         }
 
         return flags;
+    }
+
+    // Chooses which Vulkan image layout should be used for the given Dawn usage. Note that this
+    // layout must match the layout given to various Vulkan operations as well as the layout given
+    // to descriptor set writes.
+    VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage) {
+        if (usage == wgpu::TextureUsage::None) {
+            return VK_IMAGE_LAYOUT_UNDEFINED;
+        }
+
+        if (!wgpu::HasZeroOrOneBits(usage)) {
+            // Sampled | ReadOnlyStorage is the only possible multi-bit usage, if more appear  we
+            // might need additional special-casing.
+            ASSERT(usage == (wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture));
+            return VK_IMAGE_LAYOUT_GENERAL;
+        }
+
+        // Usage has a single bit so we can switch on its value directly.
+        switch (usage) {
+            case wgpu::TextureUsage::CopyDst:
+                return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+                // A texture that's sampled and storage may be used as both usages in the same pass.
+                // When that happens, the layout must be GENERAL because that's a requirement for
+                // the storage usage. We can't know at bindgroup creation time if that case will
+                // happen so we must prepare for the pessimistic case and always use the GENERAL
+                // layout.
+            case wgpu::TextureUsage::Sampled:
+                if (texture->GetUsage() & wgpu::TextureUsage::Storage) {
+                    return VK_IMAGE_LAYOUT_GENERAL;
+                } else {
+                    return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                }
+
+                // Vulkan texture copy functions require the image to be in _one_  known layout.
+                // Depending on whether parts of the texture have been transitioned to only CopySrc
+                // or a combination with something else, the texture could be in a combination of
+                // GENERAL and TRANSFER_SRC_OPTIMAL. This would be a problem, so we make CopySrc use
+                // GENERAL.
+                // TODO(cwallez@chromium.org): We no longer need to transition resources all at
+                // once and can instead track subresources so we should lift this limitation.
+            case wgpu::TextureUsage::CopySrc:
+                // Read-only and write-only storage textures must use general layout because load
+                // and store operations on storage images can only be done on the images in
+                // VK_IMAGE_LAYOUT_GENERAL layout.
+            case wgpu::TextureUsage::Storage:
+            case kReadOnlyStorageTexture:
+                return VK_IMAGE_LAYOUT_GENERAL;
+
+            case wgpu::TextureUsage::RenderAttachment:
+                if (texture->GetFormat().HasDepthOrStencil()) {
+                    return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                } else {
+                    return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                }
+
+            case kPresentTextureUsage:
+                return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+            case wgpu::TextureUsage::None:
+                UNREACHABLE();
+        }
     }
 
     VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
@@ -650,7 +669,7 @@ namespace dawn_native { namespace vulkan {
         barrier.dstAccessMask = 0;  // The barrier must be paired with another barrier that will
                                     // specify the dst access mask on the importing queue.
 
-        barrier.oldLayout = VulkanImageLayout(usage, GetFormat());
+        barrier.oldLayout = VulkanImageLayout(this, usage);
         if (desiredLayout == VK_IMAGE_LAYOUT_UNDEFINED) {
             // VK_IMAGE_LAYOUT_UNDEFINED is invalid here. We use it as a
             // special value to indicate no layout transition should be done.
@@ -748,7 +767,7 @@ namespace dawn_native { namespace vulkan {
         if (mExternalState == ExternalState::PendingAcquire) {
             if (barriers->size() == transitionBarrierStart) {
                 barriers->push_back(BuildMemoryBarrier(
-                    GetFormat(), mHandle, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
+                    this, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
                     SubresourceRange::SingleMipAndLayer(0, 0, GetFormat().aspects)));
             }
 
@@ -887,8 +906,7 @@ namespace dawn_native { namespace vulkan {
                     return;
                 }
 
-                imageBarriers->push_back(
-                    BuildMemoryBarrier(format, mHandle, *lastUsage, newUsage, range));
+                imageBarriers->push_back(BuildMemoryBarrier(this, *lastUsage, newUsage, range));
 
                 allLastUsages |= *lastUsage;
                 allUsages |= newUsage;
@@ -963,17 +981,17 @@ namespace dawn_native { namespace vulkan {
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
 
         wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
-        mSubresourceLastUsages.Update(range, [&](const SubresourceRange& range,
-                                                 wgpu::TextureUsage* lastUsage) {
-            if (CanReuseWithoutBarrier(*lastUsage, usage)) {
-                return;
-            }
+        mSubresourceLastUsages.Update(
+            range, [&](const SubresourceRange& range, wgpu::TextureUsage* lastUsage) {
+                if (CanReuseWithoutBarrier(*lastUsage, usage)) {
+                    return;
+                }
 
-            imageBarriers->push_back(BuildMemoryBarrier(format, mHandle, *lastUsage, usage, range));
+                imageBarriers->push_back(BuildMemoryBarrier(this, *lastUsage, usage, range));
 
-            allLastUsages |= *lastUsage;
-            *lastUsage = usage;
-        });
+                allLastUsages |= *lastUsage;
+                *lastUsage = usage;
+            });
 
         *srcStages |= VulkanPipelineStage(allLastUsages, format);
         *dstStages |= VulkanPipelineStage(usage, format);
@@ -1131,7 +1149,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     VkImageLayout Texture::GetCurrentLayoutForSwapChain() const {
-        return VulkanImageLayout(mSubresourceLastUsages.Get(Aspect::Color, 0, 0), GetFormat());
+        return VulkanImageLayout(this, mSubresourceLastUsages.Get(Aspect::Color, 0, 0));
     }
 
     // static

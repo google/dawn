@@ -234,6 +234,75 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(2, 0, 0, 255), renderPass.color, 0, 0);
 }
 
+// Use an image as both sampled and readonly storage in a compute pass. This is a regression test
+// for the Vulkan backend choosing different layouts for Sampled and ReadOnlyStorage.
+TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
+    // TODO(dawn:483): Test is skipped on OpenGL because it uses WriteTexture which is
+    // unimplemented.
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    // Create a storage + sampled texture of one texel initialized to 1
+    wgpu::TextureDescriptor texDesc;
+    texDesc.format = wgpu::TextureFormat::R32Uint;
+    texDesc.size = {1, 1, 1};
+    texDesc.usage =
+        wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
+    wgpu::Texture tex = device.CreateTexture(&texDesc);
+
+    wgpu::TextureCopyView copyView;
+    copyView.texture = tex;
+    wgpu::TextureDataLayout layout;
+    wgpu::Extent3D copySize = {1, 1, 1};
+    uint32_t kOne = 1;
+    queue.WriteTexture(&copyView, &kOne, sizeof(kOne), &layout, &copySize);
+
+    // Create a pipeline that loads the texture from both the sampled and storage paths.
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.computeStage.entryPoint = "main";
+    pipelineDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct Output {
+            [[offset(0)]] sampledOut: u32;
+            [[offset(4)]] storageOut: u32;
+        };
+        [[group(0), binding(0)]] var<storage_buffer> output : [[access(write)]] Output;
+        [[group(0), binding(1)]] var<uniform_constant> sampledTex : texture_2d<u32>;
+        [[group(0), binding(2)]] var<uniform_constant> storageTex : [[access(read)]] texture_storage_2d<r32uint>;
+
+        [[stage(compute)]] fn main() -> void {
+            output.sampledOut = textureLoad(sampledTex, vec2<i32>(0, 0), 0).x;
+            output.storageOut = textureLoad(storageTex, vec2<i32>(0, 0)).x;
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    // Run the compute pipeline and store the result in the buffer.
+    wgpu::BufferDescriptor outputDesc;
+    outputDesc.size = 8;
+    outputDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer outputBuffer = device.CreateBuffer(&outputDesc);
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                              {
+                                                  {0, outputBuffer},
+                                                  {1, tex.CreateView()},
+                                                  {2, tex.CreateView()},
+                                              });
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetBindGroup(0, bg);
+    pass.SetPipeline(pipeline);
+    pass.Dispatch(1);
+    pass.EndPass();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Check the buffer's content is what we expect.
+    EXPECT_BUFFER_U32_EQ(1, outputBuffer, 0);
+    EXPECT_BUFFER_U32_EQ(1, outputBuffer, 4);
+}
+
 DAWN_INSTANTIATE_TEST(GpuMemorySyncTests,
                       D3D12Backend(),
                       MetalBackend(),
