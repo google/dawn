@@ -34,51 +34,31 @@ namespace dawn_native {
         TextureBase* texture = view->GetTexture();
         const SubresourceRange& range = view->GetSubresourceRange();
 
-        // std::map's operator[] will create the key and return a PassTextureUsage with usage = 0
-        // and an empty vector for subresourceUsages.
-        // TODO (yunchao.he@intel.com): optimize this
-        PassTextureUsage& textureUsage = mTextureUsages[texture];
+        // Get or create a new PassTextureUsage for that texture (initially filled with
+        // wgpu::TextureUsage::None)
+        auto it = mTextureUsages.emplace(texture, texture);
+        PassTextureUsage& textureUsage = it.first->second;
 
-        // Set parameters for the whole texture
         textureUsage.usage |= usage;
-        textureUsage.sameUsagesAcrossSubresources &=
-            (range.levelCount == texture->GetNumMipLevels() &&  //
-             range.layerCount == texture->GetArrayLayers() &&   //
-             range.aspects == texture->GetFormat().aspects);
-
-        // Set usages for subresources
-        if (!textureUsage.subresourceUsages.size()) {
-            textureUsage.subresourceUsages = std::vector<wgpu::TextureUsage>(
-                texture->GetSubresourceCount(), wgpu::TextureUsage::None);
-        }
-        for (Aspect aspect : IterateEnumMask(range.aspects)) {
-            for (uint32_t arrayLayer = range.baseArrayLayer;
-                 arrayLayer < range.baseArrayLayer + range.layerCount; ++arrayLayer) {
-                for (uint32_t mipLevel = range.baseMipLevel;
-                     mipLevel < range.baseMipLevel + range.levelCount; ++mipLevel) {
-                    uint32_t subresourceIndex =
-                        texture->GetSubresourceIndex(mipLevel, arrayLayer, aspect);
-                    textureUsage.subresourceUsages[subresourceIndex] |= usage;
-                }
-            }
-        }
+        textureUsage.subresourceUsages.Update(
+            range, [usage](const SubresourceRange&, wgpu::TextureUsage* storedUsage) {
+                *storedUsage |= usage;
+            });
     }
 
     void PassResourceUsageTracker::AddTextureUsage(TextureBase* texture,
                                                    const PassTextureUsage& textureUsage) {
-        PassTextureUsage& passTextureUsage = mTextureUsages[texture];
-        passTextureUsage.usage |= textureUsage.usage;
-        passTextureUsage.sameUsagesAcrossSubresources &= textureUsage.sameUsagesAcrossSubresources;
+        // Get or create a new PassTextureUsage for that texture (initially filled with
+        // wgpu::TextureUsage::None)
+        auto it = mTextureUsages.emplace(texture, texture);
+        PassTextureUsage* passTextureUsage = &it.first->second;
 
-        uint32_t subresourceCount = texture->GetSubresourceCount();
-        ASSERT(textureUsage.subresourceUsages.size() == subresourceCount);
-        if (!passTextureUsage.subresourceUsages.size()) {
-            passTextureUsage.subresourceUsages = textureUsage.subresourceUsages;
-            return;
-        }
-        for (uint32_t i = 0; i < subresourceCount; ++i) {
-            passTextureUsage.subresourceUsages[i] |= textureUsage.subresourceUsages[i];
-        }
+        passTextureUsage->usage |= textureUsage.usage;
+
+        passTextureUsage->subresourceUsages.Merge(
+            textureUsage.subresourceUsages,
+            [](const SubresourceRange&, wgpu::TextureUsage* storedUsage,
+               const wgpu::TextureUsage& addedUsage) { *storedUsage |= addedUsage; });
     }
 
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.

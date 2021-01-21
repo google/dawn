@@ -28,11 +28,15 @@ namespace dawn_native {
         Color = 0x1,
         Depth = 0x2,
         Stencil = 0x4,
+
+        // An aspect for that represents the combination of both the depth and stencil aspects. It
+        // can be ignored outside of the Vulkan backend.
+        CombinedDepthStencil = 0x8,
     };
 
     template <>
     struct EnumBitmaskSize<Aspect> {
-        static constexpr unsigned value = 3;
+        static constexpr unsigned value = 4;
     };
 
     // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect

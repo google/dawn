@@ -308,6 +308,7 @@ namespace dawn_native {
     // Performs the per-pass usage validation checks
     // This will eventually need to differentiate between render and compute passes.
     // It will be valid to use a buffer both as uniform and storage in the same compute pass.
+    // TODO(yunchao.he@intel.com): add read/write usage tracking for compute
     MaybeError ValidatePassResourceUsage(const PassResourceUsage& pass) {
         // Buffers can only be used as single-write or multiple read.
         for (size_t i = 0; i < pass.buffers.size(); ++i) {
@@ -337,8 +338,6 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");
             }
 
-            // TODO (yunchao.he@intel.com): add read/write usage tracking for compute
-
             // The usage variable for the whole texture is a fast path for texture usage tracking.
             // Because in most cases a texture (with or without subresources) is used as
             // single-write or multiple read, then we can skip iterating the subresources' usages.
@@ -347,16 +346,20 @@ namespace dawn_native {
             if (pass.passType != PassType::Render || readOnly || singleUse) {
                 continue;
             }
-            // Inspect the subresources if the usage of the whole texture violates usage validation.
-            // Every single subresource can only be used as single-write or multiple read.
-            for (wgpu::TextureUsage subresourceUsage : textureUsage.subresourceUsages) {
-                bool readOnly = IsSubset(subresourceUsage, kReadOnlyTextureUsages);
-                bool singleUse = wgpu::HasZeroOrOneBits(subresourceUsage);
-                if (!readOnly && !singleUse) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Texture used as writable usage and another usage in render pass");
-                }
-            }
+
+            // Check that every single subresource is used as either a single-write usage or a
+            // combination of readonly usages.
+            MaybeError error = {};
+            textureUsage.subresourceUsages.Iterate(
+                [&](const SubresourceRange&, const wgpu::TextureUsage& usage) {
+                    bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
+                    bool singleUse = wgpu::HasZeroOrOneBits(usage);
+                    if (!readOnly && !singleUse && !error.IsError()) {
+                        error = DAWN_VALIDATION_ERROR(
+                            "Texture used as writable usage and another usage in render pass");
+                    }
+                });
+            DAWN_TRY(std::move(error));
         }
         return {};
     }

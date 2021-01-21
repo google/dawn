@@ -46,8 +46,8 @@ namespace dawn_native {
         ASSERT(HasOneBit(aspect));
         switch (aspect) {
             case Aspect::Color:
-                return 0;
             case Aspect::Depth:
+            case Aspect::CombinedDepthStencil:
                 return 0;
             case Aspect::Stencil:
                 return 1;
@@ -60,7 +60,8 @@ namespace dawn_native {
         // TODO(cwallez@chromium.org): This should use popcount once Dawn has such a function.
         // Note that we can't do a switch because compilers complain that Depth | Stencil is not
         // a valid enum value.
-        if (aspects == Aspect::Color || aspects == Aspect::Depth) {
+        if (aspects == Aspect::Color || aspects == Aspect::Depth ||
+            aspects == Aspect::CombinedDepthStencil) {
             return 1;
         } else {
             ASSERT(aspects == (Aspect::Depth | Aspect::Stencil));

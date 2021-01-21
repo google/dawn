@@ -472,7 +472,7 @@ namespace dawn_native {
 
         T layer0Data = Data(aspectIndex, 0);
         for (uint32_t layer = 1; layer < mArrayLayerCount; layer++) {
-            if (Data(aspectIndex, layer) != layer0Data) {
+            if (!(Data(aspectIndex, layer) == layer0Data)) {
                 return;
             }
         }
@@ -502,7 +502,7 @@ namespace dawn_native {
         const T& level0Data = Data(aspectIndex, layer, 0);
 
         for (uint32_t level = 1; level < mMipLevelCount; level++) {
-            if (Data(aspectIndex, layer, level) != level0Data) {
+            if (!(Data(aspectIndex, layer, level) == level0Data)) {
                 return;
             }
         }

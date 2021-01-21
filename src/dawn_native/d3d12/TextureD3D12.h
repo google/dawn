@@ -96,26 +96,26 @@ namespace dawn_native { namespace d3d12 {
                                 const SubresourceRange& range,
                                 TextureBase::ClearValue clearValue);
 
-        void TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
-                                                  std::vector<D3D12_RESOURCE_BARRIER>* barrier,
-                                                  D3D12_RESOURCE_STATES newState,
-                                                  const SubresourceRange& range);
-
-        void TransitionSingleOrAllSubresources(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
-                                               uint32_t index,
-                                               D3D12_RESOURCE_STATES subresourceNewState,
-                                               ExecutionSerial pendingCommandSerial,
-                                               bool allSubresources);
-        void HandleTransitionSpecialCases(CommandRecordingContext* commandContext);
-
-        bool mSameLastUsagesAcrossSubresources = true;
-
+        // Barriers implementation details.
         struct StateAndDecay {
             D3D12_RESOURCE_STATES lastState;
             ExecutionSerial lastDecaySerial;
             bool isValidToDecay;
+
+            bool operator==(const StateAndDecay& other) const;
         };
-        std::vector<StateAndDecay> mSubresourceStateAndDecay;
+        void TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                                  std::vector<D3D12_RESOURCE_BARRIER>* barrier,
+                                                  D3D12_RESOURCE_STATES newState,
+                                                  const SubresourceRange& range);
+        void TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
+                                        const SubresourceRange& range,
+                                        StateAndDecay* state,
+                                        D3D12_RESOURCE_STATES subresourceNewState,
+                                        ExecutionSerial pendingCommandSerial) const;
+        void HandleTransitionSpecialCases(CommandRecordingContext* commandContext);
+
+        SubresourceStorage<StateAndDecay> mSubresourceStateAndDecay;
 
         ResourceHeapAllocation mResourceAllocation;
         bool mSwapChainTexture = false;

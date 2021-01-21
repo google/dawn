@@ -513,7 +513,9 @@ namespace dawn_native { namespace d3d12 {
     Texture::Texture(Device* device, const TextureDescriptor* descriptor, TextureState state)
         : TextureBase(device, descriptor, state),
           mSubresourceStateAndDecay(
-              GetSubresourceCount(),
+              GetFormat().aspects,
+              GetArrayLayers(),
+              GetNumMipLevels(),
               {D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON, kMaxExecutionSerial, false}) {
     }
 
@@ -615,12 +617,11 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    void Texture::TransitionSingleOrAllSubresources(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
-                                                    uint32_t index,
-                                                    D3D12_RESOURCE_STATES newState,
-                                                    ExecutionSerial pendingCommandSerial,
-                                                    bool allSubresources) {
-        StateAndDecay* state = &mSubresourceStateAndDecay[index];
+    void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
+                                             const SubresourceRange& range,
+                                             StateAndDecay* state,
+                                             D3D12_RESOURCE_STATES newState,
+                                             ExecutionSerial pendingCommandSerial) const {
         // Reuse the subresource(s) directly and avoid transition when it isn't needed, and
         // return false.
         // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
@@ -682,9 +683,28 @@ namespace dawn_native { namespace d3d12 {
         barrier.Transition.pResource = GetD3D12Resource();
         barrier.Transition.StateBefore = lastState;
         barrier.Transition.StateAfter = newState;
-        barrier.Transition.Subresource =
-            allSubresources ? D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES : index;
-        barriers->push_back(barrier);
+
+        bool isFullRange = range.baseArrayLayer == 0 && range.baseMipLevel == 0 &&
+                           range.layerCount == GetArrayLayers() &&
+                           range.levelCount == GetNumMipLevels() &&
+                           range.aspects == GetFormat().aspects;
+
+        // Use a single transition for all subresources if possible.
+        if (isFullRange) {
+            barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+            barriers->push_back(barrier);
+        } else {
+            for (Aspect aspect : IterateEnumMask(range.aspects)) {
+                for (uint32_t arrayLayer = 0; arrayLayer < range.layerCount; ++arrayLayer) {
+                    for (uint32_t mipLevel = 0; mipLevel < range.levelCount; ++mipLevel) {
+                        barrier.Transition.Subresource =
+                            GetSubresourceIndex(range.baseMipLevel + mipLevel,
+                                                range.baseArrayLayer + arrayLayer, aspect);
+                        barriers->push_back(barrier);
+                    }
+                }
+            }
+        }
 
         state->isValidToDecay = false;
     }
@@ -719,36 +739,11 @@ namespace dawn_native { namespace d3d12 {
         // This transitions assume it is a 2D texture
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
 
-        // If the usages transitions can cover all subresources, and old usages of all subresources
-        // are the same, then we can use one barrier to do state transition for all subresources.
-        // Note that if the texture has only one mip level and one array slice, it will fall into
-        // this category.
-        bool areAllSubresourcesCovered = (range.levelCount == GetNumMipLevels() &&  //
-                                          range.layerCount == GetArrayLayers() &&   //
-                                          range.aspects == GetFormat().aspects);
-        if (mSameLastUsagesAcrossSubresources && areAllSubresourcesCovered) {
-            TransitionSingleOrAllSubresources(barriers, 0, newState, pendingCommandSerial, true);
-
-            // TODO(yunchao.he@intel.com): compress and decompress if all subresources have the
-            // same states. We may need to retain mSubresourceStateAndDecay[0] only.
-            for (uint32_t i = 1; i < GetSubresourceCount(); ++i) {
-                mSubresourceStateAndDecay[i] = mSubresourceStateAndDecay[0];
-            }
-
-            return;
-        }
-        for (Aspect aspect : IterateEnumMask(range.aspects)) {
-            for (uint32_t arrayLayer = 0; arrayLayer < range.layerCount; ++arrayLayer) {
-                for (uint32_t mipLevel = 0; mipLevel < range.levelCount; ++mipLevel) {
-                    uint32_t index = GetSubresourceIndex(range.baseMipLevel + mipLevel,
-                                                         range.baseArrayLayer + arrayLayer, aspect);
-
-                    TransitionSingleOrAllSubresources(barriers, index, newState,
-                                                      pendingCommandSerial, false);
-                }
-            }
-        }
-        mSameLastUsagesAcrossSubresources = areAllSubresourcesCovered;
+        mSubresourceStateAndDecay.Update(
+            range, [&](const SubresourceRange& updateRange, StateAndDecay* state) {
+                TransitionSubresourceRange(barriers, updateRange, state, newState,
+                                           pendingCommandSerial);
+            });
     }
 
     void Texture::TrackUsageAndGetResourceBarrierForPass(
@@ -765,47 +760,21 @@ namespace dawn_native { namespace d3d12 {
 
         const ExecutionSerial pendingCommandSerial =
             ToBackend(GetDevice())->GetPendingCommandSerial();
-        uint32_t subresourceCount = GetSubresourceCount();
-        ASSERT(textureUsages.subresourceUsages.size() == subresourceCount);
         // This transitions assume it is a 2D texture
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
 
-        // If new usages of all subresources are the same and old usages of all subresources are
-        // the same too, we can use one barrier to do state transition for all subresources.
-        // Note that if the texture has only one mip level and one array slice, it will fall into
-        // this category.
-        if (textureUsages.sameUsagesAcrossSubresources && mSameLastUsagesAcrossSubresources) {
-            D3D12_RESOURCE_STATES newState = D3D12TextureUsage(textureUsages.usage, GetFormat());
-            TransitionSingleOrAllSubresources(barriers, 0, newState, pendingCommandSerial, true);
-
-            // TODO(yunchao.he@intel.com): compress and decompress if all subresources have the
-            // same states. We may need to retain mSubresourceStateAndDecay[0] only.
-            for (uint32_t i = 1; i < subresourceCount; ++i) {
-                mSubresourceStateAndDecay[i] = mSubresourceStateAndDecay[0];
-            }
-
-            return;
-        }
-
-        for (Aspect aspect : IterateEnumMask(GetFormat().aspects)) {
-            for (uint32_t arrayLayer = 0; arrayLayer < GetArrayLayers(); ++arrayLayer) {
-                for (uint32_t mipLevel = 0; mipLevel < GetNumMipLevels(); ++mipLevel) {
-                    uint32_t index = GetSubresourceIndex(mipLevel, arrayLayer, aspect);
-
-                    // Skip if this subresource is not used during the current pass
-                    if (textureUsages.subresourceUsages[index] == wgpu::TextureUsage::None) {
-                        continue;
-                    }
-
-                    D3D12_RESOURCE_STATES newState =
-                        D3D12TextureUsage(textureUsages.subresourceUsages[index], GetFormat());
-
-                    TransitionSingleOrAllSubresources(barriers, index, newState,
-                                                      pendingCommandSerial, false);
+        mSubresourceStateAndDecay.Merge(
+            textureUsages.subresourceUsages, [&](const SubresourceRange& mergeRange,
+                                                 StateAndDecay* state, wgpu::TextureUsage usage) {
+                // Skip if this subresource is not used during the current pass
+                if (usage == wgpu::TextureUsage::None) {
+                    return;
                 }
-            }
-        }
-        mSameLastUsagesAcrossSubresources = textureUsages.sameUsagesAcrossSubresources;
+
+                D3D12_RESOURCE_STATES newState = D3D12TextureUsage(usage, GetFormat());
+                TransitionSubresourceRange(barriers, mergeRange, state, newState,
+                                           pendingCommandSerial);
+            });
     }
 
     D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t mipLevel,
@@ -1023,6 +992,11 @@ namespace dawn_native { namespace d3d12 {
             GetDevice()->ConsumedError(
                 ClearTexture(commandContext, range, TextureBase::ClearValue::Zero));
         }
+    }
+
+    bool Texture::StateAndDecay::operator==(const Texture::StateAndDecay& other) const {
+        return lastState == other.lastState && lastDecaySerial == other.lastDecaySerial &&
+               isValidToDecay == other.isValidToDecay;
     }
 
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)

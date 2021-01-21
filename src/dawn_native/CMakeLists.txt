@@ -107,6 +107,7 @@ target_sources(dawn_native PRIVATE
     "IntegerTypes.h"
     "ObjectBase.cpp"
     "ObjectBase.h"
+    "PassResourceUsage.cpp"
     "PassResourceUsage.h"
     "PassResourceUsageTracker.cpp"
     "PassResourceUsageTracker.h"

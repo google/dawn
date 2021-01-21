@@ -306,6 +306,7 @@ namespace dawn_native { namespace opengl {
                                     switch (aspect) {
                                         case Aspect::None:
                                         case Aspect::Color:
+                                        case Aspect::CombinedDepthStencil:
                                             UNREACHABLE();
                                         case Aspect::Depth:
                                             gl.TexParameteri(target, GL_DEPTH_STENCIL_TEXTURE_MODE,
@@ -714,6 +715,7 @@ namespace dawn_native { namespace opengl {
                             glType = GL_UNSIGNED_BYTE;
                             break;
 
+                        case Aspect::CombinedDepthStencil:
                         case Aspect::None:
                             UNREACHABLE();
                     }
