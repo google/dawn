@@ -64,14 +64,14 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        if (!TrackDeviceChild(device, ObjectType::Texture, id)) {
-            return false;
-        }
-
         data->handle = texture;
         data->generation = generation;
         data->allocated = true;
-        data->device = device;
+        data->deviceInfo = device->info.get();
+
+        if (!TrackDeviceChild(data->deviceInfo, ObjectType::Texture, id)) {
+            return false;
+        }
 
         // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
         // message from the client. Add a reference to counterbalance the eventual release.
@@ -131,9 +131,8 @@ namespace dawn_wire { namespace server {
         mProcs.deviceSetDeviceLostCallback(device, nullptr, nullptr);
     }
 
-    bool TrackDeviceChild(ObjectDataBase<WGPUDevice>* device, ObjectType type, ObjectId id) {
-        auto it = static_cast<ObjectData<WGPUDevice>*>(device)->childObjectTypesAndIds.insert(
-            PackObjectTypeAndId(type, id));
+    bool TrackDeviceChild(DeviceInfo* info, ObjectType type, ObjectId id) {
+        auto it = info->childObjectTypesAndIds.insert(PackObjectTypeAndId(type, id));
         if (!it.second) {
             // An object of this type and id already exists.
             return false;
@@ -141,8 +140,8 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool UntrackDeviceChild(ObjectDataBase<WGPUDevice>* device, ObjectType type, ObjectId id) {
-        auto& children = static_cast<ObjectData<WGPUDevice>*>(device)->childObjectTypesAndIds;
+    bool UntrackDeviceChild(DeviceInfo* info, ObjectType type, ObjectId id) {
+        auto& children = info->childObjectTypesAndIds;
         auto it = children.find(PackObjectTypeAndId(type, id));
         if (it == children.end()) {
             // An object of this type and id was already deleted.

@@ -24,6 +24,10 @@
 
 namespace dawn_wire { namespace server {
 
+    struct DeviceInfo {
+        std::unordered_set<uint64_t> childObjectTypesAndIds;
+    };
+
     template <typename T>
     struct ObjectDataBase {
         // The backend-provided handle and generation to this object.
@@ -34,7 +38,8 @@ namespace dawn_wire { namespace server {
         // TODO(cwallez@chromium.org): make this an internal bit vector in KnownObjects.
         bool allocated;
 
-        ObjectDataBase<WGPUDevice>* device = nullptr;
+        // This points to an allocation that is owned by the device.
+        DeviceInfo* deviceInfo = nullptr;
     };
 
     // Stores what the backend knows about the type.
@@ -68,7 +73,9 @@ namespace dawn_wire { namespace server {
 
     template <>
     struct ObjectData<WGPUDevice> : public ObjectDataBase<WGPUDevice> {
-        std::unordered_set<uint64_t> childObjectTypesAndIds;
+        // Store |info| as a separate allocation so that its address does not move.
+        // The pointer to |info| is stored in device child objects.
+        std::unique_ptr<DeviceInfo> info = std::make_unique<DeviceInfo>();
     };
 
     // Keeps track of the mapping between client IDs and backend objects.

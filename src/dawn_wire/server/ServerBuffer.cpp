@@ -137,8 +137,8 @@ namespace dawn_wire { namespace server {
         }
         resultData->generation = bufferResult.generation;
         resultData->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
-        resultData->device = device;
-        if (!TrackDeviceChild(device, ObjectType::Buffer, bufferResult.id)) {
+        resultData->deviceInfo = device->info.get();
+        if (!TrackDeviceChild(resultData->deviceInfo, ObjectType::Buffer, bufferResult.id)) {
             return false;
         }
 

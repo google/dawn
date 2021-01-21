@@ -59,13 +59,13 @@ namespace dawn_wire { namespace server {
                 {% if command.derived_object %}
                     {% set type = command.derived_object %}
                     {% if type.name.get() == "device" %}
-                        {{name}}Data->device = DeviceObjects().Get(cmd.selfId);
+                        {{name}}Data->deviceInfo = DeviceObjects().Get(cmd.selfId)->info.get();
                     {% else %}
                         auto* selfData = {{type.name.CamelCase()}}Objects().Get(cmd.selfId);
-                        {{name}}Data->device = selfData->device;
+                        {{name}}Data->deviceInfo = selfData->deviceInfo;
                     {% endif %}
-                    if ({{name}}Data->device != nullptr) {
-                        if (!TrackDeviceChild({{name}}Data->device, ObjectType::{{Type}}, cmd.{{name}}.id)) {
+                    if ({{name}}Data->deviceInfo != nullptr) {
+                        if (!TrackDeviceChild({{name}}Data->deviceInfo, ObjectType::{{Type}}, cmd.{{name}}.id)) {
                             return false;
                         }
                     }

@@ -223,8 +223,8 @@ namespace dawn_wire { namespace server {
         std::shared_ptr<bool> mIsAlive;
     };
 
-    bool TrackDeviceChild(ObjectDataBase<WGPUDevice>* device, ObjectType type, ObjectId id);
-    bool UntrackDeviceChild(ObjectDataBase<WGPUDevice>* device, ObjectType type, ObjectId id);
+    bool TrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
+    bool UntrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
 
     std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 

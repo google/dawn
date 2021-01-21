@@ -182,3 +182,49 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, nullptr, nullptr)).Times(1);
 }
+
+// This is a regression test where a second device reservation invalidated pointers into the
+// KnownObjects std::vector of devices. The fix was to store pointers to heap allocated
+// objects instead.
+TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
+    // Reserve one device, inject it, and get the default queue.
+    ReservedDevice reservation1 = GetWireClient()->ReserveDevice();
+
+    WGPUDevice serverDevice1 = api.GetNewDevice();
+    EXPECT_CALL(api, DeviceReference(serverDevice1));
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, _, _));
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, _, _));
+    ASSERT_TRUE(
+        GetWireServer()->InjectDevice(serverDevice1, reservation1.id, reservation1.generation));
+
+    WGPUCommandEncoder commandEncoder =
+        wgpuDeviceCreateCommandEncoder(reservation1.device, nullptr);
+
+    WGPUCommandEncoder serverCommandEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(serverDevice1, _))
+        .WillOnce(Return(serverCommandEncoder));
+    FlushClient();
+
+    // Reserve a second device, and inject it.
+    ReservedDevice reservation2 = GetWireClient()->ReserveDevice();
+
+    WGPUDevice serverDevice2 = api.GetNewDevice();
+    EXPECT_CALL(api, DeviceReference(serverDevice2));
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, _, _));
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, _, _));
+    ASSERT_TRUE(
+        GetWireServer()->InjectDevice(serverDevice2, reservation2.id, reservation2.generation));
+
+    // Release the encoder. This should work without error because it stores a stable
+    // pointer to its device's list of child objects. On destruction, it removes itself from the
+    // list.
+    wgpuCommandEncoderRelease(commandEncoder);
+    EXPECT_CALL(api, CommandEncoderRelease(serverCommandEncoder));
+    FlushClient();
+
+    // Called on shutdown.
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, nullptr, nullptr)).Times(1);
+}

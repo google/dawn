@@ -77,9 +77,8 @@ namespace dawn_wire { namespace server {
                     if (data == nullptr) {
                         return false;
                     }
-                    if (data->device != nullptr) {
-                        auto* device = static_cast<ObjectData<WGPUDevice>*>(data->device);
-                        if (!UntrackDeviceChild(device, objectType, objectId)) {
+                    if (data->deviceInfo != nullptr) {
+                        if (!UntrackDeviceChild(data->deviceInfo, objectType, objectId)) {
                             return false;
                         }
                     }
@@ -91,11 +90,11 @@ namespace dawn_wire { namespace server {
                         //* are destroyed before their device. We should have a solution in
                         //* Dawn native that makes all child objects internally null if their
                         //* Device is destroyed.
-                        while (data->childObjectTypesAndIds.size() > 0) {
+                        while (data->info->childObjectTypesAndIds.size() > 0) {
                             ObjectType childObjectType;
                             ObjectId childObjectId;
                             std::tie(childObjectType, childObjectId) = UnpackObjectTypeAndId(
-                                *data->childObjectTypesAndIds.begin());
+                                *data->info->childObjectTypesAndIds.begin());
                             DoDestroyObject(childObjectType, childObjectId);
                         }
                         if (data->handle != nullptr) {

@@ -74,8 +74,9 @@ namespace dawn_wire { namespace server {
         }
 
         resultData->generation = pipelineObjectHandle.generation;
-        resultData->device = device;
-        if (!TrackDeviceChild(device, ObjectType::ComputePipeline, pipelineObjectHandle.id)) {
+        resultData->deviceInfo = device->info.get();
+        if (!TrackDeviceChild(resultData->deviceInfo, ObjectType::ComputePipeline,
+                              pipelineObjectHandle.id)) {
             return false;
         }
 
@@ -140,8 +141,9 @@ namespace dawn_wire { namespace server {
         }
 
         resultData->generation = pipelineObjectHandle.generation;
-        resultData->device = device;
-        if (!TrackDeviceChild(device, ObjectType::RenderPipeline, pipelineObjectHandle.id)) {
+        resultData->deviceInfo = device->info.get();
+        if (!TrackDeviceChild(resultData->deviceInfo, ObjectType::RenderPipeline,
+                              pipelineObjectHandle.id)) {
             return false;
         }
 
