@@ -53,7 +53,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 

@@ -360,5 +360,32 @@ Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
   return ret;
 }
 
+Function* FunctionList::Find(Symbol sym) const {
+  for (auto* func : *this) {
+    if (func->symbol() == sym) {
+      return func;
+    }
+  }
+  return nullptr;
+}
+
+Function* FunctionList::Find(Symbol sym, PipelineStage stage) const {
+  for (auto* func : *this) {
+    if (func->symbol() == sym && func->pipeline_stage() == stage) {
+      return func;
+    }
+  }
+  return nullptr;
+}
+
+bool FunctionList::HasStage(ast::PipelineStage stage) const {
+  for (auto* func : *this) {
+    if (func->pipeline_stage() == stage) {
+      return true;
+    }
+  }
+  return false;
+}
+
 }  // namespace ast
 }  // namespace tint

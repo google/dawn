@@ -48,34 +48,6 @@ void Module::Clone(CloneContext* ctx) const {
   }
 }
 
-Function* Module::FindFunctionBySymbol(Symbol sym) const {
-  for (auto* func : functions_) {
-    if (func->symbol() == sym) {
-      return func;
-    }
-  }
-  return nullptr;
-}
-
-Function* Module::FindFunctionBySymbolAndStage(Symbol sym,
-                                               PipelineStage stage) const {
-  for (auto* func : functions_) {
-    if (func->symbol() == sym && func->pipeline_stage() == stage) {
-      return func;
-    }
-  }
-  return nullptr;
-}
-
-bool Module::HasStage(ast::PipelineStage stage) const {
-  for (auto* func : functions_) {
-    if (func->pipeline_stage() == stage) {
-      return true;
-    }
-  }
-  return false;
-}
-
 Symbol Module::RegisterSymbol(const std::string& name) {
   return symbol_table_.Register(name);
 }

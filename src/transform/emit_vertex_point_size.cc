@@ -41,7 +41,7 @@ EmitVertexPointSize::~EmitVertexPointSize() = default;
 Transform::Output EmitVertexPointSize::Run(ast::Module* in) {
   Output out;
 
-  if (!in->HasStage(ast::PipelineStage::kVertex)) {
+  if (!in->Functions().HasStage(ast::PipelineStage::kVertex)) {
     // If the module doesn't have any vertex stages, then there's nothing to do.
     out.module = in->Clone();
     return out;

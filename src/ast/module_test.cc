@@ -32,24 +32,13 @@ namespace {
 using ModuleTest = TestHelper;
 
 TEST_F(ModuleTest, Creation) {
-  EXPECT_EQ(mod->functions().size(), 0u);
+  EXPECT_EQ(mod->Functions().size(), 0u);
 }
 
 TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
   const auto str = mod->to_str();
   auto* const expected = "Module{\n}\n";
   EXPECT_EQ(str, expected);
-}
-
-TEST_F(ModuleTest, LookupFunction) {
-  auto* func = Func("main", VariableList{}, ty.f32, StatementList{},
-                    ast::FunctionDecorationList{});
-  mod->AddFunction(func);
-  EXPECT_EQ(func, mod->FindFunctionBySymbol(mod->RegisterSymbol("main")));
-}
-
-TEST_F(ModuleTest, LookupFunctionMissing) {
-  EXPECT_EQ(nullptr, mod->FindFunctionBySymbol(mod->RegisterSymbol("Missing")));
 }
 
 TEST_F(ModuleTest, IsValid_Empty) {
@@ -102,12 +91,12 @@ TEST_F(ModuleTest, IsValid_Function) {
   auto* func = Func("main", VariableList(), ty.f32, StatementList{},
                     ast::FunctionDecorationList{});
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
   EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ModuleTest, IsValid_Null_Function) {
-  mod->AddFunction(nullptr);
+  mod->Functions().Add(nullptr);
   EXPECT_FALSE(mod->IsValid());
 }
 
@@ -115,7 +104,7 @@ TEST_F(ModuleTest, IsValid_Invalid_Function) {
   auto* func = Func("main", VariableList{}, nullptr, StatementList{},
                     ast::FunctionDecorationList{});
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
   EXPECT_FALSE(mod->IsValid());
 }
 

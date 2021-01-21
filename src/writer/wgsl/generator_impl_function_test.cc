@@ -212,7 +212,7 @@ TEST_F(WgslGeneratorImplTest,
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AddFunction(func);
+    mod->Functions().Add(func);
   }
 
   {
@@ -231,7 +231,7 @@ TEST_F(WgslGeneratorImplTest,
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AddFunction(func);
+    mod->Functions().Add(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

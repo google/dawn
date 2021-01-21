@@ -138,7 +138,7 @@ bool GeneratorImpl::Generate() {
   }
 
   // Make sure all entry point data is emitted before the entry point functions
-  for (auto* func : module_->functions()) {
+  for (auto* func : module_->Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -148,13 +148,13 @@ bool GeneratorImpl::Generate() {
     }
   }
 
-  for (auto* func : module_->functions()) {
+  for (auto* func : module_->Functions()) {
     if (!EmitFunction(func)) {
       return false;
     }
   }
 
-  for (auto* func : module_->functions()) {
+  for (auto* func : module_->Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -525,7 +525,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     name = it->second;
   }
 
-  auto* func = module_->FindFunctionBySymbol(ident->symbol());
+  auto* func = module_->Functions().Find(ident->symbol());
   if (func == nullptr) {
     error_ =
         "Unable to find function: " + module_->SymbolToName(ident->symbol());

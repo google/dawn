@@ -135,8 +135,8 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_module();
-  ASSERT_EQ(m.functions().size(), 1u);
-  EXPECT_EQ(m.SymbolToName(m.functions()[0]->symbol()), "main");
+  ASSERT_EQ(m.Functions().size(), 1u);
+  EXPECT_EQ(m.SymbolToName(m.Functions()[0]->symbol()), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
@@ -145,8 +145,8 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_module();
-  ASSERT_EQ(m.functions().size(), 1u);
-  EXPECT_EQ(m.SymbolToName(m.functions()[0]->symbol()), "main");
+  ASSERT_EQ(m.Functions().size(), 1u);
+  EXPECT_EQ(m.SymbolToName(m.Functions()[0]->symbol()), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {

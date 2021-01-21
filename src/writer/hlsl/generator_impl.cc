@@ -160,7 +160,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
 
   std::unordered_set<Symbol> emitted_globals;
   // Make sure all entry point data is emitted before the entry point functions
-  for (auto* func : module_->functions()) {
+  for (auto* func : module_->Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -170,13 +170,13 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     }
   }
 
-  for (auto* func : module_->functions()) {
+  for (auto* func : module_->Functions()) {
     if (!EmitFunction(out, func)) {
       return false;
     }
   }
 
-  for (auto* func : module_->functions()) {
+  for (auto* func : module_->Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -631,7 +631,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     name = it->second;
   }
 
-  auto* func = module_->FindFunctionBySymbol(ident->symbol());
+  auto* func = module_->Functions().Find(ident->symbol());
   if (func == nullptr) {
     error_ =
         "Unable to find function: " + module_->SymbolToName(ident->symbol());

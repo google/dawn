@@ -15,8 +15,8 @@
 #include "src/reader/wgsl/parser_impl.h"
 
 #include "gtest/gtest.h"
-#include "src/type/i32_type.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
+#include "src/type/i32_type.h"
 
 namespace tint {
 namespace reader {
@@ -40,7 +40,7 @@ fn main() -> void {
   ASSERT_TRUE(p->Parse()) << p->error();
 
   auto& m = p->get_module();
-  ASSERT_EQ(1u, m.functions().size());
+  ASSERT_EQ(1u, m.Functions().size());
   ASSERT_EQ(1u, m.global_variables().size());
 }
 

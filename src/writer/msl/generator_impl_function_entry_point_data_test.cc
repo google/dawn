@@ -71,7 +71,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -119,7 +119,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -167,7 +167,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -215,7 +215,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -260,7 +260,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -300,7 +300,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -345,7 +345,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 

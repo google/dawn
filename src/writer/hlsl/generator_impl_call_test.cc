@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
 
   auto* func = Func("my_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -47,7 +47,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
 
   auto* func = Func("my_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -60,7 +60,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
 
   auto* func = Func("my_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 

@@ -71,10 +71,10 @@ bool ValidatorImpl::Validate() {
   if (!ValidateConstructedTypes(module_.constructed_types())) {
     return false;
   }
-  if (!ValidateFunctions(module_.functions())) {
+  if (!ValidateFunctions(module_.Functions())) {
     return false;
   }
-  if (!ValidateEntryPoint(module_.functions())) {
+  if (!ValidateEntryPoint(module_.Functions())) {
     return false;
   }
   function_stack_.pop_scope();

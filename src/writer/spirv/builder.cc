@@ -302,7 +302,7 @@ bool Builder::Build() {
     }
   }
 
-  for (auto* func : mod_->functions()) {
+  for (auto* func : mod_->Functions()) {
     if (!GenerateFunction(func)) {
       return false;
     }

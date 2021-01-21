@@ -42,7 +42,7 @@ fn main() -> void {
   ASSERT_TRUE(p.Parse()) << p.error();
 
   auto m = p.module();
-  ASSERT_EQ(1u, m.functions().size());
+  ASSERT_EQ(1u, m.Functions().size());
   ASSERT_EQ(1u, m.global_variables().size());
 }
 

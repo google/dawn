@@ -30,7 +30,7 @@ using HlslGeneratorImplTest = TestHelper;
 TEST_F(HlslGeneratorImplTest, Generate) {
   auto* func = Func("my_func", ast::VariableList{}, ty.void_,
                     ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 

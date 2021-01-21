@@ -18,6 +18,7 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/test_helper.h"
 #include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
@@ -354,6 +355,58 @@ TEST_F(FunctionTest, WorkgroupSize) {
   EXPECT_EQ(x, 2u);
   EXPECT_EQ(y, 4u);
   EXPECT_EQ(z, 6u);
+}
+
+using FunctionListTest = TestHelper;
+
+TEST_F(FunctionListTest, FindSymbol) {
+  auto* func = Func("main", VariableList{}, ty.f32, StatementList{},
+                    ast::FunctionDecorationList{});
+  FunctionList list;
+  list.Add(func);
+  EXPECT_EQ(func, list.Find(mod->RegisterSymbol("main")));
+}
+
+TEST_F(FunctionListTest, FindSymbolMissing) {
+  FunctionList list;
+  EXPECT_EQ(nullptr, list.Find(mod->RegisterSymbol("Missing")));
+}
+
+TEST_F(FunctionListTest, FindSymbolStage) {
+  auto* fs = Func("main", VariableList{}, ty.f32, StatementList{},
+                  ast::FunctionDecorationList{
+                      create<ast::StageDecoration>(PipelineStage::kFragment),
+                  });
+  auto* vs = Func("main", VariableList{}, ty.f32, StatementList{},
+                  ast::FunctionDecorationList{
+                      create<ast::StageDecoration>(PipelineStage::kVertex),
+                  });
+  FunctionList list;
+  list.Add(fs);
+  list.Add(vs);
+  EXPECT_EQ(fs,
+            list.Find(mod->RegisterSymbol("main"), PipelineStage::kFragment));
+  EXPECT_EQ(vs, list.Find(mod->RegisterSymbol("main"), PipelineStage::kVertex));
+}
+
+TEST_F(FunctionListTest, FindSymbolStageMissing) {
+  FunctionList list;
+  list.Add(Func("main", VariableList{}, ty.f32, StatementList{},
+                ast::FunctionDecorationList{
+                    create<ast::StageDecoration>(PipelineStage::kFragment),
+                }));
+  EXPECT_EQ(nullptr,
+            list.Find(mod->RegisterSymbol("main"), PipelineStage::kVertex));
+}
+
+TEST_F(FunctionListTest, HasStage) {
+  FunctionList list;
+  list.Add(Func("main", VariableList{}, ty.f32, StatementList{},
+                ast::FunctionDecorationList{
+                    create<ast::StageDecoration>(PipelineStage::kFragment),
+                }));
+  EXPECT_TRUE(list.HasStage(PipelineStage::kFragment));
+  EXPECT_FALSE(list.HasStage(PipelineStage::kVertex));
 }
 
 }  // namespace

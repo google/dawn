@@ -507,7 +507,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   auto* func = Func("foo", ast::VariableList{}, ty.void_, ast::StatementList{},
                     ast::FunctionDecorationList{});
-  mod->AddFunction(func);
+  mod->Functions().Add(func);
 
   ast::ExpressionList params;
   params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,

@@ -82,24 +82,11 @@ class Module {
     return constructed_types_;
   }
 
-  /// Adds a function to the module
-  /// @param func the function
-  void AddFunction(Function* func) { functions_.push_back(func); }
-  /// @returns the modules functions
-  const FunctionList& functions() const { return functions_; }
-  /// Returns the function with the given name
-  /// @param sym the function symbol to search for
-  /// @returns the associated function or nullptr if none exists
-  Function* FindFunctionBySymbol(Symbol sym) const;
-  /// Returns the function with the given name
-  /// @param sym the function symbol to search for
-  /// @param stage the pipeline stage
-  /// @returns the associated function or nullptr if none exists
-  Function* FindFunctionBySymbolAndStage(Symbol sym, PipelineStage stage) const;
-  /// @param stage the pipeline stage
-  /// @returns true if the module contains an entrypoint function with the given
-  /// stage
-  bool HasStage(PipelineStage stage) const;
+  /// @returns the functions declared in the translation unit
+  const FunctionList& Functions() const { return functions_; }
+
+  /// @returns the functions declared in the translation unit
+  FunctionList& Functions() { return functions_; }
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const;

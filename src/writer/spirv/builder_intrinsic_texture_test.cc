@@ -4165,7 +4165,7 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AddFunction(main);
+  mod->Functions().Add(main);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 

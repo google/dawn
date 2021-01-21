@@ -30,8 +30,9 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
-  mod->AddFunction(Func("my_func", ast::VariableList{}, ty.void_,
-                        ast::StatementList{}, ast::FunctionDecorationList{}));
+  mod->Functions().Add(Func("my_func", ast::VariableList{}, ty.void_,
+                            ast::StatementList{},
+                            ast::FunctionDecorationList{}));
 
   GeneratorImpl& gen = Build();
 

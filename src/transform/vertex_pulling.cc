@@ -85,8 +85,8 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
   }
 
   // Find entry point
-  auto* func = in->FindFunctionBySymbolAndStage(
-      in->GetSymbol(cfg.entry_point_name), ast::PipelineStage::kVertex);
+  auto* func = in->Functions().Find(in->GetSymbol(cfg.entry_point_name),
+                                    ast::PipelineStage::kVertex);
   if (func == nullptr) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;

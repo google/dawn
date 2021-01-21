@@ -210,7 +210,28 @@ class Function : public Castable<Function, Node> {
 };
 
 /// A list of functions
-using FunctionList = std::vector<Function*>;
+class FunctionList : public std::vector<Function*> {
+ public:
+  /// Appends f to the end of the list
+  /// @param f the function to append to this list
+  void Add(Function* f) { this->emplace_back(f); }
+
+  /// Returns the function with the given name
+  /// @param sym the function symbol to search for
+  /// @returns the associated function or nullptr if none exists
+  Function* Find(Symbol sym) const;
+
+  /// Returns the function with the given name
+  /// @param sym the function symbol to search for
+  /// @param stage the pipeline stage
+  /// @returns the associated function or nullptr if none exists
+  Function* Find(Symbol sym, PipelineStage stage) const;
+
+  /// @param stage the pipeline stage
+  /// @returns true if the Builder contains an entrypoint function with
+  /// the given stage
+  bool HasStage(PipelineStage stage) const;
+};
 
 }  // namespace ast
 }  // namespace tint
