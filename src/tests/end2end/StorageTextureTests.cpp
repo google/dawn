@@ -286,7 +286,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
     }
 
     std::string CommonReadOnlyTestCode(wgpu::TextureFormat format, bool is2DArray = false) {
-        std::string componentFmt = utils::GetColorTextureComponentWGSLType(format);
+        std::string componentFmt = utils::GetWGSLColorTextureComponentType(format);
         auto texelType = "vec4<" + componentFmt + ">";
         auto* layerCount = is2DArray ? "textureNumLayers(storageImage0)" : "1";
         auto* textureLoad = is2DArray ? "textureLoad(storageImage0, vec2<i32>(x, y), i32(layer))"
@@ -320,7 +320,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
     std::string CommonWriteOnlyTestCode(const char* stage,
                                         wgpu::TextureFormat format,
                                         bool is2DArray = false) {
-        std::string componentFmt = utils::GetColorTextureComponentWGSLType(format);
+        std::string componentFmt = utils::GetWGSLColorTextureComponentType(format);
         auto texelType = "vec4<" + componentFmt + ">";
         auto* layerCount = is2DArray ? "textureNumLayers(storageImage0)" : "1";
         auto* textureStore = is2DArray

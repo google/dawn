@@ -15,153 +15,6 @@
 #include "TextureFormatUtils.h"
 
 namespace utils {
-    const char* GetColorTextureComponentGLSLTypePrefix(wgpu::TextureFormat textureFormat) {
-        switch (textureFormat) {
-            case wgpu::TextureFormat::R8Unorm:
-            case wgpu::TextureFormat::R8Snorm:
-            case wgpu::TextureFormat::R16Float:
-            case wgpu::TextureFormat::RG8Unorm:
-            case wgpu::TextureFormat::RG8Snorm:
-            case wgpu::TextureFormat::R32Float:
-            case wgpu::TextureFormat::RG16Float:
-            case wgpu::TextureFormat::RGBA8Unorm:
-            case wgpu::TextureFormat::RGBA8Snorm:
-            case wgpu::TextureFormat::RGB10A2Unorm:
-            case wgpu::TextureFormat::RG11B10Ufloat:
-            case wgpu::TextureFormat::RGB9E5Ufloat:
-            case wgpu::TextureFormat::RG32Float:
-            case wgpu::TextureFormat::RGBA16Float:
-            case wgpu::TextureFormat::RGBA32Float:
-            case wgpu::TextureFormat::BGRA8Unorm:
-            case wgpu::TextureFormat::BGRA8UnormSrgb:
-            case wgpu::TextureFormat::RGBA8UnormSrgb:
-                return "";
-
-            case wgpu::TextureFormat::R8Uint:
-            case wgpu::TextureFormat::R16Uint:
-            case wgpu::TextureFormat::RG8Uint:
-            case wgpu::TextureFormat::R32Uint:
-            case wgpu::TextureFormat::RG16Uint:
-            case wgpu::TextureFormat::RGBA8Uint:
-            case wgpu::TextureFormat::RG32Uint:
-            case wgpu::TextureFormat::RGBA16Uint:
-            case wgpu::TextureFormat::RGBA32Uint:
-                return "u";
-
-            case wgpu::TextureFormat::R8Sint:
-            case wgpu::TextureFormat::R16Sint:
-            case wgpu::TextureFormat::RG8Sint:
-            case wgpu::TextureFormat::R32Sint:
-            case wgpu::TextureFormat::RG16Sint:
-            case wgpu::TextureFormat::RGBA8Sint:
-            case wgpu::TextureFormat::RG32Sint:
-            case wgpu::TextureFormat::RGBA16Sint:
-            case wgpu::TextureFormat::RGBA32Sint:
-                return "i";
-
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    const char* GetColorTextureComponentWGSLTypePrefix(wgpu::TextureFormat textureFormat) {
-        switch (textureFormat) {
-            case wgpu::TextureFormat::R8Unorm:
-            case wgpu::TextureFormat::R8Snorm:
-            case wgpu::TextureFormat::R16Float:
-            case wgpu::TextureFormat::RG8Unorm:
-            case wgpu::TextureFormat::RG8Snorm:
-            case wgpu::TextureFormat::R32Float:
-            case wgpu::TextureFormat::RG16Float:
-            case wgpu::TextureFormat::RGBA8Unorm:
-            case wgpu::TextureFormat::RGBA8Snorm:
-            case wgpu::TextureFormat::RGB10A2Unorm:
-            case wgpu::TextureFormat::RG11B10Ufloat:
-            case wgpu::TextureFormat::RGB9E5Ufloat:
-            case wgpu::TextureFormat::RG32Float:
-            case wgpu::TextureFormat::RGBA16Float:
-            case wgpu::TextureFormat::RGBA32Float:
-            case wgpu::TextureFormat::BGRA8Unorm:
-            case wgpu::TextureFormat::BGRA8UnormSrgb:
-            case wgpu::TextureFormat::RGBA8UnormSrgb:
-                return "f";
-
-            case wgpu::TextureFormat::R8Uint:
-            case wgpu::TextureFormat::R16Uint:
-            case wgpu::TextureFormat::RG8Uint:
-            case wgpu::TextureFormat::R32Uint:
-            case wgpu::TextureFormat::RG16Uint:
-            case wgpu::TextureFormat::RGBA8Uint:
-            case wgpu::TextureFormat::RG32Uint:
-            case wgpu::TextureFormat::RGBA16Uint:
-            case wgpu::TextureFormat::RGBA32Uint:
-                return "u";
-
-            case wgpu::TextureFormat::R8Sint:
-            case wgpu::TextureFormat::R16Sint:
-            case wgpu::TextureFormat::RG8Sint:
-            case wgpu::TextureFormat::R32Sint:
-            case wgpu::TextureFormat::RG16Sint:
-            case wgpu::TextureFormat::RGBA8Sint:
-            case wgpu::TextureFormat::RG32Sint:
-            case wgpu::TextureFormat::RGBA16Sint:
-            case wgpu::TextureFormat::RGBA32Sint:
-                return "i";
-
-            default:
-                UNREACHABLE();
-        }
-    }
-
-    const char* GetColorTextureComponentWGSLType(wgpu::TextureFormat textureFormat) {
-        switch (textureFormat) {
-            case wgpu::TextureFormat::R8Unorm:
-            case wgpu::TextureFormat::R8Snorm:
-            case wgpu::TextureFormat::R16Float:
-            case wgpu::TextureFormat::RG8Unorm:
-            case wgpu::TextureFormat::RG8Snorm:
-            case wgpu::TextureFormat::R32Float:
-            case wgpu::TextureFormat::RG16Float:
-            case wgpu::TextureFormat::RGBA8Unorm:
-            case wgpu::TextureFormat::RGBA8Snorm:
-            case wgpu::TextureFormat::RGB10A2Unorm:
-            case wgpu::TextureFormat::RG11B10Ufloat:
-            case wgpu::TextureFormat::RGB9E5Ufloat:
-            case wgpu::TextureFormat::RG32Float:
-            case wgpu::TextureFormat::RGBA16Float:
-            case wgpu::TextureFormat::RGBA32Float:
-            case wgpu::TextureFormat::BGRA8Unorm:
-            case wgpu::TextureFormat::BGRA8UnormSrgb:
-            case wgpu::TextureFormat::RGBA8UnormSrgb:
-                return "f32";
-
-            case wgpu::TextureFormat::R8Uint:
-            case wgpu::TextureFormat::R16Uint:
-            case wgpu::TextureFormat::RG8Uint:
-            case wgpu::TextureFormat::R32Uint:
-            case wgpu::TextureFormat::RG16Uint:
-            case wgpu::TextureFormat::RGBA8Uint:
-            case wgpu::TextureFormat::RG32Uint:
-            case wgpu::TextureFormat::RGBA16Uint:
-            case wgpu::TextureFormat::RGBA32Uint:
-                return "u32";
-
-            case wgpu::TextureFormat::R8Sint:
-            case wgpu::TextureFormat::R16Sint:
-            case wgpu::TextureFormat::RG8Sint:
-            case wgpu::TextureFormat::R32Sint:
-            case wgpu::TextureFormat::RG16Sint:
-            case wgpu::TextureFormat::RGBA8Sint:
-            case wgpu::TextureFormat::RG32Sint:
-            case wgpu::TextureFormat::RGBA16Sint:
-            case wgpu::TextureFormat::RGBA32Sint:
-                return "i32";
-
-            default:
-                UNREACHABLE();
-        }
-    }
-
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format) {
         switch (format) {
             case wgpu::TextureFormat::R32Uint:
@@ -389,95 +242,51 @@ namespace utils {
         }
     }
 
-    const char* GetGLSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
+    const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) {
         switch (textureFormat) {
             case wgpu::TextureFormat::R8Unorm:
-                return "r8";
             case wgpu::TextureFormat::R8Snorm:
-                return "r8_snorm";
-            case wgpu::TextureFormat::R8Uint:
-                return "r8ui";
-            case wgpu::TextureFormat::R8Sint:
-                return "r8i";
-            case wgpu::TextureFormat::R16Uint:
-                return "r16ui";
-            case wgpu::TextureFormat::R16Sint:
-                return "r16i";
             case wgpu::TextureFormat::R16Float:
-                return "r16f";
             case wgpu::TextureFormat::RG8Unorm:
-                return "rg8";
             case wgpu::TextureFormat::RG8Snorm:
-                return "rg8_snorm";
-            case wgpu::TextureFormat::RG8Uint:
-                return "rg8ui";
-            case wgpu::TextureFormat::RG8Sint:
-                return "rg8i";
             case wgpu::TextureFormat::R32Float:
-                return "r32f";
-            case wgpu::TextureFormat::R32Uint:
-                return "r32ui";
-            case wgpu::TextureFormat::R32Sint:
-                return "r32i";
-            case wgpu::TextureFormat::RG16Uint:
-                return "rg16ui";
-            case wgpu::TextureFormat::RG16Sint:
-                return "rg16i";
             case wgpu::TextureFormat::RG16Float:
-                return "rg16f";
             case wgpu::TextureFormat::RGBA8Unorm:
-                return "rgba8";
             case wgpu::TextureFormat::RGBA8Snorm:
-                return "rgba8_snorm";
-            case wgpu::TextureFormat::RGBA8Uint:
-                return "rgba8ui";
-            case wgpu::TextureFormat::RGBA8Sint:
-                return "rgba8i";
             case wgpu::TextureFormat::RGB10A2Unorm:
-                return "rgb10_a2";
             case wgpu::TextureFormat::RG11B10Ufloat:
-                return "r11f_g11f_b10f";
-            case wgpu::TextureFormat::RG32Float:
-                return "rg32f";
-            case wgpu::TextureFormat::RG32Uint:
-                return "rg32ui";
-            case wgpu::TextureFormat::RG32Sint:
-                return "rg32i";
-            case wgpu::TextureFormat::RGBA16Uint:
-                return "rgba16ui";
-            case wgpu::TextureFormat::RGBA16Sint:
-                return "rgba16i";
-            case wgpu::TextureFormat::RGBA16Float:
-                return "rgba16f";
-            case wgpu::TextureFormat::RGBA32Float:
-                return "rgba32f";
-            case wgpu::TextureFormat::RGBA32Uint:
-                return "rgba32ui";
-            case wgpu::TextureFormat::RGBA32Sint:
-                return "rgba32i";
-
             case wgpu::TextureFormat::RGB9E5Ufloat:
-            case wgpu::TextureFormat::RGBA8UnormSrgb:
+            case wgpu::TextureFormat::RG32Float:
+            case wgpu::TextureFormat::RGBA16Float:
+            case wgpu::TextureFormat::RGBA32Float:
             case wgpu::TextureFormat::BGRA8Unorm:
             case wgpu::TextureFormat::BGRA8UnormSrgb:
-            case wgpu::TextureFormat::BC1RGBAUnorm:
-            case wgpu::TextureFormat::BC1RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC4RUnorm:
-            case wgpu::TextureFormat::BC4RSnorm:
-            case wgpu::TextureFormat::BC2RGBAUnorm:
-            case wgpu::TextureFormat::BC2RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC3RGBAUnorm:
-            case wgpu::TextureFormat::BC3RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC5RGUnorm:
-            case wgpu::TextureFormat::BC5RGSnorm:
-            case wgpu::TextureFormat::BC6HRGBUfloat:
-            case wgpu::TextureFormat::BC6HRGBFloat:
-            case wgpu::TextureFormat::BC7RGBAUnorm:
-            case wgpu::TextureFormat::BC7RGBAUnormSrgb:
-            case wgpu::TextureFormat::Depth32Float:
-            case wgpu::TextureFormat::Depth24Plus:
-            case wgpu::TextureFormat::Depth24PlusStencil8:
-            case wgpu::TextureFormat::Undefined:
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
+                return "f32";
+
+            case wgpu::TextureFormat::R8Uint:
+            case wgpu::TextureFormat::R16Uint:
+            case wgpu::TextureFormat::RG8Uint:
+            case wgpu::TextureFormat::R32Uint:
+            case wgpu::TextureFormat::RG16Uint:
+            case wgpu::TextureFormat::RGBA8Uint:
+            case wgpu::TextureFormat::RG32Uint:
+            case wgpu::TextureFormat::RGBA16Uint:
+            case wgpu::TextureFormat::RGBA32Uint:
+                return "u32";
+
+            case wgpu::TextureFormat::R8Sint:
+            case wgpu::TextureFormat::R16Sint:
+            case wgpu::TextureFormat::RG8Sint:
+            case wgpu::TextureFormat::R32Sint:
+            case wgpu::TextureFormat::RG16Sint:
+            case wgpu::TextureFormat::RGBA8Sint:
+            case wgpu::TextureFormat::RG32Sint:
+            case wgpu::TextureFormat::RGBA16Sint:
+            case wgpu::TextureFormat::RGBA32Sint:
+                return "i32";
+
+            default:
                 UNREACHABLE();
         }
     }
