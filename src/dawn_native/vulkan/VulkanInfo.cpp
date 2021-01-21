@@ -52,11 +52,11 @@ namespace dawn_native { namespace vulkan {
     const char kLayerNameFuchsiaImagePipeSwapchain[] = "VK_LAYER_FUCHSIA_imagepipe_swapchain";
 
     bool VulkanGlobalKnobs::HasExt(InstanceExt ext) const {
-        return extensions.Has(ext);
+        return extensions[ext];
     }
 
     bool VulkanDeviceKnobs::HasExt(DeviceExt ext) const {
-        return extensions.Has(ext);
+        return extensions[ext];
     }
 
     ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const Backend& backend) {
@@ -124,7 +124,7 @@ namespace dawn_native { namespace vulkan {
             for (const VkExtensionProperties& extension : extensionsProperties) {
                 auto it = knownExts.find(extension.extensionName);
                 if (it != knownExts.end()) {
-                    info.extensions.Set(it->second, true);
+                    info.extensions.set(it->second, true);
                 }
             }
 
@@ -141,7 +141,7 @@ namespace dawn_native { namespace vulkan {
                     auto it = knownExts.find(extension.extensionName);
                     if (it != knownExts.end() &&
                         it->second == InstanceExt::FuchsiaImagePipeSurface) {
-                        info.extensions.Set(InstanceExt::FuchsiaImagePipeSurface, true);
+                        info.extensions.set(InstanceExt::FuchsiaImagePipeSurface, true);
                     }
                 }
             }
@@ -240,7 +240,7 @@ namespace dawn_native { namespace vulkan {
             for (const VkExtensionProperties& extension : extensionsProperties) {
                 auto it = knownExts.find(extension.extensionName);
                 if (it != knownExts.end()) {
-                    info.extensions.Set(it->second, true);
+                    info.extensions.set(it->second, true);
                 }
             }
 
@@ -262,17 +262,17 @@ namespace dawn_native { namespace vulkan {
         properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
         PNextChainBuilder propertiesChain(&properties2);
 
-        if (info.extensions.Has(DeviceExt::ShaderFloat16Int8)) {
+        if (info.extensions[DeviceExt::ShaderFloat16Int8]) {
             featuresChain.Add(&info.shaderFloat16Int8Features,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
         }
 
-        if (info.extensions.Has(DeviceExt::_16BitStorage)) {
+        if (info.extensions[DeviceExt::_16BitStorage]) {
             featuresChain.Add(&info._16BitStorageFeatures,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
         }
 
-        if (info.extensions.Has(DeviceExt::SubgroupSizeControl)) {
+        if (info.extensions[DeviceExt::SubgroupSizeControl]) {
             featuresChain.Add(&info.subgroupSizeControlFeatures,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT);
             propertiesChain.Add(
@@ -280,7 +280,7 @@ namespace dawn_native { namespace vulkan {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT);
         }
 
-        if (info.extensions.Has(DeviceExt::DriverProperties)) {
+        if (info.extensions[DeviceExt::DriverProperties]) {
             propertiesChain.Add(&info.driverProperties,
                                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES);
         }
@@ -291,7 +291,7 @@ namespace dawn_native { namespace vulkan {
         // Note that info.properties has already been filled at the start of this function to get
         // `apiVersion`.
         ASSERT(info.properties.apiVersion != 0);
-        if (info.extensions.Has(DeviceExt::GetPhysicalDeviceProperties2)) {
+        if (info.extensions[DeviceExt::GetPhysicalDeviceProperties2]) {
             vkFunctions.GetPhysicalDeviceProperties2(physicalDevice, &properties2);
             vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &features2);
             info.features = features2.features;

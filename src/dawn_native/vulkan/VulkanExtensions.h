@@ -15,7 +15,8 @@
 #ifndef DAWNNATIVE_VULKAN_VULKANEXTENSIONS_H_
 #define DAWNNATIVE_VULKAN_VULKANEXTENSIONS_H_
 
-#include <bitset>
+#include "common/ityp_bitset.h"
+
 #include <unordered_map>
 
 namespace dawn_native { namespace vulkan {
@@ -43,12 +44,8 @@ namespace dawn_native { namespace vulkan {
         EnumCount,
     };
 
-    // A bitset wrapper that is indexed with InstanceExt.
-    struct InstanceExtSet {
-        std::bitset<static_cast<size_t>(InstanceExt::EnumCount)> extensionBitSet;
-        void Set(InstanceExt extension, bool enabled);
-        bool Has(InstanceExt extension) const;
-    };
+    // A bitset that is indexed with InstanceExt.
+    using InstanceExtSet = ityp::bitset<InstanceExt, static_cast<uint32_t>(InstanceExt::EnumCount)>;
 
     // Information about a known instance extension.
     struct InstanceExtInfo {
@@ -106,14 +103,10 @@ namespace dawn_native { namespace vulkan {
         EnumCount,
     };
 
-    // A bitset wrapper that is indexed with DeviceExt.
-    struct DeviceExtSet {
-        std::bitset<static_cast<size_t>(DeviceExt::EnumCount)> extensionBitSet;
-        void Set(DeviceExt extension, bool enabled);
-        bool Has(DeviceExt extension) const;
-    };
+    // A bitset that is indexed with DeviceExt.
+    using DeviceExtSet = ityp::bitset<DeviceExt, static_cast<uint32_t>(DeviceExt::EnumCount)>;
 
-    // A bitset wrapper that is indexed with DeviceExt.
+    // Information about a known device extension.
     struct DeviceExtInfo {
         DeviceExt index;
         const char* name;

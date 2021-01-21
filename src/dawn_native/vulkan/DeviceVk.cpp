@@ -279,8 +279,8 @@ namespace dawn_native { namespace vulkan {
 
         // However only request the extensions that haven't been promoted in the device's apiVersion
         std::vector<const char*> extensionNames;
-        for (uint32_t ext : IterateBitSet(usedKnobs.extensions.extensionBitSet)) {
-            const DeviceExtInfo& info = GetDeviceExtInfo(static_cast<DeviceExt>(ext));
+        for (DeviceExt ext : IterateBitSet(usedKnobs.extensions)) {
+            const DeviceExtInfo& info = GetDeviceExtInfo(ext);
 
             if (info.versionPromoted > mDeviceInfo.properties.apiVersion) {
                 extensionNames.push_back(info.name);

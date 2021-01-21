@@ -240,8 +240,8 @@ namespace dawn_native { namespace vulkan {
         usedKnobs.extensions = extensionsToRequest;
 
         std::vector<const char*> extensionNames;
-        for (uint32_t ext : IterateBitSet(extensionsToRequest.extensionBitSet)) {
-            const InstanceExtInfo& info = GetInstanceExtInfo(static_cast<InstanceExt>(ext));
+        for (InstanceExt ext : IterateBitSet(extensionsToRequest)) {
+            const InstanceExtInfo& info = GetInstanceExtInfo(ext);
 
             if (info.versionPromoted > mGlobalInfo.apiVersion) {
                 extensionNames.push_back(info.name);

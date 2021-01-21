@@ -51,14 +51,6 @@ namespace dawn_native { namespace vulkan {
         //
     }};
 
-    void InstanceExtSet::Set(InstanceExt extension, bool enabled) {
-        extensionBitSet.set(static_cast<uint32_t>(extension), enabled);
-    }
-
-    bool InstanceExtSet::Has(InstanceExt extension) const {
-        return extensionBitSet[static_cast<uint32_t>(extension)];
-    }
-
     const InstanceExtInfo& GetInstanceExtInfo(InstanceExt ext) {
         uint32_t index = static_cast<uint32_t>(ext);
         ASSERT(index < sInstanceExtInfos.size());
@@ -84,8 +76,8 @@ namespace dawn_native { namespace vulkan {
         InstanceExtSet trimmedSet;
 
         auto HasDep = [&](InstanceExt ext) -> bool {
-            ASSERT(visitedSet.Has(ext));
-            return trimmedSet.Has(ext);
+            ASSERT(visitedSet[ext]);
+            return trimmedSet[ext];
         };
 
         for (uint32_t i = 0; i < sInstanceExtInfos.size(); i++) {
@@ -117,8 +109,8 @@ namespace dawn_native { namespace vulkan {
                     UNREACHABLE();
             }
 
-            trimmedSet.Set(ext, hasDependencies && advertisedExts.Has(ext));
-            visitedSet.Set(ext, true);
+            trimmedSet.set(ext, hasDependencies && advertisedExts[ext]);
+            visitedSet.set(ext, true);
         }
 
         return trimmedSet;
@@ -127,7 +119,7 @@ namespace dawn_native { namespace vulkan {
     void MarkPromotedExtensions(InstanceExtSet* extensions, uint32_t version) {
         for (const InstanceExtInfo& info : sInstanceExtInfos) {
             if (info.versionPromoted <= version) {
-                extensions->Set(info.index, true);
+                extensions->set(info.index, true);
             }
         }
     }
@@ -167,14 +159,6 @@ namespace dawn_native { namespace vulkan {
         //
     }};
 
-    void DeviceExtSet::Set(DeviceExt extension, bool enabled) {
-        extensionBitSet.set(static_cast<uint32_t>(extension), enabled);
-    }
-
-    bool DeviceExtSet::Has(DeviceExt extension) const {
-        return extensionBitSet[static_cast<uint32_t>(extension)];
-    }
-
     const DeviceExtInfo& GetDeviceExtInfo(DeviceExt ext) {
         uint32_t index = static_cast<uint32_t>(ext);
         ASSERT(index < sDeviceExtInfos.size());
@@ -199,8 +183,8 @@ namespace dawn_native { namespace vulkan {
         DeviceExtSet trimmedSet;
 
         auto HasDep = [&](DeviceExt ext) -> bool {
-            ASSERT(visitedSet.Has(ext));
-            return trimmedSet.Has(ext);
+            ASSERT(visitedSet[ext]);
+            return trimmedSet[ext];
         };
 
         for (uint32_t i = 0; i < sDeviceExtInfos.size(); i++) {
@@ -222,16 +206,15 @@ namespace dawn_native { namespace vulkan {
                 // advertises the extension. So if we didn't have this check, we'd risk a calling
                 // a nullptr.
                 case DeviceExt::GetPhysicalDeviceProperties2:
-                    hasDependencies = instanceExts.Has(InstanceExt::GetPhysicalDeviceProperties2);
+                    hasDependencies = instanceExts[InstanceExt::GetPhysicalDeviceProperties2];
                     break;
                 case DeviceExt::ExternalMemoryCapabilities:
-                    hasDependencies = instanceExts.Has(InstanceExt::ExternalMemoryCapabilities) &&
+                    hasDependencies = instanceExts[InstanceExt::ExternalMemoryCapabilities] &&
                                       HasDep(DeviceExt::GetPhysicalDeviceProperties2);
                     break;
                 case DeviceExt::ExternalSemaphoreCapabilities:
-                    hasDependencies =
-                        instanceExts.Has(InstanceExt::ExternalSemaphoreCapabilities) &&
-                        HasDep(DeviceExt::GetPhysicalDeviceProperties2);
+                    hasDependencies = instanceExts[InstanceExt::ExternalSemaphoreCapabilities] &&
+                                      HasDep(DeviceExt::GetPhysicalDeviceProperties2);
                     break;
 
                 case DeviceExt::ImageDrmFormatModifier:
@@ -242,7 +225,7 @@ namespace dawn_native { namespace vulkan {
                     break;
 
                 case DeviceExt::Swapchain:
-                    hasDependencies = instanceExts.Has(InstanceExt::Surface);
+                    hasDependencies = instanceExts[InstanceExt::Surface];
                     break;
 
                 case DeviceExt::SamplerYCbCrConversion:
@@ -295,8 +278,8 @@ namespace dawn_native { namespace vulkan {
                     UNREACHABLE();
             }
 
-            trimmedSet.Set(ext, hasDependencies && advertisedExts.Has(ext));
-            visitedSet.Set(ext, true);
+            trimmedSet.set(ext, hasDependencies && advertisedExts[ext]);
+            visitedSet.set(ext, true);
         }
 
         return trimmedSet;
@@ -305,7 +288,7 @@ namespace dawn_native { namespace vulkan {
     void MarkPromotedExtensions(DeviceExtSet* extensions, uint32_t version) {
         for (const DeviceExtInfo& info : sDeviceExtInfos) {
             if (info.versionPromoted <= version) {
-                extensions->Set(info.index, true);
+                extensions->set(info.index, true);
             }
         }
     }
