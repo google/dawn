@@ -206,37 +206,39 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<VulkanGlobalKnobs> Backend::CreateInstance() {
         VulkanGlobalKnobs usedKnobs = {};
         std::vector<const char*> layerNames;
+        InstanceExtSet extensionsToRequest = mGlobalInfo.extensions;
 
-        // vktrace works by instering a layer, but we hide it behind a macro due to the vktrace
+        auto UseLayerIfAvailable = [&](VulkanLayer layer) {
+            if (mGlobalInfo.layers[layer]) {
+                layerNames.push_back(GetVulkanLayerInfo(layer).name);
+                usedKnobs.layers.set(layer, true);
+                extensionsToRequest |= mGlobalInfo.layerExtensions[layer];
+            }
+        };
+
+        // vktrace works by instering a layer, but we hide it behind a macro because the vktrace
         // layer crashes when used without vktrace server started. See this vktrace issue:
         // https://github.com/LunarG/VulkanTools/issues/254
         // Also it is good to put it in first position so that it doesn't see Vulkan calls inserted
         // by other layers.
 #if defined(DAWN_USE_VKTRACE)
-        if (mGlobalInfo.vktrace) {
-            layerNames.push_back(kLayerNameLunargVKTrace);
-            usedKnobs.vktrace = true;
-        }
+        UseLayerIfAvailable(VulkanLayer::LunargVkTrace);
 #endif
         // RenderDoc installs a layer at the system level for its capture but we don't want to use
         // it unless we are debugging in RenderDoc so we hide it behind a macro.
 #if defined(DAWN_USE_RENDERDOC)
-        if (mGlobalInfo.renderDocCapture) {
-            layerNames.push_back(kLayerNameRenderDocCapture);
-            usedKnobs.renderDocCapture = true;
-        }
+        UseLayerIfAvailable(VulkanLayer::RenderDocCapture);
 #endif
 
         if (GetInstance()->IsBackendValidationEnabled()) {
-            if (mGlobalInfo.validation) {
-                layerNames.push_back(kLayerNameKhronosValidation);
-                usedKnobs.validation = true;
-            }
+            UseLayerIfAvailable(VulkanLayer::Validation);
         }
+
+        // Always use the Fuchsia swapchain layer if available.
+        UseLayerIfAvailable(VulkanLayer::FuchsiaImagePipeSwapchain);
 
         // Available and known instance extensions default to being requested, but some special
         // cases are removed.
-        InstanceExtSet extensionsToRequest = mGlobalInfo.extensions;
         usedKnobs.extensions = extensionsToRequest;
 
         std::vector<const char*> extensionNames;
@@ -282,7 +284,7 @@ namespace dawn_native { namespace vulkan {
         // Register the debug callback for instance creation so we receive message for any errors
         // (validation or other).
         VkDebugUtilsMessengerCreateInfoEXT utilsMessengerCreateInfo;
-        if (mGlobalInfo.HasExt(InstanceExt::DebugUtils)) {
+        if (usedKnobs.HasExt(InstanceExt::DebugUtils)) {
             utilsMessengerCreateInfo.flags = 0;
             utilsMessengerCreateInfo.messageSeverity =
                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |

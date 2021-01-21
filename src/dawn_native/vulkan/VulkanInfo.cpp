@@ -14,7 +14,6 @@
 
 #include "dawn_native/vulkan/VulkanInfo.h"
 
-#include "common/Log.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
@@ -25,31 +24,34 @@
 namespace dawn_native { namespace vulkan {
 
     namespace {
-        bool IsLayerName(const VkLayerProperties& layer, const char* name) {
-            return strncmp(layer.layerName, name, VK_MAX_EXTENSION_NAME_SIZE) == 0;
-        }
-
-        bool EnumerateInstanceExtensions(const char* layerName,
-                                         const dawn_native::vulkan::VulkanFunctions& vkFunctions,
-                                         std::vector<VkExtensionProperties>* extensions) {
+        ResultOrError<InstanceExtSet> GatherInstanceExtensions(
+            const char* layerName,
+            const dawn_native::vulkan::VulkanFunctions& vkFunctions,
+            const std::unordered_map<std::string, InstanceExt>& knownExts) {
             uint32_t count = 0;
-            VkResult result = VkResult::WrapUnsafe(
+            VkResult vkResult = VkResult::WrapUnsafe(
                 vkFunctions.EnumerateInstanceExtensionProperties(layerName, &count, nullptr));
-            if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-                return false;
+            if (vkResult != VK_SUCCESS && vkResult != VK_INCOMPLETE) {
+                return DAWN_INTERNAL_ERROR("vkEnumerateInstanceExtensionProperties");
             }
-            extensions->resize(count);
-            result = VkResult::WrapUnsafe(vkFunctions.EnumerateInstanceExtensionProperties(
-                layerName, &count, extensions->data()));
-            return (result == VK_SUCCESS);
+
+            std::vector<VkExtensionProperties> extensions(count);
+            DAWN_TRY(CheckVkSuccess(vkFunctions.EnumerateInstanceExtensionProperties(
+                                        layerName, &count, extensions.data()),
+                                    "vkEnumerateInstanceExtensionProperties"));
+
+            InstanceExtSet result;
+            for (const VkExtensionProperties& extension : extensions) {
+                auto it = knownExts.find(extension.extensionName);
+                if (it != knownExts.end()) {
+                    result.set(it->second, true);
+                }
+            }
+
+            return result;
         }
 
     }  // namespace
-
-    const char kLayerNameKhronosValidation[] = "VK_LAYER_KHRONOS_validation";
-    const char kLayerNameLunargVKTrace[] = "VK_LAYER_LUNARG_vktrace";
-    const char kLayerNameRenderDocCapture[] = "VK_LAYER_RENDERDOC_Capture";
-    const char kLayerNameFuchsiaImagePipeSwapchain[] = "VK_LAYER_FUCHSIA_imagepipe_swapchain";
 
     bool VulkanGlobalKnobs::HasExt(InstanceExt ext) const {
         return extensions[ext];
@@ -88,26 +90,16 @@ namespace dawn_native { namespace vulkan {
                 return DAWN_INTERNAL_ERROR("vkEnumerateInstanceLayerProperties");
             }
 
-            info.layers.resize(count);
+            std::vector<VkLayerProperties> layersProperties(count);
             DAWN_TRY(CheckVkSuccess(
-                vkFunctions.EnumerateInstanceLayerProperties(&count, info.layers.data()),
+                vkFunctions.EnumerateInstanceLayerProperties(&count, layersProperties.data()),
                 "vkEnumerateInstanceLayerProperties"));
 
-            for (const auto& layer : info.layers) {
-                if (IsLayerName(layer, kLayerNameKhronosValidation)) {
-                    info.validation = true;
-                }
-                if (IsLayerName(layer, kLayerNameLunargVKTrace)) {
-                    info.vktrace = true;
-                }
-                if (IsLayerName(layer, kLayerNameRenderDocCapture)) {
-                    info.renderDocCapture = true;
-                }
-                // Technical note: Fuchsia implements the swapchain through
-                // a layer (VK_LAYER_FUCHSIA_image_pipe_swapchain), which adds
-                // an instance extensions (VK_FUCHSIA_image_surface) to all ICDs.
-                if (IsLayerName(layer, kLayerNameFuchsiaImagePipeSwapchain)) {
-                    info.fuchsiaImagePipeSwapchain = true;
+            std::unordered_map<std::string, VulkanLayer> knownLayers = CreateVulkanLayerNameMap();
+            for (const VkLayerProperties& layer : layersProperties) {
+                auto it = knownLayers.find(layer.layerName);
+                if (it != knownLayers.end()) {
+                    info.layers.set(it->second, true);
                 }
             }
         }
@@ -116,41 +108,19 @@ namespace dawn_native { namespace vulkan {
         {
             std::unordered_map<std::string, InstanceExt> knownExts = CreateInstanceExtNameMap();
 
-            std::vector<VkExtensionProperties> extensionsProperties;
-            if (!EnumerateInstanceExtensions(nullptr, vkFunctions, &extensionsProperties)) {
-                return DAWN_INTERNAL_ERROR("vkEnumerateInstanceExtensionProperties");
-            }
-
-            for (const VkExtensionProperties& extension : extensionsProperties) {
-                auto it = knownExts.find(extension.extensionName);
-                if (it != knownExts.end()) {
-                    info.extensions.set(it->second, true);
-                }
-            }
-
-            // Specific handling for the Fuchsia swapchain surface creation extension
-            // which is normally part of the Fuchsia-specific swapchain layer.
-            if (info.fuchsiaImagePipeSwapchain &&
-                !info.HasExt(InstanceExt::FuchsiaImagePipeSurface)) {
-                if (!EnumerateInstanceExtensions(kLayerNameFuchsiaImagePipeSwapchain, vkFunctions,
-                                                 &extensionsProperties)) {
-                    return DAWN_INTERNAL_ERROR("vkEnumerateInstanceExtensionProperties");
-                }
-
-                for (const VkExtensionProperties& extension : extensionsProperties) {
-                    auto it = knownExts.find(extension.extensionName);
-                    if (it != knownExts.end() &&
-                        it->second == InstanceExt::FuchsiaImagePipeSurface) {
-                        info.extensions.set(InstanceExt::FuchsiaImagePipeSurface, true);
-                    }
-                }
-            }
-
+            DAWN_TRY_ASSIGN(info.extensions,
+                            GatherInstanceExtensions(nullptr, vkFunctions, knownExts));
             MarkPromotedExtensions(&info.extensions, info.apiVersion);
             info.extensions = EnsureDependencies(info.extensions);
-        }
 
-        // TODO(cwallez@chromium:org): Each layer can expose additional extensions, query them?
+            for (VulkanLayer layer : IterateBitSet(info.layers)) {
+                DAWN_TRY_ASSIGN(info.layerExtensions[layer],
+                                GatherInstanceExtensions(GetVulkanLayerInfo(layer).name,
+                                                         vkFunctions, knownExts));
+                MarkPromotedExtensions(&info.layerExtensions[layer], info.apiVersion);
+                info.layerExtensions[layer] = EnsureDependencies(info.layerExtensions[layer]);
+            }
+        }
 
         return std::move(info);
     }

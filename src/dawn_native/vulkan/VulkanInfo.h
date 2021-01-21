@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_VULKAN_VULKANINFO_H_
 #define DAWNNATIVE_VULKAN_VULKANINFO_H_
 
+#include "common/ityp_array.h"
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/vulkan/VulkanExtensions.h"
@@ -26,27 +27,22 @@ namespace dawn_native { namespace vulkan {
     class Adapter;
     class Backend;
 
-    extern const char kLayerNameKhronosValidation[];
-    extern const char kLayerNameLunargVKTrace[];
-    extern const char kLayerNameRenderDocCapture[];
-    extern const char kLayerNameFuchsiaImagePipeSwapchain[];
-
     // Global information - gathered before the instance is created
     struct VulkanGlobalKnobs {
-        // Layers
-        bool validation = false;
-        bool vktrace = false;
-        bool renderDocCapture = false;
-        bool fuchsiaImagePipeSwapchain = false;
+        bool HasLayer(VulkanLayer layer) const;
+        VulkanLayerSet layers;
+        ityp::array<VulkanLayer, InstanceExtSet, static_cast<uint32_t>(VulkanLayer::EnumCount)>
+            layerExtensions;
 
-        bool HasExt(InstanceExt ext) const;
+        // During information gathering `extensions` only contains the instance's extensions but
+        // during the instance creation logic it becomes the OR of the instance's extensions and
+        // the selected layers' extensions.
         InstanceExtSet extensions;
+        bool HasExt(InstanceExt ext) const;
     };
 
     struct VulkanGlobalInfo : VulkanGlobalKnobs {
-        std::vector<VkLayerProperties> layers;
         uint32_t apiVersion;
-        // TODO(cwallez@chromium.org): layer instance extensions
     };
 
     // Device information - gathered before the device is created.

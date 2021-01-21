@@ -129,6 +129,33 @@ namespace dawn_native { namespace vulkan {
                                     const InstanceExtSet& instanceExts,
                                     uint32_t icdVersion);
 
+    // The list of all known Vulkan layers.
+    enum class VulkanLayer {
+        Validation,
+        LunargVkTrace,
+        RenderDocCapture,
+
+        // Fuchsia implements the swapchain through a layer (VK_LAYER_FUCHSIA_image_pipe_swapchain),
+        // which adds an instance extensions (VK_FUCHSIA_image_surface) to all ICDs.
+        FuchsiaImagePipeSwapchain,
+
+        EnumCount,
+    };
+
+    // A bitset that is indexed with VulkanLayer.
+    using VulkanLayerSet = ityp::bitset<VulkanLayer, static_cast<uint32_t>(VulkanLayer::EnumCount)>;
+
+    // Information about a known layer
+    struct VulkanLayerInfo {
+        VulkanLayer layer;
+        const char* name;
+    };
+
+    // Returns the information about a known VulkanLayer
+    const VulkanLayerInfo& GetVulkanLayerInfo(VulkanLayer layer);
+    // Returns a map that maps a Vulkan layer name to its VulkanLayer.
+    std::unordered_map<std::string, VulkanLayer> CreateVulkanLayerNameMap();
+
 }}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANEXTENSIONS_H_

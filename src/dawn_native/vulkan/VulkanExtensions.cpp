@@ -293,4 +293,32 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
+    // A static array for VulkanLayerInfo that can be indexed with VulkanLayers.
+    // GetVulkanLayerInfo checks that "index" matches the index used to access this array so an
+    // assert will fire if it isn't in the correct order.
+    static constexpr size_t kVulkanLayerCount = static_cast<size_t>(VulkanLayer::EnumCount);
+    static constexpr std::array<VulkanLayerInfo, kVulkanLayerCount> sVulkanLayerInfos{{
+        //
+        {VulkanLayer::Validation, "VK_LAYER_KHRONOS_validation"},
+        {VulkanLayer::LunargVkTrace, "VK_LAYER_LUNARG_vktrace"},
+        {VulkanLayer::RenderDocCapture, "VK_LAYER_RENDERDOC_Capture"},
+        {VulkanLayer::FuchsiaImagePipeSwapchain, "VK_LAYER_FUCHSIA_imagepipe_swapchain"},
+        //
+    }};
+
+    const VulkanLayerInfo& GetVulkanLayerInfo(VulkanLayer layer) {
+        uint32_t index = static_cast<uint32_t>(layer);
+        ASSERT(index < sVulkanLayerInfos.size());
+        ASSERT(sVulkanLayerInfos[index].layer == layer);
+        return sVulkanLayerInfos[index];
+    }
+
+    std::unordered_map<std::string, VulkanLayer> CreateVulkanLayerNameMap() {
+        std::unordered_map<std::string, VulkanLayer> result;
+        for (const VulkanLayerInfo& info : sVulkanLayerInfos) {
+            result[info.name] = info.layer;
+        }
+        return result;
+    }
+
 }}  // namespace dawn_native::vulkan
