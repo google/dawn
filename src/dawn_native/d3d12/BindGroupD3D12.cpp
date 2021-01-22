@@ -57,6 +57,14 @@ namespace dawn_native { namespace d3d12 {
                 case BindingInfoType::Buffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
+                    ID3D12Resource* resource = ToBackend(binding.buffer)->GetD3D12Resource();
+                    if (resource == nullptr) {
+                        // The Buffer was destroyed. Skip creating buffer views since there is no
+                        // resource. This bind group won't be used as it is an error to submit a
+                        // command buffer that references destroyed resources.
+                        continue;
+                    }
+
                     switch (bindingInfo.buffer.type) {
                         case wgpu::BufferBindingType::Uniform: {
                             D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
@@ -89,7 +97,7 @@ namespace dawn_native { namespace d3d12 {
                             desc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_RAW;
 
                             d3d12Device->CreateUnorderedAccessView(
-                                ToBackend(binding.buffer)->GetD3D12Resource(), nullptr, &desc,
+                                resource, nullptr, &desc,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
                                                           bindingOffsets[bindingIndex]));
                             break;
@@ -108,7 +116,7 @@ namespace dawn_native { namespace d3d12 {
                             desc.Buffer.StructureByteStride = 0;
                             desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
                             d3d12Device->CreateShaderResourceView(
-                                ToBackend(binding.buffer)->GetD3D12Resource(), &desc,
+                                resource, &desc,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
                                                           bindingOffsets[bindingIndex]));
                             break;
@@ -123,8 +131,17 @@ namespace dawn_native { namespace d3d12 {
                 case BindingInfoType::Texture: {
                     auto* view = ToBackend(GetBindingAsTextureView(bindingIndex));
                     auto& srv = view->GetSRVDescriptor();
+
+                    ID3D12Resource* resource = ToBackend(view->GetTexture())->GetD3D12Resource();
+                    if (resource == nullptr) {
+                        // The Texture was destroyed. Skip creating the SRV since there is no
+                        // resource. This bind group won't be used as it is an error to submit a
+                        // command buffer that references destroyed resources.
+                        continue;
+                    }
+
                     d3d12Device->CreateShaderResourceView(
-                        ToBackend(view->GetTexture())->GetD3D12Resource(), &srv,
+                        resource, &srv,
                         viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
                     break;
                 }
@@ -132,13 +149,21 @@ namespace dawn_native { namespace d3d12 {
                 case BindingInfoType::StorageTexture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
+                    ID3D12Resource* resource = ToBackend(view->GetTexture())->GetD3D12Resource();
+                    if (resource == nullptr) {
+                        // The Texture was destroyed. Skip creating the SRV/UAV since there is no
+                        // resource. This bind group won't be used as it is an error to submit a
+                        // command buffer that references destroyed resources.
+                        continue;
+                    }
+
                     switch (bindingInfo.storageTexture.access) {
                         case wgpu::StorageTextureAccess::ReadOnly: {
                             // Readonly storage is implemented as SRV so it can be used at the same
                             // time as a sampled texture.
                             auto& srv = view->GetSRVDescriptor();
                             d3d12Device->CreateShaderResourceView(
-                                ToBackend(view->GetTexture())->GetD3D12Resource(), &srv,
+                                resource, &srv,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
                                                           bindingOffsets[bindingIndex]));
                             break;
@@ -147,7 +172,7 @@ namespace dawn_native { namespace d3d12 {
                         case wgpu::StorageTextureAccess::WriteOnly: {
                             D3D12_UNORDERED_ACCESS_VIEW_DESC uav = view->GetUAVDescriptor();
                             d3d12Device->CreateUnorderedAccessView(
-                                ToBackend(view->GetTexture())->GetD3D12Resource(), nullptr, &uav,
+                                resource, nullptr, &uav,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
                                                           bindingOffsets[bindingIndex]));
                             break;

@@ -66,7 +66,15 @@ namespace dawn_native { namespace vulkan {
                 case BindingInfoType::Buffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
-                    writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();
+                    VkBuffer handle = ToBackend(binding.buffer)->GetHandle();
+                    if (handle == VK_NULL_HANDLE) {
+                        // The Buffer was destroyed. Skip this descriptor write since it would be
+                        // a Vulkan Validation Layers error. This bind group won't be used as it
+                        // is an error to submit a command buffer that references destroyed
+                        // resources.
+                        continue;
+                    }
+                    writeBufferInfo[numWrites].buffer = handle;
                     writeBufferInfo[numWrites].offset = binding.offset;
                     writeBufferInfo[numWrites].range = binding.size;
                     write.pBufferInfo = &writeBufferInfo[numWrites];

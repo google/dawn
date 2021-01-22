@@ -1320,6 +1320,63 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     EXPECT_BUFFER_U32_EQ(1, result, 0);
 }
 
+// This is a regression test for crbug.com/dawn/319 where creating a bind group with a
+// destroyed resource would crash the backend.
+TEST_P(BindGroupTests, CreateWithDestroyedResource) {
+    auto doBufferTest = [&](wgpu::BufferBindingType bindingType, wgpu::BufferUsage usage) {
+        wgpu::BindGroupLayout bgl =
+            utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment, bindingType}});
+
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = sizeof(float);
+        bufferDesc.usage = usage;
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+        buffer.Destroy();
+
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
+    };
+
+    // Test various usages and binding types since they take different backend code paths.
+    doBufferTest(wgpu::BufferBindingType::Uniform, wgpu::BufferUsage::Uniform);
+    doBufferTest(wgpu::BufferBindingType::Storage, wgpu::BufferUsage::Storage);
+    doBufferTest(wgpu::BufferBindingType::ReadOnlyStorage, wgpu::BufferUsage::Storage);
+
+    // Test a sampled texture.
+    {
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.usage = wgpu::TextureUsage::Sampled;
+        textureDesc.size = {1, 1, 1};
+        textureDesc.format = wgpu::TextureFormat::BGRA8Unorm;
+
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+        wgpu::TextureView textureView = texture.CreateView();
+
+        texture.Destroy();
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+    }
+
+    // Test a storage texture.
+    {
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                      wgpu::TextureFormat::R32Uint}});
+
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.usage = wgpu::TextureUsage::Storage;
+        textureDesc.size = {1, 1, 1};
+        textureDesc.format = wgpu::TextureFormat::R32Uint;
+
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+        wgpu::TextureView textureView = texture.CreateView();
+
+        texture.Destroy();
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+    }
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests,
                       D3D12Backend(),
                       MetalBackend(),
