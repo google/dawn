@@ -156,6 +156,8 @@ namespace dawn_native {
             const TextureViewBase* resolveTarget = colorAttachment.resolveTarget;
             const TextureViewBase* attachment = colorAttachment.attachment;
             DAWN_TRY(device->ValidateObject(colorAttachment.resolveTarget));
+            DAWN_TRY(ValidateCanUseAs(colorAttachment.resolveTarget->GetTexture(),
+                                      wgpu::TextureUsage::RenderAttachment));
 
             if (!attachment->GetTexture()->IsMultisampledTexture()) {
                 return DAWN_VALIDATION_ERROR(
@@ -206,6 +208,8 @@ namespace dawn_native {
             uint32_t* height,
             uint32_t* sampleCount) {
             DAWN_TRY(device->ValidateObject(colorAttachment.attachment));
+            DAWN_TRY(ValidateCanUseAs(colorAttachment.attachment->GetTexture(),
+                                      wgpu::TextureUsage::RenderAttachment));
 
             const TextureViewBase* attachment = colorAttachment.attachment;
             if (!(attachment->GetAspects() & Aspect::Color) ||
@@ -246,6 +250,8 @@ namespace dawn_native {
             DAWN_ASSERT(depthStencilAttachment != nullptr);
 
             DAWN_TRY(device->ValidateObject(depthStencilAttachment->attachment));
+            DAWN_TRY(ValidateCanUseAs(depthStencilAttachment->attachment->GetTexture(),
+                                      wgpu::TextureUsage::RenderAttachment));
 
             const TextureViewBase* attachment = depthStencilAttachment->attachment;
             if ((attachment->GetAspects() & (Aspect::Depth | Aspect::Stencil)) == Aspect::None ||

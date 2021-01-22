@@ -310,39 +310,27 @@ namespace dawn_native {
     // It will be valid to use a buffer both as uniform and storage in the same compute pass.
     // TODO(yunchao.he@intel.com): add read/write usage tracking for compute
     MaybeError ValidatePassResourceUsage(const PassResourceUsage& pass) {
+        // TODO(cwallez@chromium.org): Remove this special casing once the PassResourceUsage is a
+        // SyncScopeResourceUsage.
+        if (pass.passType != PassType::Render) {
+            return {};
+        }
+
         // Buffers can only be used as single-write or multiple read.
         for (size_t i = 0; i < pass.buffers.size(); ++i) {
             wgpu::BufferUsage usage = pass.bufferUsages[i];
             bool readOnly = IsSubset(usage, kReadOnlyBufferUsages);
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
 
-            if (pass.passType == PassType::Render && !readOnly && !singleUse) {
+            if (!readOnly && !singleUse) {
                 return DAWN_VALIDATION_ERROR(
                     "Buffer used as writable usage and another usage in pass");
             }
         }
 
-        // Textures can only be used as single-write or multiple read.
-        for (size_t i = 0; i < pass.textures.size(); ++i) {
-            const TextureBase* texture = pass.textures[i];
-            const PassTextureUsage& textureUsage = pass.textureUsages[i];
-            wgpu::TextureUsage usage = textureUsage.usage;
-
-            if (usage & ~texture->GetUsage()) {
-                return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");
-            }
-
-            // The usage variable for the whole texture is a fast path for texture usage tracking.
-            // Because in most cases a texture (with or without subresources) is used as
-            // single-write or multiple read, then we can skip iterating the subresources' usages.
-            bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
-            bool singleUse = wgpu::HasZeroOrOneBits(usage);
-            if (pass.passType != PassType::Render || readOnly || singleUse) {
-                continue;
-            }
-
-            // Check that every single subresource is used as either a single-write usage or a
-            // combination of readonly usages.
+        // Check that every single subresource is used as either a single-write usage or a
+        // combination of readonly usages.
+        for (const PassTextureUsage& textureUsage : pass.textureUsages) {
             MaybeError error = {};
             textureUsage.subresourceUsages.Iterate(
                 [&](const SubresourceRange&, const wgpu::TextureUsage& usage) {

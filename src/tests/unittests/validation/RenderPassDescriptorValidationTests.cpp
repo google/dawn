@@ -146,6 +146,29 @@ namespace {
         }
     }
 
+    // Check that the render pass color attachment must have the RenderAttachment usage.
+    TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentInvalidUsage) {
+        // Control case: using a texture with RenderAttachment is valid.
+        {
+            wgpu::TextureView renderView =
+                Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+            utils::ComboRenderPassDescriptor renderPass({renderView});
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
+        // Error case: using a texture with Sampled is invalid.
+        {
+            wgpu::TextureDescriptor texDesc;
+            texDesc.usage = wgpu::TextureUsage::Sampled;
+            texDesc.size = {1, 1, 1};
+            texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+            wgpu::Texture sampledTex = device.CreateTexture(&texDesc);
+
+            utils::ComboRenderPassDescriptor renderPass({sampledTex.CreateView()});
+            AssertBeginRenderPassError(&renderPass);
+        }
+    }
+
     // Attachments must have the same size
     TEST_F(RenderPassDescriptorValidationTest, SizeMustMatch) {
         wgpu::TextureView color1x1A =
@@ -341,6 +364,30 @@ namespace {
             wgpu::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
             utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
             AssertBeginRenderPassSuccess(&renderPass);
+        }
+    }
+
+    // Check that the render pass depth attachment must have the RenderAttachment usage.
+    TEST_F(RenderPassDescriptorValidationTest, DepthAttachmentInvalidUsage) {
+        // Control case: using a texture with RenderAttachment is valid.
+        {
+            wgpu::TextureView renderView =
+                Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth32Float);
+            utils::ComboRenderPassDescriptor renderPass({}, renderView);
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
+        // Error case: using a texture with Sampled is invalid.
+        {
+            wgpu::TextureDescriptor texDesc;
+            texDesc.usage = wgpu::TextureUsage::Sampled;
+            texDesc.size = {1, 1, 1};
+            texDesc.format = wgpu::TextureFormat::Depth32Float;
+            wgpu::Texture sampledTex = device.CreateTexture(&texDesc);
+            wgpu::TextureView sampledView = sampledTex.CreateView();
+
+            utils::ComboRenderPassDescriptor renderPass({}, sampledView);
+            AssertBeginRenderPassError(&renderPass);
         }
     }
 
