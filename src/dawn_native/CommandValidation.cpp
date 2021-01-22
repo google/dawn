@@ -312,13 +312,7 @@ namespace dawn_native {
     MaybeError ValidatePassResourceUsage(const PassResourceUsage& pass) {
         // Buffers can only be used as single-write or multiple read.
         for (size_t i = 0; i < pass.buffers.size(); ++i) {
-            const BufferBase* buffer = pass.buffers[i];
             wgpu::BufferUsage usage = pass.bufferUsages[i];
-
-            if (usage & ~buffer->GetUsage()) {
-                return DAWN_VALIDATION_ERROR("Buffer missing usage for the pass");
-            }
-
             bool readOnly = IsSubset(usage, kReadOnlyBufferUsages);
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
 

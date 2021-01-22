@@ -69,9 +69,10 @@ class DrawIndirectValidationTest : public ValidationTest {
     void TestIndirectOffset(utils::Expectation expectation,
                             std::initializer_list<uint32_t> bufferList,
                             uint64_t indirectOffset,
-                            bool indexed) {
+                            bool indexed,
+                            wgpu::BufferUsage usage = wgpu::BufferUsage::Indirect) {
         wgpu::Buffer indirectBuffer =
-            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, bufferList);
+            utils::CreateBufferFromData<uint32_t>(device, usage, bufferList);
 
         DummyRenderPass renderPass(device);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -145,4 +146,19 @@ TEST_F(DrawIndirectValidationTest, DrawIndexedIndirectOffsetBounds) {
     uint64_t offset = std::numeric_limits<uint64_t>::max();
     TestIndirectOffsetDrawIndexed(utils::Expectation::Failure, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
                                   offset);
+}
+
+// Check that the buffer must have the indirect usage
+TEST_F(DrawIndirectValidationTest, IndirectUsage) {
+    // Control cases: using a buffer with the indirect usage is valid.
+    TestIndirectOffset(utils::Expectation::Success, {1, 2, 3, 4}, 0, false,
+                       wgpu::BufferUsage::Indirect);
+    TestIndirectOffset(utils::Expectation::Success, {1, 2, 3, 4, 5}, 0, true,
+                       wgpu::BufferUsage::Indirect);
+
+    // Error cases: using a buffer with the vertex usage is an error.
+    TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3, 4}, 0, false,
+                       wgpu::BufferUsage::Vertex);
+    TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3, 4, 5}, 0, true,
+                       wgpu::BufferUsage::Vertex);
 }

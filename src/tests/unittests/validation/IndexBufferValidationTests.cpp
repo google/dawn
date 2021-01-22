@@ -184,3 +184,45 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
         encoder.Finish();
     }
 }
+
+// Check that the index buffer must have the Index usage.
+TEST_F(IndexBufferValidationTest, InvalidUsage) {
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
+    wgpu::Buffer copyBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::CopySrc, {0, 1, 2});
+
+    DummyRenderPass renderPass(device);
+    // Control case: using the index buffer is valid.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.EndPass();
+        encoder.Finish();
+    }
+    // Error case: using the copy buffer is an error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetIndexBuffer(copyBuffer, wgpu::IndexFormat::Uint32);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
+    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+    // Control case: using the index buffer is valid.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        encoder.Finish();
+    }
+    // Error case: using the copy buffer is an error.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetIndexBuffer(copyBuffer, wgpu::IndexFormat::Uint32);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}

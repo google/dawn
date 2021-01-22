@@ -69,6 +69,7 @@ namespace dawn_native {
     void ComputePassEncoder::DispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
+            DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
 
             // Indexed dispatches need a compute-shader based validation to check that the dispatch
             // sizes aren't too big. Disallow them as unsafe until the validation is implemented.

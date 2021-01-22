@@ -46,9 +46,10 @@ class ComputeIndirectValidationTest : public ValidationTest {
 
     void TestIndirectOffset(utils::Expectation expectation,
                             std::initializer_list<uint32_t> bufferList,
-                            uint64_t indirectOffset) {
+                            uint64_t indirectOffset,
+                            wgpu::BufferUsage usage = wgpu::BufferUsage::Indirect) {
         wgpu::Buffer indirectBuffer =
-            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, bufferList);
+            utils::CreateBufferFromData<uint32_t>(device, usage, bufferList);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
@@ -84,4 +85,13 @@ TEST_F(ComputeIndirectValidationTest, IndirectOffsetBounds) {
     // Out of bounds, index + size of command overflows
     uint64_t offset = std::numeric_limits<uint64_t>::max();
     TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3, 4, 5, 6}, offset);
+}
+
+// Check that the buffer must have the indirect usage
+TEST_F(ComputeIndirectValidationTest, IndirectUsage) {
+    // Control case: using a buffer with the indirect usage is valid.
+    TestIndirectOffset(utils::Expectation::Success, {1, 2, 3}, 0, wgpu::BufferUsage::Indirect);
+
+    // Error case: using a buffer with the vertex usage is an error.
+    TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3}, 0, wgpu::BufferUsage::Vertex);
 }

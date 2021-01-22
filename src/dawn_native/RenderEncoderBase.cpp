@@ -17,6 +17,7 @@
 #include "common/Constants.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandEncoder.h"
+#include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/RenderPipeline.h"
@@ -87,6 +88,7 @@ namespace dawn_native {
     void RenderEncoderBase::DrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
+            DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
 
             if (indirectOffset % 4 != 0) {
                 return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
@@ -111,6 +113,7 @@ namespace dawn_native {
                                                 uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
+            DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
 
             // Indexed indirect draws need a compute-shader based validation check that the range of
             // indices is contained inside the index buffer on Metal. Disallow them as unsafe until
@@ -167,6 +170,7 @@ namespace dawn_native {
                                            uint64_t size) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(buffer));
+            DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index));
 
             DAWN_TRY(ValidateIndexFormat(format));
             if (format == wgpu::IndexFormat::Undefined) {
@@ -206,6 +210,7 @@ namespace dawn_native {
                                             uint64_t size) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(buffer));
+            DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Vertex));
 
             if (slot >= kMaxVertexBuffers) {
                 return DAWN_VALIDATION_ERROR("Vertex buffer slot out of bounds");

@@ -83,6 +83,7 @@ class VertexBufferValidationTest : public ValidationTest {
     wgpu::ShaderModule fsModule;
 };
 
+// Check that vertex buffers still count as bound if we switch the pipeline.
 TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     DummyRenderPass renderPass(device);
     wgpu::ShaderModule vsModule2 = MakeVertexShader(2);
@@ -119,7 +120,8 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     encoder.Finish();
 }
 
-TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) {
+// Check that vertex buffers that are set are reset between render passes.
+TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRenderPasses) {
     DummyRenderPass renderPass(device);
     wgpu::ShaderModule vsModule2 = MakeVertexShader(2);
     wgpu::ShaderModule vsModule1 = MakeVertexShader(1);
@@ -168,6 +170,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
+// Check validation of the vertex buffer slot for OOB.
 TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
     wgpu::Buffer buffer = MakeVertexBuffer();
 
@@ -278,6 +281,47 @@ TEST_F(VertexBufferValidationTest, VertexBufferOffsetOOBValidation) {
     {
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
         encoder.SetVertexBuffer(0, buffer, 256 + 4, 0);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Check that the vertex buffer must have the Vertex usage.
+TEST_F(VertexBufferValidationTest, InvalidUsage) {
+    wgpu::Buffer vertexBuffer = MakeVertexBuffer();
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 0, 0});
+
+    DummyRenderPass renderPass(device);
+    // Control case: using the vertex buffer is valid.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.EndPass();
+        encoder.Finish();
+    }
+    // Error case: using the index buffer is an error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(0, indexBuffer);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
+    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+    // Control case: using the vertex buffer is valid.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetVertexBuffer(0, vertexBuffer);
+        encoder.Finish();
+    }
+    // Error case: using the index buffer is an error.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetVertexBuffer(0, indexBuffer);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
