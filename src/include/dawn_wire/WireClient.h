@@ -61,6 +61,9 @@ namespace dawn_wire {
         ReservedTexture ReserveTexture(WGPUDevice device);
         ReservedDevice ReserveDevice();
 
+        void ReclaimTextureReservation(const ReservedTexture& reservation);
+        void ReclaimDeviceReservation(const ReservedDevice& reservation);
+
         // Disconnects the client.
         // Commands allocated after this point will not be sent.
         void Disconnect();

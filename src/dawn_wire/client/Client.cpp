@@ -118,6 +118,14 @@ namespace dawn_wire { namespace client {
         return result;
     }
 
+    void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {
+        TextureAllocator().Free(FromAPI(reservation.texture));
+    }
+
+    void Client::ReclaimDeviceReservation(const ReservedDevice& reservation) {
+        DeviceAllocator().Free(FromAPI(reservation.device));
+    }
+
     void Client::Disconnect() {
         mDisconnected = true;
         mSerializer = ChunkedCommandSerializer(NoopCommandSerializer::GetInstance());

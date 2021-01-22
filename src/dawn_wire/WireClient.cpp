@@ -41,6 +41,14 @@ namespace dawn_wire {
         return mImpl->ReserveDevice();
     }
 
+    void WireClient::ReclaimTextureReservation(const ReservedTexture& reservation) {
+        mImpl->ReclaimTextureReservation(reservation);
+    }
+
+    void WireClient::ReclaimDeviceReservation(const ReservedDevice& reservation) {
+        mImpl->ReclaimDeviceReservation(reservation);
+    }
+
     void WireClient::Disconnect() {
         mImpl->Disconnect();
     }

@@ -48,6 +48,9 @@ namespace dawn_wire { namespace client {
         ReservedTexture ReserveTexture(WGPUDevice device);
         ReservedDevice ReserveDevice();
 
+        void ReclaimTextureReservation(const ReservedTexture& reservation);
+        void ReclaimDeviceReservation(const ReservedDevice& reservation);
+
         template <typename Cmd>
         void SerializeCommand(const Cmd& cmd) {
             mSerializer.SerializeCommand(cmd, *this);

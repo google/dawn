@@ -228,3 +228,29 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, nullptr, nullptr)).Times(1);
 }
+
+// Test that a device reservation can be reclaimed. This is necessary to
+// avoid leaking ObjectIDs for reservations that are never injected.
+TEST_F(WireInjectDeviceTests, ReclaimDeviceReservation) {
+    // Test that doing a reservation and full release is an error.
+    {
+        ReservedDevice reservation = GetWireClient()->ReserveDevice();
+        wgpuDeviceRelease(reservation.device);
+        FlushClient(false);
+    }
+
+    // Test that doing a reservation and then reclaiming it recycles the ID.
+    {
+        ReservedDevice reservation1 = GetWireClient()->ReserveDevice();
+        GetWireClient()->ReclaimDeviceReservation(reservation1);
+
+        ReservedDevice reservation2 = GetWireClient()->ReserveDevice();
+
+        // The ID is the same, but the generation is still different.
+        ASSERT_EQ(reservation1.id, reservation2.id);
+        ASSERT_NE(reservation1.generation, reservation2.generation);
+
+        // No errors should occur.
+        FlushClient();
+    }
+}

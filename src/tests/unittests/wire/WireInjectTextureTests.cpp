@@ -86,3 +86,29 @@ TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
     DeleteServer();
     Mock::VerifyAndClearExpectations(&api);
 }
+
+// Test that a texture reservation can be reclaimed. This is necessary to
+// avoid leaking ObjectIDs for reservations that are never injected.
+TEST_F(WireInjectTextureTests, ReclaimTextureReservation) {
+    // Test that doing a reservation and full release is an error.
+    {
+        ReservedTexture reservation = GetWireClient()->ReserveTexture(device);
+        wgpuTextureRelease(reservation.texture);
+        FlushClient(false);
+    }
+
+    // Test that doing a reservation and then reclaiming it recycles the ID.
+    {
+        ReservedTexture reservation1 = GetWireClient()->ReserveTexture(device);
+        GetWireClient()->ReclaimTextureReservation(reservation1);
+
+        ReservedTexture reservation2 = GetWireClient()->ReserveTexture(device);
+
+        // The ID is the same, but the generation is still different.
+        ASSERT_EQ(reservation1.id, reservation2.id);
+        ASSERT_NE(reservation1.generation, reservation2.generation);
+
+        // No errors should occur.
+        FlushClient();
+    }
+}
