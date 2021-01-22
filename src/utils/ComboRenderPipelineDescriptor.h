@@ -27,6 +27,11 @@ namespace utils {
       public:
         ComboVertexStateDescriptor();
 
+        ComboVertexStateDescriptor(const ComboVertexStateDescriptor&) = delete;
+        ComboVertexStateDescriptor& operator=(const ComboVertexStateDescriptor&) = delete;
+        ComboVertexStateDescriptor(ComboVertexStateDescriptor&&) = delete;
+        ComboVertexStateDescriptor& operator=(ComboVertexStateDescriptor&&) = delete;
+
         std::array<wgpu::VertexBufferLayoutDescriptor, kMaxVertexBuffers> cVertexBuffers;
         std::array<wgpu::VertexAttributeDescriptor, kMaxVertexAttributes> cAttributes;
     };
