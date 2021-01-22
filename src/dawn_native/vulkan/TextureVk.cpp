@@ -864,8 +864,7 @@ namespace dawn_native { namespace vulkan {
         if (ShouldCombineDepthStencilBarriers()) {
             SubresourceStorage<wgpu::TextureUsage> combinedUsages(
                 Aspect::CombinedDepthStencil, GetArrayLayers(), GetNumMipLevels());
-            textureUsages.subresourceUsages.Iterate([&](const SubresourceRange& range,
-                                                        wgpu::TextureUsage usage) {
+            textureUsages.Iterate([&](const SubresourceRange& range, wgpu::TextureUsage usage) {
                 SubresourceRange updateRange = range;
                 updateRange.aspects = Aspect::CombinedDepthStencil;
 
@@ -878,8 +877,8 @@ namespace dawn_native { namespace vulkan {
             TransitionUsageForPassImpl(recordingContext, combinedUsages, imageBarriers, srcStages,
                                        dstStages);
         } else {
-            TransitionUsageForPassImpl(recordingContext, textureUsages.subresourceUsages,
-                                       imageBarriers, srcStages, dstStages);
+            TransitionUsageForPassImpl(recordingContext, textureUsages, imageBarriers, srcStages,
+                                       dstStages);
         }
     }
 

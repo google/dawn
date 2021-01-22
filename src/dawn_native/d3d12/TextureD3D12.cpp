@@ -764,8 +764,8 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
 
         mSubresourceStateAndDecay.Merge(
-            textureUsages.subresourceUsages, [&](const SubresourceRange& mergeRange,
-                                                 StateAndDecay* state, wgpu::TextureUsage usage) {
+            textureUsages, [&](const SubresourceRange& mergeRange, StateAndDecay* state,
+                               wgpu::TextureUsage usage) {
                 // Skip if this subresource is not used during the current pass
                 if (usage == wgpu::TextureUsage::None) {
                     return;

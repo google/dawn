@@ -889,6 +889,67 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(renderTexture.Get(), 0, 1, 0, 1));
 }
 
+// This is a regression test for a bug where a texture wouldn't get clear for a pass if at least
+// one of its subresources was used as an attachment. It tests that if a texture is used as both
+// sampled and attachment (with LoadOp::Clear so the lazy clear can be skipped) then the sampled
+// subresource is correctly cleared.
+TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
+    // Create a 2D array texture, layer 0 will be used as attachment, layer 1 as sampled.
+    wgpu::TextureDescriptor texDesc;
+    texDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment |
+                    wgpu::TextureUsage::CopySrc;
+    texDesc.size = {1, 1, 2};
+    texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::Texture texture = device.CreateTexture(&texDesc);
+
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    viewDesc.arrayLayerCount = 1;
+
+    viewDesc.baseArrayLayer = 0;
+    wgpu::TextureView attachmentView = texture.CreateView(&viewDesc);
+
+    viewDesc.baseArrayLayer = 1;
+    wgpu::TextureView sampleView = texture.CreateView(&viewDesc);
+
+    // Create render pipeline
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    renderPipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
+    renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+
+    // Create bindgroup
+    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                                     {{0, sampler}, {1, sampleView}});
+
+    // Encode pass and submit
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    utils::ComboRenderPassDescriptor renderPassDesc({attachmentView});
+    renderPassDesc.cColorAttachments[0].clearColor = {1.0, 1.0, 1.0, 1.0};
+    renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    pass.SetPipeline(renderPipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.Draw(6);
+    pass.EndPass();
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    // Expect the lazy clear for the sampled subresource.
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+
+    // Expect both subresources to be zero: the sampled one with lazy-clearing and the attachment
+    // because it sampled the lazy-cleared sampled subresource.
+    EXPECT_TEXTURE_RGBA8_EQ(&RGBA8::kZero, texture, 0, 0, 1, 1, 0, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(&RGBA8::kZero, texture, 0, 0, 1, 1, 0, 1);
+
+    // The whole texture is now initialized.
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 2));
+}
+
 // This tests the clearing of sampled textures during compute pass
 TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Create needed resources

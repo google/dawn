@@ -332,15 +332,14 @@ namespace dawn_native {
         // combination of readonly usages.
         for (const PassTextureUsage& textureUsage : pass.textureUsages) {
             MaybeError error = {};
-            textureUsage.subresourceUsages.Iterate(
-                [&](const SubresourceRange&, const wgpu::TextureUsage& usage) {
-                    bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
-                    bool singleUse = wgpu::HasZeroOrOneBits(usage);
-                    if (!readOnly && !singleUse && !error.IsError()) {
-                        error = DAWN_VALIDATION_ERROR(
-                            "Texture used as writable usage and another usage in render pass");
-                    }
-                });
+            textureUsage.Iterate([&](const SubresourceRange&, const wgpu::TextureUsage& usage) {
+                bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
+                bool singleUse = wgpu::HasZeroOrOneBits(usage);
+                if (!readOnly && !singleUse && !error.IsError()) {
+                    error = DAWN_VALIDATION_ERROR(
+                        "Texture used as writable usage and another usage in render pass");
+                }
+            });
             DAWN_TRY(std::move(error));
         }
         return {};

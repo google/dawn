@@ -599,18 +599,21 @@ namespace dawn_native { namespace d3d12 {
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {
                 Texture* texture = ToBackend(usages.textures[i]);
-                // Clear textures that are not output attachments. Output attachments will be
-                // cleared during record render pass if the texture subresource has not been
-                // initialized before the render pass.
-                if (!(usages.textureUsages[i].usage & wgpu::TextureUsage::RenderAttachment)) {
-                    texture->EnsureSubresourceContentInitialized(commandContext,
-                                                                 texture->GetAllSubresources());
-                }
+
+                // Clear subresources that are not render attachments. Render attachments will be
+                // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
+                // subresource has not been initialized before the render pass.
+                usages.textureUsages[i].Iterate(
+                    [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
+                        if (usage & ~wgpu::TextureUsage::RenderAttachment) {
+                            texture->EnsureSubresourceContentInitialized(commandContext, range);
+                        }
+                        textureUsages |= usage;
+                    });
 
                 ToBackend(usages.textures[i])
                     ->TrackUsageAndGetResourceBarrierForPass(commandContext, &barriers,
                                                              usages.textureUsages[i]);
-                textureUsages |= usages.textureUsages[i].usage;
             }
 
             if (barriers.size()) {

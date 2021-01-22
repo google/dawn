@@ -19,6 +19,8 @@
 #include "dawn_native/Format.h"
 #include "dawn_native/Texture.h"
 
+#include <utility>
+
 namespace dawn_native {
     PassResourceUsageTracker::PassResourceUsageTracker(PassType passType) : mPassType(passType) {
     }
@@ -36,29 +38,31 @@ namespace dawn_native {
 
         // Get or create a new PassTextureUsage for that texture (initially filled with
         // wgpu::TextureUsage::None)
-        auto it = mTextureUsages.emplace(texture, texture);
+        auto it = mTextureUsages.emplace(
+            std::piecewise_construct, std::forward_as_tuple(texture),
+            std::forward_as_tuple(texture->GetFormat().aspects, texture->GetArrayLayers(),
+                                  texture->GetNumMipLevels(), wgpu::TextureUsage::None));
         PassTextureUsage& textureUsage = it.first->second;
 
-        textureUsage.usage |= usage;
-        textureUsage.subresourceUsages.Update(
-            range, [usage](const SubresourceRange&, wgpu::TextureUsage* storedUsage) {
-                *storedUsage |= usage;
-            });
+        textureUsage.Update(range,
+                            [usage](const SubresourceRange&, wgpu::TextureUsage* storedUsage) {
+                                *storedUsage |= usage;
+                            });
     }
 
     void PassResourceUsageTracker::AddTextureUsage(TextureBase* texture,
                                                    const PassTextureUsage& textureUsage) {
         // Get or create a new PassTextureUsage for that texture (initially filled with
         // wgpu::TextureUsage::None)
-        auto it = mTextureUsages.emplace(texture, texture);
+        auto it = mTextureUsages.emplace(
+            std::piecewise_construct, std::forward_as_tuple(texture),
+            std::forward_as_tuple(texture->GetFormat().aspects, texture->GetArrayLayers(),
+                                  texture->GetNumMipLevels(), wgpu::TextureUsage::None));
         PassTextureUsage* passTextureUsage = &it.first->second;
 
-        passTextureUsage->usage |= textureUsage.usage;
-
-        passTextureUsage->subresourceUsages.Merge(
-            textureUsage.subresourceUsages,
-            [](const SubresourceRange&, wgpu::TextureUsage* storedUsage,
-               const wgpu::TextureUsage& addedUsage) { *storedUsage |= addedUsage; });
+        passTextureUsage->Merge(
+            textureUsage, [](const SubresourceRange&, wgpu::TextureUsage* storedUsage,
+                             const wgpu::TextureUsage& addedUsage) { *storedUsage |= addedUsage; });
     }
 
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.

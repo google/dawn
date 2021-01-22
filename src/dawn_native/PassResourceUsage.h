@@ -29,20 +29,8 @@ namespace dawn_native {
 
     enum class PassType { Render, Compute };
 
-    // Describe the usage of the whole texture and its subresources.
-    //
-    // - usage variable is used the track the whole texture even though it can be deduced from
-    // subresources' usages. This is designed deliberately to track texture usage in a fast path
-    // at frontend.
-    //
-    // - subresourceUsages is used to track every subresource's usage within a texture.
-    struct PassTextureUsage {
-        // Constructor used to size subresourceUsages correctly.
-        PassTextureUsage(const TextureBase* texture);
-
-        wgpu::TextureUsage usage = wgpu::TextureUsage::None;
-        SubresourceStorage<wgpu::TextureUsage> subresourceUsages;
-    };
+    // The texture usage inside passes must be tracked per-subresource.
+    using PassTextureUsage = SubresourceStorage<wgpu::TextureUsage>;
 
     // Which resources are used by pass and how they are used. The command buffer validation
     // pre-computes this information so that backends with explicit barriers don't have to
