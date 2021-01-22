@@ -701,10 +701,15 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Source and destination texture formats must match.");
         }
 
-        if (src.aspect != wgpu::TextureAspect::All || dst.aspect != wgpu::TextureAspect::All) {
-            // Metal cannot select a single aspect for texture-to-texture copies
+        // Metal cannot select a single aspect for texture-to-texture copies.
+        const Format& format = src.texture->GetFormat();
+        if (SelectFormatAspects(format, src.aspect) != format.aspects) {
             return DAWN_VALIDATION_ERROR(
-                "Texture aspect must be \"all\" for texture to texture copies");
+                "Source aspect doesn't select all the aspects of the source format.");
+        }
+        if (SelectFormatAspects(format, dst.aspect) != format.aspects) {
+            return DAWN_VALIDATION_ERROR(
+                "Destination aspect doesn't select all the aspects of the destination format.");
         }
 
         if (src.texture == dst.texture && src.mipLevel == dst.mipLevel) {
