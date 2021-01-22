@@ -871,7 +871,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
 
 // Test doing MSAA resolve into multiple resolve targets works correctly with
 // alphaToCoverage. The alphaToCoverage mask is computed based on the alpha
-// component of the first color output attachment.
+// component of the first color render attachment.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCoverage) {
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -882,7 +882,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
     constexpr bool kAlphaToCoverageEnabled = true;
 
     // The alpha-to-coverage mask should not depend on the alpha component of the
-    // second color output attachment.
+    // second color render attachment.
     // We test alpha = 0.51f and 0.99f instead of 0.50f and 1.00f because there are some rounding
     // differences on QuadroP400 devices in that case.
     for (float alpha : {0.0f, 0.51f, 0.99f}) {

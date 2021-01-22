@@ -844,7 +844,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneRender
 }
 
 // Verify it is invalid to use a a texture as both storage texture (either read-only or write-only)
-// and output attachment in one render pass.
+// and render attachment in one render pass.
 TEST_F(StorageTextureValidationTests, StorageTextureAndRenderAttachmentInOneRenderPass) {
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
     wgpu::Texture storageTexture =
@@ -858,7 +858,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndRenderAttachmentInOneRend
         wgpu::BindGroup bindGroupWithStorageTexture =
             utils::MakeBindGroup(device, bindGroupLayout, {{0, storageTexture.CreateView()}});
 
-        // It is invalid to use a texture as both storage texture and output attachment in one
+        // It is invalid to use a texture as both storage texture and render attachment in one
         // render pass.
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);

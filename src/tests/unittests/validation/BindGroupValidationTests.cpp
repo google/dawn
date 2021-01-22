@@ -287,7 +287,7 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
     // Control case: setting a sampleable texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
 
-    // Make an output attachment texture and try to set it for a SampledTexture binding
+    // Make an render attachment texture and try to set it for a SampledTexture binding
     wgpu::Texture outputTexture =
         CreateTexture(wgpu::TextureUsage::RenderAttachment, wgpu::TextureFormat::RGBA8Unorm, 1);
     wgpu::TextureView outputTextureView = outputTexture.CreateView();

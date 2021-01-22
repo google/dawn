@@ -1053,11 +1053,11 @@ namespace {
             wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl, {{0, v0}});
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, v1}});
 
-            // Create render passes that will use the textures as output attachments
+            // Create render passes that will use the textures as render attachments
             utils::ComboRenderPassDescriptor renderPass0({v1});
             utils::ComboRenderPassDescriptor renderPass1({v0});
 
-            // Use the textures as both sampled and output attachments in different passes
+            // Use the textures as both sampled and render attachments in different passes
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
             wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&renderPass0);
@@ -1290,7 +1290,7 @@ namespace {
         wgpu::TextureCopyView dstView = utils::CreateTextureCopyView(texture1, 0, {0, 0, 0});
         wgpu::Extent3D copySize = {1, 1, 1};
 
-        // Use the texture as both copy dst and output attachment in render pass
+        // Use the texture as both copy dst and render attachment in render pass
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             encoder.CopyTextureToTexture(&srcView, &dstView, &copySize);
@@ -1335,11 +1335,11 @@ namespace {
             wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl, {{0, view0}});
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, view1}});
 
-            // Create the render pass that will use the texture as an output attachment
+            // Create the render pass that will use the texture as an render attachment
             utils::ComboRenderPassDescriptor renderPass({view0});
 
             // Set bind group on the same index twice. The second one overwrites the first one.
-            // No texture is used as both sampled and output attachment in the same pass. But the
+            // No texture is used as both sampled and render attachment in the same pass. But the
             // overwritten texture still take effect during resource tracking.
             {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -1351,7 +1351,7 @@ namespace {
             }
 
             // Set bind group on the same index twice. The second one overwrites the first one.
-            // texture0 is used as both sampled and output attachment in the same pass
+            // texture0 is used as both sampled and render attachment in the same pass
             {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
@@ -1483,7 +1483,7 @@ namespace {
 
         // Test render pass
         {
-            // Create the render pass that will use the texture as an output attachment
+            // Create the render pass that will use the texture as an render attachment
             utils::ComboRenderPassDescriptor renderPass({view});
 
             // Create a bind group which use the texture as readonly storage in compute stage

@@ -164,7 +164,7 @@ void DoRender(WindowData* data) {
 }
 
 std::ostream& operator<<(std::ostream& o, const wgpu::SwapChainDescriptor& desc) {
-    // For now only output attachment is possible.
+    // For now only render attachment is possible.
     ASSERT(desc.usage == wgpu::TextureUsage::RenderAttachment);
     o << "RenderAttachment ";
     o << desc.width << "x" << desc.height << " ";

@@ -660,8 +660,7 @@ namespace dawn_native {
                         compiler.get_decoration(fragmentOutput.id, spv::DecorationLocation);
                     if (unsanitizedAttachment >= kMaxColorAttachments) {
                         return DAWN_VALIDATION_ERROR(
-                            "Fragment output attachment index must be less than max number of "
-                            "color "
+                            "Fragment output index must be less than max number of color "
                             "attachments");
                     }
                     ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));

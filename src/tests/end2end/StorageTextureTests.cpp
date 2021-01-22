@@ -489,7 +489,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, pipeline.GetBindGroupLayout(0), {{0, readonlyStorageTexture.CreateView()}});
 
-        // Clear the output attachment to red at the beginning of the render pass.
+        // Clear the render attachment to red at the beginning of the render pass.
         wgpu::Texture outputTexture =
             CreateTexture(kRenderAttachmentFormat,
                           wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
@@ -552,7 +552,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        // TODO(jiawei.shao@intel.com): remove the output attachment when Dawn supports beginning a
+        // TODO(jiawei.shao@intel.com): remove the render attachment when Dawn supports beginning a
         // render pass with no attachments.
         wgpu::Texture dummyOutputTexture =
             CreateTexture(kRenderAttachmentFormat,

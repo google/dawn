@@ -1037,7 +1037,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        // Clear the output attachment to |base|
+        // Clear the render attachment to |base|
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(basePipeline);
         pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({{base}})));
@@ -1048,7 +1048,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
         pass.EndPass();
     }
     {
-        // This renderpass' loadOp should clear all channels of the output attachment
+        // This renderpass' loadOp should clear all channels of the render attachment
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.EndPass();
     }
