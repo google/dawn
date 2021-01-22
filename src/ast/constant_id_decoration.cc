@@ -33,7 +33,7 @@ void ConstantIdDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 ConstantIdDecoration* ConstantIdDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<ConstantIdDecoration>(ctx->Clone(source()), value_);
+  return ctx->dst->create<ConstantIdDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

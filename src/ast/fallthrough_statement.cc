@@ -30,7 +30,7 @@ FallthroughStatement::FallthroughStatement(FallthroughStatement&&) = default;
 FallthroughStatement::~FallthroughStatement() = default;
 
 FallthroughStatement* FallthroughStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<FallthroughStatement>(ctx->Clone(source()));
+  return ctx->dst->create<FallthroughStatement>(ctx->Clone(source()));
 }
 
 bool FallthroughStatement::IsValid() const {

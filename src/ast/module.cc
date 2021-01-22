@@ -38,13 +38,13 @@ Module Module::Clone() const {
 
 void Module::Clone(CloneContext* ctx) const {
   for (auto* ty : constructed_types_) {
-    ctx->mod->constructed_types_.emplace_back(ctx->Clone(ty));
+    ctx->dst->constructed_types_.emplace_back(ctx->Clone(ty));
   }
   for (auto* var : global_variables_) {
-    ctx->mod->global_variables_.emplace_back(ctx->Clone(var));
+    ctx->dst->global_variables_.emplace_back(ctx->Clone(var));
   }
   for (auto* func : functions_) {
-    ctx->mod->functions_.emplace_back(ctx->Clone(func));
+    ctx->dst->functions_.emplace_back(ctx->Clone(func));
   }
 }
 

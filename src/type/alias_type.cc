@@ -46,7 +46,7 @@ uint64_t Alias::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Alias* Alias::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Alias>(ctx->Clone(symbol()), ctx->Clone(subtype_));
+  return ctx->dst->create<Alias>(ctx->Clone(symbol()), ctx->Clone(subtype_));
 }
 
 }  // namespace type

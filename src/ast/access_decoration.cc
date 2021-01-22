@@ -33,7 +33,7 @@ void AccessDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 AccessDecoration* AccessDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<AccessDecoration>(ctx->Clone(source()), value_);
+  return ctx->dst->create<AccessDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

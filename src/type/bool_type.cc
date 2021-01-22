@@ -33,7 +33,7 @@ std::string Bool::type_name() const {
 }
 
 Bool* Bool::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Bool>();
+  return ctx->dst->create<Bool>();
 }
 
 }  // namespace type

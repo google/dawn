@@ -36,7 +36,7 @@ std::string SintLiteral::name() const {
 }
 
 SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<SintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
+  return ctx->dst->create<SintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
                                        value_);
 }
 

@@ -33,7 +33,7 @@ void GroupDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 GroupDecoration* GroupDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<GroupDecoration>(ctx->Clone(source()), value_);
+  return ctx->dst->create<GroupDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

@@ -31,7 +31,7 @@ BlockStatement::BlockStatement(BlockStatement&&) = default;
 BlockStatement::~BlockStatement() = default;
 
 BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BlockStatement>(ctx->Clone(source()),
+  return ctx->dst->create<BlockStatement>(ctx->Clone(source()),
                                           ctx->Clone(statements_));
 }
 

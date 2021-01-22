@@ -19,11 +19,11 @@
 namespace tint {
 
 CloneContext::CloneContext(ast::Module* to, ast::Module const* from)
-    : mod(to), src(from) {}
+    : dst(to), src(from) {}
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(const Symbol& s) const {
-  return mod->RegisterSymbol(src->SymbolToName(s));
+  return dst->RegisterSymbol(src->SymbolToName(s));
 }
 
 void CloneContext::Clone() {

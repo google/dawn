@@ -33,7 +33,7 @@ void StructBlockDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 StructBlockDecoration* StructBlockDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StructBlockDecoration>(ctx->Clone(source()));
+  return ctx->dst->create<StructBlockDecoration>(ctx->Clone(source()));
 }
 
 }  // namespace ast

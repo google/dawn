@@ -29,7 +29,7 @@ ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 ContinueStatement::~ContinueStatement() = default;
 
 ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<ContinueStatement>(ctx->Clone(source()));
+  return ctx->dst->create<ContinueStatement>(ctx->Clone(source()));
 }
 
 bool ContinueStatement::IsValid() const {

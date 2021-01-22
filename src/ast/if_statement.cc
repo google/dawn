@@ -37,7 +37,7 @@ IfStatement::IfStatement(IfStatement&&) = default;
 IfStatement::~IfStatement() = default;
 
 IfStatement* IfStatement::Clone(CloneContext* ctx) const {
-  auto* cloned = ctx->mod->create<IfStatement>(
+  auto* cloned = ctx->dst->create<IfStatement>(
       ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_),
       ctx->Clone(else_statements_));
   return cloned;

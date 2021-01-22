@@ -33,7 +33,7 @@ SwitchStatement::SwitchStatement(SwitchStatement&&) = default;
 SwitchStatement::~SwitchStatement() = default;
 
 SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<SwitchStatement>(
+  return ctx->dst->create<SwitchStatement>(
       ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_));
 }
 

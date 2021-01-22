@@ -33,7 +33,7 @@ void StrideDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 StrideDecoration* StrideDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StrideDecoration>(ctx->Clone(source()), stride_);
+  return ctx->dst->create<StrideDecoration>(ctx->Clone(source()), stride_);
 }
 
 }  // namespace ast

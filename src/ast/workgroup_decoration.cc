@@ -45,7 +45,7 @@ void WorkgroupDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 WorkgroupDecoration* WorkgroupDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<WorkgroupDecoration>(ctx->Clone(source()), x_, y_,
+  return ctx->dst->create<WorkgroupDecoration>(ctx->Clone(source()), x_, y_,
                                                z_);
 }
 

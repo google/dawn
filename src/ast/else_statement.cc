@@ -32,7 +32,7 @@ ElseStatement::ElseStatement(ElseStatement&&) = default;
 ElseStatement::~ElseStatement() = default;
 
 ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<ElseStatement>(
+  return ctx->dst->create<ElseStatement>(
       ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_));
 }
 

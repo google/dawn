@@ -36,7 +36,7 @@ void StructMemberOffsetDecoration::to_str(std::ostream& out,
 
 StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
     CloneContext* ctx) const {
-  return ctx->mod->create<StructMemberOffsetDecoration>(ctx->Clone(source()),
+  return ctx->dst->create<StructMemberOffsetDecoration>(ctx->Clone(source()),
                                                         offset_);
 }
 

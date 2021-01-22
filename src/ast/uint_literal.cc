@@ -36,7 +36,7 @@ std::string UintLiteral::name() const {
 }
 
 UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<UintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
+  return ctx->dst->create<UintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
                                        value_);
 }
 

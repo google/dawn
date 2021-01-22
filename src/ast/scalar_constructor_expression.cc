@@ -33,7 +33,7 @@ ScalarConstructorExpression::~ScalarConstructorExpression() = default;
 
 ScalarConstructorExpression* ScalarConstructorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->mod->create<ScalarConstructorExpression>(ctx->Clone(source()),
+  return ctx->dst->create<ScalarConstructorExpression>(ctx->Clone(source()),
                                                        ctx->Clone(literal_));
 }
 

@@ -32,7 +32,7 @@ CallExpression::CallExpression(CallExpression&&) = default;
 CallExpression::~CallExpression() = default;
 
 CallExpression* CallExpression::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<CallExpression>(
+  return ctx->dst->create<CallExpression>(
       ctx->Clone(source()), ctx->Clone(func_), ctx->Clone(params_));
 }
 

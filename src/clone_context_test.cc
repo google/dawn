@@ -29,7 +29,7 @@ struct Cloneable : public Castable<Cloneable, ast::Node> {
   Cloneable* c = nullptr;
 
   Cloneable* Clone(CloneContext* ctx) const override {
-    auto* out = ctx->mod->create<Cloneable>();
+    auto* out = ctx->dst->create<Cloneable>();
     out->a = ctx->Clone(a);
     out->b = ctx->Clone(b);
     out->c = ctx->Clone(c);

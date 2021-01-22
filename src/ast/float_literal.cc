@@ -43,7 +43,7 @@ std::string FloatLiteral::name() const {
 }
 
 FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<FloatLiteral>(ctx->Clone(source()),
+  return ctx->dst->create<FloatLiteral>(ctx->Clone(source()),
                                         ctx->Clone(type()), value_);
 }
 

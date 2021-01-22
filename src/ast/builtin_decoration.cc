@@ -33,7 +33,7 @@ void BuiltinDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BuiltinDecoration>(ctx->Clone(source()), builtin_);
+  return ctx->dst->create<BuiltinDecoration>(ctx->Clone(source()), builtin_);
 }
 
 }  // namespace ast

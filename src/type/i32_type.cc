@@ -41,7 +41,7 @@ uint64_t I32::BaseAlignment(MemoryLayout) const {
 }
 
 I32* I32::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<I32>();
+  return ctx->dst->create<I32>();
 }
 
 }  // namespace type

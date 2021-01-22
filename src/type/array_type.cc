@@ -96,7 +96,7 @@ std::string Array::type_name() const {
 }
 
 Array* Array::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Array>(ctx->Clone(subtype_), size_,
+  return ctx->dst->create<Array>(ctx->Clone(subtype_), size_,
                                  ctx->Clone(decorations()));
 }
 

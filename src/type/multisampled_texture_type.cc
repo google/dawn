@@ -41,7 +41,7 @@ std::string MultisampledTexture::type_name() const {
 }
 
 MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<MultisampledTexture>(dim(), ctx->Clone(type_));
+  return ctx->dst->create<MultisampledTexture>(dim(), ctx->Clone(type_));
 }
 
 }  // namespace type

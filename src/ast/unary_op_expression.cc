@@ -32,7 +32,7 @@ UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 UnaryOpExpression::~UnaryOpExpression() = default;
 
 UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<UnaryOpExpression>(ctx->Clone(source()), op_,
+  return ctx->dst->create<UnaryOpExpression>(ctx->Clone(source()), op_,
                                              ctx->Clone(expr_));
 }
 

@@ -42,7 +42,7 @@ class CloneContext {
   /// Destructor
   ~CloneContext();
 
-  /// Clones the Node or type::Type `a` into the module #mod if `a` is not
+  /// Clones the Node or type::Type `a` into the module #dst if `a` is not
   /// null. If `a` is null, then Clone() returns null. If `a` has been cloned
   /// already by this CloneContext then the same cloned pointer is returned.
   ///
@@ -76,7 +76,7 @@ class CloneContext {
     return static_cast<T*>(c);
   }
 
-  /// Clones the Source `s` into `mod`
+  /// Clones the Source `s` into `dst`
   /// TODO(bclayton) - Currently this 'clone' is a shallow copy. If/when
   /// `Source.File`s are owned by the `Module` this should make a copy of the
   /// file.
@@ -84,7 +84,7 @@ class CloneContext {
   /// @return the cloned source
   Source Clone(const Source& s) const { return s; }
 
-  /// Clones the Symbol `s` into `mod`
+  /// Clones the Symbol `s` into `dst`
   ///
   /// The Symbol `s` must be owned by the module #src.
   ///
@@ -92,7 +92,7 @@ class CloneContext {
   /// @return the cloned source
   Symbol Clone(const Symbol& s) const;
 
-  /// Clones each of the elements of the vector `v` into the module #mod->
+  /// Clones each of the elements of the vector `v` into the module #dst->
   ///
   /// All the elements of the vector `v` must be owned by the module #src.
   ///
@@ -127,7 +127,7 @@ class CloneContext {
   ///   // Replace all ast::UintLiterals with the number 42
   ///   CloneCtx ctx(&out, in)
   ///     .ReplaceAll([&] (CloneContext* ctx, ast::UintLiteral* l) {
-  ///       return ctx->mod->create<ast::UintLiteral>(ctx->Clone(l->source()),
+  ///       return ctx->dst->create<ast::UintLiteral>(ctx->Clone(l->source()),
   ///                                                 ctx->Clone(l->type()),
   ///                                                 42);
   ///     }).Clone();
@@ -147,11 +147,11 @@ class CloneContext {
     return *this;
   }
 
-  /// Clone performs the clone of the entire module #src to #mod.
+  /// Clone performs the clone of the entire module #src to #dst.
   void Clone();
 
   /// The target module to clone into.
-  ast::Module* const mod;
+  ast::Module* const dst;
 
   /// The source module to clone from.
   ast::Module const* const src;

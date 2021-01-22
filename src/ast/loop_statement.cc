@@ -32,7 +32,7 @@ LoopStatement::LoopStatement(LoopStatement&&) = default;
 LoopStatement::~LoopStatement() = default;
 
 LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<LoopStatement>(
+  return ctx->dst->create<LoopStatement>(
       ctx->Clone(source()), ctx->Clone(body_), ctx->Clone(continuing_));
 }
 

@@ -31,7 +31,7 @@ BitcastExpression::BitcastExpression(BitcastExpression&&) = default;
 BitcastExpression::~BitcastExpression() = default;
 
 BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BitcastExpression>(
+  return ctx->dst->create<BitcastExpression>(
       ctx->Clone(source()), ctx->Clone(type_), ctx->Clone(expr_));
 }
 

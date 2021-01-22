@@ -31,7 +31,7 @@ CallStatement::CallStatement(CallStatement&&) = default;
 CallStatement::~CallStatement() = default;
 
 CallStatement* CallStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<CallStatement>(ctx->Clone(source()),
+  return ctx->dst->create<CallStatement>(ctx->Clone(source()),
                                          ctx->Clone(call_));
 }
 

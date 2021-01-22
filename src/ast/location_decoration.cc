@@ -33,7 +33,7 @@ void LocationDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 LocationDecoration* LocationDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<LocationDecoration>(ctx->Clone(source()), value_);
+  return ctx->dst->create<LocationDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

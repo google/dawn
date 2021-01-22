@@ -163,7 +163,7 @@ std::string StorageTexture::type_name() const {
 }
 
 StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StorageTexture>(dim(), image_format_);
+  return ctx->dst->create<StorageTexture>(dim(), image_format_);
 }
 
 }  // namespace type

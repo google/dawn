@@ -33,7 +33,7 @@ void StageDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 StageDecoration* StageDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StageDecoration>(ctx->Clone(source()), stage_);
+  return ctx->dst->create<StageDecoration>(ctx->Clone(source()), stage_);
 }
 
 }  // namespace ast

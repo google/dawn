@@ -53,7 +53,7 @@ bool Struct::IsBlockDecorated() const {
 }
 
 Struct* Struct::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Struct>(ctx->Clone(source()), ctx->Clone(members_),
+  return ctx->dst->create<Struct>(ctx->Clone(source()), ctx->Clone(members_),
                                   ctx->Clone(decorations_));
 }
 

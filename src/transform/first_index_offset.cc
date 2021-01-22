@@ -64,9 +64,9 @@ constexpr char kIndexOffsetPrefix[] = "tint_first_index_offset_";
 ast::Variable* clone_variable_with_new_name(CloneContext* ctx,
                                             ast::Variable* in,
                                             std::string new_name) {
-  return ctx->mod->create<ast::Variable>(
+  return ctx->dst->create<ast::Variable>(
       ctx->Clone(in->source()),            // source
-      ctx->mod->RegisterSymbol(new_name),  // symbol
+      ctx->dst->RegisterSymbol(new_name),  // symbol
       in->storage_class(),                 // storage_class
       ctx->Clone(in->type()),              // type
       in->is_const(),                      // is_const
@@ -152,7 +152,7 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
                     // which determines the original builtin variable names,
                     // but this should be fine, as variables are cloned first.
           [&](CloneContext* ctx, ast::Function* func) -> ast::Function* {
-            maybe_create_buffer_var(ctx->mod);
+            maybe_create_buffer_var(ctx->dst);
             if (buffer_var == nullptr) {
               return nullptr;  // no transform need, just clone func
             }
@@ -162,11 +162,11 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
               if (data.second->value() == ast::Builtin::kVertexIndex) {
                 statements.emplace_back(CreateFirstIndexOffset(
                     in->SymbolToName(vertex_index_sym), kFirstVertexName,
-                    buffer_var, ctx->mod));
+                    buffer_var, ctx->dst));
               } else if (data.second->value() == ast::Builtin::kInstanceIndex) {
                 statements.emplace_back(CreateFirstIndexOffset(
                     in->SymbolToName(instance_index_sym), kFirstInstanceName,
-                    buffer_var, ctx->mod));
+                    buffer_var, ctx->dst));
               }
             }
             return CloneWithStatementsAtStart(ctx, func, statements);

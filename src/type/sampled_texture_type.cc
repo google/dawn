@@ -41,7 +41,7 @@ std::string SampledTexture::type_name() const {
 }
 
 SampledTexture* SampledTexture::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<SampledTexture>(dim(), ctx->Clone(type_));
+  return ctx->dst->create<SampledTexture>(dim(), ctx->Clone(type_));
 }
 
 }  // namespace type

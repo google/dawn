@@ -33,7 +33,7 @@ ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 ReturnStatement::~ReturnStatement() = default;
 
 ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<ReturnStatement>(ctx->Clone(source()),
+  return ctx->dst->create<ReturnStatement>(ctx->Clone(source()),
                                            ctx->Clone(value_));
 }
 

@@ -53,7 +53,7 @@ uint64_t Vector::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Vector* Vector::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Vector>(ctx->Clone(subtype_), size_);
+  return ctx->dst->create<Vector>(ctx->Clone(subtype_), size_);
 }
 
 }  // namespace type

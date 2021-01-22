@@ -34,7 +34,7 @@ TypeConstructorExpression::~TypeConstructorExpression() = default;
 
 TypeConstructorExpression* TypeConstructorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->mod->create<TypeConstructorExpression>(
+  return ctx->dst->create<TypeConstructorExpression>(
       ctx->Clone(source()), ctx->Clone(type_), ctx->Clone(values_));
 }
 

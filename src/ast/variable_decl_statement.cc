@@ -31,7 +31,7 @@ VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 VariableDeclStatement::~VariableDeclStatement() = default;
 
 VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<VariableDeclStatement>(ctx->Clone(source()),
+  return ctx->dst->create<VariableDeclStatement>(ctx->Clone(source()),
                                                  ctx->Clone(variable_));
 }
 

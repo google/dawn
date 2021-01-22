@@ -29,7 +29,7 @@ BreakStatement::BreakStatement(BreakStatement&&) = default;
 BreakStatement::~BreakStatement() = default;
 
 BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BreakStatement>(ctx->Clone(source()));
+  return ctx->dst->create<BreakStatement>(ctx->Clone(source()));
 }
 
 bool BreakStatement::IsValid() const {

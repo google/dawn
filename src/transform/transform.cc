@@ -31,10 +31,10 @@ ast::Function* Transform::CloneWithStatementsAtStart(
   for (auto* s : *in->body()) {
     statements.emplace_back(ctx->Clone(s));
   }
-  return ctx->mod->create<ast::Function>(
+  return ctx->dst->create<ast::Function>(
       ctx->Clone(in->source()), ctx->Clone(in->symbol()),
       ctx->Clone(in->params()), ctx->Clone(in->return_type()),
-      ctx->mod->create<ast::BlockStatement>(ctx->Clone(in->body()->source()),
+      ctx->dst->create<ast::BlockStatement>(ctx->Clone(in->body()->source()),
                                             statements),
       ctx->Clone(in->decorations()));
 }

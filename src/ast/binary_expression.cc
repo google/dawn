@@ -33,7 +33,7 @@ BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
 BinaryExpression::~BinaryExpression() = default;
 
 BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BinaryExpression>(ctx->Clone(source()), op_,
+  return ctx->dst->create<BinaryExpression>(ctx->Clone(source()), op_,
                                             ctx->Clone(lhs_), ctx->Clone(rhs_));
 }
 

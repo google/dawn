@@ -32,7 +32,7 @@ CaseStatement::CaseStatement(CaseStatement&&) = default;
 CaseStatement::~CaseStatement() = default;
 
 CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<CaseStatement>(
+  return ctx->dst->create<CaseStatement>(
       ctx->Clone(source()), ctx->Clone(selectors_), ctx->Clone(body_));
 }
 

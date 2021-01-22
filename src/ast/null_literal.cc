@@ -36,7 +36,7 @@ std::string NullLiteral::name() const {
 }
 
 NullLiteral* NullLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<NullLiteral>(ctx->Clone(source()),
+  return ctx->dst->create<NullLiteral>(ctx->Clone(source()),
                                        ctx->Clone(type()));
 }
 

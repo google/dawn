@@ -83,7 +83,7 @@ uint64_t Struct::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Struct* Struct::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Struct>(ctx->Clone(symbol()), ctx->Clone(struct_));
+  return ctx->dst->create<Struct>(ctx->Clone(symbol()), ctx->Clone(struct_));
 }
 
 }  // namespace type

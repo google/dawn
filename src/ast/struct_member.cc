@@ -55,7 +55,7 @@ uint32_t StructMember::offset() const {
 }
 
 StructMember* StructMember::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<StructMember>(ctx->Clone(source()),
+  return ctx->dst->create<StructMember>(ctx->Clone(source()),
                                         ctx->Clone(symbol_), ctx->Clone(type_),
                                         ctx->Clone(decorations_));
 }

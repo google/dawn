@@ -33,7 +33,7 @@ void BindingDecoration::to_str(std::ostream& out, size_t indent) const {
 }
 
 BindingDecoration* BindingDecoration::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BindingDecoration>(ctx->Clone(source()), value_);
+  return ctx->dst->create<BindingDecoration>(ctx->Clone(source()), value_);
 }
 
 }  // namespace ast

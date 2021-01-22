@@ -29,7 +29,7 @@ DiscardStatement::DiscardStatement(DiscardStatement&&) = default;
 DiscardStatement::~DiscardStatement() = default;
 
 DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<DiscardStatement>(ctx->Clone(source()));
+  return ctx->dst->create<DiscardStatement>(ctx->Clone(source()));
 }
 
 bool DiscardStatement::IsValid() const {

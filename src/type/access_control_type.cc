@@ -59,7 +59,7 @@ uint64_t AccessControl::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 AccessControl* AccessControl::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<AccessControl>(access_, ctx->Clone(subtype_));
+  return ctx->dst->create<AccessControl>(access_, ctx->Clone(subtype_));
 }
 
 }  // namespace type

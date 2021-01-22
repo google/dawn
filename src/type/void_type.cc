@@ -33,7 +33,7 @@ std::string Void::type_name() const {
 }
 
 Void* Void::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Void>();
+  return ctx->dst->create<Void>();
 }
 
 }  // namespace type

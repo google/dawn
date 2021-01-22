@@ -75,7 +75,7 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     return nullptr;
   }
 
-  ast::Builder b(ctx->mod);
+  ast::Builder b(ctx->dst);
   using u32 = ast::Builder::u32;
 
   uint32_t size = 0;

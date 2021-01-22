@@ -32,7 +32,7 @@ AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
 AssignmentStatement::~AssignmentStatement() = default;
 
 AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<AssignmentStatement>(
+  return ctx->dst->create<AssignmentStatement>(
       ctx->Clone(source()), ctx->Clone(lhs_), ctx->Clone(rhs_));
 }
 

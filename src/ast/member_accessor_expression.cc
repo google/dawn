@@ -34,7 +34,7 @@ MemberAccessorExpression::~MemberAccessorExpression() = default;
 
 MemberAccessorExpression* MemberAccessorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->mod->create<MemberAccessorExpression>(
+  return ctx->dst->create<MemberAccessorExpression>(
       ctx->Clone(source()), ctx->Clone(struct_), ctx->Clone(member_));
 }
 

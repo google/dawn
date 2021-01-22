@@ -52,7 +52,7 @@ std::string DepthTexture::type_name() const {
 }
 
 DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<DepthTexture>(dim());
+  return ctx->dst->create<DepthTexture>(dim());
 }
 
 }  // namespace type

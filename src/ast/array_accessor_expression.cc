@@ -34,7 +34,7 @@ ArrayAccessorExpression::~ArrayAccessorExpression() = default;
 
 ArrayAccessorExpression* ArrayAccessorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->mod->create<ArrayAccessorExpression>(
+  return ctx->dst->create<ArrayAccessorExpression>(
       ctx->Clone(source()), ctx->Clone(array_), ctx->Clone(idx_expr_));
 }
 

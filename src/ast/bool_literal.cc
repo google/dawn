@@ -36,7 +36,7 @@ std::string BoolLiteral::name() const {
 }
 
 BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<BoolLiteral>(ctx->Clone(source()), ctx->Clone(type()),
+  return ctx->dst->create<BoolLiteral>(ctx->Clone(source()), ctx->Clone(type()),
                                        value_);
 }
 

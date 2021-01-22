@@ -91,7 +91,7 @@ uint32_t Variable::constant_id() const {
 }
 
 Variable* Variable::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Variable>(ctx->Clone(source()), ctx->Clone(symbol_),
+  return ctx->dst->create<Variable>(ctx->Clone(source()), ctx->Clone(symbol_),
                                     storage_class(), ctx->Clone(type()),
                                     is_const_, ctx->Clone(constructor()),
                                     ctx->Clone(decorations_));

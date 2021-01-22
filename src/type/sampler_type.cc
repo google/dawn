@@ -46,7 +46,7 @@ std::string Sampler::type_name() const {
 }
 
 Sampler* Sampler::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Sampler>(kind_);
+  return ctx->dst->create<Sampler>(kind_);
 }
 
 }  // namespace type

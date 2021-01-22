@@ -36,7 +36,7 @@ Pointer::Pointer(Pointer&&) = default;
 Pointer::~Pointer() = default;
 
 Pointer* Pointer::Clone(CloneContext* ctx) const {
-  return ctx->mod->create<Pointer>(ctx->Clone(subtype_), storage_class_);
+  return ctx->dst->create<Pointer>(ctx->Clone(subtype_), storage_class_);
 }
 
 }  // namespace type
