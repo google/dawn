@@ -112,8 +112,6 @@ TEST_P(QueueWriteBufferTests, ManyWriteBuffer) {
     // fails the test. Since GPUs may or may not complete by then, this test must be disabled OR
     // modified to be well-below the timeout limit.
 
-    // TODO (jiawei.shao@intel.com): find out why this test fails on Intel Vulkan Linux bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsLinux());
     // TODO(https://bugs.chromium.org/p/dawn/issues/detail?id=228): Re-enable
     // once the issue with Metal on 10.14.6 is fixed.
     DAWN_SKIP_TEST_IF(IsMacOS() && IsIntel() && IsMetal());
