@@ -84,14 +84,24 @@ namespace dawn_native {
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
                                                      EncodingContext* encodingContext,
                                                      PassType passType)
-        : ObjectBase(device), mEncodingContext(encodingContext), mUsageTracker(passType) {
+        : ObjectBase(device),
+          mEncodingContext(encodingContext),
+          mUsageTracker(passType),
+          mValidationEnabled(device->IsValidationEnabled()) {
     }
 
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
                                                      EncodingContext* encodingContext,
                                                      ErrorTag errorTag,
                                                      PassType passType)
-        : ObjectBase(device, errorTag), mEncodingContext(encodingContext), mUsageTracker(passType) {
+        : ObjectBase(device, errorTag),
+          mEncodingContext(encodingContext),
+          mUsageTracker(passType),
+          mValidationEnabled(false) {
+    }
+
+    bool ProgrammablePassEncoder::IsValidationEnabled() const {
+        return mValidationEnabled;
     }
 
     void ProgrammablePassEncoder::InsertDebugMarker(const char* groupLabel) {
@@ -135,7 +145,7 @@ namespace dawn_native {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             BindGroupIndex groupIndex(groupIndexIn);
 
-            if (GetDevice()->IsValidationEnabled()) {
+            if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(group));
 
                 if (groupIndex >= kMaxBindGroupsTyped) {

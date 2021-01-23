@@ -47,8 +47,10 @@ namespace dawn_native {
                                  uint32_t firstVertex,
                                  uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (mDisableBaseInstance && firstInstance != 0) {
-                return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
+            if (IsValidationEnabled()) {
+                if (mDisableBaseInstance && firstInstance != 0) {
+                    return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
+                }
             }
 
             DrawCmd* draw = allocator->Allocate<DrawCmd>(Command::Draw);
@@ -67,11 +69,13 @@ namespace dawn_native {
                                         int32_t baseVertex,
                                         uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (mDisableBaseInstance && firstInstance != 0) {
-                return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
-            }
-            if (mDisableBaseVertex && baseVertex != 0) {
-                return DAWN_VALIDATION_ERROR("Non-zero base vertex not supported");
+            if (IsValidationEnabled()) {
+                if (mDisableBaseInstance && firstInstance != 0) {
+                    return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
+                }
+                if (mDisableBaseVertex && baseVertex != 0) {
+                    return DAWN_VALIDATION_ERROR("Non-zero base vertex not supported");
+                }
             }
 
             DrawIndexedCmd* draw = allocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
@@ -87,16 +91,18 @@ namespace dawn_native {
 
     void RenderEncoderBase::DrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
-            DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+            if (IsValidationEnabled()) {
+                DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
 
-            if (indirectOffset % 4 != 0) {
-                return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
-            }
+                if (indirectOffset % 4 != 0) {
+                    return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
+                }
 
-            if (indirectOffset >= indirectBuffer->GetSize() ||
-                indirectOffset + kDrawIndirectSize > indirectBuffer->GetSize()) {
-                return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
+                if (indirectOffset >= indirectBuffer->GetSize() ||
+                    indirectOffset + kDrawIndirectSize > indirectBuffer->GetSize()) {
+                    return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
+                }
             }
 
             DrawIndirectCmd* cmd = allocator->Allocate<DrawIndirectCmd>(Command::DrawIndirect);
@@ -112,25 +118,28 @@ namespace dawn_native {
     void RenderEncoderBase::DrawIndexedIndirect(BufferBase* indirectBuffer,
                                                 uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
-            DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+            if (IsValidationEnabled()) {
+                DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
 
-            // Indexed indirect draws need a compute-shader based validation check that the range of
-            // indices is contained inside the index buffer on Metal. Disallow them as unsafe until
-            // the validation is implemented.
-            if (GetDevice()->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-                return DAWN_VALIDATION_ERROR(
-                    "DrawIndexedIndirect is disallowed because it doesn't validate that the index "
-                    "range is valid yet.");
-            }
+                // Indexed indirect draws need a compute-shader based validation check that the
+                // range of indices is contained inside the index buffer on Metal. Disallow them as
+                // unsafe until the validation is implemented.
+                if (GetDevice()->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "DrawIndexedIndirect is disallowed because it doesn't validate that the "
+                        "index "
+                        "range is valid yet.");
+                }
 
-            if (indirectOffset % 4 != 0) {
-                return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
-            }
+                if (indirectOffset % 4 != 0) {
+                    return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
+                }
 
-            if ((indirectOffset >= indirectBuffer->GetSize() ||
-                 indirectOffset + kDrawIndexedIndirectSize > indirectBuffer->GetSize())) {
-                return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
+                if ((indirectOffset >= indirectBuffer->GetSize() ||
+                     indirectOffset + kDrawIndexedIndirectSize > indirectBuffer->GetSize())) {
+                    return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
+                }
             }
 
             DrawIndexedIndirectCmd* cmd =
@@ -146,7 +155,9 @@ namespace dawn_native {
 
     void RenderEncoderBase::SetPipeline(RenderPipelineBase* pipeline) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_TRY(GetDevice()->ValidateObject(pipeline));
+            if (IsValidationEnabled()) {
+                DAWN_TRY(GetDevice()->ValidateObject(pipeline));
+            }
 
             SetRenderPipelineCmd* cmd =
                 allocator->Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
@@ -169,25 +180,31 @@ namespace dawn_native {
                                            uint64_t offset,
                                            uint64_t size) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_TRY(GetDevice()->ValidateObject(buffer));
-            DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index));
+            if (IsValidationEnabled()) {
+                DAWN_TRY(GetDevice()->ValidateObject(buffer));
+                DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index));
 
-            DAWN_TRY(ValidateIndexFormat(format));
-            if (format == wgpu::IndexFormat::Undefined) {
-                return DAWN_VALIDATION_ERROR("Index format must be specified");
-            }
+                DAWN_TRY(ValidateIndexFormat(format));
+                if (format == wgpu::IndexFormat::Undefined) {
+                    return DAWN_VALIDATION_ERROR("Index format must be specified");
+                }
 
-            uint64_t bufferSize = buffer->GetSize();
-            if (offset > bufferSize) {
-                return DAWN_VALIDATION_ERROR("Offset larger than the buffer size");
-            }
-            uint64_t remainingSize = bufferSize - offset;
+                uint64_t bufferSize = buffer->GetSize();
+                if (offset > bufferSize) {
+                    return DAWN_VALIDATION_ERROR("Offset larger than the buffer size");
+                }
+                uint64_t remainingSize = bufferSize - offset;
 
-            if (size == 0) {
-                size = remainingSize;
+                if (size == 0) {
+                    size = remainingSize;
+                } else {
+                    if (size > remainingSize) {
+                        return DAWN_VALIDATION_ERROR("Size + offset larger than the buffer size");
+                    }
+                }
             } else {
-                if (size > remainingSize) {
-                    return DAWN_VALIDATION_ERROR("Size + offset larger than the buffer size");
+                if (size == 0) {
+                    size = buffer->GetSize() - offset;
                 }
             }
 
@@ -209,24 +226,30 @@ namespace dawn_native {
                                             uint64_t offset,
                                             uint64_t size) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            DAWN_TRY(GetDevice()->ValidateObject(buffer));
-            DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Vertex));
+            if (IsValidationEnabled()) {
+                DAWN_TRY(GetDevice()->ValidateObject(buffer));
+                DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Vertex));
 
-            if (slot >= kMaxVertexBuffers) {
-                return DAWN_VALIDATION_ERROR("Vertex buffer slot out of bounds");
-            }
+                if (slot >= kMaxVertexBuffers) {
+                    return DAWN_VALIDATION_ERROR("Vertex buffer slot out of bounds");
+                }
 
-            uint64_t bufferSize = buffer->GetSize();
-            if (offset > bufferSize) {
-                return DAWN_VALIDATION_ERROR("Offset larger than the buffer size");
-            }
-            uint64_t remainingSize = bufferSize - offset;
+                uint64_t bufferSize = buffer->GetSize();
+                if (offset > bufferSize) {
+                    return DAWN_VALIDATION_ERROR("Offset larger than the buffer size");
+                }
+                uint64_t remainingSize = bufferSize - offset;
 
-            if (size == 0) {
-                size = remainingSize;
+                if (size == 0) {
+                    size = remainingSize;
+                } else {
+                    if (size > remainingSize) {
+                        return DAWN_VALIDATION_ERROR("Size + offset larger than the buffer size");
+                    }
+                }
             } else {
-                if (size > remainingSize) {
-                    return DAWN_VALIDATION_ERROR("Size + offset larger than the buffer size");
+                if (size == 0) {
+                    size = buffer->GetSize() - offset;
                 }
             }
 

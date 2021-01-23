@@ -44,6 +44,8 @@ namespace dawn_native {
                           const uint32_t* dynamicOffsets = nullptr);
 
       protected:
+        bool IsValidationEnabled() const;
+
         // Construct an "error" programmable pass encoder.
         ProgrammablePassEncoder(DeviceBase* device,
                                 EncodingContext* encodingContext,
@@ -52,6 +54,9 @@ namespace dawn_native {
 
         EncodingContext* mEncodingContext = nullptr;
         PassResourceUsageTracker mUsageTracker;
+
+      private:
+        const bool mValidationEnabled;
     };
 
 }  // namespace dawn_native

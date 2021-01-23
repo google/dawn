@@ -96,7 +96,7 @@ namespace dawn_native {
         if (mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
                 allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
 
-                if (GetDevice()->IsValidationEnabled()) {
+                if (IsValidationEnabled()) {
                     if (mOcclusionQueryActive) {
                         return DAWN_VALIDATION_ERROR(
                             "The occlusion query must be ended before endPass.");
@@ -135,24 +135,26 @@ namespace dawn_native {
                                         float minDepth,
                                         float maxDepth) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if ((isnan(x) || isnan(y) || isnan(width) || isnan(height) || isnan(minDepth) ||
-                 isnan(maxDepth))) {
-                return DAWN_VALIDATION_ERROR("NaN is not allowed.");
-            }
+            if (IsValidationEnabled()) {
+                if ((isnan(x) || isnan(y) || isnan(width) || isnan(height) || isnan(minDepth) ||
+                     isnan(maxDepth))) {
+                    return DAWN_VALIDATION_ERROR("NaN is not allowed.");
+                }
 
-            if (x < 0 || y < 0 || width < 0 || height < 0) {
-                return DAWN_VALIDATION_ERROR("X, Y, width and height must be non-negative.");
-            }
+                if (x < 0 || y < 0 || width < 0 || height < 0) {
+                    return DAWN_VALIDATION_ERROR("X, Y, width and height must be non-negative.");
+                }
 
-            if (x + width > mRenderTargetWidth || y + height > mRenderTargetHeight) {
-                return DAWN_VALIDATION_ERROR(
-                    "The viewport must be contained in the render targets");
-            }
+                if (x + width > mRenderTargetWidth || y + height > mRenderTargetHeight) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The viewport must be contained in the render targets");
+                }
 
-            // Check for depths being in [0, 1] and min <= max in 3 checks instead of 5.
-            if (minDepth < 0 || minDepth > maxDepth || maxDepth > 1) {
-                return DAWN_VALIDATION_ERROR(
-                    "minDepth and maxDepth must be in [0, 1] and minDepth <= maxDepth.");
+                // Check for depths being in [0, 1] and min <= max in 3 checks instead of 5.
+                if (minDepth < 0 || minDepth > maxDepth || maxDepth > 1) {
+                    return DAWN_VALIDATION_ERROR(
+                        "minDepth and maxDepth must be in [0, 1] and minDepth <= maxDepth.");
+                }
             }
 
             SetViewportCmd* cmd = allocator->Allocate<SetViewportCmd>(Command::SetViewport);
@@ -172,10 +174,12 @@ namespace dawn_native {
                                            uint32_t width,
                                            uint32_t height) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (width > mRenderTargetWidth || height > mRenderTargetHeight ||
-                x > mRenderTargetWidth - width || y > mRenderTargetHeight - height) {
-                return DAWN_VALIDATION_ERROR(
-                    "The scissor rect must be contained in the render targets");
+            if (IsValidationEnabled()) {
+                if (width > mRenderTargetWidth || height > mRenderTargetHeight ||
+                    x > mRenderTargetWidth - width || y > mRenderTargetHeight - height) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The scissor rect must be contained in the render targets");
+                }
             }
 
             SetScissorRectCmd* cmd =
@@ -191,8 +195,10 @@ namespace dawn_native {
 
     void RenderPassEncoder::ExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            for (uint32_t i = 0; i < count; ++i) {
-                DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i]));
+            if (IsValidationEnabled()) {
+                for (uint32_t i = 0; i < count; ++i) {
+                    DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i]));
+                }
             }
 
             ExecuteBundlesCmd* cmd =
@@ -219,7 +225,7 @@ namespace dawn_native {
 
     void RenderPassEncoder::BeginOcclusionQuery(uint32_t queryIndex) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (GetDevice()->IsValidationEnabled()) {
+            if (IsValidationEnabled()) {
                 if (mOcclusionQuerySet.Get() == nullptr) {
                     return DAWN_VALIDATION_ERROR(
                         "The occlusionQuerySet in RenderPassDescriptor must be set.");
@@ -258,7 +264,7 @@ namespace dawn_native {
 
     void RenderPassEncoder::EndOcclusionQuery() {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (GetDevice()->IsValidationEnabled()) {
+            if (IsValidationEnabled()) {
                 if (!mOcclusionQueryActive) {
                     return DAWN_VALIDATION_ERROR(
                         "EndOcclusionQuery cannot be called without corresponding "
@@ -280,7 +286,7 @@ namespace dawn_native {
 
     void RenderPassEncoder::WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (GetDevice()->IsValidationEnabled()) {
+            if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(querySet));
                 DAWN_TRY(ValidateTimestampQuery(querySet, queryIndex));
                 DAWN_TRY(
