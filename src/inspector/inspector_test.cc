@@ -1113,6 +1113,43 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
   EXPECT_EQ(3u, result[1].output_variables[0].location_decoration);
 }
 
+TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
+  mod->AddGlobalVariable(
+      Var("in_var", ast::StorageClass::kInput, ty.u32, nullptr,
+          ast::VariableDecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kPosition)}));
+  mod->AddGlobalVariable(
+      Var("out_var", ast::StorageClass::kOutput, ty.u32, nullptr,
+          ast::VariableDecorationList{create<ast::LocationDecoration>(0)}));
+  auto* func =
+      MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
+  mod->Functions().Add(func);
+
+  auto* foo = MakeCallerBodyFunction(
+      "foo", "func",
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+      });
+  mod->Functions().Add(foo);
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  // TODO(dsinclair): Update to run the namer transform when available.
+
+  auto result = inspector()->GetEntryPoints();
+  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ("foo", result[0].name);
+  ASSERT_EQ("foo", result[0].remapped_name);
+  EXPECT_EQ(0u, result[0].input_variables.size());
+  EXPECT_EQ(1u, result[0].output_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+}
+
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {

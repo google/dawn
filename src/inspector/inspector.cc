@@ -66,6 +66,10 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
     for (auto* var : func->referenced_module_variables()) {
       auto name = module_.SymbolToName(var->symbol());
+      if (var->HasBuiltinDecoration()) {
+        continue;
+      }
+
       StageVariable stage_variable;
       stage_variable.name = name;
       auto* location_decoration = var->GetLocationDecoration();
@@ -82,6 +86,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         entry_point.output_variables.push_back(stage_variable);
       }
     }
+
     result.push_back(std::move(entry_point));
   }
 
