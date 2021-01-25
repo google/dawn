@@ -74,9 +74,6 @@ class GeneratorImpl {
   /// @returns the error
   std::string error() const { return error_; }
 
-  /// Resets the generator
-  void Reset();
-
   /// @param out the output stream
   /// @returns true on successful generation; false otherwise
   bool Generate(std::ostream& out);

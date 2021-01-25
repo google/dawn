@@ -187,6 +187,7 @@ set(TINT_LIB_SRCS
   inspector/scalar.h
   namer.cc
   namer.h
+  program.h
   reader/reader.cc
   reader/reader.h
   scope_stack.h

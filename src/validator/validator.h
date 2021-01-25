@@ -24,6 +24,7 @@
 #include "src/ast/statement.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
+#include "src/program.h"
 
 namespace tint {
 
@@ -38,6 +39,11 @@ class Validator {
   /// @param module the module to validate
   /// @returns true if the validation was successful
   bool Validate(const ast::Module* module);
+
+  /// Runs the validator
+  /// @param program the program to validate
+  /// @returns true if the validation was successful
+  bool Validate(const Program* program) { return Validate(&program->module); }
 
   /// @returns error messages from the validator
   std::string error() {

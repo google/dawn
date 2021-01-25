@@ -25,6 +25,7 @@
 #include "src/ast/pipeline_stage.h"
 #include "src/inspector/entry_point.h"
 #include "src/inspector/scalar.h"
+#include "src/program.h"
 
 namespace tint {
 namespace inspector {
@@ -73,6 +74,12 @@ class Inspector {
   /// Constructor
   /// @param module Shader module to extract information from.
   explicit Inspector(const ast::Module& module);
+
+  /// Constructor
+  /// @param program Shader program to extract information from.
+  explicit Inspector(const Program* program);
+
+  /// Destructor
   ~Inspector();
 
   /// @returns error messages from the Inspector

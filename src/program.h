@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_WRITER_TEXT_H_
-#define SRC_WRITER_TEXT_H_
+#ifndef SRC_PROGRAM_H_
+#define SRC_PROGRAM_H_
 
 #include <string>
 
-#include "src/writer/writer.h"
+#include "src/ast/module.h"
 
 namespace tint {
-namespace writer {
 
-/// Class to generate text source
-class Text : public Writer {
+/// Program is (currently) a simple wrapper of to ast::Module.
+/// This wrapper is used as a stepping stone to having Dawn use tint::Program
+/// instead of tint::ast::Module.
+class Program {
  public:
-  ~Text() override;
+  /// The wrapped module
+  ast::Module module;
 
-  /// @returns the result data
-  virtual std::string result() const = 0;
+  /// @returns true if all required fields in the module are present.
+  bool IsValid() const { return module.IsValid(); }
+
+  /// @return a deep copy of this program
+  Program Clone() const { return Program{module.Clone()}; }
 };
 
-}  // namespace writer
 }  // namespace tint
 
-#endif  // SRC_WRITER_TEXT_H_
+#endif  // SRC_PROGRAM_H_

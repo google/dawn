@@ -373,6 +373,7 @@ source_set("libtint_core_src") {
     "src/inspector/scalar.h",
     "src/namer.cc",
     "src/namer.h",
+    "src/program.h",
     "src/reader/reader.cc",
     "src/reader/reader.h",
     "src/scope_stack.h",

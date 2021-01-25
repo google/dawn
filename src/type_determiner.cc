@@ -61,6 +61,9 @@ namespace tint {
 
 TypeDeterminer::TypeDeterminer(ast::Module* mod) : mod_(mod) {}
 
+TypeDeterminer::TypeDeterminer(Program* program)
+    : TypeDeterminer(&program->module) {}
+
 TypeDeterminer::~TypeDeterminer() = default;
 
 void TypeDeterminer::set_error(const Source& src, const std::string& msg) {

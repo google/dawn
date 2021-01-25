@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 
+#include "src/program.h"
 #include "src/writer/text.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -31,10 +32,13 @@ class Generator : public Text {
   /// Constructor
   /// @param module the module to convert
   explicit Generator(ast::Module module);
-  ~Generator() override;
 
-  /// Resets the generator
-  void Reset() override;
+  /// Constructor
+  /// @param program the program to convert
+  explicit Generator(Program* program);
+
+  /// Destructor
+  ~Generator() override;
 
   /// Generates the result data
   /// @returns true on successful generation; false otherwise
@@ -54,6 +58,7 @@ class Generator : public Text {
   std::string error() const;
 
  private:
+  ast::Module module_;
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

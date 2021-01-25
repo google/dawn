@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "src/ast/module.h"
+#include "src/program.h"
 #include "src/scope_stack.h"
 #include "src/type/storage_texture_type.h"
 
@@ -45,6 +46,12 @@ class TypeDeterminer {
   /// Constructor
   /// @param mod the module to update with typing information
   explicit TypeDeterminer(ast::Module* mod);
+
+  /// Constructor
+  /// @param program the module to update with typing information
+  explicit TypeDeterminer(Program* program);
+
+  /// Destructor
   ~TypeDeterminer();
 
   /// @returns error messages from the type determiner

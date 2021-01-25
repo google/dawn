@@ -19,8 +19,6 @@
 namespace tint {
 namespace writer {
 
-Writer::Writer(ast::Module module) : module_(std::move(module)) {}
-
 Writer::~Writer() = default;
 
 }  // namespace writer

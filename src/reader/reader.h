@@ -21,6 +21,7 @@
 #include "src/ast/module.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
+#include "src/program.h"
 
 namespace tint {
 namespace reader {
@@ -48,6 +49,9 @@ class Reader {
 
   /// @returns the module. The module in the parser will be reset after this.
   virtual ast::Module module() = 0;
+
+  /// @returns the program. The module in the parser will be reset after this.
+  Program program() { return Program{module()}; }
 
  protected:
   /// Constructor

@@ -45,6 +45,8 @@ namespace inspector {
 
 Inspector::Inspector(const ast::Module& module) : module_(module) {}
 
+Inspector::Inspector(const Program* program) : Inspector(program->module) {}
+
 Inspector::~Inspector() = default;
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {

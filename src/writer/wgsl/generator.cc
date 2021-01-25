@@ -21,15 +21,13 @@ namespace writer {
 namespace wgsl {
 
 Generator::Generator(ast::Module module)
-    : Text(std::move(module)),
+    : module_(std::move(module)),
       impl_(std::make_unique<GeneratorImpl>(&module_)) {}
 
-Generator::~Generator() = default;
+Generator::Generator(Program* program)
+    : impl_(std::make_unique<GeneratorImpl>(&program->module)) {}
 
-void Generator::Reset() {
-  set_error("");
-  impl_ = std::make_unique<GeneratorImpl>(&module_);
-}
+Generator::~Generator() = default;
 
 bool Generator::Generate() {
   auto ret = impl_->Generate();

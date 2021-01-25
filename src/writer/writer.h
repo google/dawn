@@ -31,11 +31,6 @@ class Writer {
   /// @returns the writer error string
   const std::string& error() const { return error_; }
 
-  /// Resets the generator
-  //! @cond Doxygen_Suppress
-  virtual void Reset() = 0;
-  //! @endcond
-
   /// Converts the module into the desired format
   /// @returns true on success; false on failure
   virtual bool Generate() = 0;
@@ -48,18 +43,12 @@ class Writer {
                                   const std::string& name) = 0;
 
  protected:
-  /// Constructor
-  /// @param module the tint module to convert
-  explicit Writer(ast::Module module);
-
   /// Sets the error string
   /// @param msg the error message
   void set_error(const std::string& msg) { error_ = msg; }
 
   /// An error message, if an error was encountered
   std::string error_;
-  /// The module being converted
-  ast::Module module_;
 };
 
 }  // namespace writer

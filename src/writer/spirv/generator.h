@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "src/ast/module.h"
+#include "src/program.h"
 #include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/writer.h"
@@ -34,10 +35,13 @@ class Generator : public writer::Writer {
   /// Constructor
   /// @param module the module to convert
   explicit Generator(ast::Module module);
-  ~Generator() override;
 
-  /// Resets the generator
-  void Reset() override;
+  /// Constructor
+  /// @param program the program to convert
+  explicit Generator(Program* program);
+
+  /// Destructor
+  ~Generator() override;
 
   /// Generates the result data
   /// @returns true on successful generation; false otherwise
@@ -54,6 +58,7 @@ class Generator : public writer::Writer {
   const std::vector<uint32_t>& result() const { return writer_->result(); }
 
  private:
+  ast::Module module_;
   std::unique_ptr<Builder> builder_;
   std::unique_ptr<BinaryWriter> writer_;
 };
