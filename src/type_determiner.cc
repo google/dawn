@@ -66,6 +66,17 @@ TypeDeterminer::TypeDeterminer(Program* program)
 
 TypeDeterminer::~TypeDeterminer() = default;
 
+diag::List TypeDeterminer::Run(Program* program) {
+  TypeDeterminer td(program);
+  if (!td.Determine()) {
+    diag::Diagnostic err;
+    err.severity = diag::Severity::Error;
+    err.message = td.error();
+    return {err};
+  }
+  return {};
+}
+
 void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
   error_ = "";
   if (src.range.begin.line > 0) {
