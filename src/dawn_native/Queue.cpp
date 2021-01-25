@@ -263,7 +263,11 @@ namespace dawn_native {
             return {};
         }
 
-        return WriteTextureImpl(*destination, data, *dataLayout, *writeSize);
+        const TexelBlockInfo& blockInfo =
+            destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
+        TextureDataLayout layout = *dataLayout;
+        ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, *writeSize);
+        return WriteTextureImpl(*destination, data, layout, *writeSize);
     }
 
     MaybeError QueueBase::WriteTextureImpl(const TextureCopyView& destination,

@@ -17,6 +17,7 @@
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/CommandBufferGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_native/opengl/TextureGL.h"
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
@@ -55,7 +56,63 @@ namespace dawn_native { namespace opengl {
                                        const void* data,
                                        const TextureDataLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
-        return DAWN_UNIMPLEMENTED_ERROR("Unable to write to texture\n");
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
+        Texture* texture = ToBackend(destination.texture);
+        SubresourceRange range(Aspect::Color, {destination.origin.z, writeSizePixel.depth},
+                               {destination.mipLevel, 1});
+        if (IsCompleteSubresourceCopiedTo(texture, writeSizePixel, destination.mipLevel)) {
+            texture->SetIsSubresourceContentInitialized(true, range);
+        } else {
+            texture->EnsureSubresourceContentInitialized(range);
+        }
+
+        const GLFormat& format = texture->GetGLFormat();
+        GLenum target = texture->GetGLTarget();
+        data = static_cast<const uint8_t*>(data) + dataLayout.offset;
+        gl.BindTexture(target, texture->GetHandle());
+        const TexelBlockInfo& blockInfo =
+            texture->GetFormat().GetAspectInfo(destination.aspect).block;
+        if (dataLayout.bytesPerRow % blockInfo.byteSize == 0) {
+            gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                           dataLayout.bytesPerRow / blockInfo.byteSize * blockInfo.width);
+            if (texture->GetArrayLayers() == 1) {
+                gl.TexSubImage2D(target, destination.mipLevel, destination.origin.x,
+                                 destination.origin.y, writeSizePixel.width, writeSizePixel.height,
+                                 format.format, format.type, data);
+            } else {
+                gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, dataLayout.rowsPerImage * blockInfo.height);
+                gl.TexSubImage3D(target, destination.mipLevel, destination.origin.x,
+                                 destination.origin.y, destination.origin.z, writeSizePixel.width,
+                                 writeSizePixel.height, writeSizePixel.depth, format.format,
+                                 format.type, data);
+                gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+            }
+            gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        } else {
+            if (texture->GetArrayLayers() == 1) {
+                const uint8_t* d = static_cast<const uint8_t*>(data);
+                for (uint32_t y = 0; y < writeSizePixel.height; ++y) {
+                    gl.TexSubImage2D(target, destination.mipLevel, destination.origin.x,
+                                     destination.origin.y + y, writeSizePixel.width, 1,
+                                     format.format, format.type, d);
+                    d += dataLayout.bytesPerRow;
+                }
+            } else {
+                const uint8_t* slice = static_cast<const uint8_t*>(data);
+                for (uint32_t z = 0; z < writeSizePixel.depth; ++z) {
+                    const uint8_t* d = slice;
+                    for (uint32_t y = 0; y < writeSizePixel.height; ++y) {
+                        gl.TexSubImage3D(target, destination.mipLevel, destination.origin.x,
+                                         destination.origin.y + y, destination.origin.z + z,
+                                         writeSizePixel.width, 1, 1, format.format, format.type, d);
+                        d += dataLayout.bytesPerRow;
+                    }
+                    slice += dataLayout.rowsPerImage * dataLayout.bytesPerRow;
+                }
+            }
+        }
+        return {};
     }
 
 }}  // namespace dawn_native::opengl

@@ -620,4 +620,9 @@ TEST_P(QueueWriteTextureTests, UnalignedDynamicUploader) {
     DoTest(textureSpec, MinimumDataSpec(size), size);
 }
 
-DAWN_INSTANTIATE_TEST(QueueWriteTextureTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(QueueWriteTextureTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
