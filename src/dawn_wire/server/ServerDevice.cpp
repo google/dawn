@@ -16,28 +16,62 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::OnUncapturedError(WGPUErrorType type, const char* message) {
+    namespace {
+
+        template <ObjectType objectType, typename Pipeline>
+        void HandleCreateReadyRenderPipelineCallbackResult(KnownObjects<Pipeline>* knownObjects,
+                                                           WGPUCreateReadyPipelineStatus status,
+                                                           Pipeline pipeline,
+                                                           const char* message,
+                                                           CreateReadyPipelineUserData* data) {
+            auto* pipelineObject = knownObjects->Get(data->pipelineObjectID);
+
+            if (status == WGPUCreateReadyPipelineStatus_Success) {
+                ASSERT(pipelineObject != nullptr);
+                pipelineObject->handle = pipeline;
+            } else if (pipelineObject != nullptr) {
+                // May be null if the device was destroyed. Device destruction destroys child
+                // objects on the wire.
+                if (!UntrackDeviceChild(pipelineObject->deviceInfo, objectType,
+                                        data->pipelineObjectID)) {
+                    UNREACHABLE();
+                }
+                knownObjects->Free(data->pipelineObjectID);
+            }
+        }
+
+    }  // anonymous namespace
+
+    void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message) {
         ReturnDeviceUncapturedErrorCallbackCmd cmd;
+        cmd.device = device;
         cmd.type = type;
         cmd.message = message;
 
         SerializeCommand(cmd);
     }
 
-    void Server::OnDeviceLost(const char* message) {
+    void Server::OnDeviceLost(ObjectHandle device, const char* message) {
         ReturnDeviceLostCallbackCmd cmd;
+        cmd.device = device;
         cmd.message = message;
 
         SerializeCommand(cmd);
     }
 
-    bool Server::DoDevicePopErrorScope(WGPUDevice cDevice, uint64_t requestSerial) {
+    bool Server::DoDevicePopErrorScope(ObjectId deviceId, uint64_t requestSerial) {
+        auto* device = DeviceObjects().Get(deviceId);
+        if (device == nullptr) {
+            return false;
+        }
+
         auto userdata = MakeUserdata<ErrorScopeUserdata>();
         userdata->requestSerial = requestSerial;
+        userdata->device = ObjectHandle{deviceId, device->generation};
 
         ErrorScopeUserdata* unownedUserdata = userdata.release();
         bool success = mProcs.devicePopErrorScope(
-            cDevice,
+            device->handle,
             ForwardToServer<decltype(
                 &Server::OnDevicePopErrorScope)>::Func<&Server::OnDevicePopErrorScope>(),
             unownedUserdata);
@@ -51,6 +85,7 @@ namespace dawn_wire { namespace server {
                                        const char* message,
                                        ErrorScopeUserdata* userdata) {
         ReturnDevicePopErrorScopeCallbackCmd cmd;
+        cmd.device = userdata->device;
         cmd.requestSerial = userdata->requestSerial;
         cmd.type = type;
         cmd.message = message;
@@ -81,6 +116,7 @@ namespace dawn_wire { namespace server {
         }
 
         auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
+        userdata->device = ObjectHandle{deviceId, device->generation};
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
 
@@ -96,29 +132,11 @@ namespace dawn_wire { namespace server {
                                                       WGPUComputePipeline pipeline,
                                                       const char* message,
                                                       CreateReadyPipelineUserData* data) {
-        auto* computePipelineObject = ComputePipelineObjects().Get(data->pipelineObjectID);
-        ASSERT(computePipelineObject != nullptr);
-
-        switch (status) {
-            case WGPUCreateReadyPipelineStatus_Success:
-                computePipelineObject->handle = pipeline;
-                break;
-
-            case WGPUCreateReadyPipelineStatus_Error:
-                ComputePipelineObjects().Free(data->pipelineObjectID);
-                break;
-
-            // Currently this code is unreachable because WireServer is always deleted before the
-            // removal of the device. In the future this logic may be changed when we decide to
-            // support sharing one pair of WireServer/WireClient to multiple devices.
-            case WGPUCreateReadyPipelineStatus_DeviceLost:
-            case WGPUCreateReadyPipelineStatus_DeviceDestroyed:
-            case WGPUCreateReadyPipelineStatus_Unknown:
-            default:
-                UNREACHABLE();
-        }
+        HandleCreateReadyRenderPipelineCallbackResult<ObjectType::ComputePipeline>(
+            &ComputePipelineObjects(), status, pipeline, message, data);
 
         ReturnDeviceCreateReadyComputePipelineCallbackCmd cmd;
+        cmd.device = data->device;
         cmd.status = status;
         cmd.requestSerial = data->requestSerial;
         cmd.message = message;
@@ -148,6 +166,7 @@ namespace dawn_wire { namespace server {
         }
 
         auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
+        userdata->device = ObjectHandle{deviceId, device->generation};
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
 
@@ -163,29 +182,11 @@ namespace dawn_wire { namespace server {
                                                      WGPURenderPipeline pipeline,
                                                      const char* message,
                                                      CreateReadyPipelineUserData* data) {
-        auto* renderPipelineObject = RenderPipelineObjects().Get(data->pipelineObjectID);
-        ASSERT(renderPipelineObject != nullptr);
-
-        switch (status) {
-            case WGPUCreateReadyPipelineStatus_Success:
-                renderPipelineObject->handle = pipeline;
-                break;
-
-            case WGPUCreateReadyPipelineStatus_Error:
-                RenderPipelineObjects().Free(data->pipelineObjectID);
-                break;
-
-            // Currently this code is unreachable because WireServer is always deleted before the
-            // removal of the device. In the future this logic may be changed when we decide to
-            // support sharing one pair of WireServer/WireClient to multiple devices.
-            case WGPUCreateReadyPipelineStatus_DeviceLost:
-            case WGPUCreateReadyPipelineStatus_DeviceDestroyed:
-            case WGPUCreateReadyPipelineStatus_Unknown:
-            default:
-                UNREACHABLE();
-        }
+        HandleCreateReadyRenderPipelineCallbackResult<ObjectType::RenderPipeline>(
+            &RenderPipelineObjects(), status, pipeline, message, data);
 
         ReturnDeviceCreateReadyRenderPipelineCallbackCmd cmd;
+        cmd.device = data->device;
         cmd.status = status;
         cmd.requestSerial = data->requestSerial;
         cmd.message = message;

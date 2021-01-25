@@ -26,6 +26,8 @@ namespace dawn_wire { namespace server {
 
     struct DeviceInfo {
         std::unordered_set<uint64_t> childObjectTypesAndIds;
+        Server* server;
+        ObjectHandle self;
     };
 
     template <typename T>

@@ -90,6 +90,8 @@ namespace dawn_wire { namespace server {
         data->handle = device;
         data->generation = generation;
         data->allocated = true;
+        data->info->server = this;
+        data->info->self = ObjectHandle{id, generation};
 
         // The device is externally owned so it shouldn't be destroyed when we receive a destroy
         // message from the client. Add a reference to counterbalance the eventual release.
@@ -97,21 +99,23 @@ namespace dawn_wire { namespace server {
 
         // Set callbacks to forward errors to the client.
         // Note: these callbacks are manually inlined here since they do not acquire and
-        // free their userdata.
+        // free their userdata. Also unlike other callbacks, these are cleared and unset when
+        // the server is destroyed, so we don't need to check if the server is still alive
+        // inside them.
         mProcs.deviceSetUncapturedErrorCallback(
             device,
             [](WGPUErrorType type, const char* message, void* userdata) {
-                Server* server = static_cast<Server*>(userdata);
-                server->OnUncapturedError(type, message);
+                DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
+                info->server->OnUncapturedError(info->self, type, message);
             },
-            this);
+            data->info.get());
         mProcs.deviceSetDeviceLostCallback(
             device,
             [](const char* message, void* userdata) {
-                Server* server = static_cast<Server*>(userdata);
-                server->OnDeviceLost(message);
+                DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
+                info->server->OnDeviceLost(info->self, message);
             },
-            this);
+            data->info.get());
 
         return true;
     }

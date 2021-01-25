@@ -52,7 +52,7 @@
             { "name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
         ],
         "device pop error scope": [
-            { "name": "device", "type": "device" },
+            { "name": "device id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint64_t" }
         ],
         "destroy object": [
@@ -89,23 +89,28 @@
             { "name": "read initial data info", "type": "uint8_t", "annotation": "const*", "length": "read initial data info length", "skip_serialize": true }
         ],
         "device create ready compute pipeline callback": [
+            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "status", "type": "create ready pipeline status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device create ready render pipeline callback": [
+            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "status", "type": "create ready pipeline status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device uncaptured error callback": [
+            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "type", "type": "error type"},
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device lost callback" : [
+            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device pop error scope callback": [
+            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "type", "type": "error type" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }

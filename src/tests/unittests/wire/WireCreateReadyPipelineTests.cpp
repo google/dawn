@@ -328,3 +328,46 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineAfterDisconnect) {
     wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
                                          ToMockCreateReadyComputePipelineCallback, this);
 }
+
+TEST_F(WireCreateReadyPipelineTest, DeviceDeletedBeforeCallback) {
+    WGPUShaderModuleDescriptor vertexDescriptor = {};
+    WGPUShaderModule module = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
+    WGPUShaderModule apiModule = api.GetNewShaderModule();
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiModule));
+
+    WGPURenderPipelineDescriptor pipelineDescriptor{};
+    pipelineDescriptor.vertexStage.module = module;
+    pipelineDescriptor.vertexStage.entryPoint = "main";
+
+    WGPUProgrammableStageDescriptor fragmentStage = {};
+    fragmentStage.module = module;
+    fragmentStage.entryPoint = "main";
+    pipelineDescriptor.fragmentStage = &fragmentStage;
+
+    wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
+                                        ToMockCreateReadyRenderPipelineCallback, this);
+
+    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _));
+    FlushClient();
+
+    EXPECT_CALL(*mockCreateReadyRenderPipelineCallback,
+                Call(WGPUCreateReadyPipelineStatus_DeviceDestroyed, nullptr, _, this))
+        .Times(1);
+
+    wgpuDeviceRelease(device);
+
+    // Expect release on all objects created by the client.
+    Sequence s1, s2;
+    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1).InSequence(s1);
+    EXPECT_CALL(api, ShaderModuleRelease(apiModule)).Times(1).InSequence(s2);
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
+        .Times(1)
+        .InSequence(s1, s2);
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
+        .Times(1)
+        .InSequence(s1, s2);
+    EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1).InSequence(s1, s2);
+
+    FlushClient();
+    DefaultApiDeviceWasReleased();
+}

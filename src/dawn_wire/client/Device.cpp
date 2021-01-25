@@ -146,7 +146,7 @@ namespace dawn_wire { namespace client {
         mErrorScopes[serial] = {callback, userdata};
 
         DevicePopErrorScopeCmd cmd;
-        cmd.device = ToAPI(this);
+        cmd.deviceId = this->id;
         cmd.requestSerial = serial;
 
         client->SerializeCommand(cmd);
