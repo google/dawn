@@ -42,6 +42,7 @@
 #include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/type/i32_type.h"
+#include "src/type/texture_type.h"
 
 namespace tint {
 namespace reader {
@@ -855,6 +856,31 @@ class FunctionEmitter {
   /// @param inst the SPIR-V instruction
   /// @returns an expression
   TypedExpression MakeOuterProduct(const spvtools::opt::Instruction& inst);
+
+  /// Get the SPIR-V instruction for the image memory object declaration for
+  /// the image operand to the given instruction.
+  /// @param inst the SPIR-V instruction
+  /// @returns a SPIR-V OpVariable or OpFunctionParameter instruction, or null
+  /// on error
+  const spvtools::opt::Instruction* GetImage(
+      const spvtools::opt::Instruction& inst);
+
+  /// Get the AST texture the SPIR-V image memory object declaration.
+  /// @param inst the SPIR-V memory object declaration for the image.
+  /// @returns a texture type, or null on error
+  type::Texture* GetImageType(const spvtools::opt::Instruction& inst);
+
+  /// Get the expression for the image operand from the first operand to the
+  /// given instruction.
+  /// @param inst the SPIR-V instruction
+  /// @returns an identifier expression, or null on error
+  ast::Expression* GetImageExpression(const spvtools::opt::Instruction& inst);
+
+  /// Get the expression for the sampler operand from the first operand to the
+  /// given instruction.
+  /// @param inst the SPIR-V instruction
+  /// @returns an identifier expression, or null on error
+  ast::Expression* GetSamplerExpression(const spvtools::opt::Instruction& inst);
 
   /// Emits a texture builtin function call for a SPIR-V instruction that
   /// accesses an image or sampled image.

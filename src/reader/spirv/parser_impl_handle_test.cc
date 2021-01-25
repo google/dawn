@@ -4282,8 +4282,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 1D 0 0 0 1 Unknown",
          "OpNop",
-         "internal error: not an image access "
-         "instruction: OpNop",
+         "not an image access instruction: OpNop",
          {}},
         {"%float 1D 0 0 0 1 Unknown",
          "%50 = OpCopyObject %float %float_1",

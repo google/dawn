@@ -4019,35 +4019,82 @@ Source FunctionEmitter::GetSourceForInst(
   return parser_impl_.GetSourceForInst(&inst);
 }
 
-bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
-  uint32_t arg_index = 0;  // The SPIR-V input argument index
-  ast::ExpressionList params;
-
-  const auto image_or_sampled_image_operand_id =
-      inst.GetSingleWordInOperand(arg_index);
-  // Form the texture operand.
+const spvtools::opt::Instruction* FunctionEmitter::GetImage(
+    const spvtools::opt::Instruction& inst) {
+  if (inst.NumInOperands() == 0) {
+    Fail() << "not an image access instruction: " << inst.PrettyPrint();
+    return nullptr;
+  }
+  // The image or sampled image operand is always the first operand.
+  const auto image_or_sampled_image_operand_id = inst.GetSingleWordInOperand(0);
   const auto* image = parser_impl_.GetMemoryObjectDeclarationForHandle(
       image_or_sampled_image_operand_id, true);
   if (!image) {
-    return Fail() << "internal error: couldn't find image for "
-                  << inst.PrettyPrint();
+    Fail() << "internal error: couldn't find image for " << inst.PrettyPrint();
+    return nullptr;
+  }
+  return image;
+}
+
+type::Texture* FunctionEmitter::GetImageType(
+    const spvtools::opt::Instruction& image) {
+  type::Pointer* ptr_type = parser_impl_.GetTypeForHandleVar(image);
+  if (!parser_impl_.success()) {
+    Fail();
+    return nullptr;
+  }
+  if (!ptr_type || !ptr_type->type()->UnwrapAll()->Is<type::Texture>()) {
+    Fail() << "invalid texture type for " << image.PrettyPrint();
+    return nullptr;
+  }
+  return As<type::Texture>(ptr_type->type()->UnwrapAll());
+}
+
+ast::Expression* FunctionEmitter::GetImageExpression(
+    const spvtools::opt::Instruction& inst) {
+  auto* image = GetImage(inst);
+  if (!image) {
+    return nullptr;
   }
   auto name = namer_.Name(image->result_id());
-  params.push_back(create<ast::IdentifierExpression>(
-      Source{}, ast_module_.RegisterSymbol(name)));
+  return create<ast::IdentifierExpression>(GetSourceForInst(inst),
+                                           ast_module_.RegisterSymbol(name));
+}
 
+ast::Expression* FunctionEmitter::GetSamplerExpression(
+    const spvtools::opt::Instruction& inst) {
+  // The sampled image operand is always the first operand.
+  const auto image_or_sampled_image_operand_id = inst.GetSingleWordInOperand(0);
+  const auto* image = parser_impl_.GetMemoryObjectDeclarationForHandle(
+      image_or_sampled_image_operand_id, false);
+  if (!image) {
+    Fail() << "internal error: couldn't find sampler for "
+           << inst.PrettyPrint();
+    return nullptr;
+  }
+  auto name = namer_.Name(image->result_id());
+  return create<ast::IdentifierExpression>(GetSourceForInst(inst),
+                                           ast_module_.RegisterSymbol(name));
+}
+
+bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
+  ast::ExpressionList params;
   const auto opcode = inst.opcode();
+
+  // Form the texture operand.
+  const spvtools::opt::Instruction* image = GetImage(inst);
+  if (!image) {
+    return false;
+  }
+  params.push_back(GetImageExpression(inst));
+
   if (IsSampledImageAccess(opcode)) {
     // Form the sampler operand.
-    const auto* sampler = parser_impl_.GetMemoryObjectDeclarationForHandle(
-        image_or_sampled_image_operand_id, false);
-    if (!sampler) {
-      return Fail() << "internal error: couldn't find sampler for "
-                    << inst.PrettyPrint();
+    if (auto* sampler = GetSamplerExpression(inst)) {
+      params.push_back(sampler);
+    } else {
+      return false;
     }
-    auto param_name = namer_.Name(sampler->result_id());
-    params.push_back(create<ast::IdentifierExpression>(
-        Source{}, ast_module_.RegisterSymbol(param_name)));
   }
 
   type::Pointer* texture_ptr_type = parser_impl_.GetTypeForHandleVar(*image);
@@ -4060,8 +4107,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     return Fail();
   }
 
-  // We're done with the first SPIR-V operand.  Move on to the next.
-  arg_index++;
+  // This is the SPIR-V operand index.  We're done with the first operand.
+  uint32_t arg_index = 1;
 
   // Push the coordinates operands.
   auto coords = MakeCoordinateOperandsForImageAccess(inst);
@@ -4291,16 +4338,8 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     Fail();
     return {};
   }
-  if (inst.NumInOperands() == 0) {
-    Fail() << "internal error: not an image access instruction: "
-           << inst.PrettyPrint();
-    return {};
-  }
-  const auto sampled_image_id = inst.GetSingleWordInOperand(0);
-  const auto* image =
-      parser_impl_.GetMemoryObjectDeclarationForHandle(sampled_image_id, true);
+  const spvtools::opt::Instruction* image = GetImage(inst);
   if (!image) {
-    Fail() << "internal error: couldn't find image for " << inst.PrettyPrint();
     return {};
   }
   if (image->NumInOperands() < 1) {
@@ -4325,24 +4364,18 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   if (!raw_coords.type) {
     return {};
   }
-  type::Pointer* type = parser_impl_.GetTypeForHandleVar(*image);
-  if (!parser_impl_.success()) {
-    Fail();
+  type::Texture* texture_type = GetImageType(*image);
+  if (!texture_type) {
     return {};
   }
-  if (!type || !type->type()->UnwrapAll()->Is<type::Texture>()) {
-    Fail() << "invalid texture type for " << image->PrettyPrint();
-    return {};
-  }
-
-  auto* unwrapped_type = type->type()->UnwrapAll();
-  type::TextureDimension dim = unwrapped_type->As<type::Texture>()->dim();
+  type::TextureDimension dim = texture_type->dim();
   // Number of regular coordinates.
   uint32_t num_axes = type::NumCoordinateAxes(dim);
   bool is_arrayed = type::IsTextureArray(dim);
   if ((num_axes == 0) || (num_axes > 3)) {
-    Fail() << "unsupported image dimensionality for " << type->type_name()
-           << " prompted by " << inst.PrettyPrint();
+    Fail() << "unsupported image dimensionality for "
+           << texture_type->type_name() << " prompted by "
+           << inst.PrettyPrint();
   }
   const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
   uint32_t num_coords_supplied = 0;
