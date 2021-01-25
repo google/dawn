@@ -90,9 +90,6 @@ class CopyTextureForBrowserTests : public DawnTest {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        // Use writeTexture to populate the current slice of the texture in
-        // `level` mip level for all platforms except OpenGL.
-        // TODO(shaobo.yan@intel.com): OpenGL doesn't have 'WriteTexture' implementation.
         const utils::TextureDataCopyLayout copyLayout =
             utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
                 kTextureFormat,
@@ -165,11 +162,6 @@ TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // OpenGL tests fails because 'WriteTexture' is unimplemented.
-    // Related bug : crbug.com/dawn/483
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
-
     constexpr uint32_t kWidth = 10;
     constexpr uint32_t kHeight = 1;
 
@@ -185,11 +177,6 @@ TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
 TEST_P(CopyTextureForBrowserTests, VerifyCopyOnXDirection) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
-
-    // OpenGL tests fails because 'WriteTexture' is unimplemented.
-    // Related bug : crbug.com/dawn/483
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 1000;
     constexpr uint32_t kHeight = 1;
@@ -207,11 +194,6 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // OpenGL tests fails because 'WriteTexture' is unimplemented.
-    // Related bug : crbug.com/dawn/483
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
-
     constexpr uint32_t kWidth = 1;
     constexpr uint32_t kHeight = 1000;
 
@@ -227,11 +209,6 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
 TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
-
-    // OpenGL tests fails because 'WriteTexture' is unimplemented.
-    // Related bug : crbug.com/dawn/483
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 899;
     constexpr uint32_t kHeight = 999;
@@ -249,11 +226,6 @@ TEST_P(CopyTextureForBrowserTests, VerifyFlipY) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // OpenGL tests fails because 'WriteTexture' is unimplemented.
-    // Related bug : crbug.com/dawn/483
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
-
     constexpr uint32_t kWidth = 901;
     constexpr uint32_t kHeight = 1001;
 
@@ -270,11 +242,6 @@ TEST_P(CopyTextureForBrowserTests, VerifyFlipY) {
 TEST_P(CopyTextureForBrowserTests, VerifyFlipYInSlimTexture) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
-
-    // OpenGL tests fails because 'WriteTexture' is unimplemented.
-    // Related bug : crbug.com/dawn/483
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 1;
     constexpr uint32_t kHeight = 1001;

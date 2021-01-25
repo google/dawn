@@ -178,13 +178,6 @@ TEST_P(QueueWriteBufferTests, SuperLargeWriteBuffer) {
 // Test a special code path: writing when dynamic uploader already contatins some unaligned
 // data, it might be necessary to use a ring buffer with properly aligned offset.
 TEST_P(QueueWriteBufferTests, UnalignedDynamicUploader) {
-    // TODO(dawn:483): Skipping test because WriteTexture inside UnalignDynamicUploader
-    // is not implemented. Moreover when using UnalignDynamicUploader we are assuming
-    // that WriteTexture implementation uses a DynamicUploader which might be false in the
-    // case of a future OpenGL implementation.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
-
     utils::UnalignDynamicUploader(device);
 
     wgpu::BufferDescriptor descriptor;

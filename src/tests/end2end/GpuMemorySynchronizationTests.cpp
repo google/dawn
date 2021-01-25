@@ -237,10 +237,6 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
 // Use an image as both sampled and readonly storage in a compute pass. This is a regression test
 // for the Vulkan backend choosing different layouts for Sampled and ReadOnlyStorage.
 TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
-    // TODO(dawn:483): Test is skipped on OpenGL because it uses WriteTexture which is
-    // unimplemented.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     // Create a storage + sampled texture of one texel initialized to 1
     wgpu::TextureDescriptor texDesc;
     texDesc.format = wgpu::TextureFormat::R32Uint;
