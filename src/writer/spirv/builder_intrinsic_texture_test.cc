@@ -16,7 +16,6 @@
 
 #include "gmock/gmock.h"
 #include "spirv-tools/libspirv.hpp"
-#include "src/ast/builder.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/stage_decoration.h"

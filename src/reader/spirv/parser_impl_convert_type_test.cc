@@ -566,7 +566,7 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
   EXPECT_TRUE(type->Is<type::Struct>());
   std::stringstream ss;
   type->As<type::Struct>()->impl()->to_str(ss, 0);
-  EXPECT_THAT(Demangler().Demangle(p->get_program().Symbols(), ss.str()),
+  EXPECT_THAT(Demangler().Demangle(p->program().Symbols(), ss.str()),
               Eq(R"(Struct{
   StructMember{field0: __u32}
   StructMember{field1: __f32}
@@ -588,7 +588,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
   EXPECT_TRUE(type->Is<type::Struct>());
   std::stringstream ss;
   type->As<type::Struct>()->impl()->to_str(ss, 0);
-  EXPECT_THAT(Demangler().Demangle(p->get_program().Symbols(), ss.str()),
+  EXPECT_THAT(Demangler().Demangle(p->program().Symbols(), ss.str()),
               Eq(R"(Struct{
   [[block]]
   StructMember{field0: __u32}
@@ -614,7 +614,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
   EXPECT_TRUE(type->Is<type::Struct>());
   std::stringstream ss;
   type->As<type::Struct>()->impl()->to_str(ss, 0);
-  EXPECT_THAT(Demangler().Demangle(p->get_program().Symbols(), ss.str()),
+  EXPECT_THAT(Demangler().Demangle(p->program().Symbols(), ss.str()),
               Eq(R"(Struct{
   StructMember{[[ offset 0 ]] field0: __f32}
   StructMember{[[ offset 8 ]] field1: __vec_2__f32}

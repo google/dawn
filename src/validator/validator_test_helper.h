@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/builder.h"
+#include "src/program_builder.h"
 #include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/validator/validator_impl.h"
@@ -28,7 +28,7 @@
 namespace tint {
 
 /// A helper for testing validation
-class ValidatorTestHelper : public ast::BuilderWithProgram {
+class ValidatorTestHelper : public ProgramBuilder {
  public:
   /// Constructor
   ValidatorTestHelper();
@@ -42,7 +42,8 @@ class ValidatorTestHelper : public ast::BuilderWithProgram {
     if (val_) {
       return *val_;
     }
-    val_ = std::make_unique<ValidatorImpl>(program);
+    program_ = std::make_unique<Program>(std::move(*this));
+    val_ = std::make_unique<ValidatorImpl>(program_.get());
     for (auto* var : vars_for_testing_) {
       val_->RegisterVariableForTesting(var);
     }
@@ -62,6 +63,7 @@ class ValidatorTestHelper : public ast::BuilderWithProgram {
 
  private:
   std::unique_ptr<TypeDeterminer> td_;
+  std::unique_ptr<Program> program_;
   std::unique_ptr<ValidatorImpl> val_;
   std::vector<ast::Variable*> vars_for_testing_;
 };

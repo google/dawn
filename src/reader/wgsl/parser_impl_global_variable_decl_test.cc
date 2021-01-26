@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
 
-  EXPECT_EQ(e->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
@@ -59,7 +59,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
 
-  EXPECT_EQ(e->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
@@ -84,7 +84,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
 
-  EXPECT_EQ(e->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->type(), nullptr);
   EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
@@ -114,7 +114,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   EXPECT_FALSE(e.errored);
   ASSERT_NE(e.value, nullptr);
 
-  EXPECT_EQ(e->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->type(), nullptr);
   EXPECT_TRUE(e->type()->Is<type::F32>());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);

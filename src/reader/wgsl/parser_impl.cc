@@ -293,7 +293,7 @@ void ParserImpl::translation_unit() {
     }
   }
 
-  assert(program_.IsValid());
+  assert(builder_.IsValid());
 }
 
 // global_decl
@@ -323,7 +323,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("variable declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      program_.AST().AddGlobalVariable(gv.value);
+      builder_.AST().AddGlobalVariable(gv.value);
       return true;
     }
 
@@ -335,7 +335,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("constant declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      program_.AST().AddGlobalVariable(gc.value);
+      builder_.AST().AddGlobalVariable(gc.value);
       return true;
     }
 
@@ -347,7 +347,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("type alias", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      program_.AST().AddConstructedType(ta.value);
+      builder_.AST().AddConstructedType(ta.value);
       return true;
     }
 
@@ -359,10 +359,9 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("struct declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      auto* type = str.value;
-      register_constructed(
-          program_.Symbols().NameFor(type->As<type::Struct>()->symbol()), type);
-      program_.AST().AddConstructedType(type);
+      register_constructed(builder_.Symbols().NameFor(str.value->symbol()),
+                           str.value);
+      builder_.AST().AddConstructedType(str.value);
       return true;
     }
 
@@ -378,7 +377,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
   if (func.errored)
     errored = true;
   if (func.matched) {
-    program_.AST().Functions().Add(func.value);
+    builder_.AST().Functions().Add(func.value);
     return true;
   }
 
@@ -437,7 +436,7 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
 
   return create<ast::Variable>(
       decl->source,                             // source
-      program_.Symbols().Register(decl->name),  // symbol
+      builder_.Symbols().Register(decl->name),  // symbol
       decl->storage_class,                      // storage_class
       decl->type,                               // type
       false,                                    // is_const
@@ -466,7 +465,7 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
 
   return create<ast::Variable>(
       decl->source,                             // source
-      program_.Symbols().Register(decl->name),  // symbol
+      builder_.Symbols().Register(decl->name),  // symbol
       ast::StorageClass::kNone,                 // storage_class
       decl->type,                               // type
       true,                                     // is_const
@@ -516,7 +515,7 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return program_.create<type::SampledTexture>(dim.value, subtype.value);
+    return builder_.create<type::SampledTexture>(dim.value, subtype.value);
   }
 
   auto ms_dim = multisampled_texture_type();
@@ -527,7 +526,7 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return program_.create<type::MultisampledTexture>(ms_dim.value,
+    return builder_.create<type::MultisampledTexture>(ms_dim.value,
                                                       subtype.value);
   }
 
@@ -541,7 +540,7 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    return program_.create<type::StorageTexture>(storage.value, format.value);
+    return builder_.create<type::StorageTexture>(storage.value, format.value);
   }
 
   // DEPRECATED
@@ -555,9 +554,9 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    return program_.create<type::AccessControl>(
+    return builder_.create<type::AccessControl>(
         ac_storage->second,
-        program_.create<type::StorageTexture>(ac_storage->first, format.value));
+        builder_.create<type::StorageTexture>(ac_storage->first, format.value));
   }
 
   return Failure::kNoMatch;
@@ -568,10 +567,10 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
 //  | SAMPLER_COMPARISON
 Maybe<type::Type*> ParserImpl::sampler_type() {
   if (match(Token::Type::kSampler))
-    return program_.create<type::Sampler>(type::SamplerKind::kSampler);
+    return builder_.create<type::Sampler>(type::SamplerKind::kSampler);
 
   if (match(Token::Type::kComparisonSampler))
-    return program_.create<type::Sampler>(
+    return builder_.create<type::Sampler>(
         type::SamplerKind::kComparisonSampler);
 
   return Failure::kNoMatch;
@@ -717,17 +716,17 @@ ParserImpl::storage_texture_type_access_control() {
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 Maybe<type::Type*> ParserImpl::depth_texture_type() {
   if (match(Token::Type::kTextureDepth2d))
-    return program_.create<type::DepthTexture>(type::TextureDimension::k2d);
+    return builder_.create<type::DepthTexture>(type::TextureDimension::k2d);
 
   if (match(Token::Type::kTextureDepth2dArray))
-    return program_.create<type::DepthTexture>(
+    return builder_.create<type::DepthTexture>(
         type::TextureDimension::k2dArray);
 
   if (match(Token::Type::kTextureDepthCube))
-    return program_.create<type::DepthTexture>(type::TextureDimension::kCube);
+    return builder_.create<type::DepthTexture>(type::TextureDimension::kCube);
 
   if (match(Token::Type::kTextureDepthCubeArray))
-    return program_.create<type::DepthTexture>(
+    return builder_.create<type::DepthTexture>(
         type::TextureDimension::kCubeArray);
 
   return Failure::kNoMatch;
@@ -913,7 +912,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
     // type up with that decoration
-    ty = program_.create<type::AccessControl>(
+    ty = builder_.create<type::AccessControl>(
         deco->As<ast::AccessDecoration>()->value(), ty);
   }
 
@@ -975,8 +974,8 @@ Maybe<type::Type*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  auto* alias = program_.create<type::Alias>(
-      program_.Symbols().Register(name.value), type.value);
+  auto* alias = builder_.create<type::Alias>(
+      builder_.Symbols().Register(name.value), type.value);
   register_constructed(name.value, alias);
 
   return alias;
@@ -1034,16 +1033,16 @@ Maybe<type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   }
 
   if (match(Token::Type::kBool))
-    return program_.create<type::Bool>();
+    return builder_.create<type::Bool>();
 
   if (match(Token::Type::kF32))
-    return program_.create<type::F32>();
+    return builder_.create<type::F32>();
 
   if (match(Token::Type::kI32))
-    return program_.create<type::I32>();
+    return builder_.create<type::I32>();
 
   if (match(Token::Type::kU32))
-    return program_.create<type::U32>();
+    return builder_.create<type::U32>();
 
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     next();  // Consume the peek
@@ -1101,7 +1100,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_pointer() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return program_.create<type::Pointer>(subtype.value, sc.value);
+    return builder_.create<type::Pointer>(subtype.value, sc.value);
   });
 }
 
@@ -1118,7 +1117,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return program_.create<type::Vector>(subtype.value, count);
+  return builder_.create<type::Vector>(subtype.value, count);
 }
 
 Expect<type::Type*> ParserImpl::expect_type_decl_array(
@@ -1162,7 +1161,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return program_.create<type::Matrix>(subtype.value, rows, columns);
+  return builder_.create<type::Matrix>(subtype.value, rows, columns);
 }
 
 // storage_class
@@ -1229,7 +1228,7 @@ Maybe<type::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   return create<type::Struct>(
-      program_.Symbols().Register(name.value),
+      builder_.Symbols().Register(name.value),
       create<ast::Struct>(source, std::move(body.value),
                           std::move(struct_decos.value)));
 }
@@ -1284,7 +1283,7 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
     return Failure::kErrored;
 
   return create<ast::StructMember>(decl->source,
-                                   program_.Symbols().Register(decl->name),
+                                   builder_.Symbols().Register(decl->name),
                                    decl->type, std::move(member_decos.value));
 }
 
@@ -1321,7 +1320,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   return create<ast::Function>(
-      header->source, program_.Symbols().Register(header->name), header->params,
+      header->source, builder_.Symbols().Register(header->name), header->params,
       header->return_type, body.value, func_decos.value);
 }
 
@@ -1330,7 +1329,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 //   | VOID
 Maybe<type::Type*> ParserImpl::function_type_decl() {
   if (match(Token::Type::kVoid))
-    return program_.create<type::Void>();
+    return builder_.create<type::Void>();
 
   return type_decl();
 }
@@ -1391,7 +1390,7 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
   for (;;) {
     auto* var = create<ast::Variable>(
         decl->source,                             // source
-        program_.Symbols().Register(decl->name),  // symbol
+        builder_.Symbols().Register(decl->name),  // symbol
         ast::StorageClass::kNone,                 // storage_class
         decl->type,                               // type
         true,                                     // is_const
@@ -1662,7 +1661,7 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
 
     auto* var = create<ast::Variable>(
         decl->source,                             // source
-        program_.Symbols().Register(decl->name),  // symbol
+        builder_.Symbols().Register(decl->name),  // symbol
         ast::StorageClass::kNone,                 // storage_class
         decl->type,                               // type
         true,                                     // is_const
@@ -1691,7 +1690,7 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
 
   auto* var =
       create<ast::Variable>(decl->source,                             // source
-                            program_.Symbols().Register(decl->name),  // symbol
+                            builder_.Symbols().Register(decl->name),  // symbol
                             decl->storage_class,             // storage_class
                             decl->type,                      // type
                             false,                           // is_const
@@ -2093,7 +2092,7 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
       Source{}, create<ast::CallExpression>(
                     source,
                     create<ast::IdentifierExpression>(
-                        source, program_.Symbols().Register(name)),
+                        source, builder_.Symbols().Register(name)),
                     std::move(params)));
 }
 
@@ -2166,7 +2165,7 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 
   if (match(Token::Type::kIdentifier))
     return create<ast::IdentifierExpression>(
-        t.source(), program_.Symbols().Register(t.to_str()));
+        t.source(), builder_.Symbols().Register(t.to_str()));
 
   auto type = type_decl();
   if (type.errored)
@@ -2242,7 +2241,7 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
     return postfix_expr(create<ast::MemberAccessorExpression>(
         ident.source, prefix,
         create<ast::IdentifierExpression>(
-            ident.source, program_.Symbols().Register(ident.value))));
+            ident.source, builder_.Symbols().Register(ident.value))));
   }
 
   return prefix;
@@ -2742,19 +2741,19 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
-    auto* type = program_.create<type::Bool>();
+    auto* type = builder_.create<type::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, true);
   }
   if (match(Token::Type::kFalse)) {
-    auto* type = program_.create<type::Bool>();
+    auto* type = builder_.create<type::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, false);
   }
   if (match(Token::Type::kSintLiteral)) {
-    auto* type = program_.create<type::I32>();
+    auto* type = builder_.create<type::I32>();
     return create<ast::SintLiteral>(Source{}, type, t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
-    auto* type = program_.create<type::U32>();
+    auto* type = builder_.create<type::U32>();
     return create<ast::UintLiteral>(Source{}, type, t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
@@ -2763,7 +2762,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
       next();  // Consume 'f'
       add_error(p.source(), "float literals must not be suffixed with 'f'");
     }
-    auto* type = program_.create<type::F32>();
+    auto* type = builder_.create<type::F32>();
     return create<ast::FloatLiteral>(Source{}, type, t.to_f32());
   }
   return Failure::kNoMatch;

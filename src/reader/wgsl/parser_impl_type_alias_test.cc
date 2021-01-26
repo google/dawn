@@ -28,8 +28,7 @@ namespace {
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto p = parser("type a = i32");
 
-  auto& mod = p->get_program();
-  auto* i32 = mod.create<type::I32>();
+  auto* i32 = p->builder().create<type::I32>();
 
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
@@ -45,7 +44,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  type::Struct str(p->get_program().Symbols().Register("B"), {});
+  type::Struct str(p->builder().Symbols().Get("B"), {});
   p->register_constructed("B", &str);
 
   auto t = p->type_alias();
@@ -55,12 +54,12 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<type::Alias>());
   auto* alias = t->As<type::Alias>();
-  EXPECT_EQ(p->get_program().Symbols().NameFor(alias->symbol()), "a");
+  EXPECT_EQ(p->builder().Symbols().NameFor(alias->symbol()), "a");
   ASSERT_TRUE(alias->type()->Is<type::Struct>());
 
   auto* s = alias->type()->As<type::Struct>();
-  EXPECT_EQ(s->symbol(), p->get_program().Symbols().Register("B"));
-  EXPECT_EQ(s->symbol(), p->get_program().Symbols().Register("B"));
+  EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
+  EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {

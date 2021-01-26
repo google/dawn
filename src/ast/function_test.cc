@@ -36,7 +36,7 @@ TEST_F(FunctionTest, Creation) {
 
   auto* f = Func("func", params, ty.void_(), StatementList{},
                  FunctionDecorationList{});
-  EXPECT_EQ(f->symbol(), Symbols().Register("func"));
+  EXPECT_EQ(f->symbol(), Symbols().Get("func"));
   ASSERT_EQ(f->params().size(), 1u);
   EXPECT_EQ(f->return_type(), ty.void_());
   EXPECT_EQ(f->params()[0], var);
@@ -151,7 +151,7 @@ TEST_F(FunctionTest, AddDuplicateEntryPoints) {
   auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
                  FunctionDecorationList{});
 
-  auto main_sym = Symbols().Register("main");
+  auto main_sym = Symbols().Get("main");
   f->add_ancestor_entry_point(main_sym);
   ASSERT_EQ(1u, f->ancestor_entry_points().size());
   EXPECT_EQ(main_sym, f->ancestor_entry_points()[0]);

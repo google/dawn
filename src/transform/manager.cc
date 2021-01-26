@@ -14,6 +14,7 @@
 
 #include "src/transform/manager.h"
 
+#include "src/program_builder.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -35,16 +36,10 @@ Transform::Output Manager::Run(const Program* program) {
       program = &out.program;
     }
   } else {
-    out.program = program->Clone();
+    out.program = Program(program->Clone());
   }
 
-  TypeDeterminer td(&out.program);
-  if (!td.Determine()) {
-    diag::Diagnostic err;
-    err.severity = diag::Severity::Error;
-    err.message = td.error();
-    out.diagnostics.add(std::move(err));
-  }
+  out.diagnostics.add(TypeDeterminer::Run(&out.program));
 
   return out;
 }

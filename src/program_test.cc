@@ -31,80 +31,101 @@ namespace {
 using ProgramTest = ast::TestHelper;
 
 TEST_F(ProgramTest, Creation) {
-  EXPECT_EQ(AST().Functions().size(), 0u);
+  Program program(std::move(*this));
+  EXPECT_EQ(program.AST().Functions().size(), 0u);
 }
 
 TEST_F(ProgramTest, ToStrEmitsPreambleAndPostamble) {
-  const auto str = mod->to_str();
+  Program program(std::move(*this));
+  const auto str = program.to_str();
   auto* const expected = "Module{\n}\n";
   EXPECT_EQ(str, expected);
 }
 
 TEST_F(ProgramTest, IsValid_Empty) {
-  EXPECT_TRUE(IsValid());
+  Program program(std::move(*this));
+  EXPECT_TRUE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_GlobalVariable) {
   auto* var = Var("var", ast::StorageClass::kInput, ty.f32());
   AST().AddGlobalVariable(var);
-  EXPECT_TRUE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_TRUE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_GlobalVariable) {
   AST().AddGlobalVariable(nullptr);
-  EXPECT_FALSE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
   auto* var = Var("var", ast::StorageClass::kInput, nullptr);
   AST().AddGlobalVariable(var);
-  EXPECT_FALSE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Alias) {
   auto* alias = ty.alias("alias", ty.f32());
   AST().AddConstructedType(alias);
-  EXPECT_TRUE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_TRUE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_Alias) {
   AST().AddConstructedType(nullptr);
-  EXPECT_FALSE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Struct) {
   auto* st = ty.struct_("name", {});
   auto* alias = ty.alias("name", st);
   AST().AddConstructedType(alias);
-  EXPECT_TRUE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_TRUE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Struct_EmptyName) {
   auto* st = ty.struct_("", {});
   auto* alias = ty.alias("name", st);
   AST().AddConstructedType(alias);
-  EXPECT_FALSE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Function) {
   auto* func = Func("main", ast::VariableList(), ty.f32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
-
   AST().Functions().Add(func);
-  EXPECT_TRUE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_TRUE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_Function) {
   AST().Functions().Add(nullptr);
-  EXPECT_FALSE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Invalid_Function) {
   auto* func = Func("main", ast::VariableList{}, nullptr, ast::StatementList{},
                     ast::FunctionDecorationList{});
-
   AST().Functions().Add(func);
-  EXPECT_FALSE(IsValid());
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
 }
 
 }  // namespace

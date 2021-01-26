@@ -66,17 +66,19 @@ TEST_F(BuilderTest_Type, GenerateAlias) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
-  auto* alias_type = ty.alias("my_type", ty.f32());
+  auto* i32 = ty.i32();
+  auto* f32 = ty.f32();
+  auto* alias_type = ty.alias("my_type", f32);
 
   spirv::Builder& b = Build();
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -163,9 +165,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateBool) {
+  auto* bool_ = ty.bool_();
+
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(ty.bool_());
+  auto id = b.GenerateTypeIfNeeded(bool_);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -175,20 +179,25 @@ TEST_F(BuilderTest_Type, GenerateBool) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
+  auto* bool_ = ty.bool_();
+  auto* i32 = ty.i32();
+
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.bool_()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(bool_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.bool_()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(bool_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateF32) {
+  auto* f32 = ty.f32();
+
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(ty.f32());
+  auto id = b.GenerateTypeIfNeeded(f32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -198,20 +207,25 @@ TEST_F(BuilderTest_Type, GenerateF32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
+  auto* f32 = ty.f32();
+  auto* i32 = ty.i32();
+
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateI32) {
+  auto* i32 = ty.i32();
+
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(ty.i32());
+  auto id = b.GenerateTypeIfNeeded(i32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -221,20 +235,25 @@ TEST_F(BuilderTest_Type, GenerateI32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
+  auto* f32 = ty.f32();
+  auto* i32 = ty.i32();
+
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32()), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(f32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateMatrix) {
+  auto* mat2x3 = ty.mat2x3<f32>();
+
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(ty.mat2x3<f32>());
+  auto id = b.GenerateTypeIfNeeded(mat2x3);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -247,12 +266,13 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
   auto* mat = ty.mat4x3<i32>();
+  auto* i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
   EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 3u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 3u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -498,9 +518,11 @@ OpMemberDecorate %1 2 MatrixStride 16
 }
 
 TEST_F(BuilderTest_Type, GenerateU32) {
+  auto* u32 = ty.u32();
+
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(ty.u32());
+  auto id = b.GenerateTypeIfNeeded(u32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -510,20 +532,25 @@ TEST_F(BuilderTest_Type, GenerateU32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
+  auto* u32 = ty.u32();
+  auto* f32 = ty.f32();
+
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.u32()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(u32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.f32()), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(f32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.u32()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(u32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateVector) {
+  auto* vec = ty.vec3<f32>();
+
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(ty.vec3<f32>());
+  auto id = b.GenerateTypeIfNeeded(vec);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -534,22 +561,25 @@ TEST_F(BuilderTest_Type, GenerateVector) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
-  auto* vec_type = ty.vec3<i32>();
+  auto* vec = ty.vec3<i32>();
+  auto* i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(vec_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(vec), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(vec_type), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(vec), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
 TEST_F(BuilderTest_Type, GenerateVoid) {
+  auto* void_ = ty.void_();
+
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(ty.void_());
+  auto id = b.GenerateTypeIfNeeded(void_);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -559,13 +589,16 @@ TEST_F(BuilderTest_Type, GenerateVoid) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
+  auto* void_ = ty.void_();
+  auto* i32 = ty.i32();
+
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.void_()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(void_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.i32()), 2u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(ty.void_()), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(void_), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 

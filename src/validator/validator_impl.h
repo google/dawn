@@ -24,6 +24,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
 #include "src/ast/switch_statement.h"
@@ -47,6 +48,9 @@ class ValidatorImpl {
   /// Runs the validator
   /// @returns true if the validation was successful
   bool Validate();
+
+  /// @returns the program being validated
+  const Program* program() { return program_; }
 
   /// @returns the diagnostic messages
   const diag::List& diagnostics() const { return diags_; }

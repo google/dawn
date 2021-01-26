@@ -17,7 +17,7 @@
 #include <assert.h>
 
 #include "src/clone_context.h"
-#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/type/array_type.h"
 #include "src/type/vector_type.h"
 

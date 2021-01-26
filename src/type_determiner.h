@@ -21,7 +21,6 @@
 
 #include "src/ast/module.h"
 #include "src/diagnostic/diagnostic.h"
-#include "src/program.h"
 #include "src/scope_stack.h"
 #include "src/type/storage_texture_type.h"
 
@@ -45,8 +44,8 @@ class Variable;
 class TypeDeterminer {
  public:
   /// Constructor
-  /// @param program the program to update with typing information
-  explicit TypeDeterminer(Program* program);
+  /// @param builder the program builder
+  explicit TypeDeterminer(ProgramBuilder* builder);
 
   /// Destructor
   ~TypeDeterminer();
@@ -138,7 +137,7 @@ class TypeDeterminer {
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 
-  Program* program_;
+  ProgramBuilder* builder_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
   std::unordered_map<Symbol, ast::Function*> symbol_to_function_;

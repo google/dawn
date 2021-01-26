@@ -16,7 +16,10 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/module.h"
 #include "src/demangler.h"
+#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/reader/wgsl/parser.h"
 #include "src/writer/wgsl/generator.h"
 
@@ -114,12 +117,12 @@ fn main() -> void {
   auto src = parser.program();
 
   // Clone the src program to dst
-  auto dst = src.Clone();
+  Program dst(src.Clone());
 
   // Expect the AST printed with to_str() to match
   Demangler demanger;
-  EXPECT_EQ(demanger.Demangle(src.Symbols(), src.to_str()),
-            demanger.Demangle(dst.Symbols(), dst.to_str()));
+  EXPECT_EQ(demanger.Demangle(src.Symbols(), src.AST().to_str()),
+            demanger.Demangle(dst.Symbols(), dst.AST().to_str()));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<ast::Node*> src_nodes;
@@ -142,8 +145,8 @@ fn main() -> void {
   // comparison.
   std::string src_wgsl;
   {
-    tint::writer::wgsl::Generator src_gen(&src);
-    ASSERT_TRUE(src_gen.Generate());
+    writer::wgsl::Generator src_gen(&src);
+    ASSERT_TRUE(src_gen.Generate()) << src_gen.error();
     src_wgsl = src_gen.result();
 
     // Move the src program to a temporary that'll be dropped, so that the src
@@ -154,8 +157,8 @@ fn main() -> void {
     auto tmp = std::move(src);
   }
 
-  // Print the dst program, check it matches the original source
-  tint::writer::wgsl::Generator dst_gen(&dst);
+  // Print the dst module, check it matches the original source
+  writer::wgsl::Generator dst_gen(&dst);
   ASSERT_TRUE(dst_gen.Generate());
   auto dst_wgsl = dst_gen.result();
   ASSERT_EQ(src_wgsl, dst_wgsl);

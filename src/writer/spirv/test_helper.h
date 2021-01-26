@@ -19,8 +19,8 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/ast/builder.h"
-#include "src/program.h"
+#include "src/ast/module.h"
+#include "src/program_builder.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 
@@ -30,9 +30,9 @@ namespace spirv {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public ast::BuilderWithProgram, public BASE {
+class TestHelperBase : public ProgramBuilder, public BASE {
  public:
-  TestHelperBase() : td(program) {}
+  TestHelperBase() : td(this) {}
   ~TestHelperBase() override = default;
 
   /// Builds and returns a spirv::Builder from the program.
@@ -43,7 +43,8 @@ class TestHelperBase : public ast::BuilderWithProgram, public BASE {
     if (spirv_builder) {
       return *spirv_builder;
     }
-    spirv_builder = std::make_unique<spirv::Builder>(program);
+    program_ = std::make_unique<Program>(std::move(*this));
+    spirv_builder = std::make_unique<spirv::Builder>(program_.get());
     return *spirv_builder;
   }
 
@@ -58,6 +59,7 @@ class TestHelperBase : public ast::BuilderWithProgram, public BASE {
   }
 
  private:
+  std::unique_ptr<Program> program_;
   std::unique_ptr<spirv::Builder> spirv_builder;
 };
 using TestHelper = TestHelperBase<testing::Test>;

@@ -27,7 +27,6 @@
 #include "src/ast/block_statement.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/builder.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
@@ -51,6 +50,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/program_builder.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -87,9 +87,9 @@ class FakeExpr : public ast::Expression {
   void to_str(std::ostream&, size_t) const override {}
 };
 
-class TypeDeterminerHelper : public ast::BuilderWithProgram {
+class TypeDeterminerHelper : public ProgramBuilder {
  public:
-  TypeDeterminerHelper() : td_(std::make_unique<TypeDeterminer>(program)) {}
+  TypeDeterminerHelper() : td_(std::make_unique<TypeDeterminer>(this)) {}
 
   TypeDeterminer* td() const { return td_.get(); }
 

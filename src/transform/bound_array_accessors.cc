@@ -23,7 +23,6 @@
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/builder.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
@@ -44,6 +43,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/clone_context.h"
+#include "src/program_builder.h"
 #include "src/type/array_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/u32_type.h"
@@ -56,13 +56,14 @@ BoundArrayAccessors::BoundArrayAccessors() = default;
 BoundArrayAccessors::~BoundArrayAccessors() = default;
 
 Transform::Output BoundArrayAccessors::Run(const Program* in) {
-  Output out;
-  CloneContext(&out.program, in)
+  ProgramBuilder out;
+  diag::List diagnostics;
+  CloneContext(&out, in)
       .ReplaceAll([&](CloneContext* ctx, ast::ArrayAccessorExpression* expr) {
-        return Transform(expr, ctx, &out.diagnostics);
+        return Transform(expr, ctx, &diagnostics);
       })
       .Clone();
-  return out;
+  return Output(Program(std::move(out)), std::move(diagnostics));
 }
 
 ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
@@ -75,8 +76,8 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     return nullptr;
   }
 
-  ast::Builder b(ctx->dst);
-  using u32 = ast::Builder::u32;
+  ProgramBuilder& b = *ctx->dst;
+  using u32 = ProgramBuilder::u32;
 
   uint32_t size = 0;
   bool is_vec = ret_type->Is<type::Vector>();

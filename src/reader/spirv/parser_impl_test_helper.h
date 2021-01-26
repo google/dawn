@@ -58,16 +58,16 @@ class SpvParserTestBase : public T {
 using SpvParserTest = SpvParserTestBase<::testing::Test>;
 
 /// Returns the string dump of a statement list.
-/// @param program the program
+/// @param symbols the SymbolTable
 /// @param stmts the statement list
 /// @returns the string dump of a statement list.
-inline std::string ToString(const Program& program,
+inline std::string ToString(const SymbolTable& symbols,
                             const ast::StatementList& stmts) {
   std::ostringstream outs;
   for (const auto* stmt : stmts) {
     stmt->to_str(outs, 0);
   }
-  return Demangler().Demangle(program.Symbols(), outs.str());
+  return Demangler().Demangle(symbols, outs.str());
 }
 
 }  // namespace spirv

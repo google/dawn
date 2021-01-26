@@ -56,7 +56,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   auto src = parser.program();
 
   // Clone the src program to dst
-  auto dst = src.Clone();
+  tint::Program dst(src.Clone());
 
   // Expect the demangled AST printed with to_str() to match
   tint::Demangler d;

@@ -16,6 +16,8 @@
 
 #include "gtest/gtest.h"
 
+#include "src/ast/module.h"
+
 namespace tint {
 namespace reader {
 namespace wgsl {
@@ -41,9 +43,9 @@ fn main() -> void {
   Parser p(&file);
   ASSERT_TRUE(p.Parse()) << p.error();
 
-  auto m = p.program();
-  ASSERT_EQ(1u, m.AST().Functions().size());
-  ASSERT_EQ(1u, m.AST().GlobalVariables().size());
+  auto program = p.program();
+  ASSERT_EQ(1u, program.AST().Functions().size());
+  ASSERT_EQ(1u, program.AST().GlobalVariables().size());
 }
 
 TEST_F(ParserTest, HandlesError) {

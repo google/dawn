@@ -47,18 +47,6 @@ class Transform {
     /// @param diags the list of diagnostics to move into this Output
     Output(Program&& program, diag::List&& diags);
 
-    /// Move constructor
-    /// @param output the output to move into this Output
-    Output(Output&& output);
-
-    /// Destructor
-    ~Output();
-
-    /// Move assignment operator
-    /// @param rhs the Output to move into this Output
-    /// @returns this Output
-    Output& operator=(Output&& rhs);
-
     /// The transformed program. May be empty on error.
     Program program;
     /// Diagnostics raised while running the Transform.

@@ -17,6 +17,7 @@
 #include "src/ast/block_statement.h"
 #include "src/ast/function.h"
 #include "src/clone_context.h"
+#include "src/program_builder.h"
 
 namespace tint {
 namespace transform {
@@ -27,12 +28,6 @@ Transform::Output::Output(Program&& p) : program(std::move(p)) {}
 
 Transform::Output::Output(Program&& p, diag::List&& d)
     : program(std::move(p)), diagnostics(std::move(d)) {}
-
-Transform::Output::~Output() = default;
-
-Transform::Output::Output(Output&&) = default;
-
-Transform::Output& Transform::Output::operator=(Output&& rhs) = default;
 
 Transform::Transform() = default;
 

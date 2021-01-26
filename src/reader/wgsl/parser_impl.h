@@ -52,7 +52,7 @@
 #include "src/ast/variable_decoration.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
-#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
 #include "src/type/storage_texture_type.h"
@@ -307,11 +307,12 @@ class ParserImpl {
   /// @returns the diagnostic messages
   diag::List& diagnostics() { return diags_; }
 
-  /// @returns the program. The program in the parser will be reset after this.
-  Program program() { return std::move(program_); }
+  /// @returns the Program. The program builder in the parser will be reset
+  /// after this.
+  Program program() { return Program(std::move(builder_)); }
 
-  /// @returns a pointer to the module, without resetting it.
-  Program& get_program() { return program_; }
+  /// @returns the program builder.
+  ProgramBuilder& builder() { return builder_; }
 
   /// @returns the next token
   Token next();
@@ -829,7 +830,7 @@ class ParserImpl {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) {
-    return program_.create<T>(std::forward<ARGS>(args)...);
+    return builder_.create<T>(std::forward<ARGS>(args)...);
   }
 
   diag::List diags_;
@@ -839,7 +840,7 @@ class ParserImpl {
   std::vector<Token::Type> sync_tokens_;
   int silence_errors_ = 0;
   std::unordered_map<std::string, type::Type*> registered_constructs_;
-  Program program_;
+  ProgramBuilder builder_;
   size_t max_errors_ = 25;
 };
 

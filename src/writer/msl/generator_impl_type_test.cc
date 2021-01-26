@@ -66,9 +66,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
+  auto* arr = ty.array<bool, 4>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>(), "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(arr, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[4]");
 }
 
@@ -106,59 +108,74 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
+  auto* arr = ty.array<bool, 4>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>(), "bool")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(arr, "bool")) << gen.error();
   EXPECT_EQ(gen.result(), "bool bool_tint_0[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
+  auto* arr = ty.array<bool, 4>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(arr, "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
+  auto* arr = ty.array<bool, 1>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.array<bool, 1>(), "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(arr, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray_NameCollision) {
+  auto* arr = ty.array<bool, 1>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.array<bool, 1>(), "discard_fragment"))
-      << gen.error();
+  ASSERT_TRUE(gen.EmitType(arr, "discard_fragment")) << gen.error();
   EXPECT_EQ(gen.result(), "bool discard_fragment_tint_0[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
+  auto* bool_ = ty.bool_();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.bool_(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(bool_, "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_F32) {
+  auto* f32 = ty.f32();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.f32(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(f32, "")) << gen.error();
   EXPECT_EQ(gen.result(), "float");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_I32) {
+  auto* i32 = ty.i32();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.i32(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(i32, "")) << gen.error();
   EXPECT_EQ(gen.result(), "int");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
+  auto* mat2x3 = ty.mat2x3<f32>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.mat2x3<f32>(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(mat2x3, "")) << gen.error();
   EXPECT_EQ(gen.result(), "float2x3");
 }
 
@@ -268,23 +285,29 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_U32) {
+  auto* u32 = ty.u32();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.u32(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(u32, "")) << gen.error();
   EXPECT_EQ(gen.result(), "uint");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Vector) {
+  auto* vec3 = ty.vec3<f32>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.vec3<f32>(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(vec3, "")) << gen.error();
   EXPECT_EQ(gen.result(), "float3");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Void) {
+  auto* void_ = ty.void_();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.void_(), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(void_, "")) << gen.error();
   EXPECT_EQ(gen.result(), "void");
 }
 

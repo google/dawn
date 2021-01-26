@@ -22,11 +22,13 @@
 #include "src/ast/constructor_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
+#include "src/ast/module.h"
 #include "src/ast/null_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
+#include "src/program.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
 #include "src/type/f32_type.h"
@@ -43,27 +45,27 @@
 namespace tint {
 namespace inspector {
 
-Inspector::Inspector(const Program* program) : program_(*program) {}
+Inspector::Inspector(const Program* program) : program_(program) {}
 
 Inspector::~Inspector() = default;
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
 
-  for (auto* func : program_.AST().Functions()) {
+  for (auto* func : program_->AST().Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
 
     EntryPoint entry_point;
-    entry_point.name = program_.Symbols().NameFor(func->symbol());
-    entry_point.remapped_name = program_.Symbols().NameFor(func->symbol());
+    entry_point.name = program_->Symbols().NameFor(func->symbol());
+    entry_point.remapped_name = program_->Symbols().NameFor(func->symbol());
     entry_point.stage = func->pipeline_stage();
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
 
     for (auto* var : func->referenced_module_variables()) {
-      auto name = program_.Symbols().NameFor(var->symbol());
+      auto name = program_->Symbols().NameFor(var->symbol());
       if (var->HasBuiltinDecoration()) {
         continue;
       }
@@ -106,7 +108,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
-  for (auto* var : program_.AST().GlobalVariables()) {
+  for (auto* var : program_->AST().GlobalVariables()) {
     if (!var->HasConstantIdDecoration()) {
       continue;
     }
@@ -283,7 +285,7 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
-  auto* func = program_.AST().Functions().Find(program_.Symbols().Get(name));
+  auto* func = program_->AST().Functions().Find(program_->Symbols().Get(name));
   if (!func) {
     error_ += name + " was not found!";
     return nullptr;

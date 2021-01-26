@@ -502,9 +502,10 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  tint::TypeDeterminer td(&program);
-  if (!td.Determine()) {
-    std::cerr << "Type Determination: " << td.error() << std::endl;
+  auto diags = tint::TypeDeterminer::Run(&program);
+  if (diags.contains_errors()) {
+    std::cerr << "Type Determination: ";
+    diag_formatter.format(reader->diagnostics(), diag_printer.get());
     return 1;
   }
 

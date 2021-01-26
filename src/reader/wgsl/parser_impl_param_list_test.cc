@@ -30,15 +30,14 @@ namespace {
 TEST_F(ParserImplTest, ParamList_Single) {
   auto p = parser("a : i32");
 
-  auto& mod = p->get_program();
-  auto* i32 = mod.create<type::I32>();
+  auto* i32 = p->builder().create<type::I32>();
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 1u);
 
-  EXPECT_EQ(e.value[0]->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_EQ(e.value[0]->type(), i32);
   EXPECT_TRUE(e.value[0]->is_const());
 
@@ -51,17 +50,16 @@ TEST_F(ParserImplTest, ParamList_Single) {
 TEST_F(ParserImplTest, ParamList_Multiple) {
   auto p = parser("a : i32, b: f32, c: vec2<f32>");
 
-  auto& mod = p->get_program();
-  auto* i32 = mod.create<type::I32>();
-  auto* f32 = mod.create<type::F32>();
-  auto* vec2 = mod.create<type::Vector>(f32, 2);
+  auto* i32 = p->builder().create<type::I32>();
+  auto* f32 = p->builder().create<type::F32>();
+  auto* vec2 = p->builder().create<type::Vector>(f32, 2);
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 3u);
 
-  EXPECT_EQ(e.value[0]->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_EQ(e.value[0]->type(), i32);
   EXPECT_TRUE(e.value[0]->is_const());
 
@@ -70,7 +68,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
   ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
 
-  EXPECT_EQ(e.value[1]->symbol(), p->get_program().Symbols().Register("b"));
+  EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("b"));
   EXPECT_EQ(e.value[1]->type(), f32);
   EXPECT_TRUE(e.value[1]->is_const());
 
@@ -79,7 +77,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[1]->source().range.end.line, 1u);
   ASSERT_EQ(e.value[1]->source().range.end.column, 11u);
 
-  EXPECT_EQ(e.value[2]->symbol(), p->get_program().Symbols().Register("c"));
+  EXPECT_EQ(e.value[2]->symbol(), p->builder().Symbols().Get("c"));
   EXPECT_EQ(e.value[2]->type(), vec2);
   EXPECT_TRUE(e.value[2]->is_const());
 

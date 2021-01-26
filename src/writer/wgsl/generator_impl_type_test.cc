@@ -57,9 +57,11 @@ TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
+  auto* arr = ty.array<bool, 4>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.array<bool, 4>())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(arr)) << gen.error();
   EXPECT_EQ(gen.result(), "array<bool, 4>");
 }
 
@@ -132,30 +134,38 @@ TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
+  auto* bool_ = ty.bool_();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.bool_())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(bool_)) << gen.error();
   EXPECT_EQ(gen.result(), "bool");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_F32) {
+  auto* f32 = ty.f32();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.f32())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(f32)) << gen.error();
   EXPECT_EQ(gen.result(), "f32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_I32) {
+  auto* i32 = ty.i32();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.i32())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(i32)) << gen.error();
   EXPECT_EQ(gen.result(), "i32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
+  auto* mat2x3 = ty.mat2x3<f32>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.mat2x3<f32>())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(mat2x3)) << gen.error();
   EXPECT_EQ(gen.result(), "mat2x3<f32>");
 }
 
@@ -222,23 +232,29 @@ struct S {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {
+  auto* u32 = ty.u32();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.u32())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(u32)) << gen.error();
   EXPECT_EQ(gen.result(), "u32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
+  auto* vec3 = ty.vec3<f32>();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.vec3<f32>())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(vec3)) << gen.error();
   EXPECT_EQ(gen.result(), "vec3<f32>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Void) {
+  auto* void_ = ty.void_();
+
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ty.void_())) << gen.error();
+  ASSERT_TRUE(gen.EmitType(void_)) << gen.error();
   EXPECT_EQ(gen.result(), "void");
 }
 

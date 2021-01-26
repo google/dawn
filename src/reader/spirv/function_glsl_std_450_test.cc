@@ -183,7 +183,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -191,14 +191,14 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{f1}
         )
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
@@ -212,7 +212,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -220,14 +220,14 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2f1}
         )
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
@@ -241,7 +241,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -249,7 +249,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{f1}
           Identifier[not set]{f2}
@@ -257,7 +257,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
@@ -271,7 +271,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -279,7 +279,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2f1}
           Identifier[not set]{v2f2}
@@ -287,7 +287,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
@@ -301,7 +301,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -309,14 +309,14 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{f1}
         )
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
@@ -330,7 +330,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -338,14 +338,14 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2f1}
         )
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
@@ -359,7 +359,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -367,7 +367,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{f1}
           Identifier[not set]{f2}
@@ -375,7 +375,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
@@ -389,7 +389,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -397,7 +397,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2f1}
           Identifier[not set]{v2f2}
@@ -405,7 +405,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
@@ -419,7 +419,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -427,7 +427,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{f1}
           Identifier[not set]{f2}
@@ -436,7 +436,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
@@ -451,7 +451,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -459,7 +459,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2f1}
           Identifier[not set]{v2f2}
@@ -468,7 +468,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
@@ -482,7 +482,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -490,7 +490,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{f1}
           Identifier[not set]{u1}
@@ -498,7 +498,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
@@ -513,7 +513,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -521,7 +521,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2f1}
           Identifier[not set]{v2u1}
@@ -529,7 +529,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
@@ -543,7 +543,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -551,7 +551,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{f1}
           Identifier[not set]{i1}
@@ -559,7 +559,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
@@ -574,7 +574,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -582,7 +582,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2f1}
           Identifier[not set]{v2i1}
@@ -590,7 +590,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
@@ -605,7 +605,7 @@ TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -613,7 +613,7 @@ TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v3f1}
           Identifier[not set]{v3f2}
@@ -621,7 +621,7 @@ TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -709,7 +709,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -717,14 +717,14 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{i1}
         )
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
@@ -739,7 +739,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -747,14 +747,14 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2i1}
         )
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
@@ -769,7 +769,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -777,7 +777,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{i1}
           Identifier[not set]{i2}
@@ -785,7 +785,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
@@ -800,7 +800,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -808,7 +808,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2i1}
           Identifier[not set]{v2i2}
@@ -816,7 +816,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
@@ -831,7 +831,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -839,7 +839,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{i1}
           Identifier[not set]{i2}
@@ -848,7 +848,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
@@ -863,7 +863,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -871,7 +871,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2i1}
           Identifier[not set]{v2i2}
@@ -880,7 +880,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -907,7 +907,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -915,7 +915,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{u1}
           Identifier[not set]{u2}
@@ -923,7 +923,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
@@ -938,7 +938,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -946,7 +946,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2u1}
           Identifier[not set]{v2u2}
@@ -954,7 +954,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
@@ -968,7 +968,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -976,7 +976,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{u1}
           Identifier[not set]{u2}
@@ -985,7 +985,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
@@ -1000,7 +1000,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -1008,7 +1008,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
     {
       Call[not set]{
         Identifier[not set]{)" + GetParam().wgsl_func +
-                                                                   R"(}
+                                                                         R"(}
         (
           Identifier[not set]{v2u1}
           Identifier[not set]{v2u2}
@@ -1017,7 +1017,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
       }
     }
   })"))
-      << ToString(p->get_program(), fe.ast_body());
+      << ToString(p->builder().Symbols(), fe.ast_body());
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -1043,7 +1043,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->get_program(), fe.ast_body());
+  auto body = ToString(p->builder().Symbols(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
   VariableConst{
     x_1
@@ -1095,7 +1095,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->get_program(), fe.ast_body());
+  auto body = ToString(p->builder().Symbols(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
   VariableConst{
     x_1
@@ -1153,7 +1153,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->get_program(), fe.ast_body());
+  auto body = ToString(p->builder().Symbols(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
   VariableConst{
     x_1
@@ -1211,7 +1211,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->get_program(), fe.ast_body());
+  auto body = ToString(p->builder().Symbols(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
   VariableConst{
     x_1
@@ -1271,7 +1271,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->get_program(), fe.ast_body());
+  auto body = ToString(p->builder().Symbols(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
   VariableConst{
     x_1
@@ -1329,7 +1329,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->get_program(), fe.ast_body());
+  auto body = ToString(p->builder().Symbols(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
   VariableConst{
     x_1
@@ -1387,7 +1387,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->get_program(), fe.ast_body());
+  auto body = ToString(p->builder().Symbols(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
   VariableConst{
     x_1

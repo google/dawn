@@ -14,11 +14,14 @@
 
 #include "src/clone_context.h"
 
+#include "src/ast/function.h"
+#include "src/ast/module.h"
 #include "src/program.h"
+#include "src/program_builder.h"
 
 namespace tint {
 
-CloneContext::CloneContext(Program* to, Program const* from)
+CloneContext::CloneContext(ProgramBuilder* to, Program const* from)
     : dst(to), src(from) {}
 CloneContext::~CloneContext() = default;
 
@@ -27,7 +30,15 @@ Symbol CloneContext::Clone(const Symbol& s) const {
 }
 
 void CloneContext::Clone() {
-  src->Clone(this);
+  for (auto* ty : src->AST().ConstructedTypes()) {
+    dst->AST().AddConstructedType(Clone(ty));
+  }
+  for (auto* var : src->AST().GlobalVariables()) {
+    dst->AST().AddGlobalVariable(Clone(var));
+  }
+  for (auto* func : src->AST().Functions()) {
+    dst->AST().Functions().Add(Clone(func));
+  }
 }
 
 ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {

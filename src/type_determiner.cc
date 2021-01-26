@@ -15,6 +15,7 @@
 #include "src/type_determiner.h"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "src/ast/array_accessor_expression.h"
@@ -41,6 +42,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/program_builder.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
 #include "src/type/depth_texture_type.h"
@@ -59,18 +61,20 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer(Program* program) : program_(program) {}
+TypeDeterminer::TypeDeterminer(ProgramBuilder* builder) : builder_(builder) {}
 
 TypeDeterminer::~TypeDeterminer() = default;
 
 diag::List TypeDeterminer::Run(Program* program) {
-  TypeDeterminer td(program);
+  ProgramBuilder builder = program->CloneAsBuilder();
+  TypeDeterminer td(&builder);
   if (!td.Determine()) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;
     err.message = td.error();
     return {err};
   }
+  *program = Program(std::move(builder));
   return {};
 }
 
@@ -101,8 +105,9 @@ void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
 
 bool TypeDeterminer::Determine() {
   std::vector<type::StorageTexture*> storage_textures;
-  for (auto* ty : program_->Types()) {
-    if (auto* storage = ty->UnwrapIfNeeded()->As<type::StorageTexture>()) {
+  for (auto& it : builder_->Types().types()) {
+    if (auto* storage =
+            it.second->UnwrapIfNeeded()->As<type::StorageTexture>()) {
       storage_textures.emplace_back(storage);
     }
   }
@@ -115,7 +120,7 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  for (auto* var : program_->AST().GlobalVariables()) {
+  for (auto* var : builder_->AST().GlobalVariables()) {
     variable_stack_.set_global(var->symbol(), var);
 
     if (var->has_constructor()) {
@@ -125,13 +130,13 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  if (!DetermineFunctions(program_->AST().Functions())) {
+  if (!DetermineFunctions(builder_->AST().Functions())) {
     return false;
   }
 
   // Walk over the caller to callee information and update functions with which
   // entry points call those functions.
-  for (auto* func : program_->AST().Functions()) {
+  for (auto* func : builder_->AST().Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -350,7 +355,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
   } else if (auto* vec = parent_type->As<type::Vector>()) {
     ret = vec->type();
   } else if (auto* mat = parent_type->As<type::Matrix>()) {
-    ret = program_->create<type::Vector>(mat->type(), mat->rows());
+    ret = builder_->create<type::Vector>(mat->type(), mat->rows());
   } else {
     set_error(expr->source(), "invalid parent type (" +
                                   parent_type->type_name() +
@@ -360,13 +365,13 @@ bool TypeDeterminer::DetermineArrayAccessor(
 
   // If we're extracting from a pointer, we return a pointer.
   if (auto* ptr = res->As<type::Pointer>()) {
-    ret = program_->create<type::Pointer>(ret, ptr->storage_class());
+    ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
   } else if (auto* arr = parent_type->As<type::Array>()) {
     if (!arr->type()->is_scalar()) {
       // If we extract a non-scalar from an array then we also get a pointer. We
       // will generate a Function storage class variable to store this
       // into.
-      ret = program_->create<type::Pointer>(ret, ast::StorageClass::kFunction);
+      ret = builder_->create<type::Pointer>(ret, ast::StorageClass::kFunction);
     }
   }
   expr->set_result_type(ret);
@@ -403,11 +408,11 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
         caller_to_callee_[current_function_->symbol()].push_back(
             ident->symbol());
 
-        auto* callee_func = program_->AST().Functions().Find(ident->symbol());
+        auto* callee_func = builder_->AST().Functions().Find(ident->symbol());
         if (callee_func == nullptr) {
           set_error(expr->source(),
                     "unable to find called function: " +
-                        program_->Symbols().NameFor(ident->symbol()));
+                        builder_->Symbols().NameFor(ident->symbol()));
           return false;
         }
 
@@ -433,7 +438,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     auto func_sym = expr->func()->As<ast::IdentifierExpression>()->symbol();
     set_error(expr->source(),
               "v-0005: function must be declared before use: '" +
-                  program_->Symbols().NameFor(func_sym) + "'");
+                  builder_->Symbols().NameFor(func_sym) + "'");
     return false;
   }
 
@@ -521,7 +526,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     if (expr->params().size() != 1) {
       set_error(expr->source(),
                 "incorrect number of parameters for " +
-                    program_->Symbols().NameFor(ident->symbol()));
+                    builder_->Symbols().NameFor(ident->symbol()));
       return false;
     }
 
@@ -532,27 +537,27 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (ident->intrinsic() == ast::Intrinsic::kAny ||
       ident->intrinsic() == ast::Intrinsic::kAll) {
-    expr->func()->set_result_type(program_->create<type::Bool>());
+    expr->func()->set_result_type(builder_->create<type::Bool>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kArrayLength) {
-    expr->func()->set_result_type(program_->create<type::U32>());
+    expr->func()->set_result_type(builder_->create<type::U32>());
     return true;
   }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
     if (expr->params().size() != 1) {
       set_error(expr->source(),
                 "incorrect number of parameters for " +
-                    program_->Symbols().NameFor(ident->symbol()));
+                    builder_->Symbols().NameFor(ident->symbol()));
       return false;
     }
 
-    auto* bool_type = program_->create<type::Bool>();
+    auto* bool_type = builder_->create<type::Bool>();
 
     auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
     if (auto* vec = param_type->As<type::Vector>()) {
       expr->func()->set_result_type(
-          program_->create<type::Vector>(bool_type, vec->size()));
+          builder_->create<type::Vector>(bool_type, vec->size()));
     } else {
       expr->func()->set_result_type(bool_type);
     }
@@ -565,7 +570,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     if (!texture_param->result_type()->UnwrapAll()->Is<type::Texture>()) {
       set_error(expr->source(),
                 "invalid first argument for " +
-                    program_->Symbols().NameFor(ident->symbol()));
+                    builder_->Symbols().NameFor(ident->symbol()));
       return false;
     }
     type::Texture* texture =
@@ -677,7 +682,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     if (expr->params().size() != param.count) {
       set_error(expr->source(),
                 "incorrect number of parameters for " +
-                    program_->Symbols().NameFor(ident->symbol()) + ", got " +
+                    builder_->Symbols().NameFor(ident->symbol()) + ", got " +
                     std::to_string(expr->params().size()) + " and expected " +
                     std::to_string(param.count));
       return false;
@@ -690,7 +695,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     type::Type* return_type = nullptr;
     switch (ident->intrinsic()) {
       case ast::Intrinsic::kTextureDimensions: {
-        auto* i32 = program_->create<type::I32>();
+        auto* i32 = builder_->create<type::I32>();
         switch (texture->dim()) {
           default:
             set_error(expr->source(), "invalid texture dimensions");
@@ -701,12 +706,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
             break;
           case type::TextureDimension::k2d:
           case type::TextureDimension::k2dArray:
-            return_type = program_->create<type::Vector>(i32, 2);
+            return_type = builder_->create<type::Vector>(i32, 2);
             break;
           case type::TextureDimension::k3d:
           case type::TextureDimension::kCube:
           case type::TextureDimension::kCubeArray:
-            return_type = program_->create<type::Vector>(i32, 3);
+            return_type = builder_->create<type::Vector>(i32, 3);
             break;
         }
         break;
@@ -714,14 +719,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       case ast::Intrinsic::kTextureNumLayers:
       case ast::Intrinsic::kTextureNumLevels:
       case ast::Intrinsic::kTextureNumSamples:
-        return_type = program_->create<type::I32>();
+        return_type = builder_->create<type::I32>();
         break;
       case ast::Intrinsic::kTextureStore:
-        return_type = program_->create<type::Void>();
+        return_type = builder_->create<type::Void>();
         break;
       default: {
         if (texture->Is<type::DepthTexture>()) {
-          return_type = program_->create<type::F32>();
+          return_type = builder_->create<type::F32>();
         } else {
           type::Type* type = nullptr;
           if (auto* storage = texture->As<type::StorageTexture>()) {
@@ -736,7 +741,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                       "unknown texture type for texture sampling");
             return false;
           }
-          return_type = program_->create<type::Vector>(type, 4);
+          return_type = builder_->create<type::Vector>(type, 4);
         }
       }
     }
@@ -745,14 +750,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kDot) {
-    expr->func()->set_result_type(program_->create<type::F32>());
+    expr->func()->set_result_type(builder_->create<type::F32>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
     if (expr->params().size() != 3) {
       set_error(expr->source(),
                 "incorrect number of parameters for " +
-                    program_->Symbols().NameFor(ident->symbol()) +
+                    builder_->Symbols().NameFor(ident->symbol()) +
                     " expected 3 got " + std::to_string(expr->params().size()));
       return false;
     }
@@ -772,13 +777,13 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (data == nullptr) {
     error_ = "unable to find intrinsic " +
-             program_->Symbols().NameFor(ident->symbol());
+             builder_->Symbols().NameFor(ident->symbol());
     return false;
   }
 
   if (expr->params().size() != data->param_count) {
     set_error(expr->source(), "incorrect number of parameters for " +
-                                  program_->Symbols().NameFor(ident->symbol()) +
+                                  builder_->Symbols().NameFor(ident->symbol()) +
                                   ". Expected " +
                                   std::to_string(data->param_count) + " got " +
                                   std::to_string(expr->params().size()));
@@ -796,7 +801,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
             !result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->Symbols().NameFor(ident->symbol()) + ". " +
+                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires float or int, scalar or vector values");
           return false;
         }
@@ -805,7 +810,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_float_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->Symbols().NameFor(ident->symbol()) + ". " +
+                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires float scalar or float vector values");
           return false;
         }
@@ -815,7 +820,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->Symbols().NameFor(ident->symbol()) + ". " +
+                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires integer scalar or integer vector values");
           return false;
         }
@@ -824,7 +829,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_float_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->Symbols().NameFor(ident->symbol()) + ". " +
+                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires float vector values");
           return false;
         }
@@ -833,7 +838,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                 data->vector_size) {
           set_error(expr->source(),
                     "incorrect vector size for " +
-                        program_->Symbols().NameFor(ident->symbol()) + ". " +
+                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires " + std::to_string(data->vector_size) +
                         " elements");
           return false;
@@ -843,7 +848,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->Is<type::Matrix>()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->Symbols().NameFor(ident->symbol()) +
+                        builder_->Symbols().NameFor(ident->symbol()) +
                         ". Requires matrix value");
           return false;
         }
@@ -856,7 +861,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     if (result_types[0] != result_types[i]) {
       set_error(expr->source(),
                 "mismatched parameter types for " +
-                    program_->Symbols().NameFor(ident->symbol()));
+                    builder_->Symbols().NameFor(ident->symbol()));
       return false;
     }
   }
@@ -907,7 +912,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
       expr->set_result_type(var->type());
     } else {
       expr->set_result_type(
-          program_->create<type::Pointer>(var->type(), var->storage_class()));
+          builder_->create<type::Pointer>(var->type(), var->storage_class()));
     }
 
     set_referenced_from_function_if_needed(var, true);
@@ -923,14 +928,14 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   if (!SetIntrinsicIfNeeded(expr)) {
     set_error(expr->source(),
               "v-0006: identifier must be declared before use: " +
-                  program_->Symbols().NameFor(symbol));
+                  builder_->Symbols().NameFor(symbol));
     return false;
   }
   return true;
 }
 
 bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
-  auto name = program_->Symbols().NameFor(ident->symbol());
+  auto name = builder_->Symbols().NameFor(ident->symbol());
   if (name == "abs") {
     ident->set_intrinsic(ast::Intrinsic::kAbs);
   } else if (name == "acos") {
@@ -1104,31 +1109,31 @@ bool TypeDeterminer::DetermineMemberAccessor(
 
     if (ret == nullptr) {
       set_error(expr->source(), "struct member " +
-                                    program_->Symbols().NameFor(symbol) +
+                                    builder_->Symbols().NameFor(symbol) +
                                     " not found");
       return false;
     }
 
     // If we're extracting from a pointer, we return a pointer.
     if (auto* ptr = res->As<type::Pointer>()) {
-      ret = program_->create<type::Pointer>(ret, ptr->storage_class());
+      ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
     }
   } else if (auto* vec = data_type->As<type::Vector>()) {
     // TODO(dsinclair): Swizzle, record into the identifier experesion
 
-    auto size = program_->Symbols().NameFor(expr->member()->symbol()).size();
+    auto size = builder_->Symbols().NameFor(expr->member()->symbol()).size();
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
       // If we're extracting from a pointer, we return a pointer.
       if (auto* ptr = res->As<type::Pointer>()) {
-        ret = program_->create<type::Pointer>(ret, ptr->storage_class());
+        ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
       }
     } else {
       // The vector will have a number of components equal to the length of the
       // swizzle. This assumes the validator will check that the swizzle
       // is correct.
-      ret = program_->create<type::Vector>(vec->type(),
+      ret = builder_->create<type::Vector>(vec->type(),
                                            static_cast<uint32_t>(size));
     }
   } else {
@@ -1160,11 +1165,11 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   if (expr->IsLogicalAnd() || expr->IsLogicalOr() || expr->IsEqual() ||
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
-    auto* bool_type = program_->create<type::Bool>();
+    auto* bool_type = builder_->create<type::Bool>();
     auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
     if (auto* vec = param_type->As<type::Vector>()) {
       expr->set_result_type(
-          program_->create<type::Vector>(bool_type, vec->size()));
+          builder_->create<type::Vector>(bool_type, vec->size()));
     } else {
       expr->set_result_type(bool_type);
     }
@@ -1181,14 +1186,14 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     auto* lhs_vec = lhs_type->As<type::Vector>();
     auto* rhs_vec = rhs_type->As<type::Vector>();
     if (lhs_mat && rhs_mat) {
-      expr->set_result_type(program_->create<type::Matrix>(
+      expr->set_result_type(builder_->create<type::Matrix>(
           lhs_mat->type(), lhs_mat->rows(), rhs_mat->columns()));
     } else if (lhs_mat && rhs_vec) {
       expr->set_result_type(
-          program_->create<type::Vector>(lhs_mat->type(), lhs_mat->rows()));
+          builder_->create<type::Vector>(lhs_mat->type(), lhs_mat->rows()));
     } else if (lhs_vec && rhs_mat) {
       expr->set_result_type(
-          program_->create<type::Vector>(rhs_mat->type(), rhs_mat->columns()));
+          builder_->create<type::Vector>(rhs_mat->type(), rhs_mat->columns()));
     } else if (lhs_mat) {
       // matrix * scalar
       expr->set_result_type(lhs_type);
@@ -1239,7 +1244,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
     case type::ImageFormat::kRg32Uint:
     case type::ImageFormat::kRgba16Uint:
     case type::ImageFormat::kRgba32Uint: {
-      tex->set_type(program_->create<type::U32>());
+      tex->set_type(builder_->create<type::U32>());
       return true;
     }
 
@@ -1252,7 +1257,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
     case type::ImageFormat::kRg32Sint:
     case type::ImageFormat::kRgba16Sint:
     case type::ImageFormat::kRgba32Sint: {
-      tex->set_type(program_->create<type::I32>());
+      tex->set_type(builder_->create<type::I32>());
       return true;
     }
 
@@ -1273,7 +1278,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
     case type::ImageFormat::kRg32Float:
     case type::ImageFormat::kRgba16Float:
     case type::ImageFormat::kRgba32Float: {
-      tex->set_type(program_->create<type::F32>());
+      tex->set_type(builder_->create<type::F32>());
       return true;
     }
 

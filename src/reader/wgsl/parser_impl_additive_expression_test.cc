@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());

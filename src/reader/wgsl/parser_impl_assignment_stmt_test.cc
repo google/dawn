@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 
   ASSERT_TRUE(e->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = e->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
 
   ASSERT_TRUE(e->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(e->rhs()->Is<ast::ScalarConstructorExpression>());
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 
   ASSERT_TRUE(mem->member()->Is<ast::IdentifierExpression>());
   auto* ident = mem->member()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("d"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("d"));
 
   ASSERT_TRUE(mem->structure()->Is<ast::ArrayAccessorExpression>());
   auto* ary = mem->structure()->As<ast::ArrayAccessorExpression>();
@@ -93,18 +93,18 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   mem = ary->array()->As<ast::MemberAccessorExpression>();
   ASSERT_TRUE(mem->member()->Is<ast::IdentifierExpression>());
   ident = mem->member()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("c"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("c"));
 
   ASSERT_TRUE(mem->structure()->Is<ast::MemberAccessorExpression>());
   mem = mem->structure()->As<ast::MemberAccessorExpression>();
 
   ASSERT_TRUE(mem->structure()->Is<ast::IdentifierExpression>());
   ident = mem->structure()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
 
   ASSERT_TRUE(mem->member()->Is<ast::IdentifierExpression>());
   ident = mem->member()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("b"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("b"));
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {

@@ -129,7 +129,7 @@ class Inspector {
       const std::string& entry_point);
 
  private:
-  const Program& program_;
+  const Program* program_;
   std::string error_;
 
   /// @param name name of the entry point to find

@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   auto* ary = e->As<ast::ArrayAccessorExpression>();
   ASSERT_TRUE(ary->array()->Is<ast::IdentifierExpression>());
   auto* ident = ary->array()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
 
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());

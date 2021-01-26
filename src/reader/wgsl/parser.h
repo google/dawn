@@ -39,7 +39,8 @@ class Parser : public Reader {
   /// @returns true if the parse was successful, false otherwise.
   bool Parse() override;
 
-  /// @returns the program. The program in the parser will be reset after this.
+  /// @returns the program. The program builder in the parser will be reset
+  /// after this.
   Program program() override;
 
  private:

@@ -31,13 +31,16 @@ namespace ast {
 class Module : public Castable<Module, Node> {
  public:
   /// Constructor
-  Module();
+  /// @param source the source of the module
+  explicit Module(const Source& source);
 
   /// Constructor
+  /// @param source the source of the module
   /// @param constructed_types the list of types explicitly declared in the AST
   /// @param functions the list of program functions
   /// @param global_variables the list of global variables
-  Module(std::vector<type::Type*> constructed_types,
+  Module(const Source& source,
+         std::vector<type::Type*> constructed_types,
          FunctionList functions,
          VariableList global_variables);
 

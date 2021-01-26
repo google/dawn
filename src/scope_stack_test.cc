@@ -14,15 +14,15 @@
 #include "src/scope_stack.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/builder.h"
 #include "src/ast/variable.h"
+#include "src/program_builder.h"
 #include "src/symbol.h"
 #include "src/type/f32_type.h"
 
 namespace tint {
 namespace {
 
-class ScopeStackTest : public ast::BuilderWithProgram, public testing::Test {};
+class ScopeStackTest : public ProgramBuilder, public testing::Test {};
 
 TEST_F(ScopeStackTest, Global) {
   ScopeStack<uint32_t> s;

@@ -82,6 +82,7 @@ TEST_F(MslGeneratorImplTest, InputStructName_ConflictWithExisting) {
 
 TEST_F(MslGeneratorImplTest, NameConflictWith_InputStructName) {
   auto* ident = Expr("func_main_in");
+
   GeneratorImpl& gen = Build();
 
   ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
@@ -124,43 +125,55 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_alias) {
   auto* alias = ty.alias("a", ty.f32());
+
   GeneratorImpl& gen = Build();
 
   EXPECT_EQ(4u, gen.calculate_alignment_size(alias));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_array) {
+  auto* array = ty.array<f32, 4>();
+
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(4u * 4u, gen.calculate_alignment_size(ty.array<f32, 4>()));
+  EXPECT_EQ(4u * 4u, gen.calculate_alignment_size(array));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_bool) {
+  auto* bool_ = ty.bool_();
+
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(1u, gen.calculate_alignment_size(ty.bool_()));
+  EXPECT_EQ(1u, gen.calculate_alignment_size(bool_));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_f32) {
+  auto* f32 = ty.f32();
+
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(4u, gen.calculate_alignment_size(ty.f32()));
+  EXPECT_EQ(4u, gen.calculate_alignment_size(f32));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_i32) {
+  auto* i32 = ty.i32();
+
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(4u, gen.calculate_alignment_size(ty.i32()));
+  EXPECT_EQ(4u, gen.calculate_alignment_size(i32));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_matrix) {
+  auto* mat3x2 = ty.mat3x2<f32>();
+
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(4u * 3u * 2u, gen.calculate_alignment_size(ty.mat3x2<f32>()));
+  EXPECT_EQ(4u * 3u * 2u, gen.calculate_alignment_size(mat3x2));
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_pointer) {
   type::Pointer ptr(ty.bool_(), ast::StorageClass::kPrivate);
+
   GeneratorImpl& gen = Build();
 
   EXPECT_EQ(0u, gen.calculate_alignment_size(&ptr));
@@ -203,9 +216,11 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
 }
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_u32) {
+  auto* u32 = ty.u32();
+
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(4u, gen.calculate_alignment_size(ty.u32()));
+  EXPECT_EQ(4u, gen.calculate_alignment_size(u32));
 }
 
 struct MslVectorSizeData {
@@ -221,6 +236,7 @@ TEST_P(MslVectorSizeBoolTest, calculate) {
   auto param = GetParam();
 
   type::Vector vec(ty.bool_(), param.elements);
+
   GeneratorImpl& gen = Build();
 
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
@@ -252,6 +268,7 @@ TEST_P(MslVectorSizeU32Test, calculate) {
   auto param = GetParam();
 
   type::Vector vec(ty.u32(), param.elements);
+
   GeneratorImpl& gen = Build();
 
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));
@@ -267,6 +284,7 @@ TEST_P(MslVectorSizeF32Test, calculate) {
   auto param = GetParam();
 
   type::Vector vec(ty.f32(), param.elements);
+
   GeneratorImpl& gen = Build();
 
   EXPECT_EQ(param.byte_size, gen.calculate_alignment_size(&vec));

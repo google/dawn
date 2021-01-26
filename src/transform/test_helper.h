@@ -21,6 +21,8 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/reader/wgsl/parser.h"
 #include "src/transform/manager.h"
 #include "src/type_determiner.h"
@@ -46,29 +48,33 @@ class TransformTest : public testing::Test {
       return "WGSL reader failed:\n" + parser.error();
     }
 
+    diag::Formatter::Style style;
+    style.print_newline_at_end = false;
+
     auto program = parser.program();
-    TypeDeterminer td(&program);
-    if (!td.Determine()) {
-      return "Type determination failed:\n" + td.error();
+    {
+      auto diagnostics = TypeDeterminer::Run(&program);
+      if (diagnostics.contains_errors()) {
+        return "Type determination failed:\n" +
+               diag::Formatter(style).format(diagnostics);
+      }
     }
 
-    Manager manager;
-    for (auto& transform : transforms) {
-      manager.append(std::move(transform));
+    {
+      Manager manager;
+      for (auto& transform : transforms) {
+        manager.append(std::move(transform));
+      }
+      auto result = manager.Run(&program);
+
+      if (result.diagnostics.contains_errors()) {
+        return "manager().Run() errored:\n" +
+               diag::Formatter(style).format(result.diagnostics);
+      }
+      program = std::move(result.program);
     }
-    auto result = manager.Run(&program);
 
-    if (result.diagnostics.contains_errors()) {
-      diag::Formatter::Style style;
-      style.print_newline_at_end = false;
-      return "manager().Run() errored:\n" +
-             diag::Formatter(style).format(result.diagnostics);
-    }
-
-    // Release the source program to ensure there's no uncloned data in result
-    { auto tmp = std::move(program); }
-
-    writer::wgsl::Generator generator(&result.program);
+    writer::wgsl::Generator generator(&program);
     if (!generator.Generate()) {
       return "WGSL writer failed:\n" + generator.error();
     }

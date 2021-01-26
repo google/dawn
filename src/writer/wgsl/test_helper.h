@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/ast/builder.h"
+#include "src/program_builder.h"
 #include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -29,9 +29,9 @@ namespace wgsl {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public BASE, public ast::BuilderWithProgram {
+class TestHelperBase : public BASE, public ProgramBuilder {
  public:
-  TestHelperBase() : td(program) {}
+  TestHelperBase() : td(this) {}
 
   ~TestHelperBase() = default;
 
@@ -43,7 +43,8 @@ class TestHelperBase : public BASE, public ast::BuilderWithProgram {
     if (gen_) {
       return *gen_;
     }
-    gen_ = std::make_unique<GeneratorImpl>(program);
+    program_ = std::make_unique<Program>(std::move(*this));
+    gen_ = std::make_unique<GeneratorImpl>(program_.get());
     return *gen_;
   }
 
@@ -51,6 +52,7 @@ class TestHelperBase : public BASE, public ast::BuilderWithProgram {
   TypeDeterminer td;
 
  private:
+  std::unique_ptr<Program> program_;
   std::unique_ptr<GeneratorImpl> gen_;
 };
 using TestHelper = TestHelperBase<testing::Test>;

@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/ast/module.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
@@ -53,7 +54,8 @@ TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
   auto p = parser(test::Assemble(CommonTypes()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = p->get_program().to_str();
+  Program program = p->program();
+  const auto program_ast = program.AST().to_str();
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
 }
 
@@ -64,7 +66,8 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = p->get_program().to_str();
+  Program program = p->program();
+  const auto program_ast = program.AST().to_str();
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
 }
 
@@ -79,9 +82,10 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto program_ast = p->get_program().to_str();
+  Program program = p->program();
+  const auto program_ast = program.AST().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().Symbols().Get("main").to_str() +
+  Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
   StageDecoration{vertex}
   ()
@@ -99,9 +103,10 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto program_ast = p->get_program().to_str();
+  Program program = p->program();
+  const auto program_ast = program.AST().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().Symbols().Get("main").to_str() +
+  Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
   StageDecoration{fragment}
   ()
@@ -119,9 +124,10 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto program_ast = p->get_program().to_str();
+  Program program = p->program();
+  const auto program_ast = program.AST().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().Symbols().Get("main").to_str() +
+  Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
   StageDecoration{compute}
   ()
@@ -141,15 +147,16 @@ OpFunctionEnd)";
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
-  const auto program_ast = p->get_program().to_str();
+  Program program = p->program();
+  const auto program_ast = program.AST().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().Symbols().Get("frag_main").to_str() +
+  Function )" + program.Symbols().Get("frag_main").to_str() +
                                      R"( -> __void
   StageDecoration{fragment}
   ()
   {)"));
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().Symbols().Get("comp_main").to_str() +
+  Function )" + program.Symbols().Get("comp_main").to_str() +
                                      R"( -> __void
   StageDecoration{compute}
   ()
@@ -165,9 +172,10 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = p->get_program().to_str();
+  Program program = p->program();
+  const auto program_ast = program.AST().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().Symbols().Get("main").to_str() +
+  Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
   ()
   {)"));
@@ -199,7 +207,8 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = Demangler().Demangle(p->get_program());
+  Program program = p->program();
+  const auto program_ast = Demangler().Demangle(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function leaf -> __u32
   ()
@@ -266,7 +275,8 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = Demangler().Demangle(p->get_program());
+  Program program = p->program();
+  const auto program_ast = Demangler().Demangle(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function ret_float -> __f32
   ()
@@ -295,7 +305,8 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = Demangler().Demangle(p->get_program());
+  Program program = p->program();
+  const auto program_ast = Demangler().Demangle(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function mixed_params -> __void
   (
@@ -334,7 +345,8 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = Demangler().Demangle(p->get_program());
+  Program program = p->program();
+  const auto program_ast = Demangler().Demangle(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function mixed_params -> __void
   (

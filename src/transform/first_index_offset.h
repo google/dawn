@@ -89,19 +89,19 @@ class FirstIndexOffset : public Transform {
   uint32_t GetFirstInstanceOffset();
 
  private:
-  /// Adds uniform buffer with firstVertex/Instance to `program`
+  /// Adds uniform buffer with firstVertex/Instance to the program builder
   /// @returns variable of new uniform buffer
-  ast::Variable* AddUniformBuffer(Program* program);
+  ast::Variable* AddUniformBuffer(ProgramBuilder* builder);
   /// Adds constant with modified original_name builtin to func
   /// @param original_name the name of the original builtin used in function
   /// @param field_name name of field in firstVertex/Instance buffer
   /// @param buffer_var variable of firstVertex/Instance buffer
-  /// @param program the target program to contain the new ast nodes
+  /// @param builder the target to contain the new ast nodes
   ast::VariableDeclStatement* CreateFirstIndexOffset(
       const std::string& original_name,
       const std::string& field_name,
       ast::Variable* buffer_var,
-      Program* program);
+      ProgramBuilder* builder);
 
   uint32_t binding_;
   uint32_t group_;

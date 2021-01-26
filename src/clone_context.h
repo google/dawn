@@ -19,7 +19,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "src/ast/function.h"
 #include "src/castable.h"
 #include "src/source.h"
 #include "src/symbol.h"
@@ -29,26 +28,34 @@ namespace tint {
 
 // Forward declarations
 class Program;
+class ProgramBuilder;
+
+namespace ast {
+
+class FunctionList;
+
+}  // namespace ast
 
 /// CloneContext holds the state used while cloning AST nodes and types.
 class CloneContext {
  public:
   /// Constructor
-  /// @param to the target program to clone into
-  /// @param from the source program to clone from
-  CloneContext(Program* to, Program const* from);
+  /// @param to the target ProgramBuilder to clone into
+  /// @param from the source Program to clone from
+  CloneContext(ProgramBuilder* to, Program const* from);
 
   /// Destructor
   ~CloneContext();
 
-  /// Clones the Node or type::Type `a` into the program #dst if `a` is not
-  /// null. If `a` is null, then Clone() returns null. If `a` has been cloned
-  /// already by this CloneContext then the same cloned pointer is returned.
+  /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
+  /// not null. If `a` is null, then Clone() returns null. If `a` has been
+  /// cloned already by this CloneContext then the same cloned pointer is
+  /// returned.
   ///
   /// Clone() may use a function registered with ReplaceAll() to create a
   /// transformed version of the object. See ReplaceAll() for more information.
   ///
-  /// The Node or type::Type `a` must be owned by the program #src.
+  /// The Node or type::Type `a` must be owned by the Program #src.
   ///
   /// @note Semantic information such as resolved expression type and intrinsic
   /// information is not cloned.
@@ -85,15 +92,16 @@ class CloneContext {
 
   /// Clones the Symbol `s` into `dst`
   ///
-  /// The Symbol `s` must be owned by the program #src.
+  /// The Symbol `s` must be owned by the Program #src.
   ///
   /// @param s the Symbol to clone
   /// @return the cloned source
   Symbol Clone(const Symbol& s) const;
 
-  /// Clones each of the elements of the vector `v` into the program #dst.
+  /// Clones each of the elements of the vector `v` into the ProgramBuilder
+  /// #dst.
   ///
-  /// All the elements of the vector `v` must be owned by the program #src.
+  /// All the elements of the vector `v` must be owned by the Program #src.
   ///
   /// @param v the vector to clone
   /// @return the cloned vector
@@ -107,7 +115,8 @@ class CloneContext {
     return out;
   }
 
-  /// Clones each of the elements of the vector `v` into the Program #dst.
+  /// Clones each of the elements of the vector `v` into the ProgramBuilder
+  /// #dst.
   ///
   /// All the elements of the vector `v` must be owned by the Program #src.
   ///
@@ -134,9 +143,10 @@ class CloneContext {
   ///   // Replace all ast::UintLiterals with the number 42
   ///   CloneCtx ctx(&out, in)
   ///     .ReplaceAll([&] (CloneContext* ctx, ast::UintLiteral* l) {
-  ///       return ctx->dst->create<ast::UintLiteral>(ctx->Clone(l->source()),
-  ///                                                 ctx->Clone(l->type()),
-  ///                                                 42);
+  ///       return ctx->dst->create<ast::UintLiteral>(
+  ///           ctx->Clone(l->source()),
+  ///           ctx->Clone(l->type()),
+  ///           42);
   ///     }).Clone();
   /// ```
   ///
@@ -167,13 +177,13 @@ class CloneContext {
     return *this;
   }
 
-  /// Clone performs the clone of the entire program #src to #dst.
+  /// Clone performs the clone of the entire Program #src to #dst.
   void Clone();
 
-  /// The target program to clone into.
-  Program* const dst;
+  /// The target ProgramBuilder to clone into.
+  ProgramBuilder* const dst;
 
-  /// The source program to clone from.
+  /// The source Program to clone from.
   Program const* const src;
 
  private:

@@ -24,6 +24,8 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/variable.h"
 #include "src/clone_context.h"
+#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/type/f32_type.h"
 #include "src/type/type_manager.h"
 
@@ -39,41 +41,39 @@ EmitVertexPointSize::EmitVertexPointSize() = default;
 EmitVertexPointSize::~EmitVertexPointSize() = default;
 
 Transform::Output EmitVertexPointSize::Run(const Program* in) {
-  Output out;
-
   if (!in->AST().Functions().HasStage(ast::PipelineStage::kVertex)) {
     // If the module doesn't have any vertex stages, then there's nothing to do.
-    out.program = in->Clone();
-    return out;
+    return Output(Program(in->Clone()));
   }
 
-  auto* f32 = out.program.create<type::F32>();
+  ProgramBuilder out;
+  auto* f32 = out.create<type::F32>();
 
   // Declare the pointsize builtin output variable.
-  auto* pointsize_var = out.program.create<ast::Variable>(
-      Source{},                                       // source
-      out.program.Symbols().Register(kPointSizeVar),  // symbol
-      ast::StorageClass::kOutput,                     // storage_class
-      f32,                                            // type
-      false,                                          // is_const
-      nullptr,                                        // constructor
+  auto* pointsize_var = out.create<ast::Variable>(
+      Source{},                               // source
+      out.Symbols().Register(kPointSizeVar),  // symbol
+      ast::StorageClass::kOutput,             // storage_class
+      f32,                                    // type
+      false,                                  // is_const
+      nullptr,                                // constructor
       ast::VariableDecorationList{
           // decorations
-          out.program.create<ast::BuiltinDecoration>(Source{},
-                                                     ast::Builtin::kPointSize),
+          out.create<ast::BuiltinDecoration>(Source{},
+                                             ast::Builtin::kPointSize),
       });
-  out.program.AST().AddGlobalVariable(pointsize_var);
+  out.AST().AddGlobalVariable(pointsize_var);
 
   // Build the AST expression & statement for assigning pointsize one.
-  auto* one = out.program.create<ast::ScalarConstructorExpression>(
-      Source{}, out.program.create<ast::FloatLiteral>(Source{}, f32, 1.0f));
-  auto* pointsize_ident = out.program.create<ast::IdentifierExpression>(
-      Source{}, out.program.Symbols().Register(kPointSizeVar));
-  auto* pointsize_assign = out.program.create<ast::AssignmentStatement>(
-      Source{}, pointsize_ident, one);
+  auto* one = out.create<ast::ScalarConstructorExpression>(
+      Source{}, out.create<ast::FloatLiteral>(Source{}, f32, 1.0f));
+  auto* pointsize_ident = out.create<ast::IdentifierExpression>(
+      Source{}, out.Symbols().Register(kPointSizeVar));
+  auto* pointsize_assign =
+      out.create<ast::AssignmentStatement>(Source{}, pointsize_ident, one);
 
   // Add the pointsize assignment statement to the front of all vertex stages.
-  CloneContext(&out.program, in)
+  CloneContext(&out, in)
       .ReplaceAll(
           [&](CloneContext* ctx, ast::Function* func) -> ast::Function* {
             if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
@@ -83,7 +83,7 @@ Transform::Output EmitVertexPointSize::Run(const Program* in) {
           })
       .Clone();
 
-  return out;
+  return Output(Program(std::move(out)));
 }
 
 }  // namespace transform

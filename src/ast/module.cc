@@ -18,8 +18,7 @@
 #include <string>
 #include <utility>
 
-#include "src/clone_context.h"
-#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/type/alias_type.h"
 #include "src/type/struct_type.h"
 
@@ -28,12 +27,13 @@ TINT_INSTANTIATE_CLASS_ID(tint::ast::Module);
 namespace tint {
 namespace ast {
 
-Module::Module() : Base(Source{}) {}
+Module::Module(const Source& source) : Base(source) {}
 
-Module::Module(std::vector<type::Type*> constructed_types,
+Module::Module(const Source& source,
+               std::vector<type::Type*> constructed_types,
                FunctionList functions,
                VariableList global_variables)
-    : Base(Source{}),
+    : Base(source),
       constructed_types_(std::move(constructed_types)),
       functions_(std::move(functions)),
       global_variables_(std::move(global_variables)) {}

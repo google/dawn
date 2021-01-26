@@ -15,44 +15,72 @@
 #include "src/program.h"
 
 #include <sstream>
+#include <utility>
 
+#include "src/ast/module.h"
 #include "src/clone_context.h"
-#include "src/type/struct_type.h"
+#include "src/program_builder.h"
 
 namespace tint {
 
-Program::Program() : ast_(nodes_.Create<ast::Module>()) {}
+Program::Program() = default;
 
-Program::Program(Program&& rhs) = default;
+Program::Program(Program&& program)
+    : types_(std::move(program.types_)),
+      nodes_(std::move(program.nodes_)),
+      ast_(std::move(program.ast_)),
+      symbols_(std::move(program.symbols_)) {
+  program.AssertNotMoved();
+  program.moved_ = true;
+}
 
-Program& Program::operator=(Program&& rhs) = default;
+Program::Program(ProgramBuilder&& builder)
+    : types_(std::move(builder.Types())),
+      nodes_(std::move(builder.Nodes())),
+      ast_(nodes_.Create<ast::Module>(Source{},
+                                      builder.AST().ConstructedTypes(),
+                                      builder.AST().Functions(),
+                                      builder.AST().GlobalVariables())),
+      symbols_(std::move(builder.Symbols())) {
+  builder.MarkAsMoved();
+}
 
 Program::~Program() = default;
 
+Program& Program::operator=(Program&& program) {
+  program.AssertNotMoved();
+  program.moved_ = true;
+  types_ = std::move(program.types_);
+  nodes_ = std::move(program.nodes_);
+  ast_ = std::move(program.ast_);
+  symbols_ = std::move(program.symbols_);
+  return *this;
+}
+
 Program Program::Clone() const {
-  Program out;
+  AssertNotMoved();
+  return Program(CloneAsBuilder());
+}
+
+ProgramBuilder Program::CloneAsBuilder() const {
+  AssertNotMoved();
+  ProgramBuilder out;
   CloneContext(&out, this).Clone();
   return out;
 }
 
-void Program::Clone(CloneContext* ctx) const {
-  for (auto* ty : AST().ConstructedTypes()) {
-    ctx->dst->AST().AddConstructedType(ctx->Clone(ty));
-  }
-  for (auto* var : AST().GlobalVariables()) {
-    ctx->dst->AST().AddGlobalVariable(ctx->Clone(var));
-  }
-  for (auto* func : AST().Functions()) {
-    ctx->dst->AST().Functions().Add(ctx->Clone(func));
-  }
-}
-
 bool Program::IsValid() const {
+  AssertNotMoved();
   return ast_->IsValid();
 }
 
 std::string Program::to_str() const {
+  AssertNotMoved();
   return ast_->to_str();
+}
+
+void Program::AssertNotMoved() const {
+  assert(!moved_);
 }
 
 }  // namespace tint

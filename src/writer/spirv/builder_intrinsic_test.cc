@@ -15,7 +15,6 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/builder.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"

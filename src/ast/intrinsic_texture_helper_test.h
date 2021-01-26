@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "src/ast/access_control.h"
-#include "src/ast/builder.h"
+#include "src/program_builder.h"
 #include "src/type/sampler_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/texture_type.h"
@@ -211,7 +211,7 @@ struct TextureOverloadCase {
                       type::TextureDimension,
                       TextureDataType,
                       const char*,
-                      std::function<ExpressionList(Builder*)>);
+                      std::function<ExpressionList(ProgramBuilder*)>);
   /// Constructor for textureLoad() functions with non-storage textures
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
@@ -219,7 +219,7 @@ struct TextureOverloadCase {
                       type::TextureDimension,
                       TextureDataType,
                       const char*,
-                      std::function<ExpressionList(Builder*)>);
+                      std::function<ExpressionList(ProgramBuilder*)>);
   /// Constructor for textureLoad() with storage textures
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
@@ -228,7 +228,7 @@ struct TextureOverloadCase {
                       type::TextureDimension,
                       TextureDataType,
                       const char*,
-                      std::function<ExpressionList(Builder*)>);
+                      std::function<ExpressionList(ProgramBuilder*)>);
   /// Copy constructor
   TextureOverloadCase(const TextureOverloadCase&);
   /// Destructor
@@ -240,13 +240,13 @@ struct TextureOverloadCase {
 
   /// @param builder the AST builder used for the test
   /// @returns the vector component type of the texture function return value
-  type::Type* resultVectorComponentType(ast::Builder* builder) const;
+  type::Type* resultVectorComponentType(ProgramBuilder* builder) const;
   /// @param builder the AST builder used for the test
   /// @returns a Variable holding the test texture
-  ast::Variable* buildTextureVariable(ast::Builder* builder) const;
+  ast::Variable* buildTextureVariable(ProgramBuilder* builder) const;
   /// @param builder the AST builder used for the test
   /// @returns a Variable holding the test sampler
-  ast::Variable* buildSamplerVariable(ast::Builder* builder) const;
+  ast::Variable* buildSamplerVariable(ProgramBuilder* builder) const;
 
   /// The enumerator for this overload
   ValidTextureOverload const overload;
@@ -270,7 +270,7 @@ struct TextureOverloadCase {
   /// Name of the function. e.g. `textureSample`, `textureSampleGrad`, etc
   const char* const function;
   /// A function that builds the AST arguments for the overload
-  std::function<ExpressionList(Builder*)> const args;
+  std::function<ExpressionList(ProgramBuilder*)> const args;
 };
 
 std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data);

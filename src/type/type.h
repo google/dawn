@@ -18,12 +18,12 @@
 #include <string>
 
 #include "src/castable.h"
+#include "src/clone_context.h"
 
 namespace tint {
 
 // Forward declarations
-class CloneContext;
-class Program;
+class ProgramBuilder;
 
 namespace type {
 
@@ -101,12 +101,12 @@ class Type : public Castable<Type> {
 
   /// A helper method for cloning the `Type` `t` if it is not null.
   /// If `t` is null, then `Clone()` returns null.
-  /// @param p the program to clone `n` into
+  /// @param b the program builder to clone `n` into
   /// @param t the `Type` to clone (if not null)
   /// @return the cloned type
   template <typename T>
-  static T* Clone(Program* p, const T* t) {
-    return (t != nullptr) ? static_cast<T*>(t->Clone(p)) : nullptr;
+  static T* Clone(ProgramBuilder* b, const T* t) {
+    return (t != nullptr) ? static_cast<T*>(t->Clone(b)) : nullptr;
   }
 };
 

@@ -33,6 +33,8 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/clone_context.h"
+#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/type/array_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
@@ -101,9 +103,9 @@ Transform::Output VertexPulling::Run(const Program* in) {
 
   // TODO(idanr): Make sure we covered all error cases, to guarantee the
   // following stages will pass
-  Output out;
+  ProgramBuilder out;
 
-  CloneContext ctx(&out.program, in);
+  CloneContext ctx(&out, in);
   State state{ctx, cfg};
   state.FindOrInsertVertexIndexIfUsed();
   state.FindOrInsertInstanceIndexIfUsed();
@@ -122,7 +124,7 @@ Transform::Output VertexPulling::Run(const Program* in) {
   });
   ctx.Clone();
 
-  return out;
+  return Output(Program(std::move(out)));
 }
 
 VertexPulling::Config::Config() = default;

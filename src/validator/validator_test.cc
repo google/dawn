@@ -73,9 +73,10 @@ TEST_F(ValidatorTest, AssignToScalar_Fail) {
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
   RegisterVariable(var);
 
+  EXPECT_TRUE(td()->DetermineResultType(assign));
+
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(td()->DetermineResultType(assign));
   // TODO(sarahM0): Invalidate assignment to scalar.
   EXPECT_FALSE(v.ValidateAssign(assign));
   ASSERT_TRUE(v.has_error());
@@ -131,6 +132,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
+
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.ValidateAssign(assign)) << v.error();
@@ -153,6 +155,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesThroughAlias_Pass) {
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
+
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.ValidateAssign(assign)) << v.error();
@@ -177,6 +180,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInferRHSLoad_Pass) {
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
   ASSERT_NE(lhs->result_type(), nullptr);
   ASSERT_NE(rhs->result_type(), nullptr);
+
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.ValidateAssign(assign)) << v.error();
@@ -329,8 +333,10 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
                               ast::VariableDecorationList{}));
 
   ValidatorImpl& v = Build();
+  const Program* program = v.program();
 
-  EXPECT_TRUE(v.ValidateGlobalVariables(AST().GlobalVariables())) << v.error();
+  EXPECT_TRUE(v.ValidateGlobalVariables(program->AST().GlobalVariables()))
+      << v.error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
@@ -509,8 +515,10 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   AST().AddGlobalVariable(var1);
 
   ValidatorImpl& v = Build();
+  const Program* program = v.program();
 
-  EXPECT_TRUE(v.ValidateGlobalVariables(AST().GlobalVariables())) << v.error();
+  EXPECT_TRUE(v.ValidateGlobalVariables(program->AST().GlobalVariables()))
+      << v.error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
@@ -526,8 +534,9 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
   AST().AddGlobalVariable(var1);
 
   ValidatorImpl& v = Build();
+  const Program* program = v.program();
 
-  EXPECT_FALSE(v.ValidateGlobalVariables(AST().GlobalVariables()));
+  EXPECT_FALSE(v.ValidateGlobalVariables(program->AST().GlobalVariables()));
   EXPECT_EQ(v.error(),
             "12:34 v-0011: redeclared global identifier 'global_var'");
 }
@@ -747,50 +756,78 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
 }
 
 TEST_F(ValidatorTest, IsStorable_Void) {
+  auto* void_ty = ty.void_();
+
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.IsStorable(ty.void_()));
+  EXPECT_FALSE(v.IsStorable(void_ty));
 }
 
 TEST_F(ValidatorTest, IsStorable_Scalar) {
+  auto* bool_ = ty.bool_();
+  auto* i32 = ty.i32();
+  auto* u32 = ty.u32();
+  auto* f32 = ty.f32();
+
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.IsStorable(ty.bool_()));
-  EXPECT_TRUE(v.IsStorable(ty.i32()));
-  EXPECT_TRUE(v.IsStorable(ty.u32()));
-  EXPECT_TRUE(v.IsStorable(ty.f32()));
+  EXPECT_TRUE(v.IsStorable(bool_));
+  EXPECT_TRUE(v.IsStorable(i32));
+  EXPECT_TRUE(v.IsStorable(u32));
+  EXPECT_TRUE(v.IsStorable(f32));
 }
 
 TEST_F(ValidatorTest, IsStorable_Vector) {
+  auto* vec2_i32 = ty.vec2<int>();
+  auto* vec3_i32 = ty.vec3<int>();
+  auto* vec4_i32 = ty.vec4<int>();
+  auto* vec2_u32 = ty.vec2<unsigned>();
+  auto* vec3_u32 = ty.vec3<unsigned>();
+  auto* vec4_u32 = ty.vec4<unsigned>();
+  auto* vec2_f32 = ty.vec2<float>();
+  auto* vec3_f32 = ty.vec3<float>();
+  auto* vec4_f32 = ty.vec4<float>();
+
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.IsStorable(ty.vec2<int>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec3<int>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec4<int>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec2<unsigned>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec3<unsigned>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec4<unsigned>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec2<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec3<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.vec4<float>()));
+  EXPECT_TRUE(v.IsStorable(vec2_i32));
+  EXPECT_TRUE(v.IsStorable(vec3_i32));
+  EXPECT_TRUE(v.IsStorable(vec4_i32));
+  EXPECT_TRUE(v.IsStorable(vec2_u32));
+  EXPECT_TRUE(v.IsStorable(vec3_u32));
+  EXPECT_TRUE(v.IsStorable(vec4_u32));
+  EXPECT_TRUE(v.IsStorable(vec2_f32));
+  EXPECT_TRUE(v.IsStorable(vec3_f32));
+  EXPECT_TRUE(v.IsStorable(vec4_f32));
 }
 
 TEST_F(ValidatorTest, IsStorable_Matrix) {
+  auto* mat2x2 = ty.mat2x2<float>();
+  auto* mat2x3 = ty.mat2x3<float>();
+  auto* mat2x4 = ty.mat2x4<float>();
+  auto* mat3x2 = ty.mat3x2<float>();
+  auto* mat3x3 = ty.mat3x3<float>();
+  auto* mat3x4 = ty.mat3x4<float>();
+  auto* mat4x2 = ty.mat4x2<float>();
+  auto* mat4x3 = ty.mat4x3<float>();
+  auto* mat4x4 = ty.mat4x4<float>();
+
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.IsStorable(ty.mat2x2<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat2x3<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat2x4<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat3x2<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat3x3<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat3x4<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat4x2<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat4x3<float>()));
-  EXPECT_TRUE(v.IsStorable(ty.mat4x4<float>()));
+  EXPECT_TRUE(v.IsStorable(mat2x2));
+  EXPECT_TRUE(v.IsStorable(mat2x3));
+  EXPECT_TRUE(v.IsStorable(mat2x4));
+  EXPECT_TRUE(v.IsStorable(mat3x2));
+  EXPECT_TRUE(v.IsStorable(mat3x3));
+  EXPECT_TRUE(v.IsStorable(mat3x4));
+  EXPECT_TRUE(v.IsStorable(mat4x2));
+  EXPECT_TRUE(v.IsStorable(mat4x3));
+  EXPECT_TRUE(v.IsStorable(mat4x4));
 }
 
 TEST_F(ValidatorTest, IsStorable_Pointer) {
   auto* ptr_ty = ty.pointer<int>(ast::StorageClass::kPrivate);
+
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.IsStorable(ptr_ty));
@@ -798,6 +835,7 @@ TEST_F(ValidatorTest, IsStorable_Pointer) {
 
 TEST_F(ValidatorTest, IsStorable_AliasVoid) {
   auto* alias = ty.alias("myalias", ty.void_());
+
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.IsStorable(alias));
@@ -805,39 +843,49 @@ TEST_F(ValidatorTest, IsStorable_AliasVoid) {
 
 TEST_F(ValidatorTest, IsStorable_AliasI32) {
   auto* alias = ty.alias("myalias", ty.i32());
+
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.IsStorable(alias));
 }
 
 TEST_F(ValidatorTest, IsStorable_ArraySizedOfStorable) {
+  auto* arr = ty.array(ty.i32(), 5);
+
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.IsStorable(ty.array(ty.i32(), 5)));
+  EXPECT_TRUE(v.IsStorable(arr));
 }
 
 TEST_F(ValidatorTest, IsStorable_ArraySizedOfNonStorable) {
+  auto* arr = ty.array(ty.void_(), 5);
+
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.IsStorable(ty.array(ty.void_(), 5)));
+  EXPECT_FALSE(v.IsStorable(arr));
 }
 
 TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfStorable) {
+  auto* arr = ty.array<int>();
+
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.IsStorable(ty.array<int>()));
+  EXPECT_TRUE(v.IsStorable(arr));
 }
 
 TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfNonStorable) {
+  auto* arr = ty.array<void>();
+
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.IsStorable(ty.array<void>()));
+  EXPECT_FALSE(v.IsStorable(arr));
 }
 
 TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
   ast::StructMemberList members{Member("a", ty.i32()), Member("b", ty.f32())};
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   auto* s_ty = ty.struct_("mystruct", s);
+
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.IsStorable(s_ty));
@@ -848,6 +896,7 @@ TEST_F(ValidatorTest, IsStorable_Struct_SomeMembersNonStorable) {
   ast::StructMemberList members{Member("a", ty.i32()), Member("b", ptr_ty)};
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   auto* s_ty = ty.struct_("mystruct", s);
+
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.IsStorable(s_ty));

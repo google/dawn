@@ -60,8 +60,6 @@ set(TINT_LIB_SRCS
   ast/bool_literal.h
   ast/break_statement.cc
   ast/break_statement.h
-  ast/builder.cc
-  ast/builder.h
   ast/builtin_decoration.cc
   ast/builtin_decoration.h
   ast/builtin.cc
@@ -187,6 +185,8 @@ set(TINT_LIB_SRCS
   inspector/scalar.h
   namer.cc
   namer.h
+  program_builder.cc
+  program_builder.h
   program.cc
   program.h
   reader/reader.cc
@@ -422,6 +422,7 @@ if(${TINT_BUILD_TESTS})
     ast/loop_statement_test.cc
     ast/member_accessor_expression_test.cc
     ast/module_clone_test.cc
+    ast/module_test.cc
     ast/null_literal_test.cc
     ast/return_statement_test.cc
     ast/scalar_constructor_expression_test.cc

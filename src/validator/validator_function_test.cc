@@ -132,8 +132,9 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   EXPECT_TRUE(td()->DetermineFunctions(AST().Functions())) << td()->error();
 
   ValidatorImpl& v = Build();
+  const Program* program = v.program();
 
-  EXPECT_TRUE(v.ValidateFunctions(AST().Functions())) << v.error();
+  EXPECT_TRUE(v.ValidateFunctions(program->AST().Functions())) << v.error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {

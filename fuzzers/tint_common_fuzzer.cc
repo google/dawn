@@ -19,6 +19,10 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/module.h"
+#include "src/program.h"
+#include "src/program_builder.h"
+
 namespace tint {
 namespace fuzzers {
 
@@ -81,9 +85,13 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  TypeDeterminer td(&program);
-  if (!td.Determine()) {
-    return 0;
+  {
+    ProgramBuilder builder = program.CloneAsBuilder();
+    TypeDeterminer td(&builder);
+    if (!td.Determine()) {
+      return 0;
+    }
+    program = Program(std::move(builder));
   }
 
   Validator v;

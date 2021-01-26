@@ -19,7 +19,6 @@
 #include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bool_literal.h"
-#include "src/ast/builder.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
@@ -44,6 +43,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/program_builder.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -67,11 +67,10 @@ namespace tint {
 namespace inspector {
 namespace {
 
-class InspectorHelper : public ast::BuilderWithProgram {
+class InspectorHelper : public ProgramBuilder {
  public:
   InspectorHelper()
-      : td_(std::make_unique<TypeDeterminer>(mod)),
-        inspector_(std::make_unique<Inspector>(mod)),
+      : td_(std::make_unique<TypeDeterminer>(this)),
         sampler_type_(type::SamplerKind::kSampler),
         comparison_sampler_type_(type::SamplerKind::kComparisonSampler) {}
 
@@ -611,8 +610,16 @@ class InspectorHelper : public ast::BuilderWithProgram {
     return vec_type(base_type, 3);
   }
 
+  Inspector& Build() {
+    if (inspector_) {
+      return *inspector_;
+    }
+    program_ = std::make_unique<Program>(std::move(*this));
+    inspector_ = std::make_unique<Inspector>(program_.get());
+    return *inspector_;
+  }
+
   TypeDeterminer* td() { return td_.get(); }
-  Inspector* inspector() { return inspector_.get(); }
 
   type::Array* u32_array_type(uint32_t count) {
     if (array_type_memo_.find(count) == array_type_memo_.end()) {
@@ -637,8 +644,8 @@ class InspectorHelper : public ast::BuilderWithProgram {
 
  private:
   std::unique_ptr<TypeDeterminer> td_;
+  std::unique_ptr<Program> program_;
   std::unique_ptr<Inspector> inspector_;
-
   type::Sampler sampler_type_;
   type::Sampler comparison_sampler_type_;
   std::map<uint32_t, type::Array*> array_type_memo_;
@@ -694,8 +701,10 @@ class InspectorGetMultisampledTextureResourceBindingsTestWithParam
       public testing::TestWithParam<GetMultisampledTextureTestParams> {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   EXPECT_EQ(0u, result.size());
 }
@@ -703,8 +712,10 @@ TEST_F(InspectorGetEntryPointTest, NoFunctions) {
 TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
   AST().Functions().Add(MakeEmptyBodyFunction("foo", {}));
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   EXPECT_EQ(0u, result.size());
 }
@@ -718,8 +729,10 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ("foo", result[0].name);
@@ -742,8 +755,10 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(2u, result.size());
   EXPECT_EQ("foo", result[0].name);
@@ -774,8 +789,10 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
-  auto result = inspector()->GetEntryPoints();
-  EXPECT_FALSE(inspector()->has_error());
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  EXPECT_FALSE(inspector.has_error());
 
   ASSERT_EQ(2u, result.size());
   EXPECT_EQ("foo", result[0].name);
@@ -794,8 +811,10 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
       });
   AST().Functions().Add(foo);
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   uint32_t x, y, z;
@@ -813,8 +832,10 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
              });
   AST().Functions().Add(foo);
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   uint32_t x, y, z;
@@ -835,8 +856,10 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
       });
   AST().Functions().Add(foo);
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].input_variables.size());
@@ -855,8 +878,10 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -886,8 +911,10 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -917,8 +944,10 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -944,8 +973,10 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -981,8 +1012,10 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -1022,10 +1055,13 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  // TODO(dsinclair): Update to run the namer transform when available.
+  // TODO(dsinclair): Update to run the namer transform when
+  // available.
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(2u, result.size());
 
@@ -1075,10 +1111,13 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  // TODO(dsinclair): Update to run the namer transform when available.
+  // TODO(dsinclair): Update to run the namer transform when
+  // available.
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(2u, result.size());
 
@@ -1136,8 +1175,10 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
-  auto result = inspector()->GetEntryPoints();
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
 
@@ -1153,8 +1194,10 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
-  auto result = inspector()->GetRemappedNameForEntryPoint("foo");
-  ASSERT_TRUE(inspector()->has_error());
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetRemappedNameForEntryPoint("foo");
+  ASSERT_TRUE(inspector.has_error());
 
   EXPECT_EQ("", result);
 }
@@ -1164,8 +1207,10 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
   AST().Functions().Add(MakeEmptyBodyFunction("foo", {}));
 
-  auto result = inspector()->GetRemappedNameForEntryPoint("foo");
-  ASSERT_TRUE(inspector()->has_error());
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetRemappedNameForEntryPoint("foo");
+  ASSERT_TRUE(inspector.has_error());
 
   EXPECT_EQ("", result);
 }
@@ -1179,10 +1224,13 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
              });
   AST().Functions().Add(foo);
 
-  // TODO(dsinclair): Update to run the namer transform when available.
+  // TODO(dsinclair): Update to run the namer transform when
+  // available.
 
-  auto result = inspector()->GetRemappedNameForEntryPoint("foo");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetRemappedNameForEntryPoint("foo");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   EXPECT_EQ("foo", result);
 }
@@ -1197,7 +1245,8 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
              });
   AST().Functions().Add(foo);
 
-  // TODO(dsinclair): Update to run the namer transform when available.
+  // TODO(dsinclair): Update to run the namer transform when
+  // available.
 
   auto* bar = MakeEmptyBodyFunction(
       "bar", ast::FunctionDecorationList{
@@ -1205,14 +1254,16 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
              });
   AST().Functions().Add(bar);
 
+  Inspector& inspector = Build();
+
   {
-    auto result = inspector()->GetRemappedNameForEntryPoint("foo");
-    ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+    auto result = inspector.GetRemappedNameForEntryPoint("foo");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
     EXPECT_EQ("foo", result);
   }
   {
-    auto result = inspector()->GetRemappedNameForEntryPoint("bar");
-    ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+    auto result = inspector.GetRemappedNameForEntryPoint("bar");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
     EXPECT_EQ("bar", result);
   }
 }
@@ -1224,7 +1275,9 @@ TEST_F(InspectorGetConstantIDsTest, Bool) {
   AddConstantID<bool>("bar", 20, ty.bool_(), &val_true);
   AddConstantID<bool>("baz", 300, ty.bool_(), &val_false);
 
-  auto result = inspector()->GetConstantIDs();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetConstantIDs();
   ASSERT_EQ(3u, result.size());
 
   ASSERT_TRUE(result.find(1) != result.end());
@@ -1244,7 +1297,9 @@ TEST_F(InspectorGetConstantIDsTest, U32) {
   AddConstantID<uint32_t>("foo", 1, ty.u32(), nullptr);
   AddConstantID<uint32_t>("bar", 20, ty.u32(), &val);
 
-  auto result = inspector()->GetConstantIDs();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetConstantIDs();
   ASSERT_EQ(2u, result.size());
 
   ASSERT_TRUE(result.find(1) != result.end());
@@ -1262,7 +1317,9 @@ TEST_F(InspectorGetConstantIDsTest, I32) {
   AddConstantID<int32_t>("bar", 20, ty.i32(), &val_neg);
   AddConstantID<int32_t>("baz", 300, ty.i32(), &val_pos);
 
-  auto result = inspector()->GetConstantIDs();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetConstantIDs();
   ASSERT_EQ(3u, result.size());
 
   ASSERT_TRUE(result.find(1) != result.end());
@@ -1286,7 +1343,9 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
   AddConstantID<float>("baz", 300, ty.f32(), &val_neg);
   AddConstantID<float>("x", 4000, ty.f32(), &val_pos);
 
-  auto result = inspector()->GetConstantIDs();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetConstantIDs();
   ASSERT_EQ(4u, result.size());
 
   ASSERT_TRUE(result.find(1) != result.end());
@@ -1306,9 +1365,11 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
-  auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_TRUE(inspector()->has_error());
-  std::string error = inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_TRUE(inspector.has_error());
+  std::string error = inspector.error();
   EXPECT_TRUE(error.find("not found") != std::string::npos);
 }
 
@@ -1332,8 +1393,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetUniformBufferResourceBindings("ub_func");
-  std::string error = inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ub_func");
+  std::string error = inspector.error();
   EXPECT_TRUE(error.find("not an entry point") != std::string::npos);
 }
 
@@ -1360,8 +1423,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   EXPECT_EQ(0u, result.size());
 }
 
@@ -1385,8 +1450,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1414,8 +1481,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1458,8 +1527,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(3u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1495,8 +1566,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1524,8 +1597,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1553,8 +1628,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1600,8 +1677,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(3u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1637,8 +1716,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1666,8 +1747,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1695,8 +1778,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(0u, result.size());
 }
 
@@ -1720,9 +1805,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result =
-      inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1769,9 +1855,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result =
-      inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(3u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1807,9 +1894,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result =
-      inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1838,9 +1926,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result =
-      inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1868,9 +1957,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result =
-      inspector()->GetReadOnlyStorageBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(0u, result.size());
 }
 
@@ -1890,8 +1980,10 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSamplerResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1907,8 +1999,10 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSamplerResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(0u, result.size());
 }
@@ -1933,8 +2027,10 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSamplerResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -1957,8 +2053,10 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSamplerResourceBindings("foo");
-  ASSERT_TRUE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerResourceBindings("foo");
+  ASSERT_TRUE(inspector.has_error()) << inspector.error();
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
@@ -1977,8 +2075,10 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSamplerResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(0u, result.size());
 }
@@ -1999,8 +2099,10 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetComparisonSamplerResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetComparisonSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -2016,8 +2118,10 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetComparisonSamplerResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetComparisonSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(0u, result.size());
 }
@@ -2043,8 +2147,10 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetComparisonSamplerResourceBindings("ep_func");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetComparisonSamplerResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -2067,8 +2173,10 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSamplerResourceBindings("foo");
-  ASSERT_TRUE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerResourceBindings("foo");
+  ASSERT_TRUE(inspector.has_error()) << inspector.error();
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
@@ -2087,8 +2195,10 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetComparisonSamplerResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetComparisonSamplerResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(0u, result.size());
 }
@@ -2100,8 +2210,10 @@ TEST_F(InspectorGetSampledTextureResourceBindingsTest, Empty) {
              });
   AST().Functions().Add(foo);
 
-  auto result = inspector()->GetSampledTextureResourceBindings("foo");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSampledTextureResourceBindings("foo");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   EXPECT_EQ(0u, result.size());
 }
@@ -2125,8 +2237,10 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSampledTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -2137,8 +2251,8 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
   // Prove that sampled and multi-sampled bindings are accounted
   // for separately.
   auto multisampled_result =
-      inspector()->GetMultisampledTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+      inspector.GetMultisampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_TRUE(multisampled_result.empty());
 }
 
@@ -2216,8 +2330,10 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetSampledTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -2287,8 +2403,10 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetMultisampledTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetMultisampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -2299,8 +2417,8 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
   // Prove that sampled and multi-sampled bindings are accounted
   // for separately.
   auto single_sampled_result =
-      inspector()->GetSampledTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+      inspector.GetSampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_TRUE(single_sampled_result.empty());
 }
 
@@ -2340,8 +2458,10 @@ TEST_F(InspectorGetMultisampledArrayTextureResourceBindingsTest, Empty) {
              });
   AST().Functions().Add(foo);
 
-  auto result = inspector()->GetSampledTextureResourceBindings("foo");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSampledTextureResourceBindings("foo");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   EXPECT_EQ(0u, result.size());
 }
@@ -2367,8 +2487,10 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  auto result = inspector()->GetMultisampledTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetMultisampledTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);

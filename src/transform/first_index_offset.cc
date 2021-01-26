@@ -47,6 +47,8 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
 #include "src/clone_context.h"
+#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/type/struct_type.h"
 #include "src/type/u32_type.h"
 #include "src/type_determiner.h"
@@ -99,15 +101,20 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
   // Running TypeDeterminer as we require local_referenced_builtin_variables()
   // to be populated. TODO(bclayton) - it should not be necessary to re-run the
   // type determiner if semantic information is already generated. Remove.
-  // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
-  TypeDeterminer td(const_cast<Program*>(in));
-  if (!td.Determine()) {
-    diag::Diagnostic err;
-    err.severity = diag::Severity::Error;
-    err.message = td.error();
-    Output out;
-    out.diagnostics.add(std::move(err));
-    return out;
+  Program program;
+  {
+    ProgramBuilder builder = in->CloneAsBuilder();
+    TypeDeterminer td(&builder);
+    if (!td.Determine()) {
+      diag::Diagnostic err;
+      err.severity = diag::Severity::Error;
+      err.message = td.error();
+      Output out;
+      out.diagnostics.add(std::move(err));
+      return out;
+    }
+    program = Program(std::move(builder));
+    in = &program;
   }
 
   Symbol vertex_index_sym;
@@ -116,9 +123,9 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
   // Lazilly construct the UniformBuffer on first call to
   // maybe_create_buffer_var()
   ast::Variable* buffer_var = nullptr;
-  auto maybe_create_buffer_var = [&](Program* program) {
+  auto maybe_create_buffer_var = [&](ProgramBuilder* dst) {
     if (buffer_var == nullptr) {
-      buffer_var = AddUniformBuffer(program);
+      buffer_var = AddUniformBuffer(dst);
     }
   };
 
@@ -126,8 +133,8 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
   // add a CreateFirstIndexOffset() statement to each function that uses one of
   // these builtins.
 
-  Output out;
-  CloneContext(&out.program, in)
+  ProgramBuilder out;
+  CloneContext(&out, in)
       .ReplaceAll([&](CloneContext* ctx, ast::Variable* var) -> ast::Variable* {
         for (ast::VariableDecoration* dec : var->decorations()) {
           if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
@@ -174,7 +181,7 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
           })
       .Clone();
 
-  return out;
+  return Output(Program(std::move(out)));
 }
 
 bool FirstIndexOffset::HasVertexIndex() {
@@ -195,7 +202,7 @@ uint32_t FirstIndexOffset::GetFirstInstanceOffset() {
   return instance_index_offset_;
 }
 
-ast::Variable* FirstIndexOffset::AddUniformBuffer(Program* dst) {
+ast::Variable* FirstIndexOffset::AddUniformBuffer(ProgramBuilder* dst) {
   auto* u32_type = dst->create<type::U32>();
   ast::StructMemberList members;
   uint32_t offset = 0;
@@ -251,7 +258,7 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
     const std::string& original_name,
     const std::string& field_name,
     ast::Variable* buffer_var,
-    Program* dst) {
+    ProgramBuilder* dst) {
   auto* buffer =
       dst->create<ast::IdentifierExpression>(Source{}, buffer_var->symbol());
 

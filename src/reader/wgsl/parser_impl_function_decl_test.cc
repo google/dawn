@@ -37,13 +37,13 @@ TEST_F(ParserImplTest, FunctionDecl) {
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f->symbol(), p->get_program().Symbols().Register("main"));
+  EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->Is<type::Void>());
 
   ASSERT_EQ(f->params().size(), 2u);
-  EXPECT_EQ(f->params()[0]->symbol(), p->get_program().Symbols().Register("a"));
-  EXPECT_EQ(f->params()[1]->symbol(), p->get_program().Symbols().Register("b"));
+  EXPECT_EQ(f->params()[0]->symbol(), p->builder().Symbols().Get("a"));
+  EXPECT_EQ(f->params()[1]->symbol(), p->builder().Symbols().Get("b"));
 
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->Is<type::Void>());
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f->symbol(), p->get_program().Symbols().Register("main"));
+  EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->Is<type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
@@ -103,7 +103,7 @@ fn main() -> void { return; })");
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f->symbol(), p->get_program().Symbols().Register("main"));
+  EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->Is<type::Void>());
   ASSERT_EQ(f->params().size(), 0u);
@@ -148,7 +148,7 @@ fn main() -> void { return; })");
   EXPECT_TRUE(f.matched);
   ASSERT_NE(f.value, nullptr);
 
-  EXPECT_EQ(f->symbol(), p->get_program().Symbols().Register("main"));
+  EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->Is<type::Void>());
   ASSERT_EQ(f->params().size(), 0u);

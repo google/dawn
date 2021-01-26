@@ -14,15 +14,17 @@
 
 #include "src/clone_context.h"
 
+#include <utility>
+
 #include "gtest/gtest.h"
 
-#include "src/program.h"
+#include "src/program_builder.h"
 
 namespace tint {
 namespace {
 
 struct Cloneable : public Castable<Cloneable, ast::Node> {
-  Cloneable() : Base(Source{}) {}
+  explicit Cloneable(const Source& source) : Base(source) {}
 
   Cloneable* a = nullptr;
   Cloneable* b = nullptr;
@@ -40,18 +42,23 @@ struct Cloneable : public Castable<Cloneable, ast::Node> {
   void to_str(std::ostream&, size_t) const override {}
 };
 
-struct Replaceable : public Castable<Replaceable, Cloneable> {};
-struct Replacement : public Castable<Replacement, Replaceable> {};
+struct Replaceable : public Castable<Replaceable, Cloneable> {
+  explicit Replaceable(const Source& source) : Base(source) {}
+};
+struct Replacement : public Castable<Replacement, Replaceable> {
+  explicit Replacement(const Source& source) : Base(source) {}
+};
 
 TEST(CloneContext, Clone) {
-  Program original;
-  auto* original_root = original.create<Cloneable>();
-  original_root->a = original.create<Cloneable>();
-  original_root->a->b = original.create<Cloneable>();
-  original_root->b = original.create<Cloneable>();
+  ProgramBuilder builder;
+  auto* original_root = builder.create<Cloneable>();
+  original_root->a = builder.create<Cloneable>();
+  original_root->a->b = builder.create<Cloneable>();
+  original_root->b = builder.create<Cloneable>();
   original_root->b->a = original_root->a;  // Aliased
-  original_root->b->b = original.create<Cloneable>();
+  original_root->b->b = builder.create<Cloneable>();
   original_root->c = original_root->b;  // Aliased
+  Program original(std::move(builder));
 
   //                          root
   //        ╭──────────────────┼──────────────────╮
@@ -63,7 +70,7 @@ TEST(CloneContext, Clone) {
   //
   // C: Clonable
 
-  Program cloned;
+  ProgramBuilder cloned;
   auto* cloned_root = CloneContext(&cloned, &original).Clone(original_root);
 
   EXPECT_NE(cloned_root->a, nullptr);
@@ -87,14 +94,15 @@ TEST(CloneContext, Clone) {
   EXPECT_EQ(cloned_root->c, cloned_root->b);     // Aliased
 }
 
-TEST(CloneContext, CloneWithReplaceAll) {
-  Program original;
-  auto* original_root = original.create<Cloneable>();
-  original_root->a = original.create<Cloneable>();
-  original_root->a->b = original.create<Replaceable>();
-  original_root->b = original.create<Replaceable>();
+TEST(CloneContext, CloneWithReplacements) {
+  ProgramBuilder builder;
+  auto* original_root = builder.create<Cloneable>();
+  original_root->a = builder.create<Cloneable>();
+  original_root->a->b = builder.create<Replaceable>();
+  original_root->b = builder.create<Replaceable>();
   original_root->b->a = original_root->a;  // Aliased
   original_root->c = original_root->b;     // Aliased
+  Program original(std::move(builder));
 
   //                          root
   //        ╭──────────────────┼──────────────────╮
@@ -107,7 +115,7 @@ TEST(CloneContext, CloneWithReplaceAll) {
   // C: Clonable
   // R: Replaceable
 
-  Program cloned;
+  ProgramBuilder cloned;
   auto* cloned_root = CloneContext(&cloned, &original)
                           .ReplaceAll([&](CloneContext* ctx, Replaceable* in) {
                             auto* out = cloned.create<Replacement>();
@@ -161,18 +169,19 @@ TEST(CloneContext, CloneWithReplaceAll) {
 }
 
 TEST(CloneContext, CloneWithReplace) {
-  Program original;
-  auto* original_root = original.create<Cloneable>();
-  original_root->a = original.create<Cloneable>();
-  original_root->b = original.create<Cloneable>();
-  original_root->c = original.create<Cloneable>();
+  ProgramBuilder builder;
+  auto* original_root = builder.create<Cloneable>();
+  original_root->a = builder.create<Cloneable>();
+  original_root->b = builder.create<Cloneable>();
+  original_root->c = builder.create<Cloneable>();
+  Program original(std::move(builder));
 
   //                          root
   //        ╭──────────────────┼──────────────────╮
   //       (a)                (b)                (c)
   //                        Replaced
 
-  Program cloned;
+  ProgramBuilder cloned;
   auto* replacement = cloned.create<Cloneable>();
 
   auto* cloned_root = CloneContext(&cloned, &original)
