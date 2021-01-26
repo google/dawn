@@ -297,7 +297,7 @@ bool Builder::Build() {
                     {Operand::Int(SpvAddressingModelLogical),
                      Operand::Int(SpvMemoryModelGLSL450)});
 
-  for (auto* var : program_->global_variables()) {
+  for (auto* var : program_->AST().GlobalVariables()) {
     if (!GenerateGlobalVariable(var)) {
       return false;
     }

@@ -136,7 +136,7 @@ void GeneratorImpl::make_indent(std::ostream& out) {
 }
 
 bool GeneratorImpl::Generate(std::ostream& out) {
-  for (auto* global : program_->global_variables()) {
+  for (auto* global : program_->AST().GlobalVariables()) {
     register_global(global);
   }
 
@@ -149,7 +149,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     out << std::endl;
   }
 
-  for (auto* var : program_->global_variables()) {
+  for (auto* var : program_->AST().GlobalVariables()) {
     if (!var->is_const()) {
       continue;
     }

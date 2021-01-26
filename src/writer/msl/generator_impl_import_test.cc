@@ -198,7 +198,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
 
 TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
   auto* var = Var("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  mod->AddGlobalVariable(var);
+  mod->AST().AddGlobalVariable(var);
 
   auto* expr = Call("determinant", "var");
 

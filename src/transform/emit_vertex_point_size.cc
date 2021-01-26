@@ -62,7 +62,7 @@ Transform::Output EmitVertexPointSize::Run(const Program* in) {
           out.program.create<ast::BuiltinDecoration>(Source{},
                                                      ast::Builtin::kPointSize),
       });
-  out.program.AddGlobalVariable(pointsize_var);
+  out.program.AST().AddGlobalVariable(pointsize_var);
 
   // Build the AST expression & statement for assigning pointsize one.
   auto* one = out.program.create<ast::ScalarConstructorExpression>(

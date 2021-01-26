@@ -1091,7 +1091,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
           MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type,
                        true, ast_expr, std::move(spec_id_decos));
       if (ast_var) {
-        program_.AddGlobalVariable(ast_var);
+        program_.AST().AddGlobalVariable(ast_var);
         scalar_spec_constants_.insert(inst.result_id());
       }
     }
@@ -1209,7 +1209,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
                      ast_constructor, ast::VariableDecorationList{});
     // TODO(dneto): initializers (a.k.a. constructor expression)
     if (ast_var) {
-      program_.AddGlobalVariable(ast_var);
+      program_.AST().AddGlobalVariable(ast_var);
     }
   }
 
@@ -1226,7 +1226,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
             create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
         });
 
-    program_.AddGlobalVariable(var);
+    program_.AST().AddGlobalVariable(var);
   }
   return success_;
 }

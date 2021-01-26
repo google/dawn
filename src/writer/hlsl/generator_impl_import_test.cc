@@ -213,7 +213,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
 
   auto* expr = Call("determinant", "var");
 
-  mod->AddGlobalVariable(var);
+  mod->AST().AddGlobalVariable(var);
 
   // Register the global
   ASSERT_TRUE(td.Determine()) << td.error();

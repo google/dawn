@@ -43,7 +43,7 @@ fn main() -> void {
 
   auto m = p.program();
   ASSERT_EQ(1u, m.Functions().size());
-  ASSERT_EQ(1u, m.global_variables().size());
+  ASSERT_EQ(1u, m.AST().GlobalVariables().size());
 }
 
 TEST_F(ParserTest, HandlesError) {

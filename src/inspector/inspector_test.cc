@@ -114,11 +114,11 @@ class InspectorHelper : public ast::BuilderWithProgram {
       std::string in, out;
       std::tie(in, out) = inout;
 
-      mod->AddGlobalVariable(
+      mod->AST().AddGlobalVariable(
           Var(in, ast::StorageClass::kInput, ty.u32, nullptr,
               ast::VariableDecorationList{
                   create<ast::LocationDecoration>(location++)}));
-      mod->AddGlobalVariable(
+      mod->AST().AddGlobalVariable(
           Var(out, ast::StorageClass::kOutput, ty.u32, nullptr,
               ast::VariableDecorationList{
                   create<ast::LocationDecoration>(location++)}));
@@ -187,7 +187,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
                       ast::VariableDecorationList{
                           create<ast::ConstantIdDecoration>(id),
                       });
-    mod->AddGlobalVariable(var);
+    mod->AST().AddGlobalVariable(var);
   }
 
   /// @param type AST type of the literal, must resolve to BoolLiteral
@@ -334,7 +334,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
                         create<ast::GroupDecoration>(group),
                     });
 
-    mod->AddGlobalVariable(var);
+    mod->AST().AddGlobalVariable(var);
   }
 
   /// Adds an uniform buffer variable to the program
@@ -469,7 +469,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
   }
 
   void AddGlobalVariable(const std::string& name, type::Type* type) {
-    mod->AddGlobalVariable(
+    mod->AST().AddGlobalVariable(
         Var(name, ast::StorageClass::kUniformConstant, type));
   }
 
@@ -477,7 +477,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
   /// @param name the name of the variable
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, type::Type* type) {
-    mod->AddGlobalVariable(
+    mod->AST().AddGlobalVariable(
         Var(name, ast::StorageClass::kUniformConstant, type));
   }
 
@@ -1114,11 +1114,11 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
-  mod->AddGlobalVariable(
+  mod->AST().AddGlobalVariable(
       Var("in_var", ast::StorageClass::kInput, ty.u32, nullptr,
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kPosition)}));
-  mod->AddGlobalVariable(
+  mod->AST().AddGlobalVariable(
       Var("out_var", ast::StorageClass::kOutput, ty.u32, nullptr,
           ast::VariableDecorationList{create<ast::LocationDecoration>(0)}));
   auto* func =

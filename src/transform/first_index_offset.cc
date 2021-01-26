@@ -83,7 +83,7 @@ FirstIndexOffset::~FirstIndexOffset() = default;
 
 Transform::Output FirstIndexOffset::Run(const Program* in) {
   // First do a quick check to see if the transform has already been applied.
-  for (ast::Variable* var : in->global_variables()) {
+  for (ast::Variable* var : in->AST().GlobalVariables()) {
     if (auto* dec_var = var->As<ast::Variable>()) {
       if (dec_var->symbol() == in->GetSymbol(kBufferName)) {
         diag::Diagnostic err;
@@ -240,7 +240,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(Program* dst) {
           dst->create<ast::GroupDecoration>(Source{}, group_),
       });  // decorations
 
-  dst->AddGlobalVariable(idx_var);
+  dst->AST().AddGlobalVariable(idx_var);
 
   dst->AddConstructedType(struct_type);
 

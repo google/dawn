@@ -245,7 +245,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   mod->AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
-  mod->AddGlobalVariable(data_var);
+  mod->AST().AddGlobalVariable(data_var);
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,

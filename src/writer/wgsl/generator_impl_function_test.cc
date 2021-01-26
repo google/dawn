@@ -194,7 +194,7 @@ TEST_F(WgslGeneratorImplTest,
   mod->AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
-  mod->AddGlobalVariable(data_var);
+  mod->AST().AddGlobalVariable(data_var);
 
   {
     auto* var =

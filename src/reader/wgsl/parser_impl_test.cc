@@ -41,7 +41,7 @@ fn main() -> void {
 
   auto& m = p->get_program();
   ASSERT_EQ(1u, m.Functions().size());
-  ASSERT_EQ(1u, m.global_variables().size());
+  ASSERT_EQ(1u, m.AST().GlobalVariables().size());
 }
 
 TEST_F(ParserImplTest, HandlesError) {

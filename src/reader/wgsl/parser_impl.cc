@@ -323,7 +323,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("variable declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      program_.AddGlobalVariable(gv.value);
+      program_.AST().AddGlobalVariable(gv.value);
       return true;
     }
 
@@ -335,7 +335,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("constant declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      program_.AddGlobalVariable(gc.value);
+      program_.AST().AddGlobalVariable(gc.value);
       return true;
     }
 

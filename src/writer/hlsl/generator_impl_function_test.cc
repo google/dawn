@@ -157,8 +157,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AddGlobalVariable(foo_var);
-  mod->AddGlobalVariable(bar_var);
+  mod->AST().AddGlobalVariable(foo_var);
+  mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.void_,
@@ -208,8 +208,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AddGlobalVariable(foo_var);
-  mod->AddGlobalVariable(bar_var);
+  mod->AST().AddGlobalVariable(foo_var);
+  mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("frag_main", ast::VariableList{}, ty.void_,
@@ -262,8 +262,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AddGlobalVariable(coord_var);
-  mod->AddGlobalVariable(depth_var);
+  mod->AST().AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(depth_var);
 
   auto* func =
       Func("frag_main", ast::VariableList{}, ty.void_,
@@ -310,7 +310,7 @@ TEST_F(HlslGeneratorImplTest_Function,
           });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   MemberAccessor("coord", "x"), ast::VariableDecorationList{});
@@ -361,7 +361,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   mod->AddConstructedType(s);
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   create<ast::MemberAccessorExpression>(
@@ -416,7 +416,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                         });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
@@ -466,7 +466,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                         });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
@@ -515,7 +515,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                         });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(coord_var);
 
   auto* func =
       Func("frag_main", ast::VariableList{}, ty.void_,
@@ -567,9 +567,9 @@ TEST_F(
   td.RegisterVariableForTesting(bar_var);
   td.RegisterVariableForTesting(val_var);
 
-  mod->AddGlobalVariable(foo_var);
-  mod->AddGlobalVariable(bar_var);
-  mod->AddGlobalVariable(val_var);
+  mod->AST().AddGlobalVariable(foo_var);
+  mod->AST().AddGlobalVariable(bar_var);
+  mod->AST().AddGlobalVariable(val_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -635,7 +635,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AddGlobalVariable(depth_var);
+  mod->AST().AddGlobalVariable(depth_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -701,8 +701,8 @@ TEST_F(
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AddGlobalVariable(coord_var);
-  mod->AddGlobalVariable(depth_var);
+  mod->AST().AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(depth_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -768,7 +768,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   td.RegisterVariableForTesting(coord_var);
 
-  mod->AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(coord_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -828,7 +828,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   td.RegisterVariableForTesting(coord_var);
 
-  mod->AddGlobalVariable(coord_var);
+  mod->AST().AddGlobalVariable(coord_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -883,7 +883,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       });
 
   td.RegisterVariableForTesting(bar_var);
-  mod->AddGlobalVariable(bar_var);
+  mod->AST().AddGlobalVariable(bar_var);
 
   auto* list = create<ast::BlockStatement>(ast::StatementList{
       create<ast::ReturnStatement>(),
@@ -1055,7 +1055,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   mod->AddConstructedType(s);
   td.RegisterVariableForTesting(data_var);
-  mod->AddGlobalVariable(data_var);
+  mod->AST().AddGlobalVariable(data_var);
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,

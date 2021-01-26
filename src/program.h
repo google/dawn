@@ -118,21 +118,6 @@ class Program {
     return types_.Get<T>(std::forward<ARGS>(args)...);
   }
 
-  /// Add a global variable to the program
-  /// [DEPRECATED]: Use AST().AddGlobalVariable(var)
-  /// @param var the variable to add
-  void AddGlobalVariable(ast::Variable* var) { AST().AddGlobalVariable(var); }
-
-  /// [DEPRECATED]: Use AST().GlobalVariables()
-  /// @returns the global variables for the program
-  const ast::VariableList& global_variables() const {
-    return AST().GlobalVariables();
-  }
-
-  /// [DEPRECATED]: Use AST().GlobalVariables()
-  /// @returns the global variables for the program
-  ast::VariableList& global_variables() { return AST().GlobalVariables(); }
-
   /// Adds a constructed type to the program.
   /// The type must be an alias or a struct.
   /// [DEPRECATED]: Use AST().AddConstructedType(type)

@@ -116,7 +116,7 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  for (auto* var : program_->global_variables()) {
+  for (auto* var : program_->AST().GlobalVariables()) {
     variable_stack_.set_global(var->symbol(), var);
 
     if (var->has_constructor()) {

@@ -115,7 +115,7 @@ std::string GeneratorImpl::generate_name(const std::string& prefix) {
 bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
 
-  for (auto* global : program_->global_variables()) {
+  for (auto* global : program_->AST().GlobalVariables()) {
     global_variables_.set(global->symbol(), global);
   }
 
@@ -128,7 +128,7 @@ bool GeneratorImpl::Generate() {
     out_ << std::endl;
   }
 
-  for (auto* var : program_->global_variables()) {
+  for (auto* var : program_->AST().GlobalVariables()) {
     if (!var->is_const()) {
       continue;
     }

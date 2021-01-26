@@ -4150,8 +4150,8 @@ TEST_P(IntrinsicTextureTest, Call) {
 TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
   auto param = GetParam();
 
-  mod->AddGlobalVariable(param.buildTextureVariable(this));
-  mod->AddGlobalVariable(param.buildSamplerVariable(this));
+  mod->AST().AddGlobalVariable(param.buildTextureVariable(this));
+  mod->AST().AddGlobalVariable(param.buildSamplerVariable(this));
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));

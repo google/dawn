@@ -324,20 +324,21 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
 
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
-  mod->AddGlobalVariable(Var(Source{Source::Location{12, 34}}, "global_var",
-                             ast::StorageClass::kInput, ty.f32, nullptr,
-                             ast::VariableDecorationList{}));
+  mod->AST().AddGlobalVariable(Var(
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kInput,
+      ty.f32, nullptr, ast::VariableDecorationList{}));
 
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.ValidateGlobalVariables(mod->global_variables())) << v.error();
+  EXPECT_TRUE(v.ValidateGlobalVariables(mod->AST().GlobalVariables()))
+      << v.error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   // var gloabl_var: f32;
-  mod->AddGlobalVariable(Var(Source{Source::Location{12, 34}}, "global_var",
-                             ast::StorageClass::kNone, ty.f32, nullptr,
-                             ast::VariableDecorationList{}));
+  mod->AST().AddGlobalVariable(Var(
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kNone,
+      ty.f32, nullptr, ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -349,9 +350,9 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
 
 TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> gloabl_var: f32;
-  mod->AddGlobalVariable(Const(Source{Source::Location{12, 34}}, "global_var",
-                               ast::StorageClass::kInput, ty.f32, nullptr,
-                               ast::VariableDecorationList{}));
+  mod->AST().AddGlobalVariable(Const(
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kInput,
+      ty.f32, nullptr, ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -364,9 +365,9 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
 
 TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
   // const gloabl_var: f32;
-  mod->AddGlobalVariable(Const(Source{Source::Location{12, 34}}, "global_var",
-                               ast::StorageClass::kNone, ty.f32, nullptr,
-                               ast::VariableDecorationList{}));
+  mod->AST().AddGlobalVariable(Const(
+      Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kNone,
+      ty.f32, nullptr, ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -379,8 +380,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   // fn my_func() -> f32 {
   //   not_global_var = 3.14f;
   // }
-  mod->AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate, ty.f32,
-                             Expr(2.1f), ast::VariableDecorationList{}));
+  mod->AST().AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate,
+                                   ty.f32, Expr(2.1f),
+                                   ast::VariableDecorationList{}));
 
   SetSource(Source{Source::Location{12, 34}});
   auto* lhs = Expr("not_global_var");
@@ -407,8 +409,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   //   return;
   // }
 
-  mod->AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate, ty.f32,
-                             Expr(2.1f), ast::VariableDecorationList{}));
+  mod->AST().AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate,
+                                   ty.f32, Expr(2.1f),
+                                   ast::VariableDecorationList{}));
 
   auto* func = Func(
       "my_func", ast::VariableList{}, ty.void_,
@@ -499,16 +502,17 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   // var global_var1 : i32 = 0;
   auto* var0 = Var("global_var0", ast::StorageClass::kPrivate, ty.f32,
                    Expr(0.1f), ast::VariableDecorationList{});
-  mod->AddGlobalVariable(var0);
+  mod->AST().AddGlobalVariable(var0);
 
   auto* var1 = Var(Source{Source::Location{12, 34}}, "global_var1",
                    ast::StorageClass::kPrivate, ty.f32, Expr(0),
                    ast::VariableDecorationList{});
-  mod->AddGlobalVariable(var1);
+  mod->AST().AddGlobalVariable(var1);
 
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.ValidateGlobalVariables(mod->global_variables())) << v.error();
+  EXPECT_TRUE(v.ValidateGlobalVariables(mod->AST().GlobalVariables()))
+      << v.error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
@@ -516,16 +520,16 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
   // var global_var : i32 = 0;
   auto* var0 = Var("global_var", ast::StorageClass::kPrivate, ty.f32,
                    Expr(0.1f), ast::VariableDecorationList{});
-  mod->AddGlobalVariable(var0);
+  mod->AST().AddGlobalVariable(var0);
 
   auto* var1 = Var(Source{Source::Location{12, 34}}, "global_var",
                    ast::StorageClass::kPrivate, ty.i32, Expr(0),
                    ast::VariableDecorationList{});
-  mod->AddGlobalVariable(var1);
+  mod->AST().AddGlobalVariable(var1);
 
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.ValidateGlobalVariables(mod->global_variables()));
+  EXPECT_FALSE(v.ValidateGlobalVariables(mod->AST().GlobalVariables()));
   EXPECT_EQ(v.error(),
             "12:34 v-0011: redeclared global identifier 'global_var'");
 }
@@ -566,7 +570,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
 
   auto* global_var = Var("a", ast::StorageClass::kPrivate, ty.f32, Expr(2.1f),
                          ast::VariableDecorationList{});
-  mod->AddGlobalVariable(global_var);
+  mod->AST().AddGlobalVariable(global_var);
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
                   ast::VariableDecorationList{});

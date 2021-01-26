@@ -35,9 +35,9 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(m.global_variables().size(), 1u);
+  ASSERT_EQ(m.AST().GlobalVariables().size(), 1u);
 
-  auto* v = m.global_variables()[0];
+  auto* v = m.AST().GlobalVariables()[0];
   EXPECT_EQ(v->symbol(), p->get_program().RegisterSymbol("a"));
 }
 
@@ -61,9 +61,9 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(m.global_variables().size(), 1u);
+  ASSERT_EQ(m.AST().GlobalVariables().size(), 1u);
 
-  auto* v = m.global_variables()[0];
+  auto* v = m.AST().GlobalVariables()[0];
   EXPECT_EQ(v->symbol(), p->get_program().RegisterSymbol("a"));
 }
 

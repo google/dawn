@@ -92,12 +92,12 @@ bool GeneratorImpl::Generate() {
   if (!program_->constructed_types().empty())
     out_ << std::endl;
 
-  for (auto* var : program_->global_variables()) {
+  for (auto* var : program_->AST().GlobalVariables()) {
     if (!EmitVariable(var)) {
       return false;
     }
   }
-  if (!program_->global_variables().empty()) {
+  if (!program_->AST().GlobalVariables().empty()) {
     out_ << std::endl;
   }
 
@@ -132,7 +132,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
 
   // TODO(dsinclair): This should be smarter and only emit needed const
   // variables
-  for (auto* var : program_->global_variables()) {
+  for (auto* var : program_->AST().GlobalVariables()) {
     if (!var->is_const()) {
       continue;
     }

@@ -106,7 +106,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
-  for (auto* var : program_.global_variables()) {
+  for (auto* var : program_.AST().GlobalVariables()) {
     if (!var->HasConstantIdDecoration()) {
       continue;
     }

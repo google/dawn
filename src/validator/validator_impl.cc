@@ -65,7 +65,7 @@ void ValidatorImpl::add_error(const Source& src, const std::string& msg) {
 
 bool ValidatorImpl::Validate() {
   function_stack_.push_scope();
-  if (!ValidateGlobalVariables(program_->global_variables())) {
+  if (!ValidateGlobalVariables(program_->AST().GlobalVariables())) {
     return false;
   }
   if (!ValidateConstructedTypes(program_->constructed_types())) {

@@ -150,7 +150,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   }
 
   // Look for an existing vertex index builtin
-  for (auto* v : in->global_variables()) {
+  for (auto* v : in->AST().GlobalVariables()) {
     if (v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
@@ -181,7 +181,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
                                               ast::Builtin::kVertexIndex),
       });
 
-  out->AddGlobalVariable(var);
+  out->AST().AddGlobalVariable(var);
 }
 
 void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
@@ -197,7 +197,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   }
 
   // Look for an existing instance index builtin
-  for (auto* v : in->global_variables()) {
+  for (auto* v : in->AST().GlobalVariables()) {
     if (v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
@@ -227,12 +227,12 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
           out->create<ast::BuiltinDecoration>(Source{},
                                               ast::Builtin::kInstanceIndex),
       });
-  out->AddGlobalVariable(var);
+  out->AST().AddGlobalVariable(var);
 }
 
 void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
   // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
-  for (auto*& v : const_cast<Program*>(in)->global_variables()) {
+  for (auto*& v : const_cast<Program*>(in)->AST().GlobalVariables()) {
     if (v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }
@@ -299,7 +299,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
             out->create<ast::BindingDecoration>(Source{}, i),
             out->create<ast::GroupDecoration>(Source{}, cfg.pulling_group),
         });
-    out->AddGlobalVariable(var);
+    out->AST().AddGlobalVariable(var);
   }
   out->AddConstructedType(struct_type);
 }

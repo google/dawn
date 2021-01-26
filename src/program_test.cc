@@ -46,18 +46,18 @@ TEST_F(ProgramTest, IsValid_Empty) {
 
 TEST_F(ProgramTest, IsValid_GlobalVariable) {
   auto* var = Var("var", ast::StorageClass::kInput, ty.f32);
-  mod->AddGlobalVariable(var);
+  mod->AST().AddGlobalVariable(var);
   EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_GlobalVariable) {
-  mod->AddGlobalVariable(nullptr);
+  mod->AST().AddGlobalVariable(nullptr);
   EXPECT_FALSE(mod->IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
   auto* var = Var("var", ast::StorageClass::kInput, nullptr);
-  mod->AddGlobalVariable(var);
+  mod->AST().AddGlobalVariable(var);
   EXPECT_FALSE(mod->IsValid());
 }
 
