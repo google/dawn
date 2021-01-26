@@ -730,6 +730,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
     // TODO(crbug.com/tint/372): Support sample mask builtin.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
 
+    // TODO(crbug.com/dawn/644): Diagnose and fix this ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     constexpr bool kTestDepth = false;
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
@@ -775,6 +778,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOutputMask) {
     // TODO(crbug.com/tint/372): Support sample mask builtin.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
+    // TODO(crbug.com/dawn/644): Diagnose and fix this ANGLE failure.
+    DAWN_SKIP_TEST_IF(IsANGLE());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -927,7 +933,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCoverage) {
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
+    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsANGLE());
 
     constexpr bool kTestDepth = true;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
@@ -988,7 +994,7 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCo
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSampleMask) {
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
+    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsANGLE());
 
     // TODO(dawn:491): This doesn't work on Metal, because we're using both the shader-output
     // mask (emulting the sampleMask from RenderPipeline) and alpha-to-coverage at the same
@@ -1033,7 +1039,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRasterizationMask) {
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
+    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsANGLE());
 
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
