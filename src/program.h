@@ -118,19 +118,6 @@ class Program {
     return types_.Get<T>(std::forward<ARGS>(args)...);
   }
 
-  /// Returns all the declared types in the program
-  /// [DEPRECATED]: Use AST().Types().types()
-  /// @returns the mapping from name string to type.
-  const std::unordered_map<std::string, type::Type*>& types() {
-    return types_.types();
-  }
-
-  /// @returns all the declared nodes in the program
-  /// [DEPRECATED]: Use Nodes().Objects()
-  BlockAllocator<ast::Node>::ConstView nodes() const {
-    return Nodes().Objects();
-  }
-
   /// Registers `name` as a symbol
   /// @param name the name to register
   /// @returns the symbol for the `name`. If `name` is already registered the

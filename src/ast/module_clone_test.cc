@@ -123,19 +123,18 @@ fn main() -> void {
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<ast::Node*> src_nodes;
-  for (auto* src_node : src.nodes()) {
+  for (auto* src_node : src.Nodes().Objects()) {
     src_nodes.emplace(src_node);
   }
   std::unordered_set<type::Type*> src_types;
-  for (auto& src_type : src.types()) {
-    src_types.emplace(src_type.second);
+  for (auto* src_type : src.Types()) {
+    src_types.emplace(src_type);
   }
-  for (auto* dst_node : dst.nodes()) {
+  for (auto* dst_node : dst.Nodes().Objects()) {
     ASSERT_EQ(src_nodes.count(dst_node), 0u) << dst_node->str();
   }
-  for (auto& dst_type : dst.types()) {
-    ASSERT_EQ(src_types.count(dst_type.second), 0u)
-        << dst_type.second->type_name();
+  for (auto* dst_type : dst.Types()) {
+    ASSERT_EQ(src_types.count(dst_type), 0u) << dst_type->type_name();
   }
 
   // Regenerate the wgsl for the src program. We use this instead of the

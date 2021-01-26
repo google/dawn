@@ -65,7 +65,7 @@ class Manager {
 
   /// Returns the type map
   /// @returns the mapping from name string to type.
-  const std::unordered_map<std::string, type::Type*>& types() {
+  const std::unordered_map<std::string, type::Type*>& types() const {
     return by_name_;
   }
 

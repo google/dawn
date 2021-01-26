@@ -101,9 +101,8 @@ void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
 
 bool TypeDeterminer::Determine() {
   std::vector<type::StorageTexture*> storage_textures;
-  for (auto& it : program_->types()) {
-    if (auto* storage =
-            it.second->UnwrapIfNeeded()->As<type::StorageTexture>()) {
+  for (auto* ty : program_->Types()) {
+    if (auto* storage = ty->UnwrapIfNeeded()->As<type::StorageTexture>()) {
       storage_textures.emplace_back(storage);
     }
   }
