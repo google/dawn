@@ -22,6 +22,16 @@ namespace tint {
 namespace type {
 namespace {
 
+template <typename T>
+size_t count(const T& range_loopable) {
+  size_t n = 0;
+  for (auto it : range_loopable) {
+    (void)it;
+    n++;
+  }
+  return n;
+}
+
 using TypeManagerTest = testing::Test;
 
 TEST_F(TypeManagerTest, GetUnregistered) {
@@ -51,6 +61,21 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
   ASSERT_NE(t2, nullptr);
   EXPECT_NE(t, t2);
   EXPECT_TRUE(t2->Is<U32>());
+}
+
+TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
+  Manager inner;
+  Manager outer = Manager::Wrap(inner);
+
+  inner.Get<I32>();
+
+  EXPECT_EQ(count(inner), 1u);
+  EXPECT_EQ(count(outer), 0u);
+
+  outer.Get<U32>();
+
+  EXPECT_EQ(count(inner), 1u);
+  EXPECT_EQ(count(outer), 1u);
 }
 
 }  // namespace
