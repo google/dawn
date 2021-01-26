@@ -3036,7 +3036,8 @@ INSTANTIATE_TEST_SUITE_P(
     ImageFetch_OptionalParams,
     SpvParserTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // OpImageFetch with no extra params
+        // OpImageFetch with no extra params, on sampled texture
+        // Level of detail is injected for sampled texture
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
          R"(Variable{
     Decorations{
@@ -3058,12 +3059,13 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{vi12}
+              ScalarConstructor[not set]{0}
             )
           }
         }
       }
     })"},
-        // OpImageFetch with explicit level
+        // OpImageFetch with explicit level, on sampled texture
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
          R"(Variable{
@@ -3088,6 +3090,76 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{vi12}
               ScalarConstructor[not set]{3}
             )
+          }
+        }
+      }
+    })"},
+        // OpImageFetch with no extra params, on depth texture
+        // Level of detail is injected for depth texture
+        {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vi12}
+                ScalarConstructor[not set]{0}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+          }
+        }
+      }
+    })"},
+        // OpImageFetch with extra params, on depth texture
+        {"%float 2D 1 0 0 1 Unknown",
+         "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__f32
+        {
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vi12}
+                ScalarConstructor[not set]{3}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
           }
         }
       }
@@ -3125,6 +3197,7 @@ INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
               (
                 Identifier[not set]{x_20}
                 Identifier[not set]{vi12}
+                ScalarConstructor[not set]{0}
               )
             }
             ScalarConstructor[not set]{0.000000}
@@ -3284,6 +3357,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{vi12}
+              ScalarConstructor[not set]{0}
             )
           }
         }
@@ -3311,6 +3385,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{vi12}
+              ScalarConstructor[not set]{0}
             )
           }
         }
@@ -3339,6 +3414,7 @@ INSTANTIATE_TEST_SUITE_P(
               (
                 Identifier[not set]{x_20}
                 Identifier[not set]{vi12}
+                ScalarConstructor[not set]{0}
               )
             }
           }
@@ -3367,6 +3443,7 @@ INSTANTIATE_TEST_SUITE_P(
             (
               Identifier[not set]{x_20}
               Identifier[not set]{vi12}
+              ScalarConstructor[not set]{0}
             )
           }
         }
@@ -3395,6 +3472,7 @@ INSTANTIATE_TEST_SUITE_P(
               (
                 Identifier[not set]{x_20}
                 Identifier[not set]{vi12}
+                ScalarConstructor[not set]{0}
               )
             }
           }

@@ -68,6 +68,7 @@
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/texture_type.h"
 #include "src/type/type.h"
@@ -4212,6 +4213,12 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     params.push_back(lod.expr);
     image_operands_mask ^= SpvImageOperandsLodMask;
     arg_index++;
+  } else if ((opcode == SpvOpImageFetch) &&
+             (texture_type->Is<type::SampledTexture>() ||
+              texture_type->Is<type::DepthTexture>())) {
+    // textureLoad on sampled texture and depth texture requires an explicit
+    // level-of-detail parameter.
+    params.push_back(parser_impl_.MakeNullValue(i32_));
   }
   if (arg_index + 1 < num_args &&
       (image_operands_mask & SpvImageOperandsGradMask)) {
