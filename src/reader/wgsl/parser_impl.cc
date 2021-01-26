@@ -361,7 +361,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
 
       auto* type = str.value;
       register_constructed(
-          program_.SymbolToName(type->As<type::Struct>()->symbol()), type);
+          program_.Symbols().NameFor(type->As<type::Struct>()->symbol()), type);
       program_.AST().AddConstructedType(type);
       return true;
     }
@@ -435,13 +435,14 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
     constructor = expr.value;
   }
 
-  return create<ast::Variable>(decl->source,                         // source
-                               program_.RegisterSymbol(decl->name),  // symbol
-                               decl->storage_class,          // storage_class
-                               decl->type,                   // type
-                               false,                        // is_const
-                               constructor,                  // constructor
-                               std::move(var_decos.value));  // decorations
+  return create<ast::Variable>(
+      decl->source,                             // source
+      program_.Symbols().Register(decl->name),  // symbol
+      decl->storage_class,                      // storage_class
+      decl->type,                               // type
+      false,                                    // is_const
+      constructor,                              // constructor
+      std::move(var_decos.value));              // decorations
 }
 
 // global_constant_decl
@@ -463,13 +464,14 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
   if (init.errored)
     return Failure::kErrored;
 
-  return create<ast::Variable>(decl->source,                         // source
-                               program_.RegisterSymbol(decl->name),  // symbol
-                               ast::StorageClass::kNone,        // storage_class
-                               decl->type,                      // type
-                               true,                            // is_const
-                               init.value,                      // constructor
-                               ast::VariableDecorationList{});  // decorations
+  return create<ast::Variable>(
+      decl->source,                             // source
+      program_.Symbols().Register(decl->name),  // symbol
+      ast::StorageClass::kNone,                 // storage_class
+      decl->type,                               // type
+      true,                                     // is_const
+      init.value,                               // constructor
+      ast::VariableDecorationList{});           // decorations
 }
 
 // variable_decl
@@ -974,7 +976,7 @@ Maybe<type::Type*> ParserImpl::type_alias() {
     return add_error(peek(), "invalid type alias");
 
   auto* alias = program_.create<type::Alias>(
-      program_.RegisterSymbol(name.value), type.value);
+      program_.Symbols().Register(name.value), type.value);
   register_constructed(name.value, alias);
 
   return alias;
@@ -1227,7 +1229,7 @@ Maybe<type::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   return create<type::Struct>(
-      program_.RegisterSymbol(name.value),
+      program_.Symbols().Register(name.value),
       create<ast::Struct>(source, std::move(body.value),
                           std::move(struct_decos.value)));
 }
@@ -1282,7 +1284,7 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
     return Failure::kErrored;
 
   return create<ast::StructMember>(decl->source,
-                                   program_.RegisterSymbol(decl->name),
+                                   program_.Symbols().Register(decl->name),
                                    decl->type, std::move(member_decos.value));
 }
 
@@ -1319,7 +1321,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   return create<ast::Function>(
-      header->source, program_.RegisterSymbol(header->name), header->params,
+      header->source, program_.Symbols().Register(header->name), header->params,
       header->return_type, body.value, func_decos.value);
 }
 
@@ -1387,14 +1389,14 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
 
   ast::VariableList ret;
   for (;;) {
-    auto* var =
-        create<ast::Variable>(decl->source,                         // source
-                              program_.RegisterSymbol(decl->name),  // symbol
-                              ast::StorageClass::kNone,        // storage_class
-                              decl->type,                      // type
-                              true,                            // is_const
-                              nullptr,                         // constructor
-                              ast::VariableDecorationList{});  // decorations
+    auto* var = create<ast::Variable>(
+        decl->source,                             // source
+        program_.Symbols().Register(decl->name),  // symbol
+        ast::StorageClass::kNone,                 // storage_class
+        decl->type,                               // type
+        true,                                     // is_const
+        nullptr,                                  // constructor
+        ast::VariableDecorationList{});           // decorations
     // Formal parameters are treated like a const declaration where the
     // initializer value is provided by the call's argument.  The key point is
     // that it's not updatable after intially set.  This is unlike C or GLSL
@@ -1658,14 +1660,14 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
     if (!constructor.matched)
       return add_error(peek(), "missing constructor for const declaration");
 
-    auto* var =
-        create<ast::Variable>(decl->source,                         // source
-                              program_.RegisterSymbol(decl->name),  // symbol
-                              ast::StorageClass::kNone,        // storage_class
-                              decl->type,                      // type
-                              true,                            // is_const
-                              constructor.value,               // constructor
-                              ast::VariableDecorationList{});  // decorations
+    auto* var = create<ast::Variable>(
+        decl->source,                             // source
+        program_.Symbols().Register(decl->name),  // symbol
+        ast::StorageClass::kNone,                 // storage_class
+        decl->type,                               // type
+        true,                                     // is_const
+        constructor.value,                        // constructor
+        ast::VariableDecorationList{});           // decorations
 
     return create<ast::VariableDeclStatement>(decl->source, var);
   }
@@ -1688,8 +1690,8 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   }
 
   auto* var =
-      create<ast::Variable>(decl->source,                         // source
-                            program_.RegisterSymbol(decl->name),  // symbol
+      create<ast::Variable>(decl->source,                             // source
+                            program_.Symbols().Register(decl->name),  // symbol
                             decl->storage_class,             // storage_class
                             decl->type,                      // type
                             false,                           // is_const
@@ -2088,11 +2090,11 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
     return Failure::kErrored;
 
   return create<ast::CallStatement>(
-      Source{},
-      create<ast::CallExpression>(source,
-                                  create<ast::IdentifierExpression>(
-                                      source, program_.RegisterSymbol(name)),
-                                  std::move(params)));
+      Source{}, create<ast::CallExpression>(
+                    source,
+                    create<ast::IdentifierExpression>(
+                        source, program_.Symbols().Register(name)),
+                    std::move(params)));
 }
 
 // break_stmt
@@ -2164,7 +2166,7 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 
   if (match(Token::Type::kIdentifier))
     return create<ast::IdentifierExpression>(
-        t.source(), program_.RegisterSymbol(t.to_str()));
+        t.source(), program_.Symbols().Register(t.to_str()));
 
   auto type = type_decl();
   if (type.errored)
@@ -2240,7 +2242,7 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
     return postfix_expr(create<ast::MemberAccessorExpression>(
         ident.source, prefix,
         create<ast::IdentifierExpression>(
-            ident.source, program_.RegisterSymbol(ident.value))));
+            ident.source, program_.Symbols().Register(ident.value))));
   }
 
   return prefix;

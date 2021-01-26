@@ -947,7 +947,7 @@ type::Type* ParserImpl::ConvertType(
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);
     auto* ast_struct_member = create<ast::StructMember>(
-        Source{}, program_.RegisterSymbol(member_name), ast_member_ty,
+        Source{}, program_.Symbols().Register(member_name), ast_member_ty,
         std::move(ast_member_decorations));
     ast_members.push_back(ast_struct_member);
   }
@@ -963,8 +963,8 @@ type::Type* ParserImpl::ConvertType(
   namer_.SuggestSanitizedName(type_id, "S");
 
   auto name = namer_.GetName(type_id);
-  auto* result =
-      program_.create<type::Struct>(program_.RegisterSymbol(name), ast_struct);
+  auto* result = program_.create<type::Struct>(
+      program_.Symbols().Register(name), ast_struct);
   id_to_type_[type_id] = result;
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(result);
@@ -1130,7 +1130,7 @@ void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
   }
   const auto name = namer_.GetName(type_id);
   auto* ast_alias_type = program_.create<type::Alias>(
-      program_.RegisterSymbol(name), ast_underlying_type);
+      program_.Symbols().Register(name), ast_underlying_type);
   // Record this new alias as the AST type for this SPIR-V ID.
   id_to_type_[type_id] = ast_alias_type;
   program_.AST().AddConstructedType(ast_alias_type);
@@ -1306,13 +1306,13 @@ ast::Variable* ParserImpl::MakeVariable(
   }
 
   std::string name = namer_.Name(id);
-  return create<ast::Variable>(Source{},                       // source
-                               program_.RegisterSymbol(name),  // symbol
-                               sc,                             // storage_class
-                               type,                           // type
-                               is_const,                       // is_const
-                               constructor,                    // constructor
-                               decorations);                   // decorations
+  return create<ast::Variable>(Source{},                           // source
+                               program_.Symbols().Register(name),  // symbol
+                               sc,            // storage_class
+                               type,          // type
+                               is_const,      // is_const
+                               constructor,   // constructor
+                               decorations);  // decorations
 }
 
 TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {

@@ -450,7 +450,7 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
 
   OperandList operands = {
       Operand::Int(stage), Operand::Int(id),
-      Operand::String(program_->SymbolToName(func->symbol()))};
+      Operand::String(program_->Symbols().NameFor(func->symbol()))};
 
   for (const auto* var : func->referenced_module_variables()) {
     // For SPIR-V 1.3 we only output Input/output variables. If we update to
@@ -463,7 +463,7 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
     uint32_t var_id;
     if (!scope_stack_.get(var->symbol(), &var_id)) {
       error_ = "unable to find ID for global variable: " +
-               program_->SymbolToName(var->symbol());
+               program_->Symbols().NameFor(var->symbol());
       return false;
     }
 
@@ -543,7 +543,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
   push_debug(spv::Op::OpName,
              {Operand::Int(func_id),
-              Operand::String(program_->SymbolToName(func->symbol()))});
+              Operand::String(program_->Symbols().NameFor(func->symbol()))});
 
   auto ret_id = GenerateTypeIfNeeded(func->return_type());
   if (ret_id == 0) {
@@ -569,7 +569,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
     push_debug(spv::Op::OpName,
                {Operand::Int(param_id),
-                Operand::String(program_->SymbolToName(param->symbol()))});
+                Operand::String(program_->Symbols().NameFor(param->symbol()))});
     params.push_back(Instruction{spv::Op::OpFunctionParameter,
                                  {Operand::Int(param_type_id), param_op}});
 
@@ -660,7 +660,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
 
   push_debug(spv::Op::OpName,
              {Operand::Int(var_id),
-              Operand::String(program_->SymbolToName(var->symbol()))});
+              Operand::String(program_->Symbols().NameFor(var->symbol()))});
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
@@ -712,7 +712,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     }
     push_debug(spv::Op::OpName,
                {Operand::Int(init_id),
-                Operand::String(program_->SymbolToName(var->symbol()))});
+                Operand::String(program_->Symbols().NameFor(var->symbol()))});
 
     scope_stack_.set_global(var->symbol(), init_id);
     spirv_id_to_variable_[init_id] = var;
@@ -734,7 +734,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   push_debug(spv::Op::OpName,
              {Operand::Int(var_id),
-              Operand::String(program_->SymbolToName(var->symbol()))});
+              Operand::String(program_->Symbols().NameFor(var->symbol()))});
 
   OperandList ops = {Operand::Int(type_id), result,
                      Operand::Int(ConvertStorageClass(sc))};
@@ -915,7 +915,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
   }
 
   // TODO(dsinclair): Swizzle stuff
-  auto swiz = program_->SymbolToName(expr->member()->symbol());
+  auto swiz = program_->Symbols().NameFor(expr->member()->symbol());
   // Single element swizzle is either an access chain or a composite extract
   if (swiz.size() == 1) {
     auto val = IndexFromName(swiz[0]);
@@ -1123,7 +1123,7 @@ uint32_t Builder::GenerateIdentifierExpression(
   }
 
   error_ = "unable to find variable with identifier: " +
-           program_->SymbolToName(expr->symbol());
+           program_->Symbols().NameFor(expr->symbol());
   return 0;
 }
 
@@ -1816,7 +1816,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   auto func_id = func_symbol_to_id_[ident->symbol()];
   if (func_id == 0) {
     error_ = "unable to find called function: " +
-             program_->SymbolToName(ident->symbol());
+             program_->Symbols().NameFor(ident->symbol());
     return 0;
   }
   ops.push_back(Operand::Int(func_id));
@@ -1948,7 +1948,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     auto inst_id =
         intrinsic_to_glsl_method(ident->result_type(), ident->intrinsic());
     if (inst_id == 0) {
-      error_ = "unknown method " + program_->SymbolToName(ident->symbol());
+      error_ = "unknown method " + program_->Symbols().NameFor(ident->symbol());
       return 0;
     }
 
@@ -1960,7 +1960,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
 
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " +
-             program_->SymbolToName(ident->symbol());
+             program_->Symbols().NameFor(ident->symbol());
     return 0;
   }
 
@@ -2384,7 +2384,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
 
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " +
-             program_->SymbolToName(ident->symbol());
+             program_->Symbols().NameFor(ident->symbol());
     return false;
   }
 
@@ -3006,7 +3006,7 @@ bool Builder::GenerateStructType(type::Struct* struct_type,
     push_debug(
         spv::Op::OpName,
         {Operand::Int(struct_id),
-         Operand::String(program_->SymbolToName(struct_type->symbol()))});
+         Operand::String(program_->Symbols().NameFor(struct_type->symbol()))});
   }
 
   OperandList ops;
@@ -3049,7 +3049,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                                        ast::StructMember* member) {
   push_debug(spv::Op::OpMemberName,
              {Operand::Int(struct_id), Operand::Int(idx),
-              Operand::String(program_->SymbolToName(member->symbol()))});
+              Operand::String(program_->Symbols().NameFor(member->symbol()))});
 
   bool has_layout = false;
   for (auto* deco : member->decorations()) {

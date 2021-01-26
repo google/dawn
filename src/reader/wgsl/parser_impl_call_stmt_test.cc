@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, Statement_Call) {
 
   ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
   auto* ident = c->func()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
 
   EXPECT_EQ(c->params().size(), 0u);
 }
@@ -56,7 +56,7 @@ TEST_F(ParserImplTest, Statement_Call_WithParams) {
 
   ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
   auto* ident = c->func()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
 
   EXPECT_EQ(c->params().size(), 3u);
   EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());

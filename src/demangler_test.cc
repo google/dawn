@@ -24,7 +24,7 @@ using DemanglerTest = testing::Test;
 
 TEST_F(DemanglerTest, NoSymbols) {
   Program m;
-  m.RegisterSymbol("sym1");
+  m.Symbols().Register("sym1");
 
   Demangler d;
   EXPECT_EQ("test str", d.Demangle(m, "test str"));
@@ -32,7 +32,7 @@ TEST_F(DemanglerTest, NoSymbols) {
 
 TEST_F(DemanglerTest, Symbol) {
   Program m;
-  m.RegisterSymbol("sym1");
+  m.Symbols().Register("sym1");
 
   Demangler d;
   EXPECT_EQ("test sym1 str", d.Demangle(m, "test tint_symbol_1 str"));
@@ -40,8 +40,8 @@ TEST_F(DemanglerTest, Symbol) {
 
 TEST_F(DemanglerTest, MultipleSymbols) {
   Program m;
-  m.RegisterSymbol("sym1");
-  m.RegisterSymbol("sym2");
+  m.Symbols().Register("sym1");
+  m.Symbols().Register("sym2");
 
   Demangler d;
   EXPECT_EQ(

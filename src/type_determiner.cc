@@ -407,7 +407,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
         if (callee_func == nullptr) {
           set_error(expr->source(),
                     "unable to find called function: " +
-                        program_->SymbolToName(ident->symbol()));
+                        program_->Symbols().NameFor(ident->symbol()));
           return false;
         }
 
@@ -433,7 +433,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     auto func_sym = expr->func()->As<ast::IdentifierExpression>()->symbol();
     set_error(expr->source(),
               "v-0005: function must be declared before use: '" +
-                  program_->SymbolToName(func_sym) + "'");
+                  program_->Symbols().NameFor(func_sym) + "'");
     return false;
   }
 
@@ -519,8 +519,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                                         ast::CallExpression* expr) {
   if (ast::intrinsic::IsDerivative(ident->intrinsic())) {
     if (expr->params().size() != 1) {
-      set_error(expr->source(), "incorrect number of parameters for " +
-                                    program_->SymbolToName(ident->symbol()));
+      set_error(expr->source(),
+                "incorrect number of parameters for " +
+                    program_->Symbols().NameFor(ident->symbol()));
       return false;
     }
 
@@ -540,8 +541,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
     if (expr->params().size() != 1) {
-      set_error(expr->source(), "incorrect number of parameters for " +
-                                    program_->SymbolToName(ident->symbol()));
+      set_error(expr->source(),
+                "incorrect number of parameters for " +
+                    program_->Symbols().NameFor(ident->symbol()));
       return false;
     }
 
@@ -561,8 +563,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     auto* texture_param = expr->params()[0];
     if (!texture_param->result_type()->UnwrapAll()->Is<type::Texture>()) {
-      set_error(expr->source(), "invalid first argument for " +
-                                    program_->SymbolToName(ident->symbol()));
+      set_error(expr->source(),
+                "invalid first argument for " +
+                    program_->Symbols().NameFor(ident->symbol()));
       return false;
     }
     type::Texture* texture =
@@ -674,7 +677,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     if (expr->params().size() != param.count) {
       set_error(expr->source(),
                 "incorrect number of parameters for " +
-                    program_->SymbolToName(ident->symbol()) + ", got " +
+                    program_->Symbols().NameFor(ident->symbol()) + ", got " +
                     std::to_string(expr->params().size()) + " and expected " +
                     std::to_string(param.count));
       return false;
@@ -747,10 +750,10 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
     if (expr->params().size() != 3) {
-      set_error(expr->source(), "incorrect number of parameters for " +
-                                    program_->SymbolToName(ident->symbol()) +
-                                    " expected 3 got " +
-                                    std::to_string(expr->params().size()));
+      set_error(expr->source(),
+                "incorrect number of parameters for " +
+                    program_->Symbols().NameFor(ident->symbol()) +
+                    " expected 3 got " + std::to_string(expr->params().size()));
       return false;
     }
 
@@ -768,14 +771,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
   }
   if (data == nullptr) {
-    error_ =
-        "unable to find intrinsic " + program_->SymbolToName(ident->symbol());
+    error_ = "unable to find intrinsic " +
+             program_->Symbols().NameFor(ident->symbol());
     return false;
   }
 
   if (expr->params().size() != data->param_count) {
     set_error(expr->source(), "incorrect number of parameters for " +
-                                  program_->SymbolToName(ident->symbol()) +
+                                  program_->Symbols().NameFor(ident->symbol()) +
                                   ". Expected " +
                                   std::to_string(data->param_count) + " got " +
                                   std::to_string(expr->params().size()));
@@ -793,7 +796,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
             !result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->SymbolToName(ident->symbol()) + ". " +
+                        program_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires float or int, scalar or vector values");
           return false;
         }
@@ -802,7 +805,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_float_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->SymbolToName(ident->symbol()) + ". " +
+                        program_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires float scalar or float vector values");
           return false;
         }
@@ -812,7 +815,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->SymbolToName(ident->symbol()) + ". " +
+                        program_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires integer scalar or integer vector values");
           return false;
         }
@@ -821,7 +824,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_float_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->SymbolToName(ident->symbol()) + ". " +
+                        program_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires float vector values");
           return false;
         }
@@ -830,7 +833,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                 data->vector_size) {
           set_error(expr->source(),
                     "incorrect vector size for " +
-                        program_->SymbolToName(ident->symbol()) + ". " +
+                        program_->Symbols().NameFor(ident->symbol()) + ". " +
                         "Requires " + std::to_string(data->vector_size) +
                         " elements");
           return false;
@@ -840,7 +843,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->Is<type::Matrix>()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        program_->SymbolToName(ident->symbol()) +
+                        program_->Symbols().NameFor(ident->symbol()) +
                         ". Requires matrix value");
           return false;
         }
@@ -851,8 +854,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   // Verify all the parameter types match
   for (size_t i = 1; i < data->param_count; ++i) {
     if (result_types[0] != result_types[i]) {
-      set_error(expr->source(), "mismatched parameter types for " +
-                                    program_->SymbolToName(ident->symbol()));
+      set_error(expr->source(),
+                "mismatched parameter types for " +
+                    program_->Symbols().NameFor(ident->symbol()));
       return false;
     }
   }
@@ -919,14 +923,14 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   if (!SetIntrinsicIfNeeded(expr)) {
     set_error(expr->source(),
               "v-0006: identifier must be declared before use: " +
-                  program_->SymbolToName(symbol));
+                  program_->Symbols().NameFor(symbol));
     return false;
   }
   return true;
 }
 
 bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
-  auto name = program_->SymbolToName(ident->symbol());
+  auto name = program_->Symbols().NameFor(ident->symbol());
   if (name == "abs") {
     ident->set_intrinsic(ast::Intrinsic::kAbs);
   } else if (name == "acos") {
@@ -1099,9 +1103,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
     }
 
     if (ret == nullptr) {
-      set_error(
-          expr->source(),
-          "struct member " + program_->SymbolToName(symbol) + " not found");
+      set_error(expr->source(), "struct member " +
+                                    program_->Symbols().NameFor(symbol) +
+                                    " not found");
       return false;
     }
 
@@ -1112,7 +1116,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
   } else if (auto* vec = data_type->As<type::Vector>()) {
     // TODO(dsinclair): Swizzle, record into the identifier experesion
 
-    auto size = program_->SymbolToName(expr->member()->symbol()).size();
+    auto size = program_->Symbols().NameFor(expr->member()->symbol()).size();
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();

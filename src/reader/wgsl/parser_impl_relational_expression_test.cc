@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
@@ -108,7 +108,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().Symbols().Register("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());

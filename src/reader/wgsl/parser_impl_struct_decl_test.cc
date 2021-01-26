@@ -39,12 +39,12 @@ struct S {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->symbol(), p->get_program().RegisterSymbol("S"));
+  ASSERT_EQ(s->symbol(), p->get_program().Symbols().Register("S"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->symbol(),
-            p->get_program().RegisterSymbol("a"));
+            p->get_program().Symbols().Register("a"));
   EXPECT_EQ(s->impl()->members()[1]->symbol(),
-            p->get_program().RegisterSymbol("b"));
+            p->get_program().Symbols().Register("b"));
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
@@ -63,12 +63,12 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->symbol(), p->get_program().RegisterSymbol("B"));
+  ASSERT_EQ(s->symbol(), p->get_program().Symbols().Register("B"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->symbol(),
-            p->get_program().RegisterSymbol("a"));
+            p->get_program().Symbols().Register("a"));
   EXPECT_EQ(s->impl()->members()[1]->symbol(),
-            p->get_program().RegisterSymbol("b"));
+            p->get_program().Symbols().Register("b"));
   ASSERT_EQ(s->impl()->decorations().size(), 1u);
   EXPECT_TRUE(s->impl()->decorations()[0]->Is<ast::StructBlockDecoration>());
 }
@@ -90,12 +90,12 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithMultipleDecoration) {
   EXPECT_FALSE(s.errored);
   EXPECT_TRUE(s.matched);
   ASSERT_NE(s.value, nullptr);
-  ASSERT_EQ(s->symbol(), p->get_program().RegisterSymbol("S"));
+  ASSERT_EQ(s->symbol(), p->get_program().Symbols().Register("S"));
   ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->symbol(),
-            p->get_program().RegisterSymbol("a"));
+            p->get_program().Symbols().Register("a"));
   EXPECT_EQ(s->impl()->members()[1]->symbol(),
-            p->get_program().RegisterSymbol("b"));
+            p->get_program().Symbols().Register("b"));
   ASSERT_EQ(s->impl()->decorations().size(), 2u);
   EXPECT_TRUE(s->impl()->decorations()[0]->Is<ast::StructBlockDecoration>());
   EXPECT_TRUE(s->impl()->decorations()[1]->Is<ast::StructBlockDecoration>());

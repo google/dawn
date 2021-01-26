@@ -40,7 +40,7 @@ Variable* Builder::Var(const std::string& name,
                        type::Type* type,
                        Expression* constructor,
                        VariableDecorationList decorations) {
-  auto* var = create<Variable>(program->RegisterSymbol(name), storage, type,
+  auto* var = create<Variable>(program->Symbols().Register(name), storage, type,
                                false, constructor, decorations);
   OnVariableBuilt(var);
   return var;
@@ -52,8 +52,8 @@ Variable* Builder::Var(const Source& source,
                        type::Type* type,
                        Expression* constructor,
                        VariableDecorationList decorations) {
-  auto* var = create<Variable>(source, program->RegisterSymbol(name), storage,
-                               type, false, constructor, decorations);
+  auto* var = create<Variable>(source, program->Symbols().Register(name),
+                               storage, type, false, constructor, decorations);
   OnVariableBuilt(var);
   return var;
 }
@@ -69,7 +69,7 @@ Variable* Builder::Const(const std::string& name,
                          type::Type* type,
                          Expression* constructor,
                          VariableDecorationList decorations) {
-  auto* var = create<Variable>(program->RegisterSymbol(name), storage, type,
+  auto* var = create<Variable>(program->Symbols().Register(name), storage, type,
                                true, constructor, decorations);
   OnVariableBuilt(var);
   return var;
@@ -81,8 +81,8 @@ Variable* Builder::Const(const Source& source,
                          type::Type* type,
                          Expression* constructor,
                          VariableDecorationList decorations) {
-  auto* var = create<Variable>(source, program->RegisterSymbol(name), storage,
-                               type, true, constructor, decorations);
+  auto* var = create<Variable>(source, program->Symbols().Register(name),
+                               storage, type, true, constructor, decorations);
   OnVariableBuilt(var);
   return var;
 }

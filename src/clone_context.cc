@@ -23,7 +23,7 @@ CloneContext::CloneContext(Program* to, Program const* from)
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(const Symbol& s) const {
-  return dst->RegisterSymbol(src->SymbolToName(s));
+  return dst->Symbols().Register(src->Symbols().NameFor(s));
 }
 
 void CloneContext::Clone() {

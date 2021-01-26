@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   ASSERT_EQ(m.AST().GlobalVariables().size(), 1u);
 
   auto* v = m.AST().GlobalVariables()[0];
-  EXPECT_EQ(v->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(v->symbol(), p->get_program().Symbols().Register("a"));
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
@@ -64,7 +64,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
   ASSERT_EQ(m.AST().GlobalVariables().size(), 1u);
 
   auto* v = m.AST().GlobalVariables()[0];
-  EXPECT_EQ(v->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(v->symbol(), p->get_program().Symbols().Register("a"));
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   auto& m = p->get_program();
   ASSERT_EQ(m.AST().ConstructedTypes().size(), 1u);
   ASSERT_TRUE(m.AST().ConstructedTypes()[0]->Is<type::Alias>());
-  EXPECT_EQ(m.SymbolToName(
+  EXPECT_EQ(m.Symbols().NameFor(
                 m.AST().ConstructedTypes()[0]->As<type::Alias>()->symbol()),
             "A");
 }
@@ -107,11 +107,11 @@ type B = A;)");
   ASSERT_EQ(m.AST().ConstructedTypes().size(), 2u);
   ASSERT_TRUE(m.AST().ConstructedTypes()[0]->Is<type::Struct>());
   auto* str = m.AST().ConstructedTypes()[0]->As<type::Struct>();
-  EXPECT_EQ(str->symbol(), p->get_program().RegisterSymbol("A"));
+  EXPECT_EQ(str->symbol(), p->get_program().Symbols().Register("A"));
 
   ASSERT_TRUE(m.AST().ConstructedTypes()[1]->Is<type::Alias>());
   auto* alias = m.AST().ConstructedTypes()[1]->As<type::Alias>();
-  EXPECT_EQ(alias->symbol(), p->get_program().RegisterSymbol("B"));
+  EXPECT_EQ(alias->symbol(), p->get_program().Symbols().Register("B"));
   EXPECT_EQ(alias->type(), str);
 }
 
@@ -136,7 +136,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
   auto& m = p->get_program();
   ASSERT_EQ(m.AST().Functions().size(), 1u);
-  EXPECT_EQ(m.SymbolToName(m.AST().Functions()[0]->symbol()), "main");
+  EXPECT_EQ(m.Symbols().NameFor(m.AST().Functions()[0]->symbol()), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
@@ -146,7 +146,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
 
   auto& m = p->get_program();
   ASSERT_EQ(m.AST().Functions().size(), 1u);
-  EXPECT_EQ(m.SymbolToName(m.AST().Functions()[0]->symbol()), "main");
+  EXPECT_EQ(m.Symbols().NameFor(m.AST().Functions()[0]->symbol()), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
@@ -169,7 +169,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   ASSERT_TRUE(t->Is<type::Struct>());
 
   auto* str = t->As<type::Struct>();
-  EXPECT_EQ(str->symbol(), p->get_program().RegisterSymbol("A"));
+  EXPECT_EQ(str->symbol(), p->get_program().Symbols().Register("A"));
   EXPECT_EQ(str->impl()->members().size(), 2u);
 }
 
@@ -188,7 +188,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   ASSERT_TRUE(t->Is<type::Struct>());
 
   auto* str = t->As<type::Struct>();
-  EXPECT_EQ(str->symbol(), p->get_program().RegisterSymbol("A"));
+  EXPECT_EQ(str->symbol(), p->get_program().Symbols().Register("A"));
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
 
@@ -212,7 +212,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   ASSERT_TRUE(t->Is<type::Struct>());
 
   auto* str = t->As<type::Struct>();
-  EXPECT_EQ(str->symbol(), p->get_program().RegisterSymbol("A"));
+  EXPECT_EQ(str->symbol(), p->get_program().Symbols().Register("A"));
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_TRUE(str->IsBlockDecorated());
 }

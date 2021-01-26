@@ -36,7 +36,7 @@ TEST_F(FunctionTest, Creation) {
 
   auto* f =
       Func("func", params, ty.void_, StatementList{}, FunctionDecorationList{});
-  EXPECT_EQ(f->symbol(), mod->RegisterSymbol("func"));
+  EXPECT_EQ(f->symbol(), mod->Symbols().Register("func"));
   ASSERT_EQ(f->params().size(), 1u);
   EXPECT_EQ(f->return_type(), ty.void_);
   EXPECT_EQ(f->params()[0], var);
@@ -151,7 +151,7 @@ TEST_F(FunctionTest, AddDuplicateEntryPoints) {
   auto* f = Func("func", VariableList{}, ty.void_, StatementList{},
                  FunctionDecorationList{});
 
-  auto main_sym = mod->RegisterSymbol("main");
+  auto main_sym = mod->Symbols().Register("main");
   f->add_ancestor_entry_point(main_sym);
   ASSERT_EQ(1u, f->ancestor_entry_points().size());
   EXPECT_EQ(main_sym, f->ancestor_entry_points()[0]);
@@ -364,12 +364,12 @@ TEST_F(FunctionListTest, FindSymbol) {
                     ast::FunctionDecorationList{});
   FunctionList list;
   list.Add(func);
-  EXPECT_EQ(func, list.Find(mod->RegisterSymbol("main")));
+  EXPECT_EQ(func, list.Find(mod->Symbols().Register("main")));
 }
 
 TEST_F(FunctionListTest, FindSymbolMissing) {
   FunctionList list;
-  EXPECT_EQ(nullptr, list.Find(mod->RegisterSymbol("Missing")));
+  EXPECT_EQ(nullptr, list.Find(mod->Symbols().Register("Missing")));
 }
 
 TEST_F(FunctionListTest, FindSymbolStage) {
@@ -384,9 +384,10 @@ TEST_F(FunctionListTest, FindSymbolStage) {
   FunctionList list;
   list.Add(fs);
   list.Add(vs);
-  EXPECT_EQ(fs,
-            list.Find(mod->RegisterSymbol("main"), PipelineStage::kFragment));
-  EXPECT_EQ(vs, list.Find(mod->RegisterSymbol("main"), PipelineStage::kVertex));
+  EXPECT_EQ(
+      fs, list.Find(mod->Symbols().Register("main"), PipelineStage::kFragment));
+  EXPECT_EQ(vs,
+            list.Find(mod->Symbols().Register("main"), PipelineStage::kVertex));
 }
 
 TEST_F(FunctionListTest, FindSymbolStageMissing) {
@@ -396,7 +397,7 @@ TEST_F(FunctionListTest, FindSymbolStageMissing) {
                     create<ast::StageDecoration>(PipelineStage::kFragment),
                 }));
   EXPECT_EQ(nullptr,
-            list.Find(mod->RegisterSymbol("main"), PipelineStage::kVertex));
+            list.Find(mod->Symbols().Register("main"), PipelineStage::kVertex));
 }
 
 TEST_F(FunctionListTest, HasStage) {

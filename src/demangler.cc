@@ -46,7 +46,7 @@ std::string Demangler::Demangle(const Program& program,
     auto id = ret.substr(start_idx, len);
 
     Symbol sym(std::stoi(id));
-    auto name = program.SymbolToName(sym);
+    auto name = program.Symbols().NameFor(sym);
     ret.replace(idx, end_idx - idx, name);
 
     pos = idx + name.length();

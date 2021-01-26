@@ -166,7 +166,8 @@ class TypesBuilder {
   /// @param type the alias type
   /// @returns the alias pointer
   type::Alias* alias(const std::string& name, type::Type* type) const {
-    return program_->create<type::Alias>(program_->RegisterSymbol(name), type);
+    return program_->create<type::Alias>(program_->Symbols().Register(name),
+                                         type);
   }
 
   /// @return the tint AST pointer to type `T` with the given StorageClass.
@@ -180,7 +181,8 @@ class TypesBuilder {
   /// @param impl the struct implementation
   /// @returns a struct pointer
   type::Struct* struct_(const std::string& name, ast::Struct* impl) const {
-    return program_->create<type::Struct>(program_->RegisterSymbol(name), impl);
+    return program_->create<type::Struct>(program_->Symbols().Register(name),
+                                          impl);
   }
 
  private:
@@ -227,20 +229,21 @@ class Builder {
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const std::string& name) {
-    return create<IdentifierExpression>(program->RegisterSymbol(name));
+    return create<IdentifierExpression>(program->Symbols().Register(name));
   }
 
   /// @param source the source information
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const Source& source, const std::string& name) {
-    return create<IdentifierExpression>(source, program->RegisterSymbol(name));
+    return create<IdentifierExpression>(source,
+                                        program->Symbols().Register(name));
   }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const char* name) {
-    return create<IdentifierExpression>(program->RegisterSymbol(name));
+    return create<IdentifierExpression>(program->Symbols().Register(name));
   }
 
   /// @param value the boolean value
@@ -620,7 +623,7 @@ class Builder {
                  ast::StatementList body,
                  ast::FunctionDecorationList decorations) {
     return program->create<ast::Function>(
-        source, program->RegisterSymbol(name), params, type,
+        source, program->Symbols().Register(name), params, type,
         create<ast::BlockStatement>(body), decorations);
   }
 
@@ -636,8 +639,8 @@ class Builder {
                  type::Type* type,
                  ast::StatementList body,
                  ast::FunctionDecorationList decorations) {
-    return create<ast::Function>(program->RegisterSymbol(name), params, type,
-                                 create<ast::BlockStatement>(body),
+    return create<ast::Function>(program->Symbols().Register(name), params,
+                                 type, create<ast::BlockStatement>(body),
                                  decorations);
   }
 
@@ -649,7 +652,8 @@ class Builder {
   StructMember* Member(const Source& source,
                        const std::string& name,
                        type::Type* type) {
-    return program->create<StructMember>(source, program->RegisterSymbol(name),
+    return program->create<StructMember>(source,
+                                         program->Symbols().Register(name),
                                          type, StructMemberDecorationList{});
   }
 
@@ -658,7 +662,8 @@ class Builder {
   /// @param type the struct member type
   /// @returns the struct member pointer
   StructMember* Member(const std::string& name, type::Type* type) {
-    return program->create<StructMember>(source_, program->RegisterSymbol(name),
+    return program->create<StructMember>(source_,
+                                         program->Symbols().Register(name),
                                          type, StructMemberDecorationList{});
   }
 
@@ -670,8 +675,8 @@ class Builder {
   StructMember* Member(const std::string& name,
                        type::Type* type,
                        StructMemberDecorationList decos) {
-    return program->create<StructMember>(source_, program->RegisterSymbol(name),
-                                         type, decos);
+    return program->create<StructMember>(
+        source_, program->Symbols().Register(name), type, decos);
   }
 
   /// Creates a new Node owned by the Module, with the explicit Source.

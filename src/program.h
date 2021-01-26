@@ -118,25 +118,6 @@ class Program {
     return types_.Get<T>(std::forward<ARGS>(args)...);
   }
 
-  /// Registers `name` as a symbol
-  /// @param name the name to register
-  /// @returns the symbol for the `name`. If `name` is already registered the
-  /// previously generated symbol will be returned.
-  /// [DEPRECATED]: Use Symbols().Register()
-  Symbol RegisterSymbol(const std::string& name);
-
-  /// Returns the symbol for `name`
-  /// @param name the name to lookup
-  /// @returns the symbol for name or symbol::kInvalid
-  /// [DEPRECATED]: Use Symbols().Get()
-  Symbol GetSymbol(const std::string& name) const;
-
-  /// Returns the `name` for `sym`
-  /// @param sym the symbol to retrieve the name for
-  /// @returns the use provided `name` for the symbol or "" if not found
-  /// [DEPRECATED]: Use Symbols().NameFor()
-  std::string SymbolToName(const Symbol sym) const;
-
  private:
   Program(const Program&) = delete;
 

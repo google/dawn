@@ -56,14 +56,14 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     }
 
     EntryPoint entry_point;
-    entry_point.name = program_.SymbolToName(func->symbol());
-    entry_point.remapped_name = program_.SymbolToName(func->symbol());
+    entry_point.name = program_.Symbols().NameFor(func->symbol());
+    entry_point.remapped_name = program_.Symbols().NameFor(func->symbol());
     entry_point.stage = func->pipeline_stage();
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
 
     for (auto* var : func->referenced_module_variables()) {
-      auto name = program_.SymbolToName(var->symbol());
+      auto name = program_.Symbols().NameFor(var->symbol());
       if (var->HasBuiltinDecoration()) {
         continue;
       }
@@ -283,7 +283,7 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
-  auto* func = program_.AST().Functions().Find(program_.GetSymbol(name));
+  auto* func = program_.AST().Functions().Find(program_.Symbols().Get(name));
   if (!func) {
     error_ += name + " was not found!";
     return nullptr;

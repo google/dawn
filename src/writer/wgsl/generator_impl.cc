@@ -114,7 +114,7 @@ bool GeneratorImpl::Generate() {
 bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
                                        const std::string& name) {
   auto* func =
-      program_->AST().Functions().Find(program_->GetSymbol(name), stage);
+      program_->AST().Functions().Find(program_->Symbols().Get(name), stage);
   if (func == nullptr) {
     error_ = "Unable to find requested entry point: " + name;
     return false;
@@ -154,7 +154,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
   }
 
   for (auto* f : program_->AST().Functions()) {
-    if (!f->HasAncestorEntryPoint(program_->GetSymbol(name))) {
+    if (!f->HasAncestorEntryPoint(program_->Symbols().Get(name))) {
       continue;
     }
 
@@ -175,7 +175,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
 bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
   make_indent();
   if (auto* alias = ty->As<type::Alias>()) {
-    out_ << "type " << program_->SymbolToName(alias->symbol()) << " = ";
+    out_ << "type " << program_->Symbols().NameFor(alias->symbol()) << " = ";
     if (!EmitType(alias->type())) {
       return false;
     }
@@ -338,7 +338,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
-  out_ << program_->SymbolToName(ident->symbol());
+  out_ << program_->Symbols().NameFor(ident->symbol());
   return true;
 }
 
@@ -361,7 +361,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   }
 
   make_indent();
-  out_ << "fn " << program_->SymbolToName(func->symbol()) << "(";
+  out_ << "fn " << program_->Symbols().NameFor(func->symbol()) << "(";
 
   bool first = true;
   for (auto* v : func->params()) {
@@ -370,7 +370,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     }
     first = false;
 
-    out_ << program_->SymbolToName(v->symbol()) << " : ";
+    out_ << program_->Symbols().NameFor(v->symbol()) << " : ";
 
     if (!EmitType(v->type())) {
       return false;
@@ -418,7 +418,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
     }
     return true;
   } else if (auto* alias = type->As<type::Alias>()) {
-    out_ << program_->SymbolToName(alias->symbol());
+    out_ << program_->Symbols().NameFor(alias->symbol());
   } else if (auto* ary = type->As<type::Array>()) {
     for (auto* deco : ary->decorations()) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
@@ -462,7 +462,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
   } else if (auto* str = type->As<type::Struct>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
-    out_ << program_->SymbolToName(str->symbol());
+    out_ << program_->Symbols().NameFor(str->symbol());
   } else if (auto* texture = type->As<type::Texture>()) {
     out_ << "texture_";
     if (texture->Is<type::DepthTexture>()) {
@@ -550,7 +550,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
     deco->to_str(out_, 0);
     out_ << "]]" << std::endl;
   }
-  out_ << "struct " << program_->SymbolToName(str->symbol()) << " {"
+  out_ << "struct " << program_->Symbols().NameFor(str->symbol()) << " {"
        << std::endl;
 
   increment_indent();
@@ -564,7 +564,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
       out_ << "[[offset(" << offset->offset() << ")]]" << std::endl;
     }
     make_indent();
-    out_ << program_->SymbolToName(mem->symbol()) << " : ";
+    out_ << program_->Symbols().NameFor(mem->symbol()) << " : ";
     if (!EmitType(mem->type())) {
       return false;
     }
@@ -594,7 +594,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     }
   }
 
-  out_ << " " << program_->SymbolToName(var->symbol()) << " : ";
+  out_ << " " << program_->Symbols().NameFor(var->symbol()) << " : ";
   if (!EmitType(var->type())) {
     return false;
   }

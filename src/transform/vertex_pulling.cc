@@ -85,8 +85,8 @@ Transform::Output VertexPulling::Run(const Program* in) {
   }
 
   // Find entry point
-  auto* func = in->AST().Functions().Find(in->GetSymbol(cfg.entry_point_name),
-                                          ast::PipelineStage::kVertex);
+  auto* func = in->AST().Functions().Find(
+      in->Symbols().Get(cfg.entry_point_name), ast::PipelineStage::kVertex);
   if (func == nullptr) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;
@@ -158,7 +158,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
     for (auto* d : v->decorations()) {
       if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
         if (builtin->value() == ast::Builtin::kVertexIndex) {
-          vertex_index_name = in->SymbolToName(v->symbol());
+          vertex_index_name = in->Symbols().NameFor(v->symbol());
           return;
         }
       }
@@ -169,12 +169,12 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
   vertex_index_name = kDefaultVertexIndexName;
 
   auto* var = out->create<ast::Variable>(
-      Source{},                                // source
-      out->RegisterSymbol(vertex_index_name),  // symbol
-      ast::StorageClass::kInput,               // storage_class
-      GetI32Type(),                            // type
-      false,                                   // is_const
-      nullptr,                                 // constructor
+      Source{},                                    // source
+      out->Symbols().Register(vertex_index_name),  // symbol
+      ast::StorageClass::kInput,                   // storage_class
+      GetI32Type(),                                // type
+      false,                                       // is_const
+      nullptr,                                     // constructor
       ast::VariableDecorationList{
           // decorations
           out->create<ast::BuiltinDecoration>(Source{},
@@ -205,7 +205,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
     for (auto* d : v->decorations()) {
       if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
         if (builtin->value() == ast::Builtin::kInstanceIndex) {
-          instance_index_name = in->SymbolToName(v->symbol());
+          instance_index_name = in->Symbols().NameFor(v->symbol());
           return;
         }
       }
@@ -216,12 +216,12 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
   instance_index_name = kDefaultInstanceIndexName;
 
   auto* var = out->create<ast::Variable>(
-      Source{},                                  // source
-      out->RegisterSymbol(instance_index_name),  // symbol
-      ast::StorageClass::kInput,                 // storage_class
-      GetI32Type(),                              // type
-      false,                                     // is_const
-      nullptr,                                   // constructor
+      Source{},                                      // source
+      out->Symbols().Register(instance_index_name),  // symbol
+      ast::StorageClass::kInput,                     // storage_class
+      GetI32Type(),                                  // type
+      false,                                         // is_const
+      nullptr,                                       // constructor
       ast::VariableDecorationList{
           // decorations
           out->create<ast::BuiltinDecoration>(Source{},
@@ -274,26 +274,26 @@ void VertexPulling::State::AddVertexStorageBuffers() {
       out->create<ast::StructMemberOffsetDecoration>(Source{}, 0u));
 
   members.push_back(out->create<ast::StructMember>(
-      Source{}, out->RegisterSymbol(kStructBufferName), internal_array_type,
+      Source{}, out->Symbols().Register(kStructBufferName), internal_array_type,
       std::move(member_dec)));
 
   ast::StructDecorationList decos;
   decos.push_back(out->create<ast::StructBlockDecoration>(Source{}));
 
   auto* struct_type = out->create<type::Struct>(
-      out->RegisterSymbol(kStructName),
+      out->Symbols().Register(kStructName),
       out->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
   for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
     // The decorated variable with struct type
     std::string name = GetVertexBufferName(i);
     auto* var = out->create<ast::Variable>(
-        Source{},                     // source
-        out->RegisterSymbol(name),    // symbol
-        ast::StorageClass::kStorage,  // storage_class
-        struct_type,                  // type
-        false,                        // is_const
-        nullptr,                      // constructor
+        Source{},                       // source
+        out->Symbols().Register(name),  // symbol
+        ast::StorageClass::kStorage,    // storage_class
+        struct_type,                    // type
+        false,                          // is_const
+        nullptr,                        // constructor
         ast::VariableDecorationList{
             // decorations
             out->create<ast::BindingDecoration>(Source{}, i),
@@ -313,13 +313,13 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
   // Declare the |kPullingPosVarName| variable in the shader
   auto* pos_declaration = out->create<ast::VariableDeclStatement>(
       Source{}, out->create<ast::Variable>(
-                    Source{},                                 // source
-                    out->RegisterSymbol(kPullingPosVarName),  // symbol
-                    ast::StorageClass::kFunction,             // storage_class
-                    GetI32Type(),                             // type
-                    false,                                    // is_const
-                    nullptr,                                  // constructor
-                    ast::VariableDecorationList{}));          // decorations
+                    Source{},                                     // source
+                    out->Symbols().Register(kPullingPosVarName),  // symbol
+                    ast::StorageClass::kFunction,     // storage_class
+                    GetI32Type(),                     // type
+                    false,                            // is_const
+                    nullptr,                          // constructor
+                    ast::VariableDecorationList{}));  // decorations
 
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression
@@ -342,7 +342,7 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
                       : instance_index_name;
       // Identifier to index by
       auto* index_identifier = out->create<ast::IdentifierExpression>(
-          Source{}, out->RegisterSymbol(name));
+          Source{}, out->Symbols().Register(name));
 
       // An expression for the start of the read in the buffer in bytes
       auto* pos_value = out->create<ast::BinaryExpression>(
@@ -357,11 +357,11 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
           Source{}, CreatePullingPositionIdent(), pos_value);
       stmts.emplace_back(set_pos_expr);
 
-      auto ident_name = in->SymbolToName(v->symbol());
+      auto ident_name = in->Symbols().NameFor(v->symbol());
       stmts.emplace_back(out->create<ast::AssignmentStatement>(
           Source{},
           out->create<ast::IdentifierExpression>(
-              Source{}, out->RegisterSymbol(ident_name)),
+              Source{}, out->Symbols().Register(ident_name)),
           AccessByFormat(i, attribute_desc.format)));
     }
   }
@@ -376,7 +376,7 @@ ast::Expression* VertexPulling::State::GenUint(uint32_t value) const {
 
 ast::Expression* VertexPulling::State::CreatePullingPositionIdent() const {
   return out->create<ast::IdentifierExpression>(
-      Source{}, out->RegisterSymbol(kPullingPosVarName));
+      Source{}, out->Symbols().Register(kPullingPosVarName));
 }
 
 ast::Expression* VertexPulling::State::AccessByFormat(
@@ -420,9 +420,9 @@ ast::Expression* VertexPulling::State::AccessU32(uint32_t buffer,
       out->create<ast::MemberAccessorExpression>(
           Source{},
           out->create<ast::IdentifierExpression>(
-              Source{}, out->RegisterSymbol(vbuf_name)),
+              Source{}, out->Symbols().Register(vbuf_name)),
           out->create<ast::IdentifierExpression>(
-              Source{}, out->RegisterSymbol(kStructBufferName))),
+              Source{}, out->Symbols().Register(kStructBufferName))),
       out->create<ast::BinaryExpression>(Source{}, ast::BinaryOp::kDivide, pos,
                                          GenUint(4)));
 }

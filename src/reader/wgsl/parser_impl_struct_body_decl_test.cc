@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   ASSERT_EQ(m.value.size(), 1u);
 
   const auto* mem = m.value[0];
-  EXPECT_EQ(mem->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(mem->symbol(), p->get_program().Symbols().Register("a"));
   EXPECT_EQ(mem->type(), i32);
   EXPECT_EQ(mem->decorations().size(), 0u);
 }

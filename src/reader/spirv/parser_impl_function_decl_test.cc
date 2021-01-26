@@ -81,7 +81,7 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->error().empty()) << p->error();
   const auto program_ast = p->get_program().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().GetSymbol("main").to_str() +
+  Function )" + p->get_program().Symbols().Get("main").to_str() +
                                      R"( -> __void
   StageDecoration{vertex}
   ()
@@ -101,7 +101,7 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->error().empty()) << p->error();
   const auto program_ast = p->get_program().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().GetSymbol("main").to_str() +
+  Function )" + p->get_program().Symbols().Get("main").to_str() +
                                      R"( -> __void
   StageDecoration{fragment}
   ()
@@ -121,7 +121,7 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->error().empty()) << p->error();
   const auto program_ast = p->get_program().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().GetSymbol("main").to_str() +
+  Function )" + p->get_program().Symbols().Get("main").to_str() +
                                      R"( -> __void
   StageDecoration{compute}
   ()
@@ -143,13 +143,13 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->error().empty()) << p->error();
   const auto program_ast = p->get_program().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().GetSymbol("frag_main").to_str() +
+  Function )" + p->get_program().Symbols().Get("frag_main").to_str() +
                                      R"( -> __void
   StageDecoration{fragment}
   ()
   {)"));
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().GetSymbol("comp_main").to_str() +
+  Function )" + p->get_program().Symbols().Get("comp_main").to_str() +
                                      R"( -> __void
   StageDecoration{compute}
   ()
@@ -167,7 +167,7 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
   EXPECT_TRUE(p->error().empty());
   const auto program_ast = p->get_program().to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + p->get_program().GetSymbol("main").to_str() +
+  Function )" + p->get_program().Symbols().Get("main").to_str() +
                                      R"( -> __void
   ()
   {)"));

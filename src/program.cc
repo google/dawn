@@ -47,18 +47,6 @@ void Program::Clone(CloneContext* ctx) const {
   }
 }
 
-Symbol Program::RegisterSymbol(const std::string& name) {
-  return symbols_.Register(name);
-}
-
-Symbol Program::GetSymbol(const std::string& name) const {
-  return symbols_.Get(name);
-}
-
-std::string Program::SymbolToName(const Symbol sym) const {
-  return symbols_.NameFor(sym);
-}
-
 bool Program::IsValid() const {
   return ast_->IsValid();
 }

@@ -51,12 +51,12 @@ Transform::Output EmitVertexPointSize::Run(const Program* in) {
 
   // Declare the pointsize builtin output variable.
   auto* pointsize_var = out.program.create<ast::Variable>(
-      Source{},                                   // source
-      out.program.RegisterSymbol(kPointSizeVar),  // symbol
-      ast::StorageClass::kOutput,                 // storage_class
-      f32,                                        // type
-      false,                                      // is_const
-      nullptr,                                    // constructor
+      Source{},                                       // source
+      out.program.Symbols().Register(kPointSizeVar),  // symbol
+      ast::StorageClass::kOutput,                     // storage_class
+      f32,                                            // type
+      false,                                          // is_const
+      nullptr,                                        // constructor
       ast::VariableDecorationList{
           // decorations
           out.program.create<ast::BuiltinDecoration>(Source{},
@@ -68,7 +68,7 @@ Transform::Output EmitVertexPointSize::Run(const Program* in) {
   auto* one = out.program.create<ast::ScalarConstructorExpression>(
       Source{}, out.program.create<ast::FloatLiteral>(Source{}, f32, 1.0f));
   auto* pointsize_ident = out.program.create<ast::IdentifierExpression>(
-      Source{}, out.program.RegisterSymbol(kPointSizeVar));
+      Source{}, out.program.Symbols().Register(kPointSizeVar));
   auto* pointsize_assign = out.program.create<ast::AssignmentStatement>(
       Source{}, pointsize_ident, one);
 
