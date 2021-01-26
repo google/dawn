@@ -537,22 +537,6 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     return builder_.create<type::StorageTexture>(storage.value, format.value);
   }
 
-  // DEPRECATED
-  auto ac_storage = storage_texture_type_access_control();
-  if (ac_storage.matched) {
-    const char* use = "storage texture type";
-
-    auto format =
-        expect_lt_gt_block(use, [&] { return expect_image_storage_type(use); });
-
-    if (format.errored)
-      return Failure::kErrored;
-
-    return builder_.create<type::AccessControl>(
-        ac_storage->second,
-        builder_.create<type::StorageTexture>(ac_storage->first, format.value));
-  }
-
   return Failure::kNoMatch;
 }
 
@@ -629,76 +613,6 @@ Maybe<type::TextureDimension> ParserImpl::storage_texture_type() {
     return type::TextureDimension::k2dArray;
   if (match(Token::Type::kTextureStorage3d))
     return type::TextureDimension::k3d;
-
-  return Failure::kNoMatch;
-}
-
-// DEPRECATED
-// storage_texture_type
-//  | TEXTURE_RO_1D
-//  | TEXTURE_RO_1D_ARRAY
-//  | TEXTURE_RO_2D
-//  | TEXTURE_RO_2D_ARRAY
-//  | TEXTURE_RO_3D
-//  | TEXTURE_WO_1D
-//  | TEXTURE_WO_1D_ARRAY
-//  | TEXTURE_WO_2D
-//  | TEXTURE_WO_2D_ARRAY
-//  | TEXTURE_WO_3D
-//  | TEXTURE_STORAGE_RO_1D
-//  | TEXTURE_STORAGE_RO_1D_ARRAY
-//  | TEXTURE_STORAGE_RO_2D
-//  | TEXTURE_STORAGE_RO_2D_ARRAY
-//  | TEXTURE_STORAGE_RO_3D
-//  | TEXTURE_STORAGE_WO_1D
-//  | TEXTURE_STORAGE_WO_1D_ARRAY
-//  | TEXTURE_STORAGE_WO_2D
-//  | TEXTURE_STORAGE_WO_2D_ARRAY
-//  | TEXTURE_STORAGE_WO_3D
-Maybe<std::pair<type::TextureDimension, ast::AccessControl>>
-ParserImpl::storage_texture_type_access_control() {
-  using Ret = std::pair<type::TextureDimension, ast::AccessControl>;
-  if (match(Token::Type::kTextureStorageReadonly1d)) {
-    return Ret{type::TextureDimension::k1d, ast::AccessControl::kReadOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageReadonly1dArray)) {
-    return Ret{type::TextureDimension::k1dArray, ast::AccessControl::kReadOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageReadonly2d)) {
-    return Ret{type::TextureDimension::k2d, ast::AccessControl::kReadOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageReadonly2dArray)) {
-    return Ret{type::TextureDimension::k2dArray, ast::AccessControl::kReadOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageReadonly3d)) {
-    return Ret{type::TextureDimension::k3d, ast::AccessControl::kReadOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageWriteonly1d)) {
-    return Ret{type::TextureDimension::k1d, ast::AccessControl::kWriteOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageWriteonly1dArray)) {
-    return Ret{type::TextureDimension::k1dArray,
-               ast::AccessControl::kWriteOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageWriteonly2d)) {
-    return Ret{type::TextureDimension::k2d, ast::AccessControl::kWriteOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageWriteonly2dArray)) {
-    return Ret{type::TextureDimension::k2dArray,
-               ast::AccessControl::kWriteOnly};
-  }
-
-  if (match(Token::Type::kTextureStorageWriteonly3d)) {
-    return Ret{type::TextureDimension::k3d, ast::AccessControl::kWriteOnly};
-  }
 
   return Failure::kNoMatch;
 }

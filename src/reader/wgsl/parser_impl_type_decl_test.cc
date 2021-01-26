@@ -751,23 +751,6 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   ASSERT_FALSE(t->As<type::Sampler>()->IsComparison());
 }
 
-TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
-  auto p = parser("texture_sampled_cube<f32>");
-
-  auto& builder = p->builder();
-  auto* type = builder.create<type::SampledTexture>(
-      type::TextureDimension::kCube, ty.f32());
-
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
-  EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t->Is<type::Texture>());
-  ASSERT_TRUE(t->Is<type::SampledTexture>());
-  ASSERT_TRUE(t->As<type::SampledTexture>()->type()->Is<type::F32>());
-}
-
 TEST_F(ParserImplTest, TypeDecl_Texture) {
   auto p = parser("texture_cube<f32>");
 
