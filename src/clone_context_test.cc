@@ -87,7 +87,7 @@ TEST(CloneContext, Clone) {
   EXPECT_EQ(cloned_root->c, cloned_root->b);     // Aliased
 }
 
-TEST(CloneContext, CloneWithReplacements) {
+TEST(CloneContext, CloneWithReplaceAll) {
   Program original;
   auto* original_root = original.create<Cloneable>();
   original_root->a = original.create<Cloneable>();
@@ -158,6 +158,30 @@ TEST(CloneContext, CloneWithReplacements) {
   EXPECT_FALSE(cloned_root->a->b->b->Is<Replacement>());
   EXPECT_TRUE(cloned_root->b->Is<Replacement>());
   EXPECT_FALSE(cloned_root->b->b->Is<Replacement>());
+}
+
+TEST(CloneContext, CloneWithReplace) {
+  Program original;
+  auto* original_root = original.create<Cloneable>();
+  original_root->a = original.create<Cloneable>();
+  original_root->b = original.create<Cloneable>();
+  original_root->c = original.create<Cloneable>();
+
+  //                          root
+  //        ╭──────────────────┼──────────────────╮
+  //       (a)                (b)                (c)
+  //                        Replaced
+
+  Program cloned;
+  auto* replacement = cloned.create<Cloneable>();
+
+  auto* cloned_root = CloneContext(&cloned, &original)
+                          .Replace(original_root->b, replacement)
+                          .Clone(original_root);
+
+  EXPECT_NE(cloned_root->a, replacement);
+  EXPECT_EQ(cloned_root->b, replacement);
+  EXPECT_NE(cloned_root->c, replacement);
 }
 
 }  // namespace

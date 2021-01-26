@@ -154,6 +154,19 @@ class CloneContext {
     return *this;
   }
 
+  /// Replace replaces all occurrences of `what` in #src with `with` in #dst
+  /// when calling Clone().
+  /// @param what a pointer to the object in #src that will be replaced with
+  /// `with`
+  /// @param with a pointer to the replacement object that will be used when
+  /// cloning into #dst
+  /// @returns this CloneContext so calls can be chained
+  template <typename T>
+  CloneContext& Replace(T* what, T* with) {
+    cloned_.emplace(what, with);
+    return *this;
+  }
+
   /// Clone performs the clone of the entire program #src to #dst.
   void Clone();
 
