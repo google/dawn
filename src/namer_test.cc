@@ -15,7 +15,7 @@
 #include "src/namer.h"
 
 #include "gtest/gtest.h"
-#include "src/program.h"
+#include "src/symbol_table.h"
 
 namespace tint {
 namespace {
@@ -23,8 +23,8 @@ namespace {
 using NamerTest = testing::Test;
 
 TEST_F(NamerTest, GenerateName) {
-  Program m;
-  MangleNamer n(&m);
+  SymbolTable t;
+  MangleNamer n(&t);
   EXPECT_EQ("name", n.GenerateName("name"));
   EXPECT_EQ("name_0", n.GenerateName("name"));
   EXPECT_EQ("name_1", n.GenerateName("name"));
@@ -33,19 +33,19 @@ TEST_F(NamerTest, GenerateName) {
 using MangleNamerTest = testing::Test;
 
 TEST_F(MangleNamerTest, ReturnsName) {
-  Program m;
-  auto s = m.RegisterSymbol("my_sym");
+  SymbolTable t;
+  auto s = t.Register("my_sym");
 
-  MangleNamer n(&m);
+  MangleNamer n(&t);
   EXPECT_EQ("tint_symbol_1", n.NameFor(s));
 }
 
 TEST_F(MangleNamerTest, ReturnsSameValueForSameName) {
-  Program m;
-  auto s1 = m.RegisterSymbol("my_sym");
-  auto s2 = m.RegisterSymbol("my_sym2");
+  SymbolTable t;
+  auto s1 = t.Register("my_sym");
+  auto s2 = t.Register("my_sym2");
 
-  MangleNamer n(&m);
+  MangleNamer n(&t);
   EXPECT_EQ("tint_symbol_1", n.NameFor(s1));
   EXPECT_EQ("tint_symbol_2", n.NameFor(s2));
   EXPECT_EQ("tint_symbol_1", n.NameFor(s1));
@@ -53,10 +53,10 @@ TEST_F(MangleNamerTest, ReturnsSameValueForSameName) {
 
 using UnsafeNamerTest = testing::Test;
 TEST_F(UnsafeNamerTest, ReturnsName) {
-  Program m;
-  auto s = m.RegisterSymbol("my_sym");
+  SymbolTable t;
+  auto s = t.Register("my_sym");
 
-  UnsafeNamer n(&m);
+  UnsafeNamer n(&t);
   EXPECT_EQ("my_sym", n.NameFor(s));
 }
 

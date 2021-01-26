@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "src/program.h"
+#include "src/symbol_table.h"
 
 namespace tint {
 
@@ -27,8 +27,8 @@ namespace tint {
 class Namer {
  public:
   /// Constructor
-  /// @param program the program this namer works with
-  explicit Namer(Program* program);
+  /// @param symbols the symbol table this namer works with
+  explicit Namer(SymbolTable* symbols);
   /// Destructor
   virtual ~Namer();
 
@@ -48,8 +48,8 @@ class Namer {
   /// @returns true if `name` has already been used
   bool IsUsed(const std::string& name);
 
-  /// The program storing the symbol table
-  Program* program_ = nullptr;
+  /// The symbol table
+  SymbolTable* symbols_ = nullptr;
 
  private:
   // The list of names taken by the remapper
@@ -60,8 +60,8 @@ class Namer {
 class MangleNamer : public Namer {
  public:
   /// Constructor
-  /// @param program the program to retrieve names from
-  explicit MangleNamer(Program* program);
+  /// @param symbols the symbol table this namer works with
+  explicit MangleNamer(SymbolTable* symbols);
   /// Destructor
   ~MangleNamer() override;
 
@@ -77,8 +77,8 @@ class MangleNamer : public Namer {
 class UnsafeNamer : public Namer {
  public:
   /// Constructor
-  /// @param program the program to retrieve names from
-  explicit UnsafeNamer(Program* program);
+  /// @param symbols the symbol table this namer works with
+  explicit UnsafeNamer(SymbolTable* symbols);
   /// Destructor
   ~UnsafeNamer() override;
 
