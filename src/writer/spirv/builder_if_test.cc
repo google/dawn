@@ -94,7 +94,7 @@ TEST_F(BuilderTest, If_WithStatements) {
   //   v = 2;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* expr =
@@ -134,7 +134,7 @@ TEST_F(BuilderTest, If_WithElse) {
   //   v = 3;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
@@ -183,7 +183,7 @@ TEST_F(BuilderTest, If_WithElseIf) {
   //   v = 3;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
@@ -243,7 +243,7 @@ TEST_F(BuilderTest, If_WithMultiple) {
   //   v = 5;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* elseif_1_body = create<ast::BlockStatement>(
@@ -577,7 +577,7 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // if (a) {
   // }
 
-  auto* var = Var("a", ast::StorageClass::kFunction, ty.bool_);
+  auto* var = Var("a", ast::StorageClass::kFunction, ty.bool_());
   td.RegisterVariableForTesting(var);
 
   auto* expr = create<ast::IfStatement>(

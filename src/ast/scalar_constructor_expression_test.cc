@@ -25,7 +25,7 @@ namespace {
 using ScalarConstructorExpressionTest = TestHelper;
 
 TEST_F(ScalarConstructorExpressionTest, Creation) {
-  auto* b = create<BoolLiteral>(ty.bool_, true);
+  auto* b = create<BoolLiteral>(ty.bool_(), true);
   auto* c = create<ScalarConstructorExpression>(b);
   EXPECT_EQ(c->literal(), b);
 }

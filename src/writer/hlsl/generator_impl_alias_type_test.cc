@@ -27,7 +27,7 @@ namespace {
 using HlslGeneratorImplTest_Alias = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
-  auto* alias = ty.alias("a", ty.f32);
+  auto* alias = ty.alias("a", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -37,7 +37,7 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
-  auto* alias = ty.alias("float", ty.f32);
+  auto* alias = ty.alias("float", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -48,8 +48,8 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32),
-                            Member("b", ty.i32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.f32()),
+                            Member("b", ty.i32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("A", str);

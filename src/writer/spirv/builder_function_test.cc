@@ -46,7 +46,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-  auto* func = Func("a_func", {}, ty.void_, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -63,7 +63,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Return) {
-  auto* func = Func("a_func", {}, ty.void_,
+  auto* func = Func("a_func", {}, ty.void_(),
                     ast::StatementList{
                         create<ast::ReturnStatement>(),
                     },
@@ -83,10 +83,10 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-  auto* var_a = Var("a", ast::StorageClass::kPrivate, ty.f32);
+  auto* var_a = Var("a", ast::StorageClass::kPrivate, ty.f32());
   td.RegisterVariableForTesting(var_a);
 
-  auto* func = Func("a_func", {}, ty.void_,
+  auto* func = Func("a_func", {}, ty.void_(),
                     ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
                     ast::FunctionDecorationList{});
 
@@ -113,7 +113,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Discard) {
-  auto* func = Func("a_func", {}, ty.void_,
+  auto* func = Func("a_func", {}, ty.void_(),
                     ast::StatementList{
                         create<ast::DiscardStatement>(),
                     },
@@ -133,10 +133,10 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithParams) {
-  ast::VariableList params = {Var("a", ast::StorageClass::kFunction, ty.f32),
-                              Var("b", ast::StorageClass::kFunction, ty.i32)};
+  ast::VariableList params = {Var("a", ast::StorageClass::kFunction, ty.f32()),
+                              Var("b", ast::StorageClass::kFunction, ty.i32())};
 
-  auto* func = Func("a_func", params, ty.f32,
+  auto* func = Func("a_func", params, ty.f32(),
                     ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
                     ast::FunctionDecorationList{});
 
@@ -164,7 +164,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithBody) {
-  auto* func = Func("a_func", {}, ty.void_,
+  auto* func = Func("a_func", {}, ty.void_(),
                     ast::StatementList{
                         create<ast::ReturnStatement>(),
                     },
@@ -184,7 +184,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-  auto* func = Func("a_func", {}, ty.void_, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -196,9 +196,9 @@ TEST_F(BuilderTest, FunctionType) {
 }
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
-  auto* func1 = Func("a_func", {}, ty.void_, ast::StatementList{},
+  auto* func1 = Func("a_func", {}, ty.void_(), ast::StatementList{},
                      ast::FunctionDecorationList{});
-  auto* func2 = Func("b_func", {}, ty.void_, ast::StatementList{},
+  auto* func2 = Func("b_func", {}, ty.void_(), ast::StatementList{},
                      ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -231,7 +231,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   s_decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
+      ast::StructMemberList{Member("d", ty.f32(), {MemberOffset(0)})}, s_decos);
 
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
@@ -248,11 +248,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   mod->AST().AddGlobalVariable(data_var);
 
   {
-    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
+    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     auto* func =
-        Func("a", ast::VariableList{}, ty.void_,
+        Func("a", ast::VariableList{}, ty.void_(),
              ast::StatementList{
                  create<ast::VariableDeclStatement>(var),
                  create<ast::ReturnStatement>(),
@@ -265,11 +265,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   }
 
   {
-    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
+    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     auto* func =
-        Func("b", ast::VariableList{}, ty.void_,
+        Func("b", ast::VariableList{}, ty.void_(),
              ast::StatementList{
                  create<ast::VariableDeclStatement>(var),
                  create<ast::ReturnStatement>(),

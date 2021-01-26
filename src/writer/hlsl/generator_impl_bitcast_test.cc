@@ -31,7 +31,7 @@ using HlslGeneratorImplTest_Bitcast = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
   auto* id = Expr("id");
-  auto* bitcast = create<ast::BitcastExpression>(ty.f32, id);
+  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), id);
 
   GeneratorImpl& gen = Build();
 
@@ -41,7 +41,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
   auto* id = Expr("id");
-  auto* bitcast = create<ast::BitcastExpression>(ty.i32, id);
+  auto* bitcast = create<ast::BitcastExpression>(ty.i32(), id);
 
   GeneratorImpl& gen = Build();
 
@@ -51,7 +51,7 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
   auto* id = Expr("id");
-  auto* bitcast = create<ast::BitcastExpression>(ty.u32, id);
+  auto* bitcast = create<ast::BitcastExpression>(ty.u32(), id);
 
   GeneratorImpl& gen = Build();
 

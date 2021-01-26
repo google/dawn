@@ -35,7 +35,7 @@ TEST_F(ScopeStackTest, Global) {
 }
 
 TEST_F(ScopeStackTest, Global_SetWithPointer) {
-  auto* v = Var("my_var", ast::StorageClass::kNone, ty.f32);
+  auto* v = Var("my_var", ast::StorageClass::kNone, ty.f32());
   ScopeStack<ast::Variable*> s;
   s.set_global(v->symbol(), v);
 

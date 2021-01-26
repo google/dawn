@@ -42,7 +42,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Assign_Var) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32());
 
   auto* assign = create<ast::AssignmentStatement>(Expr("var"), Expr(1.f));
   td.RegisterVariableForTesting(v);
@@ -71,7 +71,7 @@ TEST_F(BuilderTest, Assign_Var) {
 }
 
 TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32());
 
   auto* assign = create<ast::AssignmentStatement>(Expr("var"), Expr(1.f));
   td.RegisterVariableForTesting(v);
@@ -200,7 +200,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
   // ident.b = 4.0;
 
   auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+      ast::StructMemberList{Member("a", ty.f32()), Member("b", ty.f32())},
       ast::StructDecorationList{});
 
   auto* s_type = ty.struct_("my_struct", s);

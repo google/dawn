@@ -41,7 +41,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::DiscardStatement>(),
                         create<ast::ReturnStatement>(),
@@ -63,9 +63,9 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   auto* func =
       Func("my_func",
-           ast::VariableList{Var("a", ast::StorageClass::kNone, ty.f32),
-                             Var("b", ast::StorageClass::kNone, ty.i32)},
-           ty.void_,
+           ast::VariableList{Var("a", ast::StorageClass::kNone, ty.f32()),
+                             Var("b", ast::StorageClass::kNone, ty.i32())},
+           ty.void_(),
            ast::StatementList{
                create<ast::DiscardStatement>(),
                create<ast::ReturnStatement>(),
@@ -85,7 +85,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::DiscardStatement>(),
                         create<ast::ReturnStatement>(),
@@ -109,7 +109,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
   auto* func =
-      Func("my_func", ast::VariableList{}, ty.void_,
+      Func("my_func", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::DiscardStatement>(),
                create<ast::ReturnStatement>(),
@@ -133,7 +133,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
   auto* func =
-      Func("my_func", ast::VariableList{}, ty.void_,
+      Func("my_func", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::DiscardStatement>(),
                create<ast::ReturnStatement>(),
@@ -179,7 +179,7 @@ TEST_F(WgslGeneratorImplTest,
   s_decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("d", ty.f32, {MemberOffset(0)})}, s_decos);
+      ast::StructMemberList{Member("d", ty.f32(), {MemberOffset(0)})}, s_decos);
 
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
@@ -198,12 +198,12 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     auto* var =
-        Var("v", ast::StorageClass::kFunction, ty.f32,
+        Var("v", ast::StorageClass::kFunction, ty.f32(),
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 
     auto* func =
-        Func("a", ast::VariableList{}, ty.void_,
+        Func("a", ast::VariableList{}, ty.void_(),
              ast::StatementList{
                  create<ast::VariableDeclStatement>(var),
                  create<ast::ReturnStatement>(),
@@ -217,12 +217,12 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     auto* var =
-        Var("v", ast::StorageClass::kFunction, ty.f32,
+        Var("v", ast::StorageClass::kFunction, ty.f32(),
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 
     auto* func =
-        Func("b", ast::VariableList{}, ty.void_,
+        Func("b", ast::VariableList{}, ty.void_(),
              ast::StatementList{
                  create<ast::VariableDeclStatement>(var),
                  create<ast::ReturnStatement>(),

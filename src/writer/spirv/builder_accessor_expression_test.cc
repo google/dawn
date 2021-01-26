@@ -87,7 +87,7 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   // ary[idx]  -> ptr<f32>
 
   auto* var = Var("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
-  auto* idx = Var("idx", ast::StorageClass::kFunction, ty.i32);
+  auto* idx = Var("idx", ast::StorageClass::kFunction, ty.i32());
 
   auto* ary = Expr("ary");
   auto* idx_expr = Expr("idx");
@@ -253,7 +253,7 @@ TEST_F(BuilderTest, MemberAccessor) {
   // ident.b
 
   auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32), Member("b", ty.f32)},
+      ast::StructMemberList{Member("a", ty.f32()), Member("b", ty.f32())},
       ast::StructDecorationList{});
 
   auto* s_type = ty.struct_("my_struct", s);
@@ -298,8 +298,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   // var ident : my_struct
   // ident.inner.a
   auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32),
-                                                         Member("b", ty.f32)},
+      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
+                                                         Member("b", ty.f32())},
                                    ast::StructDecorationList{}));
 
   auto* s_type = ty.struct_(
@@ -349,8 +349,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   // var ident : my_struct
   // ident.inner.a
   auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32),
-                                                         Member("b", ty.f32)},
+      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
+                                                         Member("b", ty.f32())},
                                    ast::StructDecorationList{}));
 
   auto* alias = ty.alias("Inner", inner_struct);
@@ -400,8 +400,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   // var ident : my_struct
   // ident.inner.a = 2.0f;
   auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32),
-                                                         Member("b", ty.f32)},
+      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
+                                                         Member("b", ty.f32())},
                                    ast::StructDecorationList{}));
 
   auto* s_type = ty.struct_(
@@ -454,8 +454,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   // var store : f32 = ident.inner.a
 
   auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32),
-                                                         Member("b", ty.f32)},
+      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
+                                                         Member("b", ty.f32())},
                                    ast::StructDecorationList{}));
 
   auto* s_type = ty.struct_(
@@ -464,7 +464,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
                           ast::StructDecorationList{}));
 
   auto* var = Var("ident", ast::StorageClass::kFunction, s_type);
-  auto* store = Var("store", ast::StorageClass::kFunction, ty.f32);
+  auto* store = Var("store", ast::StorageClass::kFunction, ty.f32());
 
   auto* rhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
   auto* expr = create<ast::AssignmentStatement>(Expr("store"), rhs);

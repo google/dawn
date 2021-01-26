@@ -100,7 +100,7 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   auto param = GetParam();
 
-  auto* var = Var("param", ast::StorageClass::kFunction, ty.i32);
+  auto* var = Var("param", ast::StorageClass::kFunction, ty.i32());
   auto* expr =
       create<ast::BinaryExpression>(param.op, Expr("param"), Expr("param"));
 
@@ -680,9 +680,9 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
-  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_, Expr(true),
+  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_(), Expr(true),
                     ast::VariableDecorationList{});
-  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_, Expr(false),
+  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_(), Expr(false),
                     ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(a_var);
@@ -842,9 +842,9 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
-  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_, Expr(true),
+  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_(), Expr(true),
                     ast::VariableDecorationList{});
-  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_, Expr(false),
+  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_(), Expr(false),
                     ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(a_var);

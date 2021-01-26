@@ -41,7 +41,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
@@ -64,7 +64,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32());
   td.RegisterVariableForTesting(v);
 
   auto* expr = Expr("var");
@@ -89,7 +89,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
@@ -112,7 +112,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kNone, ty.f32());
   td.RegisterVariableForTesting(v);
 
   auto* expr = Expr("var");
@@ -138,7 +138,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-  auto* var = Var("var", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("var", ast::StorageClass::kPrivate, ty.i32());
   td.RegisterVariableForTesting(var);
 
   auto* expr = Add("var", "var");
@@ -164,7 +164,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-  auto* var = Const("var", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Const("var", ast::StorageClass::kNone, ty.i32(), Expr(2),
                     ast::VariableDecorationList{});
   td.RegisterVariableForTesting(var);
 

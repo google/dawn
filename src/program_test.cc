@@ -45,7 +45,7 @@ TEST_F(ProgramTest, IsValid_Empty) {
 }
 
 TEST_F(ProgramTest, IsValid_GlobalVariable) {
-  auto* var = Var("var", ast::StorageClass::kInput, ty.f32);
+  auto* var = Var("var", ast::StorageClass::kInput, ty.f32());
   mod->AST().AddGlobalVariable(var);
   EXPECT_TRUE(mod->IsValid());
 }
@@ -62,7 +62,7 @@ TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
 }
 
 TEST_F(ProgramTest, IsValid_Alias) {
-  auto* alias = ty.alias("alias", ty.f32);
+  auto* alias = ty.alias("alias", ty.f32());
   mod->AST().AddConstructedType(alias);
   EXPECT_TRUE(mod->IsValid());
 }
@@ -87,7 +87,7 @@ TEST_F(ProgramTest, IsValid_Struct_EmptyName) {
 }
 
 TEST_F(ProgramTest, IsValid_Function) {
-  auto* func = Func("main", ast::VariableList(), ty.f32, ast::StatementList{},
+  auto* func = Func("main", ast::VariableList(), ty.f32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   mod->AST().Functions().Add(func);

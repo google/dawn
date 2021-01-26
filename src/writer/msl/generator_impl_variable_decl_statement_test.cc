@@ -41,7 +41,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32);
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   GeneratorImpl& gen = Build();
@@ -53,7 +53,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
-  auto* var = Const("a", ast::StorageClass::kNone, ty.f32);
+  auto* var = Const("a", ast::StorageClass::kNone, ty.f32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   GeneratorImpl& gen = Build();
@@ -65,7 +65,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
-  type::Array ary(ty.f32, 5, ast::ArrayDecorationList{});
+  type::Array ary(ty.f32(), 5, ast::ArrayDecorationList{});
 
   auto* var = Var("a", ast::StorageClass::kNone, &ary);
   auto* stmt = create<ast::VariableDeclStatement>(var);
@@ -80,8 +80,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.f32()),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
@@ -123,7 +123,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32);
+  auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
   GeneratorImpl& gen = Build();
@@ -135,7 +135,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr("initializer"),
                   ast::VariableDecorationList{});
   auto* stmt = create<ast::VariableDeclStatement>(var);
 

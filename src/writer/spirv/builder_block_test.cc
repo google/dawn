@@ -39,11 +39,11 @@ TEST_F(BuilderTest, Block) {
   // serves to prove the block code is pushing new scopes as needed.
   auto* inner = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(
-          Var("var", ast::StorageClass::kFunction, ty.f32)),
+          Var("var", ast::StorageClass::kFunction, ty.f32())),
       create<ast::AssignmentStatement>(Expr("var"), Expr(2.f))});
   auto* outer = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(
-          Var("var", ast::StorageClass::kFunction, ty.f32)),
+          Var("var", ast::StorageClass::kFunction, ty.f32())),
       create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)), inner,
       create<ast::AssignmentStatement>(Expr("var"), Expr(3.f))});
 

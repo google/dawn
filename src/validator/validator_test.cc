@@ -64,7 +64,7 @@ TEST_F(ValidatorTest, AssignToScalar_Fail) {
   // var my_var : i32 = 2;
   // 1 = my_var;
 
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("my_var", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
   auto* lhs = Expr(1);
@@ -119,7 +119,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
 TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   // var a :i32 = 2;
   // a = 2
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
   auto* lhs = Expr("a");
@@ -140,7 +140,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesThroughAlias_Pass) {
   // alias myint = i32;
   // var a :myint = 2;
   // a = 2
-  auto* myint = ty.alias("myint", ty.i32);
+  auto* myint = ty.alias("myint", ty.i32());
   auto* var = Var("a", ast::StorageClass::kNone, myint, Expr(2),
                   ast::VariableDecorationList{});
 
@@ -162,9 +162,9 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInferRHSLoad_Pass) {
   // var a :i32 = 2;
   // var b :i32 = 3;
   // a = b;
-  auto* var_a = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var_a = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                     ast::VariableDecorationList{});
-  auto* var_b = Var("b", ast::StorageClass::kNone, ty.i32, Expr(3),
+  auto* var_b = Var("b", ast::StorageClass::kNone, ty.i32(), Expr(3),
                     ast::VariableDecorationList{});
 
   auto* lhs = Expr("a");
@@ -187,7 +187,7 @@ TEST_F(ValidatorTest, AssignThroughPointer_Pass) {
   // const b : ptr<function,i32> = a;
   // b = 2;
   const auto func = ast::StorageClass::kFunction;
-  auto* var_a = Var("a", func, ty.i32, Expr(2), {});
+  auto* var_a = Var("a", func, ty.i32(), Expr(2), {});
   auto* var_b = Const("b", ast::StorageClass::kNone, ty.pointer<int>(func),
                       Expr("a"), {});
 
@@ -213,7 +213,7 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   //  a = 2.3;
   // }
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
   auto* lhs = Expr("a");
@@ -241,7 +241,7 @@ TEST_F(ValidatorTest, AssignThroughPointerWrongeStoreType_Fail) {
   // const b : ptr<function,f32> = a;
   // b = 2;
   const auto priv = ast::StorageClass::kFunction;
-  auto* var_a = Var("a", priv, ty.f32, Expr(2), {});
+  auto* var_a = Var("a", priv, ty.f32(), Expr(2), {});
   auto* var_b = Const("b", ast::StorageClass::kNone, ty.pointer<float>(priv),
                       Expr("a"), {});
 
@@ -269,7 +269,7 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   //  var a :i32 = 2;
   //  a = 2
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
   auto* lhs = Expr("a");
@@ -296,7 +296,7 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   //  a = 2.3;
   // }
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
   auto* lhs = Expr("a");
@@ -326,7 +326,7 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
   mod->AST().AddGlobalVariable(Var(
       Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kInput,
-      ty.f32, nullptr, ast::VariableDecorationList{}));
+      ty.f32(), nullptr, ast::VariableDecorationList{}));
 
   ValidatorImpl& v = Build();
 
@@ -338,7 +338,7 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   // var gloabl_var: f32;
   mod->AST().AddGlobalVariable(Var(
       Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kNone,
-      ty.f32, nullptr, ast::VariableDecorationList{}));
+      ty.f32(), nullptr, ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -352,7 +352,7 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> gloabl_var: f32;
   mod->AST().AddGlobalVariable(Const(
       Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kInput,
-      ty.f32, nullptr, ast::VariableDecorationList{}));
+      ty.f32(), nullptr, ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -367,7 +367,7 @@ TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
   // const gloabl_var: f32;
   mod->AST().AddGlobalVariable(Const(
       Source{Source::Location{12, 34}}, "global_var", ast::StorageClass::kNone,
-      ty.f32, nullptr, ast::VariableDecorationList{}));
+      ty.f32(), nullptr, ast::VariableDecorationList{}));
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -381,14 +381,14 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   //   not_global_var = 3.14f;
   // }
   mod->AST().AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate,
-                                   ty.f32, Expr(2.1f),
+                                   ty.f32(), Expr(2.1f),
                                    ast::VariableDecorationList{}));
 
   SetSource(Source{Source::Location{12, 34}});
   auto* lhs = Expr("not_global_var");
   auto* rhs = Expr(3.14f);
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.f32,
+  auto* func = Func("my_func", ast::VariableList{}, ty.f32(),
                     ast::StatementList{
                         create<ast::AssignmentStatement>(
                             Source{Source::Location{12, 34}}, lhs, rhs),
@@ -410,11 +410,11 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   // }
 
   mod->AST().AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate,
-                                   ty.f32, Expr(2.1f),
+                                   ty.f32(), Expr(2.1f),
                                    ast::VariableDecorationList{}));
 
   auto* func = Func(
-      "my_func", ast::VariableList{}, ty.void_,
+      "my_func", ast::VariableList{}, ty.void_(),
       ast::StatementList{
           create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
                                            Expr("global_var"), Expr(3.14f)),
@@ -437,7 +437,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   //   if (true) { var a : f32 = 2.0; }
   //   a = 3.14;
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                   ast::VariableDecorationList{});
 
   auto* cond = Expr(true);
@@ -470,7 +470,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   //   var a : f32 = 2.0;
   //   if (true) { a = 3.14; }
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                   ast::VariableDecorationList{});
 
   SetSource(Source{Source::Location{12, 34}});
@@ -500,12 +500,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
 TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   // var global_var0 : f32 = 0.1;
   // var global_var1 : i32 = 0;
-  auto* var0 = Var("global_var0", ast::StorageClass::kPrivate, ty.f32,
+  auto* var0 = Var("global_var0", ast::StorageClass::kPrivate, ty.f32(),
                    Expr(0.1f), ast::VariableDecorationList{});
   mod->AST().AddGlobalVariable(var0);
 
   auto* var1 = Var(Source{Source::Location{12, 34}}, "global_var1",
-                   ast::StorageClass::kPrivate, ty.f32, Expr(0),
+                   ast::StorageClass::kPrivate, ty.f32(), Expr(0),
                    ast::VariableDecorationList{});
   mod->AST().AddGlobalVariable(var1);
 
@@ -518,12 +518,12 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
 TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
   // var global_var : f32 = 0.1;
   // var global_var : i32 = 0;
-  auto* var0 = Var("global_var", ast::StorageClass::kPrivate, ty.f32,
+  auto* var0 = Var("global_var", ast::StorageClass::kPrivate, ty.f32(),
                    Expr(0.1f), ast::VariableDecorationList{});
   mod->AST().AddGlobalVariable(var0);
 
   auto* var1 = Var(Source{Source::Location{12, 34}}, "global_var",
-                   ast::StorageClass::kPrivate, ty.i32, Expr(0),
+                   ast::StorageClass::kPrivate, ty.i32(), Expr(0),
                    ast::VariableDecorationList{});
   mod->AST().AddGlobalVariable(var1);
 
@@ -539,7 +539,7 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   //  const a :i32 = 2;
   //  a = 2
   // }
-  auto* var = Const("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Const("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                     ast::VariableDecorationList{});
 
   auto* lhs = Expr("a");
@@ -568,14 +568,14 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   //   return 0;
   // }
 
-  auto* global_var = Var("a", ast::StorageClass::kPrivate, ty.f32, Expr(2.1f),
+  auto* global_var = Var("a", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
                          ast::VariableDecorationList{});
   mod->AST().AddGlobalVariable(global_var);
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                   ast::VariableDecorationList{});
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::VariableDeclStatement>(
                             Source{Source::Location{12, 34}}, var),
@@ -598,13 +598,13 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   //  var a :i32 = 2;
   //  var a :f21 = 2.0;
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
-  auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32, Expr(0.1f),
+  auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(0.1f),
                           ast::VariableDecorationList{});
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::VariableDeclStatement>(var),
                         create<ast::VariableDeclStatement>(
@@ -628,7 +628,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
   // if (true) { var a : f32 = 2.0; }
   // var a : f32 = 3.14;
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                   ast::VariableDecorationList{});
 
   auto* cond = Expr(true);
@@ -636,7 +636,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
       create<ast::VariableDeclStatement>(var),
   });
 
-  auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32, Expr(3.1f),
+  auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(3.1f),
                           ast::VariableDecorationList{});
 
   auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
@@ -659,10 +659,10 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   // var a : f32 = 3.14;
   // if (true) { var a : f32 = 2.0; }
   // }
-  auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32, Expr(3.1f),
+  auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(3.1f),
                           ast::VariableDecorationList{});
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                   ast::VariableDecorationList{});
 
   auto* cond = Expr(true);
@@ -686,13 +686,13 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
 TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   // func0 { var a : f32 = 2.0; return; }
   // func1 { var a : f32 = 3.0; return; }
-  auto* var0 = Var("a", ast::StorageClass::kNone, ty.f32, Expr(2.0f),
+  auto* var0 = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                    ast::VariableDecorationList{});
 
-  auto* var1 = Var("a", ast::StorageClass::kNone, ty.void_, Expr(1.0f),
+  auto* var1 = Var("a", ast::StorageClass::kNone, ty.void_(), Expr(1.0f),
                    ast::VariableDecorationList{});
 
-  auto* func0 = Func("func0", ast::VariableList{}, ty.void_,
+  auto* func0 = Func("func0", ast::VariableList{}, ty.void_(),
                      ast::StatementList{
                          create<ast::VariableDeclStatement>(
                              Source{Source::Location{12, 34}}, var0),
@@ -701,7 +701,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
                      ast::FunctionDecorationList{});
 
   auto* func1 =
-      Func("func1", ast::VariableList{}, ty.void_,
+      Func("func1", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::VariableDeclStatement>(
                    Source{Source::Location{13, 34}}, var1),
@@ -726,7 +726,7 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   // var a :i32;
   // a = 2;
   // }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, nullptr,
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), nullptr,
                   ast::VariableDecorationList{});
 
   td()->RegisterVariableForTesting(var);
@@ -751,16 +751,16 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
 TEST_F(ValidatorTest, IsStorable_Void) {
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.IsStorable(ty.void_));
+  EXPECT_FALSE(v.IsStorable(ty.void_()));
 }
 
 TEST_F(ValidatorTest, IsStorable_Scalar) {
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.IsStorable(ty.bool_));
-  EXPECT_TRUE(v.IsStorable(ty.i32));
-  EXPECT_TRUE(v.IsStorable(ty.u32));
-  EXPECT_TRUE(v.IsStorable(ty.f32));
+  EXPECT_TRUE(v.IsStorable(ty.bool_()));
+  EXPECT_TRUE(v.IsStorable(ty.i32()));
+  EXPECT_TRUE(v.IsStorable(ty.u32()));
+  EXPECT_TRUE(v.IsStorable(ty.f32()));
 }
 
 TEST_F(ValidatorTest, IsStorable_Vector) {
@@ -799,14 +799,14 @@ TEST_F(ValidatorTest, IsStorable_Pointer) {
 }
 
 TEST_F(ValidatorTest, IsStorable_AliasVoid) {
-  auto* alias = ty.alias("myalias", ty.void_);
+  auto* alias = ty.alias("myalias", ty.void_());
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.IsStorable(alias));
 }
 
 TEST_F(ValidatorTest, IsStorable_AliasI32) {
-  auto* alias = ty.alias("myalias", ty.i32);
+  auto* alias = ty.alias("myalias", ty.i32());
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.IsStorable(alias));
@@ -815,13 +815,13 @@ TEST_F(ValidatorTest, IsStorable_AliasI32) {
 TEST_F(ValidatorTest, IsStorable_ArraySizedOfStorable) {
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.IsStorable(ty.array(ty.i32, 5)));
+  EXPECT_TRUE(v.IsStorable(ty.array(ty.i32(), 5)));
 }
 
 TEST_F(ValidatorTest, IsStorable_ArraySizedOfNonStorable) {
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.IsStorable(ty.array(ty.void_, 5)));
+  EXPECT_FALSE(v.IsStorable(ty.array(ty.void_(), 5)));
 }
 
 TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfStorable) {
@@ -837,7 +837,7 @@ TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfNonStorable) {
 }
 
 TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
-  ast::StructMemberList members{Member("a", ty.i32), Member("b", ty.f32)};
+  ast::StructMemberList members{Member("a", ty.i32()), Member("b", ty.f32())};
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   auto* s_ty = ty.struct_("mystruct", s);
   ValidatorImpl& v = Build();
@@ -847,7 +847,7 @@ TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
 
 TEST_F(ValidatorTest, IsStorable_Struct_SomeMembersNonStorable) {
   auto* ptr_ty = ty.pointer<int>(ast::StorageClass::kPrivate);
-  ast::StructMemberList members{Member("a", ty.i32), Member("b", ptr_ty)};
+  ast::StructMemberList members{Member("a", ty.i32()), Member("b", ptr_ty)};
   auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
   auto* s_ty = ty.struct_("mystruct", s);
   ValidatorImpl& v = Build();

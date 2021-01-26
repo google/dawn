@@ -32,7 +32,7 @@ using HlslGeneratorImplTest_Call = TestHelper;
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
   auto* call = Call("my_func");
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AST().Functions().Add(func);
 
@@ -45,7 +45,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
   auto* call = Call("my_func", "param1", "param2");
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AST().Functions().Add(func);
 
@@ -58,7 +58,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
 TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   auto* call = create<ast::CallStatement>(Call("my_func", "param1", "param2"));
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AST().Functions().Add(func);
 

@@ -30,12 +30,12 @@ namespace {
 using IntLiteralTest = TestHelper;
 
 TEST_F(IntLiteralTest, Sint_IsInt) {
-  auto* i = create<SintLiteral>(ty.i32, 47);
+  auto* i = create<SintLiteral>(ty.i32(), 47);
   ASSERT_TRUE(i->Is<IntLiteral>());
 }
 
 TEST_F(IntLiteralTest, Uint_IsInt) {
-  auto* i = create<UintLiteral>(ty.i32, 42);
+  auto* i = create<UintLiteral>(ty.i32(), 42);
   EXPECT_TRUE(i->Is<IntLiteral>());
 }
 

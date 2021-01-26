@@ -122,7 +122,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // type Int = i32
   // cast<Int>(2.3f)
 
-  auto* alias = ty.alias("Int", ty.i32);
+  auto* alias = ty.alias("Int", ty.i32());
   auto* cast = Construct(alias, 2.3f);
 
   ASSERT_TRUE(td.DetermineResultType(cast)) << td.error();
@@ -142,7 +142,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
-  auto* var = Var("ident", ast::StorageClass::kFunction, ty.f32);
+  auto* var = Var("ident", ast::StorageClass::kFunction, ty.f32());
 
   auto* t = vec2<f32>(1.0f, "ident");
 
@@ -1050,7 +1050,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
   auto* s = create<ast::Struct>(
       ast::StructMemberList{
-          Member("a", ty.f32),
+          Member("a", ty.f32()),
           Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
@@ -1076,7 +1076,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
-  auto* t = Construct(ty.f32);
+  auto* t = Construct(ty.f32());
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
@@ -1127,7 +1127,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Bool) {
-  auto* t = Construct(ty.bool_);
+  auto* t = Construct(ty.bool_());
 
   EXPECT_TRUE(td.DetermineResultType(t)) << td.error();
 
@@ -1203,7 +1203,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   auto* s = create<ast::Struct>(
       ast::StructMemberList{
-          Member("a", ty.f32),
+          Member("a", ty.f32()),
       },
       ast::StructDecorationList{});
   auto* s_type = ty.struct_("my_struct", s);
@@ -1516,9 +1516,9 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVector_WithIdent) {
   // vec3<f32>(a, b, c)  -> false -- ERROR
   auto* t = vec3<f32>("a", "b", "c");
 
-  Var("a", ast::StorageClass::kPrivate, ty.f32);
-  Var("b", ast::StorageClass::kPrivate, ty.f32);
-  Var("c", ast::StorageClass::kPrivate, ty.f32);
+  Var("a", ast::StorageClass::kPrivate, ty.f32());
+  Var("b", ast::StorageClass::kPrivate, ty.f32());
+  Var("c", ast::StorageClass::kPrivate, ty.f32());
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
@@ -1591,9 +1591,9 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
 
   auto* t = vec3<f32>("a", "b", "c");
 
-  Var("a", ast::StorageClass::kPrivate, ty.f32);
-  Var("b", ast::StorageClass::kPrivate, ty.f32);
-  Var("c", ast::StorageClass::kPrivate, ty.f32);
+  Var("a", ast::StorageClass::kPrivate, ty.f32());
+  Var("b", ast::StorageClass::kPrivate, ty.f32());
+  Var("c", ast::StorageClass::kPrivate, ty.f32());
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 
@@ -1662,7 +1662,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
   auto* s = create<ast::Struct>(
       ast::StructMemberList{
-          Member("a", ty.f32),
+          Member("a", ty.f32()),
           Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
@@ -1680,7 +1680,7 @@ TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_Struct_WithIdentSubExpression) {
   auto* s = create<ast::Struct>(
       ast::StructMemberList{
-          Member("a", ty.f32),
+          Member("a", ty.f32()),
           Member("b", ty.vec3<f32>()),
       },
       ast::StructDecorationList{});
@@ -1688,8 +1688,8 @@ TEST_F(SpvBuilderConstructorTest,
   auto* s_type = ty.struct_("my_struct", s);
   auto* t = Construct(s_type, 2.f, "a", 2.f);
 
-  Var("a", ast::StorageClass::kPrivate, ty.f32);
-  Var("b", ast::StorageClass::kPrivate, ty.f32);
+  Var("a", ast::StorageClass::kPrivate, ty.f32());
+  Var("b", ast::StorageClass::kPrivate, ty.f32());
 
   ASSERT_TRUE(td.DetermineResultType(t)) << td.error();
 

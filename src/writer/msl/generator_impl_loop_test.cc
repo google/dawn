@@ -150,13 +150,13 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   //   }
   // }
 
-  auto* var = Var("lhs", ast::StorageClass::kFunction, ty.f32, Expr(2.4f),
+  auto* var = Var("lhs", ast::StorageClass::kFunction, ty.f32(), Expr(2.4f),
                   ast::VariableDecorationList{});
 
-  auto* body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::VariableDeclStatement>(var),
-                         create<ast::VariableDeclStatement>(Var(
-                             "other", ast::StorageClass::kFunction, ty.f32))});
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::VariableDeclStatement>(
+          Var("other", ast::StorageClass::kFunction, ty.f32()))});
 
   auto* continuing = create<ast::BlockStatement>(ast::StatementList{
       create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs")),

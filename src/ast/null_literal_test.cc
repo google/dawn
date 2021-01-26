@@ -28,7 +28,7 @@ namespace {
 using NullLiteralTest = TestHelper;
 
 TEST_F(NullLiteralTest, Is) {
-  ast::Literal* l = create<NullLiteral>(ty.i32);
+  ast::Literal* l = create<NullLiteral>(ty.i32());
   EXPECT_FALSE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
   EXPECT_FALSE(l->Is<FloatLiteral>());
@@ -38,13 +38,13 @@ TEST_F(NullLiteralTest, Is) {
 }
 
 TEST_F(NullLiteralTest, ToStr) {
-  auto* i = create<NullLiteral>(ty.i32);
+  auto* i = create<NullLiteral>(ty.i32());
 
   EXPECT_EQ(i->to_str(), "null __i32");
 }
 
 TEST_F(NullLiteralTest, Name_I32) {
-  auto* i = create<NullLiteral>(ty.i32);
+  auto* i = create<NullLiteral>(ty.i32());
   EXPECT_EQ("__null__i32", i->name());
 }
 

@@ -30,7 +30,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
-  auto* bitcast = create<ast::BitcastExpression>(ty.f32, Expr("id"));
+  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("id"));
 
   GeneratorImpl& gen = Build();
 

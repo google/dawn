@@ -31,22 +31,22 @@ using FunctionTest = TestHelper;
 
 TEST_F(FunctionTest, Creation) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
   auto* var = params[0];
 
-  auto* f =
-      Func("func", params, ty.void_, StatementList{}, FunctionDecorationList{});
+  auto* f = Func("func", params, ty.void_(), StatementList{},
+                 FunctionDecorationList{});
   EXPECT_EQ(f->symbol(), mod->Symbols().Register("func"));
   ASSERT_EQ(f->params().size(), 1u);
-  EXPECT_EQ(f->return_type(), ty.void_);
+  EXPECT_EQ(f->return_type(), ty.void_());
   EXPECT_EQ(f->params()[0], var);
 }
 
 TEST_F(FunctionTest, Creation_WithSource) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
 
-  auto* f = Func(Source{Source::Location{20, 2}}, "func", params, ty.void_,
+  auto* f = Func(Source{Source::Location{20, 2}}, "func", params, ty.void_(),
                  StatementList{}, FunctionDecorationList{});
   auto src = f->source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -54,8 +54,8 @@ TEST_F(FunctionTest, Creation_WithSource) {
 }
 
 TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
-  auto* v = Var("var", StorageClass::kInput, ty.i32);
-  auto* f = Func("func", VariableList{}, ty.void_, StatementList{},
+  auto* v = Var("var", StorageClass::kInput, ty.i32());
+  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
                  FunctionDecorationList{});
 
   f->add_referenced_module_variable(v);
@@ -65,34 +65,34 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   f->add_referenced_module_variable(v);
   ASSERT_EQ(f->referenced_module_variables().size(), 1u);
 
-  auto* v2 = Var("var2", StorageClass::kOutput, ty.i32);
+  auto* v2 = Var("var2", StorageClass::kOutput, ty.i32());
   f->add_referenced_module_variable(v2);
   ASSERT_EQ(f->referenced_module_variables().size(), 2u);
   EXPECT_EQ(f->referenced_module_variables()[1], v2);
 }
 
 TEST_F(FunctionTest, GetReferenceLocations) {
-  auto* loc1 = Var("loc1", StorageClass::kInput, ty.i32, nullptr,
+  auto* loc1 = Var("loc1", StorageClass::kInput, ty.i32(), nullptr,
                    ast::VariableDecorationList{
                        create<LocationDecoration>(0),
                    });
 
-  auto* loc2 = Var("loc2", StorageClass::kInput, ty.i32, nullptr,
+  auto* loc2 = Var("loc2", StorageClass::kInput, ty.i32(), nullptr,
                    ast::VariableDecorationList{
                        create<LocationDecoration>(1),
                    });
 
-  auto* builtin1 = Var("builtin1", StorageClass::kInput, ty.i32, nullptr,
+  auto* builtin1 = Var("builtin1", StorageClass::kInput, ty.i32(), nullptr,
                        ast::VariableDecorationList{
                            create<BuiltinDecoration>(Builtin::kPosition),
                        });
 
-  auto* builtin2 = Var("builtin2", StorageClass::kInput, ty.i32, nullptr,
+  auto* builtin2 = Var("builtin2", StorageClass::kInput, ty.i32(), nullptr,
                        ast::VariableDecorationList{
                            create<BuiltinDecoration>(Builtin::kFragDepth),
                        });
 
-  auto* f = Func("func", VariableList{}, ty.void_, StatementList{},
+  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
                  FunctionDecorationList{});
 
   f->add_referenced_module_variable(loc1);
@@ -110,27 +110,27 @@ TEST_F(FunctionTest, GetReferenceLocations) {
 }
 
 TEST_F(FunctionTest, GetReferenceBuiltins) {
-  auto* loc1 = Var("loc1", StorageClass::kInput, ty.i32, nullptr,
+  auto* loc1 = Var("loc1", StorageClass::kInput, ty.i32(), nullptr,
                    ast::VariableDecorationList{
                        create<LocationDecoration>(0),
                    });
 
-  auto* loc2 = Var("loc2", StorageClass::kInput, ty.i32, nullptr,
+  auto* loc2 = Var("loc2", StorageClass::kInput, ty.i32(), nullptr,
                    ast::VariableDecorationList{
                        create<LocationDecoration>(1),
                    });
 
-  auto* builtin1 = Var("builtin1", StorageClass::kInput, ty.i32, nullptr,
+  auto* builtin1 = Var("builtin1", StorageClass::kInput, ty.i32(), nullptr,
                        ast::VariableDecorationList{
                            create<BuiltinDecoration>(Builtin::kPosition),
                        });
 
-  auto* builtin2 = Var("builtin2", StorageClass::kInput, ty.i32, nullptr,
+  auto* builtin2 = Var("builtin2", StorageClass::kInput, ty.i32(), nullptr,
                        ast::VariableDecorationList{
                            create<BuiltinDecoration>(Builtin::kFragDepth),
                        });
 
-  auto* f = Func("func", VariableList{}, ty.void_, StatementList{},
+  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
                  FunctionDecorationList{});
 
   f->add_referenced_module_variable(loc1);
@@ -148,7 +148,7 @@ TEST_F(FunctionTest, GetReferenceBuiltins) {
 }
 
 TEST_F(FunctionTest, AddDuplicateEntryPoints) {
-  auto* f = Func("func", VariableList{}, ty.void_, StatementList{},
+  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
                  FunctionDecorationList{});
 
   auto main_sym = mod->Symbols().Register("main");
@@ -163,9 +163,9 @@ TEST_F(FunctionTest, AddDuplicateEntryPoints) {
 
 TEST_F(FunctionTest, IsValid) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
 
-  auto* f = Func("func", params, ty.void_,
+  auto* f = Func("func", params, ty.void_(),
                  StatementList{
                      create<DiscardStatement>(),
                  },
@@ -175,16 +175,16 @@ TEST_F(FunctionTest, IsValid) {
 
 TEST_F(FunctionTest, IsValid_InvalidName) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
 
   auto* f =
-      Func("", params, ty.void_, StatementList{}, FunctionDecorationList{});
+      Func("", params, ty.void_(), StatementList{}, FunctionDecorationList{});
   EXPECT_FALSE(f->IsValid());
 }
 
 TEST_F(FunctionTest, IsValid_MissingReturnType) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
 
   auto* f =
       Func("func", params, nullptr, StatementList{}, FunctionDecorationList{});
@@ -193,11 +193,11 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
 
 TEST_F(FunctionTest, IsValid_NullParam) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
   params.push_back(nullptr);
 
-  auto* f =
-      Func("func", params, ty.void_, StatementList{}, FunctionDecorationList{});
+  auto* f = Func("func", params, ty.void_(), StatementList{},
+                 FunctionDecorationList{});
   EXPECT_FALSE(f->IsValid());
 }
 
@@ -205,16 +205,16 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
   VariableList params;
   params.push_back(Var("var", StorageClass::kNone, nullptr));
 
-  auto* f =
-      Func("func", params, ty.void_, StatementList{}, FunctionDecorationList{});
+  auto* f = Func("func", params, ty.void_(), StatementList{},
+                 FunctionDecorationList{});
   EXPECT_FALSE(f->IsValid());
 }
 
 TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
 
-  auto* f = Func("func", params, ty.void_,
+  auto* f = Func("func", params, ty.void_(),
                  StatementList{
                      create<DiscardStatement>(),
                      nullptr,
@@ -226,9 +226,9 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
 
 TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
 
-  auto* f = Func("func", params, ty.void_,
+  auto* f = Func("func", params, ty.void_(),
                  StatementList{
                      create<DiscardStatement>(),
                      nullptr,
@@ -238,7 +238,7 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(FunctionTest, ToStr) {
-  auto* f = Func("func", VariableList{}, ty.void_,
+  auto* f = Func("func", VariableList{}, ty.void_(),
                  StatementList{
                      create<DiscardStatement>(),
                  },
@@ -255,7 +255,7 @@ TEST_F(FunctionTest, ToStr) {
 }
 
 TEST_F(FunctionTest, ToStr_WithDecoration) {
-  auto* f = Func("func", VariableList{}, ty.void_,
+  auto* f = Func("func", VariableList{}, ty.void_(),
                  StatementList{
                      create<DiscardStatement>(),
                  },
@@ -274,9 +274,9 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
 
 TEST_F(FunctionTest, ToStr_WithParams) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32));
+  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
 
-  auto* f = Func("func", params, ty.void_,
+  auto* f = Func("func", params, ty.void_(),
                  StatementList{
                      create<DiscardStatement>(),
                  },
@@ -299,25 +299,25 @@ TEST_F(FunctionTest, ToStr_WithParams) {
 }
 
 TEST_F(FunctionTest, TypeName) {
-  auto* f = Func("func", VariableList{}, ty.void_, StatementList{},
+  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
                  FunctionDecorationList{});
   EXPECT_EQ(f->type_name(), "__func__void");
 }
 
 TEST_F(FunctionTest, TypeName_WithParams) {
   VariableList params;
-  params.push_back(Var("var1", StorageClass::kNone, ty.i32));
-  params.push_back(Var("var2", StorageClass::kNone, ty.f32));
+  params.push_back(Var("var1", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var2", StorageClass::kNone, ty.f32()));
 
-  auto* f =
-      Func("func", params, ty.void_, StatementList{}, FunctionDecorationList{});
+  auto* f = Func("func", params, ty.void_(), StatementList{},
+                 FunctionDecorationList{});
   EXPECT_EQ(f->type_name(), "__func__void__i32__f32");
 }
 
 TEST_F(FunctionTest, GetLastStatement) {
   VariableList params;
   auto* stmt = create<DiscardStatement>();
-  auto* f = Func("func", params, ty.void_, StatementList{stmt},
+  auto* f = Func("func", params, ty.void_(), StatementList{stmt},
                  FunctionDecorationList{});
 
   EXPECT_EQ(f->get_last_statement(), stmt);
@@ -325,14 +325,14 @@ TEST_F(FunctionTest, GetLastStatement) {
 
 TEST_F(FunctionTest, GetLastStatement_nullptr) {
   VariableList params;
-  auto* f =
-      Func("func", params, ty.void_, StatementList{}, FunctionDecorationList{});
+  auto* f = Func("func", params, ty.void_(), StatementList{},
+                 FunctionDecorationList{});
 
   EXPECT_EQ(f->get_last_statement(), nullptr);
 }
 
 TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
-  auto* f = Func("func", VariableList{}, ty.void_, StatementList{},
+  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
                  FunctionDecorationList{});
   uint32_t x = 0;
   uint32_t y = 0;
@@ -345,7 +345,7 @@ TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
 
 TEST_F(FunctionTest, WorkgroupSize) {
   auto* f =
-      Func("func", VariableList{}, ty.void_, StatementList{},
+      Func("func", VariableList{}, ty.void_(), StatementList{},
            FunctionDecorationList{create<WorkgroupDecoration>(2u, 4u, 6u)});
 
   uint32_t x = 0;
@@ -360,7 +360,7 @@ TEST_F(FunctionTest, WorkgroupSize) {
 using FunctionListTest = TestHelper;
 
 TEST_F(FunctionListTest, FindSymbol) {
-  auto* func = Func("main", VariableList{}, ty.f32, StatementList{},
+  auto* func = Func("main", VariableList{}, ty.f32(), StatementList{},
                     ast::FunctionDecorationList{});
   FunctionList list;
   list.Add(func);
@@ -373,11 +373,11 @@ TEST_F(FunctionListTest, FindSymbolMissing) {
 }
 
 TEST_F(FunctionListTest, FindSymbolStage) {
-  auto* fs = Func("main", VariableList{}, ty.f32, StatementList{},
+  auto* fs = Func("main", VariableList{}, ty.f32(), StatementList{},
                   ast::FunctionDecorationList{
                       create<ast::StageDecoration>(PipelineStage::kFragment),
                   });
-  auto* vs = Func("main", VariableList{}, ty.f32, StatementList{},
+  auto* vs = Func("main", VariableList{}, ty.f32(), StatementList{},
                   ast::FunctionDecorationList{
                       create<ast::StageDecoration>(PipelineStage::kVertex),
                   });
@@ -392,7 +392,7 @@ TEST_F(FunctionListTest, FindSymbolStage) {
 
 TEST_F(FunctionListTest, FindSymbolStageMissing) {
   FunctionList list;
-  list.Add(Func("main", VariableList{}, ty.f32, StatementList{},
+  list.Add(Func("main", VariableList{}, ty.f32(), StatementList{},
                 ast::FunctionDecorationList{
                     create<ast::StageDecoration>(PipelineStage::kFragment),
                 }));
@@ -402,7 +402,7 @@ TEST_F(FunctionListTest, FindSymbolStageMissing) {
 
 TEST_F(FunctionListTest, HasStage) {
   FunctionList list;
-  list.Add(Func("main", VariableList{}, ty.f32, StatementList{},
+  list.Add(Func("main", VariableList{}, ty.f32(), StatementList{},
                 ast::FunctionDecorationList{
                     create<ast::StageDecoration>(PipelineStage::kFragment),
                 }));

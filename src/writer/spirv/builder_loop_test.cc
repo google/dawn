@@ -68,7 +68,7 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   //   v = 2;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
 
@@ -112,7 +112,7 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   //   }
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* continuing = create<ast::BlockStatement>(

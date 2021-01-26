@@ -41,13 +41,13 @@ namespace {
 using AliasTest = TestHelper;
 
 TEST_F(AliasTest, Create) {
-  auto* a = ty.alias("a_type", ty.u32);
+  auto* a = ty.alias("a_type", ty.u32());
   EXPECT_EQ(a->symbol(), Symbol(1));
-  EXPECT_EQ(a->type(), ty.u32);
+  EXPECT_EQ(a->type(), ty.u32());
 }
 
 TEST_F(AliasTest, Is) {
-  auto* at = ty.alias("a", ty.i32);
+  auto* at = ty.alias("a", ty.i32());
   type::Type* ty = at;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_TRUE(ty->Is<Alias>());
@@ -65,43 +65,43 @@ TEST_F(AliasTest, Is) {
 }
 
 TEST_F(AliasTest, TypeName) {
-  auto* at = ty.alias("Particle", ty.i32);
+  auto* at = ty.alias("Particle", ty.i32());
   EXPECT_EQ(at->type_name(), "__alias_tint_symbol_1__i32");
 }
 
 TEST_F(AliasTest, UnwrapIfNeeded_Alias) {
-  auto* a = ty.alias("a_type", ty.u32);
+  auto* a = ty.alias("a_type", ty.u32());
   EXPECT_EQ(a->symbol(), Symbol(1));
-  EXPECT_EQ(a->type(), ty.u32);
-  EXPECT_EQ(a->UnwrapIfNeeded(), ty.u32);
-  EXPECT_EQ(ty.u32->UnwrapIfNeeded(), ty.u32);
+  EXPECT_EQ(a->type(), ty.u32());
+  EXPECT_EQ(a->UnwrapIfNeeded(), ty.u32());
+  EXPECT_EQ(ty.u32()->UnwrapIfNeeded(), ty.u32());
 }
 
 TEST_F(AliasTest, UnwrapIfNeeded_AccessControl) {
-  AccessControl a{ast::AccessControl::kReadOnly, ty.u32};
-  EXPECT_EQ(a.type(), ty.u32);
-  EXPECT_EQ(a.UnwrapIfNeeded(), ty.u32);
+  AccessControl a{ast::AccessControl::kReadOnly, ty.u32()};
+  EXPECT_EQ(a.type(), ty.u32());
+  EXPECT_EQ(a.UnwrapIfNeeded(), ty.u32());
 }
 
 TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel) {
-  auto* a = ty.alias("a_type", ty.u32);
+  auto* a = ty.alias("a_type", ty.u32());
   auto* aa = ty.alias("aa_type", a);
 
   EXPECT_EQ(aa->symbol(), Symbol(2));
   EXPECT_EQ(aa->type(), a);
-  EXPECT_EQ(aa->UnwrapIfNeeded(), ty.u32);
+  EXPECT_EQ(aa->UnwrapIfNeeded(), ty.u32());
 }
 
 TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
-  auto* a = ty.alias("a_type", ty.u32);
+  auto* a = ty.alias("a_type", ty.u32());
 
   AccessControl aa{ast::AccessControl::kReadWrite, a};
   EXPECT_EQ(aa.type(), a);
-  EXPECT_EQ(aa.UnwrapIfNeeded(), ty.u32);
+  EXPECT_EQ(aa.UnwrapIfNeeded(), ty.u32());
 }
 
 TEST_F(AliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
-  auto* a = ty.alias("a_type", ty.u32);
+  auto* a = ty.alias("a_type", ty.u32());
   auto* aa = ty.alias("aa_type", a);
   Pointer paa{aa, ast::StorageClass::kUniform};
   auto* apaa = ty.alias("paa_type", &paa);
@@ -109,11 +109,11 @@ TEST_F(AliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
 
   EXPECT_EQ(aapaa->symbol(), Symbol(4));
   EXPECT_EQ(aapaa->type(), apaa);
-  EXPECT_EQ(aapaa->UnwrapAll(), ty.u32);
+  EXPECT_EQ(aapaa->UnwrapAll(), ty.u32());
 }
 
 TEST_F(AliasTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
-  auto* a = ty.alias("a_type", ty.u32);
+  auto* a = ty.alias("a_type", ty.u32());
   auto* aa = ty.alias("aa_type", a);
 
   Pointer paa{aa, ast::StorageClass::kUniform};
@@ -123,7 +123,7 @@ TEST_F(AliasTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
 }
 
 TEST_F(AliasTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
-  auto* a = ty.alias("a_type", ty.u32);
+  auto* a = ty.alias("a_type", ty.u32());
   auto* aa = ty.alias("aa_type", a);
   Pointer paa{aa, ast::StorageClass::kUniform};
 
@@ -136,27 +136,27 @@ TEST_F(AliasTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
 }
 
 TEST_F(AliasTest, UnwrapAll_AccessControlPointer) {
-  AccessControl a{ast::AccessControl::kReadOnly, ty.u32};
+  AccessControl a{ast::AccessControl::kReadOnly, ty.u32()};
   Pointer pa{&a, ast::StorageClass::kUniform};
   EXPECT_EQ(pa.type(), &a);
-  EXPECT_EQ(pa.UnwrapAll(), ty.u32);
+  EXPECT_EQ(pa.UnwrapAll(), ty.u32());
 }
 
 TEST_F(AliasTest, UnwrapAll_PointerAccessControl) {
-  Pointer p{ty.u32, ast::StorageClass::kUniform};
+  Pointer p{ty.u32(), ast::StorageClass::kUniform};
   AccessControl a{ast::AccessControl::kReadOnly, &p};
 
   EXPECT_EQ(a.type(), &p);
-  EXPECT_EQ(a.UnwrapAll(), ty.u32);
+  EXPECT_EQ(a.UnwrapAll(), ty.u32());
 }
 
 TEST_F(AliasTest, MinBufferBindingSizeU32) {
-  auto* alias = ty.alias("alias", ty.u32);
+  auto* alias = ty.alias("alias", ty.u32());
   EXPECT_EQ(4u, alias->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AliasTest, MinBufferBindingSizeArray) {
-  Array array(ty.u32, 4,
+  Array array(ty.u32(), 4,
               ast::ArrayDecorationList{
                   create<ast::StrideDecoration>(4),
               });
@@ -165,7 +165,7 @@ TEST_F(AliasTest, MinBufferBindingSizeArray) {
 }
 
 TEST_F(AliasTest, MinBufferBindingSizeRuntimeArray) {
-  Array array(ty.u32, 0,
+  Array array(ty.u32(), 0,
               ast::ArrayDecorationList{
                   create<ast::StrideDecoration>(4),
               });
@@ -175,8 +175,8 @@ TEST_F(AliasTest, MinBufferBindingSizeRuntimeArray) {
 
 TEST_F(AliasTest, MinBufferBindingSizeStruct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* struct_type = ty.struct_("struct_type", str);
   auto* alias = ty.alias("alias", struct_type);
@@ -186,12 +186,12 @@ TEST_F(AliasTest, MinBufferBindingSizeStruct) {
 }
 
 TEST_F(AliasTest, BaseAlignmentU32) {
-  auto* alias = ty.alias("alias", ty.u32);
+  auto* alias = ty.alias("alias", ty.u32());
   EXPECT_EQ(4u, alias->BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AliasTest, BaseAlignmentArray) {
-  Array array(ty.u32, 4,
+  Array array(ty.u32(), 4,
               ast::ArrayDecorationList{
                   create<ast::StrideDecoration>(4),
               });
@@ -200,7 +200,7 @@ TEST_F(AliasTest, BaseAlignmentArray) {
 }
 
 TEST_F(AliasTest, BaseAlignmentRuntimeArray) {
-  Array array(ty.u32, 0,
+  Array array(ty.u32(), 0,
               ast::ArrayDecorationList{
                   create<ast::StrideDecoration>(4),
               });
@@ -210,8 +210,8 @@ TEST_F(AliasTest, BaseAlignmentRuntimeArray) {
 
 TEST_F(AliasTest, BaseAlignmentStruct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* struct_type = ty.struct_("struct_type", str);
   auto* alias = ty.alias("alias", struct_type);

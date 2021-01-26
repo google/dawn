@@ -4157,7 +4157,7 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
       create<ast::CallExpression>(Expr(param.function), param.args(this));
 
   auto* main =
-      Func("main", ast::VariableList{}, ty.void_,
+      Func("main", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::CallStatement>(call),
            },

@@ -59,22 +59,26 @@ class TypesBuilder {
   /// @param program the program
   explicit TypesBuilder(Program* program);
 
-  /// A boolean type
-  type::Bool* const bool_;
-  /// A f32 type
-  type::F32* const f32;
-  /// A i32 type
-  type::I32* const i32;
-  /// A u32 type
-  type::U32* const u32;
-  /// A void type
-  type::Void* const void_;
-
   /// @return the tint AST type for the C type `T`.
   template <typename T>
   type::Type* Of() const {
     return CToAST<T>::get(this);
   }
+
+  /// @returns A boolean type
+  type::Bool* bool_() const { return program_->create<type::Bool>(); }
+
+  /// @returns A f32 type
+  type::F32* f32() const { return program_->create<type::F32>(); }
+
+  /// @returns A i32 type
+  type::I32* i32() const { return program_->create<type::I32>(); }
+
+  /// @returns A u32 type
+  type::U32* u32() const { return program_->create<type::U32>(); }
+
+  /// @returns A void type
+  type::Void* void_() const { return program_->create<type::Void>(); }
 
   /// @return the tint AST type for a 2-element vector of the C type `T`.
   template <typename T>
@@ -310,19 +314,21 @@ class Builder {
 
   /// @param val the boolan value
   /// @return a boolean literal with the given value
-  BoolLiteral* Literal(bool val) { return create<BoolLiteral>(ty.bool_, val); }
+  BoolLiteral* Literal(bool val) {
+    return create<BoolLiteral>(ty.bool_(), val);
+  }
 
   /// @param val the float value
   /// @return a float literal with the given value
-  FloatLiteral* Literal(f32 val) { return create<FloatLiteral>(ty.f32, val); }
+  FloatLiteral* Literal(f32 val) { return create<FloatLiteral>(ty.f32(), val); }
 
   /// @param val the unsigned int value
   /// @return a UintLiteral with the given value
-  UintLiteral* Literal(u32 val) { return create<UintLiteral>(ty.u32, val); }
+  UintLiteral* Literal(u32 val) { return create<UintLiteral>(ty.u32(), val); }
 
   /// @param val the integer value
   /// @return the SintLiteral with the given value
-  SintLiteral* Literal(i32 val) { return create<SintLiteral>(ty.i32, val); }
+  SintLiteral* Literal(i32 val) { return create<SintLiteral>(ty.i32(), val); }
 
   /// @param args the arguments for the type constructor
   /// @return an `TypeConstructorExpression` of type `ty`, with the values
@@ -763,23 +769,23 @@ class BuilderWithProgram : public Builder {
 // Various template specializations for TypesBuilder::CToAST.
 template <>
 struct TypesBuilder::CToAST<Builder::i32> {
-  static type::Type* get(const TypesBuilder* t) { return t->i32; }
+  static type::Type* get(const TypesBuilder* t) { return t->i32(); }
 };
 template <>
 struct TypesBuilder::CToAST<Builder::u32> {
-  static type::Type* get(const TypesBuilder* t) { return t->u32; }
+  static type::Type* get(const TypesBuilder* t) { return t->u32(); }
 };
 template <>
 struct TypesBuilder::CToAST<Builder::f32> {
-  static type::Type* get(const TypesBuilder* t) { return t->f32; }
+  static type::Type* get(const TypesBuilder* t) { return t->f32(); }
 };
 template <>
 struct TypesBuilder::CToAST<bool> {
-  static type::Type* get(const TypesBuilder* t) { return t->bool_; }
+  static type::Type* get(const TypesBuilder* t) { return t->bool_(); }
 };
 template <>
 struct TypesBuilder::CToAST<void> {
-  static type::Type* get(const TypesBuilder* t) { return t->void_; }
+  static type::Type* get(const TypesBuilder* t) { return t->void_(); }
 };
 //! @endcond
 

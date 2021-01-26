@@ -33,8 +33,8 @@ TEST_F(TypeConstructorExpressionTest, Creation) {
   ExpressionList expr;
   expr.push_back(Expr("expr"));
 
-  auto* t = create<TypeConstructorExpression>(ty.f32, expr);
-  EXPECT_EQ(t->type(), ty.f32);
+  auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
+  EXPECT_EQ(t->type(), ty.f32());
   ASSERT_EQ(t->values().size(), 1u);
   EXPECT_EQ(t->values()[0], expr[0]);
 }
@@ -44,7 +44,7 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
   expr.push_back(Expr("expr"));
 
   auto* t = create<TypeConstructorExpression>(Source{Source::Location{20, 2}},
-                                              ty.f32, expr);
+                                              ty.f32(), expr);
   auto src = t->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -54,7 +54,7 @@ TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {
   ExpressionList expr;
   expr.push_back(Expr("expr"));
 
-  auto* t = create<TypeConstructorExpression>(ty.f32, expr);
+  auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
   EXPECT_TRUE(t->Is<TypeConstructorExpression>());
 }
 
@@ -62,14 +62,14 @@ TEST_F(TypeConstructorExpressionTest, IsValid) {
   ExpressionList expr;
   expr.push_back(Expr("expr"));
 
-  auto* t = create<TypeConstructorExpression>(ty.f32, expr);
+  auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
   EXPECT_TRUE(t->IsValid());
 }
 
 TEST_F(TypeConstructorExpressionTest, IsValid_EmptyValue) {
   ExpressionList expr;
 
-  auto* t = create<TypeConstructorExpression>(ty.f32, expr);
+  auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
   EXPECT_TRUE(t->IsValid());
 }
 
@@ -86,7 +86,7 @@ TEST_F(TypeConstructorExpressionTest, IsValid_NullValue) {
   expr.push_back(Expr("expr"));
   expr.push_back(nullptr);
 
-  auto* t = create<TypeConstructorExpression>(ty.f32, expr);
+  auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
   EXPECT_FALSE(t->IsValid());
 }
 
@@ -94,12 +94,12 @@ TEST_F(TypeConstructorExpressionTest, IsValid_InvalidValue) {
   ExpressionList expr;
   expr.push_back(Expr(""));
 
-  auto* t = create<TypeConstructorExpression>(ty.f32, expr);
+  auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
   EXPECT_FALSE(t->IsValid());
 }
 
 TEST_F(TypeConstructorExpressionTest, ToStr) {
-  type::Vector vec(ty.f32, 3);
+  type::Vector vec(ty.f32(), 3);
   ExpressionList expr;
   expr.push_back(Expr("expr_1"));
   expr.push_back(Expr("expr_2"));

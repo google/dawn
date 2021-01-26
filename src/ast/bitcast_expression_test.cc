@@ -27,16 +27,16 @@ using BitcastExpressionTest = TestHelper;
 TEST_F(BitcastExpressionTest, Create) {
   auto* expr = Expr("expr");
 
-  auto* exp = create<BitcastExpression>(ty.f32, expr);
-  ASSERT_EQ(exp->type(), ty.f32);
+  auto* exp = create<BitcastExpression>(ty.f32(), expr);
+  ASSERT_EQ(exp->type(), ty.f32());
   ASSERT_EQ(exp->expr(), expr);
 }
 
 TEST_F(BitcastExpressionTest, CreateWithSource) {
   auto* expr = Expr("expr");
 
-  auto* exp =
-      create<BitcastExpression>(Source{Source::Location{20, 2}}, ty.f32, expr);
+  auto* exp = create<BitcastExpression>(Source{Source::Location{20, 2}},
+                                        ty.f32(), expr);
   auto src = exp->source();
   EXPECT_EQ(src.range.begin.line, 20u);
   EXPECT_EQ(src.range.begin.column, 2u);
@@ -45,14 +45,14 @@ TEST_F(BitcastExpressionTest, CreateWithSource) {
 TEST_F(BitcastExpressionTest, IsBitcast) {
   auto* expr = Expr("expr");
 
-  auto* exp = create<BitcastExpression>(ty.f32, expr);
+  auto* exp = create<BitcastExpression>(ty.f32(), expr);
   EXPECT_TRUE(exp->Is<BitcastExpression>());
 }
 
 TEST_F(BitcastExpressionTest, IsValid) {
   auto* expr = Expr("expr");
 
-  auto* exp = create<BitcastExpression>(ty.f32, expr);
+  auto* exp = create<BitcastExpression>(ty.f32(), expr);
   EXPECT_TRUE(exp->IsValid());
 }
 
@@ -64,20 +64,20 @@ TEST_F(BitcastExpressionTest, IsValid_MissingType) {
 }
 
 TEST_F(BitcastExpressionTest, IsValid_MissingExpr) {
-  auto* exp = create<BitcastExpression>(ty.f32, nullptr);
+  auto* exp = create<BitcastExpression>(ty.f32(), nullptr);
   EXPECT_FALSE(exp->IsValid());
 }
 
 TEST_F(BitcastExpressionTest, IsValid_InvalidExpr) {
   auto* expr = Expr("");
-  auto* e = create<BitcastExpression>(ty.f32, expr);
+  auto* e = create<BitcastExpression>(ty.f32(), expr);
   EXPECT_FALSE(e->IsValid());
 }
 
 TEST_F(BitcastExpressionTest, ToStr) {
   auto* expr = Expr("expr");
 
-  auto* exp = create<BitcastExpression>(ty.f32, expr);
+  auto* exp = create<BitcastExpression>(ty.f32(), expr);
   std::ostringstream out;
   exp->to_str(out, 2);
 

@@ -60,8 +60,8 @@ using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit_f32) {
   auto params = GetParam();
 
-  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.f32);
-  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.f32);
+  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.f32());
+  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.f32());
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -81,8 +81,8 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 TEST_P(HlslBinaryTest, Emit_u32) {
   auto params = GetParam();
 
-  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.u32);
-  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.u32);
+  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.u32());
+  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.u32());
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -102,8 +102,8 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 TEST_P(HlslBinaryTest, Emit_i32) {
   auto params = GetParam();
 
-  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.i32);
-  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.i32);
+  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.i32());
+  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.i32());
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -451,7 +451,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   auto* d = Expr("d");
 
   auto* var = Var(
-      "a", ast::StorageClass::kFunction, ty.bool_,
+      "a", ast::StorageClass::kFunction, ty.bool_(),
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalOr,
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d),
@@ -482,7 +482,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   auto* c = Expr("c");
 
   auto* expr = create<ast::BitcastExpression>(
-      ty.i32,
+      ty.i32(),
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalAnd, a,
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c)));
@@ -505,8 +505,8 @@ if (_tint_tmp) {
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 
-  auto* func = Func("foo", ast::VariableList{}, ty.void_, ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func = Func("foo", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AST().Functions().Add(func);
 
   ast::ExpressionList params;

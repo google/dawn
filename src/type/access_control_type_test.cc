@@ -121,8 +121,8 @@ TEST_F(AccessControlTest, MinBufferBindingSizeRuntimeArray) {
 
 TEST_F(AccessControlTest, MinBufferBindingSizeStruct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* struct_type = ty.struct_("struct_type", str);
@@ -155,8 +155,8 @@ TEST_F(AccessControlTest, BaseAlignmentRuntimeArray) {
 
 TEST_F(AccessControlTest, BaseAlignmentStruct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* struct_type = ty.struct_("struct_type", str);
 

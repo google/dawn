@@ -71,8 +71,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
   //     v = 2;
   // }
 
-  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
-  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32());
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
@@ -96,7 +96,7 @@ TEST_F(BuilderTest, Switch_WithCase) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -143,8 +143,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   //     v = 1;
   //  }
 
-  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
-  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32());
 
   auto* default_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
@@ -159,7 +159,7 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -204,8 +204,8 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //      v = 3;
   //  }
 
-  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
-  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32());
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
@@ -235,7 +235,7 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -289,8 +289,8 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //      v = 3;
   //  }
 
-  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
-  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32());
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
@@ -320,7 +320,7 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -370,8 +370,8 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   //      fallthrough;
   //  }
 
-  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
-  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32());
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
@@ -389,7 +389,7 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -411,8 +411,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //     v = 1;
   //  }
 
-  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32);
-  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32);
+  auto* v = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* a = Var("a", ast::StorageClass::kPrivate, ty.i32());
 
   auto* if_body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::BreakStatement>(),
@@ -434,7 +434,7 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   td.RegisterVariableForTesting(a);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", {}, ty.i32, ast::StatementList{},
+  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();

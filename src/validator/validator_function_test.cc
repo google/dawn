@@ -38,11 +38,11 @@ class ValidateFunctionTest : public ValidatorTestHelper,
 TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { var a:i32 = 2; }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
   auto* func = Func(
-      Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.void_,
+      Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.void_(),
       ast::StatementList{
           create<ast::VariableDeclStatement>(var),
       },
@@ -64,7 +64,7 @@ TEST_F(ValidateFunctionTest,
   // fn func -> void {}
   auto* func =
       Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
-           ty.void_, ast::StatementList{},
+           ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
@@ -80,11 +80,11 @@ TEST_F(ValidateFunctionTest,
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, Expr(2),
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
 
   auto* func = Func(Source{Source::Location{12, 34}}, "func",
-                    ast::VariableList{}, ty.i32,
+                    ast::VariableList{}, ty.i32(),
                     ast::StatementList{
                         create<ast::VariableDeclStatement>(var),
                     },
@@ -104,7 +104,7 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   // fn func -> int {}
   auto* func =
       Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
-           ty.i32, ast::StatementList{}, ast::FunctionDecorationList{});
+           ty.i32(), ast::StatementList{}, ast::FunctionDecorationList{});
   mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -120,7 +120,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { return; }
   auto* func =
-      Func("func", ast::VariableList{}, ty.void_,
+      Func("func", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::ReturnStatement>(),
            },
@@ -139,7 +139,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
   // fn func -> void { return 2; }
-  auto* func = Func("func", ast::VariableList{}, ty.void_,
+  auto* func = Func("func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::ReturnStatement>(
                             Source{Source::Location{12, 34}}, Expr(2)),
@@ -160,7 +160,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   // fn func -> f32 { return 2; }
-  auto* func = Func("func", ast::VariableList{}, ty.f32,
+  auto* func = Func("func", ast::VariableList{}, ty.f32(),
                     ast::StatementList{
                         create<ast::ReturnStatement>(
                             Source{Source::Location{12, 34}}, Expr(2)),
@@ -182,14 +182,14 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
 TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   // fn func -> i32 { return 2; }
   // fn func -> i32 { return 2; }
-  auto* func = Func("func", ast::VariableList{}, ty.i32,
+  auto* func = Func("func", ast::VariableList{}, ty.i32(),
                     ast::StatementList{
                         create<ast::ReturnStatement>(Expr(2)),
                     },
                     ast::FunctionDecorationList{});
 
   auto* func_copy = Func(Source{Source::Location{12, 34}}, "func",
-                         ast::VariableList{}, ty.i32,
+                         ast::VariableList{}, ty.i32(),
                          ast::StatementList{
                              create<ast::ReturnStatement>(Expr(2)),
                          },
@@ -212,7 +212,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
   auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}}, Expr("func"), call_params);
 
-  auto* func0 = Func("func", ast::VariableList{}, ty.f32,
+  auto* func0 = Func("func", ast::VariableList{}, ty.f32(),
                      ast::StatementList{
                          create<ast::CallStatement>(call_expr),
                          create<ast::ReturnStatement>(),
@@ -233,10 +233,10 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}}, Expr("func"), call_params);
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32, call_expr,
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), call_expr,
                   ast::VariableDecorationList{});
 
-  auto* func0 = Func("func", ast::VariableList{}, ty.i32,
+  auto* func0 = Func("func", ast::VariableList{}, ty.i32(),
                      ast::StatementList{
                          create<ast::VariableDeclStatement>(var),
                          create<ast::ReturnStatement>(Expr(2)),
@@ -255,14 +255,15 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
 TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   // [[stage(vertex)]]
   // fn vtx_main() -> i32 { return 0; }
-  auto* func = Func(
-      Source{Source::Location{12, 34}}, "vtx_main", ast::VariableList{}, ty.i32,
-      ast::StatementList{
-          create<ast::ReturnStatement>(Expr(0)),
-      },
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* func =
+      Func(Source{Source::Location{12, 34}}, "vtx_main", ast::VariableList{},
+           ty.i32(),
+           ast::StatementList{
+               create<ast::ReturnStatement>(Expr(0)),
+           },
+           ast::FunctionDecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
 
   mod->AST().Functions().Add(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -279,9 +280,9 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   // fn vtx_func(a : i32) -> void { return; }
   auto* func =
       Func(Source{Source::Location{12, 34}}, "vtx_func",
-           ast::VariableList{Var("a", ast::StorageClass::kNone, ty.i32, nullptr,
-                                 ast::VariableDecorationList{})},
-           ty.void_,
+           ast::VariableList{Var("a", ast::StorageClass::kNone, ty.i32(),
+                                 nullptr, ast::VariableDecorationList{})},
+           ty.void_(),
            ast::StatementList{
                create<ast::ReturnStatement>(),
            },
@@ -305,7 +306,7 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(vertex)]]
   // fn main() -> void { return; }
   auto* func = Func(
-      Source{Source::Location{12, 34}}, "main", ast::VariableList{}, ty.void_,
+      Source{Source::Location{12, 34}}, "main", ast::VariableList{}, ty.void_(),
       ast::StatementList{
           create<ast::ReturnStatement>(),
       },
@@ -329,7 +330,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
   // [[stage(vertex)]]
   // fn vtx_func() -> void { return; }
   auto* func =
-      Func("vtx_func", ast::VariableList{}, ty.void_,
+      Func("vtx_func", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::ReturnStatement>(),
            },
@@ -347,7 +348,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
 
 TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   // fn vtx_func() -> void { return; }
-  auto* func = Func("vtx_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("vtx_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::ReturnStatement>(),
                     },

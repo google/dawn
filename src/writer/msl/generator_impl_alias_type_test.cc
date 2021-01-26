@@ -28,7 +28,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
-  auto* alias = ty.alias("a", ty.f32);
+  auto* alias = ty.alias("a", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -38,7 +38,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
-  auto* alias = ty.alias("float", ty.f32);
+  auto* alias = ty.alias("float", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -49,8 +49,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_NameCollision) {
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32),
-                            Member("b", ty.i32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.f32()),
+                            Member("b", ty.i32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("a", str);
@@ -67,8 +67,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32),
-                            Member("b", ty.i32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.f32()),
+                            Member("b", ty.i32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("b", str);

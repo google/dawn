@@ -41,7 +41,7 @@ using HlslGeneratorImplTest_MemberAccessor = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   auto* strct = create<ast::Struct>(
-      ast::StructMemberList{Member("mem", ty.f32, {MemberOffset(0)})},
+      ast::StructMemberList{Member("mem", ty.f32(), {MemberOffset(0)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Str", strct);
@@ -73,8 +73,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> asfloat(data.Load(4));
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
@@ -107,8 +107,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> asint(data.Load(0));
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
@@ -143,7 +143,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32, {MemberOffset(0)}),
+      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
                             Member("a", ty.mat2x3<f32>(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
@@ -191,7 +191,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32, {MemberOffset(0)}),
+      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
                             Member("a", ty.mat2x3<f32>(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
@@ -234,7 +234,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.Load2(4 + 16)));
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32, {MemberOffset(0)}),
+      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
                             Member("a", ty.mat3x2<f32>(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
@@ -275,7 +275,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{
-          Member("z", ty.i32, {MemberOffset(0)}),
+          Member("z", ty.i32(), {MemberOffset(0)}),
           Member("a", ty.mat2x3<f32>(), {MemberOffset(4)}),
       },
       ast::StructDecorationList{});
@@ -347,7 +347,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> asfloat(data.Load((2 * 16) + (1 * 4) + 16)))
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32, {MemberOffset(0)}),
+      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
                             Member("a", ty.mat4x3<f32>(), {MemberOffset(16)})},
       ast::StructDecorationList{});
 
@@ -379,7 +379,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[2];
   //
   // -> asint(data.Load((2 * 4));
-  type::Array ary(ty.i32, 5,
+  type::Array ary(ty.i32(), 5,
                   ast::ArrayDecorationList{
                       create<ast::StrideDecoration>(4),
                   });
@@ -414,7 +414,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // data.a[(2 + 4) - 3];
   //
   // -> asint(data.Load((4 * ((2 + 4) - 3)));
-  type::Array ary(ty.i32, 5,
+  type::Array ary(ty.i32(), 5,
                   ast::ArrayDecorationList{
                       create<ast::StrideDecoration>(4),
                   });
@@ -453,8 +453,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> data.Store(0, asuint(2.0f));
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
@@ -488,7 +488,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store((2 * 4), asuint(2.3f));
 
-  type::Array ary(ty.i32, 5,
+  type::Array ary(ty.i32(), 5,
                   ast::ArrayDecorationList{
                       create<ast::StrideDecoration>(4),
                   });
@@ -530,8 +530,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> data.Store(0, asuint(2));
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(0)}),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);

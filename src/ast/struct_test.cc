@@ -30,7 +30,7 @@ namespace {
 using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
-  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32)},
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())},
                            StructDecorationList{});
   EXPECT_EQ(s->members().size(), 1u);
   EXPECT_TRUE(s->decorations().empty());
@@ -44,7 +44,7 @@ TEST_F(StructTest, Creation_WithDecorations) {
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
 
-  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32)}, decos);
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())}, decos);
   EXPECT_EQ(s->members().size(), 1u);
   ASSERT_EQ(s->decorations().size(), 1u);
   EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
@@ -60,7 +60,7 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
 
   auto* s = create<Struct>(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-      StructMemberList{Member("a", ty.i32)}, decos);
+      StructMemberList{Member("a", ty.i32())}, decos);
   EXPECT_EQ(s->members().size(), 1u);
   ASSERT_EQ(s->decorations().size(), 1u);
   EXPECT_TRUE(s->decorations()[0]->Is<StructBlockDecoration>());
@@ -76,13 +76,13 @@ TEST_F(StructTest, IsValid) {
 }
 
 TEST_F(StructTest, IsValid_Null_StructMember) {
-  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32), nullptr},
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32()), nullptr},
                            StructDecorationList{});
   EXPECT_FALSE(s->IsValid());
 }
 
 TEST_F(StructTest, IsValid_Invalid_StructMember) {
-  auto* s = create<Struct>(StructMemberList{Member("", ty.i32)},
+  auto* s = create<Struct>(StructMemberList{Member("", ty.i32())},
                            ast::StructDecorationList{});
   EXPECT_FALSE(s->IsValid());
 }
@@ -90,7 +90,7 @@ TEST_F(StructTest, IsValid_Invalid_StructMember) {
 TEST_F(StructTest, ToStr) {
   StructDecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
-  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32)}, decos);
+  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())}, decos);
 
   std::ostringstream out;
   s->to_str(out, 2);

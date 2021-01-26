@@ -45,7 +45,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kNone, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -68,7 +68,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32(), init,
                 ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
@@ -133,11 +133,11 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   // var v : f32 = 1.0;
   // var v2 : f32 = v; // Should generate the load and store automatically.
 
-  auto* v = Var("v", ast::StorageClass::kFunction, ty.f32, Expr(1.f),
+  auto* v = Var("v", ast::StorageClass::kFunction, ty.f32(), Expr(1.f),
                 ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
-  auto* v2 = Var("v2", ast::StorageClass::kFunction, ty.f32, Expr("v"),
+  auto* v2 = Var("v2", ast::StorageClass::kFunction, ty.f32(), Expr("v"),
                  ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v2);
 
@@ -174,11 +174,11 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   // var v : f32 = 1.0;
   // const v2 : f32 = v; // Should generate the load
 
-  auto* v = Var("v", ast::StorageClass::kFunction, ty.f32, Expr(1.f),
+  auto* v = Var("v", ast::StorageClass::kFunction, ty.f32(), Expr(1.f),
                 ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
-  auto* v2 = Var("v2", ast::StorageClass::kFunction, ty.f32, Expr("v"),
+  auto* v2 = Var("v2", ast::StorageClass::kFunction, ty.f32(), Expr("v"),
                  ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v2);
 
@@ -215,7 +215,7 @@ TEST_F(BuilderTest, FunctionVar_Const) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
 
   td.RegisterVariableForTesting(v);

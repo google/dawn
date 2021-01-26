@@ -18,12 +18,7 @@ namespace tint {
 namespace ast {
 
 TypesBuilder::TypesBuilder(Program* p)
-    : bool_(p->create<type::Bool>()),
-      f32(p->create<type::F32>()),
-      i32(p->create<type::I32>()),
-      u32(p->create<type::U32>()),
-      void_(p->create<type::Void>()),
-      program_(p) {}
+    : program_(p) {}
 
 Builder::Builder(Program* p) : program(p), ty(p), mod(p) {}
 

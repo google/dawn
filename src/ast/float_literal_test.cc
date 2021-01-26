@@ -28,13 +28,13 @@ namespace {
 using FloatLiteralTest = TestHelper;
 
 TEST_F(FloatLiteralTest, Value) {
-  auto* f = create<FloatLiteral>(ty.f32, 47.2f);
+  auto* f = create<FloatLiteral>(ty.f32(), 47.2f);
   ASSERT_TRUE(f->Is<FloatLiteral>());
   EXPECT_EQ(f->value(), 47.2f);
 }
 
 TEST_F(FloatLiteralTest, Is) {
-  ast::Literal* l = create<FloatLiteral>(ty.f32, 42.f);
+  ast::Literal* l = create<FloatLiteral>(ty.f32(), 42.f);
   EXPECT_FALSE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
   EXPECT_FALSE(l->Is<IntLiteral>());
@@ -44,13 +44,13 @@ TEST_F(FloatLiteralTest, Is) {
 }
 
 TEST_F(FloatLiteralTest, ToStr) {
-  auto* f = create<FloatLiteral>(ty.f32, 42.1f);
+  auto* f = create<FloatLiteral>(ty.f32(), 42.1f);
 
   EXPECT_EQ(f->to_str(), "42.099998");
 }
 
 TEST_F(FloatLiteralTest, ToName) {
-  auto* f = create<FloatLiteral>(ty.f32, 42.1f);
+  auto* f = create<FloatLiteral>(ty.f32(), 42.1f);
   EXPECT_EQ(f->name(), "__float42.0999985");
 }
 

@@ -28,9 +28,9 @@ namespace {
 using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
-  auto* st = Member("a", ty.i32, {MemberOffset(4)});
+  auto* st = Member("a", ty.i32(), {MemberOffset(4)});
   EXPECT_EQ(st->symbol(), Symbol(1));
-  EXPECT_EQ(st->type(), ty.i32);
+  EXPECT_EQ(st->type(), ty.i32());
   EXPECT_EQ(st->decorations().size(), 1u);
   EXPECT_TRUE(st->decorations()[0]->Is<StructMemberOffsetDecoration>());
   EXPECT_EQ(st->source().range.begin.line, 0u);
@@ -42,9 +42,9 @@ TEST_F(StructMemberTest, Creation) {
 TEST_F(StructMemberTest, CreationWithSource) {
   auto* st = Member(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-      "a", ty.i32);
+      "a", ty.i32());
   EXPECT_EQ(st->symbol(), Symbol(1));
-  EXPECT_EQ(st->type(), ty.i32);
+  EXPECT_EQ(st->type(), ty.i32());
   EXPECT_EQ(st->decorations().size(), 0u);
   EXPECT_EQ(st->source().range.begin.line, 27u);
   EXPECT_EQ(st->source().range.begin.column, 4u);
@@ -53,12 +53,12 @@ TEST_F(StructMemberTest, CreationWithSource) {
 }
 
 TEST_F(StructMemberTest, IsValid) {
-  auto* st = Member("a", ty.i32);
+  auto* st = Member("a", ty.i32());
   EXPECT_TRUE(st->IsValid());
 }
 
 TEST_F(StructMemberTest, IsValid_EmptySymbol) {
-  auto* st = Member("", ty.i32);
+  auto* st = Member("", ty.i32());
   EXPECT_FALSE(st->IsValid());
 }
 
@@ -68,19 +68,19 @@ TEST_F(StructMemberTest, IsValid_NullType) {
 }
 
 TEST_F(StructMemberTest, IsValid_Null_Decoration) {
-  auto* st = Member("a", ty.i32, {MemberOffset(4), nullptr});
+  auto* st = Member("a", ty.i32(), {MemberOffset(4), nullptr});
   EXPECT_FALSE(st->IsValid());
 }
 
 TEST_F(StructMemberTest, ToStr) {
-  auto* st = Member("a", ty.i32, {MemberOffset(4)});
+  auto* st = Member("a", ty.i32(), {MemberOffset(4)});
   std::ostringstream out;
   st->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), "  StructMember{[[ offset 4 ]] a: __i32}\n");
 }
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {
-  auto* st = Member("a", ty.i32);
+  auto* st = Member("a", ty.i32());
   std::ostringstream out;
   st->to_str(out, 2);
   EXPECT_EQ(demangle(out.str()), "  StructMember{a: __i32}\n");

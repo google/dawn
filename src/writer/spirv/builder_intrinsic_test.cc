@@ -101,7 +101,7 @@ using IntrinsicFloatTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
   auto param = GetParam();
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32());
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -160,7 +160,7 @@ using IntrinsicIntTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -211,7 +211,7 @@ TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
 TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
   auto param = GetParam();
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.u32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.u32());
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -293,7 +293,7 @@ using IntrinsicDeriveTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto param = GetParam();
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32);
+  auto* var = Var("v", ast::StorageClass::kPrivate, ty.f32());
   auto* expr = Call(param.name, "v");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
@@ -447,12 +447,12 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
-  auto* var = Var("ident", ast::StorageClass::kPrivate, ty.f32);
+  auto* var = Var("ident", ast::StorageClass::kPrivate, ty.f32());
   auto* expr = Call("round", "ident");
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -487,7 +487,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1.0f);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -516,7 +516,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Float_Test, Call_Vector) {
   auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -571,7 +571,7 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -597,7 +597,7 @@ TEST_F(IntrinsicBuilderTest, Call_Length_Vector) {
   auto* expr = Call("length", vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -625,7 +625,7 @@ TEST_F(IntrinsicBuilderTest, Call_Normalize) {
   auto* expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -658,7 +658,7 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -688,7 +688,7 @@ TEST_P(Intrinsic_Builtin_DualParam_Float_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -726,7 +726,7 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -753,7 +753,7 @@ TEST_F(IntrinsicBuilderTest, Call_Distance_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -783,7 +783,7 @@ TEST_F(IntrinsicBuilderTest, Call_Cross) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -815,7 +815,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1.0f, 1.0f, 1.0f);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -846,7 +846,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Float_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -888,7 +888,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -917,7 +917,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Sint_Test, Call_Vector) {
   auto* expr = Call(param.name, vec2<i32>(1, 1));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -953,7 +953,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1u);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -982,7 +982,7 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
   auto* expr = Call(param.name, vec2<u32>(1u, 1u));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1018,7 +1018,7 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1, 1);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1047,7 +1047,7 @@ TEST_P(Intrinsic_Builtin_DualParam_SInt_Test, Call_Vector) {
   auto* expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1084,7 +1084,7 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1u, 1u);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1113,7 +1113,7 @@ TEST_P(Intrinsic_Builtin_DualParam_UInt_Test, Call_Vector) {
   auto* expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1150,7 +1150,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1, 1, 1);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1181,7 +1181,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Sint_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1217,7 +1217,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
   auto* expr = Call(param.name, 1u, 1u, 1u);
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1248,7 +1248,7 @@ TEST_P(Intrinsic_Builtin_ThreeParam_Uint_Test, Call_Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1282,7 +1282,7 @@ TEST_F(IntrinsicBuilderTest, Call_Determinant) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1322,7 +1322,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
@@ -1349,9 +1349,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.f32), Member("a", ty.array<f32>())},
-      ast::StructDecorationList{});
+  auto* s =
+      create<ast::Struct>(ast::StructMemberList{Member("z", ty.f32()),
+                                                Member("a", ty.array<f32>())},
+                          ast::StructDecorationList{});
 
   auto* s_type = ty.struct_("my_struct", s);
   auto* var = Var("b", ast::StorageClass::kPrivate, s_type);
@@ -1359,7 +1360,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_,
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();

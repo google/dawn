@@ -30,7 +30,7 @@ using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32, 1));
+  lit.push_back(create<SintLiteral>(ty.i32(), 1));
 
   auto* ident = Expr("ident");
   CaseStatementList body;
@@ -56,7 +56,7 @@ TEST_F(SwitchStatementTest, Creation_WithSource) {
 
 TEST_F(SwitchStatementTest, IsSwitch) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32(), 2));
 
   auto* ident = Expr("ident");
   CaseStatementList body;
@@ -69,7 +69,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 
 TEST_F(SwitchStatementTest, IsValid) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32(), 2));
 
   auto* ident = Expr("ident");
   CaseStatementList body;
@@ -82,7 +82,7 @@ TEST_F(SwitchStatementTest, IsValid) {
 
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32(), 2));
 
   CaseStatementList body;
   body.push_back(
@@ -94,7 +94,7 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32(), 2));
 
   auto* ident = Expr("");
   CaseStatementList body;
@@ -107,7 +107,7 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
 
 TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32(), 2));
 
   auto* ident = Expr("ident");
   CaseStatementList body;
@@ -148,7 +148,7 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 
 TEST_F(SwitchStatementTest, ToStr) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32, 2));
+  lit.push_back(create<SintLiteral>(ty.i32(), 2));
 
   auto* ident = Expr("ident");
   CaseStatementList body;

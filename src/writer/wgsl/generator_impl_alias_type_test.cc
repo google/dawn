@@ -28,7 +28,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
-  auto* alias = ty.alias("a", ty.f32);
+  auto* alias = ty.alias("a", ty.f32());
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
@@ -38,8 +38,8 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
 
 TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32),
-                            Member("b", ty.i32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.f32()),
+                            Member("b", ty.i32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("A", str);
@@ -60,8 +60,8 @@ type B = A;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32),
-                            Member("b", ty.i32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.f32()),
+                            Member("b", ty.i32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("A", str);

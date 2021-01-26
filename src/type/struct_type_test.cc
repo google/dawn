@@ -75,8 +75,8 @@ TEST_F(StructTypeTest, TypeName) {
 
 TEST_F(StructTypeTest, MinBufferBindingSize) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
@@ -85,12 +85,12 @@ TEST_F(StructTypeTest, MinBufferBindingSize) {
 }
 
 TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
-  Array arr(ty.u32, 4,
+  Array arr(ty.u32(), 4,
             ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)}),
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)}),
                             Member("bar", &arr, {MemberOffset(8)})},
       ast::StructDecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
@@ -100,13 +100,13 @@ TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
 }
 
 TEST_F(StructTypeTest, MinBufferBindingSizeRuntimeArray) {
-  Array arr(ty.u32, 0,
+  Array arr(ty.u32(), 0,
             ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)}),
-                            Member("bar", ty.u32, {MemberOffset(8)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)}),
+                            Member("bar", ty.u32(), {MemberOffset(8)})},
       ast::StructDecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
@@ -145,8 +145,8 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec4) {
 
 TEST_F(StructTypeTest, BaseAlignment) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(8)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(8)})},
       ast::StructDecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
@@ -155,11 +155,11 @@ TEST_F(StructTypeTest, BaseAlignment) {
 }
 
 TEST_F(StructTypeTest, BaseAlignmentArray) {
-  Array arr(ty.u32, 4,
+  Array arr(ty.u32(), 4,
             ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)}),
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)}),
                             Member("bar", &arr, {MemberOffset(8)})},
       ast::StructDecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
@@ -169,12 +169,12 @@ TEST_F(StructTypeTest, BaseAlignmentArray) {
 }
 
 TEST_F(StructTypeTest, BaseAlignmentRuntimeArray) {
-  Array arr(ty.u32, 0,
+  Array arr(ty.u32(), 0,
             ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("foo", ty.u32, {MemberOffset(0)}),
-                            Member("bar", ty.u32, {MemberOffset(4)}),
-                            Member("bar", ty.u32, {MemberOffset(8)})},
+      ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
+                            Member("bar", ty.u32(), {MemberOffset(4)}),
+                            Member("bar", ty.u32(), {MemberOffset(8)})},
       ast::StructDecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 

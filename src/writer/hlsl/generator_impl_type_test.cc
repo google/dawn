@@ -45,7 +45,7 @@ namespace {
 using HlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
-  auto* alias = ty.alias("alias", ty.f32);
+  auto* alias = ty.alias("alias", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -54,7 +54,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias_NameCollision) {
-  auto* alias = ty.alias("bool", ty.f32);
+  auto* alias = ty.alias("bool", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -130,21 +130,21 @@ TEST_F(HlslGeneratorImplTest_Type,
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, ty.bool_, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.bool_(), "")) << gen.error();
   EXPECT_EQ(result(), "bool");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, ty.f32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.f32(), "")) << gen.error();
   EXPECT_EQ(result(), "float");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, ty.i32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.i32(), "")) << gen.error();
   EXPECT_EQ(result(), "int");
 }
 
@@ -157,7 +157,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
 
 // TODO(dsinclair): How to annotate as workgroup?
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
-  type::Pointer p(ty.f32, ast::StorageClass::kWorkgroup);
+  type::Pointer p(ty.f32(), ast::StorageClass::kWorkgroup);
 
   GeneratorImpl& gen = Build();
 
@@ -167,8 +167,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.i32()),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
@@ -184,8 +184,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.i32()),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
@@ -197,9 +197,9 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32, {MemberOffset(4)}),
-                            Member("b", ty.f32, {MemberOffset(32)}),
-                            Member("c", ty.f32, {MemberOffset(128)})},
+      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(4)}),
+                            Member("b", ty.f32(), {MemberOffset(32)}),
+                            Member("c", ty.f32(), {MemberOffset(128)})},
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
@@ -217,9 +217,10 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("double", ty.i32), Member("float", ty.f32)},
-      ast::StructDecorationList{});
+  auto* str =
+      create<ast::Struct>(ast::StructMemberList{Member("double", ty.i32()),
+                                                Member("float", ty.f32())},
+                          ast::StructDecorationList{});
 
   auto* s = ty.struct_("S", str);
   GeneratorImpl& gen = Build();
@@ -238,8 +239,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
   decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32),
-                            Member("b", ty.f32, {MemberOffset(4)})},
+      ast::StructMemberList{Member("a", ty.i32()),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
       decos);
 
   auto* s = ty.struct_("S", str);
@@ -255,7 +256,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, ty.u32, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.u32(), "")) << gen.error();
   EXPECT_EQ(result(), "uint");
 }
 
@@ -269,7 +270,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, ty.void_, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ty.void_(), "")) << gen.error();
   EXPECT_EQ(result(), "void");
 }
 
@@ -333,7 +334,7 @@ using HlslSampledtexturesTest = TestParamHelper<HlslTextureData>;
 TEST_P(HlslSampledtexturesTest, Emit) {
   auto params = GetParam();
 
-  type::SampledTexture s(params.dim, ty.f32);
+  type::SampledTexture s(params.dim, ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -354,7 +355,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "TextureCubeArray"}));
 
 TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
-  type::MultisampledTexture s(type::TextureDimension::k2d, ty.f32);
+  type::MultisampledTexture s(type::TextureDimension::k2d, ty.f32());
 
   GeneratorImpl& gen = Build();
 

@@ -46,7 +46,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
-  auto* var = Const("pos", ast::StorageClass::kNone, ty.f32, Expr(3.f),
+  auto* var = Const("pos", ast::StorageClass::kNone, ty.f32(), Expr(3.f),
                     ast::VariableDecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });

@@ -38,7 +38,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Switch) {
   auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
   ast::CaseSelectorList case_val;
-  case_val.push_back(create<ast::SintLiteral>(ty.i32, 5));
+  case_val.push_back(create<ast::SintLiteral>(ty.i32(), 5));
 
   auto* case_body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::BreakStatement>(),

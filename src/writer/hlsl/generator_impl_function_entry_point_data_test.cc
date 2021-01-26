@@ -44,12 +44,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
+  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(0),
                       });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32, nullptr,
+  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(1),
                       });
@@ -61,7 +61,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
-      Func("vtx_main", ast::VariableList{}, ty.f32,
+      Func("vtx_main", ast::VariableList{}, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
                create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -97,12 +97,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32, nullptr,
+  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(0),
                       });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32, nullptr,
+  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(1),
                       });
@@ -114,7 +114,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
-      Func("vtx_main", ast::VariableList{}, ty.f32,
+      Func("vtx_main", ast::VariableList{}, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
                create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -150,12 +150,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
+  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(0),
                       });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32, nullptr,
+  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(1),
                       });
@@ -167,7 +167,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
-      Func("main", ast::VariableList{}, ty.f32,
+      Func("main", ast::VariableList{}, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
                create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -203,12 +203,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : SV_Target1;
   // };
 
-  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32, nullptr,
+  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(0),
                       });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32, nullptr,
+  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(1),
                       });
@@ -220,7 +220,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
-      Func("main", ast::VariableList{}, ty.f32,
+      Func("main", ast::VariableList{}, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
                create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -253,12 +253,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //
   // -> Error, not allowed
 
-  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32, nullptr,
+  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(0),
                       });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32, nullptr,
+  auto* bar_var = Var("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(1),
                       });
@@ -270,7 +270,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
-      Func("main", ast::VariableList{}, ty.f32,
+      Func("main", ast::VariableList{}, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
                create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -298,12 +298,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //
   // -> Error not allowed
 
-  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32, nullptr,
+  auto* foo_var = Var("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(0),
                       });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32, nullptr,
+  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
                       ast::VariableDecorationList{
                           create<ast::LocationDecoration>(1),
                       });
@@ -315,7 +315,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AST().AddGlobalVariable(bar_var);
 
   auto* func =
-      Func("main", ast::VariableList{}, ty.f32,
+      Func("main", ast::VariableList{}, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
                create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -356,7 +356,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
           });
 
   auto* depth_var =
-      Var("depth", ast::StorageClass::kOutput, ty.f32, nullptr,
+      Var("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
           });
@@ -368,7 +368,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   mod->AST().AddGlobalVariable(depth_var);
 
   auto* func =
-      Func("main", ast::VariableList{}, ty.void_,
+      Func("main", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("depth"),
                                                 MemberAccessor("coord", "x")),

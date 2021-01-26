@@ -139,11 +139,11 @@ type::Type* TextureOverloadCase::resultVectorComponentType(
     ast::Builder* b) const {
   switch (texture_data_type) {
     case ast::intrinsic::test::TextureDataType::kF32:
-      return b->ty.f32;
+      return b->ty.f32();
     case ast::intrinsic::test::TextureDataType::kU32:
-      return b->ty.u32;
+      return b->ty.u32();
     case ast::intrinsic::test::TextureDataType::kI32:
-      return b->ty.i32;
+      return b->ty.i32();
   }
 
   assert(false /* unreachable */);

@@ -756,7 +756,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
 
   auto& mod = p->get_program();
   auto* type =
-      mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32);
+      mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32());
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -773,7 +773,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
 
   auto& mod = p->get_program();
   auto* type =
-      mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32);
+      mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32());
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);

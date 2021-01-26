@@ -34,7 +34,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32);
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -44,7 +44,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
-  auto* v = Var("a", ast::StorageClass::kInput, ty.f32);
+  auto* v = Var("a", ast::StorageClass::kInput, ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -54,7 +54,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, nullptr,
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::LocationDecoration>(2),
                 });
@@ -67,7 +67,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, nullptr,
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
                     create<ast::BindingDecoration>(0),
@@ -86,7 +86,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
+  auto* v = Var("a", ast::StorageClass::kNone, ty.f32(), Expr("initializer"),
                 ast::VariableDecorationList{});
 
   GeneratorImpl& gen = Build();
@@ -97,7 +97,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
-  auto* v = Const("a", ast::StorageClass::kNone, ty.f32, Expr("initializer"),
+  auto* v = Const("a", ast::StorageClass::kNone, ty.f32(), Expr("initializer"),
                   ast::VariableDecorationList{});
 
   GeneratorImpl& gen = Build();

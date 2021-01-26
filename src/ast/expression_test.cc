@@ -35,13 +35,13 @@ using ExpressionTest = TestHelper;
 
 TEST_F(ExpressionTest, set_result_type) {
   FakeExpr e;
-  e.set_result_type(ty.i32);
+  e.set_result_type(ty.i32());
   ASSERT_NE(e.result_type(), nullptr);
   EXPECT_TRUE(e.result_type()->Is<type::I32>());
 }
 
 TEST_F(ExpressionTest, set_result_type_alias) {
-  auto* a = ty.alias("a", ty.i32);
+  auto* a = ty.alias("a", ty.i32());
   auto* b = ty.alias("b", a);
 
   FakeExpr e;

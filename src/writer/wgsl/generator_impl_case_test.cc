@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
       create<ast::BreakStatement>(),
   });
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32, 5));
+  lit.push_back(create<ast::SintLiteral>(ty.i32(), 5));
   auto* c = create<ast::CaseStatement>(lit, body);
 
   GeneratorImpl& gen = Build();
@@ -54,8 +54,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
       create<ast::BreakStatement>(),
   });
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32, 5));
-  lit.push_back(create<ast::SintLiteral>(ty.i32, 6));
+  lit.push_back(create<ast::SintLiteral>(ty.i32(), 5));
+  lit.push_back(create<ast::SintLiteral>(ty.i32(), 6));
   auto* c = create<ast::CaseStatement>(lit, body);
 
   GeneratorImpl& gen = Build();

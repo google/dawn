@@ -45,7 +45,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st =
-      create<ast::Struct>(ast::StructMemberList{Member("vf", ty.f32),
+      create<ast::Struct>(ast::StructMemberList{Member("vf", ty.f32()),
                                                 Member("rt", ty.array<f32>())},
                           decos);
 
@@ -66,7 +66,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
 
   ast::StructDecorationList decos;
   auto* st =
-      create<ast::Struct>(ast::StructMemberList{Member("vf", ty.f32),
+      create<ast::Struct>(ast::StructMemberList{Member("vf", ty.f32()),
                                                 Member("rt", ty.array<f32>())},
                           decos);
 
@@ -95,7 +95,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   auto* rt = Member("rt", ty.array<f32>());
   SetSource(Source{});
   auto* st = create<ast::Struct>(
-      ast::StructMemberList{rt, Member("vf", ty.f32)}, decos);
+      ast::StructMemberList{rt, Member("vf", ty.f32())}, decos);
 
   auto* struct_type = ty.struct_("Foo", st);
 
@@ -122,7 +122,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
-      ast::StructMemberList{Member("b", alias), Member("a", ty.u32)}, decos);
+      ast::StructMemberList{Member("b", alias), Member("a", ty.u32())}, decos);
 
   auto* struct_type = ty.struct_("s", st);
   mod->AST().AddConstructedType(struct_type);
@@ -148,7 +148,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   ast::StructDecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.u32), Member("b", alias)}, decos);
+      ast::StructMemberList{Member("a", ty.u32()), Member("b", alias)}, decos);
 
   auto* struct_type = ty.struct_("s", st);
   mod->AST().AddConstructedType(struct_type);
@@ -164,7 +164,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.array<i32>());
   auto* func =
-      Func("func", ast::VariableList{}, ty.void_,
+      Func("func", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::VariableDeclStatement>(
                    Source{Source::Location{12, 34}}, var),
@@ -192,7 +192,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
       Var(Source{Source::Location{12, 34}}, "a", ast::StorageClass::kNone,
           ty.array<i32>(), nullptr, ast::VariableDecorationList{});
 
-  auto* func = Func("func", ast::VariableList{param}, ty.void_,
+  auto* func = Func("func", ast::VariableList{param}, ty.void_(),
                     ast::StatementList{
                         create<ast::ReturnStatement>(),
                     },
@@ -200,7 +200,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
   mod->AST().Functions().Add(func);
 
   auto* main =
-      Func("main", ast::VariableList{}, ty.void_,
+      Func("main", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::ReturnStatement>(),
            },

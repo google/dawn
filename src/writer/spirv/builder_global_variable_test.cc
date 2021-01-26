@@ -50,7 +50,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kNone, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -65,7 +65,7 @@ TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -80,7 +80,7 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
-  auto* v = Var("var", ast::StorageClass::kInput, ty.f32);
+  auto* v = Var("var", ast::StorageClass::kInput, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -97,7 +97,7 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32(), init,
                 ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
@@ -122,7 +122,7 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
@@ -145,7 +145,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
   auto* init = vec3<f32>(ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)});
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
@@ -168,7 +168,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 
   EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32, init,
+  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
   td.RegisterVariableForTesting(v);
 
@@ -194,7 +194,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, nullptr,
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::LocationDecoration>(5),
                 });
@@ -214,7 +214,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, nullptr,
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::BindingDecoration>(2),
                     create<ast::GroupDecoration>(3),
@@ -236,7 +236,7 @@ OpDecorate %1 DescriptorSet 3
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32, nullptr,
+  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
                 });
@@ -256,7 +256,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.bool_, Expr(true),
+  auto* v = Var("var", ast::StorageClass::kNone, ty.bool_(), Expr(true),
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(1200),
                 });
@@ -276,7 +276,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.bool_, nullptr,
+  auto* v = Var("var", ast::StorageClass::kNone, ty.bool_(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(1200),
                 });
@@ -296,7 +296,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.f32, Expr(2.f),
+  auto* v = Var("var", ast::StorageClass::kNone, ty.f32(), Expr(2.f),
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(0),
                 });
@@ -316,7 +316,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.f32, nullptr,
+  auto* v = Var("var", ast::StorageClass::kNone, ty.f32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(0),
                 });
@@ -336,7 +336,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.i32, nullptr,
+  auto* v = Var("var", ast::StorageClass::kNone, ty.i32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(0),
                 });
@@ -356,7 +356,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.u32, nullptr,
+  auto* v = Var("var", ast::StorageClass::kNone, ty.u32(), nullptr,
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(0),
                 });
@@ -418,9 +418,9 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   // var b : [[access(read)]] A
 
   auto* A = ty.struct_(
-      "A", create<ast::Struct>(
-               ast::StructMemberList{Member("a", ty.i32), Member("b", ty.i32)},
-               ast::StructDecorationList{}));
+      "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32()),
+                                                     Member("b", ty.i32())},
+                               ast::StructDecorationList{}));
   type::AccessControl ac{ast::AccessControl::kReadOnly, A};
 
   auto* var = Var("b", ast::StorageClass::kStorage, &ac);
@@ -452,7 +452,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   // var b : [[access(read)]] B
 
   auto* A = ty.struct_(
-      "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)},
+      "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
                                ast::StructDecorationList{}));
   auto* B = ty.alias("B", A);
   type::AccessControl ac{ast::AccessControl::kReadOnly, B};
@@ -483,7 +483,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   // var b : B
 
   auto* A = ty.struct_(
-      "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)},
+      "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
                                ast::StructDecorationList{}));
   type::AccessControl ac{ast::AccessControl::kReadOnly, A};
   auto* B = ty.alias("B", &ac);
@@ -514,7 +514,7 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   // var c : [[access(read_write)]] A
 
   auto* A = ty.struct_(
-      "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32)},
+      "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
                                ast::StructDecorationList{}));
   type::AccessControl read{ast::AccessControl::kReadOnly, A};
   type::AccessControl rw{ast::AccessControl::kReadWrite, A};

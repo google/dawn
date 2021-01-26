@@ -41,15 +41,15 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
   ast::VariableList func_params;
-  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32));
-  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32));
+  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32()));
+  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32()));
 
   auto* a_func =
-      Func("a_func", func_params, ty.f32,
+      Func("a_func", func_params, ty.f32(),
            ast::StatementList{create<ast::ReturnStatement>(Add("a", "b"))},
            ast::FunctionDecorationList{});
 
-  auto* func = Func("main", {}, ty.void_, ast::StatementList{},
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   auto* expr = Call("a_func", 1.f, 1.f);
@@ -91,15 +91,15 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Statement_Call) {
   ast::VariableList func_params;
-  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32));
-  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32));
+  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32()));
+  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32()));
 
   auto* a_func =
-      Func("a_func", func_params, ty.void_,
+      Func("a_func", func_params, ty.void_(),
            ast::StatementList{create<ast::ReturnStatement>(Add("a", "b"))},
            ast::FunctionDecorationList{});
 
-  auto* func = Func("main", {}, ty.void_, ast::StatementList{},
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   auto* expr = create<ast::CallStatement>(Call("a_func", 1.f, 1.f));

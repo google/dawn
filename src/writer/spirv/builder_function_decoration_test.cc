@@ -38,7 +38,7 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionDecoration_Stage) {
   auto* func =
-      Func("main", {}, ty.void_, ast::StatementList{},
+      Func("main", {}, ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
@@ -63,7 +63,7 @@ using FunctionDecoration_StageTest = TestParamHelper<FunctionStageData>;
 TEST_P(FunctionDecoration_StageTest, Emit) {
   auto params = GetParam();
 
-  auto* func = Func("main", {}, ty.void_, ast::StatementList{},
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                     ast::FunctionDecorationList{
                         create<ast::StageDecoration>(params.stage),
                     });
@@ -91,14 +91,14 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   auto* func =
-      Func("main", {}, ty.void_, ast::StatementList{},
+      Func("main", {}, ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32);
-  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32);
-  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32);
+  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32());
+  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32());
+  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
 
   mod->AST().AddGlobalVariable(v_in);
   mod->AST().AddGlobalVariable(v_out);
@@ -134,7 +134,7 @@ OpName %11 "main"
 
 TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   auto* func =
-      Func("main", {}, ty.void_,
+      Func("main", {}, ty.void_(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("my_out"), Expr("my_in")),
                create<ast::AssignmentStatement>(Expr("my_wg"), Expr("my_wg")),
@@ -145,9 +145,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32);
-  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32);
-  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32);
+  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32());
+  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32());
+  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
 
   mod->AST().AddGlobalVariable(v_in);
   mod->AST().AddGlobalVariable(v_out);
@@ -189,7 +189,7 @@ OpName %11 "main"
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
   auto* func =
-      Func("main", {}, ty.void_, ast::StatementList{},
+      Func("main", {}, ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
@@ -204,7 +204,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize_Default) {
   auto* func =
-      Func("main", {}, ty.void_, ast::StatementList{},
+      Func("main", {}, ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
@@ -219,7 +219,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize_Default) {
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize) {
   auto* func =
-      Func("main", {}, ty.void_, ast::StatementList{},
+      Func("main", {}, ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::WorkgroupDecoration>(2u, 4u, 6u),
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
@@ -235,13 +235,13 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize) {
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
   auto* func1 =
-      Func("main1", {}, ty.void_, ast::StatementList{},
+      Func("main1", {}, ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
   auto* func2 =
-      Func("main2", {}, ty.void_, ast::StatementList{},
+      Func("main2", {}, ty.void_(), ast::StatementList{},
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
@@ -272,14 +272,14 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
   auto* fragdepth =
-      Var("fragdepth", ast::StorageClass::kOutput, ty.f32, nullptr,
+      Var("fragdepth", ast::StorageClass::kOutput, ty.f32(), nullptr,
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
           });
   mod->AST().AddGlobalVariable(fragdepth);
 
   auto* func =
-      Func("main", ast::VariableList{}, ty.void_,
+      Func("main", ast::VariableList{}, ty.void_(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
            },

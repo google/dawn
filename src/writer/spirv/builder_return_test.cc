@@ -72,7 +72,7 @@ TEST_F(BuilderTest, Return_WithValue) {
 }
 
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
-  auto* var = Var("param", ast::StorageClass::kFunction, ty.f32);
+  auto* var = Var("param", ast::StorageClass::kFunction, ty.f32());
 
   auto* ret = create<ast::ReturnStatement>(Expr("param"));
 
