@@ -45,7 +45,7 @@ Symbol SymbolTable::Register(const std::string& name) {
   return sym;
 }
 
-Symbol SymbolTable::GetSymbol(const std::string& name) const {
+Symbol SymbolTable::Get(const std::string& name) const {
   auto it = name_to_symbol_.find(name);
   return it != name_to_symbol_.end() ? it->second : Symbol();
 }

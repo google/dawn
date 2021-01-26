@@ -52,7 +52,7 @@ Symbol Program::RegisterSymbol(const std::string& name) {
 }
 
 Symbol Program::GetSymbol(const std::string& name) const {
-  return symbol_table_.GetSymbol(name);
+  return symbol_table_.Get(name);
 }
 
 std::string Program::SymbolToName(const Symbol sym) const {
