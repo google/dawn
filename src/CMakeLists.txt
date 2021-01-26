@@ -187,6 +187,7 @@ set(TINT_LIB_SRCS
   inspector/scalar.h
   namer.cc
   namer.h
+  program.cc
   program.h
   reader/reader.cc
   reader/reader.h
@@ -421,7 +422,6 @@ if(${TINT_BUILD_TESTS})
     ast/loop_statement_test.cc
     ast/member_accessor_expression_test.cc
     ast/module_clone_test.cc
-    ast/module_test.cc
     ast/null_literal_test.cc
     ast/return_statement_test.cc
     ast/scalar_constructor_expression_test.cc
@@ -447,6 +447,7 @@ if(${TINT_BUILD_TESTS})
     diagnostic/printer_test.cc
     inspector/inspector_test.cc
     namer_test.cc
+    program_test.cc
     scope_stack_test.cc
     symbol_table_test.cc
     symbol_test.cc

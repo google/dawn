@@ -27,7 +27,6 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
@@ -36,6 +35,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
+#include "src/program.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -56,8 +56,8 @@ namespace ast {
 class TypesBuilder {
  public:
   /// Constructor
-  /// @param mod the module
-  explicit TypesBuilder(Module* mod);
+  /// @param program the program
+  explicit TypesBuilder(Program* program);
 
   /// A boolean type
   type::Bool* const bool_;
@@ -79,80 +79,80 @@ class TypesBuilder {
   /// @return the tint AST type for a 2-element vector of the C type `T`.
   template <typename T>
   type::Vector* vec2() const {
-    return mod_->create<type::Vector>(Of<T>(), 2);
+    return program_->create<type::Vector>(Of<T>(), 2);
   }
 
   /// @return the tint AST type for a 3-element vector of the C type `T`.
   template <typename T>
   type::Vector* vec3() const {
-    return mod_->create<type::Vector>(Of<T>(), 3);
+    return program_->create<type::Vector>(Of<T>(), 3);
   }
 
   /// @return the tint AST type for a 4-element vector of the C type `T`.
   template <typename T>
   type::Type* vec4() const {
-    return mod_->create<type::Vector>(Of<T>(), 4);
+    return program_->create<type::Vector>(Of<T>(), 4);
   }
 
   /// @return the tint AST type for a 2x3 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat2x2() const {
-    return mod_->create<type::Matrix>(Of<T>(), 2, 2);
+    return program_->create<type::Matrix>(Of<T>(), 2, 2);
   }
 
   /// @return the tint AST type for a 2x3 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat2x3() const {
-    return mod_->create<type::Matrix>(Of<T>(), 3, 2);
+    return program_->create<type::Matrix>(Of<T>(), 3, 2);
   }
 
   /// @return the tint AST type for a 2x4 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat2x4() const {
-    return mod_->create<type::Matrix>(Of<T>(), 4, 2);
+    return program_->create<type::Matrix>(Of<T>(), 4, 2);
   }
 
   /// @return the tint AST type for a 3x2 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat3x2() const {
-    return mod_->create<type::Matrix>(Of<T>(), 2, 3);
+    return program_->create<type::Matrix>(Of<T>(), 2, 3);
   }
 
   /// @return the tint AST type for a 3x3 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat3x3() const {
-    return mod_->create<type::Matrix>(Of<T>(), 3, 3);
+    return program_->create<type::Matrix>(Of<T>(), 3, 3);
   }
 
   /// @return the tint AST type for a 3x4 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat3x4() const {
-    return mod_->create<type::Matrix>(Of<T>(), 4, 3);
+    return program_->create<type::Matrix>(Of<T>(), 4, 3);
   }
 
   /// @return the tint AST type for a 4x2 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat4x2() const {
-    return mod_->create<type::Matrix>(Of<T>(), 2, 4);
+    return program_->create<type::Matrix>(Of<T>(), 2, 4);
   }
 
   /// @return the tint AST type for a 4x3 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat4x3() const {
-    return mod_->create<type::Matrix>(Of<T>(), 3, 4);
+    return program_->create<type::Matrix>(Of<T>(), 3, 4);
   }
 
   /// @return the tint AST type for a 4x4 matrix of the C type `T`.
   template <typename T>
   type::Matrix* mat4x4() const {
-    return mod_->create<type::Matrix>(Of<T>(), 4, 4);
+    return program_->create<type::Matrix>(Of<T>(), 4, 4);
   }
 
   /// @param subtype the array element type
   /// @param n the array size. 0 represents a runtime-array.
   /// @return the tint AST type for a array of size `n` of type `T`
   type::Array* array(type::Type* subtype, uint32_t n) const {
-    return mod_->create<type::Array>(subtype, n, ArrayDecorationList{});
+    return program_->create<type::Array>(subtype, n, ArrayDecorationList{});
   }
 
   /// @return the tint AST type for an array of size `N` of type `T`
@@ -166,21 +166,21 @@ class TypesBuilder {
   /// @param type the alias type
   /// @returns the alias pointer
   type::Alias* alias(const std::string& name, type::Type* type) const {
-    return mod_->create<type::Alias>(mod_->RegisterSymbol(name), type);
+    return program_->create<type::Alias>(program_->RegisterSymbol(name), type);
   }
 
   /// @return the tint AST pointer to type `T` with the given StorageClass.
   /// @param storage_class the storage class of the pointer
   template <typename T>
   type::Pointer* pointer(StorageClass storage_class) const {
-    return mod_->create<type::Pointer>(Of<T>(), storage_class);
+    return program_->create<type::Pointer>(Of<T>(), storage_class);
   }
 
   /// @param name the struct name
   /// @param impl the struct implementation
   /// @returns a struct pointer
   type::Struct* struct_(const std::string& name, ast::Struct* impl) const {
-    return mod_->create<type::Struct>(mod_->RegisterSymbol(name), impl);
+    return program_->create<type::Struct>(program_->RegisterSymbol(name), impl);
   }
 
  private:
@@ -192,7 +192,7 @@ class TypesBuilder {
   template <typename T>
   struct CToAST {};
 
-  Module* const mod_;
+  Program* const program_;
 };
 
 /// Helper for building common AST constructs.
@@ -216,8 +216,8 @@ class Builder {
   using f32 = float;
 
   /// Constructor
-  /// @param mod the module to use in the builder
-  explicit Builder(Module* mod);
+  /// @param program the program to build
+  explicit Builder(Program* program);
   virtual ~Builder();
 
   /// @param expr the expression
@@ -227,20 +227,20 @@ class Builder {
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const std::string& name) {
-    return create<IdentifierExpression>(mod->RegisterSymbol(name));
+    return create<IdentifierExpression>(program->RegisterSymbol(name));
   }
 
   /// @param source the source information
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const Source& source, const std::string& name) {
-    return create<IdentifierExpression>(source, mod->RegisterSymbol(name));
+    return create<IdentifierExpression>(source, program->RegisterSymbol(name));
   }
 
   /// @param name the identifier name
   /// @return an IdentifierExpression with the given name
   IdentifierExpression* Expr(const char* name) {
-    return create<IdentifierExpression>(mod->RegisterSymbol(name));
+    return create<IdentifierExpression>(program->RegisterSymbol(name));
   }
 
   /// @param value the boolean value
@@ -602,7 +602,7 @@ class Builder {
   /// @param val the offset value
   /// @returns the offset decoration pointer
   StructMemberOffsetDecoration* MemberOffset(uint32_t val) {
-    return mod->create<StructMemberOffsetDecoration>(source_, val);
+    return program->create<StructMemberOffsetDecoration>(source_, val);
   }
 
   /// Creates a Function
@@ -619,9 +619,9 @@ class Builder {
                  type::Type* type,
                  ast::StatementList body,
                  ast::FunctionDecorationList decorations) {
-    return mod->create<ast::Function>(source, mod->RegisterSymbol(name), params,
-                                      type, create<ast::BlockStatement>(body),
-                                      decorations);
+    return program->create<ast::Function>(
+        source, program->RegisterSymbol(name), params, type,
+        create<ast::BlockStatement>(body), decorations);
   }
 
   /// Creates a Function
@@ -636,7 +636,7 @@ class Builder {
                  type::Type* type,
                  ast::StatementList body,
                  ast::FunctionDecorationList decorations) {
-    return create<ast::Function>(mod->RegisterSymbol(name), params, type,
+    return create<ast::Function>(program->RegisterSymbol(name), params, type,
                                  create<ast::BlockStatement>(body),
                                  decorations);
   }
@@ -649,8 +649,8 @@ class Builder {
   StructMember* Member(const Source& source,
                        const std::string& name,
                        type::Type* type) {
-    return mod->create<StructMember>(source, mod->RegisterSymbol(name), type,
-                                     StructMemberDecorationList{});
+    return program->create<StructMember>(source, program->RegisterSymbol(name),
+                                         type, StructMemberDecorationList{});
   }
 
   /// Creates a StructMember
@@ -658,8 +658,8 @@ class Builder {
   /// @param type the struct member type
   /// @returns the struct member pointer
   StructMember* Member(const std::string& name, type::Type* type) {
-    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), type,
-                                     StructMemberDecorationList{});
+    return program->create<StructMember>(source_, program->RegisterSymbol(name),
+                                         type, StructMemberDecorationList{});
   }
 
   /// Creates a StructMember
@@ -670,8 +670,8 @@ class Builder {
   StructMember* Member(const std::string& name,
                        type::Type* type,
                        StructMemberDecorationList decos) {
-    return mod->create<StructMember>(source_, mod->RegisterSymbol(name), type,
-                                     decos);
+    return program->create<StructMember>(source_, program->RegisterSymbol(name),
+                                         type, decos);
   }
 
   /// Creates a new Node owned by the Module, with the explicit Source.
@@ -682,7 +682,7 @@ class Builder {
   template <typename T, typename... ARGS>
   traits::EnableIfIsType<T, Node>* create(const Source& source,
                                           ARGS&&... args) {
-    return mod->create<T>(source, std::forward<ARGS>(args)...);
+    return program->create<T>(source, std::forward<ARGS>(args)...);
   }
 
   /// Creates a new Node owned by the Module, with the explicit Source.
@@ -692,7 +692,7 @@ class Builder {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   traits::EnableIfIsType<T, Node>* create(Source&& source, ARGS&&... args) {
-    return mod->create<T>(std::move(source), std::forward<ARGS>(args)...);
+    return program->create<T>(std::move(source), std::forward<ARGS>(args)...);
   }
 
   /// Creates a new type::Type owned by the Module, using the Builder's
@@ -702,7 +702,7 @@ class Builder {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   traits::EnableIfIsType<T, Node>* create(ARGS&&... args) {
-    return mod->create<T>(source_, std::forward<ARGS>(args)...);
+    return program->create<T>(source_, std::forward<ARGS>(args)...);
   }
 
   /// Creates a new type::Type owned by the Module.
@@ -720,7 +720,7 @@ class Builder {
   traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
     static_assert(std::is_base_of<type::Type, T>::value,
                   "T does not derive from type::Type");
-    return mod->create<T>(std::forward<ARGS>(args)...);
+    return program->create<T>(std::forward<ARGS>(args)...);
   }
 
   /// Sets the current builder source to `src`
@@ -731,10 +731,13 @@ class Builder {
   /// @param loc the Source used for future create() calls
   void SetSource(const Source::Location& loc) { source_ = Source(loc); }
 
-  /// The builder module
-  Module* const mod;
+  /// The builder program
+  Program* const program;
   /// The builder types
   const TypesBuilder ty;
+
+  /// [DEPRECATED] Temporary alias to #program
+  Program* const mod;
 
  protected:
   /// Called whenever a new variable is built with `Var()`.
@@ -744,11 +747,11 @@ class Builder {
   Source source_;
 };
 
-/// BuilderWithModule is a `Builder` that constructs and owns its `Module`.
-class BuilderWithModule : public Builder {
+/// BuilderWithProgram is a `Builder` that constructs and owns its `Program`.
+class BuilderWithProgram : public Builder {
  public:
-  BuilderWithModule();
-  ~BuilderWithModule() override;
+  BuilderWithProgram();
+  ~BuilderWithProgram() override;
 };
 
 //! @cond Doxygen_Suppress

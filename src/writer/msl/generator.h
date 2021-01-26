@@ -30,12 +30,8 @@ namespace msl {
 class Generator : public Text {
  public:
   /// Constructor
-  /// @param module the module to convert
-  explicit Generator(ast::Module module);
-
-  /// Constructor
   /// @param program the program to convert
-  explicit Generator(Program* program);
+  explicit Generator(const Program* program);
 
   /// Destructor
   ~Generator() override;
@@ -58,7 +54,6 @@ class Generator : public Text {
   std::string error() const;
 
  private:
-  ast::Module module_;
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

@@ -16,9 +16,9 @@
 #include <vector>
 
 #include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/program.h"
 #include "src/type/array_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/matrix_type.h"

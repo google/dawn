@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/program.h"
 
 namespace tint {
 namespace writer {

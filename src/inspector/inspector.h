@@ -21,7 +21,6 @@
 #include <tuple>
 #include <vector>
 
-#include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/inspector/entry_point.h"
 #include "src/inspector/scalar.h"
@@ -68,13 +67,9 @@ struct ResourceBinding {
   SampledKind sampled_kind;
 };
 
-/// Extracts information from a module
+/// Extracts information from a program
 class Inspector {
  public:
-  /// Constructor
-  /// @param module Shader module to extract information from.
-  explicit Inspector(const ast::Module& module);
-
   /// Constructor
   /// @param program Shader program to extract information from.
   explicit Inspector(const Program* program);
@@ -134,7 +129,7 @@ class Inspector {
       const std::string& entry_point);
 
  private:
-  const ast::Module& module_;
+  const Program& program_;
   std::string error_;
 
   /// @param name name of the entry point to find

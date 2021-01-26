@@ -17,8 +17,8 @@
 #include <cmath>
 #include <utility>
 
-#include "src/ast/module.h"
 #include "src/clone_context.h"
+#include "src/program.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/matrix_type.h"

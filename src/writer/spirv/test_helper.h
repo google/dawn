@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/builder.h"
-#include "src/ast/module.h"
+#include "src/program.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 
@@ -30,12 +30,12 @@ namespace spirv {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public ast::BuilderWithModule, public BASE {
+class TestHelperBase : public ast::BuilderWithProgram, public BASE {
  public:
-  TestHelperBase() : td(mod) {}
+  TestHelperBase() : td(program) {}
   ~TestHelperBase() override = default;
 
-  /// Builds and returns a spirv::Builder from the module.
+  /// Builds and returns a spirv::Builder from the program.
   /// @note The spirv::Builder is only built once. Multiple calls to Build()
   /// will return the same spirv::Builder without rebuilding.
   /// @return the built spirv::Builder
@@ -43,7 +43,7 @@ class TestHelperBase : public ast::BuilderWithModule, public BASE {
     if (spirv_builder) {
       return *spirv_builder;
     }
-    spirv_builder = std::make_unique<spirv::Builder>(mod);
+    spirv_builder = std::make_unique<spirv::Builder>(program);
     return *spirv_builder;
   }
 

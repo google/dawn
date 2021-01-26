@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "src/ast/module.h"
 #include "src/program.h"
 #include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
@@ -29,16 +28,12 @@ namespace tint {
 namespace writer {
 namespace spirv {
 
-/// Class to generate SPIR-V from a Tint module
+/// Class to generate SPIR-V from a Tint program
 class Generator : public writer::Writer {
  public:
   /// Constructor
-  /// @param module the module to convert
-  explicit Generator(ast::Module module);
-
-  /// Constructor
   /// @param program the program to convert
-  explicit Generator(Program* program);
+  explicit Generator(const Program* program);
 
   /// Destructor
   ~Generator() override;
@@ -58,7 +53,6 @@ class Generator : public writer::Writer {
   const std::vector<uint32_t>& result() const { return writer_->result(); }
 
  private:
-  ast::Module module_;
   std::unique_ptr<Builder> builder_;
   std::unique_ptr<BinaryWriter> writer_;
 };

@@ -24,7 +24,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
 #include "src/ast/switch_statement.h"
@@ -32,16 +31,17 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
+#include "src/program.h"
 #include "src/scope_stack.h"
 
 namespace tint {
 
-/// Determines if the module is complete and valid
+/// Determines if the program is complete and valid
 class ValidatorImpl {
  public:
   /// Constructor
-  /// @param module the module to validate
-  explicit ValidatorImpl(const ast::Module* module);
+  /// @param program the program to validate
+  explicit ValidatorImpl(const Program* program);
   ~ValidatorImpl();
 
   /// Runs the validator
@@ -159,7 +159,7 @@ class ValidatorImpl {
   }
 
  private:
-  const ast::Module& module_;
+  const Program* program_;
   diag::List diags_;
   ScopeStack<ast::Variable*> variable_stack_;
   ScopeStack<ast::Function*> function_stack_;

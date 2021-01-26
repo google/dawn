@@ -35,12 +35,12 @@
 #include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/program.h"
 #include "src/scope_stack.h"
 #include "src/type/struct_type.h"
 #include "src/writer/msl/namer.h"
@@ -54,8 +54,8 @@ namespace msl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  /// @param module the module to generate
-  explicit GeneratorImpl(ast::Module* module);
+  /// @param program the program to generate
+  explicit GeneratorImpl(const Program* program);
   ~GeneratorImpl();
 
   /// @returns true on successful generation; false otherwise
@@ -284,7 +284,7 @@ class GeneratorImpl : public TextGenerator {
   ScopeStack<ast::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
-  const ast::Module* module_ = nullptr;
+  const Program* program_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
 
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;

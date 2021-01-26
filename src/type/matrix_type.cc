@@ -16,8 +16,8 @@
 
 #include <assert.h>
 
-#include "src/ast/module.h"
 #include "src/clone_context.h"
+#include "src/program.h"
 #include "src/type/array_type.h"
 #include "src/type/vector_type.h"
 

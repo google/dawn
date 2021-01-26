@@ -28,13 +28,13 @@
 namespace tint {
 
 /// A helper for testing validation
-class ValidatorTestHelper : public ast::BuilderWithModule {
+class ValidatorTestHelper : public ast::BuilderWithProgram {
  public:
   /// Constructor
   ValidatorTestHelper();
   ~ValidatorTestHelper() override;
 
-  /// Builds and returns a validator from the module.
+  /// Builds and returns a validator from the program.
   /// @note The validator is only built once. Multiple calls to Build() will
   /// return the same ValidatorImpl without rebuilding.
   /// @return the built validator
@@ -42,7 +42,7 @@ class ValidatorTestHelper : public ast::BuilderWithModule {
     if (val_) {
       return *val_;
     }
-    val_ = std::make_unique<ValidatorImpl>(mod);
+    val_ = std::make_unique<ValidatorImpl>(program);
     for (auto* var : vars_for_testing_) {
       val_->RegisterVariableForTesting(var);
     }

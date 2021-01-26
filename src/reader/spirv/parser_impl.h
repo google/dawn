@@ -32,8 +32,8 @@
 #include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
 #include "src/ast/expression.h"
-#include "src/ast/module.h"
 #include "src/ast/struct_member_decoration.h"
+#include "src/program.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/entry_point_info.h"
 #include "src/reader/spirv/enum_converter.h"
@@ -95,12 +95,12 @@ class ParserImpl : Reader {
   /// @returns true if the parse was successful, false otherwise.
   bool Parse() override;
 
-  /// @returns the module. The module in the parser will be reset after this.
-  ast::Module module() override;
+  /// @returns the program. The program in the parser will be reset after this.
+  Program program() override;
 
-  /// Returns a pointer to the module, without resetting it.
-  /// @returns the module
-  ast::Module& get_module() { return ast_module_; }
+  /// Returns a reference to the program, without resetting it.
+  /// @returns the program
+  Program& get_program() { return program_; }
 
   /// Logs failure, ands return a failure stream to accumulate diagnostic
   /// messages. By convention, a failure should only be logged along with
@@ -118,14 +118,14 @@ class ParserImpl : Reader {
   const std::string error() { return errors_.str(); }
 
   /// Builds an internal representation of the SPIR-V binary,
-  /// and parses it into a Tint AST module.  Diagnostics are emitted
+  /// and parses it into a Tint program.  Diagnostics are emitted
   /// to the error stream.
   /// @returns true if it was successful.
   bool BuildAndParseInternalModule() {
     return BuildInternalModule() && ParseInternalModule();
   }
   /// Builds an internal representation of the SPIR-V binary,
-  /// and parses the module, except functions, into a Tint AST module.
+  /// and parses the module, except functions, into a Tint program.
   /// Diagnostics are emitted to the error stream.
   /// @returns true if it was successful.
   bool BuildAndParseInternalModuleExceptFunctions() {
@@ -524,20 +524,20 @@ class ParserImpl : Reader {
   bool ParseArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
                              ast::ArrayDecorationList* decorations);
 
-  /// Creates a new `ast::Node` owned by the Module. When the Module is
+  /// Creates a new `ast::Node` owned by the Program. When the Program is
   /// destructed, the `ast::Node` will also be destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) {
-    return ast_module_.create<T>(std::forward<ARGS>(args)...);
+    return program_.create<T>(std::forward<ARGS>(args)...);
   }
 
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
 
   // The resulting module in Tint AST form.
-  ast::Module ast_module_;
+  Program program_;
 
   // Is the parse successful?
   bool success_ = true;

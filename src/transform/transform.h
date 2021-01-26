@@ -19,14 +19,13 @@
 #include <string>
 #include <utility>
 
-#include "src/ast/module.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
 
 namespace tint {
 namespace transform {
 
-/// Interface for ast::Module transforms
+/// Interface for Program transforms
 class Transform {
  public:
   /// Constructor
@@ -40,13 +39,13 @@ class Transform {
     Output();
 
     /// Constructor
-    /// @param module the module to move into this Output
-    explicit Output(ast::Module&& module);
+    /// @param program the program to move into this Output
+    explicit Output(Program&& program);
 
     /// Constructor
-    /// @param module the module to move into this Output
+    /// @param program the program to move into this Output
     /// @param diags the list of diagnostics to move into this Output
-    Output(ast::Module&& module, diag::List&& diags);
+    Output(Program&& program, diag::List&& diags);
 
     /// Move constructor
     /// @param output the output to move into this Output
@@ -64,17 +63,7 @@ class Transform {
     Program program;
     /// Diagnostics raised while running the Transform.
     diag::List diagnostics;
-    /// The transformed module. May be empty on error.
-    ast::Module& module{program.module};
   };
-
-  /// Runs the transform on `module`, returning the transformation result.
-  /// @note Users of Tint should register the transform with transform manager
-  /// and invoke its Run(), instead of directly calling the transform's Run().
-  /// Calling Run() directly does not perform module state cleanup operations.
-  /// @param module the source module to transform
-  /// @returns the transformation result
-  virtual Output Run(ast::Module* module) = 0;
 
   /// Runs the transform on `program`, returning the transformation result.
   /// @note Users of Tint should register the transform with transform manager
@@ -82,7 +71,7 @@ class Transform {
   /// Calling Run() directly does not perform program state cleanup operations.
   /// @param program the source program to transform
   /// @returns the transformation result
-  Output Run(Program* program) { return Run(&program->module); }
+  virtual Output Run(const Program* program) = 0;
 
  protected:
   /// Clones the function `in` adding `statements` to the beginning of the

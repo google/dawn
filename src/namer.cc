@@ -22,7 +22,7 @@
 
 namespace tint {
 
-Namer::Namer(ast::Module* mod) : module_(mod) {}
+Namer::Namer(Program* program) : program_(program) {}
 
 Namer::~Namer() = default;
 
@@ -42,7 +42,7 @@ std::string Namer::GenerateName(const std::string& prefix) {
   return name;
 }
 
-MangleNamer::MangleNamer(ast::Module* mod) : Namer(mod) {}
+MangleNamer::MangleNamer(Program* program) : Namer(program) {}
 
 MangleNamer::~MangleNamer() = default;
 
@@ -50,12 +50,12 @@ std::string MangleNamer::NameFor(const Symbol& sym) {
   return sym.to_str();
 }
 
-UnsafeNamer::UnsafeNamer(ast::Module* mod) : Namer(mod) {}
+UnsafeNamer::UnsafeNamer(Program* program) : Namer(program) {}
 
 UnsafeNamer::~UnsafeNamer() = default;
 
 std::string UnsafeNamer::NameFor(const Symbol& sym) {
-  return module_->SymbolToName(sym);
+  return program_->SymbolToName(sym);
 }
 
 }  // namespace tint

@@ -73,7 +73,7 @@ void VertexPulling::SetPullingBufferBindingSet(uint32_t number) {
   cfg.pulling_group = number;
 }
 
-Transform::Output VertexPulling::Run(ast::Module* in) {
+Transform::Output VertexPulling::Run(const Program* in) {
   // Check SetVertexState was called
   if (!cfg.vertex_state_set) {
     diag::Diagnostic err;
@@ -103,13 +103,13 @@ Transform::Output VertexPulling::Run(ast::Module* in) {
   // following stages will pass
   Output out;
 
-  State state{in, &out.module, cfg};
+  State state{in, &out.program, cfg};
   state.FindOrInsertVertexIndexIfUsed();
   state.FindOrInsertInstanceIndexIfUsed();
   state.ConvertVertexInputVariablesToPrivate();
   state.AddVertexStorageBuffers();
 
-  CloneContext(&out.module, in)
+  CloneContext(&out.program, in)
       .ReplaceAll([&](CloneContext* ctx, ast::Function* f) -> ast::Function* {
         if (f == func) {
           return CloneWithStatementsAtStart(
@@ -126,7 +126,7 @@ VertexPulling::Config::Config() = default;
 VertexPulling::Config::Config(const Config&) = default;
 VertexPulling::Config::~Config() = default;
 
-VertexPulling::State::State(ast::Module* i, ast::Module* o, const Config& c)
+VertexPulling::State::State(const Program* i, Program* o, const Config& c)
     : in(i), out(o), cfg(c) {}
 
 VertexPulling::State::State(const State&) = default;
@@ -231,7 +231,8 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
 }
 
 void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
-  for (auto*& v : in->global_variables()) {
+  // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
+  for (auto*& v : const_cast<Program*>(in)->global_variables()) {
     if (v->storage_class() != ast::StorageClass::kInput) {
       continue;
     }

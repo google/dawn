@@ -31,12 +31,12 @@ namespace hlsl {
 
 /// Helper class for testing
 template <typename BODY>
-class TestHelperBase : public BODY, public ast::BuilderWithModule {
+class TestHelperBase : public BODY, public ast::BuilderWithProgram {
  public:
-  TestHelperBase() : td(mod) {}
+  TestHelperBase() : td(program) {}
   ~TestHelperBase() = default;
 
-  /// Builds and returns a GeneratorImpl from the module.
+  /// Builds and returns a GeneratorImpl from the program.
   /// @note The generator is only built once. Multiple calls to Build() will
   /// return the same GeneratorImpl without rebuilding.
   /// @return the built generator
@@ -44,7 +44,7 @@ class TestHelperBase : public BODY, public ast::BuilderWithModule {
     if (gen_) {
       return *gen_;
     }
-    gen_ = std::make_unique<GeneratorImpl>(mod);
+    gen_ = std::make_unique<GeneratorImpl>(program);
     return *gen_;
   }
 

@@ -82,7 +82,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -93,7 +93,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
@@ -108,7 +108,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -123,7 +123,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_BadArg) {
@@ -238,7 +238,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -250,7 +250,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
@@ -266,7 +266,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -280,7 +280,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
@@ -296,7 +296,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -308,7 +308,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
@@ -324,7 +324,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -338,7 +338,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
@@ -387,7 +387,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -401,7 +401,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
@@ -417,7 +417,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -429,7 +429,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
@@ -445,7 +445,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -459,7 +459,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
@@ -475,7 +475,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -487,7 +487,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
@@ -537,7 +537,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -549,7 +549,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
@@ -565,7 +565,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -579,7 +579,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
@@ -595,7 +595,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -607,7 +607,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
@@ -623,7 +623,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -637,7 +637,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
@@ -687,7 +687,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -701,7 +701,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
@@ -717,7 +717,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -729,7 +729,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
@@ -745,7 +745,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -759,7 +759,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
@@ -775,7 +775,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_1
     none
@@ -787,7 +787,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 // TODO(dneto): OpSConvert // only if multiple widths

@@ -86,7 +86,7 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -128,7 +128,7 @@ VariableDeclStatement{
       }
     }
   }
-})")) << ToString(p->get_module(), fe.ast_body());
+})")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Matrix) {
@@ -143,7 +143,7 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -169,7 +169,7 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Array) {
@@ -184,7 +184,7 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -200,7 +200,7 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Struct) {
@@ -215,7 +215,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -233,7 +233,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 using SpvParserTest_CompositeExtract = SpvParserTest;
@@ -250,7 +250,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -266,7 +266,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
@@ -301,7 +301,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_2
     none
@@ -313,7 +313,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
@@ -352,7 +352,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_2
     none
@@ -367,7 +367,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Array) {
@@ -386,7 +386,7 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_2
     none
@@ -398,7 +398,7 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
@@ -437,7 +437,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_2
     none
@@ -449,7 +449,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
@@ -480,7 +480,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto got = fe.ast_body();
-  EXPECT_THAT(ToString(p->get_module(), got), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), got), HasSubstr(R"(
   VariableConst{
     x_2
     none
@@ -492,8 +492,8 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
       }
     }
   })"))
-      << ToString(p->get_module(), got);
-  EXPECT_THAT(ToString(p->get_module(), got), HasSubstr(R"(
+      << ToString(p->get_program(), got);
+  EXPECT_THAT(ToString(p->get_program(), got), HasSubstr(R"(
   VariableConst{
     x_4
     none
@@ -505,7 +505,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
       }
     }
   })"))
-      << ToString(p->get_module(), got);
+      << ToString(p->get_program(), got);
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
@@ -546,7 +546,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_2
     none
@@ -567,7 +567,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 using SpvParserTest_CopyObject = SpvParserTest;
@@ -585,7 +585,7 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -605,7 +605,7 @@ VariableDeclStatement{
       Identifier[not set]{x_1}
     }
   }
-})")) << ToString(p->get_module(), fe.ast_body());
+})")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_CopyObject, Pointer) {
@@ -624,7 +624,7 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -644,7 +644,7 @@ VariableDeclStatement{
       Identifier[not set]{x_1}
     }
   }
-})")) << ToString(p->get_module(), fe.ast_body());
+})")) << ToString(p->get_program(), fe.ast_body());
 }
 
 using SpvParserTest_VectorShuffle = SpvParserTest;
@@ -665,7 +665,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_10
     none
@@ -692,7 +692,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
       }
     }
   }
-})")) << ToString(p->get_module(), fe.ast_body());
+})")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
@@ -708,7 +708,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_10
     none
@@ -751,7 +751,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
@@ -768,7 +768,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableConst{
     x_10
     none
@@ -784,7 +784,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
       }
     }
   })"))
-      << ToString(p->get_module(), fe.ast_body());
+      << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {

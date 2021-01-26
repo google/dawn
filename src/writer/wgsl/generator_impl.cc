@@ -78,30 +78,30 @@ namespace tint {
 namespace writer {
 namespace wgsl {
 
-GeneratorImpl::GeneratorImpl(ast::Module* module)
-    : TextGenerator(), module_(*module) {}
+GeneratorImpl::GeneratorImpl(const Program* program)
+    : TextGenerator(), program_(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-  for (auto* const ty : module_.constructed_types()) {
+  for (auto* const ty : program_->constructed_types()) {
     if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!module_.constructed_types().empty())
+  if (!program_->constructed_types().empty())
     out_ << std::endl;
 
-  for (auto* var : module_.global_variables()) {
+  for (auto* var : program_->global_variables()) {
     if (!EmitVariable(var)) {
       return false;
     }
   }
-  if (!module_.global_variables().empty()) {
+  if (!program_->global_variables().empty()) {
     out_ << std::endl;
   }
 
-  for (auto* func : module_.Functions()) {
+  for (auto* func : program_->Functions()) {
     if (!EmitFunction(func)) {
       return false;
     }
@@ -113,7 +113,7 @@ bool GeneratorImpl::Generate() {
 
 bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
                                        const std::string& name) {
-  auto* func = module_.Functions().Find(module_.GetSymbol(name), stage);
+  auto* func = program_->Functions().Find(program_->GetSymbol(name), stage);
   if (func == nullptr) {
     error_ = "Unable to find requested entry point: " + name;
     return false;
@@ -121,18 +121,18 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
 
   // TODO(dsinclair): We always emit constructed types even if they aren't
   // strictly needed
-  for (auto* const ty : module_.constructed_types()) {
+  for (auto* const ty : program_->constructed_types()) {
     if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!module_.constructed_types().empty()) {
+  if (!program_->constructed_types().empty()) {
     out_ << std::endl;
   }
 
   // TODO(dsinclair): This should be smarter and only emit needed const
   // variables
-  for (auto* var : module_.global_variables()) {
+  for (auto* var : program_->global_variables()) {
     if (!var->is_const()) {
       continue;
     }
@@ -152,8 +152,8 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
     out_ << std::endl;
   }
 
-  for (auto* f : module_.Functions()) {
-    if (!f->HasAncestorEntryPoint(module_.GetSymbol(name))) {
+  for (auto* f : program_->Functions()) {
+    if (!f->HasAncestorEntryPoint(program_->GetSymbol(name))) {
       continue;
     }
 
@@ -174,7 +174,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
 bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
   make_indent();
   if (auto* alias = ty->As<type::Alias>()) {
-    out_ << "type " << module_.SymbolToName(alias->symbol()) << " = ";
+    out_ << "type " << program_->SymbolToName(alias->symbol()) << " = ";
     if (!EmitType(alias->type())) {
       return false;
     }
@@ -337,7 +337,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
-  out_ << module_.SymbolToName(ident->symbol());
+  out_ << program_->SymbolToName(ident->symbol());
   return true;
 }
 
@@ -360,7 +360,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   }
 
   make_indent();
-  out_ << "fn " << module_.SymbolToName(func->symbol()) << "(";
+  out_ << "fn " << program_->SymbolToName(func->symbol()) << "(";
 
   bool first = true;
   for (auto* v : func->params()) {
@@ -369,7 +369,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     }
     first = false;
 
-    out_ << module_.SymbolToName(v->symbol()) << " : ";
+    out_ << program_->SymbolToName(v->symbol()) << " : ";
 
     if (!EmitType(v->type())) {
       return false;
@@ -417,7 +417,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
     }
     return true;
   } else if (auto* alias = type->As<type::Alias>()) {
-    out_ << module_.SymbolToName(alias->symbol());
+    out_ << program_->SymbolToName(alias->symbol());
   } else if (auto* ary = type->As<type::Array>()) {
     for (auto* deco : ary->decorations()) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
@@ -461,7 +461,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
   } else if (auto* str = type->As<type::Struct>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
-    out_ << module_.SymbolToName(str->symbol());
+    out_ << program_->SymbolToName(str->symbol());
   } else if (auto* texture = type->As<type::Texture>()) {
     out_ << "texture_";
     if (texture->Is<type::DepthTexture>()) {
@@ -549,7 +549,8 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
     deco->to_str(out_, 0);
     out_ << "]]" << std::endl;
   }
-  out_ << "struct " << module_.SymbolToName(str->symbol()) << " {" << std::endl;
+  out_ << "struct " << program_->SymbolToName(str->symbol()) << " {"
+       << std::endl;
 
   increment_indent();
   for (auto* mem : impl->members()) {
@@ -562,7 +563,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
       out_ << "[[offset(" << offset->offset() << ")]]" << std::endl;
     }
     make_indent();
-    out_ << module_.SymbolToName(mem->symbol()) << " : ";
+    out_ << program_->SymbolToName(mem->symbol()) << " : ";
     if (!EmitType(mem->type())) {
       return false;
     }
@@ -592,7 +593,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     }
   }
 
-  out_ << " " << module_.SymbolToName(var->symbol()) << " : ";
+  out_ << " " << program_->SymbolToName(var->symbol()) << " : ";
   if (!EmitType(var->type())) {
     return false;
   }

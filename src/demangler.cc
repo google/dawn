@@ -26,7 +26,7 @@ Demangler::Demangler() = default;
 
 Demangler::~Demangler() = default;
 
-std::string Demangler::Demangle(const ast::Module& mod,
+std::string Demangler::Demangle(const Program& program,
                                 const std::string& str) const {
   auto ret = str;
 
@@ -46,7 +46,7 @@ std::string Demangler::Demangle(const ast::Module& mod,
     auto id = ret.substr(start_idx, len);
 
     Symbol sym(std::stoi(id));
-    auto name = mod.SymbolToName(sym);
+    auto name = program.SymbolToName(sym);
     ret.replace(idx, end_idx - idx, name);
 
     pos = idx + name.length();

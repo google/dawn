@@ -41,18 +41,10 @@ class Manager : public Transform {
     transforms_.push_back(std::move(transform));
   }
 
-  /// Runs the transforms on `module`, returning the transformation result.
-  /// @param module the source module to transform
-  /// @returns the transformed module and diagnostics
-  Output Run(ast::Module* module) override;
-
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @note Users of Tint should register the transform with transform manager
-  /// and invoke its Run(), instead of directly calling the transform's Run().
-  /// Calling Run() directly does not perform program state cleanup operations.
+  /// Runs the transforms on `program`, returning the transformation result.
   /// @param program the source program to transform
-  /// @returns the transformation result
-  Output Run(Program* program) { return Run(&program->module); }
+  /// @returns the transformed program and diagnostics
+  Output Run(const Program* program) override;
 
  private:
   std::vector<std::unique_ptr<Transform>> transforms_;

@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/function.h"
-#include "src/ast/module.h"
+#include "src/program.h"
 #include "src/type/void_type.h"
 #include "src/writer/wgsl/test_helper.h"
 

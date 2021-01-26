@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "src/ast/module.h"
+#include "src/program.h"
 
 namespace tint {
 
@@ -27,8 +27,8 @@ namespace tint {
 class Namer {
  public:
   /// Constructor
-  /// @param mod the module this namer works with
-  explicit Namer(ast::Module* mod);
+  /// @param program the program this namer works with
+  explicit Namer(Program* program);
   /// Destructor
   virtual ~Namer();
 
@@ -48,8 +48,8 @@ class Namer {
   /// @returns true if `name` has already been used
   bool IsUsed(const std::string& name);
 
-  /// The module storing the symbol table
-  ast::Module* module_ = nullptr;
+  /// The program storing the symbol table
+  Program* program_ = nullptr;
 
  private:
   // The list of names taken by the remapper
@@ -60,8 +60,8 @@ class Namer {
 class MangleNamer : public Namer {
  public:
   /// Constructor
-  /// @param mod the module to retrieve names from
-  explicit MangleNamer(ast::Module* mod);
+  /// @param program the program to retrieve names from
+  explicit MangleNamer(Program* program);
   /// Destructor
   ~MangleNamer() override;
 
@@ -77,8 +77,8 @@ class MangleNamer : public Namer {
 class UnsafeNamer : public Namer {
  public:
   /// Constructor
-  /// @param mod the module to retrieve names from
-  explicit UnsafeNamer(ast::Module* mod);
+  /// @param program the program to retrieve names from
+  explicit UnsafeNamer(Program* program);
   /// Destructor
   ~UnsafeNamer() override;
 

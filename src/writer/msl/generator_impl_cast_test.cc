@@ -16,8 +16,8 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/program.h"
 #include "src/type/f32_type.h"
 #include "src/type/vector_type.h"
 #include "src/writer/msl/generator_impl.h"

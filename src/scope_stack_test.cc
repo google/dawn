@@ -22,7 +22,7 @@
 namespace tint {
 namespace {
 
-class ScopeStackTest : public ast::BuilderWithModule, public testing::Test {};
+class ScopeStackTest : public ast::BuilderWithProgram, public testing::Test {};
 
 TEST_F(ScopeStackTest, Global) {
   ScopeStack<uint32_t> s;

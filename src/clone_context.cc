@@ -14,11 +14,11 @@
 
 #include "src/clone_context.h"
 
-#include "src/ast/module.h"
+#include "src/program.h"
 
 namespace tint {
 
-CloneContext::CloneContext(ast::Module* to, ast::Module const* from)
+CloneContext::CloneContext(Program* to, Program const* from)
     : dst(to), src(from) {}
 CloneContext::~CloneContext() = default;
 

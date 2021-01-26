@@ -37,13 +37,13 @@
 #include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/program.h"
 #include "src/scope_stack.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
@@ -59,7 +59,7 @@ namespace tint {
 namespace writer {
 namespace spirv {
 
-/// Builder class to create SPIR-V instructions from a module.
+/// Builder class to create SPIR-V instructions from a program.
 class Builder {
  public:
   /// Contains information for generating accessor chains
@@ -82,11 +82,11 @@ class Builder {
   };
 
   /// Constructor
-  /// @param mod the module to generate from
-  explicit Builder(ast::Module* mod);
+  /// @param program the program to generate from
+  explicit Builder(const Program* program);
   ~Builder();
 
-  /// Generates the SPIR-V instructions for the given module
+  /// Generates the SPIR-V instructions for the given program
   /// @returns true if the SPIR-V was successfully built
   bool Build();
 
@@ -98,7 +98,7 @@ class Builder {
   /// @returns the number of uint32_t's needed to make up the results
   uint32_t total_size() const;
 
-  /// @returns the id bound for this module
+  /// @returns the id bound for this program
   uint32_t id_bound() const { return next_id_; }
 
   /// @returns the next id to be used
@@ -487,7 +487,7 @@ class Builder {
   /// automatically.
   Operand result_op();
 
-  ast::Module* mod_;
+  const Program* program_;
   std::string error_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;

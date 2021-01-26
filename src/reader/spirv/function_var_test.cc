@@ -91,7 +91,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_1
@@ -130,7 +130,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
@@ -169,7 +169,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
@@ -211,7 +211,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
@@ -285,7 +285,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
@@ -345,7 +345,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -360,7 +360,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
     }
   }
 }
-)")) << ToString(p->get_module(), fe.ast_body());
+)")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
@@ -384,7 +384,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -431,7 +431,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -446,7 +446,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
     }
   }
 }
-)")) << ToString(p->get_module(), fe.ast_body());
+)")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
@@ -466,7 +466,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -481,7 +481,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
     }
   }
 }
-)")) << ToString(p->get_module(), fe.ast_body());
+)")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
@@ -500,7 +500,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -515,7 +515,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
     }
   }
 }
-)")) << ToString(p->get_module(), fe.ast_body());
+)")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
@@ -535,7 +535,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -550,7 +550,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
     }
   }
 }
-)")) << ToString(p->get_module(), fe.ast_body());
+)")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
@@ -570,7 +570,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -590,7 +590,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
     }
   }
 }
-)")) << ToString(p->get_module(), fe.ast_body());
+)")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
@@ -610,7 +610,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  EXPECT_THAT(ToString(p->get_module(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->get_program(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
@@ -630,7 +630,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
     }
   }
 }
-)")) << ToString(p->get_module(), fe.ast_body());
+)")) << ToString(p->get_program(), fe.ast_body());
 }
 
 TEST_F(SpvParserTest,
@@ -655,7 +655,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect =
       R"(VariableDeclStatement{
   Variable{
@@ -703,7 +703,7 @@ TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   Variable{
     x_25
@@ -775,7 +775,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   Variable{
     x_25
@@ -874,7 +874,7 @@ TEST_F(
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{x_1}
   ScalarConstructor[not set]{0}
@@ -992,7 +992,7 @@ TEST_F(
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
   // a const definition.
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1077,7 +1077,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{true}
@@ -1164,7 +1164,7 @@ TEST_F(
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(If{
   (
     ScalarConstructor[not set]{true}
@@ -1247,7 +1247,7 @@ TEST_F(SpvParserTest,
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
   // a const definition.
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1321,7 +1321,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(Loop{
   VariableDeclStatement{
     Variable{
@@ -1465,7 +1465,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(Loop{
   VariableDeclStatement{
     Variable{
@@ -1623,7 +1623,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_101
@@ -1792,7 +1792,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_101
@@ -1914,7 +1914,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   VariableConst{
     x_101
@@ -2022,7 +2022,7 @@ TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->get_module(), fe.ast_body());
+  auto got = ToString(p->get_program(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   Variable{
     x_101_phi

@@ -35,8 +35,8 @@ TEST_F(SpvParserTest, Import_NoImport) {
   auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->module().to_str();
-  EXPECT_THAT(module_ast, Not(HasSubstr("Import")));
+  const auto program_ast = p->program().to_str();
+  EXPECT_THAT(program_ast, Not(HasSubstr("Import")));
 }
 
 TEST_F(SpvParserTest, Import_ImportGlslStd450) {

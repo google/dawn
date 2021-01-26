@@ -19,8 +19,8 @@
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/expression.h"
-#include "src/ast/module.h"
 #include "src/ast/statement.h"
+#include "src/program.h"
 #include "src/scope_stack.h"
 #include "src/transform/transform.h"
 
@@ -38,13 +38,13 @@ class BoundArrayAccessors : public Transform {
   /// Destructor
   ~BoundArrayAccessors() override;
 
-  /// Runs the transform on `module`, returning the transformation result.
+  /// Runs the transform on `program`, returning the transformation result.
   /// @note Users of Tint should register the transform with transform manager
   /// and invoke its Run(), instead of directly calling the transform's Run().
-  /// Calling Run() directly does not perform module state cleanup operations.
-  /// @param module the source module to transform
+  /// Calling Run() directly does not perform program state cleanup operations.
+  /// @param program the source program to transform
   /// @returns the transformation result
-  Output Run(ast::Module* module) override;
+  Output Run(const Program* program) override;
 
  private:
   ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr,

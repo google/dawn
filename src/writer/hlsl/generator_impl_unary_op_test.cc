@@ -16,8 +16,8 @@
 #include <vector>
 
 #include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/program.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

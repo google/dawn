@@ -21,15 +21,15 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/builder.h"
-#include "src/ast/module.h"
 #include "src/demangler.h"
+#include "src/program.h"
 
 namespace tint {
 namespace ast {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public BASE, public BuilderWithModule {
+class TestHelperBase : public BASE, public BuilderWithProgram {
  public:
   /// Demangles the given string
   /// @param s the string to demangle

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/discard_statement.h"
-#include "src/ast/module.h"
+#include "src/program.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

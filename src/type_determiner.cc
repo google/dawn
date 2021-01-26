@@ -59,10 +59,7 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer(ast::Module* mod) : mod_(mod) {}
-
-TypeDeterminer::TypeDeterminer(Program* program)
-    : TypeDeterminer(&program->module) {}
+TypeDeterminer::TypeDeterminer(Program* program) : program_(program) {}
 
 TypeDeterminer::~TypeDeterminer() = default;
 
@@ -104,7 +101,7 @@ void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
 
 bool TypeDeterminer::Determine() {
   std::vector<type::StorageTexture*> storage_textures;
-  for (auto& it : mod_->types()) {
+  for (auto& it : program_->types()) {
     if (auto* storage =
             it.second->UnwrapIfNeeded()->As<type::StorageTexture>()) {
       storage_textures.emplace_back(storage);
@@ -119,7 +116,7 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  for (auto* var : mod_->global_variables()) {
+  for (auto* var : program_->global_variables()) {
     variable_stack_.set_global(var->symbol(), var);
 
     if (var->has_constructor()) {
@@ -129,13 +126,13 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  if (!DetermineFunctions(mod_->Functions())) {
+  if (!DetermineFunctions(program_->Functions())) {
     return false;
   }
 
   // Walk over the caller to callee information and update functions with which
   // entry points call those functions.
-  for (auto* func : mod_->Functions()) {
+  for (auto* func : program_->Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -354,7 +351,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
   } else if (auto* vec = parent_type->As<type::Vector>()) {
     ret = vec->type();
   } else if (auto* mat = parent_type->As<type::Matrix>()) {
-    ret = mod_->create<type::Vector>(mat->type(), mat->rows());
+    ret = program_->create<type::Vector>(mat->type(), mat->rows());
   } else {
     set_error(expr->source(), "invalid parent type (" +
                                   parent_type->type_name() +
@@ -364,13 +361,13 @@ bool TypeDeterminer::DetermineArrayAccessor(
 
   // If we're extracting from a pointer, we return a pointer.
   if (auto* ptr = res->As<type::Pointer>()) {
-    ret = mod_->create<type::Pointer>(ret, ptr->storage_class());
+    ret = program_->create<type::Pointer>(ret, ptr->storage_class());
   } else if (auto* arr = parent_type->As<type::Array>()) {
     if (!arr->type()->is_scalar()) {
       // If we extract a non-scalar from an array then we also get a pointer. We
       // will generate a Function storage class variable to store this
       // into.
-      ret = mod_->create<type::Pointer>(ret, ast::StorageClass::kFunction);
+      ret = program_->create<type::Pointer>(ret, ast::StorageClass::kFunction);
     }
   }
   expr->set_result_type(ret);
@@ -407,10 +404,11 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
         caller_to_callee_[current_function_->symbol()].push_back(
             ident->symbol());
 
-        auto* callee_func = mod_->Functions().Find(ident->symbol());
+        auto* callee_func = program_->Functions().Find(ident->symbol());
         if (callee_func == nullptr) {
-          set_error(expr->source(), "unable to find called function: " +
-                                        mod_->SymbolToName(ident->symbol()));
+          set_error(expr->source(),
+                    "unable to find called function: " +
+                        program_->SymbolToName(ident->symbol()));
           return false;
         }
 
@@ -436,7 +434,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     auto func_sym = expr->func()->As<ast::IdentifierExpression>()->symbol();
     set_error(expr->source(),
               "v-0005: function must be declared before use: '" +
-                  mod_->SymbolToName(func_sym) + "'");
+                  program_->SymbolToName(func_sym) + "'");
     return false;
   }
 
@@ -523,7 +521,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   if (ast::intrinsic::IsDerivative(ident->intrinsic())) {
     if (expr->params().size() != 1) {
       set_error(expr->source(), "incorrect number of parameters for " +
-                                    mod_->SymbolToName(ident->symbol()));
+                                    program_->SymbolToName(ident->symbol()));
       return false;
     }
 
@@ -534,26 +532,26 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   }
   if (ident->intrinsic() == ast::Intrinsic::kAny ||
       ident->intrinsic() == ast::Intrinsic::kAll) {
-    expr->func()->set_result_type(mod_->create<type::Bool>());
+    expr->func()->set_result_type(program_->create<type::Bool>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kArrayLength) {
-    expr->func()->set_result_type(mod_->create<type::U32>());
+    expr->func()->set_result_type(program_->create<type::U32>());
     return true;
   }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
     if (expr->params().size() != 1) {
       set_error(expr->source(), "incorrect number of parameters for " +
-                                    mod_->SymbolToName(ident->symbol()));
+                                    program_->SymbolToName(ident->symbol()));
       return false;
     }
 
-    auto* bool_type = mod_->create<type::Bool>();
+    auto* bool_type = program_->create<type::Bool>();
 
     auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
     if (auto* vec = param_type->As<type::Vector>()) {
       expr->func()->set_result_type(
-          mod_->create<type::Vector>(bool_type, vec->size()));
+          program_->create<type::Vector>(bool_type, vec->size()));
     } else {
       expr->func()->set_result_type(bool_type);
     }
@@ -565,7 +563,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     auto* texture_param = expr->params()[0];
     if (!texture_param->result_type()->UnwrapAll()->Is<type::Texture>()) {
       set_error(expr->source(), "invalid first argument for " +
-                                    mod_->SymbolToName(ident->symbol()));
+                                    program_->SymbolToName(ident->symbol()));
       return false;
     }
     type::Texture* texture =
@@ -677,7 +675,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     if (expr->params().size() != param.count) {
       set_error(expr->source(),
                 "incorrect number of parameters for " +
-                    mod_->SymbolToName(ident->symbol()) + ", got " +
+                    program_->SymbolToName(ident->symbol()) + ", got " +
                     std::to_string(expr->params().size()) + " and expected " +
                     std::to_string(param.count));
       return false;
@@ -690,7 +688,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     type::Type* return_type = nullptr;
     switch (ident->intrinsic()) {
       case ast::Intrinsic::kTextureDimensions: {
-        auto* i32 = mod_->create<type::I32>();
+        auto* i32 = program_->create<type::I32>();
         switch (texture->dim()) {
           default:
             set_error(expr->source(), "invalid texture dimensions");
@@ -701,12 +699,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
             break;
           case type::TextureDimension::k2d:
           case type::TextureDimension::k2dArray:
-            return_type = mod_->create<type::Vector>(i32, 2);
+            return_type = program_->create<type::Vector>(i32, 2);
             break;
           case type::TextureDimension::k3d:
           case type::TextureDimension::kCube:
           case type::TextureDimension::kCubeArray:
-            return_type = mod_->create<type::Vector>(i32, 3);
+            return_type = program_->create<type::Vector>(i32, 3);
             break;
         }
         break;
@@ -714,14 +712,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
       case ast::Intrinsic::kTextureNumLayers:
       case ast::Intrinsic::kTextureNumLevels:
       case ast::Intrinsic::kTextureNumSamples:
-        return_type = mod_->create<type::I32>();
+        return_type = program_->create<type::I32>();
         break;
       case ast::Intrinsic::kTextureStore:
-        return_type = mod_->create<type::Void>();
+        return_type = program_->create<type::Void>();
         break;
       default: {
         if (texture->Is<type::DepthTexture>()) {
-          return_type = mod_->create<type::F32>();
+          return_type = program_->create<type::F32>();
         } else {
           type::Type* type = nullptr;
           if (auto* storage = texture->As<type::StorageTexture>()) {
@@ -736,7 +734,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                       "unknown texture type for texture sampling");
             return false;
           }
-          return_type = mod_->create<type::Vector>(type, 4);
+          return_type = program_->create<type::Vector>(type, 4);
         }
       }
     }
@@ -745,13 +743,13 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kDot) {
-    expr->func()->set_result_type(mod_->create<type::F32>());
+    expr->func()->set_result_type(program_->create<type::F32>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
     if (expr->params().size() != 3) {
       set_error(expr->source(), "incorrect number of parameters for " +
-                                    mod_->SymbolToName(ident->symbol()) +
+                                    program_->SymbolToName(ident->symbol()) +
                                     " expected 3 got " +
                                     std::to_string(expr->params().size()));
       return false;
@@ -771,13 +769,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
   }
   if (data == nullptr) {
-    error_ = "unable to find intrinsic " + mod_->SymbolToName(ident->symbol());
+    error_ =
+        "unable to find intrinsic " + program_->SymbolToName(ident->symbol());
     return false;
   }
 
   if (expr->params().size() != data->param_count) {
     set_error(expr->source(), "incorrect number of parameters for " +
-                                  mod_->SymbolToName(ident->symbol()) +
+                                  program_->SymbolToName(ident->symbol()) +
                                   ". Expected " +
                                   std::to_string(data->param_count) + " got " +
                                   std::to_string(expr->params().size()));
@@ -795,7 +794,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
             !result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        mod_->SymbolToName(ident->symbol()) + ". " +
+                        program_->SymbolToName(ident->symbol()) + ". " +
                         "Requires float or int, scalar or vector values");
           return false;
         }
@@ -804,7 +803,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_float_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        mod_->SymbolToName(ident->symbol()) + ". " +
+                        program_->SymbolToName(ident->symbol()) + ". " +
                         "Requires float scalar or float vector values");
           return false;
         }
@@ -814,34 +813,36 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         if (!result_types.back()->is_integer_scalar_or_vector()) {
           set_error(expr->source(),
                     "incorrect type for " +
-                        mod_->SymbolToName(ident->symbol()) + ". " +
+                        program_->SymbolToName(ident->symbol()) + ". " +
                         "Requires integer scalar or integer vector values");
           return false;
         }
         break;
       case IntrinsicDataType::kFloatVector:
         if (!result_types.back()->is_float_vector()) {
-          set_error(expr->source(), "incorrect type for " +
-                                        mod_->SymbolToName(ident->symbol()) +
-                                        ". " + "Requires float vector values");
+          set_error(expr->source(),
+                    "incorrect type for " +
+                        program_->SymbolToName(ident->symbol()) + ". " +
+                        "Requires float vector values");
           return false;
         }
         if (data->vector_size > 0 &&
             result_types.back()->As<type::Vector>()->size() !=
                 data->vector_size) {
-          set_error(expr->source(), "incorrect vector size for " +
-                                        mod_->SymbolToName(ident->symbol()) +
-                                        ". " + "Requires " +
-                                        std::to_string(data->vector_size) +
-                                        " elements");
+          set_error(expr->source(),
+                    "incorrect vector size for " +
+                        program_->SymbolToName(ident->symbol()) + ". " +
+                        "Requires " + std::to_string(data->vector_size) +
+                        " elements");
           return false;
         }
         break;
       case IntrinsicDataType::kMatrix:
         if (!result_types.back()->Is<type::Matrix>()) {
-          set_error(expr->source(), "incorrect type for " +
-                                        mod_->SymbolToName(ident->symbol()) +
-                                        ". Requires matrix value");
+          set_error(expr->source(),
+                    "incorrect type for " +
+                        program_->SymbolToName(ident->symbol()) +
+                        ". Requires matrix value");
           return false;
         }
         break;
@@ -852,7 +853,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   for (size_t i = 1; i < data->param_count; ++i) {
     if (result_types[0] != result_types[i]) {
       set_error(expr->source(), "mismatched parameter types for " +
-                                    mod_->SymbolToName(ident->symbol()));
+                                    program_->SymbolToName(ident->symbol()));
       return false;
     }
   }
@@ -903,7 +904,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
       expr->set_result_type(var->type());
     } else {
       expr->set_result_type(
-          mod_->create<type::Pointer>(var->type(), var->storage_class()));
+          program_->create<type::Pointer>(var->type(), var->storage_class()));
     }
 
     set_referenced_from_function_if_needed(var, true);
@@ -919,14 +920,14 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   if (!SetIntrinsicIfNeeded(expr)) {
     set_error(expr->source(),
               "v-0006: identifier must be declared before use: " +
-                  mod_->SymbolToName(symbol));
+                  program_->SymbolToName(symbol));
     return false;
   }
   return true;
 }
 
 bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
-  auto name = mod_->SymbolToName(ident->symbol());
+  auto name = program_->SymbolToName(ident->symbol());
   if (name == "abs") {
     ident->set_intrinsic(ast::Intrinsic::kAbs);
   } else if (name == "acos") {
@@ -1099,32 +1100,33 @@ bool TypeDeterminer::DetermineMemberAccessor(
     }
 
     if (ret == nullptr) {
-      set_error(expr->source(),
-                "struct member " + mod_->SymbolToName(symbol) + " not found");
+      set_error(
+          expr->source(),
+          "struct member " + program_->SymbolToName(symbol) + " not found");
       return false;
     }
 
     // If we're extracting from a pointer, we return a pointer.
     if (auto* ptr = res->As<type::Pointer>()) {
-      ret = mod_->create<type::Pointer>(ret, ptr->storage_class());
+      ret = program_->create<type::Pointer>(ret, ptr->storage_class());
     }
   } else if (auto* vec = data_type->As<type::Vector>()) {
     // TODO(dsinclair): Swizzle, record into the identifier experesion
 
-    auto size = mod_->SymbolToName(expr->member()->symbol()).size();
+    auto size = program_->SymbolToName(expr->member()->symbol()).size();
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
       // If we're extracting from a pointer, we return a pointer.
       if (auto* ptr = res->As<type::Pointer>()) {
-        ret = mod_->create<type::Pointer>(ret, ptr->storage_class());
+        ret = program_->create<type::Pointer>(ret, ptr->storage_class());
       }
     } else {
       // The vector will have a number of components equal to the length of the
       // swizzle. This assumes the validator will check that the swizzle
       // is correct.
-      ret =
-          mod_->create<type::Vector>(vec->type(), static_cast<uint32_t>(size));
+      ret = program_->create<type::Vector>(vec->type(),
+                                           static_cast<uint32_t>(size));
     }
   } else {
     set_error(
@@ -1155,10 +1157,11 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   if (expr->IsLogicalAnd() || expr->IsLogicalOr() || expr->IsEqual() ||
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
-    auto* bool_type = mod_->create<type::Bool>();
+    auto* bool_type = program_->create<type::Bool>();
     auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
     if (auto* vec = param_type->As<type::Vector>()) {
-      expr->set_result_type(mod_->create<type::Vector>(bool_type, vec->size()));
+      expr->set_result_type(
+          program_->create<type::Vector>(bool_type, vec->size()));
     } else {
       expr->set_result_type(bool_type);
     }
@@ -1175,14 +1178,14 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     auto* lhs_vec = lhs_type->As<type::Vector>();
     auto* rhs_vec = rhs_type->As<type::Vector>();
     if (lhs_mat && rhs_mat) {
-      expr->set_result_type(mod_->create<type::Matrix>(
+      expr->set_result_type(program_->create<type::Matrix>(
           lhs_mat->type(), lhs_mat->rows(), rhs_mat->columns()));
     } else if (lhs_mat && rhs_vec) {
       expr->set_result_type(
-          mod_->create<type::Vector>(lhs_mat->type(), lhs_mat->rows()));
+          program_->create<type::Vector>(lhs_mat->type(), lhs_mat->rows()));
     } else if (lhs_vec && rhs_mat) {
       expr->set_result_type(
-          mod_->create<type::Vector>(rhs_mat->type(), rhs_mat->columns()));
+          program_->create<type::Vector>(rhs_mat->type(), rhs_mat->columns()));
     } else if (lhs_mat) {
       // matrix * scalar
       expr->set_result_type(lhs_type);
@@ -1233,7 +1236,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
     case type::ImageFormat::kRg32Uint:
     case type::ImageFormat::kRgba16Uint:
     case type::ImageFormat::kRgba32Uint: {
-      tex->set_type(mod_->create<type::U32>());
+      tex->set_type(program_->create<type::U32>());
       return true;
     }
 
@@ -1246,7 +1249,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
     case type::ImageFormat::kRg32Sint:
     case type::ImageFormat::kRgba16Sint:
     case type::ImageFormat::kRgba32Sint: {
-      tex->set_type(mod_->create<type::I32>());
+      tex->set_type(program_->create<type::I32>());
       return true;
     }
 
@@ -1267,7 +1270,7 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
     case type::ImageFormat::kRg32Float:
     case type::ImageFormat::kRgba16Float:
     case type::ImageFormat::kRgba32Float: {
-      tex->set_type(mod_->create<type::F32>());
+      tex->set_type(program_->create<type::F32>());
       return true;
     }
 

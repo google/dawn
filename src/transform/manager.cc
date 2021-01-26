@@ -22,23 +22,23 @@ namespace transform {
 Manager::Manager() = default;
 Manager::~Manager() = default;
 
-Transform::Output Manager::Run(ast::Module* module) {
+Transform::Output Manager::Run(const Program* program) {
   Output out;
   if (!transforms_.empty()) {
     for (auto& transform : transforms_) {
-      auto res = transform->Run(module);
-      out.module = std::move(res.module);
+      auto res = transform->Run(program);
+      out.program = std::move(res.program);
       out.diagnostics.add(std::move(res.diagnostics));
       if (out.diagnostics.contains_errors()) {
         return out;
       }
-      module = &out.module;
+      program = &out.program;
     }
   } else {
-    out.module = module->Clone();
+    out.program = program->Clone();
   }
 
-  TypeDeterminer td(&out.module);
+  TypeDeterminer td(&out.program);
   if (!td.Determine()) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;

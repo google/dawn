@@ -18,14 +18,14 @@
 
 #include "gmock/gmock.h"
 #include "src/ast/struct.h"
-#include "src/type/array_type.h"
-#include "src/type/matrix_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/vector_type.h"
 #include "src/demangler.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
+#include "src/type/array_type.h"
+#include "src/type/matrix_type.h"
+#include "src/type/struct_type.h"
+#include "src/type/vector_type.h"
 
 namespace tint {
 namespace reader {
@@ -40,7 +40,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr("S Struct"));
 }
 
@@ -51,7 +51,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr("mystruct Struct"));
 }
 
@@ -62,7 +62,7 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
     %s2 = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr(R"(S Struct{
     StructMember{field0: __u32}
     StructMember{field1: __u32}
@@ -84,7 +84,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr("RTArr -> __array__u32_stride_8\n"));
 }
 
@@ -97,7 +97,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
     %arr2 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr("RTArr -> __array__u32_stride_8\n  RTArr_1 -> "
                         "__array__u32_stride_8\n"));
 }
@@ -110,7 +110,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr("myrtarr -> __array__u32_stride_8\n"));
 }
 
@@ -124,7 +124,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr("myarr -> __array__u32_5_stride_8"));
 }
 
@@ -138,7 +138,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(Demangler().Demangle(p->get_module(), p->get_module().to_str()),
+  EXPECT_THAT(Demangler().Demangle(p->get_program(), p->get_program().to_str()),
               HasSubstr("Arr -> __array__u32_5_stride_8\n  Arr_1 -> "
                         "__array__u32_5_stride_8"));
 }

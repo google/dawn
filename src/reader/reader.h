@@ -18,7 +18,6 @@
 #include <string>
 #include <utility>
 
-#include "src/ast/module.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
 #include "src/program.h"
@@ -47,11 +46,8 @@ class Reader {
   /// @returns the full list of diagnostic messages.
   const diag::List& diagnostics() const { return diags_; }
 
-  /// @returns the module. The module in the parser will be reset after this.
-  virtual ast::Module module() = 0;
-
-  /// @returns the program. The module in the parser will be reset after this.
-  Program program() { return Program{module()}; }
+  /// @returns the program. The program in the parser will be reset after this.
+  virtual Program program() = 0;
 
  protected:
   /// Constructor

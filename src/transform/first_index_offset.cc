@@ -81,11 +81,11 @@ FirstIndexOffset::FirstIndexOffset(uint32_t binding, uint32_t group)
 
 FirstIndexOffset::~FirstIndexOffset() = default;
 
-Transform::Output FirstIndexOffset::Run(ast::Module* in) {
+Transform::Output FirstIndexOffset::Run(const Program* in) {
   // First do a quick check to see if the transform has already been applied.
   for (ast::Variable* var : in->global_variables()) {
     if (auto* dec_var = var->As<ast::Variable>()) {
-      if (dec_var->symbol() == in->RegisterSymbol(kBufferName)) {
+      if (dec_var->symbol() == in->GetSymbol(kBufferName)) {
         diag::Diagnostic err;
         err.message = "First index offset transform has already been applied.";
         err.severity = diag::Severity::Error;
@@ -99,7 +99,8 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // Running TypeDeterminer as we require local_referenced_builtin_variables()
   // to be populated. TODO(bclayton) - it should not be necessary to re-run the
   // type determiner if semantic information is already generated. Remove.
-  TypeDeterminer td(in);
+  // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
+  TypeDeterminer td(const_cast<Program*>(in));
   if (!td.Determine()) {
     diag::Diagnostic err;
     err.severity = diag::Severity::Error;
@@ -115,9 +116,9 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // Lazilly construct the UniformBuffer on first call to
   // maybe_create_buffer_var()
   ast::Variable* buffer_var = nullptr;
-  auto maybe_create_buffer_var = [&](ast::Module* mod) {
+  auto maybe_create_buffer_var = [&](Program* program) {
     if (buffer_var == nullptr) {
-      buffer_var = AddUniformBuffer(mod);
+      buffer_var = AddUniformBuffer(program);
     }
   };
 
@@ -126,7 +127,7 @@ Transform::Output FirstIndexOffset::Run(ast::Module* in) {
   // these builtins.
 
   Output out;
-  CloneContext(&out.module, in)
+  CloneContext(&out.program, in)
       .ReplaceAll([&](CloneContext* ctx, ast::Variable* var) -> ast::Variable* {
         for (ast::VariableDecoration* dec : var->decorations()) {
           if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
@@ -194,16 +195,16 @@ uint32_t FirstIndexOffset::GetFirstInstanceOffset() {
   return instance_index_offset_;
 }
 
-ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
-  auto* u32_type = mod->create<type::U32>();
+ast::Variable* FirstIndexOffset::AddUniformBuffer(Program* dst) {
+  auto* u32_type = dst->create<type::U32>();
   ast::StructMemberList members;
   uint32_t offset = 0;
   if (has_vertex_index_) {
     ast::StructMemberDecorationList member_dec;
     member_dec.push_back(
-        mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
-    members.push_back(mod->create<ast::StructMember>(
-        Source{}, mod->RegisterSymbol(kFirstVertexName), u32_type,
+        dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
+    members.push_back(dst->create<ast::StructMember>(
+        Source{}, dst->RegisterSymbol(kFirstVertexName), u32_type,
         std::move(member_dec)));
     vertex_index_offset_ = offset;
     offset += 4;
@@ -212,36 +213,36 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ast::Module* mod) {
   if (has_instance_index_) {
     ast::StructMemberDecorationList member_dec;
     member_dec.push_back(
-        mod->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
-    members.push_back(mod->create<ast::StructMember>(
-        Source{}, mod->RegisterSymbol(kFirstInstanceName), u32_type,
+        dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
+    members.push_back(dst->create<ast::StructMember>(
+        Source{}, dst->RegisterSymbol(kFirstInstanceName), u32_type,
         std::move(member_dec)));
     instance_index_offset_ = offset;
     offset += 4;
   }
 
   ast::StructDecorationList decos;
-  decos.push_back(mod->create<ast::StructBlockDecoration>(Source{}));
+  decos.push_back(dst->create<ast::StructBlockDecoration>(Source{}));
 
-  auto* struct_type = mod->create<type::Struct>(
-      mod->RegisterSymbol(kStructName),
-      mod->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
+  auto* struct_type = dst->create<type::Struct>(
+      dst->RegisterSymbol(kStructName),
+      dst->create<ast::Struct>(Source{}, std::move(members), std::move(decos)));
 
-  auto* idx_var = mod->create<ast::Variable>(
+  auto* idx_var = dst->create<ast::Variable>(
       Source{},                          // source
-      mod->RegisterSymbol(kBufferName),  // symbol
+      dst->RegisterSymbol(kBufferName),  // symbol
       ast::StorageClass::kUniform,       // storage_class
       struct_type,                       // type
       false,                             // is_const
       nullptr,                           // constructor
       ast::VariableDecorationList{
-          mod->create<ast::BindingDecoration>(Source{}, binding_),
-          mod->create<ast::GroupDecoration>(Source{}, group_),
+          dst->create<ast::BindingDecoration>(Source{}, binding_),
+          dst->create<ast::GroupDecoration>(Source{}, group_),
       });  // decorations
 
-  mod->AddGlobalVariable(idx_var);
+  dst->AddGlobalVariable(idx_var);
 
-  mod->AddConstructedType(struct_type);
+  dst->AddConstructedType(struct_type);
 
   return idx_var;
 }
@@ -250,28 +251,28 @@ ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
     const std::string& original_name,
     const std::string& field_name,
     ast::Variable* buffer_var,
-    ast::Module* mod) {
+    Program* dst) {
   auto* buffer =
-      mod->create<ast::IdentifierExpression>(Source{}, buffer_var->symbol());
+      dst->create<ast::IdentifierExpression>(Source{}, buffer_var->symbol());
 
   auto lhs_name = kIndexOffsetPrefix + original_name;
-  auto* constructor = mod->create<ast::BinaryExpression>(
+  auto* constructor = dst->create<ast::BinaryExpression>(
       Source{}, ast::BinaryOp::kAdd,
-      mod->create<ast::IdentifierExpression>(Source{},
-                                             mod->RegisterSymbol(lhs_name)),
-      mod->create<ast::MemberAccessorExpression>(
+      dst->create<ast::IdentifierExpression>(Source{},
+                                             dst->RegisterSymbol(lhs_name)),
+      dst->create<ast::MemberAccessorExpression>(
           Source{}, buffer,
-          mod->create<ast::IdentifierExpression>(
-              Source{}, mod->RegisterSymbol(field_name))));
+          dst->create<ast::IdentifierExpression>(
+              Source{}, dst->RegisterSymbol(field_name))));
   auto* var =
-      mod->create<ast::Variable>(Source{},                            // source
-                                 mod->RegisterSymbol(original_name),  // symbol
+      dst->create<ast::Variable>(Source{},                            // source
+                                 dst->RegisterSymbol(original_name),  // symbol
                                  ast::StorageClass::kNone,  // storage_class
-                                 mod->create<type::U32>(),  // type
+                                 dst->create<type::U32>(),  // type
                                  true,                      // is_const
                                  constructor,               // constructor
                                  ast::VariableDecorationList{});  // decorations
-  return mod->create<ast::VariableDeclStatement>(Source{}, var);
+  return dst->create<ast::VariableDeclStatement>(Source{}, var);
 }
 
 }  // namespace transform

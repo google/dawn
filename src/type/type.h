@@ -23,9 +23,7 @@ namespace tint {
 
 // Forward declarations
 class CloneContext;
-namespace ast {
-class Module;
-}  // namespace ast
+class Program;
 
 namespace type {
 
@@ -103,12 +101,12 @@ class Type : public Castable<Type> {
 
   /// A helper method for cloning the `Type` `t` if it is not null.
   /// If `t` is null, then `Clone()` returns null.
-  /// @param m the module to clone `n` into
+  /// @param p the program to clone `n` into
   /// @param t the `Type` to clone (if not null)
   /// @return the cloned type
   template <typename T>
-  static T* Clone(ast::Module* m, const T* t) {
-    return (t != nullptr) ? static_cast<T*>(t->Clone(m)) : nullptr;
+  static T* Clone(Program* p, const T* t) {
+    return (t != nullptr) ? static_cast<T*>(t->Clone(p)) : nullptr;
   }
 };
 

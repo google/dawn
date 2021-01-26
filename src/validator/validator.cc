@@ -22,8 +22,8 @@ Validator::Validator() = default;
 
 Validator::~Validator() = default;
 
-bool Validator::Validate(const ast::Module* module) {
-  ValidatorImpl impl(module);
+bool Validator::Validate(const Program* program) {
+  ValidatorImpl impl(program);
   bool ret = impl.Validate();
   diags_ = impl.diagnostics();
   return ret;

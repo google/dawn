@@ -38,7 +38,6 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
-#include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
@@ -53,6 +52,7 @@
 #include "src/ast/variable_decoration.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
+#include "src/program.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
 #include "src/type/storage_texture_type.h"
@@ -307,11 +307,11 @@ class ParserImpl {
   /// @returns the diagnostic messages
   diag::List& diagnostics() { return diags_; }
 
-  /// @returns the module. The module in the parser will be reset after this.
-  ast::Module module() { return std::move(module_); }
+  /// @returns the program. The program in the parser will be reset after this.
+  Program program() { return std::move(program_); }
 
   /// @returns a pointer to the module, without resetting it.
-  ast::Module& get_module() { return module_; }
+  Program& get_program() { return program_; }
 
   /// @returns the next token
   Token next();
@@ -829,7 +829,7 @@ class ParserImpl {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) {
-    return module_.create<T>(std::forward<ARGS>(args)...);
+    return program_.create<T>(std::forward<ARGS>(args)...);
   }
 
   diag::List diags_;
@@ -839,7 +839,7 @@ class ParserImpl {
   std::vector<Token::Type> sync_tokens_;
   int silence_errors_ = 0;
   std::unordered_map<std::string, type::Type*> registered_constructs_;
-  ast::Module module_;
+  Program program_;
   size_t max_errors_ = 25;
 };
 

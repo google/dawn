@@ -67,11 +67,11 @@ namespace tint {
 namespace inspector {
 namespace {
 
-class InspectorHelper : public ast::BuilderWithModule {
+class InspectorHelper : public ast::BuilderWithProgram {
  public:
   InspectorHelper()
       : td_(std::make_unique<TypeDeterminer>(mod)),
-        inspector_(std::make_unique<Inspector>(*mod)),
+        inspector_(std::make_unique<Inspector>(mod)),
         sampler_type_(type::SamplerKind::kSampler),
         comparison_sampler_type_(type::SamplerKind::kComparisonSampler) {}
 
@@ -317,7 +317,7 @@ class InspectorHelper : public ast::BuilderWithModule {
     return {struct_type, std::move(access_type)};
   }
 
-  /// Adds a binding variable with a struct type to the module
+  /// Adds a binding variable with a struct type to the program
   /// @param name the name of the variable
   /// @param type the type to use
   /// @param storage_class the storage class to use
@@ -337,7 +337,7 @@ class InspectorHelper : public ast::BuilderWithModule {
     mod->AddGlobalVariable(var);
   }
 
-  /// Adds an uniform buffer variable to the module
+  /// Adds an uniform buffer variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
   /// @param group the binding/group/ to use for the uniform buffer
@@ -349,7 +349,7 @@ class InspectorHelper : public ast::BuilderWithModule {
     AddBinding(name, type, ast::StorageClass::kUniform, group, binding);
   }
 
-  /// Adds a storage buffer variable to the module
+  /// Adds a storage buffer variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
   /// @param group the binding/group to use for the storage buffer
@@ -398,7 +398,7 @@ class InspectorHelper : public ast::BuilderWithModule {
                 ast::FunctionDecorationList{});
   }
 
-  /// Adds a regular sampler variable to the module
+  /// Adds a regular sampler variable to the program
   /// @param name the name of the variable
   /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
@@ -407,7 +407,7 @@ class InspectorHelper : public ast::BuilderWithModule {
                binding);
   }
 
-  /// Adds a comparison sampler variable to the module
+  /// Adds a comparison sampler variable to the program
   /// @param name the name of the variable
   /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
@@ -444,7 +444,7 @@ class InspectorHelper : public ast::BuilderWithModule {
     return create<type::MultisampledTexture>(dim, type);
   }
 
-  /// Adds a sampled texture variable to the module
+  /// Adds a sampled texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
   /// @param group the binding/group to use for the sampled texture
@@ -456,7 +456,7 @@ class InspectorHelper : public ast::BuilderWithModule {
     AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
   }
 
-  /// Adds a multi-sampled texture variable to the module
+  /// Adds a multi-sampled texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
   /// @param group the binding/group to use for the multi-sampled texture
@@ -473,7 +473,7 @@ class InspectorHelper : public ast::BuilderWithModule {
         Var(name, ast::StorageClass::kUniformConstant, type));
   }
 
-  /// Adds a depth texture variable to the module
+  /// Adds a depth texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, type::Type* type) {

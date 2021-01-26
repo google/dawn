@@ -15,7 +15,7 @@
 #include "src/namer.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/module.h"
+#include "src/program.h"
 
 namespace tint {
 namespace {
@@ -23,7 +23,7 @@ namespace {
 using NamerTest = testing::Test;
 
 TEST_F(NamerTest, GenerateName) {
-  ast::Module m;
+  Program m;
   MangleNamer n(&m);
   EXPECT_EQ("name", n.GenerateName("name"));
   EXPECT_EQ("name_0", n.GenerateName("name"));
@@ -33,7 +33,7 @@ TEST_F(NamerTest, GenerateName) {
 using MangleNamerTest = testing::Test;
 
 TEST_F(MangleNamerTest, ReturnsName) {
-  ast::Module m;
+  Program m;
   auto s = m.RegisterSymbol("my_sym");
 
   MangleNamer n(&m);
@@ -41,7 +41,7 @@ TEST_F(MangleNamerTest, ReturnsName) {
 }
 
 TEST_F(MangleNamerTest, ReturnsSameValueForSameName) {
-  ast::Module m;
+  Program m;
   auto s1 = m.RegisterSymbol("my_sym");
   auto s2 = m.RegisterSymbol("my_sym2");
 
@@ -53,7 +53,7 @@ TEST_F(MangleNamerTest, ReturnsSameValueForSameName) {
 
 using UnsafeNamerTest = testing::Test;
 TEST_F(UnsafeNamerTest, ReturnsName) {
-  ast::Module m;
+  Program m;
   auto s = m.RegisterSymbol("my_sym");
 
   UnsafeNamer n(&m);

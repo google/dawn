@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident) {
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
   auto* ident = e->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
@@ -193,7 +193,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
 TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto p = parser("f32(1)");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* f32 = mod.create<type::F32>();
 
   auto e = p->primary_expression();
@@ -215,7 +215,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   auto p = parser("bitcast<f32>(1)");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* f32 = mod.create<type::F32>();
 
   auto e = p->primary_expression();

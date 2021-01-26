@@ -29,7 +29,7 @@ namespace reader {
 namespace wgsl {
 
 /// WGSL Parser test class
-class ParserImplTest : public testing::Test, public ast::BuilderWithModule {
+class ParserImplTest : public testing::Test, public ast::BuilderWithProgram {
  public:
   /// Constructor
   ParserImplTest();
@@ -52,7 +52,7 @@ class ParserImplTest : public testing::Test, public ast::BuilderWithModule {
 /// WGSL Parser test class with param
 template <typename T>
 class ParserImplTestWithParam : public testing::TestWithParam<T>,
-                                public ast::BuilderWithModule {
+                                public ast::BuilderWithProgram {
  public:
   /// Constructor
   ParserImplTestWithParam() = default;

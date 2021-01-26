@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "src/ast/module.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/program.h"
 #include "src/symbol.h"
 #include "src/transform/transform.h"
 
@@ -68,13 +68,13 @@ class FirstIndexOffset : public Transform {
   FirstIndexOffset(uint32_t binding, uint32_t group);
   ~FirstIndexOffset() override;
 
-  /// Runs the transform on `module`, returning the transformation result.
+  /// Runs the transform on `program`, returning the transformation result.
   /// @note Users of Tint should register the transform with transform manager
   /// and invoke its Run(), instead of directly calling the transform's Run().
-  /// Calling Run() directly does not perform module state cleanup operations.
-  /// @param module the source module to transform
+  /// Calling Run() directly does not perform program state cleanup operations.
+  /// @param program the source program to transform
   /// @returns the transformation result
-  Output Run(ast::Module* module) override;
+  Output Run(const Program* program) override;
 
   /// @returns whether shader uses vertex_index
   bool HasVertexIndex();
@@ -89,19 +89,19 @@ class FirstIndexOffset : public Transform {
   uint32_t GetFirstInstanceOffset();
 
  private:
-  /// Adds uniform buffer with firstVertex/Instance to module
+  /// Adds uniform buffer with firstVertex/Instance to `program`
   /// @returns variable of new uniform buffer
-  ast::Variable* AddUniformBuffer(ast::Module* mod);
+  ast::Variable* AddUniformBuffer(Program* program);
   /// Adds constant with modified original_name builtin to func
   /// @param original_name the name of the original builtin used in function
   /// @param field_name name of field in firstVertex/Instance buffer
   /// @param buffer_var variable of firstVertex/Instance buffer
-  /// @param module the target module to contain the new ast nodes
+  /// @param program the target program to contain the new ast nodes
   ast::VariableDeclStatement* CreateFirstIndexOffset(
       const std::string& original_name,
       const std::string& field_name,
       ast::Variable* buffer_var,
-      ast::Module* module);
+      Program* program);
 
   uint32_t binding_;
   uint32_t group_;

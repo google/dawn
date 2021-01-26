@@ -15,25 +15,151 @@
 #ifndef SRC_PROGRAM_H_
 #define SRC_PROGRAM_H_
 
+#include <functional>
+#include <memory>
 #include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
-#include "src/ast/module.h"
+#include "src/ast/function.h"
+#include "src/ast/variable.h"
+#include "src/block_allocator.h"
+#include "src/symbol_table.h"
+#include "src/traits.h"
+#include "src/type/alias_type.h"
+#include "src/type/type_manager.h"
 
 namespace tint {
 
-/// Program is (currently) a simple wrapper of to ast::Module.
-/// This wrapper is used as a stepping stone to having Dawn use tint::Program
-/// instead of tint::ast::Module.
+/// Represents all the source in a given program.
 class Program {
  public:
-  /// The wrapped module
-  ast::Module module;
+  /// Constructor
+  Program();
 
-  /// @returns true if all required fields in the module are present.
-  bool IsValid() const { return module.IsValid(); }
+  /// Move constructor
+  Program(Program&&);
+
+  /// Move assignment operator
+  /// @param rhs the Program to move
+  /// @return this Program
+  Program& operator=(Program&& rhs);
+
+  /// Destructor
+  ~Program();
 
   /// @return a deep copy of this program
-  Program Clone() const { return Program{module.Clone()}; }
+  Program Clone() const;
+
+  /// Clone this program into `ctx->mod` using the provided CloneContext
+  /// The program will be cloned in this order:
+  /// * Constructed types
+  /// * Global variables
+  /// * Functions
+  /// @param ctx the clone context
+  void Clone(CloneContext* ctx) const;
+
+  /// Add a global variable to the program
+  /// @param var the variable to add
+  void AddGlobalVariable(ast::Variable* var) {
+    global_variables_.push_back(var);
+  }
+  /// @returns the global variables for the program
+  const ast::VariableList& global_variables() const {
+    return global_variables_;
+  }
+
+  /// @returns the global variables for the program
+  ast::VariableList& global_variables() { return global_variables_; }
+
+  /// Adds a constructed type to the program.
+  /// The type must be an alias or a struct.
+  /// @param type the constructed type to add
+  void AddConstructedType(type::Type* type) {
+    constructed_types_.push_back(type);
+  }
+  /// @returns the constructed types in the program
+  const std::vector<type::Type*>& constructed_types() const {
+    return constructed_types_;
+  }
+
+  /// @returns the functions declared in the translation unit
+  const ast::FunctionList& Functions() const { return functions_; }
+
+  /// @returns the functions declared in the translation unit
+  ast::FunctionList& Functions() { return functions_; }
+
+  /// @returns true if all required fields in the AST are present.
+  bool IsValid() const;
+
+  /// @returns a string representation of the program
+  std::string to_str() const;
+
+  /// Creates a new Node owned by the Program. When the Program is
+  /// destructed, the Node will also be destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
+  template <typename T, typename... ARGS>
+  traits::EnableIfIsType<T, ast::Node>* create(ARGS&&... args) {
+    return ast_nodes_.Create<T>(std::forward<ARGS>(args)...);
+  }
+
+  /// Creates a new type::Type owned by the Program.
+  /// When the Program is destructed, owned Program and the returned
+  /// `Type` will also be destructed.
+  /// Types are unique (de-aliased), and so calling create() for the same `T`
+  /// and arguments will return the same pointer.
+  /// @warning Use this method to acquire a type only if all of its type
+  /// information is provided in the constructor arguments `args`.<br>
+  /// If the type requires additional configuration after construction that
+  /// affect its fundamental type, build the type with `std::make_unique`, make
+  /// any necessary alterations and then call unique_type() instead.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the de-aliased type pointer
+  template <typename T, typename... ARGS>
+  traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
+    static_assert(std::is_base_of<type::Type, T>::value,
+                  "T does not derive from type::Type");
+    return type_mgr_.Get<T>(std::forward<ARGS>(args)...);
+  }
+
+  /// Returns all the declared types in the program
+  /// @returns the mapping from name string to type.
+  const std::unordered_map<std::string, type::Type*>& types() {
+    return type_mgr_.types();
+  }
+
+  /// @returns all the declared nodes in the program
+  BlockAllocator<ast::Node>::View nodes() { return ast_nodes_.Objects(); }
+
+  /// Registers `name` as a symbol
+  /// @param name the name to register
+  /// @returns the symbol for the `name`. If `name` is already registered the
+  /// previously generated symbol will be returned.
+  Symbol RegisterSymbol(const std::string& name);
+
+  /// Returns the symbol for `name`
+  /// @param name the name to lookup
+  /// @returns the symbol for name or symbol::kInvalid
+  Symbol GetSymbol(const std::string& name) const;
+
+  /// Returns the `name` for `sym`
+  /// @param sym the symbol to retrieve the name for
+  /// @returns the use provided `name` for the symbol or "" if not found
+  std::string SymbolToName(const Symbol sym) const;
+
+ private:
+  Program(const Program&) = delete;
+
+  SymbolTable symbol_table_;
+  ast::VariableList global_variables_;
+  // The constructed types are owned by the type manager
+  std::vector<type::Type*> constructed_types_;
+  ast::FunctionList functions_;
+  BlockAllocator<ast::Node> ast_nodes_;
+  type::Manager type_mgr_;
 };
 
 }  // namespace tint

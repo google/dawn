@@ -47,15 +47,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   tint::Source::File file("test.wgsl", str);
 
-  // Parse the wgsl, create the src module
+  // Parse the wgsl, create the src program
   tint::reader::wgsl::ParserImpl parser(&file);
   parser.set_max_errors(1);
   if (!parser.Parse()) {
     return 0;
   }
-  auto src = parser.module();
+  auto src = parser.program();
 
-  // Clone the src module to dst
+  // Clone the src program to dst
   auto dst = src.Clone();
 
   // Expect the demangled AST printed with to_str() to match
@@ -78,24 +78,25 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     ASSERT_EQ(src_types.count(dst_type.second), 0u);
   }
 
-  // Regenerate the wgsl for the src module. We use this instead of the original
-  // source so that reformatting doesn't impact the final wgsl comparision.
-  // Note that the src module is moved into the generator and this generator has
-  // a limited scope, so that the src module is released before we attempt to
-  // print the dst module.
-  // This guarantee that all the source module nodes and types are destructed
-  // and freed.
-  // ASAN should error if there's any remaining references in dst when we try to
-  // reconstruct the WGSL.
+  // Regenerate the wgsl for the src program. We use this instead of the
+  // original source so that reformatting doesn't impact the final wgsl
+  // comparison.
   std::string src_wgsl;
   {
-    tint::writer::wgsl::Generator src_gen(std::move(src));
+    tint::writer::wgsl::Generator src_gen(&src);
     ASSERT_TRUE(src_gen.Generate());
     src_wgsl = src_gen.result();
+
+    // Move the src program to a temporary that'll be dropped, so that the src
+    // program is released before we attempt to print the dst program. This
+    // guarantee that all the source program nodes and types are destructed and
+    // freed. ASAN should error if there's any remaining references in dst when
+    // we try to reconstruct the WGSL.
+    auto tmp = std::move(src);
   }
 
-  // Print the dst module, check it matches the original source
-  tint::writer::wgsl::Generator dst_gen(std::move(dst));
+  // Print the dst program, check it matches the original source
+  tint::writer::wgsl::Generator dst_gen(&dst);
   ASSERT_TRUE(dst_gen.Generate());
   auto dst_wgsl = dst_gen.result();
   ASSERT_EQ(src_wgsl, dst_wgsl);

@@ -33,13 +33,13 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
+#include "src/program.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/struct_type.h"
 #include "src/type/type.h"
@@ -53,8 +53,8 @@ namespace wgsl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  /// @param mod the module to generate
-  explicit GeneratorImpl(ast::Module* mod);
+  /// @param program the program
+  explicit GeneratorImpl(const Program* program);
   ~GeneratorImpl();
 
   /// Generates the result data
@@ -205,7 +205,7 @@ class GeneratorImpl : public TextGenerator {
   bool EmitVariableDecorations(ast::Variable* var);
 
  private:
-  ast::Module& module_;
+  Program const* const program_;
 };
 
 }  // namespace wgsl

@@ -14,8 +14,8 @@
 
 #include "src/ast/builtin_decoration.h"
 
-#include "src/ast/module.h"
 #include "src/clone_context.h"
+#include "src/program.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::ast::BuiltinDecoration);
 

@@ -87,9 +87,9 @@ class FakeExpr : public ast::Expression {
   void to_str(std::ostream&, size_t) const override {}
 };
 
-class TypeDeterminerHelper : public ast::BuilderWithModule {
+class TypeDeterminerHelper : public ast::BuilderWithProgram {
  public:
-  TypeDeterminerHelper() : td_(std::make_unique<TypeDeterminer>(mod)) {}
+  TypeDeterminerHelper() : td_(std::make_unique<TypeDeterminer>(program)) {}
 
   TypeDeterminer* td() const { return td_.get(); }
 

@@ -33,9 +33,9 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/ast/storage_class.h"
+#include "src/program.h"
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/entry_point_info.h"
 #include "src/reader/spirv/fail_stream.h"
@@ -345,9 +345,9 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
   /// Constructor
   StatementBuilder() : Base(Source{}) {}
 
-  /// @param mod the ast Module to build into
-  /// @returns the build AST node
-  virtual ast::Statement* Build(ast::Module* mod) const = 0;
+  /// @param program the program to build into
+  /// @returns the built AST node
+  virtual ast::Statement* Build(Program* program) const = 0;
 
  private:
   bool IsValid() const override;
@@ -355,15 +355,15 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
   void to_str(std::ostream& out, size_t indent) const override;
 };
 
-/// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
+/// A FunctionEmitter emits a SPIR-V function onto a Tint program.
 class FunctionEmitter {
  public:
-  /// Creates a FunctionEmitter, and prepares to write to the AST module
+  /// Creates a FunctionEmitter, and prepares to write to the program
   /// in `pi`
   /// @param pi a ParserImpl which has already executed BuildInternalModule
   /// @param function the function to emit
   FunctionEmitter(ParserImpl* pi, const spvtools::opt::Function& function);
-  /// Creates a FunctionEmitter, and prepares to write to the AST module
+  /// Creates a FunctionEmitter, and prepares to write to the program
   /// in `pi`
   /// @param pi a ParserImpl which has already executed BuildInternalModule
   /// @param function the function to emit
@@ -374,7 +374,7 @@ class FunctionEmitter {
   /// Destructor
   ~FunctionEmitter();
 
-  /// Emits the function to AST module.
+  /// Emits the function to program.
   /// @return whether emission succeeded
   bool Emit();
 
@@ -964,8 +964,8 @@ class FunctionEmitter {
     /// Replaces any StatementBuilders with the built result, and calls the
     /// completion callback (if set). Must only be called once, after all
     /// statements have been added with Add().
-    /// @param mod the module
-    void Finalize(ast::Module* mod);
+    /// @param program the program
+    void Finalize(Program* program);
 
     /// Add() adds `statement` to the block.
     /// Add() must not be called after calling Finalize().
@@ -1049,13 +1049,13 @@ class FunctionEmitter {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   T* create(ARGS&&... args) const {
-    return ast_module_.create<T>(std::forward<ARGS>(args)...);
+    return program_.create<T>(std::forward<ARGS>(args)...);
   }
 
   using StatementsStack = std::vector<StatementBlock>;
 
   ParserImpl& parser_impl_;
-  ast::Module& ast_module_;
+  Program& program_;
   spvtools::opt::IRContext& ir_context_;
   spvtools::opt::analysis::DefUseManager* def_use_mgr_;
   spvtools::opt::analysis::ConstantManager* constant_mgr_;

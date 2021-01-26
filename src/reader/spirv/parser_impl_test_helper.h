@@ -58,16 +58,16 @@ class SpvParserTestBase : public T {
 using SpvParserTest = SpvParserTestBase<::testing::Test>;
 
 /// Returns the string dump of a statement list.
-/// @param mod the module
+/// @param program the program
 /// @param stmts the statement list
 /// @returns the string dump of a statement list.
-inline std::string ToString(const ast::Module& mod,
+inline std::string ToString(const Program& program,
                             const ast::StatementList& stmts) {
   std::ostringstream outs;
   for (const auto* stmt : stmts) {
     stmt->to_str(outs, 0);
   }
-  return Demangler().Demangle(mod, outs.str());
+  return Demangler().Demangle(program, outs.str());
 }
 
 }  // namespace spirv

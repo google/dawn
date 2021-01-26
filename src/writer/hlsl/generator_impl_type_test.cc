@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/program.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"

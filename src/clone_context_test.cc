@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-#include "src/ast/module.h"
+#include "src/program.h"
 
 namespace tint {
 namespace {
@@ -44,7 +44,7 @@ struct Replaceable : public Castable<Replaceable, Cloneable> {};
 struct Replacement : public Castable<Replacement, Replaceable> {};
 
 TEST(CloneContext, Clone) {
-  ast::Module original;
+  Program original;
   auto* original_root = original.create<Cloneable>();
   original_root->a = original.create<Cloneable>();
   original_root->a->b = original.create<Cloneable>();
@@ -63,7 +63,7 @@ TEST(CloneContext, Clone) {
   //
   // C: Clonable
 
-  ast::Module cloned;
+  Program cloned;
   auto* cloned_root = CloneContext(&cloned, &original).Clone(original_root);
 
   EXPECT_NE(cloned_root->a, nullptr);
@@ -88,7 +88,7 @@ TEST(CloneContext, Clone) {
 }
 
 TEST(CloneContext, CloneWithReplacements) {
-  ast::Module original;
+  Program original;
   auto* original_root = original.create<Cloneable>();
   original_root->a = original.create<Cloneable>();
   original_root->a->b = original.create<Replaceable>();
@@ -107,7 +107,7 @@ TEST(CloneContext, CloneWithReplacements) {
   // C: Clonable
   // R: Replaceable
 
-  ast::Module cloned;
+  Program cloned;
   auto* cloned_root = CloneContext(&cloned, &original)
                           .ReplaceAll([&](CloneContext* ctx, Replaceable* in) {
                             auto* out = cloned.create<Replacement>();

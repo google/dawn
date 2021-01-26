@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
+#include "src/program.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

@@ -40,7 +40,7 @@
 
 namespace tint {
 
-ValidatorImpl::ValidatorImpl(const ast::Module* module) : module_(*module) {}
+ValidatorImpl::ValidatorImpl(const Program* program) : program_(program) {}
 
 ValidatorImpl::~ValidatorImpl() = default;
 
@@ -65,16 +65,16 @@ void ValidatorImpl::add_error(const Source& src, const std::string& msg) {
 
 bool ValidatorImpl::Validate() {
   function_stack_.push_scope();
-  if (!ValidateGlobalVariables(module_.global_variables())) {
+  if (!ValidateGlobalVariables(program_->global_variables())) {
     return false;
   }
-  if (!ValidateConstructedTypes(module_.constructed_types())) {
+  if (!ValidateConstructedTypes(program_->constructed_types())) {
     return false;
   }
-  if (!ValidateFunctions(module_.Functions())) {
+  if (!ValidateFunctions(program_->Functions())) {
     return false;
   }
-  if (!ValidateEntryPoint(module_.Functions())) {
+  if (!ValidateEntryPoint(program_->Functions())) {
     return false;
   }
   function_stack_.pop_scope();
@@ -99,7 +99,7 @@ bool ValidatorImpl::ValidateConstructedTypes(
               add_error(member->source(), "v-0031",
                         "a struct containing a runtime-sized array "
                         "must be in the 'storage' storage class: '" +
-                            module_.SymbolToName(st->symbol()) + "'");
+                            program_->SymbolToName(st->symbol()) + "'");
               return false;
             }
           }
@@ -116,7 +116,7 @@ bool ValidatorImpl::ValidateGlobalVariables(
     if (variable_stack_.has(var->symbol())) {
       add_error(var->source(), "v-0011",
                 "redeclared global identifier '" +
-                    module_.SymbolToName(var->symbol()) + "'");
+                    program_->SymbolToName(var->symbol()) + "'");
       return false;
     }
     if (!var->is_const() && var->storage_class() == ast::StorageClass::kNone) {
@@ -140,7 +140,7 @@ bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
     if (function_stack_.has(func->symbol())) {
       add_error(func->source(), "v-0016",
                 "function names must be unique '" +
-                    module_.SymbolToName(func->symbol()) + "'");
+                    program_->SymbolToName(func->symbol()) + "'");
       return false;
     }
 
@@ -163,14 +163,14 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
       if (!func->params().empty()) {
         add_error(func->source(), "v-0023",
                   "Entry point function must accept no parameters: '" +
-                      module_.SymbolToName(func->symbol()) + "'");
+                      program_->SymbolToName(func->symbol()) + "'");
         return false;
       }
 
       if (!func->return_type()->Is<type::Void>()) {
         add_error(func->source(), "v-0024",
                   "Entry point function must return void: '" +
-                      module_.SymbolToName(func->symbol()) + "'");
+                      program_->SymbolToName(func->symbol()) + "'");
         return false;
       }
       auto stage_deco_count = 0;
@@ -275,7 +275,7 @@ bool ValidatorImpl::ValidateDeclStatement(
       error_code = "v-0013";
     }
     add_error(decl->source(), error_code,
-              "redeclared identifier '" + module_.SymbolToName(symbol) + "'");
+              "redeclared identifier '" + program_->SymbolToName(symbol) + "'");
     return false;
   }
   // TODO(dneto): Check type compatibility of the initializer.
@@ -415,13 +415,13 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
       if (!function_stack_.has(symbol)) {
         add_error(expr->source(), "v-0005",
                   "function must be declared before use: '" +
-                      module_.SymbolToName(symbol) + "'");
+                      program_->SymbolToName(symbol) + "'");
         return false;
       }
       if (symbol == current_function_->symbol()) {
-        add_error(
-            expr->source(), "v-0004",
-            "recursion is not allowed: '" + module_.SymbolToName(symbol) + "'");
+        add_error(expr->source(), "v-0004",
+                  "recursion is not allowed: '" +
+                      program_->SymbolToName(symbol) + "'");
         return false;
       }
     }
@@ -447,7 +447,7 @@ bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
     if (var->is_const()) {
       add_error(assign->source(), "v-0021",
                 "cannot re-assign a constant: '" +
-                    module_.SymbolToName(ident->symbol()) + "'");
+                    program_->SymbolToName(ident->symbol()) + "'");
       return false;
     }
   } else {
@@ -455,7 +455,7 @@ bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
     // when validating the subexpression.
     add_error(
         ident->source(), "v-0006",
-        "'" + module_.SymbolToName(ident->symbol()) + "' is not declared");
+        "'" + program_->SymbolToName(ident->symbol()) + "' is not declared");
     return false;
   }
   return true;
@@ -527,7 +527,7 @@ bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
   if (!variable_stack_.get(ident->symbol(), &var)) {
     add_error(
         ident->source(), "v-0006",
-        "'" + module_.SymbolToName(ident->symbol()) + "' is not declared");
+        "'" + program_->SymbolToName(ident->symbol()) + "' is not declared");
     return false;
   }
   return true;

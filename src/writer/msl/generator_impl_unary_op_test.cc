@@ -17,8 +17,8 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/program.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 

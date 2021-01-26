@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/builder.h"
-#include "src/ast/module.h"
+#include "src/program.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
 
@@ -30,12 +30,12 @@ namespace msl {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public BASE, public ast::BuilderWithModule {
+class TestHelperBase : public BASE, public ast::BuilderWithProgram {
  public:
-  TestHelperBase() : td(mod) {}
+  TestHelperBase() : td(program) {}
   ~TestHelperBase() = default;
 
-  /// Builds and returns a GeneratorImpl from the module.
+  /// Builds and returns a GeneratorImpl from the program.
   /// @note The generator is only built once. Multiple calls to Build() will
   /// return the same GeneratorImpl without rebuilding.
   /// @return the built generator
@@ -43,7 +43,7 @@ class TestHelperBase : public BASE, public ast::BuilderWithModule {
     if (gen_) {
       return *gen_;
     }
-    gen_ = std::make_unique<GeneratorImpl>(mod);
+    gen_ = std::make_unique<GeneratorImpl>(program);
     return *gen_;
   }
 

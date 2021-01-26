@@ -293,7 +293,7 @@ void ParserImpl::translation_unit() {
     }
   }
 
-  assert(module_.IsValid());
+  assert(program_.IsValid());
 }
 
 // global_decl
@@ -323,7 +323,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("variable declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      module_.AddGlobalVariable(gv.value);
+      program_.AddGlobalVariable(gv.value);
       return true;
     }
 
@@ -335,7 +335,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("constant declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      module_.AddGlobalVariable(gc.value);
+      program_.AddGlobalVariable(gc.value);
       return true;
     }
 
@@ -347,7 +347,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("type alias", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      module_.AddConstructedType(ta.value);
+      program_.AddConstructedType(ta.value);
       return true;
     }
 
@@ -361,8 +361,8 @@ Expect<bool> ParserImpl::expect_global_decl() {
 
       auto* type = str.value;
       register_constructed(
-          module_.SymbolToName(type->As<type::Struct>()->symbol()), type);
-      module_.AddConstructedType(type);
+          program_.SymbolToName(type->As<type::Struct>()->symbol()), type);
+      program_.AddConstructedType(type);
       return true;
     }
 
@@ -378,7 +378,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
   if (func.errored)
     errored = true;
   if (func.matched) {
-    module_.Functions().Add(func.value);
+    program_.Functions().Add(func.value);
     return true;
   }
 
@@ -435,8 +435,8 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
     constructor = expr.value;
   }
 
-  return create<ast::Variable>(decl->source,                        // source
-                               module_.RegisterSymbol(decl->name),  // symbol
+  return create<ast::Variable>(decl->source,                         // source
+                               program_.RegisterSymbol(decl->name),  // symbol
                                decl->storage_class,          // storage_class
                                decl->type,                   // type
                                false,                        // is_const
@@ -463,8 +463,8 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
   if (init.errored)
     return Failure::kErrored;
 
-  return create<ast::Variable>(decl->source,                        // source
-                               module_.RegisterSymbol(decl->name),  // symbol
+  return create<ast::Variable>(decl->source,                         // source
+                               program_.RegisterSymbol(decl->name),  // symbol
                                ast::StorageClass::kNone,        // storage_class
                                decl->type,                      // type
                                true,                            // is_const
@@ -514,7 +514,7 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return module_.create<type::SampledTexture>(dim.value, subtype.value);
+    return program_.create<type::SampledTexture>(dim.value, subtype.value);
   }
 
   auto ms_dim = multisampled_texture_type();
@@ -525,8 +525,8 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return module_.create<type::MultisampledTexture>(ms_dim.value,
-                                                     subtype.value);
+    return program_.create<type::MultisampledTexture>(ms_dim.value,
+                                                      subtype.value);
   }
 
   auto storage = storage_texture_type();
@@ -539,7 +539,7 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    return module_.create<type::StorageTexture>(storage.value, format.value);
+    return program_.create<type::StorageTexture>(storage.value, format.value);
   }
 
   // DEPRECATED
@@ -553,9 +553,9 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    return module_.create<type::AccessControl>(
+    return program_.create<type::AccessControl>(
         ac_storage->second,
-        module_.create<type::StorageTexture>(ac_storage->first, format.value));
+        program_.create<type::StorageTexture>(ac_storage->first, format.value));
   }
 
   return Failure::kNoMatch;
@@ -566,10 +566,11 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
 //  | SAMPLER_COMPARISON
 Maybe<type::Type*> ParserImpl::sampler_type() {
   if (match(Token::Type::kSampler))
-    return module_.create<type::Sampler>(type::SamplerKind::kSampler);
+    return program_.create<type::Sampler>(type::SamplerKind::kSampler);
 
   if (match(Token::Type::kComparisonSampler))
-    return module_.create<type::Sampler>(type::SamplerKind::kComparisonSampler);
+    return program_.create<type::Sampler>(
+        type::SamplerKind::kComparisonSampler);
 
   return Failure::kNoMatch;
 }
@@ -714,16 +715,17 @@ ParserImpl::storage_texture_type_access_control() {
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 Maybe<type::Type*> ParserImpl::depth_texture_type() {
   if (match(Token::Type::kTextureDepth2d))
-    return module_.create<type::DepthTexture>(type::TextureDimension::k2d);
+    return program_.create<type::DepthTexture>(type::TextureDimension::k2d);
 
   if (match(Token::Type::kTextureDepth2dArray))
-    return module_.create<type::DepthTexture>(type::TextureDimension::k2dArray);
+    return program_.create<type::DepthTexture>(
+        type::TextureDimension::k2dArray);
 
   if (match(Token::Type::kTextureDepthCube))
-    return module_.create<type::DepthTexture>(type::TextureDimension::kCube);
+    return program_.create<type::DepthTexture>(type::TextureDimension::kCube);
 
   if (match(Token::Type::kTextureDepthCubeArray))
-    return module_.create<type::DepthTexture>(
+    return program_.create<type::DepthTexture>(
         type::TextureDimension::kCubeArray);
 
   return Failure::kNoMatch;
@@ -909,7 +911,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
     // type up with that decoration
-    ty = module_.create<type::AccessControl>(
+    ty = program_.create<type::AccessControl>(
         deco->As<ast::AccessDecoration>()->value(), ty);
   }
 
@@ -971,8 +973,8 @@ Maybe<type::Type*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  auto* alias = module_.create<type::Alias>(module_.RegisterSymbol(name.value),
-                                            type.value);
+  auto* alias = program_.create<type::Alias>(
+      program_.RegisterSymbol(name.value), type.value);
   register_constructed(name.value, alias);
 
   return alias;
@@ -1030,16 +1032,16 @@ Maybe<type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   }
 
   if (match(Token::Type::kBool))
-    return module_.create<type::Bool>();
+    return program_.create<type::Bool>();
 
   if (match(Token::Type::kF32))
-    return module_.create<type::F32>();
+    return program_.create<type::F32>();
 
   if (match(Token::Type::kI32))
-    return module_.create<type::I32>();
+    return program_.create<type::I32>();
 
   if (match(Token::Type::kU32))
-    return module_.create<type::U32>();
+    return program_.create<type::U32>();
 
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     next();  // Consume the peek
@@ -1097,7 +1099,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_pointer() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return module_.create<type::Pointer>(subtype.value, sc.value);
+    return program_.create<type::Pointer>(subtype.value, sc.value);
   });
 }
 
@@ -1114,7 +1116,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return module_.create<type::Vector>(subtype.value, count);
+  return program_.create<type::Vector>(subtype.value, count);
 }
 
 Expect<type::Type*> ParserImpl::expect_type_decl_array(
@@ -1158,7 +1160,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return module_.create<type::Matrix>(subtype.value, rows, columns);
+  return program_.create<type::Matrix>(subtype.value, rows, columns);
 }
 
 // storage_class
@@ -1225,7 +1227,7 @@ Maybe<type::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   return create<type::Struct>(
-      module_.RegisterSymbol(name.value),
+      program_.RegisterSymbol(name.value),
       create<ast::Struct>(source, std::move(body.value),
                           std::move(struct_decos.value)));
 }
@@ -1280,7 +1282,7 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member(
     return Failure::kErrored;
 
   return create<ast::StructMember>(decl->source,
-                                   module_.RegisterSymbol(decl->name),
+                                   program_.RegisterSymbol(decl->name),
                                    decl->type, std::move(member_decos.value));
 }
 
@@ -1317,7 +1319,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   return create<ast::Function>(
-      header->source, module_.RegisterSymbol(header->name), header->params,
+      header->source, program_.RegisterSymbol(header->name), header->params,
       header->return_type, body.value, func_decos.value);
 }
 
@@ -1326,7 +1328,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 //   | VOID
 Maybe<type::Type*> ParserImpl::function_type_decl() {
   if (match(Token::Type::kVoid))
-    return module_.create<type::Void>();
+    return program_.create<type::Void>();
 
   return type_decl();
 }
@@ -1386,8 +1388,8 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
   ast::VariableList ret;
   for (;;) {
     auto* var =
-        create<ast::Variable>(decl->source,                        // source
-                              module_.RegisterSymbol(decl->name),  // symbol
+        create<ast::Variable>(decl->source,                         // source
+                              program_.RegisterSymbol(decl->name),  // symbol
                               ast::StorageClass::kNone,        // storage_class
                               decl->type,                      // type
                               true,                            // is_const
@@ -1657,8 +1659,8 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
       return add_error(peek(), "missing constructor for const declaration");
 
     auto* var =
-        create<ast::Variable>(decl->source,                        // source
-                              module_.RegisterSymbol(decl->name),  // symbol
+        create<ast::Variable>(decl->source,                         // source
+                              program_.RegisterSymbol(decl->name),  // symbol
                               ast::StorageClass::kNone,        // storage_class
                               decl->type,                      // type
                               true,                            // is_const
@@ -1686,8 +1688,8 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   }
 
   auto* var =
-      create<ast::Variable>(decl->source,                        // source
-                            module_.RegisterSymbol(decl->name),  // symbol
+      create<ast::Variable>(decl->source,                         // source
+                            program_.RegisterSymbol(decl->name),  // symbol
                             decl->storage_class,             // storage_class
                             decl->type,                      // type
                             false,                           // is_const
@@ -2089,7 +2091,7 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
       Source{},
       create<ast::CallExpression>(source,
                                   create<ast::IdentifierExpression>(
-                                      source, module_.RegisterSymbol(name)),
+                                      source, program_.RegisterSymbol(name)),
                                   std::move(params)));
 }
 
@@ -2162,7 +2164,7 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 
   if (match(Token::Type::kIdentifier))
     return create<ast::IdentifierExpression>(
-        t.source(), module_.RegisterSymbol(t.to_str()));
+        t.source(), program_.RegisterSymbol(t.to_str()));
 
   auto type = type_decl();
   if (type.errored)
@@ -2238,7 +2240,7 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
     return postfix_expr(create<ast::MemberAccessorExpression>(
         ident.source, prefix,
         create<ast::IdentifierExpression>(
-            ident.source, module_.RegisterSymbol(ident.value))));
+            ident.source, program_.RegisterSymbol(ident.value))));
   }
 
   return prefix;
@@ -2738,19 +2740,19 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
-    auto* type = module_.create<type::Bool>();
+    auto* type = program_.create<type::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, true);
   }
   if (match(Token::Type::kFalse)) {
-    auto* type = module_.create<type::Bool>();
+    auto* type = program_.create<type::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, false);
   }
   if (match(Token::Type::kSintLiteral)) {
-    auto* type = module_.create<type::I32>();
+    auto* type = program_.create<type::I32>();
     return create<ast::SintLiteral>(Source{}, type, t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
-    auto* type = module_.create<type::U32>();
+    auto* type = program_.create<type::U32>();
     return create<ast::UintLiteral>(Source{}, type, t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
@@ -2759,7 +2761,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
       next();  // Consume 'f'
       add_error(p.source(), "float literals must not be suffixed with 'f'");
     }
-    auto* type = module_.create<type::F32>();
+    auto* type = program_.create<type::F32>();
     return create<ast::FloatLiteral>(Source{}, type, t.to_f32());
   }
   return Failure::kNoMatch;

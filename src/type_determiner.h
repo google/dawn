@@ -41,15 +41,11 @@ class Variable;
 
 }  // namespace ast
 
-/// Determines types for all items in the given tint module
+/// Determines types for all items in the given tint program
 class TypeDeterminer {
  public:
   /// Constructor
-  /// @param mod the module to update with typing information
-  explicit TypeDeterminer(ast::Module* mod);
-
-  /// Constructor
-  /// @param program the module to update with typing information
+  /// @param program the program to update with typing information
   explicit TypeDeterminer(Program* program);
 
   /// Destructor
@@ -142,7 +138,7 @@ class TypeDeterminer {
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 
-  ast::Module* mod_;
+  Program* program_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
   std::unordered_map<Symbol, ast::Function*> symbol_to_function_;

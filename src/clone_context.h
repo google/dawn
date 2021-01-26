@@ -27,29 +27,27 @@
 namespace tint {
 
 // Forward declarations
-namespace ast {
-class Module;
-}  // namespace ast
+class Program;
 
 /// CloneContext holds the state used while cloning AST nodes and types.
 class CloneContext {
  public:
   /// Constructor
-  /// @param to the target module to clone into
-  /// @param from the source module to clone from
-  CloneContext(ast::Module* to, ast::Module const* from);
+  /// @param to the target program to clone into
+  /// @param from the source program to clone from
+  CloneContext(Program* to, Program const* from);
 
   /// Destructor
   ~CloneContext();
 
-  /// Clones the Node or type::Type `a` into the module #dst if `a` is not
+  /// Clones the Node or type::Type `a` into the program #dst if `a` is not
   /// null. If `a` is null, then Clone() returns null. If `a` has been cloned
   /// already by this CloneContext then the same cloned pointer is returned.
   ///
   /// Clone() may use a function registered with ReplaceAll() to create a
   /// transformed version of the object. See ReplaceAll() for more information.
   ///
-  /// The Node or type::Type `a` must be owned by the module #src.
+  /// The Node or type::Type `a` must be owned by the program #src.
   ///
   /// @note Semantic information such as resolved expression type and intrinsic
   /// information is not cloned.
@@ -78,7 +76,7 @@ class CloneContext {
 
   /// Clones the Source `s` into `dst`
   /// TODO(bclayton) - Currently this 'clone' is a shallow copy. If/when
-  /// `Source.File`s are owned by the `Module` this should make a copy of the
+  /// `Source.File`s are owned by the Program this should make a copy of the
   /// file.
   /// @param s the `Source` to clone
   /// @return the cloned source
@@ -86,15 +84,15 @@ class CloneContext {
 
   /// Clones the Symbol `s` into `dst`
   ///
-  /// The Symbol `s` must be owned by the module #src.
+  /// The Symbol `s` must be owned by the program #src.
   ///
   /// @param s the Symbol to clone
   /// @return the cloned source
   Symbol Clone(const Symbol& s) const;
 
-  /// Clones each of the elements of the vector `v` into the module #dst->
+  /// Clones each of the elements of the vector `v` into the program #dst.
   ///
-  /// All the elements of the vector `v` must be owned by the module #src.
+  /// All the elements of the vector `v` must be owned by the program #src.
   ///
   /// @param v the vector to clone
   /// @return the cloned vector
@@ -147,14 +145,14 @@ class CloneContext {
     return *this;
   }
 
-  /// Clone performs the clone of the entire module #src to #dst.
+  /// Clone performs the clone of the entire program #src to #dst.
   void Clone();
 
-  /// The target module to clone into.
-  ast::Module* const dst;
+  /// The target program to clone into.
+  Program* const dst;
 
-  /// The source module to clone from.
-  ast::Module const* const src;
+  /// The source program to clone from.
+  Program const* const src;
 
  private:
   using Transform = std::function<CastableBase*(CastableBase*)>;

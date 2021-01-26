@@ -23,22 +23,16 @@ namespace transform {
 
 Transform::Output::Output() = default;
 
-Transform::Output::Output(ast::Module&& mod) : program{std::move(mod)} {}
+Transform::Output::Output(Program&& p) : program(std::move(p)) {}
 
-Transform::Output::Output(ast::Module&& mod, diag::List&& d)
-    : program{std::move(mod)}, diagnostics(std::move(d)) {}
+Transform::Output::Output(Program&& p, diag::List&& d)
+    : program(std::move(p)), diagnostics(std::move(d)) {}
 
 Transform::Output::~Output() = default;
 
-Transform::Output::Output(Output&& rhs)
-    : program(std::move(rhs.program)),
-      diagnostics(std::move(rhs.diagnostics)) {}
+Transform::Output::Output(Output&&) = default;
 
-Transform::Output& Transform::Output::operator=(Output&& rhs) {
-  program = std::move(rhs.program);
-  diagnostics = std::move(rhs.diagnostics);
-  return *this;
-}
+Transform::Output& Transform::Output::operator=(Output&& rhs) = default;
 
 Transform::Transform() = default;
 

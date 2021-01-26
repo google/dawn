@@ -76,23 +76,23 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  auto mod = parser->module();
-  if (!mod.IsValid()) {
+  auto program = parser->program();
+  if (!program.IsValid()) {
     return 0;
   }
 
-  TypeDeterminer td(&mod);
+  TypeDeterminer td(&program);
   if (!td.Determine()) {
     return 0;
   }
 
   Validator v;
-  if (!v.Validate(&mod)) {
+  if (!v.Validate(&program)) {
     return 0;
   }
 
   if (inspector_enabled_) {
-    inspector::Inspector inspector(mod);
+    inspector::Inspector inspector(&program);
 
     auto entry_points = inspector.GetEntryPoints();
     if (inspector.has_error()) {
@@ -154,12 +154,12 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   if (transform_manager_) {
-    auto out = transform_manager_->Run(&mod);
+    auto out = transform_manager_->Run(&program);
     if (out.diagnostics.contains_errors()) {
       return 0;
     }
 
-    mod = std::move(out.module);
+    program = std::move(out.program);
   }
 
   std::unique_ptr<writer::Writer> writer;
@@ -167,22 +167,22 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   switch (output_) {
     case OutputFormat::kWGSL:
 #if TINT_BUILD_WGSL_WRITER
-      writer = std::make_unique<writer::wgsl::Generator>(std::move(mod));
+      writer = std::make_unique<writer::wgsl::Generator>(&program);
 #endif  // TINT_BUILD_WGSL_WRITER
       break;
     case OutputFormat::kSpv:
 #if TINT_BUILD_SPV_WRITER
-      writer = std::make_unique<writer::spirv::Generator>(std::move(mod));
+      writer = std::make_unique<writer::spirv::Generator>(&program);
 #endif  // TINT_BUILD_SPV_WRITER
       break;
     case OutputFormat::kHLSL:
 #if TINT_BUILD_HLSL_WRITER
-      writer = std::make_unique<writer::hlsl::Generator>(std::move(mod));
+      writer = std::make_unique<writer::hlsl::Generator>(&program);
 #endif  // TINT_BUILD_HLSL_WRITER
       break;
     case OutputFormat::kMSL:
 #if TINT_BUILD_MSL_WRITER
-      writer = std::make_unique<writer::msl::Generator>(std::move(mod));
+      writer = std::make_unique<writer::msl::Generator>(&program);
 #endif  // TINT_BUILD_MSL_WRITER
       break;
     case OutputFormat::kNone:

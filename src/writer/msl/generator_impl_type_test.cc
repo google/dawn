@@ -13,13 +13,13 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/program.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"

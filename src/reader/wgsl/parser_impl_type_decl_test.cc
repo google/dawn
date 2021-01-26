@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, TypeDecl_Invalid) {
 TEST_F(ParserImplTest, TypeDecl_Identifier) {
   auto p = parser("A");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
 
   auto* int_type = mod.create<type::I32>();
   auto* alias_type = mod.create<type::Alias>(mod.RegisterSymbol("A"), int_type);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   ASSERT_TRUE(t->Is<type::Alias>());
 
   auto* alias = t->As<type::Alias>();
-  EXPECT_EQ(p->get_module().SymbolToName(alias->symbol()), "A");
+  EXPECT_EQ(p->get_program().SymbolToName(alias->symbol()), "A");
   EXPECT_EQ(alias->type(), int_type);
 }
 
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
 TEST_F(ParserImplTest, TypeDecl_Bool) {
   auto p = parser("bool");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* bool_type = mod.create<type::Bool>();
 
   auto t = p->type_decl();
@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
 TEST_F(ParserImplTest, TypeDecl_F32) {
   auto p = parser("f32");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* float_type = mod.create<type::F32>();
 
   auto t = p->type_decl();
@@ -107,7 +107,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
 TEST_F(ParserImplTest, TypeDecl_I32) {
   auto p = parser("i32");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* int_type = mod.create<type::I32>();
 
   auto t = p->type_decl();
@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
 TEST_F(ParserImplTest, TypeDecl_U32) {
   auto p = parser("u32");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* uint_type = mod.create<type::U32>();
 
   auto t = p->type_decl();
@@ -738,7 +738,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto p = parser("sampler");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* type = mod.create<type::Sampler>(type::SamplerKind::kSampler);
 
   auto t = p->type_decl();
@@ -753,7 +753,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
 TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
   auto p = parser("texture_sampled_cube<f32>");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* type =
       mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32);
 
@@ -770,7 +770,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture_Old) {
 TEST_F(ParserImplTest, TypeDecl_Texture) {
   auto p = parser("texture_cube<f32>");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* type =
       mod.create<type::SampledTexture>(type::TextureDimension::kCube, ty.f32);
 

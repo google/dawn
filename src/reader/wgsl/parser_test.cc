@@ -41,7 +41,7 @@ fn main() -> void {
   Parser p(&file);
   ASSERT_TRUE(p.Parse()) << p.error();
 
-  auto m = p.module();
+  auto m = p.program();
   ASSERT_EQ(1u, m.Functions().size());
   ASSERT_EQ(1u, m.global_variables().size());
 }

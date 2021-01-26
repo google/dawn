@@ -35,8 +35,8 @@ bool Parser::Parse() {
   return ret;
 }
 
-ast::Module Parser::module() {
-  return impl_->module();
+Program Parser::program() {
+  return impl_->program();
 }
 
 }  // namespace wgsl

@@ -22,9 +22,9 @@
 
 #include "src/ast/expression.h"
 #include "src/ast/function.h"
-#include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/ast/variable.h"
+#include "src/program.h"
 #include "src/transform/transform.h"
 
 namespace tint {
@@ -114,7 +114,7 @@ struct VertexBufferLayoutDescriptor {
 /// attributes
 using VertexStateDescriptor = std::vector<VertexBufferLayoutDescriptor>;
 
-/// Converts a module to use vertex pulling
+/// Converts a program to use vertex pulling
 ///
 /// Variables which accept vertex input are var<in> with a location decoration.
 /// This transform will convert those to be assigned from storage buffers
@@ -159,13 +159,13 @@ class VertexPulling : public Transform {
   /// @param number the group number we will use
   void SetPullingBufferBindingGroup(uint32_t number);
 
-  /// Runs the transform on `module`, returning the transformation result.
+  /// Runs the transform on `program`, returning the transformation result.
   /// @note Users of Tint should register the transform with transform manager
   /// and invoke its Run(), instead of directly calling the transform's Run().
-  /// Calling Run() directly does not perform module state cleanup operations.
-  /// @param module the source module to transform
+  /// Calling Run() directly does not perform program state cleanup operations.
+  /// @param program the source program to transform
   /// @returns the transformation result
-  Output Run(ast::Module* module) override;
+  Output Run(const Program* program) override;
 
  private:
   struct Config {
@@ -183,7 +183,7 @@ class VertexPulling : public Transform {
   Config cfg;
 
   struct State {
-    State(ast::Module* in, ast::Module* out, const Config& c);
+    State(const Program* in, Program* out, const Config& c);
     explicit State(const State&);
     ~State();
 
@@ -263,8 +263,8 @@ class VertexPulling : public Transform {
     type::Type* GetI32Type() const;
     type::Type* GetF32Type() const;
 
-    ast::Module* const in;
-    ast::Module* const out;
+    const Program* const in;
+    Program* const out;
     Config const cfg;
 
     std::unordered_map<uint32_t, ast::Variable*> location_to_var;

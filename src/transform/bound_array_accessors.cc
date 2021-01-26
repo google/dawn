@@ -55,9 +55,9 @@ namespace transform {
 BoundArrayAccessors::BoundArrayAccessors() = default;
 BoundArrayAccessors::~BoundArrayAccessors() = default;
 
-Transform::Output BoundArrayAccessors::Run(ast::Module* in) {
+Transform::Output BoundArrayAccessors::Run(const Program* in) {
   Output out;
-  CloneContext(&out.module, in)
+  CloneContext(&out.program, in)
       .ReplaceAll([&](CloneContext* ctx, ast::ArrayAccessorExpression* expr) {
         return Transform(expr, ctx, &out.diagnostics);
       })

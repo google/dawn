@@ -15,6 +15,7 @@
 #include "src/demangler.h"
 
 #include "gtest/gtest.h"
+#include "src/program.h"
 
 namespace tint {
 namespace {
@@ -22,7 +23,7 @@ namespace {
 using DemanglerTest = testing::Test;
 
 TEST_F(DemanglerTest, NoSymbols) {
-  ast::Module m;
+  Program m;
   m.RegisterSymbol("sym1");
 
   Demangler d;
@@ -30,7 +31,7 @@ TEST_F(DemanglerTest, NoSymbols) {
 }
 
 TEST_F(DemanglerTest, Symbol) {
-  ast::Module m;
+  Program m;
   m.RegisterSymbol("sym1");
 
   Demangler d;
@@ -38,7 +39,7 @@ TEST_F(DemanglerTest, Symbol) {
 }
 
 TEST_F(DemanglerTest, MultipleSymbols) {
-  ast::Module m;
+  Program m;
   m.RegisterSymbol("sym1");
   m.RegisterSymbol("sym2");
 

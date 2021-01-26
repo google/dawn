@@ -26,7 +26,7 @@ namespace {
 TEST_F(ParserImplTest, StructMember_Parses) {
   auto p = parser("a : i32;");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* i32 = mod.create<type::I32>();
 
   auto decos = p->decoration_list();
@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
-  EXPECT_EQ(m->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(m->symbol(), p->get_program().RegisterSymbol("a"));
   EXPECT_EQ(m->type(), i32);
   EXPECT_EQ(m->decorations().size(), 0u);
 
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   auto p = parser("[[offset(2)]] a : i32;");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* i32 = mod.create<type::I32>();
 
   auto decos = p->decoration_list();
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
-  EXPECT_EQ(m->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(m->symbol(), p->get_program().RegisterSymbol("a"));
   EXPECT_EQ(m->type(), i32);
   EXPECT_EQ(m->decorations().size(), 1u);
   EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberOffsetDecoration>());
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   auto p = parser(R"([[offset(2)]]
 [[offset(4)]] a : i32;)");
 
-  auto& mod = p->get_module();
+  auto& mod = p->get_program();
   auto* i32 = mod.create<type::I32>();
 
   auto decos = p->decoration_list();
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
 
-  EXPECT_EQ(m->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(m->symbol(), p->get_program().RegisterSymbol("a"));
   EXPECT_EQ(m->type(), i32);
   EXPECT_EQ(m->decorations().size(), 2u);
   EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberOffsetDecoration>());

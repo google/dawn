@@ -14,9 +14,9 @@
 
 #include "src/ast/struct.h"
 
-#include "src/ast/module.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/clone_context.h"
+#include "src/program.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::ast::Struct);
 

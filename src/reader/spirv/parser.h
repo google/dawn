@@ -40,8 +40,8 @@ class Parser : public Reader {
   /// @returns true if the parse was successful, false otherwise.
   bool Parse() override;
 
-  /// @returns the module. The module in the parser will be reset after this.
-  ast::Module module() override;
+  /// @returns the program. The program in the parser will be reset after this.
+  Program program() override;
 
  private:
   std::unique_ptr<ParserImpl> impl_;

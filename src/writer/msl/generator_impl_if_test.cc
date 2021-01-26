@@ -16,8 +16,8 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
+#include "src/program.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 

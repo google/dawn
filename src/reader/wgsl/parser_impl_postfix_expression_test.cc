@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
 
   ASSERT_TRUE(ary->array()->Is<ast::IdentifierExpression>());
   auto* ident = ary->array()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
 
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(ary->idx_expr()->Is<ast::ScalarConstructorExpression>());
@@ -64,7 +64,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
 
   ASSERT_TRUE(ary->array()->Is<ast::IdentifierExpression>());
   auto* ident = ary->array()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
 
   ASSERT_TRUE(ary->idx_expr()->Is<ast::BinaryExpression>());
 }
@@ -112,7 +112,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
 
   ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
   auto* func = c->func()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(func->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(func->symbol(), p->get_program().RegisterSymbol("a"));
 
   EXPECT_EQ(c->params().size(), 0u);
 }
@@ -130,7 +130,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
 
   ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
   auto* func = c->func()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(func->symbol(), p->get_module().RegisterSymbol("test"));
+  EXPECT_EQ(func->symbol(), p->get_program().RegisterSymbol("test"));
 
   EXPECT_EQ(c->params().size(), 3u);
   EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());
@@ -180,11 +180,11 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
   auto* m = e->As<ast::MemberAccessorExpression>();
   ASSERT_TRUE(m->structure()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(m->structure()->As<ast::IdentifierExpression>()->symbol(),
-            p->get_module().RegisterSymbol("a"));
+            p->get_program().RegisterSymbol("a"));
 
   ASSERT_TRUE(m->member()->Is<ast::IdentifierExpression>());
   EXPECT_EQ(m->member()->As<ast::IdentifierExpression>()->symbol(),
-            p->get_module().RegisterSymbol("b"));
+            p->get_program().RegisterSymbol("b"));
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {

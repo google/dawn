@@ -32,8 +32,6 @@ class Type;
 
 namespace ast {
 
-class Module;
-
 /// AST base class node
 class Node : public Castable<Node> {
  public:

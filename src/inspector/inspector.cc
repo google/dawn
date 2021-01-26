@@ -43,29 +43,27 @@
 namespace tint {
 namespace inspector {
 
-Inspector::Inspector(const ast::Module& module) : module_(module) {}
-
-Inspector::Inspector(const Program* program) : Inspector(program->module) {}
+Inspector::Inspector(const Program* program) : program_(*program) {}
 
 Inspector::~Inspector() = default;
 
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
 
-  for (auto* func : module_.Functions()) {
+  for (auto* func : program_.Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
 
     EntryPoint entry_point;
-    entry_point.name = module_.SymbolToName(func->symbol());
-    entry_point.remapped_name = module_.SymbolToName(func->symbol());
+    entry_point.name = program_.SymbolToName(func->symbol());
+    entry_point.remapped_name = program_.SymbolToName(func->symbol());
     entry_point.stage = func->pipeline_stage();
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
 
     for (auto* var : func->referenced_module_variables()) {
-      auto name = module_.SymbolToName(var->symbol());
+      auto name = program_.SymbolToName(var->symbol());
       if (var->HasBuiltinDecoration()) {
         continue;
       }
@@ -108,7 +106,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
-  for (auto* var : module_.global_variables()) {
+  for (auto* var : program_.global_variables()) {
     if (!var->HasConstantIdDecoration()) {
       continue;
     }
@@ -285,7 +283,7 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
-  auto* func = module_.Functions().Find(module_.GetSymbol(name));
+  auto* func = program_.Functions().Find(program_.GetSymbol(name));
   if (!func) {
     error_ += name + " was not found!";
     return nullptr;

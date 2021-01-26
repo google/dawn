@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
 
   ASSERT_TRUE(rel->lhs()->Is<ast::IdentifierExpression>());
   auto* ident = rel->lhs()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol(), p->get_module().RegisterSymbol("a"));
+  EXPECT_EQ(ident->symbol(), p->get_program().RegisterSymbol("a"));
 
   ASSERT_TRUE(rel->rhs()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(rel->rhs()->Is<ast::ScalarConstructorExpression>());

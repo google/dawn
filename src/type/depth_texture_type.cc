@@ -17,8 +17,8 @@
 #include <cassert>
 #include <sstream>
 
-#include "src/ast/module.h"
 #include "src/clone_context.h"
+#include "src/program.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::type::DepthTexture);
 

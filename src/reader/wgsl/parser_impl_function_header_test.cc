@@ -33,8 +33,8 @@ TEST_F(ParserImplTest, FunctionHeader) {
 
   EXPECT_EQ(f->name, "main");
   ASSERT_EQ(f->params.size(), 2u);
-  EXPECT_EQ(f->params[0]->symbol(), p->get_module().RegisterSymbol("a"));
-  EXPECT_EQ(f->params[1]->symbol(), p->get_module().RegisterSymbol("b"));
+  EXPECT_EQ(f->params[0]->symbol(), p->get_program().RegisterSymbol("a"));
+  EXPECT_EQ(f->params[1]->symbol(), p->get_program().RegisterSymbol("b"));
   EXPECT_TRUE(f->return_type->Is<type::Void>());
 }
 

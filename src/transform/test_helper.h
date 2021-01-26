@@ -46,8 +46,8 @@ class TransformTest : public testing::Test {
       return "WGSL reader failed:\n" + parser.error();
     }
 
-    auto module = parser.module();
-    TypeDeterminer td(&module);
+    auto program = parser.program();
+    TypeDeterminer td(&program);
     if (!td.Determine()) {
       return "Type determination failed:\n" + td.error();
     }
@@ -56,7 +56,7 @@ class TransformTest : public testing::Test {
     for (auto& transform : transforms) {
       manager.append(std::move(transform));
     }
-    auto result = manager.Run(&module);
+    auto result = manager.Run(&program);
 
     if (result.diagnostics.contains_errors()) {
       diag::Formatter::Style style;
@@ -65,10 +65,10 @@ class TransformTest : public testing::Test {
              diag::Formatter(style).format(result.diagnostics);
     }
 
-    // Release the source module to ensure there's no uncloned data in result
-    { auto tmp = std::move(module); }
+    // Release the source program to ensure there's no uncloned data in result
+    { auto tmp = std::move(program); }
 
-    writer::wgsl::Generator generator(std::move(result.module));
+    writer::wgsl::Generator generator(&result.program);
     if (!generator.Generate()) {
       return "WGSL writer failed:\n" + generator.error();
     }

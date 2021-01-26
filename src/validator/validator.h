@@ -20,7 +20,6 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/expression.h"
-#include "src/ast/module.h"
 #include "src/ast/statement.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
@@ -28,7 +27,7 @@
 
 namespace tint {
 
-/// Determines if the module is complete and valid
+/// Determines if the program is complete and valid
 class Validator {
  public:
   /// Constructor
@@ -36,14 +35,9 @@ class Validator {
   ~Validator();
 
   /// Runs the validator
-  /// @param module the module to validate
-  /// @returns true if the validation was successful
-  bool Validate(const ast::Module* module);
-
-  /// Runs the validator
   /// @param program the program to validate
   /// @returns true if the validation was successful
-  bool Validate(const Program* program) { return Validate(&program->module); }
+  bool Validate(const Program* program);
 
   /// @returns error messages from the validator
   std::string error() {

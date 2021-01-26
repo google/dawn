@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
-#include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
+#include "src/program.h"
 #include "src/type/struct_type.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"

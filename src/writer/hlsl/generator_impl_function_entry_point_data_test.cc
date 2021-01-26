@@ -19,11 +19,11 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable.h"
+#include "src/program.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 

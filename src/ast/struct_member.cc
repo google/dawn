@@ -14,9 +14,9 @@
 
 #include "src/ast/struct_member.h"
 
-#include "src/ast/module.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/clone_context.h"
+#include "src/program.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::ast::StructMember);
 

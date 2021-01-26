@@ -17,15 +17,15 @@
 namespace tint {
 namespace ast {
 
-TypesBuilder::TypesBuilder(Module* mod)
-    : bool_(mod->create<type::Bool>()),
-      f32(mod->create<type::F32>()),
-      i32(mod->create<type::I32>()),
-      u32(mod->create<type::U32>()),
-      void_(mod->create<type::Void>()),
-      mod_(mod) {}
+TypesBuilder::TypesBuilder(Program* p)
+    : bool_(p->create<type::Bool>()),
+      f32(p->create<type::F32>()),
+      i32(p->create<type::I32>()),
+      u32(p->create<type::U32>()),
+      void_(p->create<type::Void>()),
+      program_(p) {}
 
-Builder::Builder(Module* m) : mod(m), ty(m) {}
+Builder::Builder(Program* p) : program(p), ty(p), mod(p) {}
 
 Builder::~Builder() = default;
 
@@ -40,8 +40,8 @@ Variable* Builder::Var(const std::string& name,
                        type::Type* type,
                        Expression* constructor,
                        VariableDecorationList decorations) {
-  auto* var = create<Variable>(mod->RegisterSymbol(name), storage, type, false,
-                               constructor, decorations);
+  auto* var = create<Variable>(program->RegisterSymbol(name), storage, type,
+                               false, constructor, decorations);
   OnVariableBuilt(var);
   return var;
 }
@@ -52,8 +52,8 @@ Variable* Builder::Var(const Source& source,
                        type::Type* type,
                        Expression* constructor,
                        VariableDecorationList decorations) {
-  auto* var = create<Variable>(source, mod->RegisterSymbol(name), storage, type,
-                               false, constructor, decorations);
+  auto* var = create<Variable>(source, program->RegisterSymbol(name), storage,
+                               type, false, constructor, decorations);
   OnVariableBuilt(var);
   return var;
 }
@@ -69,8 +69,8 @@ Variable* Builder::Const(const std::string& name,
                          type::Type* type,
                          Expression* constructor,
                          VariableDecorationList decorations) {
-  auto* var = create<Variable>(mod->RegisterSymbol(name), storage, type, true,
-                               constructor, decorations);
+  auto* var = create<Variable>(program->RegisterSymbol(name), storage, type,
+                               true, constructor, decorations);
   OnVariableBuilt(var);
   return var;
 }
@@ -81,16 +81,16 @@ Variable* Builder::Const(const Source& source,
                          type::Type* type,
                          Expression* constructor,
                          VariableDecorationList decorations) {
-  auto* var = create<Variable>(source, mod->RegisterSymbol(name), storage, type,
-                               true, constructor, decorations);
+  auto* var = create<Variable>(source, program->RegisterSymbol(name), storage,
+                               type, true, constructor, decorations);
   OnVariableBuilt(var);
   return var;
 }
 
-BuilderWithModule::BuilderWithModule() : Builder(new Module()) {}
+BuilderWithProgram::BuilderWithProgram() : Builder(new Program()) {}
 
-BuilderWithModule::~BuilderWithModule() {
-  delete mod;
+BuilderWithProgram::~BuilderWithProgram() {
+  delete program;
 }
 
 }  // namespace ast

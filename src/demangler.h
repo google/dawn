@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/ast/module.h"
+#include "src/program.h"
 
 namespace tint {
 
@@ -30,10 +30,10 @@ class Demangler {
   ~Demangler();
 
   /// Transforms given string and replaces any symbols with original names
-  /// @param mod the module where the symbols are registered
+  /// @param program the program where the symbols are registered
   /// @param str the string to replace
   /// @returns the string with any symbol replacements performed.
-  std::string Demangle(const ast::Module& mod, const std::string& str) const;
+  std::string Demangle(const Program& program, const std::string& str) const;
 };
 
 }  // namespace tint

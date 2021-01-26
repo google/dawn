@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/module.h"
+#include "src/program.h"
 
 #include <sstream>
 #include <utility>
@@ -26,82 +26,81 @@
 #include "src/type/struct_type.h"
 
 namespace tint {
-namespace ast {
 namespace {
 
-using ModuleTest = TestHelper;
+using ProgramTest = ast::TestHelper;
 
-TEST_F(ModuleTest, Creation) {
+TEST_F(ProgramTest, Creation) {
   EXPECT_EQ(mod->Functions().size(), 0u);
 }
 
-TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
+TEST_F(ProgramTest, ToStrEmitsPreambleAndPostamble) {
   const auto str = mod->to_str();
   auto* const expected = "Module{\n}\n";
   EXPECT_EQ(str, expected);
 }
 
-TEST_F(ModuleTest, IsValid_Empty) {
+TEST_F(ProgramTest, IsValid_Empty) {
   EXPECT_TRUE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_GlobalVariable) {
-  auto* var = Var("var", StorageClass::kInput, ty.f32);
+TEST_F(ProgramTest, IsValid_GlobalVariable) {
+  auto* var = Var("var", ast::StorageClass::kInput, ty.f32);
   mod->AddGlobalVariable(var);
   EXPECT_TRUE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Null_GlobalVariable) {
+TEST_F(ProgramTest, IsValid_Null_GlobalVariable) {
   mod->AddGlobalVariable(nullptr);
   EXPECT_FALSE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
-  auto* var = Var("var", StorageClass::kInput, nullptr);
+TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
+  auto* var = Var("var", ast::StorageClass::kInput, nullptr);
   mod->AddGlobalVariable(var);
   EXPECT_FALSE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Alias) {
+TEST_F(ProgramTest, IsValid_Alias) {
   auto* alias = ty.alias("alias", ty.f32);
   mod->AddConstructedType(alias);
   EXPECT_TRUE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Null_Alias) {
+TEST_F(ProgramTest, IsValid_Null_Alias) {
   mod->AddConstructedType(nullptr);
   EXPECT_FALSE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Struct) {
+TEST_F(ProgramTest, IsValid_Struct) {
   auto* st = ty.struct_("name", {});
   auto* alias = ty.alias("name", st);
   mod->AddConstructedType(alias);
   EXPECT_TRUE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
+TEST_F(ProgramTest, IsValid_Struct_EmptyName) {
   auto* st = ty.struct_("", {});
   auto* alias = ty.alias("name", st);
   mod->AddConstructedType(alias);
   EXPECT_FALSE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Function) {
-  auto* func = Func("main", VariableList(), ty.f32, StatementList{},
+TEST_F(ProgramTest, IsValid_Function) {
+  auto* func = Func("main", ast::VariableList(), ty.f32, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   mod->Functions().Add(func);
   EXPECT_TRUE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Null_Function) {
+TEST_F(ProgramTest, IsValid_Null_Function) {
   mod->Functions().Add(nullptr);
   EXPECT_FALSE(mod->IsValid());
 }
 
-TEST_F(ModuleTest, IsValid_Invalid_Function) {
-  auto* func = Func("main", VariableList{}, nullptr, StatementList{},
+TEST_F(ProgramTest, IsValid_Invalid_Function) {
+  auto* func = Func("main", ast::VariableList{}, nullptr, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
   mod->Functions().Add(func);
@@ -109,5 +108,4 @@ TEST_F(ModuleTest, IsValid_Invalid_Function) {
 }
 
 }  // namespace
-}  // namespace ast
 }  // namespace tint

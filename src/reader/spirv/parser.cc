@@ -38,8 +38,8 @@ bool Parser::Parse() {
   return result;
 }
 
-ast::Module Parser::module() {
-  return impl_->module();
+Program Parser::program() {
+  return impl_->program();
 }
 
 }  // namespace spirv

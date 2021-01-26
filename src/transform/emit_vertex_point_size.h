@@ -21,10 +21,10 @@ namespace tint {
 namespace transform {
 
 /// EmitVertexPointSize is a Transform that adds a PointSize builtin global
-/// output variable to the module which is assigned 1.0 as the new first
+/// output variable to the program which is assigned 1.0 as the new first
 /// statement for all vertex stage entry points.
-/// If the module does not contain a vertex pipeline stage entry point then then
-/// this transform is a no-op.
+/// If the program does not contain a vertex pipeline stage entry point then
+/// then this transform is a no-op.
 class EmitVertexPointSize : public Transform {
  public:
   /// Constructor
@@ -32,13 +32,13 @@ class EmitVertexPointSize : public Transform {
   /// Destructor
   ~EmitVertexPointSize() override;
 
-  /// Runs the transform on `module`, returning the transformation result.
+  /// Runs the transform on `program`, returning the transformation result.
   /// @note Users of Tint should register the transform with transform manager
   /// and invoke its Run(), instead of directly calling the transform's Run().
-  /// Calling Run() directly does not perform module state cleanup operations.
-  /// @param module the source module to transform
+  /// Calling Run() directly does not perform program state cleanup operations.
+  /// @param program the source program to transform
   /// @returns the transformation result
-  Output Run(ast::Module* module) override;
+  Output Run(const Program* program) override;
 };
 
 }  // namespace transform

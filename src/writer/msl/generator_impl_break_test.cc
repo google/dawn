@@ -17,7 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/module.h"
+#include "src/program.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 

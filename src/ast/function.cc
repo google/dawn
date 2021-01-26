@@ -16,11 +16,11 @@
 
 #include <sstream>
 
-#include "src/ast/module.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/clone_context.h"
+#include "src/program.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
 #include "src/type/texture_type.h"

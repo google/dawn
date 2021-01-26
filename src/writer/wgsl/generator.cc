@@ -20,12 +20,8 @@ namespace tint {
 namespace writer {
 namespace wgsl {
 
-Generator::Generator(ast::Module module)
-    : module_(std::move(module)),
-      impl_(std::make_unique<GeneratorImpl>(&module_)) {}
-
-Generator::Generator(Program* program)
-    : impl_(std::make_unique<GeneratorImpl>(&program->module)) {}
+Generator::Generator(const Program* program)
+    : impl_(std::make_unique<GeneratorImpl>(program)) {}
 
 Generator::~Generator() = default;
 
