@@ -101,7 +101,7 @@ bool GeneratorImpl::Generate() {
     out_ << std::endl;
   }
 
-  for (auto* func : program_->Functions()) {
+  for (auto* func : program_->AST().Functions()) {
     if (!EmitFunction(func)) {
       return false;
     }
@@ -113,7 +113,8 @@ bool GeneratorImpl::Generate() {
 
 bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
                                        const std::string& name) {
-  auto* func = program_->Functions().Find(program_->GetSymbol(name), stage);
+  auto* func =
+      program_->AST().Functions().Find(program_->GetSymbol(name), stage);
   if (func == nullptr) {
     error_ = "Unable to find requested entry point: " + name;
     return false;
@@ -152,7 +153,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
     out_ << std::endl;
   }
 
-  for (auto* f : program_->Functions()) {
+  for (auto* f : program_->AST().Functions()) {
     if (!f->HasAncestorEntryPoint(program_->GetSymbol(name))) {
       continue;
     }

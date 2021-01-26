@@ -126,13 +126,13 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  if (!DetermineFunctions(program_->Functions())) {
+  if (!DetermineFunctions(program_->AST().Functions())) {
     return false;
   }
 
   // Walk over the caller to callee information and update functions with which
   // entry points call those functions.
-  for (auto* func : program_->Functions()) {
+  for (auto* func : program_->AST().Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -404,7 +404,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
         caller_to_callee_[current_function_->symbol()].push_back(
             ident->symbol());
 
-        auto* callee_func = program_->Functions().Find(ident->symbol());
+        auto* callee_func = program_->AST().Functions().Find(ident->symbol());
         if (callee_func == nullptr) {
           set_error(expr->source(),
                     "unable to find called function: " +

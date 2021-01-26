@@ -303,7 +303,7 @@ bool Builder::Build() {
     }
   }
 
-  for (auto* func : program_->Functions()) {
+  for (auto* func : program_->AST().Functions()) {
     if (!GenerateFunction(func)) {
       return false;
     }

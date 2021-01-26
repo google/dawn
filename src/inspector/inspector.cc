@@ -50,7 +50,7 @@ Inspector::~Inspector() = default;
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
   std::vector<EntryPoint> result;
 
-  for (auto* func : program_.Functions()) {
+  for (auto* func : program_.AST().Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -283,7 +283,7 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
-  auto* func = program_.Functions().Find(program_.GetSymbol(name));
+  auto* func = program_.AST().Functions().Find(program_.GetSymbol(name));
   if (!func) {
     error_ += name + " was not found!";
     return nullptr;

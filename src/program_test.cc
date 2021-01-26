@@ -31,7 +31,7 @@ namespace {
 using ProgramTest = ast::TestHelper;
 
 TEST_F(ProgramTest, Creation) {
-  EXPECT_EQ(mod->Functions().size(), 0u);
+  EXPECT_EQ(mod->AST().Functions().size(), 0u);
 }
 
 TEST_F(ProgramTest, ToStrEmitsPreambleAndPostamble) {
@@ -90,12 +90,12 @@ TEST_F(ProgramTest, IsValid_Function) {
   auto* func = Func("main", ast::VariableList(), ty.f32, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
   EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_Function) {
-  mod->Functions().Add(nullptr);
+  mod->AST().Functions().Add(nullptr);
   EXPECT_FALSE(mod->IsValid());
 }
 
@@ -103,7 +103,7 @@ TEST_F(ProgramTest, IsValid_Invalid_Function) {
   auto* func = Func("main", ast::VariableList{}, nullptr, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
   EXPECT_FALSE(mod->IsValid());
 }
 

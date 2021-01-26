@@ -40,7 +40,7 @@ fn main() -> void {
   ASSERT_TRUE(p->Parse()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(1u, m.Functions().size());
+  ASSERT_EQ(1u, m.AST().Functions().size());
   ASSERT_EQ(1u, m.AST().GlobalVariables().size());
 }
 

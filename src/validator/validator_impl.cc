@@ -71,10 +71,10 @@ bool ValidatorImpl::Validate() {
   if (!ValidateConstructedTypes(program_->AST().ConstructedTypes())) {
     return false;
   }
-  if (!ValidateFunctions(program_->Functions())) {
+  if (!ValidateFunctions(program_->AST().Functions())) {
     return false;
   }
-  if (!ValidateEntryPoint(program_->Functions())) {
+  if (!ValidateEntryPoint(program_->AST().Functions())) {
     return false;
   }
   function_stack_.pop_scope();

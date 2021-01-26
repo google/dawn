@@ -62,7 +62,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -85,7 +85,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -112,7 +112,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -134,7 +134,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_NoReturn_Void) {
                     ast::FunctionDecorationList{create<ast::StageDecoration>(
                         ast::PipelineStage::kFragment)});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -174,7 +174,7 @@ TEST_F(MslGeneratorImplTest,
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -223,7 +223,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
                     ast::FunctionDecorationList{create<ast::StageDecoration>(
                         ast::PipelineStage::kFragment)});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -278,7 +278,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -323,7 +323,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -374,7 +374,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -428,7 +428,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -483,7 +483,7 @@ TEST_F(
   auto* sub_func =
       Func("sub_func", params, ty.f32, body, ast::FunctionDecorationList{});
 
-  mod->Functions().Add(sub_func);
+  mod->AST().Functions().Add(sub_func);
 
   body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("bar"), Call("sub_func", 1.0f)),
@@ -495,7 +495,7 @@ TEST_F(
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func_1);
+  mod->AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -547,7 +547,7 @@ TEST_F(MslGeneratorImplTest,
                         },
                         ast::FunctionDecorationList{});
 
-  mod->Functions().Add(sub_func);
+  mod->AST().Functions().Add(sub_func);
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("depth"), Call("sub_func", 1.0f)),
@@ -560,7 +560,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func_1);
+  mod->AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -616,7 +616,7 @@ TEST_F(
   auto* sub_func =
       Func("sub_func", params, ty.f32, body, ast::FunctionDecorationList{});
 
-  mod->Functions().Add(sub_func);
+  mod->AST().Functions().Add(sub_func);
 
   body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("depth"), Call("sub_func", 1.0f)),
@@ -628,7 +628,7 @@ TEST_F(
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func_1);
+  mod->AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -674,7 +674,7 @@ TEST_F(MslGeneratorImplTest,
   auto* sub_func =
       Func("sub_func", params, ty.f32, body, ast::FunctionDecorationList{});
 
-  mod->Functions().Add(sub_func);
+  mod->AST().Functions().Add(sub_func);
 
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
@@ -692,7 +692,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -741,7 +741,7 @@ TEST_F(MslGeneratorImplTest,
   auto* sub_func =
       Func("sub_func", params, ty.f32, body, ast::FunctionDecorationList{});
 
-  mod->Functions().Add(sub_func);
+  mod->AST().Functions().Add(sub_func);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32,
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
@@ -756,7 +756,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -810,7 +810,7 @@ TEST_F(MslGeneratorImplTest,
   auto* sub_func =
       Func("sub_func", params, ty.f32, body, ast::FunctionDecorationList{});
 
-  mod->Functions().Add(sub_func);
+  mod->AST().Functions().Add(sub_func);
 
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
@@ -828,7 +828,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -881,7 +881,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func_1);
+  mod->AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -914,7 +914,7 @@ TEST_F(MslGeneratorImplTest,
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -938,7 +938,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -1004,7 +1004,7 @@ TEST_F(MslGeneratorImplTest,
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->Functions().Add(func);
+    mod->AST().Functions().Add(func);
   }
 
   {
@@ -1018,7 +1018,7 @@ TEST_F(MslGeneratorImplTest,
              ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
 
-    mod->Functions().Add(func);
+    mod->AST().Functions().Add(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

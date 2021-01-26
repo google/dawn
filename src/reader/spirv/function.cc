@@ -859,7 +859,7 @@ bool FunctionEmitter::Emit() {
 
   auto& statements = statements_stack_[0].GetStatements();
   auto* body = create<ast::BlockStatement>(Source{}, statements);
-  program_.Functions().Add(create<ast::Function>(
+  program_.AST().Functions().Add(create<ast::Function>(
       decl.source, program_.RegisterSymbol(decl.name), std::move(decl.params),
       decl.return_type, body, std::move(decl.decorations)));
 

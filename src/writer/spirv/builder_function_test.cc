@@ -261,7 +261,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->Functions().Add(func);
+    mod->AST().Functions().Add(func);
   }
 
   {
@@ -278,7 +278,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->Functions().Add(func);
+    mod->AST().Functions().Add(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

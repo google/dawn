@@ -118,14 +118,6 @@ class Program {
     return types_.Get<T>(std::forward<ARGS>(args)...);
   }
 
-  /// @returns the functions declared in the translation unit
-  /// [DEPRECATED]: Use AST().Functions()
-  const ast::FunctionList& Functions() const { return AST().Functions(); }
-
-  /// @returns the functions declared in the translation unit
-  /// [DEPRECATED]: Use AST().Functions()
-  ast::FunctionList& Functions() { return AST().Functions(); }
-
   /// Returns all the declared types in the program
   /// [DEPRECATED]: Use AST().Types().types()
   /// @returns the mapping from name string to type.

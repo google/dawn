@@ -378,7 +378,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
   if (func.errored)
     errored = true;
   if (func.matched) {
-    program_.Functions().Add(func.value);
+    program_.AST().Functions().Add(func.value);
     return true;
   }
 

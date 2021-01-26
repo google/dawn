@@ -394,7 +394,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
                             Source{Source::Location{12, 34}}, lhs, rhs),
                     },
                     ast::FunctionDecorationList{});
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   ValidatorImpl& v = Build();
 
@@ -423,7 +423,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -582,7 +582,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
@@ -612,7 +612,7 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
@@ -711,8 +711,8 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->Functions().Add(func0);
-  mod->Functions().Add(func1);
+  mod->AST().Functions().Add(func0);
+  mod->AST().Functions().Add(func1);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 

@@ -70,7 +70,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -123,7 +123,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -176,7 +176,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -229,7 +229,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -279,7 +279,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -324,7 +324,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -377,7 +377,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 

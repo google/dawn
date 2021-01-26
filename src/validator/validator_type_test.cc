@@ -172,7 +172,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -197,7 +197,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
                         create<ast::ReturnStatement>(),
                     },
                     ast::FunctionDecorationList{});
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   auto* main =
       Func("main", ast::VariableList{}, ty.void_,
@@ -207,7 +207,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->Functions().Add(main);
+  mod->AST().Functions().Add(main);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 

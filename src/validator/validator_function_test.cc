@@ -49,7 +49,7 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -68,7 +68,7 @@ TEST_F(ValidateFunctionTest,
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -89,7 +89,7 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
                         create<ast::VariableDeclStatement>(var),
                     },
                     ast::FunctionDecorationList{});
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -105,7 +105,7 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   auto* func =
       Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
            ty.i32, ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -127,13 +127,14 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
-  EXPECT_TRUE(td()->DetermineFunctions(mod->Functions())) << td()->error();
+  EXPECT_TRUE(td()->DetermineFunctions(mod->AST().Functions()))
+      << td()->error();
 
   ValidatorImpl& v = Build();
 
-  EXPECT_TRUE(v.ValidateFunctions(mod->Functions())) << v.error();
+  EXPECT_TRUE(v.ValidateFunctions(mod->AST().Functions())) << v.error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
@@ -144,7 +145,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
                             Source{Source::Location{12, 34}}, Expr(2)),
                     },
                     ast::FunctionDecorationList{});
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -165,7 +166,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
                             Source{Source::Location{12, 34}}, Expr(2)),
                     },
                     ast::FunctionDecorationList{});
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -194,8 +195,8 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
                          },
                          ast::FunctionDecorationList{});
 
-  mod->Functions().Add(func);
-  mod->Functions().Add(func_copy);
+  mod->AST().Functions().Add(func);
+  mod->AST().Functions().Add(func_copy);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -217,7 +218,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
                          create<ast::ReturnStatement>(),
                      },
                      ast::FunctionDecorationList{});
-  mod->Functions().Add(func0);
+  mod->AST().Functions().Add(func0);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -241,7 +242,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
                          create<ast::ReturnStatement>(Expr(2)),
                      },
                      ast::FunctionDecorationList{});
-  mod->Functions().Add(func0);
+  mod->AST().Functions().Add(func0);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -263,7 +264,7 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -288,7 +289,7 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -313,7 +314,7 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
 
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
@@ -335,7 +336,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -351,7 +352,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
                         create<ast::ReturnStatement>(),
                     },
                     ast::FunctionDecorationList{});
-  mod->Functions().Add(func);
+  mod->AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
