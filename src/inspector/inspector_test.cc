@@ -114,11 +114,11 @@ class InspectorHelper : public ast::BuilderWithProgram {
       std::string in, out;
       std::tie(in, out) = inout;
 
-      mod->AST().AddGlobalVariable(
+      AST().AddGlobalVariable(
           Var(in, ast::StorageClass::kInput, ty.u32(), nullptr,
               ast::VariableDecorationList{
                   create<ast::LocationDecoration>(location++)}));
-      mod->AST().AddGlobalVariable(
+      AST().AddGlobalVariable(
           Var(out, ast::StorageClass::kOutput, ty.u32(), nullptr,
               ast::VariableDecorationList{
                   create<ast::LocationDecoration>(location++)}));
@@ -187,7 +187,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
                       ast::VariableDecorationList{
                           create<ast::ConstantIdDecoration>(id),
                       });
-    mod->AST().AddGlobalVariable(var);
+    AST().AddGlobalVariable(var);
   }
 
   /// @param type AST type of the literal, must resolve to BoolLiteral
@@ -334,7 +334,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
                         create<ast::GroupDecoration>(group),
                     });
 
-    mod->AST().AddGlobalVariable(var);
+    AST().AddGlobalVariable(var);
   }
 
   /// Adds an uniform buffer variable to the program
@@ -469,7 +469,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
   }
 
   void AddGlobalVariable(const std::string& name, type::Type* type) {
-    mod->AST().AddGlobalVariable(
+    AST().AddGlobalVariable(
         Var(name, ast::StorageClass::kUniformConstant, type));
   }
 
@@ -477,7 +477,7 @@ class InspectorHelper : public ast::BuilderWithProgram {
   /// @param name the name of the variable
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, type::Type* type) {
-    mod->AST().AddGlobalVariable(
+    AST().AddGlobalVariable(
         Var(name, ast::StorageClass::kUniformConstant, type));
   }
 
@@ -701,7 +701,7 @@ TEST_F(InspectorGetEntryPointTest, NoFunctions) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
-  mod->AST().Functions().Add(MakeEmptyBodyFunction("foo", {}));
+  AST().Functions().Add(MakeEmptyBodyFunction("foo", {}));
 
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
@@ -714,7 +714,7 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -732,13 +732,13 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto* bar = MakeEmptyBodyFunction(
       "bar", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
-  mod->AST().Functions().Add(bar);
+  AST().Functions().Add(bar);
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -756,21 +756,21 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 
 TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   auto* func = MakeEmptyBodyFunction("func", {});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* foo = MakeCallerBodyFunction(
       "foo", "func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto* bar = MakeCallerBodyFunction(
       "bar", "func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
-  mod->AST().Functions().Add(bar);
+  AST().Functions().Add(bar);
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -792,7 +792,7 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
@@ -811,7 +811,7 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
                  create<ast::WorkgroupDecoration>(8u, 2u, 1u),
              });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
@@ -826,14 +826,14 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
 
 TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   auto* func = MakeEmptyBodyFunction("func", {});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* foo = MakeCallerBodyFunction(
       "foo", "func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto result = inspector()->GetEntryPoints();
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
@@ -851,7 +851,7 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -875,14 +875,14 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
 
   auto* func =
       MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* foo = MakeCallerBodyFunction(
       "foo", "func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -906,14 +906,14 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
 
   auto* func =
       MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* foo = MakeInOutVariableCallerBodyFunction(
       "foo", "func", {{"in_var", "out_var"}},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -940,7 +940,7 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -970,14 +970,14 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
 
   auto* func = MakeInOutVariableBodyFunction(
       "func", {{"in_var", "out_var"}, {"in2_var", "out2_var"}}, {});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* foo = MakeCallerBodyFunction(
       "foo", "func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1011,14 +1011,14 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto* bar = MakeInOutVariableBodyFunction(
       "bar", {{"in2_var", "out_var"}},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
       });
-  mod->AST().Functions().Add(bar);
+  AST().Functions().Add(bar);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1057,21 +1057,21 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 
   auto* func =
       MakeInOutVariableBodyFunction("func", {{"in2_var", "out2_var"}}, {});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* foo = MakeInOutVariableCallerBodyFunction(
       "foo", "func", {{"in_var", "out_var"}},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto* bar = MakeCallerBodyFunction(
       "bar", "func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
       });
-  mod->AST().Functions().Add(bar);
+  AST().Functions().Add(bar);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1114,23 +1114,23 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
-  mod->AST().AddGlobalVariable(
+  AST().AddGlobalVariable(
       Var("in_var", ast::StorageClass::kInput, ty.u32(), nullptr,
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kPosition)}));
-  mod->AST().AddGlobalVariable(
+  AST().AddGlobalVariable(
       Var("out_var", ast::StorageClass::kOutput, ty.u32(), nullptr,
           ast::VariableDecorationList{create<ast::LocationDecoration>(0)}));
   auto* func =
       MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* foo = MakeCallerBodyFunction(
       "foo", "func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1162,7 +1162,7 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
-  mod->AST().Functions().Add(MakeEmptyBodyFunction("foo", {}));
+  AST().Functions().Add(MakeEmptyBodyFunction("foo", {}));
 
   auto result = inspector()->GetRemappedNameForEntryPoint("foo");
   ASSERT_TRUE(inspector()->has_error());
@@ -1177,7 +1177,7 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -1195,7 +1195,7 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -1203,7 +1203,7 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
       "bar", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
-  mod->AST().Functions().Add(bar);
+  AST().Functions().Add(bar);
 
   {
     auto result = inspector()->GetRemappedNameForEntryPoint("foo");
@@ -1321,14 +1321,14 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 
   auto* ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(ub_func);
+  AST().Functions().Add(ub_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "ub_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1349,14 +1349,14 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
 
   auto* ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(ub_func);
+  AST().Functions().Add(ub_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "ub_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1374,14 +1374,14 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 
   auto* ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(ub_func);
+  AST().Functions().Add(ub_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "ub_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1403,14 +1403,14 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 
   auto* ub_func = MakeStructVariableReferenceBodyFunction(
       "ub_func", "foo_ub", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
-  mod->AST().Functions().Add(ub_func);
+  AST().Functions().Add(ub_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "ub_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1436,7 +1436,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
                                  const std::string& var_name) {
     auto* ub_func = MakeStructVariableReferenceBodyFunction(
         func_name, var_name, {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
-    mod->AST().Functions().Add(ub_func);
+    AST().Functions().Add(ub_func);
   };
   AddReferenceFunc("ub_foo_func", "ub_foo");
   AddReferenceFunc("ub_bar_func", "ub_bar");
@@ -1454,7 +1454,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1484,14 +1484,14 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 
   auto* ub_func = MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(ub_func);
+  AST().Functions().Add(ub_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "ub_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1513,14 +1513,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1542,14 +1542,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction(
       "sb_func", "foo_sb", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1575,7 +1575,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
                                  const std::string& var_name) {
     auto* sb_func = MakeStructVariableReferenceBodyFunction(
         func_name, var_name, {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
-    mod->AST().Functions().Add(sb_func);
+    AST().Functions().Add(sb_func);
   };
   AddReferenceFunc("sb_foo_func", "sb_foo");
   AddReferenceFunc("sb_bar_func", "sb_bar");
@@ -1596,7 +1596,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1626,14 +1626,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1655,14 +1655,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1684,14 +1684,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1709,14 +1709,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1744,7 +1744,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
                                  const std::string& var_name) {
     auto* sb_func = MakeStructVariableReferenceBodyFunction(
         func_name, var_name, {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
-    mod->AST().Functions().Add(sb_func);
+    AST().Functions().Add(sb_func);
   };
   AddReferenceFunc("sb_foo_func", "sb_foo");
   AddReferenceFunc("sb_bar_func", "sb_bar");
@@ -1765,7 +1765,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1796,14 +1796,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1827,14 +1827,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1857,14 +1857,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
 
   auto* sb_func = MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                                           {{0, ty.i32()}});
-  mod->AST().Functions().Add(sb_func);
+  AST().Functions().Add(sb_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "sb_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1886,7 +1886,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1903,7 +1903,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
       "ep_func", ast::FunctionDecorationList{
                      create<ast::StageDecoration>(ast::PipelineStage::kVertex),
                  });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1922,14 +1922,14 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
 
   auto* foo_func = MakeSamplerReferenceBodyFunction(
       "foo_func", "foo_texture", "foo_sampler", "foo_coords", ty.f32(), {});
-  mod->AST().Functions().Add(foo_func);
+  AST().Functions().Add(foo_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "foo_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1953,7 +1953,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1973,7 +1973,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -1995,7 +1995,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2012,7 +2012,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
       "ep_func", ast::FunctionDecorationList{
                      create<ast::StageDecoration>(ast::PipelineStage::kVertex),
                  });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2032,14 +2032,14 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
   auto* foo_func = MakeComparisonSamplerReferenceBodyFunction(
       "foo_func", "foo_texture", "foo_sampler", "foo_coords", "foo_depth",
       ty.f32(), {});
-  mod->AST().Functions().Add(foo_func);
+  AST().Functions().Add(foo_func);
 
   auto* ep_func = MakeCallerBodyFunction(
       "ep_func", "foo_func",
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(ep_func);
+  AST().Functions().Add(ep_func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2063,7 +2063,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2083,7 +2083,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2098,7 +2098,7 @@ TEST_F(InspectorGetSampledTextureResourceBindingsTest, Empty) {
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto result = inspector()->GetSampledTextureResourceBindings("foo");
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
@@ -2121,7 +2121,7 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2212,7 +2212,7 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2283,7 +2283,7 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
@@ -2338,7 +2338,7 @@ TEST_F(InspectorGetMultisampledArrayTextureResourceBindingsTest, Empty) {
       "foo", ast::FunctionDecorationList{
                  create<ast::StageDecoration>(ast::PipelineStage::kVertex),
              });
-  mod->AST().Functions().Add(foo);
+  AST().Functions().Add(foo);
 
   auto result = inspector()->GetSampledTextureResourceBindings("foo");
   ASSERT_FALSE(inspector()->has_error()) << inspector()->error();
@@ -2363,7 +2363,7 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 

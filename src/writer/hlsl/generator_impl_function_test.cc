@@ -59,7 +59,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -80,7 +80,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
                     },
                     ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -105,7 +105,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
            },
            ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -128,7 +128,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -157,8 +157,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.void_(),
@@ -169,7 +169,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -208,8 +208,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -221,7 +221,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -262,8 +262,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AST().AddGlobalVariable(coord_var);
-  mod->AST().AddGlobalVariable(depth_var);
+  AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(depth_var);
 
   auto* func =
       Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -276,7 +276,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -310,7 +310,7 @@ TEST_F(HlslGeneratorImplTest_Function,
           });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "x"), ast::VariableDecorationList{});
@@ -325,7 +325,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -358,10 +358,10 @@ TEST_F(HlslGeneratorImplTest_Function,
                             create<ast::GroupDecoration>(1),
                         });
 
-  mod->AST().AddConstructedType(s);
+  AST().AddConstructedType(s);
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   create<ast::MemberAccessorExpression>(
@@ -378,7 +378,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -416,7 +416,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                         });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
@@ -431,7 +431,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -466,7 +466,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                         });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
@@ -481,7 +481,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -515,7 +515,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                         });
 
   td.RegisterVariableForTesting(coord_var);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* func =
       Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -528,7 +528,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -567,9 +567,9 @@ TEST_F(
   td.RegisterVariableForTesting(bar_var);
   td.RegisterVariableForTesting(val_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
-  mod->AST().AddGlobalVariable(val_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(val_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -582,7 +582,7 @@ TEST_F(
       },
       ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(sub_func);
+  AST().Functions().Add(sub_func);
 
   auto* func_1 = Func(
       "ep_1", ast::VariableList{}, ty.void_(),
@@ -594,7 +594,7 @@ TEST_F(
           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
 
-  mod->AST().Functions().Add(func_1);
+  AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -635,7 +635,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AST().AddGlobalVariable(depth_var);
+  AST().AddGlobalVariable(depth_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -646,7 +646,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       },
       ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(sub_func);
+  AST().Functions().Add(sub_func);
 
   auto* func_1 =
       Func("ep_1", ast::VariableList{}, ty.void_(),
@@ -659,7 +659,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func_1);
+  AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -701,8 +701,8 @@ TEST_F(
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AST().AddGlobalVariable(coord_var);
-  mod->AST().AddGlobalVariable(depth_var);
+  AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(depth_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -715,7 +715,7 @@ TEST_F(
       },
       ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(sub_func);
+  AST().Functions().Add(sub_func);
 
   auto* func_1 =
       Func("ep_1", ast::VariableList{}, ty.void_(),
@@ -728,7 +728,7 @@ TEST_F(
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func_1);
+  AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -768,7 +768,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   td.RegisterVariableForTesting(coord_var);
 
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -779,7 +779,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       },
       ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(sub_func);
+  AST().Functions().Add(sub_func);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
@@ -794,7 +794,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -828,7 +828,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   td.RegisterVariableForTesting(coord_var);
 
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* sub_func = Func(
       "sub_func",
@@ -839,7 +839,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       },
       ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(sub_func);
+  AST().Functions().Add(sub_func);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
@@ -854,7 +854,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -883,7 +883,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       });
 
   td.RegisterVariableForTesting(bar_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* list = create<ast::BlockStatement>(ast::StatementList{
       create<ast::ReturnStatement>(),
@@ -902,7 +902,7 @@ TEST_F(HlslGeneratorImplTest_Function,
           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
 
-  mod->AST().Functions().Add(func_1);
+  AST().Functions().Add(func_1);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -933,7 +933,7 @@ TEST_F(HlslGeneratorImplTest_Function,
           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -956,7 +956,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -983,7 +983,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                create<ast::WorkgroupDecoration>(2u, 4u, 6u),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -1008,7 +1008,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
       },
       ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -1053,9 +1053,9 @@ TEST_F(HlslGeneratorImplTest_Function,
                            create<ast::GroupDecoration>(0),
                        });
 
-  mod->AST().AddConstructedType(s);
+  AST().AddConstructedType(s);
   td.RegisterVariableForTesting(data_var);
-  mod->AST().AddGlobalVariable(data_var);
+  AST().AddGlobalVariable(data_var);
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
@@ -1071,7 +1071,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AST().Functions().Add(func);
+    AST().Functions().Add(func);
   }
 
   {
@@ -1088,7 +1088,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AST().Functions().Add(func);
+    AST().Functions().Add(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

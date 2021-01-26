@@ -35,7 +35,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   auto* call = Call("my_func");
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -47,7 +47,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   auto* call = Call("my_func", "param1", "param2");
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   GeneratorImpl& gen = Build();
 
@@ -59,7 +59,7 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
   auto* call = Call("my_func", "param1", "param2");
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{}, ast::FunctionDecorationList{});
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   auto* expr = create<ast::CallStatement>(call);
 

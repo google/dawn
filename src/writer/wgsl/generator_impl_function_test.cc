@@ -191,10 +191,10 @@ TEST_F(WgslGeneratorImplTest,
                            create<ast::GroupDecoration>(0),
                        });
 
-  mod->AST().AddConstructedType(s);
+  AST().AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
-  mod->AST().AddGlobalVariable(data_var);
+  AST().AddGlobalVariable(data_var);
 
   {
     auto* var =
@@ -212,7 +212,7 @@ TEST_F(WgslGeneratorImplTest,
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AST().Functions().Add(func);
+    AST().Functions().Add(func);
   }
 
   {
@@ -231,7 +231,7 @@ TEST_F(WgslGeneratorImplTest,
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AST().Functions().Add(func);
+    AST().Functions().Add(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

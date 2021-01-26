@@ -31,7 +31,7 @@ namespace {
 using ProgramTest = ast::TestHelper;
 
 TEST_F(ProgramTest, Creation) {
-  EXPECT_EQ(mod->AST().Functions().size(), 0u);
+  EXPECT_EQ(AST().Functions().size(), 0u);
 }
 
 TEST_F(ProgramTest, ToStrEmitsPreambleAndPostamble) {
@@ -41,70 +41,70 @@ TEST_F(ProgramTest, ToStrEmitsPreambleAndPostamble) {
 }
 
 TEST_F(ProgramTest, IsValid_Empty) {
-  EXPECT_TRUE(mod->IsValid());
+  EXPECT_TRUE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_GlobalVariable) {
   auto* var = Var("var", ast::StorageClass::kInput, ty.f32());
-  mod->AST().AddGlobalVariable(var);
-  EXPECT_TRUE(mod->IsValid());
+  AST().AddGlobalVariable(var);
+  EXPECT_TRUE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_GlobalVariable) {
-  mod->AST().AddGlobalVariable(nullptr);
-  EXPECT_FALSE(mod->IsValid());
+  AST().AddGlobalVariable(nullptr);
+  EXPECT_FALSE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
   auto* var = Var("var", ast::StorageClass::kInput, nullptr);
-  mod->AST().AddGlobalVariable(var);
-  EXPECT_FALSE(mod->IsValid());
+  AST().AddGlobalVariable(var);
+  EXPECT_FALSE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Alias) {
   auto* alias = ty.alias("alias", ty.f32());
-  mod->AST().AddConstructedType(alias);
-  EXPECT_TRUE(mod->IsValid());
+  AST().AddConstructedType(alias);
+  EXPECT_TRUE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_Alias) {
-  mod->AST().AddConstructedType(nullptr);
-  EXPECT_FALSE(mod->IsValid());
+  AST().AddConstructedType(nullptr);
+  EXPECT_FALSE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Struct) {
   auto* st = ty.struct_("name", {});
   auto* alias = ty.alias("name", st);
-  mod->AST().AddConstructedType(alias);
-  EXPECT_TRUE(mod->IsValid());
+  AST().AddConstructedType(alias);
+  EXPECT_TRUE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Struct_EmptyName) {
   auto* st = ty.struct_("", {});
   auto* alias = ty.alias("name", st);
-  mod->AST().AddConstructedType(alias);
-  EXPECT_FALSE(mod->IsValid());
+  AST().AddConstructedType(alias);
+  EXPECT_FALSE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Function) {
   auto* func = Func("main", ast::VariableList(), ty.f32(), ast::StatementList{},
                     ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(func);
-  EXPECT_TRUE(mod->IsValid());
+  AST().Functions().Add(func);
+  EXPECT_TRUE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_Function) {
-  mod->AST().Functions().Add(nullptr);
-  EXPECT_FALSE(mod->IsValid());
+  AST().Functions().Add(nullptr);
+  EXPECT_FALSE(IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Invalid_Function) {
   auto* func = Func("main", ast::VariableList{}, nullptr, ast::StatementList{},
                     ast::FunctionDecorationList{});
 
-  mod->AST().Functions().Add(func);
-  EXPECT_FALSE(mod->IsValid());
+  AST().Functions().Add(func);
+  EXPECT_FALSE(IsValid());
 }
 
 }  // namespace

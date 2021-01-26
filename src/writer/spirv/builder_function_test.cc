@@ -242,10 +242,10 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                            create<ast::GroupDecoration>(0),
                        });
 
-  mod->AST().AddConstructedType(s);
+  AST().AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
-  mod->AST().AddGlobalVariable(data_var);
+  AST().AddGlobalVariable(data_var);
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
@@ -261,7 +261,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AST().Functions().Add(func);
+    AST().Functions().Add(func);
   }
 
   {
@@ -278,7 +278,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                  create<ast::StageDecoration>(ast::PipelineStage::kCompute),
              });
 
-    mod->AST().Functions().Add(func);
+    AST().Functions().Add(func);
   }
 
   ASSERT_TRUE(td.Determine()) << td.error();

@@ -58,8 +58,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -71,7 +71,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -106,8 +106,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -119,7 +119,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -154,8 +154,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -167,7 +167,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -202,8 +202,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -215,7 +215,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -247,8 +247,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -260,7 +260,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -287,8 +287,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -300,7 +300,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
@@ -334,8 +334,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AST().AddGlobalVariable(coord_var);
-  mod->AST().AddGlobalVariable(depth_var);
+  AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(depth_var);
 
   auto body = ast::StatementList{create<ast::AssignmentStatement>(
       Expr("depth"), MemberAccessor("coord", "x"))};
@@ -345,7 +345,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 

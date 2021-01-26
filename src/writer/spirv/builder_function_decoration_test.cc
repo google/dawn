@@ -100,9 +100,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
   auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32());
   auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
 
-  mod->AST().AddGlobalVariable(v_in);
-  mod->AST().AddGlobalVariable(v_out);
-  mod->AST().AddGlobalVariable(v_wg);
+  AST().AddGlobalVariable(v_in);
+  AST().AddGlobalVariable(v_out);
+  AST().AddGlobalVariable(v_wg);
 
   spirv::Builder& b = Build();
 
@@ -149,9 +149,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32());
   auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
 
-  mod->AST().AddGlobalVariable(v_in);
-  mod->AST().AddGlobalVariable(v_out);
-  mod->AST().AddGlobalVariable(v_wg);
+  AST().AddGlobalVariable(v_in);
+  AST().AddGlobalVariable(v_out);
+  AST().AddGlobalVariable(v_wg);
 
   td.RegisterVariableForTesting(v_in);
   td.RegisterVariableForTesting(v_out);
@@ -276,7 +276,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
           ast::VariableDecorationList{
               create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
           });
-  mod->AST().AddGlobalVariable(fragdepth);
+  AST().AddGlobalVariable(fragdepth);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.void_(),

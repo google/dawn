@@ -57,8 +57,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("vtx_main", ast::VariableList{}, ty.f32(),
@@ -70,7 +70,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -110,8 +110,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("vtx_main", ast::VariableList{}, ty.f32(),
@@ -123,7 +123,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -163,8 +163,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.f32(),
@@ -176,7 +176,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -216,8 +216,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.f32(),
@@ -229,7 +229,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -266,8 +266,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.f32(),
@@ -279,7 +279,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -311,8 +311,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   td.RegisterVariableForTesting(foo_var);
   td.RegisterVariableForTesting(bar_var);
 
-  mod->AST().AddGlobalVariable(foo_var);
-  mod->AST().AddGlobalVariable(bar_var);
+  AST().AddGlobalVariable(foo_var);
+  AST().AddGlobalVariable(bar_var);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.f32(),
@@ -324,7 +324,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 
@@ -364,8 +364,8 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   td.RegisterVariableForTesting(coord_var);
   td.RegisterVariableForTesting(depth_var);
 
-  mod->AST().AddGlobalVariable(coord_var);
-  mod->AST().AddGlobalVariable(depth_var);
+  AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(depth_var);
 
   auto* func =
       Func("main", ast::VariableList{}, ty.void_(),
@@ -377,7 +377,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(func);
+  AST().Functions().Add(func);
 
   std::unordered_set<Symbol> globals;
 

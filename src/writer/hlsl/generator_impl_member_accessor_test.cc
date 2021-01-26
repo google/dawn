@@ -46,7 +46,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
   auto* s = ty.struct_("Str", strct);
   auto* str_var = Var("str", ast::StorageClass::kPrivate, s);
-  mod->AST().AddGlobalVariable(str_var);
+  AST().AddGlobalVariable(str_var);
 
   auto* expr = MemberAccessor("str", "mem");
 
@@ -79,7 +79,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "b");
@@ -112,7 +112,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "a");
@@ -149,9 +149,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* b_var = Var("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
-  mod->AST().AddGlobalVariable(b_var);
+  AST().AddGlobalVariable(b_var);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr("b");
@@ -197,7 +197,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "a");
@@ -240,7 +240,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "a");
@@ -282,7 +282,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "a");
@@ -317,7 +317,7 @@ TEST_F(
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "a");
@@ -353,7 +353,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = IndexAccessor(
@@ -389,7 +389,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
@@ -424,7 +424,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"),
@@ -459,7 +459,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "b");
@@ -499,7 +499,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
@@ -536,7 +536,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "a");
@@ -573,7 +573,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor("data", "b");
@@ -607,7 +607,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* s = ty.struct_("Data", str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor("data", "b");
@@ -662,7 +662,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr =
@@ -711,7 +711,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
 
   td.RegisterVariableForTesting(coord_var);
 
@@ -765,7 +765,7 @@ TEST_F(
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = MemberAccessor(
@@ -817,7 +817,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* expr = IndexAccessor(
@@ -869,7 +869,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* lhs =
@@ -925,7 +925,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  mod->AST().AddGlobalVariable(coord_var);
+  AST().AddGlobalVariable(coord_var);
   td.RegisterVariableForTesting(coord_var);
 
   auto* lhs = MemberAccessor(

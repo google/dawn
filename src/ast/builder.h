@@ -742,6 +742,15 @@ class Builder {
   /// @param loc the Source used for future create() calls
   void SetSource(const Source::Location& loc) { source_ = Source(loc); }
 
+  /// @returns true if all required fields in the AST are present.
+  bool IsValid() const { return mod->IsValid(); }
+
+  /// @returns a reference to the program's AST root Module
+  ast::Module& AST() { return mod->AST(); }
+
+  /// @returns a reference to the program's SymbolTable
+  SymbolTable& Symbols() { return mod->Symbols(); }
+
   /// The builder program
   Program* const program;
   /// The builder types

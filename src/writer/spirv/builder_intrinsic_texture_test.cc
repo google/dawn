@@ -4150,8 +4150,8 @@ TEST_P(IntrinsicTextureTest, Call) {
 TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
   auto param = GetParam();
 
-  mod->AST().AddGlobalVariable(param.buildTextureVariable(this));
-  mod->AST().AddGlobalVariable(param.buildSamplerVariable(this));
+  AST().AddGlobalVariable(param.buildTextureVariable(this));
+  AST().AddGlobalVariable(param.buildSamplerVariable(this));
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
@@ -4165,7 +4165,7 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
-  mod->AST().Functions().Add(main);
+  AST().Functions().Add(main);
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
