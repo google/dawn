@@ -21,9 +21,9 @@
 
 namespace tint {
 
-Program::Program() = default;
+Program::Program() : ast_(nodes_.Create<ast::Module>()) {}
 
-Program::Program(Program&&) = default;
+Program::Program(Program&& rhs) = default;
 
 Program& Program::operator=(Program&& rhs) = default;
 
@@ -36,93 +36,35 @@ Program Program::Clone() const {
 }
 
 void Program::Clone(CloneContext* ctx) const {
-  for (auto* ty : constructed_types_) {
-    ctx->dst->constructed_types_.emplace_back(ctx->Clone(ty));
+  for (auto* ty : AST().ConstructedTypes()) {
+    ctx->dst->AST().AddConstructedType(ctx->Clone(ty));
   }
-  for (auto* var : global_variables_) {
-    ctx->dst->global_variables_.emplace_back(ctx->Clone(var));
+  for (auto* var : AST().GlobalVariables()) {
+    ctx->dst->AST().AddGlobalVariable(ctx->Clone(var));
   }
-  for (auto* func : functions_) {
-    ctx->dst->functions_.emplace_back(ctx->Clone(func));
+  for (auto* func : AST().Functions()) {
+    ctx->dst->AST().Functions().Add(ctx->Clone(func));
   }
 }
 
 Symbol Program::RegisterSymbol(const std::string& name) {
-  return symbol_table_.Register(name);
+  return symbols_.Register(name);
 }
 
 Symbol Program::GetSymbol(const std::string& name) const {
-  return symbol_table_.Get(name);
+  return symbols_.Get(name);
 }
 
 std::string Program::SymbolToName(const Symbol sym) const {
-  return symbol_table_.NameFor(sym);
+  return symbols_.NameFor(sym);
 }
 
 bool Program::IsValid() const {
-  for (auto* var : global_variables_) {
-    if (var == nullptr || !var->IsValid()) {
-      return false;
-    }
-  }
-  for (auto* const ty : constructed_types_) {
-    if (ty == nullptr) {
-      return false;
-    }
-    if (auto* alias = ty->As<type::Alias>()) {
-      if (alias->type() == nullptr) {
-        return false;
-      }
-      if (auto* str = alias->type()->As<type::Struct>()) {
-        if (!str->symbol().IsValid()) {
-          return false;
-        }
-      }
-    } else if (auto* str = ty->As<type::Struct>()) {
-      if (!str->symbol().IsValid()) {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-  for (auto* func : functions_) {
-    if (func == nullptr || !func->IsValid()) {
-      return false;
-    }
-  }
-  return true;
+  return ast_->IsValid();
 }
 
 std::string Program::to_str() const {
-  std::ostringstream out;
-
-  out << "Module{" << std::endl;
-  const auto indent = 2;
-  for (auto* const ty : constructed_types_) {
-    for (size_t i = 0; i < indent; ++i) {
-      out << " ";
-    }
-    if (auto* alias = ty->As<type::Alias>()) {
-      out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
-          << std::endl;
-      if (auto* str = alias->type()->As<type::Struct>()) {
-        str->impl()->to_str(out, indent);
-      }
-    } else if (auto* str = ty->As<type::Struct>()) {
-      out << str->symbol().to_str() << " ";
-      str->impl()->to_str(out, indent);
-    }
-  }
-  for (auto* var : global_variables_) {
-    var->to_str(out, indent);
-  }
-  for (auto* func : functions_) {
-    func->to_str(out, indent);
-  }
-  out << "}" << std::endl;
-
-  return out.str();
+  return ast_->to_str();
 }
 
 }  // namespace tint

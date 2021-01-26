@@ -30,4 +30,13 @@ void CloneContext::Clone() {
   src->Clone(this);
 }
 
+ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
+  ast::FunctionList out;
+  out.reserve(v.size());
+  for (ast::Function* el : v) {
+    out.Add(Clone(el));
+  }
+  return out;
+}
+
 }  // namespace tint

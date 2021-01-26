@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "src/ast/function.h"
+#include "src/ast/module.h"
 #include "src/ast/variable.h"
 #include "src/block_allocator.h"
 #include "src/symbol_table.h"
@@ -36,11 +37,15 @@ namespace tint {
 /// Represents all the source in a given program.
 class Program {
  public:
+  /// ASTNodes is an alias to BlockAllocator<ast::Node>
+  using ASTNodes = BlockAllocator<ast::Node>;
+
   /// Constructor
   Program();
 
   /// Move constructor
-  Program(Program&&);
+  /// @param rhs the Program to move
+  Program(Program&& rhs);
 
   /// Move assignment operator
   /// @param rhs the Program to move
@@ -50,46 +55,34 @@ class Program {
   /// Destructor
   ~Program();
 
+  /// @returns a reference to the program's types
+  const type::Manager& Types() const { return types_; }
+
+  /// @returns a reference to the program's AST nodes storage
+  const ASTNodes& Nodes() const { return nodes_; }
+
+  /// @returns a reference to the program's AST root Module
+  const ast::Module& AST() const { return *ast_; }
+
+  /// @returns a reference to the program's AST root Module
+  ast::Module& AST() { return *ast_; }
+
+  /// @returns a reference to the program's SymbolTable
+  const SymbolTable& Symbols() const { return symbols_; }
+
+  /// @returns a reference to the program's SymbolTable
+  SymbolTable& Symbols() { return symbols_; }
+
   /// @return a deep copy of this program
   Program Clone() const;
 
-  /// Clone this program into `ctx->mod` using the provided CloneContext
+  /// Clone this program into `ctx->dst` using the provided CloneContext
   /// The program will be cloned in this order:
   /// * Constructed types
   /// * Global variables
   /// * Functions
   /// @param ctx the clone context
   void Clone(CloneContext* ctx) const;
-
-  /// Add a global variable to the program
-  /// @param var the variable to add
-  void AddGlobalVariable(ast::Variable* var) {
-    global_variables_.push_back(var);
-  }
-  /// @returns the global variables for the program
-  const ast::VariableList& global_variables() const {
-    return global_variables_;
-  }
-
-  /// @returns the global variables for the program
-  ast::VariableList& global_variables() { return global_variables_; }
-
-  /// Adds a constructed type to the program.
-  /// The type must be an alias or a struct.
-  /// @param type the constructed type to add
-  void AddConstructedType(type::Type* type) {
-    constructed_types_.push_back(type);
-  }
-  /// @returns the constructed types in the program
-  const std::vector<type::Type*>& constructed_types() const {
-    return constructed_types_;
-  }
-
-  /// @returns the functions declared in the translation unit
-  const ast::FunctionList& Functions() const { return functions_; }
-
-  /// @returns the functions declared in the translation unit
-  ast::FunctionList& Functions() { return functions_; }
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const;
@@ -103,7 +96,7 @@ class Program {
   /// @returns the node pointer
   template <typename T, typename... ARGS>
   traits::EnableIfIsType<T, ast::Node>* create(ARGS&&... args) {
-    return ast_nodes_.Create<T>(std::forward<ARGS>(args)...);
+    return nodes_.Create<T>(std::forward<ARGS>(args)...);
   }
 
   /// Creates a new type::Type owned by the Program.
@@ -122,44 +115,83 @@ class Program {
   traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
     static_assert(std::is_base_of<type::Type, T>::value,
                   "T does not derive from type::Type");
-    return type_mgr_.Get<T>(std::forward<ARGS>(args)...);
+    return types_.Get<T>(std::forward<ARGS>(args)...);
   }
 
+  /// Add a global variable to the program
+  /// [DEPRECATED]: Use AST().AddGlobalVariable(var)
+  /// @param var the variable to add
+  void AddGlobalVariable(ast::Variable* var) { AST().AddGlobalVariable(var); }
+
+  /// [DEPRECATED]: Use AST().GlobalVariables()
+  /// @returns the global variables for the program
+  const ast::VariableList& global_variables() const {
+    return AST().GlobalVariables();
+  }
+
+  /// [DEPRECATED]: Use AST().GlobalVariables()
+  /// @returns the global variables for the program
+  ast::VariableList& global_variables() { return AST().GlobalVariables(); }
+
+  /// Adds a constructed type to the program.
+  /// The type must be an alias or a struct.
+  /// [DEPRECATED]: Use AST().AddConstructedType(type)
+  /// @param type the constructed type to add
+  void AddConstructedType(type::Type* type) { AST().AddConstructedType(type); }
+
+  /// @returns the constructed types in the program
+  /// [DEPRECATED]: Use AST().ConstructedTypes()
+  const std::vector<type::Type*>& constructed_types() const {
+    return AST().ConstructedTypes();
+  }
+
+  /// @returns the functions declared in the translation unit
+  /// [DEPRECATED]: Use AST().Functions()
+  const ast::FunctionList& Functions() const { return AST().Functions(); }
+
+  /// @returns the functions declared in the translation unit
+  /// [DEPRECATED]: Use AST().Functions()
+  ast::FunctionList& Functions() { return AST().Functions(); }
+
   /// Returns all the declared types in the program
+  /// [DEPRECATED]: Use AST().Types().types()
   /// @returns the mapping from name string to type.
   const std::unordered_map<std::string, type::Type*>& types() {
-    return type_mgr_.types();
+    return types_.types();
   }
 
   /// @returns all the declared nodes in the program
-  BlockAllocator<ast::Node>::View nodes() { return ast_nodes_.Objects(); }
+  /// [DEPRECATED]: Use Nodes().Objects()
+  BlockAllocator<ast::Node>::ConstView nodes() const {
+    return Nodes().Objects();
+  }
 
   /// Registers `name` as a symbol
   /// @param name the name to register
   /// @returns the symbol for the `name`. If `name` is already registered the
   /// previously generated symbol will be returned.
+  /// [DEPRECATED]: Use Symbols().Register()
   Symbol RegisterSymbol(const std::string& name);
 
   /// Returns the symbol for `name`
   /// @param name the name to lookup
   /// @returns the symbol for name or symbol::kInvalid
+  /// [DEPRECATED]: Use Symbols().Get()
   Symbol GetSymbol(const std::string& name) const;
 
   /// Returns the `name` for `sym`
   /// @param sym the symbol to retrieve the name for
   /// @returns the use provided `name` for the symbol or "" if not found
+  /// [DEPRECATED]: Use Symbols().NameFor()
   std::string SymbolToName(const Symbol sym) const;
 
  private:
   Program(const Program&) = delete;
 
-  SymbolTable symbol_table_;
-  ast::VariableList global_variables_;
-  // The constructed types are owned by the type manager
-  std::vector<type::Type*> constructed_types_;
-  ast::FunctionList functions_;
-  BlockAllocator<ast::Node> ast_nodes_;
-  type::Manager type_mgr_;
+  type::Manager types_;
+  ASTNodes nodes_;
+  ast::Module* ast_;
+  SymbolTable symbols_;
 };
 
 }  // namespace tint

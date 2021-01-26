@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/ast/function.h"
 #include "src/castable.h"
 #include "src/source.h"
 #include "src/symbol.h"
@@ -105,6 +106,14 @@ class CloneContext {
     }
     return out;
   }
+
+  /// Clones each of the elements of the vector `v` into the Program #dst.
+  ///
+  /// All the elements of the vector `v` must be owned by the Program #src.
+  ///
+  /// @param v the vector to clone
+  /// @return the cloned vector
+  ast::FunctionList Clone(const ast::FunctionList& v);
 
   /// ReplaceAll() registers `replacer` to be called whenever the Clone() method
   /// is called with a type that matches (or derives from) the type of the
