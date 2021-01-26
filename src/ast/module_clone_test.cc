@@ -118,8 +118,8 @@ fn main() -> void {
 
   // Expect the AST printed with to_str() to match
   Demangler demanger;
-  EXPECT_EQ(demanger.Demangle(src, src.to_str()),
-            demanger.Demangle(dst, dst.to_str()));
+  EXPECT_EQ(demanger.Demangle(src.Symbols(), src.to_str()),
+            demanger.Demangle(dst.Symbols(), dst.to_str()));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<ast::Node*> src_nodes;

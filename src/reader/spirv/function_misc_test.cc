@@ -329,7 +329,7 @@ TEST_P(SpvParserSwizzleTest, Sample) {
     ASSERT_NE(result, nullptr);
     std::ostringstream ss;
     result->to_str(ss, 0);
-    auto str = Demangler().Demangle(p->get_program(), ss.str());
+    auto str = Demangler().Demangle(p->get_program().Symbols(), ss.str());
     EXPECT_THAT(str, Eq(GetParam().expected_expr));
   } else {
     EXPECT_EQ(result, nullptr);

@@ -35,7 +35,7 @@ class TestHelperBase : public BASE, public BuilderWithProgram {
   /// @param s the string to demangle
   /// @returns the demangled string
   std::string demangle(const std::string& s) {
-    return demanger.Demangle(*mod, s);
+    return demanger.Demangle(mod->Symbols(), s);
   }
 
   /// A demangler

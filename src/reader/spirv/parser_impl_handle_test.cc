@@ -1129,8 +1129,7 @@ TEST_P(SpvParserTest_DeclUnderspecifiedHandle, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto program =
-      Demangler().Demangle(p->get_program(), p->get_program().to_str());
+  const auto program = Demangler().Demangle(p->get_program());
   EXPECT_THAT(program, HasSubstr(GetParam().var_decl)) << program;
 }
 
@@ -1306,8 +1305,7 @@ TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto program =
-      Demangler().Demangle(p->get_program(), p->get_program().to_str());
+  const auto program = Demangler().Demangle(p->get_program());
   EXPECT_THAT(program, HasSubstr(GetParam().var_decl))
       << "DECLARATIONS ARE BAD " << program;
   EXPECT_THAT(program, HasSubstr(GetParam().texture_builtin))
@@ -2556,8 +2554,7 @@ TEST_P(SpvParserTest_ImageAccessTest, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto program =
-      Demangler().Demangle(p->get_program(), p->get_program().to_str());
+  const auto program = Demangler().Demangle(p->get_program());
   EXPECT_THAT(program, HasSubstr(GetParam().var_decl))
       << "DECLARATIONS ARE BAD " << program;
   EXPECT_THAT(program, HasSubstr(GetParam().texture_builtin))
@@ -3712,7 +3709,7 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
       for (auto* expr : result) {
         ASSERT_NE(expr, nullptr);
         result_strings.push_back(
-            Demangler().Demangle(p->get_program(), expr->str()));
+            Demangler().Demangle(p->get_program().Symbols(), expr->str()));
       }
       EXPECT_THAT(result_strings,
                   ::testing::ContainerEq(GetParam().expected_expressions));

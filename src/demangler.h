@@ -17,9 +17,10 @@
 
 #include <string>
 
-#include "src/program.h"
-
 namespace tint {
+
+class Program;
+class SymbolTable;
 
 /// Helper to demangle strings and replace symbols with original names
 class Demangler {
@@ -30,10 +31,17 @@ class Demangler {
   ~Demangler();
 
   /// Transforms given string and replaces any symbols with original names
-  /// @param program the program where the symbols are registered
+  /// @param symbols the symbol table
   /// @param str the string to replace
   /// @returns the string with any symbol replacements performed.
-  std::string Demangle(const Program& program, const std::string& str) const;
+  std::string Demangle(const SymbolTable& symbols,
+                       const std::string& str) const;
+
+  /// Returns the string returned by the `program.AST().to_str()` of the
+  /// program with all symbols replaced with their original names.
+  /// @param program the program where the symbols are registered
+  /// @returns the string with any symbol replacements performed.
+  std::string Demangle(const Program& program) const;
 };
 
 }  // namespace tint

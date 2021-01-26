@@ -60,7 +60,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   // Expect the demangled AST printed with to_str() to match
   tint::Demangler d;
-  ASSERT_EQ(d.Demangle(src, src.to_str()), d.Demangle(dst, dst.to_str()));
+  ASSERT_EQ(d.Demangle(src), d.Demangle(dst));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<tint::ast::Node*> src_nodes;

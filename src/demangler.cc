@@ -14,6 +14,9 @@
 
 #include "src/demangler.h"
 
+#include "src/ast/module.h"
+#include "src/program.h"
+
 namespace tint {
 namespace {
 
@@ -26,7 +29,7 @@ Demangler::Demangler() = default;
 
 Demangler::~Demangler() = default;
 
-std::string Demangler::Demangle(const Program& program,
+std::string Demangler::Demangle(const SymbolTable& symbols,
                                 const std::string& str) const {
   auto ret = str;
 
@@ -46,13 +49,17 @@ std::string Demangler::Demangle(const Program& program,
     auto id = ret.substr(start_idx, len);
 
     Symbol sym(std::stoi(id));
-    auto name = program.Symbols().NameFor(sym);
+    auto name = symbols.NameFor(sym);
     ret.replace(idx, end_idx - idx, name);
 
     pos = idx + name.length();
   }
 
   return ret;
+}
+
+std::string Demangler::Demangle(const Program& program) const {
+  return Demangle(program.Symbols(), program.AST().to_str());
 }
 
 }  // namespace tint

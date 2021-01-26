@@ -67,7 +67,7 @@ inline std::string ToString(const Program& program,
   for (const auto* stmt : stmts) {
     stmt->to_str(outs, 0);
   }
-  return Demangler().Demangle(program, outs.str());
+  return Demangler().Demangle(program.Symbols(), outs.str());
 }
 
 }  // namespace spirv

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "src/demangler.h"
+#include "src/symbol_table.h"
 
 #include "gtest/gtest.h"
-#include "src/program.h"
 
 namespace tint {
 namespace {
@@ -23,30 +23,30 @@ namespace {
 using DemanglerTest = testing::Test;
 
 TEST_F(DemanglerTest, NoSymbols) {
-  Program m;
-  m.Symbols().Register("sym1");
+  SymbolTable t;
+  t.Register("sym1");
 
   Demangler d;
-  EXPECT_EQ("test str", d.Demangle(m, "test str"));
+  EXPECT_EQ("test str", d.Demangle(t, "test str"));
 }
 
 TEST_F(DemanglerTest, Symbol) {
-  Program m;
-  m.Symbols().Register("sym1");
+  SymbolTable t;
+  t.Register("sym1");
 
   Demangler d;
-  EXPECT_EQ("test sym1 str", d.Demangle(m, "test tint_symbol_1 str"));
+  EXPECT_EQ("test sym1 str", d.Demangle(t, "test tint_symbol_1 str"));
 }
 
 TEST_F(DemanglerTest, MultipleSymbols) {
-  Program m;
-  m.Symbols().Register("sym1");
-  m.Symbols().Register("sym2");
+  SymbolTable t;
+  t.Register("sym1");
+  t.Register("sym2");
 
   Demangler d;
   EXPECT_EQ(
       "test sym1 sym2 sym1 str",
-      d.Demangle(m, "test tint_symbol_1 tint_symbol_2 tint_symbol_1 str"));
+      d.Demangle(t, "test tint_symbol_1 tint_symbol_2 tint_symbol_1 str"));
 }
 
 }  // namespace

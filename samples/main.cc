@@ -511,7 +511,7 @@ int main(int argc, const char** argv) {
   if (options.dump_ast) {
     auto ast_str = program.to_str();
     if (options.demangle) {
-      ast_str = tint::Demangler().Demangle(program, ast_str);
+      ast_str = tint::Demangler().Demangle(program.Symbols(), ast_str);
     }
     std::cout << std::endl << ast_str << std::endl;
   }
@@ -558,15 +558,13 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
-    writer =
-        std::make_unique<tint::writer::spirv::Generator>(&program);
+    writer = std::make_unique<tint::writer::spirv::Generator>(&program);
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
   if (options.format == Format::kWgsl) {
-    writer =
-        std::make_unique<tint::writer::wgsl::Generator>(&program);
+    writer = std::make_unique<tint::writer::wgsl::Generator>(&program);
   }
 #endif  // TINT_BUILD_WGSL_WRITER
 
@@ -578,8 +576,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_HLSL_WRITER
   if (options.format == Format::kHlsl) {
-    writer =
-        std::make_unique<tint::writer::hlsl::Generator>(&program);
+    writer = std::make_unique<tint::writer::hlsl::Generator>(&program);
   }
 #endif  // TINT_BUILD_HLSL_WRITER
 
@@ -644,7 +641,7 @@ int main(int argc, const char** argv) {
     auto* w = static_cast<tint::writer::Text*>(writer.get());
     auto output = w->result();
     if (options.demangle) {
-      output = tint::Demangler().Demangle(program, output);
+      output = tint::Demangler().Demangle(program.Symbols(), output);
     }
     if (!WriteFile(options.output_file, "w", output)) {
       return 1;

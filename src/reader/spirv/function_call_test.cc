@@ -216,8 +216,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast_str =
-      Demangler().Demangle(p->get_program(), p->get_program().to_str());
+  const auto program_ast_str = Demangler().Demangle(p->get_program());
   EXPECT_THAT(program_ast_str, HasSubstr(R"(Module{
   Function x_50 -> __u32
   (
