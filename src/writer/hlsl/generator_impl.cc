@@ -125,7 +125,8 @@ const char* image_format_to_rwtexture_type(type::ImageFormat image_format) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(const Program* program) : program_(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program)
+    : program_(program), types_(type::Manager::Wrap(program->Types())) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -882,8 +883,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto* param_coords = params[pidx.coords];
 
   auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
-    // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
-    auto* i32 = const_cast<Program*>(program_)->create<type::I32>();
+    auto* i32 = types_.Get<type::I32>();
     ast::SintLiteral zero_lit(Source{}, i32, 0);
     ast::ScalarConstructorExpression zero(Source{}, &zero_lit);
     zero.set_result_type(i32);

@@ -51,6 +51,7 @@
 #include "src/type/pointer_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/struct_type.h"
+#include "src/type/type_manager.h"
 #include "src/type/vector_type.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
@@ -59,7 +60,7 @@ namespace tint {
 namespace writer {
 namespace spirv {
 
-/// Builder class to create SPIR-V instructions from a program.
+/// Builder class to create SPIR-V instructions from a module.
 class Builder {
  public:
   /// Contains information for generating accessor chains
@@ -82,7 +83,7 @@ class Builder {
   };
 
   /// Constructor
-  /// @param program the program to generate from
+  /// @param program the program
   explicit Builder(const Program* program);
   ~Builder();
 
@@ -488,6 +489,7 @@ class Builder {
   Operand result_op();
 
   const Program* program_;
+  type::Manager type_mgr_;
   std::string error_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;

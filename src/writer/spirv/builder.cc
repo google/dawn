@@ -286,7 +286,9 @@ Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 Builder::AccessorInfo::~AccessorInfo() {}
 
 Builder::Builder(const Program* program)
-    : program_(program), scope_stack_({}) {}
+    : program_(program),
+      type_mgr_(type::Manager::Wrap(program->Types())),
+      scope_stack_({}) {}
 
 Builder::~Builder() = default;
 
@@ -2043,10 +2045,8 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   // to calling append_result_type_and_id_to_spirv_params().
   auto append_result_type_and_id_to_spirv_params_for_read = [&]() {
     if (texture_type->Is<type::DepthTexture>()) {
-      // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
-      auto* f32 = const_cast<Program*>(program_)->create<type::F32>();
-      auto* spirv_result_type =
-          const_cast<Program*>(program_)->create<type::Vector>(f32, 4);
+      auto* f32 = type_mgr_.Get<type::F32>();
+      auto* spirv_result_type = type_mgr_.Get<type::Vector>(f32, 4);
       auto spirv_result = result_op();
       post_emission = [=] {
         return push_function_inst(
@@ -2077,10 +2077,8 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
           // OpImageQuerySize[Lod].
           auto* element_type = ElementTypeOf(call->result_type());
           auto spirv_result = result_op();
-          // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
           auto* spirv_result_type =
-              const_cast<Program*>(program_)->create<type::Vector>(
-                  element_type, spirv_result_width);
+              type_mgr_.Get<type::Vector>(element_type, spirv_result_width);
           if (swizzle.size() > 1) {
             post_emission = [=] {
               OperandList operands{
@@ -2198,9 +2196,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(gen_param(pidx.level));
       } else {
-        // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
-        ast::SintLiteral i32_0(
-            Source{}, const_cast<Program*>(program_)->create<type::I32>(), 0);
+        ast::SintLiteral i32_0(Source{}, type_mgr_.Get<type::I32>(), 0);
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(
             Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
@@ -2235,9 +2231,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
           texture_type->Is<type::StorageTexture>()) {
         op = spv::Op::OpImageQuerySize;
       } else {
-        // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
-        ast::SintLiteral i32_0(
-            Source{}, const_cast<Program*>(program_)->create<type::I32>(), 0);
+        ast::SintLiteral i32_0(Source{}, type_mgr_.Get<type::I32>(), 0);
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(
             Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
@@ -2316,8 +2310,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       if (call->params()[pidx.level]->result_type()->Is<type::I32>()) {
         // Depth textures have i32 parameters for the level, but SPIR-V expects
         // F32. Cast.
-        // TODO(https://crbug.com/tint/390): Remove this const_cast hack!
-        auto* f32 = const_cast<Program*>(program_)->create<type::F32>();
+        auto* f32 = type_mgr_.Get<type::F32>();
         ast::TypeConstructorExpression cast(Source{}, f32,
                                             {call->params()[pidx.level]});
         level = Operand::Int(GenerateExpression(&cast));

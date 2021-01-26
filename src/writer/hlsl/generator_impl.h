@@ -394,6 +394,7 @@ class GeneratorImpl {
 
   Namer namer_;
   const Program* program_ = nullptr;
+  type::Manager types_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   uint32_t loop_emission_counter_ = 0;
