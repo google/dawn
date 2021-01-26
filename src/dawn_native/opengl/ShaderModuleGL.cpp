@@ -82,7 +82,7 @@ namespace dawn_native { namespace opengl {
         DAWN_TRY(InitializeBase(parseResult));
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
 #ifdef DAWN_ENABLE_WGSL
-            tint::ast::Module module = std::move(*parseResult->tintModule.release());
+            tint::Program program = std::move(*parseResult->tintProgram.release());
 
             std::ostringstream errorStream;
             errorStream << "Tint SPIR-V (for GLSL) writer failure:" << std::endl;
@@ -91,9 +91,9 @@ namespace dawn_native { namespace opengl {
             transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
             transformManager.append(std::make_unique<tint::transform::EmitVertexPointSize>());
 
-            DAWN_TRY_ASSIGN(module, RunTransforms(&transformManager, &module));
+            DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program));
 
-            tint::writer::spirv::Generator generator(std::move(module));
+            tint::writer::spirv::Generator generator(&program);
             if (!generator.Generate()) {
                 errorStream << "Generator: " << generator.error() << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());

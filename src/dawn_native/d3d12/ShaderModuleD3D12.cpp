@@ -188,7 +188,7 @@ namespace dawn_native { namespace d3d12 {
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
         DAWN_TRY(InitializeBase(parseResult));
 #ifdef DAWN_ENABLE_WGSL
-        mTintModule = std::move(parseResult->tintModule);
+        mTintProgram = std::move(parseResult->tintProgram);
 #endif
         return {};
     }
@@ -217,8 +217,8 @@ namespace dawn_native { namespace d3d12 {
             transformManager.append(std::move(transformer));
         }
 
-        tint::ast::Module module;
-        DAWN_TRY_ASSIGN(module, RunTransforms(&transformManager, mTintModule.get()));
+        tint::Program program;
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, mTintProgram.get()));
 
         if (firstOffsetTransform != nullptr) {
             // Functions are only available after transform has been performed
@@ -235,10 +235,10 @@ namespace dawn_native { namespace d3d12 {
         }
 
         ASSERT(remappedEntryPointName != nullptr);
-        tint::inspector::Inspector inspector(module);
+        tint::inspector::Inspector inspector(&program);
         *remappedEntryPointName = inspector.GetRemappedNameForEntryPoint(entryPointName);
 
-        tint::writer::hlsl::Generator generator(std::move(module));
+        tint::writer::hlsl::Generator generator(&program);
         // TODO: Switch to GenerateEntryPoint once HLSL writer supports it.
         if (!generator.Generate()) {
             errorStream << "Generator: " << generator.error() << std::endl;

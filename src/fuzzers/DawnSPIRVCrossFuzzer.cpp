@@ -79,17 +79,17 @@ namespace DawnSPIRVCrossFuzzer {
             return 0;
         }
 
-        tint::ast::Module module = parser.module();
-        if (!module.IsValid()) {
+        tint::Program program = parser.program();
+        if (!program.IsValid()) {
             return 0;
         }
 
-        tint::TypeDeterminer type_determiner(&module);
+        tint::TypeDeterminer type_determiner(&program);
         if (!type_determiner.Determine()) {
             return 0;
         }
 
-        tint::writer::spirv::Generator generator(std::move(module));
+       tint::writer::spirv::Generator generator(&program);
         if (!generator.Generate()) {
             return 0;
         }

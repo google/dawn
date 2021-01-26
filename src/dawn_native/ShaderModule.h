@@ -33,9 +33,7 @@
 
 namespace tint {
 
-    namespace ast {
-        class Module;
-    }  // namespace ast
+    class Program;
 
     namespace transform {
         class Manager;
@@ -63,7 +61,7 @@ namespace dawn_native {
         ShaderModuleParseResult& operator=(ShaderModuleParseResult&& rhs);
 
 #ifdef DAWN_ENABLE_WGSL
-        std::unique_ptr<tint::ast::Module> tintModule;
+        std::unique_ptr<tint::Program> tintProgram;
 #endif
         std::vector<uint32_t> spirv;
     };
@@ -78,8 +76,8 @@ namespace dawn_native {
     RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                             const PipelineLayoutBase* layout);
 #ifdef DAWN_ENABLE_WGSL
-    ResultOrError<tint::ast::Module> RunTransforms(tint::transform::Manager* manager,
-                                                   tint::ast::Module* module);
+    ResultOrError<tint::Program> RunTransforms(tint::transform::Manager* manager,
+                                               tint::Program* program);
 
     std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
         const VertexStateDescriptor& vertexState,
@@ -88,7 +86,7 @@ namespace dawn_native {
 #endif
 
     // Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
-    // stored in the ShaderModuleBase and destroyed only when the shader module is destroyed so
+    // stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
     // pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
     // ShaderModuleBase.
     struct EntryPointMetadata {
@@ -132,7 +130,7 @@ namespace dawn_native {
 
         static ShaderModuleBase* MakeError(DeviceBase* device);
 
-        // Return true iff the module has an entrypoint called `entryPoint`.
+        // Return true iff the program has an entrypoint called `entryPoint`.
         bool HasEntryPoint(const std::string& entryPoint) const;
 
         // Returns the metadata for the given `entryPoint`. HasEntryPoint with the same argument
@@ -156,7 +154,7 @@ namespace dawn_native {
             BindGroupIndex pullingBufferBindingSet) const;
 
         ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
-            tint::ast::Module* module,
+            tint::Program* program,
             const VertexStateDescriptor& vertexState,
             const std::string& entryPoint,
             BindGroupIndex pullingBufferBindingSet) const;

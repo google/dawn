@@ -71,7 +71,7 @@ namespace dawn_native { namespace metal {
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
 #ifdef DAWN_ENABLE_WGSL
-        std::unique_ptr<tint::ast::Module> mTintModule;
+        std::unique_ptr<tint::Program> mTintProgram;
 #endif
     };
 

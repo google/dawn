@@ -50,7 +50,7 @@ namespace dawn_native { namespace metal {
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
         DAWN_TRY(InitializeBase(parseResult));
 #ifdef DAWN_ENABLE_WGSL
-        mTintModule = std::move(parseResult->tintModule);
+        mTintProgram = std::move(parseResult->tintProgram);
 #endif
         return {};
     }
@@ -88,14 +88,14 @@ namespace dawn_native { namespace metal {
         }
         transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
 
-        tint::ast::Module module;
-        DAWN_TRY_ASSIGN(module, RunTransforms(&transformManager, mTintModule.get()));
+        tint::Program program;
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, mTintProgram.get()));
 
         ASSERT(remappedEntryPointName != nullptr);
-        tint::inspector::Inspector inspector(module);
+        tint::inspector::Inspector inspector(&program);
         *remappedEntryPointName = inspector.GetRemappedNameForEntryPoint(entryPointName);
 
-        tint::writer::msl::Generator generator(std::move(module));
+        tint::writer::msl::Generator generator(&program);
         if (!generator.Generate()) {
             errorStream << "Generator: " << generator.error() << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -123,9 +123,9 @@ namespace dawn_native { namespace metal {
         std::vector<uint32_t> pullingSpirv;
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             stage == SingleShaderStage::Vertex) {
-            if (mTintModule) {
+            if (mTintProgram) {
                 DAWN_TRY_ASSIGN(pullingSpirv,
-                                GeneratePullingSpirv(mTintModule.get(),
+                                GeneratePullingSpirv(mTintProgram.get(),
                                                      *renderPipeline->GetVertexStateDescriptor(),
                                                      entryPointName, kPullingBufferBindingSet));
             } else {
