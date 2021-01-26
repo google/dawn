@@ -183,7 +183,7 @@ class VertexPulling : public Transform {
   Config cfg;
 
   struct State {
-    State(const Program* in, Program* out, const Config& c);
+    State(CloneContext& ctx, const Config& c);
     explicit State(const State&);
     ~State();
 
@@ -263,11 +263,20 @@ class VertexPulling : public Transform {
     type::Type* GetI32Type() const;
     type::Type* GetF32Type() const;
 
-    const Program* const in;
-    Program* const out;
+    CloneContext& ctx;
     Config const cfg;
 
+    /// LocationReplacement describes an ast::Variable replacement for a
+    /// location input.
+    struct LocationReplacement {
+      /// The variable to replace in the source Program
+      ast::Variable* from;
+      /// The replacement to use in the target ProgramBuilder
+      ast::Variable* to;
+    };
+
     std::unordered_map<uint32_t, ast::Variable*> location_to_var;
+    std::vector<LocationReplacement> location_replacements;
     std::string vertex_index_name;
     std::string instance_index_name;
   };
