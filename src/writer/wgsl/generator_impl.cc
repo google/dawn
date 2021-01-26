@@ -84,12 +84,12 @@ GeneratorImpl::GeneratorImpl(const Program* program)
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-  for (auto* const ty : program_->constructed_types()) {
+  for (auto* const ty : program_->AST().ConstructedTypes()) {
     if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!program_->constructed_types().empty())
+  if (!program_->AST().ConstructedTypes().empty())
     out_ << std::endl;
 
   for (auto* var : program_->AST().GlobalVariables()) {
@@ -121,12 +121,12 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
 
   // TODO(dsinclair): We always emit constructed types even if they aren't
   // strictly needed
-  for (auto* const ty : program_->constructed_types()) {
+  for (auto* const ty : program_->AST().ConstructedTypes()) {
     if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!program_->constructed_types().empty()) {
+  if (!program_->AST().ConstructedTypes().empty()) {
     out_ << std::endl;
   }
 

@@ -358,7 +358,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                             create<ast::GroupDecoration>(1),
                         });
 
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
 
   td.RegisterVariableForTesting(coord_var);
   mod->AST().AddGlobalVariable(coord_var);
@@ -1053,7 +1053,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                            create<ast::GroupDecoration>(0),
                        });
 
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
   td.RegisterVariableForTesting(data_var);
   mod->AST().AddGlobalVariable(data_var);
 

@@ -63,26 +63,26 @@ TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
 
 TEST_F(ProgramTest, IsValid_Alias) {
   auto* alias = ty.alias("alias", ty.f32);
-  mod->AddConstructedType(alias);
+  mod->AST().AddConstructedType(alias);
   EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Null_Alias) {
-  mod->AddConstructedType(nullptr);
+  mod->AST().AddConstructedType(nullptr);
   EXPECT_FALSE(mod->IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Struct) {
   auto* st = ty.struct_("name", {});
   auto* alias = ty.alias("name", st);
-  mod->AddConstructedType(alias);
+  mod->AST().AddConstructedType(alias);
   EXPECT_TRUE(mod->IsValid());
 }
 
 TEST_F(ProgramTest, IsValid_Struct_EmptyName) {
   auto* st = ty.struct_("", {});
   auto* alias = ty.alias("name", st);
-  mod->AddConstructedType(alias);
+  mod->AST().AddConstructedType(alias);
   EXPECT_FALSE(mod->IsValid());
 }
 

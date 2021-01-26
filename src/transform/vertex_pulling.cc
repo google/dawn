@@ -301,7 +301,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
         });
     out->AST().AddGlobalVariable(var);
   }
-  out->AddConstructedType(struct_type);
+  out->AST().AddConstructedType(struct_type);
 }
 
 ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {

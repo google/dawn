@@ -969,7 +969,7 @@ type::Type* ParserImpl::ConvertType(
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(result);
   }
-  program_.AddConstructedType(result);
+  program_.AST().AddConstructedType(result);
   return result;
 }
 
@@ -1133,7 +1133,7 @@ void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
       program_.RegisterSymbol(name), ast_underlying_type);
   // Record this new alias as the AST type for this SPIR-V ID.
   id_to_type_[type_id] = ast_alias_type;
-  program_.AddConstructedType(ast_alias_type);
+  program_.AST().AddConstructedType(ast_alias_type);
 }
 
 bool ParserImpl::EmitModuleScopeVariables() {

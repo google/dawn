@@ -350,7 +350,7 @@ TEST_F(MslGeneratorImplTest,
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
 
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
@@ -405,7 +405,7 @@ TEST_F(MslGeneratorImplTest,
 
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
 
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
@@ -722,7 +722,7 @@ TEST_F(MslGeneratorImplTest,
 
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
 
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
@@ -791,7 +791,7 @@ TEST_F(MslGeneratorImplTest,
 
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
 
   auto* coord_var =
       Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
@@ -986,7 +986,7 @@ TEST_F(MslGeneratorImplTest,
           ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                       create<ast::GroupDecoration>(0)});
 
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
   td.RegisterVariableForTesting(data_var);
   mod->AST().AddGlobalVariable(data_var);
 

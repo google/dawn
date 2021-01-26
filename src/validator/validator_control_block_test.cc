@@ -375,7 +375,7 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
       create<ast::VariableDeclStatement>(var),
       create<ast::SwitchStatement>(Expr("a"), body),
   });
-  mod->AddConstructedType(my_int);
+  mod->AST().AddConstructedType(my_int);
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
 

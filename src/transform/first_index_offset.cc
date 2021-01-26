@@ -242,7 +242,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(Program* dst) {
 
   dst->AST().AddGlobalVariable(idx_var);
 
-  dst->AddConstructedType(struct_type);
+  dst->AST().AddConstructedType(struct_type);
 
   return idx_var;
 }

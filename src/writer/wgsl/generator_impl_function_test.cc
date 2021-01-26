@@ -191,7 +191,7 @@ TEST_F(WgslGeneratorImplTest,
                            create<ast::GroupDecoration>(0),
                        });
 
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
   mod->AST().AddGlobalVariable(data_var);

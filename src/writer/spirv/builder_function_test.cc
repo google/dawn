@@ -242,7 +242,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                            create<ast::GroupDecoration>(0),
                        });
 
-  mod->AddConstructedType(s);
+  mod->AST().AddConstructedType(s);
 
   td.RegisterVariableForTesting(data_var);
   mod->AST().AddGlobalVariable(data_var);

@@ -68,7 +68,7 @@ bool ValidatorImpl::Validate() {
   if (!ValidateGlobalVariables(program_->AST().GlobalVariables())) {
     return false;
   }
-  if (!ValidateConstructedTypes(program_->constructed_types())) {
+  if (!ValidateConstructedTypes(program_->AST().ConstructedTypes())) {
     return false;
   }
   if (!ValidateFunctions(program_->Functions())) {

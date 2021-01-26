@@ -119,12 +119,12 @@ bool GeneratorImpl::Generate() {
     global_variables_.set(global->symbol(), global);
   }
 
-  for (auto* const ty : program_->constructed_types()) {
+  for (auto* const ty : program_->AST().ConstructedTypes()) {
     if (!EmitConstructedType(ty)) {
       return false;
     }
   }
-  if (!program_->constructed_types().empty()) {
+  if (!program_->AST().ConstructedTypes().empty()) {
     out_ << std::endl;
   }
 

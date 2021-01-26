@@ -140,12 +140,12 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     register_global(global);
   }
 
-  for (auto* const ty : program_->constructed_types()) {
+  for (auto* const ty : program_->AST().ConstructedTypes()) {
     if (!EmitConstructedType(out, ty)) {
       return false;
     }
   }
-  if (!program_->constructed_types().empty()) {
+  if (!program_->AST().ConstructedTypes().empty()) {
     out << std::endl;
   }
 

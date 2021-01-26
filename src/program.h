@@ -118,18 +118,6 @@ class Program {
     return types_.Get<T>(std::forward<ARGS>(args)...);
   }
 
-  /// Adds a constructed type to the program.
-  /// The type must be an alias or a struct.
-  /// [DEPRECATED]: Use AST().AddConstructedType(type)
-  /// @param type the constructed type to add
-  void AddConstructedType(type::Type* type) { AST().AddConstructedType(type); }
-
-  /// @returns the constructed types in the program
-  /// [DEPRECATED]: Use AST().ConstructedTypes()
-  const std::vector<type::Type*>& constructed_types() const {
-    return AST().ConstructedTypes();
-  }
-
   /// @returns the functions declared in the translation unit
   /// [DEPRECATED]: Use AST().Functions()
   const ast::FunctionList& Functions() const { return AST().Functions(); }

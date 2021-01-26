@@ -347,7 +347,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("type alias", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      program_.AddConstructedType(ta.value);
+      program_.AST().AddConstructedType(ta.value);
       return true;
     }
 
@@ -362,7 +362,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       auto* type = str.value;
       register_constructed(
           program_.SymbolToName(type->As<type::Struct>()->symbol()), type);
-      program_.AddConstructedType(type);
+      program_.AST().AddConstructedType(type);
       return true;
     }
 

@@ -87,11 +87,11 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(m.constructed_types().size(), 1u);
-  ASSERT_TRUE(m.constructed_types()[0]->Is<type::Alias>());
-  EXPECT_EQ(
-      m.SymbolToName(m.constructed_types()[0]->As<type::Alias>()->symbol()),
-      "A");
+  ASSERT_EQ(m.AST().ConstructedTypes().size(), 1u);
+  ASSERT_TRUE(m.AST().ConstructedTypes()[0]->Is<type::Alias>());
+  EXPECT_EQ(m.SymbolToName(
+                m.AST().ConstructedTypes()[0]->As<type::Alias>()->symbol()),
+            "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -104,13 +104,13 @@ type B = A;)");
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(m.constructed_types().size(), 2u);
-  ASSERT_TRUE(m.constructed_types()[0]->Is<type::Struct>());
-  auto* str = m.constructed_types()[0]->As<type::Struct>();
+  ASSERT_EQ(m.AST().ConstructedTypes().size(), 2u);
+  ASSERT_TRUE(m.AST().ConstructedTypes()[0]->Is<type::Struct>());
+  auto* str = m.AST().ConstructedTypes()[0]->As<type::Struct>();
   EXPECT_EQ(str->symbol(), p->get_program().RegisterSymbol("A"));
 
-  ASSERT_TRUE(m.constructed_types()[1]->Is<type::Alias>());
-  auto* alias = m.constructed_types()[1]->As<type::Alias>();
+  ASSERT_TRUE(m.AST().ConstructedTypes()[1]->Is<type::Alias>());
+  auto* alias = m.AST().ConstructedTypes()[1]->As<type::Alias>();
   EXPECT_EQ(alias->symbol(), p->get_program().RegisterSymbol("B"));
   EXPECT_EQ(alias->type(), str);
 }
@@ -162,9 +162,9 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(m.constructed_types().size(), 1u);
+  ASSERT_EQ(m.AST().ConstructedTypes().size(), 1u);
 
-  auto* t = m.constructed_types()[0];
+  auto* t = m.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<type::Struct>());
 
@@ -181,9 +181,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(m.constructed_types().size(), 1u);
+  ASSERT_EQ(m.AST().ConstructedTypes().size(), 1u);
 
-  auto* t = m.constructed_types()[0];
+  auto* t = m.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<type::Struct>());
 
@@ -205,9 +205,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto& m = p->get_program();
-  ASSERT_EQ(m.constructed_types().size(), 1u);
+  ASSERT_EQ(m.AST().ConstructedTypes().size(), 1u);
 
-  auto* t = m.constructed_types()[0];
+  auto* t = m.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<type::Struct>());
 
