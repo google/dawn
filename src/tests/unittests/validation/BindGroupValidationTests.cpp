@@ -2124,8 +2124,7 @@ TEST_F(ComparisonSamplerBindingTest, SamplerAndBindGroupMatches) {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
 
-        wgpu::SamplerDescriptor desc = {};
-        utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
+        utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler()}});
     }
 
     // Test that comparison sampler binding works with sampler w/ compare function.

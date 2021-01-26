@@ -96,10 +96,7 @@ namespace {
         kValidAnisoSamplerDesc.minFilter = wgpu::FilterMode::Linear;
         kValidAnisoSamplerDesc.magFilter = wgpu::FilterMode::Linear;
         kValidAnisoSamplerDesc.mipmapFilter = wgpu::FilterMode::Linear;
-        {
-            wgpu::SamplerDescriptor samplerDesc = {};
-            device.CreateSampler(&samplerDesc);
-        }
+        { device.CreateSampler(); }
         {
             wgpu::SamplerDescriptor samplerDesc = kValidAnisoSamplerDesc;
             samplerDesc.maxAnisotropy = 16;

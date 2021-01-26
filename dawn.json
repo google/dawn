@@ -726,7 +726,7 @@
                 "name": "create sampler",
                 "returns": "sampler",
                 "args": [
-                    {"name": "descriptor", "type": "sampler descriptor", "annotation": "const*"}
+                    {"name": "descriptor", "type": "sampler descriptor", "annotation": "const*", "optional": true}
                 ]
             },
             {

@@ -1219,8 +1219,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var<uniform_constant> tex" << i << " : texture_2d<f32>;\n";
 
-        wgpu::SamplerDescriptor samplerDesc = {};
-        bgEntries.push_back({binding, nullptr, 0, 0, device.CreateSampler(&samplerDesc), nullptr});
+        bgEntries.push_back({binding, nullptr, 0, 0, device.CreateSampler(), nullptr});
 
         interface << "[[group(0), binding(" << binding++ << ")]]"
                   << "var<uniform_constant> samp" << i << " : sampler;\n";

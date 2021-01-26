@@ -192,8 +192,7 @@ TEST_P(DeviceLostTest, CreateRenderPipelineFails) {
 TEST_P(DeviceLostTest, CreateSamplerFails) {
     SetCallbackAndLoseForTesting();
 
-    wgpu::SamplerDescriptor descriptor = utils::GetDefaultSamplerDescriptor();
-    ASSERT_DEVICE_ERROR(device.CreateSampler(&descriptor));
+    ASSERT_DEVICE_ERROR(device.CreateSampler());
 }
 
 // Tests that CreateShaderModule fails when device is lost

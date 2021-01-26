@@ -123,8 +123,7 @@ class TextureSubresourceTest : public DawnTest {
         descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cColorStates[0].format = kFormat;
 
-        wgpu::SamplerDescriptor samplerDescriptor = {};
-        wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
+        wgpu::Sampler sampler = device.CreateSampler();
 
         wgpu::RenderPipeline rp = device.CreateRenderPipeline(&descriptor);
         wgpu::BindGroupLayout bgl = rp.GetBindGroupLayout(0);

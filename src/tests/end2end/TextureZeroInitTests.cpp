@@ -1791,8 +1791,7 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
                 device.CreateRenderPipeline(&renderPipelineDescriptor);
             pass.SetPipeline(renderPipeline);
 
-            wgpu::SamplerDescriptor samplerDesc = {};
-            wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+            wgpu::Sampler sampler = device.CreateSampler();
 
             wgpu::TextureViewDescriptor textureViewDescriptor = CreateTextureViewDescriptor(
                 viewMipmapLevel, baseArrayLayer, textureDescriptor.format);
