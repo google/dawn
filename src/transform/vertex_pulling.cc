@@ -78,11 +78,8 @@ void VertexPulling::SetPullingBufferBindingSet(uint32_t number) {
 Transform::Output VertexPulling::Run(const Program* in) {
   // Check SetVertexState was called
   if (!cfg.vertex_state_set) {
-    diag::Diagnostic err;
-    err.severity = diag::Severity::Error;
-    err.message = "SetVertexState not called";
     Output out;
-    out.diagnostics.add(std::move(err));
+    out.diagnostics.add_error("SetVertexState not called");
     return out;
   }
 
@@ -90,11 +87,8 @@ Transform::Output VertexPulling::Run(const Program* in) {
   auto* func = in->AST().Functions().Find(
       in->Symbols().Get(cfg.entry_point_name), ast::PipelineStage::kVertex);
   if (func == nullptr) {
-    diag::Diagnostic err;
-    err.severity = diag::Severity::Error;
-    err.message = "Vertex stage entry point not found";
     Output out;
-    out.diagnostics.add(std::move(err));
+    out.diagnostics.add_error("Vertex stage entry point not found");
     return out;
   }
 

@@ -46,6 +46,7 @@ class Parser : public Reader {
 
  private:
   std::unique_ptr<ParserImpl> impl_;
+  Program program_;
 };
 
 }  // namespace spirv

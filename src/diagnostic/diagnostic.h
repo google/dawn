@@ -98,6 +98,26 @@ class List {
     }
   }
 
+  /// adds the error message without a source to the end of this list.
+  /// @param err_msg the error message
+  void add_error(const std::string& err_msg) {
+    diag::Diagnostic error{};
+    error.severity = diag::Severity::Error;
+    error.message = err_msg;
+    add(std::move(error));
+  }
+
+  /// adds the error message with the given Source to the end of this list.
+  /// @param err_msg the error message
+  /// @param source the source of the error diagnostic
+  void add_error(const std::string& err_msg, const Source& source) {
+    diag::Diagnostic error{};
+    error.severity = diag::Severity::Error;
+    error.source = source;
+    error.message = err_msg;
+    add(std::move(error));
+  }
+
   /// @returns true iff the diagnostic list contains errors diagnostics (or of
   /// higher severity).
   bool contains_errors() const { return error_count_ > 0; }

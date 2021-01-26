@@ -14,6 +14,8 @@
 
 #include "src/reader/spirv/parser.h"
 
+#include <utility>
+
 #include "src/reader/spirv/parser_impl.h"
 
 namespace tint {
@@ -30,10 +32,9 @@ bool Parser::Parse() {
   auto err_msg = impl_->error();
   if (!err_msg.empty()) {
     // TODO(bclayton): Migrate spirv::ParserImpl to using diagnostics.
-    diag::Diagnostic error{};
-    error.severity = diag::Severity::Error;
-    error.message = err_msg;
-    set_diagnostics({error});
+    diag::List diagnostics;
+    diagnostics.add_error(err_msg);
+    set_diagnostics(std::move(diagnostics));
   }
   return result;
 }

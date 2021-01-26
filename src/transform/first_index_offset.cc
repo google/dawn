@@ -88,11 +88,9 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
   for (ast::Variable* var : in->AST().GlobalVariables()) {
     if (auto* dec_var = var->As<ast::Variable>()) {
       if (dec_var->symbol() == in->Symbols().Get(kBufferName)) {
-        diag::Diagnostic err;
-        err.message = "First index offset transform has already been applied.";
-        err.severity = diag::Severity::Error;
         Output out;
-        out.diagnostics.add(std::move(err));
+        out.diagnostics.add_error(
+            "First index offset transform has already been applied.");
         return out;
       }
     }
@@ -106,11 +104,8 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
     ProgramBuilder builder = in->CloneAsBuilder();
     TypeDeterminer td(&builder);
     if (!td.Determine()) {
-      diag::Diagnostic err;
-      err.severity = diag::Severity::Error;
-      err.message = td.error();
       Output out;
-      out.diagnostics.add(std::move(err));
+      out.diagnostics.add_error(td.error());
       return out;
     }
     program = Program(std::move(builder));

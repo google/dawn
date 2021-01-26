@@ -102,11 +102,7 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
       auto* limit = b.Sub(arr_len, b.Expr(1u));
       new_idx = b.Call("min", b.Construct<u32>(ctx->Clone(old_idx)), limit);
     } else {
-      diag::Diagnostic err;
-      err.severity = diag::Severity::Error;
-      err.message = "invalid 0 size";
-      err.source = expr->source();
-      diags->add(std::move(err));
+      diags->add_error("invalid 0 size", expr->source());
       return nullptr;
     }
   } else if (auto* c = old_idx->As<ast::ScalarConstructorExpression>()) {
@@ -118,11 +114,8 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     } else if (auto* uint = lit->As<ast::UintLiteral>()) {
       new_idx = b.Expr(std::min(uint->value(), size - 1));
     } else {
-      diag::Diagnostic err;
-      err.severity = diag::Severity::Error;
-      err.message = "unknown scalar constructor type for accessor";
-      err.source = expr->source();
-      diags->add(std::move(err));
+      diags->add_error("unknown scalar constructor type for accessor",
+                       expr->source());
       return nullptr;
     }
   } else {

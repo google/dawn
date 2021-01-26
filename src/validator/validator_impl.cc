@@ -58,11 +58,7 @@ void ValidatorImpl::add_error(const Source& src,
 }
 
 void ValidatorImpl::add_error(const Source& src, const std::string& msg) {
-  diag::Diagnostic diag;
-  diag.severity = diag::Severity::Error;
-  diag.source = src;
-  diag.message = msg;
-  diags_.add(std::move(diag));
+  diags_.add_error(msg, src);
 }
 
 bool ValidatorImpl::Validate() {

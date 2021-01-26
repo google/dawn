@@ -230,11 +230,7 @@ ParserImpl::Failure::Errored ParserImpl::add_error(const Token& t,
 ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
                                                    const std::string& err) {
   if (silence_errors_ == 0) {
-    diag::Diagnostic diagnostic;
-    diagnostic.severity = diag::Severity::Error;
-    diagnostic.message = err;
-    diagnostic.source = source;
-    diags_.add(std::move(diagnostic));
+    diags_.add_error(err, source);
   }
   return Failure::kErrored;
 }

@@ -69,10 +69,9 @@ diag::List TypeDeterminer::Run(Program* program) {
   ProgramBuilder builder = program->CloneAsBuilder();
   TypeDeterminer td(&builder);
   if (!td.Determine()) {
-    diag::Diagnostic err;
-    err.severity = diag::Severity::Error;
-    err.message = td.error();
-    return {err};
+    diag::List diagnostics;
+    diagnostics.add_error(td.error());
+    return diagnostics;
   }
   *program = Program(std::move(builder));
   return {};
