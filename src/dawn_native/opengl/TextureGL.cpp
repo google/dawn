@@ -332,9 +332,14 @@ namespace dawn_native { namespace opengl {
                             GLuint framebuffer = 0;
                             gl.GenFramebuffers(1, &framebuffer);
                             gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-                            gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR, GetHandle(),
-                                                       static_cast<int>(level),
-                                                       static_cast<int>(layer));
+                            if (GetArrayLayers() == 1) {
+                                gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                                        GetGLTarget(), GetHandle(), level);
+                            } else {
+                                gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER,
+                                                           GL_COLOR_ATTACHMENT0, GetHandle(), level,
+                                                           layer);
+                            }
                             gl.Disable(GL_SCISSOR_TEST);
                             gl.ClearBufferiv(GL_COLOR, 0,
                                              reinterpret_cast<const GLint*>(clearColorData.data()));
