@@ -977,9 +977,6 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // uniform buffer.
 TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) uniform UBO {
@@ -1016,9 +1013,6 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // read-only storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) readonly buffer SSBO {
@@ -1055,9 +1049,9 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
-    // TODO(crbug.com/tint/375): Implement barriers in Tint.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
+    // TODO(crbug.com/tint/375): Enable once barriers are implemented
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") ||
+                      HasToggleEnabled("use_tint_inspector"));
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) buffer SSBO {
@@ -1103,9 +1097,6 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
 
 // Test the buffer will be lazily initialized correctly when its first use is in SetVertexBuffer.
 TEST_P(BufferZeroInitTest, SetVertexBuffer) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Bind the whole buffer as a vertex buffer.
     {
         constexpr uint64_t kVertexBufferOffset = 0u;
@@ -1121,9 +1112,6 @@ TEST_P(BufferZeroInitTest, SetVertexBuffer) {
 
 // Test the buffer will be lazily initialized correctly when its first use is in SetIndexBuffer.
 TEST_P(BufferZeroInitTest, SetIndexBuffer) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Bind the whole buffer as an index buffer.
     {
         constexpr uint64_t kIndexBufferOffset = 0u;
@@ -1140,9 +1128,6 @@ TEST_P(BufferZeroInitTest, SetIndexBuffer) {
 // Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DrawIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndirect) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Bind the whole buffer as an indirect buffer.
     {
         constexpr uint64_t kOffset = 0u;
@@ -1159,9 +1144,6 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndirect) {
 // Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DrawIndexedIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Bind the whole buffer as an indirect buffer.
     {
         constexpr uint64_t kOffset = 0u;
@@ -1178,9 +1160,6 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
 // Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DispatchIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Bind the whole buffer as an indirect buffer.
     {
         constexpr uint64_t kOffset = 0u;
@@ -1207,8 +1186,9 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     DAWN_SKIP_TEST_IF(!SupportsExtensions({"timestamp_query"}));
 
     // TODO(crbug.com/tint/255, crbug.com/tint/256, crbug.com/tint/400, crbug.com/tint/417):
-    // Skip use_tint_generator due to runtime array not supported in WGSL
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+    // Skip due to runtime array not currently supported in WGSL
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") ||
+                      HasToggleEnabled("use_tint_inspector"));
 
     constexpr uint64_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =
