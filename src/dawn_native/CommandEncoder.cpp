@@ -790,7 +790,13 @@ namespace dawn_native {
 
     void CommandEncoder::PopDebugGroup() {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            if (GetDevice()->IsValidationEnabled()) {
+                if (mDebugGroupStackSize == 0) {
+                    return DAWN_VALIDATION_ERROR("Pop must be balanced by a corresponding Push.");
+                }
+            }
             allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
+            mDebugGroupStackSize--;
 
             return {};
         });
@@ -804,6 +810,8 @@ namespace dawn_native {
 
             char* label = allocator->AllocateData<char>(cmd->length + 1);
             memcpy(label, groupLabel, cmd->length + 1);
+
+            mDebugGroupStackSize++;
 
             return {};
         });
@@ -890,7 +898,9 @@ namespace dawn_native {
             DAWN_TRY(ValidatePassResourceUsage(passUsage));
         }
 
-        uint64_t debugGroupStackSize = 0;
+        if (mDebugGroupStackSize != 0) {
+            return DAWN_VALIDATION_ERROR("Each Push must be balanced by a corresponding Pop.");
+        }
 
         commands->Reset();
         Command type;
@@ -936,15 +946,12 @@ namespace dawn_native {
 
                 case Command::PopDebugGroup: {
                     commands->NextCommand<PopDebugGroupCmd>();
-                    DAWN_TRY(ValidateCanPopDebugGroup(debugGroupStackSize));
-                    debugGroupStackSize--;
                     break;
                 }
 
                 case Command::PushDebugGroup: {
                     const PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
                     commands->NextData<char>(cmd->length + 1);
-                    debugGroupStackSize++;
                     break;
                 }
 
@@ -961,8 +968,6 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("Command disallowed outside of a pass");
             }
         }
-
-        DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));
 
         return {};
     }

@@ -94,15 +94,15 @@ namespace dawn_native {
 
     void RenderPassEncoder::EndPass() {
         if (mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-                allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
-
                 if (IsValidationEnabled()) {
+                    DAWN_TRY(ValidateProgrammableEncoderEnd());
                     if (mOcclusionQueryActive) {
                         return DAWN_VALIDATION_ERROR(
                             "The occlusion query must be ended before endPass.");
                     }
                 }
 
+                allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
                 return {};
             })) {
             mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage());

@@ -97,11 +97,18 @@ namespace dawn_native {
         : ObjectBase(device, errorTag),
           mEncodingContext(encodingContext),
           mUsageTracker(passType),
-          mValidationEnabled(false) {
+          mValidationEnabled(device->IsValidationEnabled()) {
     }
 
     bool ProgrammablePassEncoder::IsValidationEnabled() const {
         return mValidationEnabled;
+    }
+
+    MaybeError ProgrammablePassEncoder::ValidateProgrammableEncoderEnd() const {
+        if (mDebugGroupStackSize != 0) {
+            return DAWN_VALIDATION_ERROR("Each Push must be balanced by a corresponding Pop.");
+        }
+        return {};
     }
 
     void ProgrammablePassEncoder::InsertDebugMarker(const char* groupLabel) {
@@ -119,7 +126,13 @@ namespace dawn_native {
 
     void ProgrammablePassEncoder::PopDebugGroup() {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            if (IsValidationEnabled()) {
+                if (mDebugGroupStackSize == 0) {
+                    return DAWN_VALIDATION_ERROR("Pop must be balanced by a corresponding Push.");
+                }
+            }
             allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
+            mDebugGroupStackSize--;
 
             return {};
         });
@@ -133,6 +146,8 @@ namespace dawn_native {
 
             char* label = allocator->AllocateData<char>(cmd->length + 1);
             memcpy(label, groupLabel, cmd->length + 1);
+
+            mDebugGroupStackSize++;
 
             return {};
         });

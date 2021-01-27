@@ -45,6 +45,7 @@ namespace dawn_native {
 
       protected:
         bool IsValidationEnabled() const;
+        MaybeError ValidateProgrammableEncoderEnd() const;
 
         // Construct an "error" programmable pass encoder.
         ProgrammablePassEncoder(DeviceBase* device,
@@ -54,6 +55,8 @@ namespace dawn_native {
 
         EncodingContext* mEncodingContext = nullptr;
         PassResourceUsageTracker mUsageTracker;
+
+        uint64_t mDebugGroupStackSize = 0;
 
       private:
         const bool mValidationEnabled;

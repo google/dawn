@@ -33,7 +33,6 @@ namespace dawn_native {
                                                       Command type,
                                                       CommandBufferStateTracker* commandBufferState,
                                                       const AttachmentState* attachmentState,
-                                                      uint64_t* debugGroupStackSize,
                                                       const char* disallowedMessage) {
             switch (type) {
                 case Command::Draw: {
@@ -68,15 +67,12 @@ namespace dawn_native {
 
                 case Command::PopDebugGroup: {
                     commands->NextCommand<PopDebugGroupCmd>();
-                    DAWN_TRY(ValidateCanPopDebugGroup(*debugGroupStackSize));
-                    *debugGroupStackSize -= 1;
                     break;
                 }
 
                 case Command::PushDebugGroup: {
                     PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
                     commands->NextData<char>(cmd->length + 1);
-                    *debugGroupStackSize += 1;
                     break;
                 }
 
@@ -122,40 +118,21 @@ namespace dawn_native {
 
     }  // namespace
 
-    MaybeError ValidateCanPopDebugGroup(uint64_t debugGroupStackSize) {
-        if (debugGroupStackSize == 0) {
-            return DAWN_VALIDATION_ERROR("Pop must be balanced by a corresponding Push.");
-        }
-        return {};
-    }
-
-    MaybeError ValidateFinalDebugGroupStackSize(uint64_t debugGroupStackSize) {
-        if (debugGroupStackSize != 0) {
-            return DAWN_VALIDATION_ERROR("Each Push must be balanced by a corresponding Pop.");
-        }
-        return {};
-    }
-
     MaybeError ValidateRenderBundle(CommandIterator* commands,
                                     const AttachmentState* attachmentState) {
         CommandBufferStateTracker commandBufferState;
-        uint64_t debugGroupStackSize = 0;
-
         Command type;
         while (commands->NextCommandId(&type)) {
             DAWN_TRY(ValidateRenderBundleCommand(commands, type, &commandBufferState,
-                                                 attachmentState, &debugGroupStackSize,
+                                                 attachmentState,
                                                  "Command disallowed inside a render bundle"));
         }
 
-        DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));
         return {};
     }
 
     MaybeError ValidateRenderPass(CommandIterator* commands, const BeginRenderPassCmd* renderPass) {
         CommandBufferStateTracker commandBufferState;
-        uint64_t debugGroupStackSize = 0;
-
         Command type;
         while (commands->NextCommandId(&type)) {
             switch (type) {
@@ -171,7 +148,6 @@ namespace dawn_native {
 
                 case Command::EndRenderPass: {
                     commands->NextCommand<EndRenderPassCmd>();
-                    DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));
                     return {};
                 }
 
@@ -222,7 +198,7 @@ namespace dawn_native {
                 default:
                     DAWN_TRY(ValidateRenderBundleCommand(
                         commands, type, &commandBufferState, renderPass->attachmentState.Get(),
-                        &debugGroupStackSize, "Command disallowed inside a render pass"));
+                        "Command disallowed inside a render pass"));
             }
         }
 
@@ -232,14 +208,11 @@ namespace dawn_native {
 
     MaybeError ValidateComputePass(CommandIterator* commands) {
         CommandBufferStateTracker commandBufferState;
-        uint64_t debugGroupStackSize = 0;
-
         Command type;
         while (commands->NextCommandId(&type)) {
             switch (type) {
                 case Command::EndComputePass: {
                     commands->NextCommand<EndComputePassCmd>();
-                    DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));
                     return {};
                 }
 
@@ -263,15 +236,12 @@ namespace dawn_native {
 
                 case Command::PopDebugGroup: {
                     commands->NextCommand<PopDebugGroupCmd>();
-                    DAWN_TRY(ValidateCanPopDebugGroup(debugGroupStackSize));
-                    debugGroupStackSize--;
                     break;
                 }
 
                 case Command::PushDebugGroup: {
                     PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
                     commands->NextData<char>(cmd->length + 1);
-                    debugGroupStackSize++;
                     break;
                 }
 

@@ -47,6 +47,10 @@ namespace dawn_native {
 
     void ComputePassEncoder::EndPass() {
         if (mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+                if (IsValidationEnabled()) {
+                    DAWN_TRY(ValidateProgrammableEncoderEnd());
+                }
+
                 allocator->Allocate<EndComputePassCmd>(Command::EndComputePass);
 
                 return {};

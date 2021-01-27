@@ -141,6 +141,28 @@ TEST_F(RenderBundleValidationTest, Empty) {
     commandEncoder.Finish();
 }
 
+// Test that an empty error bundle encoder produces an error bundle.
+// This is a regression test for error render bundle encoders containing no commands would
+// produce non-error render bundles.
+TEST_F(RenderBundleValidationTest, EmptyErrorEncoderProducesErrorBundle) {
+    DummyRenderPass renderPass(device);
+
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    // Having 0 attachments is invalid!
+    desc.colorFormatsCount = 0;
+
+    wgpu::RenderBundleEncoder renderBundleEncoder;
+    ASSERT_DEVICE_ERROR(renderBundleEncoder = device.CreateRenderBundleEncoder(&desc));
+    wgpu::RenderBundle renderBundle;
+    ASSERT_DEVICE_ERROR(renderBundle = renderBundleEncoder.Finish());
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
+    pass.ExecuteBundles(1, &renderBundle);
+    pass.EndPass();
+    ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+}
+
 // Test executing zero render bundles.
 TEST_F(RenderBundleValidationTest, ZeroBundles) {
     DummyRenderPass renderPass(device);

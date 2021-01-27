@@ -84,6 +84,8 @@ namespace dawn_native {
         std::set<TextureBase*> mTopLevelTextures;
         std::set<QuerySetBase*> mUsedQuerySets;
         QueryAvailabilityMap mQueryAvailabilityMap;
+
+        uint64_t mDebugGroupStackSize = 0;
     };
 
 }  // namespace dawn_native

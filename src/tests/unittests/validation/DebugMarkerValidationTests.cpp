@@ -14,6 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "utils/ComboRenderBundleEncoderDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 class DebugMarkerValidationTest : public ValidationTest {};
@@ -66,6 +67,52 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPop) {
         pass.PopDebugGroup();
         pass.EndPass();
     }
+
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Correct usage of debug markers should succeed in render bundle.
+TEST_F(DebugMarkerValidationTest, RenderBundleSuccess) {
+    utils::ComboRenderBundleEncoderDescriptor desc;
+    desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+    desc.colorFormatsCount = 1;
+
+    wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&desc);
+    encoder.PushDebugGroup("Event Start");
+    encoder.PushDebugGroup("Event Start");
+    encoder.InsertDebugMarker("Marker");
+    encoder.PopDebugGroup();
+    encoder.PopDebugGroup();
+
+    encoder.Finish();
+}
+
+// A PushDebugGroup call without a following PopDebugGroup produces an error in render bundle.
+TEST_F(DebugMarkerValidationTest, RenderBundleUnbalancedPush) {
+    utils::ComboRenderBundleEncoderDescriptor desc;
+    desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+    desc.colorFormatsCount = 1;
+
+    wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&desc);
+    encoder.PushDebugGroup("Event Start");
+    encoder.PushDebugGroup("Event Start");
+    encoder.InsertDebugMarker("Marker");
+    encoder.PopDebugGroup();
+
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// A PopDebugGroup call without a preceding PushDebugGroup produces an error in render bundle.
+TEST_F(DebugMarkerValidationTest, RenderBundleUnbalancedPop) {
+    utils::ComboRenderBundleEncoderDescriptor desc;
+    desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+    desc.colorFormatsCount = 1;
+
+    wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&desc);
+    encoder.PushDebugGroup("Event Start");
+    encoder.InsertDebugMarker("Marker");
+    encoder.PopDebugGroup();
+    encoder.PopDebugGroup();
 
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
