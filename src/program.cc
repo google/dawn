@@ -38,7 +38,15 @@ Program::Program(Program&& program)
 }
 
 Program::Program(ProgramBuilder&& builder) {
-  is_valid_ = builder.IsValid();  // must be called before the std::move()s
+  is_valid_ = builder.IsValid();
+  if (builder.ResolveOnBuild() && builder.IsValid()) {
+    TypeDeterminer td(&builder);
+    if (!td.Determine()) {
+      diagnostics_.add_error(td.error());
+    }
+  }
+
+  // The above must be called *before* the calls to std::move() below
 
   types_ = std::move(builder.Types());
   nodes_ = std::move(builder.Nodes());

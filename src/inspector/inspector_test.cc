@@ -70,8 +70,7 @@ namespace {
 class InspectorHelper : public ProgramBuilder {
  public:
   InspectorHelper()
-      : td_(std::make_unique<TypeDeterminer>(this)),
-        sampler_type_(type::SamplerKind::kSampler),
+      : sampler_type_(type::SamplerKind::kSampler),
         comparison_sampler_type_(type::SamplerKind::kComparisonSampler) {}
 
   /// Generates an empty function
@@ -623,8 +622,6 @@ class InspectorHelper : public ProgramBuilder {
     return *inspector_;
   }
 
-  TypeDeterminer* td() { return td_.get(); }
-
   type::Array* u32_array_type(uint32_t count) {
     if (array_type_memo_.find(count) == array_type_memo_.end()) {
       array_type_memo_[count] =
@@ -808,11 +805,10 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
-  auto* foo = MakeCallerBodyFunction(
-      "foo", "func",
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  auto* foo = MakeEmptyBodyFunction(
+      "foo", ast::FunctionDecorationList{
+                 create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+             });
   AST().Functions().Add(foo);
 
   Inspector& inspector = Build();
@@ -880,8 +876,6 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
       });
   AST().Functions().Add(foo);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetEntryPoints();
@@ -912,8 +906,6 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(foo);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -946,8 +938,6 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
       });
   AST().Functions().Add(foo);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetEntryPoints();
@@ -974,8 +964,6 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(foo);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -1013,8 +1001,6 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(foo);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -1056,8 +1042,6 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
       });
   AST().Functions().Add(bar);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
@@ -1112,8 +1096,6 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
       });
   AST().Functions().Add(bar);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
@@ -1174,8 +1156,6 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(foo);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -1395,8 +1375,6 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetUniformBufferResourceBindings("ub_func");
@@ -1425,8 +1403,6 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetUniformBufferResourceBindings("ep_func");
@@ -1451,8 +1427,6 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(ep_func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -1482,8 +1456,6 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(ep_func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -1529,8 +1501,6 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
            });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetUniformBufferResourceBindings("ep_func");
@@ -1568,8 +1538,6 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetUniformBufferResourceBindings("ep_func");
@@ -1599,8 +1567,6 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetStorageBufferResourceBindings("ep_func");
@@ -1629,8 +1595,6 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(ep_func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -1679,8 +1643,6 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
            });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetStorageBufferResourceBindings("ep_func");
@@ -1718,8 +1680,6 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetStorageBufferResourceBindings("ep_func");
@@ -1748,8 +1708,6 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(ep_func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -1780,8 +1738,6 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetStorageBufferResourceBindings("ep_func");
@@ -1806,8 +1762,6 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(ep_func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -1857,8 +1811,6 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
            });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
@@ -1896,8 +1848,6 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
@@ -1928,8 +1878,6 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
@@ -1959,8 +1907,6 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetReadOnlyStorageBufferResourceBindings("ep_func");
@@ -1982,8 +1928,6 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
       });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetSamplerResourceBindings("ep");
@@ -2000,8 +1944,6 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
                      create<ast::StageDecoration>(ast::PipelineStage::kVertex),
                  });
   AST().Functions().Add(func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -2029,8 +1971,6 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetSamplerResourceBindings("ep_func");
@@ -2055,8 +1995,6 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
       });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetSamplerResourceBindings("foo");
@@ -2076,8 +2014,6 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -2101,8 +2037,6 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
       });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetComparisonSamplerResourceBindings("ep");
@@ -2119,8 +2053,6 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
                      create<ast::StageDecoration>(ast::PipelineStage::kVertex),
                  });
   AST().Functions().Add(func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -2149,8 +2081,6 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
       });
   AST().Functions().Add(ep_func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetComparisonSamplerResourceBindings("ep_func");
@@ -2175,8 +2105,6 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
       });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetSamplerResourceBindings("foo");
@@ -2196,8 +2124,6 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -2238,8 +2164,6 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -2332,8 +2256,6 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
       });
   AST().Functions().Add(func);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
   Inspector& inspector = Build();
 
   auto result = inspector.GetSampledTextureResourceBindings("ep");
@@ -2404,8 +2326,6 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 
@@ -2488,8 +2408,6 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
   AST().Functions().Add(func);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   Inspector& inspector = Build();
 

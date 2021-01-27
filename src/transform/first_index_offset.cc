@@ -96,22 +96,6 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
     }
   }
 
-  // Running TypeDeterminer as we require local_referenced_builtin_variables()
-  // to be populated. TODO(bclayton) - it should not be necessary to re-run the
-  // type determiner if semantic information is already generated. Remove.
-  Program program;
-  {
-    ProgramBuilder builder = in->CloneAsBuilder();
-    TypeDeterminer td(&builder);
-    if (!td.Determine()) {
-      Output out;
-      out.diagnostics.add_error(td.error());
-      return out;
-    }
-    program = Program(std::move(builder));
-    in = &program;
-  }
-
   Symbol vertex_index_sym;
   Symbol instance_index_sym;
 

@@ -40,7 +40,11 @@ class SpvParserTestBase : public T {
   /// @param input the SPIR-V binary to parse
   /// @returns a parser for the given binary
   std::unique_ptr<ParserImpl> parser(const std::vector<uint32_t>& input) {
-    return std::make_unique<ParserImpl>(input);
+    auto parser = std::make_unique<ParserImpl>(input);
+    // Don't run the TypeDeterminer when building the program.
+    // We're not interested in type information with these tests.
+    parser->builder().SetResolveOnBuild(false);
+    return parser;
   }
 
   /// Gets the internal representation of the function with the given ID.

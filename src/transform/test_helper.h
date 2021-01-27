@@ -57,14 +57,6 @@ class TransformTest : public testing::Test {
     }
 
     {
-      auto diagnostics = TypeDeterminer::Run(&program);
-      if (diagnostics.contains_errors()) {
-        return "Type determination failed:\n" +
-               diag::Formatter(style).format(diagnostics);
-      }
-    }
-
-    {
       Manager manager;
       for (auto& transform : transforms) {
         manager.append(std::move(transform));

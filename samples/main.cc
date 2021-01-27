@@ -498,13 +498,6 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  auto diags = tint::TypeDeterminer::Run(program.get());
-  if (diags.contains_errors()) {
-    std::cerr << "Type Determination: ";
-    diag_formatter.format(diags, diag_printer.get());
-    return 1;
-  }
-
   if (options.dump_ast) {
     auto ast_str = program->to_str();
     if (options.demangle) {

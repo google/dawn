@@ -85,15 +85,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  {
-    ProgramBuilder builder = program.CloneAsBuilder();
-    TypeDeterminer td(&builder);
-    if (!td.Determine()) {
-      return 0;
-    }
-    program = Program(std::move(builder));
-  }
-
   Validator v;
   if (!v.Validate(&program)) {
     return 0;

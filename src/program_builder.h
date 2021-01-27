@@ -125,6 +125,15 @@ class ProgramBuilder {
     return diagnostics_;
   }
 
+  /// Controls whether the TypeDeterminer will be run on the program when it is
+  /// built.
+  /// @param enable the new flag value (defaults to true)
+  void SetResolveOnBuild(bool enable) { resolve_on_build_ = enable; }
+
+  /// @return true if the TypeDeterminer will be run on the program when it is
+  /// built.
+  bool ResolveOnBuild() const { return resolve_on_build_; }
+
   /// @returns true if the program has no error diagnostics and is not missing
   /// information
   bool IsValid() const;
@@ -850,6 +859,10 @@ class ProgramBuilder {
   /// The source to use when creating AST nodes without providing a Source as
   /// the first argument.
   Source source_;
+
+  /// Set by SetResolveOnBuild(). If set, the TypeDeterminer will be run on the
+  /// program when built.
+  bool resolve_on_build_ = true;
 
   /// Set by MarkAsMoved(). Once set, no methods may be called on this builder.
   bool moved_ = false;

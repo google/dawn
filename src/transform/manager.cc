@@ -36,10 +36,8 @@ Transform::Output Manager::Run(const Program* program) {
       program = &out.program;
     }
   } else {
-    out.program = Program(program->Clone());
+    out.program = program->Clone();
   }
-
-  out.diagnostics.add(TypeDeterminer::Run(&out.program));
 
   return out;
 }
