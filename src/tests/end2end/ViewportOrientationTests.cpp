@@ -21,9 +21,6 @@ class ViewportOrientationTests : public DawnTest {};
 
 // Test that the pixel in viewport coordinate (-1, -1) matches texel (0, 0)
 TEST_P(ViewportOrientationTests, OriginAt0x0) {
-    // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
