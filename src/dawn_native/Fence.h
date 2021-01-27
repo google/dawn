@@ -46,7 +46,7 @@ namespace dawn_native {
         friend class QueueBase;
         friend struct FenceInFlight;
         void SetSignaledValue(FenceAPISerial signalValue);
-        void SetCompletedValue(FenceAPISerial completedValue);
+        void SetCompletedValue(FenceAPISerial completedValue, WGPUFenceCompletionStatus status);
         void UpdateFenceOnComplete(Fence* fence, FenceAPISerial value);
 
       private:

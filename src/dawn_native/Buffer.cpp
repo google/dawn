@@ -35,7 +35,10 @@ namespace dawn_native {
                 : buffer(std::move(buffer)), id(id) {
             }
             void Finish() override {
-                buffer->OnMapRequestCompleted(id);
+                buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_Success);
+            }
+            void HandleDeviceLoss() override {
+                buffer->OnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_DeviceLost);
             }
             ~MapRequestTask() override = default;
 
@@ -537,8 +540,8 @@ namespace dawn_native {
         mState = BufferState::Destroyed;
     }
 
-    void BufferBase::OnMapRequestCompleted(MapRequestID mapID) {
-        CallMapCallback(mapID, WGPUBufferMapAsyncStatus_Success);
+    void BufferBase::OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status) {
+        CallMapCallback(mapID, status);
     }
 
     bool BufferBase::IsDataInitialized() const {

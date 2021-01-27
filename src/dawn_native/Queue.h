@@ -30,6 +30,7 @@ namespace dawn_native {
         struct TaskInFlight {
             virtual ~TaskInFlight();
             virtual void Finish() = 0;
+            virtual void HandleDeviceLoss() = 0;
         };
 
         static QueueBase* MakeError(DeviceBase* device);
@@ -52,6 +53,7 @@ namespace dawn_native {
 
         void TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial);
         void Tick(ExecutionSerial finishedSerial);
+        void HandleDeviceLoss();
 
       protected:
         QueueBase(DeviceBase* device);

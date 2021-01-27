@@ -192,6 +192,13 @@ namespace dawn_native {
         mTasksInFlight.ClearUpTo(finishedSerial);
     }
 
+    void QueueBase::HandleDeviceLoss() {
+        for (auto& task : mTasksInFlight.IterateAll()) {
+            task->HandleDeviceLoss();
+        }
+        mTasksInFlight.Clear();
+    }
+
     Fence* QueueBase::CreateFence(const FenceDescriptor* descriptor) {
         if (GetDevice()->ConsumedError(ValidateCreateFence(descriptor))) {
             return Fence::MakeError(GetDevice());

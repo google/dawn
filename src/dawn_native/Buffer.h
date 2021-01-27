@@ -53,7 +53,7 @@ namespace dawn_native {
         wgpu::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation();
-        void OnMapRequestCompleted(MapRequestID mapID);
+        void OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
         MaybeError ValidateCanUseOnQueueNow() const;
 

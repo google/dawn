@@ -28,7 +28,10 @@ namespace dawn_native {
             : fence(std::move(fence)), value(value) {
         }
         void Finish() override {
-            fence->SetCompletedValue(value);
+            fence->SetCompletedValue(value, WGPUFenceCompletionStatus_Success);
+        }
+        void HandleDeviceLoss() override {
+            fence->SetCompletedValue(value, WGPUFenceCompletionStatus_DeviceLost);
         }
         ~FenceInFlight() override = default;
 
@@ -116,18 +119,14 @@ namespace dawn_native {
         mSignalValue = signalValue;
     }
 
-    void Fence::SetCompletedValue(FenceAPISerial completedValue) {
+    void Fence::SetCompletedValue(FenceAPISerial completedValue, WGPUFenceCompletionStatus status) {
         ASSERT(!IsError());
         ASSERT(completedValue <= mSignalValue);
         ASSERT(completedValue > mCompletedValue);
         mCompletedValue = completedValue;
 
         for (auto& request : mRequests.IterateUpTo(mCompletedValue)) {
-            if (GetDevice()->IsLost()) {
-                request.completionCallback(WGPUFenceCompletionStatus_DeviceLost, request.userdata);
-            } else {
-                request.completionCallback(WGPUFenceCompletionStatus_Success, request.userdata);
-            }
+            request.completionCallback(status, request.userdata);
         }
         mRequests.ClearUpTo(mCompletedValue);
     }

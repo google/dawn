@@ -240,6 +240,8 @@ namespace dawn_native {
 
         // The device was lost, call the application callback.
         if (type == InternalErrorType::DeviceLost && mDeviceLostCallback != nullptr) {
+            mDefaultQueue->HandleDeviceLoss();
+
             mDeviceLostCallback(message, mDeviceLostUserdata);
             mDeviceLostCallback = nullptr;
         }
