@@ -501,7 +501,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 
-    // Test executing 0 bundles does not clear command buffer state.
+    // Test executing 0 bundles still clears command buffer state.
     {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
@@ -514,7 +514,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.Draw(3);
 
         pass.EndPass();
-        commandEncoder.Finish();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
 }
 

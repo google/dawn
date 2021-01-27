@@ -147,12 +147,7 @@ namespace dawn_native {
                 case Command::ExecuteBundles: {
                     ExecuteBundlesCmd* cmd = commands->NextCommand<ExecuteBundlesCmd>();
                     commands->NextData<Ref<RenderBundleBase>>(cmd->count);
-
-                    if (cmd->count > 0) {
-                        // Reset state. It is invalidated after render bundle execution.
-                        commandBufferState = CommandBufferStateTracker{};
-                    }
-
+                    commandBufferState = CommandBufferStateTracker{};
                     break;
                 }
 
