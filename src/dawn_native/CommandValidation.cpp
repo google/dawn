@@ -32,7 +32,6 @@ namespace dawn_native {
         inline MaybeError ValidateRenderBundleCommand(CommandIterator* commands,
                                                       Command type,
                                                       CommandBufferStateTracker* commandBufferState,
-                                                      const AttachmentState* attachmentState,
                                                       const char* disallowedMessage) {
             switch (type) {
                 case Command::Draw: {
@@ -79,10 +78,6 @@ namespace dawn_native {
                 case Command::SetRenderPipeline: {
                     SetRenderPipelineCmd* cmd = commands->NextCommand<SetRenderPipelineCmd>();
                     RenderPipelineBase* pipeline = cmd->pipeline.Get();
-
-                    if (DAWN_UNLIKELY(pipeline->GetAttachmentState() != attachmentState)) {
-                        return DAWN_VALIDATION_ERROR("Pipeline attachment state is not compatible");
-                    }
                     commandBufferState->SetRenderPipeline(pipeline);
                     break;
                 }
@@ -118,13 +113,11 @@ namespace dawn_native {
 
     }  // namespace
 
-    MaybeError ValidateRenderBundle(CommandIterator* commands,
-                                    const AttachmentState* attachmentState) {
+    MaybeError ValidateRenderBundle(CommandIterator* commands) {
         CommandBufferStateTracker commandBufferState;
         Command type;
         while (commands->NextCommandId(&type)) {
             DAWN_TRY(ValidateRenderBundleCommand(commands, type, &commandBufferState,
-                                                 attachmentState,
                                                  "Command disallowed inside a render bundle"));
         }
 
@@ -153,14 +146,7 @@ namespace dawn_native {
 
                 case Command::ExecuteBundles: {
                     ExecuteBundlesCmd* cmd = commands->NextCommand<ExecuteBundlesCmd>();
-                    auto bundles = commands->NextData<Ref<RenderBundleBase>>(cmd->count);
-                    for (uint32_t i = 0; i < cmd->count; ++i) {
-                        if (DAWN_UNLIKELY(renderPass->attachmentState.Get() !=
-                                          bundles[i]->GetAttachmentState())) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Render bundle is not compatible with render pass");
-                        }
-                    }
+                    commands->NextData<Ref<RenderBundleBase>>(cmd->count);
 
                     if (cmd->count > 0) {
                         // Reset state. It is invalidated after render bundle execution.
@@ -196,9 +182,9 @@ namespace dawn_native {
                 }
 
                 default:
-                    DAWN_TRY(ValidateRenderBundleCommand(
-                        commands, type, &commandBufferState, renderPass->attachmentState.Get(),
-                        "Command disallowed inside a render pass"));
+                    DAWN_TRY(
+                        ValidateRenderBundleCommand(commands, type, &commandBufferState,
+                                                    "Command disallowed inside a render pass"));
             }
         }
 

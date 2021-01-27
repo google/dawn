@@ -503,6 +503,7 @@ namespace dawn_native {
 
         uint32_t width = 0;
         uint32_t height = 0;
+        Ref<AttachmentState> attachmentState;
         bool success =
             mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
                 uint32_t sampleCount = 0;
@@ -516,6 +517,7 @@ namespace dawn_native {
                     allocator->Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
 
                 cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
+                attachmentState = cmd->attachmentState;
 
                 for (ColorAttachmentIndex index :
                      IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
@@ -565,9 +567,9 @@ namespace dawn_native {
             });
 
         if (success) {
-            RenderPassEncoder* passEncoder =
-                new RenderPassEncoder(device, this, &mEncodingContext, std::move(usageTracker),
-                                      descriptor->occlusionQuerySet, width, height);
+            RenderPassEncoder* passEncoder = new RenderPassEncoder(
+                device, this, &mEncodingContext, std::move(usageTracker),
+                std::move(attachmentState), descriptor->occlusionQuerySet, width, height);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }

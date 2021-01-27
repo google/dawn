@@ -28,8 +28,11 @@
 
 namespace dawn_native {
 
-    RenderEncoderBase::RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext)
+    RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
+                                         EncodingContext* encodingContext,
+                                         Ref<AttachmentState> attachmentState)
         : ProgrammablePassEncoder(device, encodingContext, PassType::Render),
+          mAttachmentState(std::move(attachmentState)),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
     }
@@ -40,6 +43,16 @@ namespace dawn_native {
         : ProgrammablePassEncoder(device, encodingContext, errorTag, PassType::Render),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
+    }
+
+    const AttachmentState* RenderEncoderBase::GetAttachmentState() const {
+        ASSERT(!IsError());
+        ASSERT(mAttachmentState != nullptr);
+        return mAttachmentState.Get();
+    }
+
+    Ref<AttachmentState> RenderEncoderBase::AcquireAttachmentState() {
+        return std::move(mAttachmentState);
     }
 
     void RenderEncoderBase::Draw(uint32_t vertexCount,
@@ -157,6 +170,12 @@ namespace dawn_native {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
+
+                if (pipeline->GetAttachmentState() != mAttachmentState.Get()) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Pipeline attachment state is not compatible with render encoder "
+                        "attachment state");
+                }
             }
 
             SetRenderPipelineCmd* cmd =

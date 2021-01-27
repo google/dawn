@@ -29,8 +29,7 @@ namespace dawn_native {
     struct PassResourceUsage;
     struct TexelBlockInfo;
 
-    MaybeError ValidateRenderBundle(CommandIterator* commands,
-                                    const AttachmentState* attachmentState);
+    MaybeError ValidateRenderBundle(CommandIterator* commands);
     MaybeError ValidateRenderPass(CommandIterator* commands, const BeginRenderPassCmd* renderPass);
     MaybeError ValidateComputePass(CommandIterator* commands);
 

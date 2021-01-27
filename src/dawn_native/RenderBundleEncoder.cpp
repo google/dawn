@@ -79,9 +79,10 @@ namespace dawn_native {
 
     RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
                                              const RenderBundleEncoderDescriptor* descriptor)
-        : RenderEncoderBase(device, &mBundleEncodingContext),
-          mBundleEncodingContext(device, this),
-          mAttachmentState(device->GetOrCreateAttachmentState(descriptor)) {
+        : RenderEncoderBase(device,
+                            &mBundleEncodingContext,
+                            device->GetOrCreateAttachmentState(descriptor)),
+          mBundleEncodingContext(device, this) {
     }
 
     RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag)
@@ -92,10 +93,6 @@ namespace dawn_native {
     // static
     RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device) {
         return new RenderBundleEncoder(device, ObjectBase::kError);
-    }
-
-    const AttachmentState* RenderBundleEncoder::GetAttachmentState() const {
-        return mAttachmentState.Get();
     }
 
     CommandIterator RenderBundleEncoder::AcquireCommands() {
@@ -126,7 +123,7 @@ namespace dawn_native {
             DAWN_TRY(ValidateFinish(mBundleEncodingContext.GetIterator(), usages));
         }
 
-        return new RenderBundleBase(this, descriptor, mAttachmentState.Get(), std::move(usages));
+        return new RenderBundleBase(this, descriptor, AcquireAttachmentState(), std::move(usages));
     }
 
     MaybeError RenderBundleEncoder::ValidateFinish(CommandIterator* commands,
@@ -134,7 +131,7 @@ namespace dawn_native {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(ValidatePassResourceUsage(usages));
-        DAWN_TRY(ValidateRenderBundle(commands, mAttachmentState.Get()));
+        DAWN_TRY(ValidateRenderBundle(commands));
         return {};
     }
 

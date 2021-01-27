@@ -52,10 +52,11 @@ namespace dawn_native {
                                          CommandEncoder* commandEncoder,
                                          EncodingContext* encodingContext,
                                          PassResourceUsageTracker usageTracker,
+                                         Ref<AttachmentState> attachmentState,
                                          QuerySetBase* occlusionQuerySet,
                                          uint32_t renderTargetWidth,
                                          uint32_t renderTargetHeight)
-        : RenderEncoderBase(device, encodingContext),
+        : RenderEncoderBase(device, encodingContext, std::move(attachmentState)),
           mCommandEncoder(commandEncoder),
           mRenderTargetWidth(renderTargetWidth),
           mRenderTargetHeight(renderTargetHeight),
@@ -198,6 +199,12 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 for (uint32_t i = 0; i < count; ++i) {
                     DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i]));
+
+                    if (GetAttachmentState() != renderBundles[i]->GetAttachmentState()) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Render bundle attachment state is not compatible with render pass "
+                            "attachment state");
+                    }
                 }
             }
 

@@ -23,11 +23,11 @@ namespace dawn_native {
 
     RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
                                        const RenderBundleDescriptor* descriptor,
-                                       AttachmentState* attachmentState,
+                                       Ref<AttachmentState> attachmentState,
                                        PassResourceUsage resourceUsage)
         : ObjectBase(encoder->GetDevice()),
           mCommands(encoder->AcquireCommands()),
-          mAttachmentState(attachmentState),
+          mAttachmentState(std::move(attachmentState)),
           mResourceUsage(std::move(resourceUsage)) {
     }
 

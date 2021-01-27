@@ -28,6 +28,7 @@ namespace dawn_native {
                           CommandEncoder* commandEncoder,
                           EncodingContext* encodingContext,
                           PassResourceUsageTracker usageTracker,
+                          Ref<AttachmentState> attachmentState,
                           QuerySetBase* occlusionQuerySet,
                           uint32_t renderTargetWidth,
                           uint32_t renderTargetHeight);

@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_RENDERBUNDLEENCODER_H_
 #define DAWNNATIVE_RENDERBUNDLEENCODER_H_
 
-#include "dawn_native/AttachmentState.h"
 #include "dawn_native/EncodingContext.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/RenderBundle.h"
@@ -33,8 +32,6 @@ namespace dawn_native {
 
         static RenderBundleEncoder* MakeError(DeviceBase* device);
 
-        const AttachmentState* GetAttachmentState() const;
-
         RenderBundleBase* Finish(const RenderBundleDescriptor* descriptor);
 
         CommandIterator AcquireCommands();
@@ -46,7 +43,6 @@ namespace dawn_native {
         MaybeError ValidateFinish(CommandIterator* commands, const PassResourceUsage& usages) const;
 
         EncodingContext mBundleEncodingContext;
-        Ref<AttachmentState> mAttachmentState;
     };
 }  // namespace dawn_native
 
