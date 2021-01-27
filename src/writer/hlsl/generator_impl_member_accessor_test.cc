@@ -948,6 +948,34 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       EmitExpression_MemberAccessor_Swizzle_xyz) {
+  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
+  td.RegisterVariableForTesting(vec);
+
+  auto* expr = MemberAccessor("my_vec", "xyz");
+
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
+  EXPECT_EQ(result(), "my_vec.xyz");
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       EmitExpression_MemberAccessor_Swizzle_gbr) {
+  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
+  td.RegisterVariableForTesting(vec);
+
+  auto* expr = MemberAccessor("my_vec", "gbr");
+
+  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  GeneratorImpl& gen = Build();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
+  EXPECT_EQ(result(), "my_vec.gbr");
+}
+
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

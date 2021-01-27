@@ -1118,7 +1118,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
       ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
     }
   } else if (auto* vec = data_type->As<type::Vector>()) {
-    // TODO(dsinclair): Swizzle, record into the identifier experesion
+    expr->member()->SetIsSwizzle();
 
     auto size = builder_->Symbols().NameFor(expr->member()->symbol()).size();
     if (size == 1) {

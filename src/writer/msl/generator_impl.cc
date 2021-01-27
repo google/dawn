@@ -1592,7 +1592,13 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
       out_ << name << ".";
     }
   }
-  out_ << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
+
+  // Swizzles get written out directly
+  if (ident->IsSwizzle()) {
+    out_ << program_->Symbols().NameFor(ident->symbol());
+  } else {
+    out_ << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
+  }
 
   return true;
 }

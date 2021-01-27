@@ -1171,7 +1171,13 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
       out << name << ".";
     }
   }
-  out << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
+
+  // Swizzles output the name directly
+  if (ident->IsSwizzle()) {
+    out << program_->Symbols().NameFor(ident->symbol());
+  } else {
+    out << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
+  }
 
   return true;
 }
