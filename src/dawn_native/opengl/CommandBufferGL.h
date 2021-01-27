@@ -24,6 +24,7 @@ namespace dawn_native {
 namespace dawn_native { namespace opengl {
 
     class Device;
+    struct OpenGLFunctions;
 
     class CommandBuffer final : public CommandBufferBase {
       public:

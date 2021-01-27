@@ -475,9 +475,6 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStenc
 
 // Test copying both aspects in a T2T copy, then copying only depth.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
-    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
-    DAWN_SKIP_TEST_IF(IsANGLE());
-
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -496,9 +493,6 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
 
 // Test copying both aspects in a T2T copy, then copying only depth at a nonzero mip.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonZeroMipDepth) {
-    // TODO(crbug.com/dawn/634): Diagnose and fix ANGLE failure.
-    DAWN_SKIP_TEST_IF(IsANGLE());
-
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, 8, 8, wgpu::TextureUsage::RenderAttachment, 1);
 
