@@ -21,8 +21,10 @@
 #include "gtest/gtest.h"
 
 #define ASSERT_DEVICE_ERROR(statement)                          \
+    FlushWire();                                                \
     StartExpectDeviceError();                                   \
     statement;                                                  \
+    FlushWire();                                                \
     if (!EndExpectDeviceError()) {                              \
         FAIL() << "Expected device error in:\n " << #statement; \
     }                                                           \
@@ -39,17 +41,26 @@
         }                                                       \
     } while (0)
 
-#define EXPECT_DEPRECATION_WARNING(statement)                                                    \
-    do {                                                                                         \
-        size_t warningsBefore = dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
-        statement;                                                                               \
-        size_t warningsAfter = dawn_native::GetDeprecationWarningCountForTesting(device.Get());  \
-        EXPECT_EQ(mLastWarningCount, warningsBefore);                                            \
-        mLastWarningCount = warningsAfter;                                                       \
+#define EXPECT_DEPRECATION_WARNING(statement)                                                     \
+    do {                                                                                          \
+        FlushWire();                                                                              \
+        size_t warningsBefore = dawn_native::GetDeprecationWarningCountForTesting(backendDevice); \
+        statement;                                                                                \
+        FlushWire();                                                                              \
+        size_t warningsAfter = dawn_native::GetDeprecationWarningCountForTesting(backendDevice);  \
+        EXPECT_EQ(mLastWarningCount, warningsBefore);                                             \
+        mLastWarningCount = warningsAfter;                                                        \
     } while (0)
+
+namespace utils {
+    class WireHelper;
+}  // namespace utils
+
+void InitDawnValidationTestEnvironment(int argc, char** argv);
 
 class ValidationTest : public testing::Test {
   public:
+    ValidationTest();
     ~ValidationTest() override;
 
     void SetUp() override;
@@ -59,7 +70,12 @@ class ValidationTest : public testing::Test {
     bool EndExpectDeviceError();
     std::string GetLastDeviceErrorMessage() const;
 
-    void WaitForAllOperations(const wgpu::Device& device) const;
+    wgpu::Device RegisterDevice(WGPUDevice backendDevice);
+
+    bool UsesWire() const;
+
+    void FlushWire();
+    void WaitForAllOperations(const wgpu::Device& device);
 
     // Helper functions to create objects to test validation.
 
@@ -79,15 +95,18 @@ class ValidationTest : public testing::Test {
     bool HasToggleEnabled(const char* toggle) const;
 
   protected:
-    virtual wgpu::Device CreateTestDevice();
+    virtual WGPUDevice CreateTestDevice();
 
-    wgpu::Device device;
-    dawn_native::Adapter adapter;
     std::unique_ptr<dawn_native::Instance> instance;
+    dawn_native::Adapter adapter;
+    wgpu::Device device;
+    WGPUDevice backendDevice;
 
     size_t mLastWarningCount = 0;
 
   private:
+    std::unique_ptr<utils::WireHelper> mWireHelper;
+
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
     std::string mDeviceErrorMessage;
     bool mExpectError = false;

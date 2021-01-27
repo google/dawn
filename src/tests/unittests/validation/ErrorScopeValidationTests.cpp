@@ -51,6 +51,7 @@ TEST_F(ErrorScopeValidationTest, Success) {
 
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    FlushWire();
 }
 
 // Test the simple case where the error scope catches an error.
@@ -63,6 +64,7 @@ TEST_F(ErrorScopeValidationTest, CatchesError) {
 
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, this)).Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    FlushWire();
 }
 
 // Test that errors bubble to the parent scope if not handled by the current scope.
@@ -77,11 +79,13 @@ TEST_F(ErrorScopeValidationTest, ErrorBubbles) {
     // OutOfMemory does not match Validation error.
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    FlushWire();
 
     // Parent validation error scope captures the error.
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, this + 1))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+    FlushWire();
 }
 
 // Test that if an error scope matches an error, it does not bubble to the parent scope.
@@ -96,11 +100,13 @@ TEST_F(ErrorScopeValidationTest, HandledErrorsStopBubbling) {
     // Inner scope catches the error.
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Validation, _, this)).Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    FlushWire();
 
     // Parent scope does not see the error.
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this + 1))
         .Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+    FlushWire();
 }
 
 // Test that if no error scope handles an error, it goes to the device UncapturedError callback
@@ -113,6 +119,7 @@ TEST_F(ErrorScopeValidationTest, UnhandledErrorsMatchUncapturedErrorCallback) {
 
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    FlushWire();
 }
 
 // Check that push/popping error scopes must be balanced.
@@ -127,6 +134,7 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
         EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this + 1))
             .Times(1);
         device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+        FlushWire();
 
         EXPECT_FALSE(device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 2));
     }
@@ -145,6 +153,7 @@ TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmit) {
 
     // Side effects of Queue::Submit only are seen after Tick()
     device.Tick();
+    FlushWire();
 }
 
 // Test that parent error scopes do not call their callbacks until after an enclosed Queue::Submit
@@ -164,6 +173,7 @@ TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmitNested) {
 
     // Side effects of Queue::Submit only are seen after Tick()
     device.Tick();
+    FlushWire();
 }
 
 // Test a callback that returns asynchronously followed by a synchronous one
@@ -183,11 +193,15 @@ TEST_F(ErrorScopeValidationTest, AsynchronousThenSynchronous) {
 
     // Side effects of Queue::Submit only are seen after Tick()
     device.Tick();
+    FlushWire();
 }
 
 // Test that if the device is destroyed before the callback occurs, it is called with NoError
 // because all previous operations are waited upon before the destruction returns.
 TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
+    // TODO(crbug.com/dawn/652): This has different behavior on the wire and should be consistent.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::Queue queue = device.GetDefaultQueue();
 
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);

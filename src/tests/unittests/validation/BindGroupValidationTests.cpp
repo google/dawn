@@ -85,6 +85,7 @@ TEST_F(BindGroupValidationTest, NextInChainNullptr) {
 
     // Check that nextInChain != nullptr is an error.
     wgpu::ChainedStruct chainedDescriptor;
+    chainedDescriptor.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
     descriptor.nextInChain = &chainedDescriptor;
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
 }

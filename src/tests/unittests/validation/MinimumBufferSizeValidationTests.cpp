@@ -391,6 +391,10 @@ TEST_F(MinBufferSizeBindGroupCreationTests, BindingTooSmall) {
 
 // Check two layouts with different minimum size are unequal
 TEST_F(MinBufferSizeBindGroupCreationTests, LayoutEquality) {
+    // Returning the same pointer is an implementation detail of Dawn Native.
+    // It is not the same semantic with the Wire.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     auto MakeLayout = [&](uint64_t size) {
         return utils::MakeBindGroupLayout(
             device,

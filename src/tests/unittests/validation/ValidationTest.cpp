@@ -15,11 +15,40 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "common/Assert.h"
+#include "common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/webgpu.h"
 #include "dawn_native/NullBackend.h"
+#include "utils/WireHelper.h"
 
 #include <algorithm>
+
+namespace {
+
+    bool gUseWire = false;
+    std::string gWireTraceDir = "";
+
+}  // namespace
+
+void InitDawnValidationTestEnvironment(int argc, char** argv) {
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp("-w", argv[i]) == 0 || strcmp("--use-wire", argv[i]) == 0) {
+            gUseWire = true;
+            continue;
+        }
+
+        constexpr const char kWireTraceDirArg[] = "--wire-trace-dir=";
+        size_t argLen = sizeof(kWireTraceDirArg) - 1;
+        if (strncmp(argv[i], kWireTraceDirArg, argLen) == 0) {
+            gWireTraceDir = argv[i] + argLen;
+            continue;
+        }
+    }
+}
+
+ValidationTest::ValidationTest()
+    : mWireHelper(utils::CreateWireHelper(gUseWire, gWireTraceDir.c_str())) {
+}
 
 void ValidationTest::SetUp() {
     instance = std::make_unique<dawn_native::Instance>();
@@ -42,25 +71,29 @@ void ValidationTest::SetUp() {
 
     ASSERT(foundNullAdapter);
 
-    dawnProcSetProcs(&dawn_native::GetProcs());
-
-    device = CreateTestDevice();
+    std::tie(device, backendDevice) = mWireHelper->RegisterDevice(CreateTestDevice());
     device.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
+
+    std::string traceName =
+        std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
+        "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    mWireHelper->BeginWireTrace(traceName.c_str());
 }
 
 ValidationTest::~ValidationTest() {
     // We need to destroy Dawn objects before setting the procs to null otherwise the dawn*Release
     // will call a nullptr
     device = wgpu::Device();
-    dawnProcSetProcs(nullptr);
+    mWireHelper.reset();
 }
 
 void ValidationTest::TearDown() {
+    FlushWire();
     ASSERT_FALSE(mExpectError);
 
     if (device) {
         EXPECT_EQ(mLastWarningCount,
-                  dawn_native::GetDeprecationWarningCountForTesting(device.Get()));
+                  dawn_native::GetDeprecationWarningCountForTesting(backendDevice));
     }
 }
 
@@ -76,7 +109,20 @@ std::string ValidationTest::GetLastDeviceErrorMessage() const {
     return mDeviceErrorMessage;
 }
 
-void ValidationTest::WaitForAllOperations(const wgpu::Device& device) const {
+wgpu::Device ValidationTest::RegisterDevice(WGPUDevice backendDevice) {
+    return mWireHelper->RegisterDevice(backendDevice).first;
+}
+
+bool ValidationTest::UsesWire() const {
+    return gUseWire;
+}
+
+void ValidationTest::FlushWire() {
+    EXPECT_TRUE(mWireHelper->FlushClient());
+    EXPECT_TRUE(mWireHelper->FlushServer());
+}
+
+void ValidationTest::WaitForAllOperations(const wgpu::Device& device) {
     wgpu::Queue queue = device.GetDefaultQueue();
     wgpu::Fence fence = queue.CreateFence();
 
@@ -84,11 +130,13 @@ void ValidationTest::WaitForAllOperations(const wgpu::Device& device) const {
     queue.Signal(fence, 1);
     while (fence.GetCompletedValue() < 1) {
         device.Tick();
+        FlushWire();
     }
 
     // TODO(cwallez@chromium.org): It's not clear why we need this additional tick. Investigate it
     // once WebGPU has defined the ordering of callbacks firing.
     device.Tick();
+    FlushWire();
 }
 
 bool ValidationTest::HasWGSL() const {
@@ -100,14 +148,14 @@ bool ValidationTest::HasWGSL() const {
 }
 
 bool ValidationTest::HasToggleEnabled(const char* toggle) const {
-    auto toggles = dawn_native::GetTogglesUsed(device.Get());
+    auto toggles = dawn_native::GetTogglesUsed(backendDevice);
     return std::find_if(toggles.begin(), toggles.end(), [toggle](const char* name) {
                return strcmp(toggle, name) == 0;
            }) != toggles.end();
 }
 
-wgpu::Device ValidationTest::CreateTestDevice() {
-    return wgpu::Device::Acquire(adapter.CreateDevice());
+WGPUDevice ValidationTest::CreateTestDevice() {
+    return adapter.CreateDevice();
 }
 
 // static

@@ -110,13 +110,18 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
 
     // Fail to begin render pass if the occlusionQuerySet is created from other device
     {
-        wgpu::Device otherDevice = adapter.CreateDevice();
+        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
         wgpu::QuerySet occlusionQuerySetOnOther =
             CreateQuerySet(otherDevice, wgpu::QueryType::Occlusion, 2);
         renderPass.occlusionQuerySet = occlusionQuerySetOnOther;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
+
+        // Clear this out so we don't hold a reference. The query set
+        // must be destroyed before the device local to this test case.
+        renderPass.occlusionQuerySet = wgpu::QuerySet();
     }
 
     // Fail to submit occlusion query with a destroyed query set
@@ -219,10 +224,10 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
 
 class TimestampQueryValidationTest : public QuerySetValidationTest {
   protected:
-    wgpu::Device CreateTestDevice() override {
+    WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
         descriptor.requiredExtensions = {"timestamp_query"};
-        return wgpu::Device::Acquire(adapter.CreateDevice(&descriptor));
+        return adapter.CreateDevice(&descriptor);
     }
 };
 
@@ -422,10 +427,10 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
 
 class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
   protected:
-    wgpu::Device CreateTestDevice() override {
+    WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
         descriptor.requiredExtensions = {"pipeline_statistics_query"};
-        return wgpu::Device::Acquire(adapter.CreateDevice(&descriptor));
+        return adapter.CreateDevice(&descriptor);
     }
 };
 
@@ -563,7 +568,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
 
     // Fail to resolve query set to a buffer created from another device
     {
-        wgpu::Device otherDevice = adapter.CreateDevice();
+        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
         wgpu::Buffer bufferOnOther =
             CreateBuffer(otherDevice, kBufferSize, wgpu::BufferUsage::QueryResolve);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

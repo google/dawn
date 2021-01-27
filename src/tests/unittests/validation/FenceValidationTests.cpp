@@ -93,6 +93,10 @@ TEST_F(FenceValidationTest, GetCompletedValue) {
 // Test that OnCompletion handlers are called immediately for
 // already completed fence values
 TEST_F(FenceValidationTest, OnCompletionImmediate) {
+    // TODO(crbug.com/dawn/653): This has wrong different behavior on the wire, but fences will be
+    // removed soon.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
     wgpu::Fence fence = queue.CreateFence(&descriptor);
@@ -127,6 +131,10 @@ TEST_F(FenceValidationTest, OnCompletionLargerThanSignaled) {
 }
 
 TEST_F(FenceValidationTest, GetCompletedValueInsideCallback) {
+    // TODO(crbug.com/dawn/653): This has wrong different behavior on the wire, but fences will be
+    // removed soon.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
     wgpu::Fence fence = queue.CreateFence(&descriptor);

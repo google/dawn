@@ -38,6 +38,11 @@ class GetBindGroupLayoutTests : public ValidationTest {
 // Test that GetBindGroupLayout returns the same object for the same index
 // and for matching layouts.
 TEST_F(GetBindGroupLayoutTests, SameObject) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
             [[offset(0)]] pos : vec4<f32>;
@@ -86,6 +91,11 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 // - shader stage visibility is the stage that adds the binding.
 // - dynamic offsets is false
 TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         [[block]] struct S {
             [[offset(0)]] pos : vec4<f32>;
@@ -124,6 +134,11 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
 
 // Test GetBindGroupLayout works with a compute pipeline
 TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
             [[offset(0)]] pos : vec4<f32>;
@@ -156,6 +171,11 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
 // Test that the binding type matches the shader.
 TEST_F(GetBindGroupLayoutTests, BindingType) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.buffer.hasDynamicOffset = false;
@@ -242,6 +262,11 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
 
 // Test that texture view dimension matches the shader.
 TEST_F(GetBindGroupLayoutTests, ViewDimension) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.visibility = wgpu::ShaderStage::Fragment;
@@ -314,6 +339,11 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
 
 // Test that texture component type matches the shader.
 TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.visibility = wgpu::ShaderStage::Fragment;
@@ -355,6 +385,11 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
 
 // Test that binding= indices match.
 TEST_F(GetBindGroupLayoutTests, BindingIndices) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::BindGroupLayoutEntry binding = {};
     binding.visibility = wgpu::ShaderStage::Fragment;
     binding.buffer.type = wgpu::BufferBindingType::Uniform;
@@ -436,6 +471,11 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
 
 // Test that minBufferSize is set on the BGL and that the max of the min buffer sizes is used.
 TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::ShaderModule vsModule4 = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
             [[offset(0)]] pos : f32;
@@ -517,6 +557,11 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
 // Test that the visibility is correctly aggregated if two stages have the exact same binding.
 TEST_F(GetBindGroupLayoutTests, StageAggregation) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::ShaderModule vsModuleNoSampler = utils::CreateShaderModuleFromWGSL(device, R"(
         [[stage(vertex)]] fn main() -> void {
         })");
@@ -687,6 +732,11 @@ TEST_F(GetBindGroupLayoutTests, OutOfRangeIndex) {
 
 // Test that unused indices return the empty bind group layout.
 TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         [[block]] struct S {
             [[offset(0)]] pos : vec4<f32>;
@@ -712,6 +762,11 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
 // Test that after explicitly creating a pipeline with a pipeline layout, calling
 // GetBindGroupLayout reflects the same bind group layouts.
 TEST_F(GetBindGroupLayoutTests, Reflection) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.buffer.type = wgpu::BufferBindingType::Uniform;
