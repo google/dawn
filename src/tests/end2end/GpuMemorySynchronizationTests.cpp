@@ -21,13 +21,6 @@
 
 class GpuMemorySyncTests : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
-
-        // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-    }
-
     wgpu::Buffer CreateBuffer() {
         wgpu::BufferDescriptor srcDesc;
         srcDesc.size = 4;
@@ -308,13 +301,6 @@ DAWN_INSTANTIATE_TEST(GpuMemorySyncTests,
 
 class StorageToUniformSyncTests : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
-
-        // TODO(crbug.com/tint/398): GLSL builtins don't work with SPIR-V reader.
-        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-    }
-
     void CreateBuffer() {
         wgpu::BufferDescriptor bufferDesc;
         bufferDesc.size = sizeof(float);
