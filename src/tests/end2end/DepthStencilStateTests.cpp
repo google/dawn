@@ -65,10 +65,10 @@ class DepthStencilStateTest : public DawnTest {
                 const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(-1.0,  1.0),
                         vec2<f32>(-1.0, -1.0),
-                        vec2<f32>( 1.0, -1.0), # front-facing
+                        vec2<f32>( 1.0, -1.0), // front-facing
                         vec2<f32>(-1.0,  1.0),
                         vec2<f32>( 1.0,  1.0),
-                        vec2<f32>( 1.0, -1.0)); # back-facing
+                        vec2<f32>( 1.0, -1.0)); // back-facing
                 Position = vec4<f32>(pos[VertexIndex], ubo.depth, 1.0);
             })");
 

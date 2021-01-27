@@ -70,20 +70,20 @@ namespace dawn_native {
 
                 var timestamp : Timestamp = timestamps.t[index];
 
-                # Return 0 for the unavailable value.
+                // Return 0 for the unavailable value.
                 if (availability.v[index] == 0u) {
                     timestamps.t[index].low = 0u;
                     timestamps.t[index].high = 0u;
                     return;
                 }
 
-                # Multiply the values in timestamps buffer by the period.
+                // Multiply the values in timestamps buffer by the period.
                 var period : f32 = params.period;
                 var w : u32 = 0u;
 
-                # If the product of low 32-bits and the period does not exceed the maximum of u32,
-                # directly do the multiplication, otherwise, use two u32 to represent the high
-                # 16-bits and low 16-bits of this u32, then multiply them by the period separately.
+                // If the product of low 32-bits and the period does not exceed the maximum of u32,
+                // directly do the multiplication, otherwise, use two u32 to represent the high
+                // 16-bits and low 16-bits of this u32, then multiply them by the period separately.
                 if (timestamp.low <= u32(f32(0xFFFFFFFFu) / period)) {
                     timestamps.t[index].low = u32(round(f32(timestamp.low) * period));
                 } else {
@@ -99,8 +99,8 @@ namespace dawn_native {
                     timestamps.t[index].low = result;
                 }
 
-                # Get the nearest integer to the float result. For high 32-bits, the round
-                # function will greatly help reduce the accuracy loss of the final result.
+                // Get the nearest integer to the float result. For high 32-bits, the round
+                // function will greatly help reduce the accuracy loss of the final result.
                 timestamps.t[index].high = u32(round(f32(timestamp.high) * period)) + w;
             }
         )";
