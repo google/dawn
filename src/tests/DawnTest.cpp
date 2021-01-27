@@ -29,6 +29,7 @@
 #include "utils/TerribleCommandBuffer.h"
 #include "utils/TestUtils.h"
 #include "utils/WGPUHelpers.h"
+#include "utils/WireHelper.h"
 
 #include <algorithm>
 #include <fstream>
@@ -309,14 +310,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         constexpr const char kWireTraceDirArg[] = "--wire-trace-dir=";
         argLen = sizeof(kWireTraceDirArg) - 1;
         if (strncmp(argv[i], kWireTraceDirArg, argLen) == 0) {
-            const char* wireTraceDir = argv[i] + argLen;
-            if (wireTraceDir[0] != '\0') {
-                const char* sep = GetPathSeparator();
-                mWireTraceDir = wireTraceDir;
-                if (mWireTraceDir.back() != *sep) {
-                    mWireTraceDir += sep;
-                }
-            }
+            mWireTraceDir = argv[i] + argLen;
             continue;
         }
 
@@ -597,26 +591,11 @@ const std::vector<std::string>& DawnTestEnvironment::GetDisabledToggles() const 
     return mDisabledToggles;
 }
 
-class WireServerTraceLayer : public dawn_wire::CommandHandler {
-  public:
-    WireServerTraceLayer(const char* file, dawn_wire::CommandHandler* handler)
-        : dawn_wire::CommandHandler(), mHandler(handler) {
-        mFile.open(file, std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-    }
-
-    const volatile char* HandleCommands(const volatile char* commands, size_t size) override {
-        mFile.write(const_cast<const char*>(commands), size);
-        return mHandler->HandleCommands(commands, size);
-    }
-
-  private:
-    dawn_wire::CommandHandler* mHandler;
-    std::ofstream mFile;
-};
-
 // Implementation of DawnTest
 
-DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
+DawnTestBase::DawnTestBase(const AdapterTestParam& param)
+    : mParam(param),
+      mWireHelper(utils::CreateWireHelper(gTestEnv->UsesWire(), gTestEnv->GetWireTraceDir())) {
 }
 
 DawnTestBase::~DawnTestBase() {
@@ -625,13 +604,7 @@ DawnTestBase::~DawnTestBase() {
     queue = wgpu::Queue();
     device = wgpu::Device();
 
-    mWireClient = nullptr;
-    mWireServer = nullptr;
-    if (gTestEnv->UsesWire()) {
-        backendProcs.deviceRelease(backendDevice);
-    }
-
-    dawnProcSetProcs(nullptr);
+    mWireHelper.reset();
 }
 
 bool DawnTestBase::IsD3D12() const {
@@ -840,58 +813,15 @@ void DawnTestBase::SetUp() {
         deviceDescriptor.forceDisabledToggles.push_back(info->name);
     }
 
-    backendDevice = mBackendAdapter.CreateDevice(&deviceDescriptor);
+    std::tie(device, backendDevice) =
+        mWireHelper->RegisterDevice(mBackendAdapter.CreateDevice(&deviceDescriptor));
     ASSERT_NE(nullptr, backendDevice);
 
-    backendProcs = dawn_native::GetProcs();
+    std::string traceName =
+        std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
+        "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    mWireHelper->BeginWireTrace(traceName.c_str());
 
-    // Choose whether to use the backend procs and devices directly, or set up the wire.
-    WGPUDevice cDevice = nullptr;
-    DawnProcTable procs;
-
-    if (gTestEnv->UsesWire()) {
-        mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
-        mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
-
-        dawn_wire::WireServerDescriptor serverDesc = {};
-        serverDesc.device = backendDevice;
-        serverDesc.procs = &backendProcs;
-        serverDesc.serializer = mS2cBuf.get();
-
-        mWireServer.reset(new dawn_wire::WireServer(serverDesc));
-        mC2sBuf->SetHandler(mWireServer.get());
-
-        if (gTestEnv->GetWireTraceDir() != nullptr) {
-            std::string file =
-                std::string(
-                    ::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
-                "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
-            // Replace slashes in gtest names with underscores so everything is in one directory.
-            std::replace(file.begin(), file.end(), '/', '_');
-
-            std::string fullPath = gTestEnv->GetWireTraceDir() + file;
-
-            mWireServerTraceLayer.reset(
-                new WireServerTraceLayer(fullPath.c_str(), mWireServer.get()));
-            mC2sBuf->SetHandler(mWireServerTraceLayer.get());
-        }
-
-        dawn_wire::WireClientDescriptor clientDesc = {};
-        clientDesc.serializer = mC2sBuf.get();
-
-        mWireClient.reset(new dawn_wire::WireClient(clientDesc));
-        cDevice = mWireClient->GetDevice();
-        procs = dawn_wire::client::GetProcs();
-        mS2cBuf->SetHandler(mWireClient.get());
-    } else {
-        procs = backendProcs;
-        cDevice = backendDevice;
-    }
-
-    // Set up the device and queue because all tests need them, and DawnTestBase needs them too for
-    // the deferred expectations.
-    dawnProcSetProcs(&procs);
-    device = wgpu::Device::Acquire(cDevice);
     queue = device.GetDefaultQueue();
 
     device.SetUncapturedErrorCallback(OnDeviceError, this);
@@ -1050,8 +980,8 @@ void DawnTestBase::WaitABit() {
 
 void DawnTestBase::FlushWire() {
     if (gTestEnv->UsesWire()) {
-        bool C2SFlushed = mC2sBuf->Flush();
-        bool S2CFlushed = mS2cBuf->Flush();
+        bool C2SFlushed = mWireHelper->FlushClient();
+        bool S2CFlushed = mWireHelper->FlushServer();
         ASSERT(C2SFlushed);
         ASSERT(S2CFlushed);
     }

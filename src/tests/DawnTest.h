@@ -171,6 +171,7 @@ struct GLFWwindow;
 namespace utils {
     class PlatformDebugLogger;
     class TerribleCommandBuffer;
+    class WireHelper;
 }  // namespace utils
 
 namespace detail {
@@ -376,14 +377,7 @@ class DawnTestBase {
 
   private:
     AdapterTestParam mParam;
-
-    // Things used to set up testing through the Wire.
-    std::unique_ptr<dawn_wire::WireServer> mWireServer;
-    std::unique_ptr<dawn_wire::WireClient> mWireClient;
-    std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
-    std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
-
-    std::unique_ptr<dawn_wire::CommandHandler> mWireServerTraceLayer;
+    std::unique_ptr<utils::WireHelper> mWireHelper;
 
     // Tracking for validation errors
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);

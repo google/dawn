@@ -34,12 +34,15 @@ target_sources(dawn_utils PRIVATE
     "Timer.h"
     "WGPUHelpers.cpp"
     "WGPUHelpers.h"
+    "WireHelper.cpp"
+    "WireHelper.h"
 )
 target_link_libraries(dawn_utils
     PUBLIC dawncpp_headers
     PRIVATE dawn_internal_config
             dawn_common
             dawn_native
+            dawn_proc
             dawn_wire
             shaderc
             glfw
