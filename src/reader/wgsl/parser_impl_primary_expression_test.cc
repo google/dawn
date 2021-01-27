@@ -136,6 +136,62 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
   EXPECT_EQ(p->error(), "1:5: unable to parse argument expression");
 }
 
+TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
+  auto p = parser(R"(
+  struct S { a : i32; b : f32; };
+  S()
+  )");
+
+  p->expect_global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  auto e = p->primary_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+
+  auto* constructor = e->As<ast::TypeConstructorExpression>();
+  EXPECT_EQ(constructor->type(), p->get_constructed("S"));
+
+  auto values = constructor->values();
+  ASSERT_EQ(values.size(), 0u);
+}
+
+TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
+  auto p = parser(R"(
+  struct S { a : i32; b : f32; };
+  S(1u, 2.0)
+  )");
+
+  p->expect_global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  auto e = p->primary_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+
+  auto* constructor = e->As<ast::TypeConstructorExpression>();
+  EXPECT_EQ(constructor->type(), p->get_constructed("S"));
+
+  auto values = constructor->values();
+  ASSERT_EQ(values.size(), 2u);
+
+  ASSERT_TRUE(values[0]->Is<ast::ScalarConstructorExpression>());
+  auto* val0 = values[0]->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(val0->literal()->Is<ast::UintLiteral>());
+  EXPECT_EQ(val0->literal()->As<ast::UintLiteral>()->value(), 1u);
+
+  ASSERT_TRUE(values[1]->Is<ast::ScalarConstructorExpression>());
+  auto* val1 = values[1]->As<ast::ScalarConstructorExpression>();
+  ASSERT_TRUE(val1->literal()->Is<ast::FloatLiteral>());
+  EXPECT_EQ(val1->literal()->As<ast::FloatLiteral>()->value(), 2.f);
+}
+
 TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
   auto p = parser("true");
   auto e = p->primary_expression();

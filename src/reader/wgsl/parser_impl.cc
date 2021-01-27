@@ -2071,9 +2071,11 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
     return create<ast::BitcastExpression>(source, type.value, params.value);
   }
 
-  if (match(Token::Type::kIdentifier))
+  if (t.IsIdentifier() && !get_constructed(t.to_str())) {
+    next();
     return create<ast::IdentifierExpression>(
         t.source(), builder_.Symbols().Register(t.to_str()));
+  }
 
   auto type = type_decl();
   if (type.errored)
