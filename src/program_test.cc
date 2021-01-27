@@ -128,5 +128,15 @@ TEST_F(ProgramTest, IsValid_Invalid_Function) {
   EXPECT_FALSE(program.IsValid());
 }
 
+TEST_F(ProgramTest, IsValid_GeneratesError) {
+  AST().AddGlobalVariable(nullptr);
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
+  EXPECT_EQ(program.Diagnostics().count(), 1u);
+  EXPECT_EQ(program.Diagnostics().error_count(), 1u);
+  EXPECT_EQ(program.Diagnostics().begin()->message,
+            "invalid program generated");
+}
 }  // namespace
 }  // namespace tint

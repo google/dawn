@@ -43,6 +43,17 @@ Program Parser::program() {
   return impl_->program();
 }
 
+Program Parse(const std::vector<uint32_t>& input) {
+  ParserImpl parser(input);
+  bool parsed = parser.Parse();
+  ProgramBuilder builder = std::move(parser.builder());
+  if (!parsed) {
+    // TODO(bclayton): Migrate spirv::ParserImpl to using diagnostics.
+    builder.Diagnostics().add_error(parser.error());
+  }
+  return Program(std::move(builder));
+}
+
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint

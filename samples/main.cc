@@ -436,7 +436,7 @@ int main(int argc, const char** argv) {
   auto diag_printer = tint::diag::Printer::create(stderr, true);
   tint::diag::Formatter diag_formatter;
 
-  std::unique_ptr<tint::reader::Reader> reader;
+  std::unique_ptr<tint::Program> program;
   std::unique_ptr<tint::Source::File> source_file;
 #if TINT_BUILD_WGSL_READER
   if (options.input_filename.size() > 5 &&
@@ -448,7 +448,8 @@ int main(int argc, const char** argv) {
     }
     source_file = std::make_unique<tint::Source::File>(
         options.input_filename, std::string(data.begin(), data.end()));
-    reader = std::make_unique<tint::reader::wgsl::Parser>(source_file.get());
+    program = std::make_unique<tint::Program>(
+        tint::reader::wgsl::Parse(source_file.get()));
   }
 #endif  // TINT_BUILD_WGSL_READER
 
@@ -461,7 +462,7 @@ int main(int argc, const char** argv) {
     if (!ReadFile<uint32_t>(options.input_filename, &data)) {
       return 1;
     }
-    reader = std::make_unique<tint::reader::spirv::Parser>(data);
+    program = std::make_unique<tint::Program>(tint::reader::spirv::Parse(data));
   }
   // Handle SPIR-V assembly input, in files ending with .spvasm
   if (options.input_filename.size() > 7 &&
@@ -483,36 +484,31 @@ int main(int argc, const char** argv) {
                         SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
       return 1;
     }
-    reader = std::make_unique<tint::reader::spirv::Parser>(data);
+    program = std::make_unique<tint::Program>(tint::reader::spirv::Parse(data));
   }
 #endif  // TINT_BUILD_SPV_READER
 
-  if (!reader) {
+  if (!program) {
     std::cerr << "Failed to create reader for input file: "
               << options.input_filename << std::endl;
     return 1;
   }
-  if (!reader->Parse()) {
-    diag_formatter.format(reader->diagnostics(), diag_printer.get());
-    return 1;
-  }
-  auto program = reader->program();
-  if (!program.IsValid()) {
-    std::cerr << "Invalid program generated..." << std::endl;
+  if (!program->IsValid()) {
+    diag_formatter.format(program->Diagnostics(), diag_printer.get());
     return 1;
   }
 
-  auto diags = tint::TypeDeterminer::Run(&program);
+  auto diags = tint::TypeDeterminer::Run(program.get());
   if (diags.contains_errors()) {
     std::cerr << "Type Determination: ";
-    diag_formatter.format(reader->diagnostics(), diag_printer.get());
+    diag_formatter.format(diags, diag_printer.get());
     return 1;
   }
 
   if (options.dump_ast) {
-    auto ast_str = program.to_str();
+    auto ast_str = program->to_str();
     if (options.demangle) {
-      ast_str = tint::Demangler().Demangle(program.Symbols(), ast_str);
+      ast_str = tint::Demangler().Demangle(program->Symbols(), ast_str);
     }
     std::cout << std::endl << ast_str << std::endl;
   }
@@ -521,7 +517,7 @@ int main(int argc, const char** argv) {
   }
 
   tint::Validator v;
-  if (!v.Validate(&program)) {
+  if (!v.Validate(program.get())) {
     diag_formatter.format(v.diagnostics(), diag_printer.get());
     return 1;
   }
@@ -547,37 +543,37 @@ int main(int argc, const char** argv) {
     }
   }
 
-  auto out = transform_manager.Run(&program);
+  auto out = transform_manager.Run(program.get());
   if (out.diagnostics.contains_errors()) {
     diag_formatter.format(out.diagnostics, diag_printer.get());
     return 1;
   }
 
-  program = std::move(out.program);
+  *program = std::move(out.program);
 
   std::unique_ptr<tint::writer::Writer> writer;
 
 #if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
-    writer = std::make_unique<tint::writer::spirv::Generator>(&program);
+    writer = std::make_unique<tint::writer::spirv::Generator>(program.get());
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
   if (options.format == Format::kWgsl) {
-    writer = std::make_unique<tint::writer::wgsl::Generator>(&program);
+    writer = std::make_unique<tint::writer::wgsl::Generator>(program.get());
   }
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
   if (options.format == Format::kMsl) {
-    writer = std::make_unique<tint::writer::msl::Generator>(&program);
+    writer = std::make_unique<tint::writer::msl::Generator>(program.get());
   }
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
   if (options.format == Format::kHlsl) {
-    writer = std::make_unique<tint::writer::hlsl::Generator>(&program);
+    writer = std::make_unique<tint::writer::hlsl::Generator>(program.get());
   }
 #endif  // TINT_BUILD_HLSL_WRITER
 
@@ -642,7 +638,7 @@ int main(int argc, const char** argv) {
     auto* w = static_cast<tint::writer::Text*>(writer.get());
     auto output = w->result();
     if (options.demangle) {
-      output = tint::Demangler().Demangle(program.Symbols(), output);
+      output = tint::Demangler().Demangle(program->Symbols(), output);
     }
     if (!WriteFile(options.output_file, "w", output)) {
       return 1;

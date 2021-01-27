@@ -35,6 +35,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
+#include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
 #include "src/symbol_table.h"
 #include "src/type/alias_type.h"
@@ -118,7 +119,14 @@ class ProgramBuilder {
     return symbols_;
   }
 
-  /// @returns true if the program not missing information
+  /// @returns a reference to the program's diagnostics
+  diag::List& Diagnostics() {
+    AssertNotMoved();
+    return diagnostics_;
+  }
+
+  /// @returns true if the program has no error diagnostics and is not missing
+  /// information
   bool IsValid() const;
 
   /// creates a new ast::Node owned by the Module. When the Module is
@@ -837,6 +845,7 @@ class ProgramBuilder {
   ASTNodes nodes_;
   ast::Module* ast_;
   SymbolTable symbols_;
+  diag::List diagnostics_;
 
   /// The source to use when creating AST nodes without providing a Source as
   /// the first argument.

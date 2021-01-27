@@ -75,7 +75,6 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   var l4 : S;
   var l5 : u32 = l4.m1[5];
   var l6 : ptr<private, u32>;
-  l6 = null;
   loop {
     l0 = (p1 + 2);
     if (((l0 % 4) == 0)) {
@@ -115,6 +114,8 @@ fn main() -> void {
   reader::wgsl::Parser parser(&file);
   ASSERT_TRUE(parser.Parse()) << parser.error();
   auto src = parser.program();
+
+  ASSERT_TRUE(src.IsValid()) << diag::Formatter().format(src.Diagnostics());
 
   // Clone the src program to dst
   Program dst(src.Clone());

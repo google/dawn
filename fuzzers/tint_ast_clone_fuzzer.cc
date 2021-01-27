@@ -54,6 +54,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return 0;
   }
   auto src = parser.program();
+  if (!src.IsValid()) {
+    return 0;
+  }
 
   // Clone the src program to dst
   tint::Program dst(src.Clone());

@@ -28,6 +28,7 @@ namespace spirv {
 class ParserImpl;
 
 /// Parser for SPIR-V source data
+/// [DEPRECATED] - Use Parse()
 class Parser : public Reader {
  public:
   /// Creates a new parser
@@ -46,8 +47,15 @@ class Parser : public Reader {
 
  private:
   std::unique_ptr<ParserImpl> impl_;
-  Program program_;
 };
+
+/// Parses the SPIR-V source data, returning the parsed program.
+/// If the source data fails to parse then the returned
+/// `program.Diagnostics.contains_errors()` will be true, and the
+/// `program.Diagnostics()` will describe the error.
+/// @param input the source data
+/// @returns the parsed program
+Program Parse(const std::vector<uint32_t>& input);
 
 }  // namespace spirv
 }  // namespace reader

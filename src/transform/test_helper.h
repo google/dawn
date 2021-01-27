@@ -52,6 +52,10 @@ class TransformTest : public testing::Test {
     style.print_newline_at_end = false;
 
     auto program = parser.program();
+    if (!program.IsValid()) {
+      return diag::Formatter(style).format(program.Diagnostics());
+    }
+
     {
       auto diagnostics = TypeDeterminer::Run(&program);
       if (diagnostics.contains_errors()) {

@@ -49,7 +49,7 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
 }
 
 bool ProgramBuilder::IsValid() const {
-  return ast_->IsValid();
+  return !diagnostics_.contains_errors() && ast_->IsValid();
 }
 
 void ProgramBuilder::MarkAsMoved() {

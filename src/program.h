@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/ast/function.h"
+#include "src/diagnostic/diagnostic.h"
 #include "src/symbol_table.h"
 #include "src/type/type_manager.h"
 
@@ -81,13 +82,20 @@ class Program {
     return symbols_;
   }
 
+  /// @returns a reference to the program's diagnostics
+  const diag::List& Diagnostics() const {
+    AssertNotMoved();
+    return diagnostics_;
+  }
+
   /// @return a deep copy of this program
   Program Clone() const;
 
   /// @return a deep copy of this Program, as a ProgramBuilder
   ProgramBuilder CloneAsBuilder() const;
 
-  /// @returns true if the program not missing information
+  /// @returns true if the program has no error diagnostics and is not missing
+  /// information
   bool IsValid() const;
 
   /// @returns a string describing this program.
@@ -103,6 +111,8 @@ class Program {
   ASTNodes nodes_;
   ast::Module* ast_;
   SymbolTable symbols_;
+  diag::List diagnostics_;
+  bool is_valid_ = true;
   bool moved_ = false;
 };
 

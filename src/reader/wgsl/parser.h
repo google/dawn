@@ -28,6 +28,7 @@ namespace wgsl {
 class ParserImpl;
 
 /// Parser for WGSL source data
+/// [DEPRECATED] - Use Parse()
 class Parser : public Reader {
  public:
   /// Creates a new parser from the given file.
@@ -46,6 +47,14 @@ class Parser : public Reader {
  private:
   std::unique_ptr<ParserImpl> impl_;
 };
+
+/// Parses the WGSL source, returning the parsed program.
+/// If the source fails to parse then the returned
+/// `program.Diagnostics.contains_errors()` will be true, and the
+/// `program.Diagnostics()` will describe the error.
+/// @param file the source file
+/// @returns the parsed program
+Program Parse(Source::File const* file);
 
 }  // namespace wgsl
 }  // namespace reader
