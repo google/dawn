@@ -151,6 +151,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
 // These must result in different register offsets in the native APIs.
 TEST_P(BindGroupTests, ReusedUBO) {
     // TODO(crbug.com/dawn/571): Fix failures using Tint.
+    // TODO(crbug.com/tint/463): Fix emission of MSL matrices in Tint.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
                       (IsVulkan() || IsOpenGL() || IsOpenGLES()));
 
