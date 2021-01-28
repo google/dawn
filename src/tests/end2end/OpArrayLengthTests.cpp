@@ -23,9 +23,6 @@ class OpArrayLengthTest : public DawnTest {
     void SetUp() {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/tint/252): Implement arrayLength.
-        DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
         // Create buffers of various size to check the length() implementation
         wgpu::BufferDescriptor bufferDesc;
         bufferDesc.size = 4;
@@ -215,6 +212,9 @@ TEST_P(OpArrayLengthTest, Vertex) {
     // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES());
+
+    // TODO(crbug.com/dawn/657): Returned data is slightly incorrect in this case.
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") && IsIntel() && IsOpenGL());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
