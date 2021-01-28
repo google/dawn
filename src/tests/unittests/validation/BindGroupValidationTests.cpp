@@ -72,6 +72,9 @@ class BindGroupValidationTest : public ValidationTest {
 
 // Test the validation of BindGroupDescriptor::nextInChain
 TEST_F(BindGroupValidationTest, NextInChainNullptr) {
+    // TODO(crbug.com/dawn/654): Crashes with the wire. Diagnose and fix this.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
 
     wgpu::BindGroupDescriptor descriptor;
