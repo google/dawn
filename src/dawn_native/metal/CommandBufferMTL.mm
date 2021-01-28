@@ -84,27 +84,33 @@ namespace dawn_native { namespace metal {
                 descriptor.colorAttachments[i].slice = attachmentInfo.view->GetBaseArrayLayer();
 
                 bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;
+                if (hasResolveTarget) {
+                    descriptor.colorAttachments[i].resolveTexture =
+                        ToBackend(attachmentInfo.resolveTarget->GetTexture())->GetMTLTexture();
+                    descriptor.colorAttachments[i].resolveLevel =
+                        attachmentInfo.resolveTarget->GetBaseMipLevel();
+                    descriptor.colorAttachments[i].resolveSlice =
+                        attachmentInfo.resolveTarget->GetBaseArrayLayer();
 
-                switch (attachmentInfo.storeOp) {
-                    case wgpu::StoreOp::Store:
-                        if (hasResolveTarget) {
-                            descriptor.colorAttachments[i].resolveTexture =
-                                ToBackend(attachmentInfo.resolveTarget->GetTexture())
-                                    ->GetMTLTexture();
-                            descriptor.colorAttachments[i].resolveLevel =
-                                attachmentInfo.resolveTarget->GetBaseMipLevel();
-                            descriptor.colorAttachments[i].resolveSlice =
-                                attachmentInfo.resolveTarget->GetBaseArrayLayer();
+                    switch (attachmentInfo.storeOp) {
+                        case wgpu::StoreOp::Store:
                             descriptor.colorAttachments[i].storeAction =
                                 kMTLStoreActionStoreAndMultisampleResolve;
-                        } else {
+                            break;
+                        case wgpu::StoreOp::Clear:
+                            descriptor.colorAttachments[i].storeAction =
+                                MTLStoreActionMultisampleResolve;
+                            break;
+                    }
+                } else {
+                    switch (attachmentInfo.storeOp) {
+                        case wgpu::StoreOp::Store:
                             descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
-                        }
-                        break;
-
-                    case wgpu::StoreOp::Clear:
-                        descriptor.colorAttachments[i].storeAction = MTLStoreActionDontCare;
-                        break;
+                            break;
+                        case wgpu::StoreOp::Clear:
+                            descriptor.colorAttachments[i].storeAction = MTLStoreActionDontCare;
+                            break;
+                    }
                 }
             }
 

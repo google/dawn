@@ -265,25 +265,31 @@ class MultisampledRenderingTest : public DawnTest {
 // Test using one multisampled color attachment with resolve target can render correctly.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
     constexpr bool kTestDepth = false;
-    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
 
     constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
 
-    // Draw a green triangle.
-    {
-        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
-            {mMultisampledColorView}, {mResolveView}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
-            kTestDepth);
-        std::array<float, 4> kUniformData = {kGreen.r, kGreen.g, kGreen.b, kGreen.a};
-        constexpr uint32_t kSize = sizeof(kUniformData);
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
+    // storeOp should not affect the result in the resolve target.
+    for (wgpu::StoreOp storeOp : {wgpu::StoreOp::Store, wgpu::StoreOp::Clear}) {
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+        // Draw a green triangle.
+        {
+            utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+                {mMultisampledColorView}, {mResolveView}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
+                kTestDepth);
+            renderPass.cColorAttachments[0].storeOp = storeOp;
+            std::array<float, 4> kUniformData = {kGreen.r, kGreen.g, kGreen.b, kGreen.a};
+            constexpr uint32_t kSize = sizeof(kUniformData);
+            EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(),
+                                    kSize);
+        }
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        VerifyResolveTarget(kGreen, mResolveTexture);
     }
-
-    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    VerifyResolveTarget(kGreen, mResolveTexture);
 }
 
 // Test that a single-layer multisampled texture view can be created and resolved from.
