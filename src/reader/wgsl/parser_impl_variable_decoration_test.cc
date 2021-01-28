@@ -236,6 +236,22 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
             "1:9: expected signed integer literal for binding decoration");
 }
 
+// DEPRECATED
+TEST_F(ParserImplTest, VariableDecoration_set) {
+  auto p = parser("set(4)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::VariableDecoration>();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_TRUE(var_deco->Is<ast::GroupDecoration>());
+
+  auto* group = var_deco->As<ast::GroupDecoration>();
+  EXPECT_EQ(group->value(), 4u);
+}
+
 TEST_F(ParserImplTest, VariableDecoration_group) {
   auto p = parser("group(4)");
   auto deco = p->decoration();

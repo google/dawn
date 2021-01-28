@@ -137,6 +137,7 @@ const char kBuiltinDecoration[] = "builtin";
 const char kGroupDecoration[] = "group";
 const char kLocationDecoration[] = "location";
 const char kOffsetDecoration[] = "offset";
+const char kSetDecoration[] = "set";
 const char kStageDecoration[] = "stage";
 const char kStrideDecoration[] = "stride";
 const char kWorkgroupSizeDecoration[] = "workgroup_size";
@@ -149,8 +150,9 @@ bool is_decoration(Token t) {
   return s == kAccessDecoration || s == kBindingDecoration ||
          s == kBlockDecoration || s == kBuiltinDecoration ||
          s == kLocationDecoration || s == kOffsetDecoration ||
-         s == kGroupDecoration || s == kStageDecoration ||
-         s == kStrideDecoration || s == kWorkgroupSizeDecoration;
+         s == kSetDecoration || s == kGroupDecoration ||
+         s == kStageDecoration || s == kStrideDecoration ||
+         s == kWorkgroupSizeDecoration;
 }
 
 /// Enter-exit counters for block token types.
@@ -2851,7 +2853,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kGroupDecoration) {
+  if (s == kSetDecoration || s == kGroupDecoration) {
     const char* use = "group decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
