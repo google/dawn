@@ -481,11 +481,9 @@ DAWN_INSTANTIATE_TEST(TriangleStripPrimitiveRestartTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
-                      OpenGLESBackend(),
                       VulkanBackend());
 DAWN_INSTANTIATE_TEST(LineStripPrimitiveRestartTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
-                      OpenGLESBackend(),
                       VulkanBackend());
