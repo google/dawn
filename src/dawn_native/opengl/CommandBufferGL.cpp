@@ -771,7 +771,6 @@ namespace dawn_native { namespace opengl {
                     const TexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(src.aspect).block;
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage * blockInfo.height);
                     gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / blockInfo.byteSize);
 
                     GLenum glAttachment;
@@ -831,7 +830,6 @@ namespace dawn_native { namespace opengl {
                     }
 
                     gl.PixelStorei(GL_PACK_ROW_LENGTH, 0);
-                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, 0);
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
                     gl.DeleteFramebuffers(1, &readFBO);
