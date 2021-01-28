@@ -44,6 +44,7 @@ std::string Preamble() {
   %uint_3 = OpConstant %uint 3
   %uint_4 = OpConstant %uint 4
   %uint_5 = OpConstant %uint 5
+  %int_1 = OpConstant %int 1
   %int_30 = OpConstant %int 30
   %int_40 = OpConstant %int 40
   %float_50 = OpConstant %float 50
@@ -525,7 +526,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("CompositeExtract %2 index value 40 is out of "
-                             "bounds for structure %25 having 3 members"));
+                             "bounds for structure %26 having 3 members"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
@@ -802,6 +803,68 @@ TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {
   EXPECT_FALSE(fe.EmitBody()) << p->error();
   EXPECT_THAT(p->error(),
               Eq("invalid vectorshuffle ID %10: index too large: 9"));
+}
+
+using SpvParserTest_VectorExtractDynamic = SpvParserTest;
+
+TEST_F(SpvParserTest_VectorExtractDynamic, SignedIndex) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2uint %v2uint_3_4
+     %2 = OpCopyObject %int %int_1
+     %10 = OpVectorExtractDynamic %uint %1 %2
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto got = ToString(p->builder().Symbols(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(R"(VariableConst{
+    x_10
+    none
+    __u32
+    {
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{x_2}
+      }
+    }
+  }
+})")) << got;
+}
+
+TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2uint %v2uint_3_4
+     %2 = OpCopyObject %uint %uint_3
+     %10 = OpVectorExtractDynamic %uint %1 %2
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto got = ToString(p->builder().Symbols(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(R"(VariableConst{
+    x_10
+    none
+    __u32
+    {
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{x_2}
+      }
+    }
+  }
+})")) << got;
 }
 
 }  // namespace

@@ -3129,6 +3129,12 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     return MakeVectorShuffle(inst);
   }
 
+  if (opcode == SpvOpVectorExtractDynamic) {
+    return {ast_type, create<ast::ArrayAccessorExpression>(
+                          Source{}, MakeOperand(inst, 0).expr,
+                          MakeOperand(inst, 1).expr)};
+  }
+
   if (opcode == SpvOpConvertSToF || opcode == SpvOpConvertUToF ||
       opcode == SpvOpConvertFToS || opcode == SpvOpConvertFToU) {
     return MakeNumericConversion(inst);
@@ -3163,7 +3169,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpGenericCastToPtrExplicit // Not in Vulkan
   //
   //    OpArrayLength
-  //    OpVectorExtractDynamic
   //    OpVectorInsertDynamic
   //    OpCompositeInsert
 
