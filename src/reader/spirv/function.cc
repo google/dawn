@@ -3653,6 +3653,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
               // Keep the default decision based on the result type.
               break;
             case SpvOpAccessChain:
+            case SpvOpInBoundsAccessChain:
             case SpvOpCopyObject:
               // Inherit from the first operand. We need this so we can pick up
               // a remapped storage buffer.

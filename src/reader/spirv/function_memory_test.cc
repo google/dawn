@@ -848,8 +848,8 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(R"(Assignment{
+  const auto got = ToString(p->builder().Symbols(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(R"(Assignment{
   MemberAccessor[not set]{
     Identifier[not set]{myvar}
     Identifier[not set]{field0}
@@ -865,7 +865,50 @@ Assignment{
     ScalarConstructor[not set]{1}
   }
   ScalarConstructor[not set]{0}
-})")) << ToString(p->builder().Symbols(), fe.ast_body())
+})")) << got
+      << p->error();
+}
+
+TEST_F(SpvParserTest,
+       RemapStorageBuffer_ThroughAccessChain_NonCascaded_InBoundsAccessChain) {
+  // Like the previous test, but using OpInBoundsAccessChain.
+  const auto assembly = OldStorageBufferPreamble() + R"(
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  ; the scalar element
+  %1 = OpInBoundsAccessChain %ptr_uint %myvar %uint_0
+  OpStore %1 %uint_0
+
+  ; element in the runtime array
+  %2 = OpInBoundsAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto got = ToString(p->builder().Symbols(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(R"(Assignment{
+  MemberAccessor[not set]{
+    Identifier[not set]{myvar}
+    Identifier[not set]{field0}
+  }
+  ScalarConstructor[not set]{0}
+}
+Assignment{
+  ArrayAccessor[not set]{
+    MemberAccessor[not set]{
+      Identifier[not set]{myvar}
+      Identifier[not set]{field1}
+    }
+    ScalarConstructor[not set]{1}
+  }
+  ScalarConstructor[not set]{0}
+})")) << got
       << p->error();
 }
 
