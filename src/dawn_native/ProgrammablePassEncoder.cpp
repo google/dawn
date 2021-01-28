@@ -211,6 +211,8 @@ namespace dawn_native {
                 }
             }
 
+            mCommandBufferState.SetBindGroup(groupIndex, group);
+
             SetBindGroupCmd* cmd = allocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
             cmd->index = groupIndex;
             cmd->group = group;

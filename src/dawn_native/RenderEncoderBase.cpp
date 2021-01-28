@@ -61,6 +61,8 @@ namespace dawn_native {
                                  uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
+                DAWN_TRY(mCommandBufferState.ValidateCanDraw());
+
                 if (mDisableBaseInstance && firstInstance != 0) {
                     return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
                 }
@@ -83,6 +85,8 @@ namespace dawn_native {
                                         uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
+                DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
+
                 if (mDisableBaseInstance && firstInstance != 0) {
                     return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
                 }
@@ -107,6 +111,7 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                DAWN_TRY(mCommandBufferState.ValidateCanDraw());
 
                 if (indirectOffset % 4 != 0) {
                     return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
@@ -134,6 +139,7 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
 
                 // Indexed indirect draws need a compute-shader based validation check that the
                 // range of indices is contained inside the index buffer on Metal. Disallow them as
@@ -177,6 +183,8 @@ namespace dawn_native {
                         "attachment state");
                 }
             }
+
+            mCommandBufferState.SetRenderPipeline(pipeline);
 
             SetRenderPipelineCmd* cmd =
                 allocator->Allocate<SetRenderPipelineCmd>(Command::SetRenderPipeline);
@@ -227,6 +235,8 @@ namespace dawn_native {
                 }
             }
 
+            mCommandBufferState.SetIndexBuffer(format);
+
             SetIndexBufferCmd* cmd =
                 allocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
             cmd->buffer = buffer;
@@ -271,6 +281,8 @@ namespace dawn_native {
                     size = buffer->GetSize() - offset;
                 }
             }
+
+            mCommandBufferState.SetVertexBuffer(VertexBufferSlot(uint8_t(slot)));
 
             SetVertexBufferCmd* cmd =
                 allocator->Allocate<SetVertexBufferCmd>(Command::SetVertexBuffer);

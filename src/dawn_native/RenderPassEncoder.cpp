@@ -208,6 +208,8 @@ namespace dawn_native {
                 }
             }
 
+            mCommandBufferState = CommandBufferStateTracker{};
+
             ExecuteBundlesCmd* cmd =
                 allocator->Allocate<ExecuteBundlesCmd>(Command::ExecuteBundles);
             cmd->count = count;

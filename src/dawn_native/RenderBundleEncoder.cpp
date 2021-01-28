@@ -131,7 +131,6 @@ namespace dawn_native {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(ValidatePassResourceUsage(usages));
-        DAWN_TRY(ValidateRenderBundle(commands));
         return {};
     }
 

@@ -61,6 +61,10 @@ namespace dawn_native {
 
     void ComputePassEncoder::Dispatch(uint32_t x, uint32_t y, uint32_t z) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            if (IsValidationEnabled()) {
+                DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
+            }
+
             DispatchCmd* dispatch = allocator->Allocate<DispatchCmd>(Command::Dispatch);
             dispatch->x = x;
             dispatch->y = y;
@@ -75,6 +79,7 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
 
                 // Indexed dispatches need a compute-shader based validation to check that the
                 // dispatch sizes aren't too big. Disallow them as unsafe until the validation is
@@ -112,6 +117,8 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
             }
+
+            mCommandBufferState.SetComputePipeline(pipeline);
 
             SetComputePipelineCmd* cmd =
                 allocator->Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);

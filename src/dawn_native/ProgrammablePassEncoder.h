@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
 #define DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
 
+#include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/ObjectBase.h"
@@ -57,6 +58,7 @@ namespace dawn_native {
         PassResourceUsageTracker mUsageTracker;
 
         uint64_t mDebugGroupStackSize = 0;
+        CommandBufferStateTracker mCommandBufferState;
 
       private:
         const bool mValidationEnabled;
