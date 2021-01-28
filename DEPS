@@ -6,9 +6,9 @@ vars = {
   'chromium_git':  'https://chromium.googlesource.com',
   'github': '/external/github.com',
 
-  'build_revision': 'b1d8cdddd35b2ccf16a4945748b1661b19201785',
-  'buildtools_revision': 'ff93f3ea1a7f033d3caf8f60ec1937cc71351419',
-  'clang_revision': 'fcef86e30a0ab061b982b5c9d91bb060df8f5269',
+  'build_revision': 'c6c4a4c3ae890f2c020a087c90fb8c0b8be2816a',
+  'buildtools_revision': 'e3db55b4639f2a331af6f3708ca1fbd22322aac3',
+  'clang_revision': 'eb5ab41f3801e2085208204fd71a490573d72dfd',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
   'googletest_revision': '389cb68b87193358358ae87cc56d257fd0d80189',
   'gpuweb_cts_revision': '1ba84a62ae24c085faa8b74469907cf065a5d555',
