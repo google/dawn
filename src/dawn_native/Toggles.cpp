@@ -163,12 +163,20 @@ namespace dawn_native {
 
     void TogglesSet::Set(Toggle toggle, bool enabled) {
         ASSERT(toggle != Toggle::InvalidEnum);
+
+        if (toggle == Toggle::UseTintInspector)
+            toggle = Toggle::UseTintGenerator;
+
         const size_t toggleIndex = static_cast<size_t>(toggle);
         toggleBitset.set(toggleIndex, enabled);
     }
 
     bool TogglesSet::Has(Toggle toggle) const {
         ASSERT(toggle != Toggle::InvalidEnum);
+
+        if (toggle == Toggle::UseTintInspector)
+            toggle = Toggle::UseTintGenerator;
+
         const size_t toggleIndex = static_cast<size_t>(toggle);
         return toggleBitset.test(toggleIndex);
     }

@@ -1160,7 +1160,7 @@ namespace dawn_native {
 #endif
         }
 
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintInspector)) {
+        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
 #ifdef DAWN_ENABLE_WGSL
             tint::Program localProgram;
 
