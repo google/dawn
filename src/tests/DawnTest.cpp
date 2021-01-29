@@ -365,6 +365,8 @@ std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDis
     adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
     instance->DiscoverAdapters(&adapterOptions);
 
+    SetEnvironmentVar("ANGLE_DEFAULT_PLATFORM", "swiftshader");
+
     glfwDefaultWindowHints();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
