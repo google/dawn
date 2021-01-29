@@ -245,7 +245,7 @@ TEST_F(FunctionTest, ToStr) {
                  FunctionDecorationList{});
 
   std::ostringstream out;
-  f->to_str(out, 2);
+  f->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Function func -> __void
   ()
   {
@@ -262,7 +262,7 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
                  FunctionDecorationList{create<WorkgroupDecoration>(2, 4, 6)});
 
   std::ostringstream out;
-  f->to_str(out, 2);
+  f->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Function func -> __void
   WorkgroupDecoration{2 4 6}
   ()
@@ -283,7 +283,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
                  FunctionDecorationList{});
 
   std::ostringstream out;
-  f->to_str(out, 2);
+  f->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Function func -> __void
   (
     Variable{

@@ -27,7 +27,9 @@ AccessDecoration::AccessDecoration(const Source& source, AccessControl val)
 
 AccessDecoration::~AccessDecoration() = default;
 
-void AccessDecoration::to_str(std::ostream& out, size_t indent) const {
+void AccessDecoration::to_str(const semantic::Info&,
+                              std::ostream& out,
+                              size_t indent) const {
   make_indent(out, indent);
   out << "AccessDecoration{" << value_ << "}" << std::endl;
 }

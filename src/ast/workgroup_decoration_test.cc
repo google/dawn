@@ -66,7 +66,7 @@ TEST_F(WorkgroupDecorationTest, Is) {
 TEST_F(WorkgroupDecorationTest, ToStr) {
   auto* d = create<WorkgroupDecoration>(2, 4, 6);
   std::ostringstream out;
-  d->to_str(out, 0);
+  d->to_str(Sem(), out, 0);
   EXPECT_EQ(out.str(), R"(WorkgroupDecoration{2 4 6}
 )");
 }

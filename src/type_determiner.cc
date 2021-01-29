@@ -288,8 +288,8 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(v->variable()->constructor());
   }
 
-  set_error(stmt->source(),
-            "unknown statement type for type determination: " + stmt->str());
+  set_error(stmt->source(), "unknown statement type for type determination: " +
+                                stmt->str(builder_->Sem()));
   return false;
 }
 

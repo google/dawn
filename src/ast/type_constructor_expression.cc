@@ -53,14 +53,16 @@ bool TypeConstructorExpression::IsValid() const {
   return true;
 }
 
-void TypeConstructorExpression::to_str(std::ostream& out, size_t indent) const {
+void TypeConstructorExpression::to_str(const semantic::Info& sem,
+                                       std::ostream& out,
+                                       size_t indent) const {
   make_indent(out, indent);
-  out << "TypeConstructor[" << result_type_str() << "]{" << std::endl;
+  out << "TypeConstructor[" << result_type_str(sem) << "]{" << std::endl;
   make_indent(out, indent + 2);
   out << type_->type_name() << std::endl;
 
   for (auto* val : values_) {
-    val->to_str(out, indent + 2);
+    val->to_str(sem, out, indent + 2);
   }
   make_indent(out, indent);
   out << "}" << std::endl;

@@ -93,7 +93,7 @@ TEST_F(StructTest, ToStr) {
   auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())}, decos);
 
   std::ostringstream out;
-  s->to_str(out, 2);
+  s->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(Struct{
     [[block]]
     StructMember{a: __i32}

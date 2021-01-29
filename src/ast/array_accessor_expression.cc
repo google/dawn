@@ -47,11 +47,13 @@ bool ArrayAccessorExpression::IsValid() const {
   return true;
 }
 
-void ArrayAccessorExpression::to_str(std::ostream& out, size_t indent) const {
+void ArrayAccessorExpression::to_str(const semantic::Info& sem,
+                                     std::ostream& out,
+                                     size_t indent) const {
   make_indent(out, indent);
-  out << "ArrayAccessor[" << result_type_str() << "]{" << std::endl;
-  array_->to_str(out, indent + 2);
-  idx_expr_->to_str(out, indent + 2);
+  out << "ArrayAccessor[" << result_type_str(sem) << "]{" << std::endl;
+  array_->to_str(sem, out, indent + 2);
+  idx_expr_->to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

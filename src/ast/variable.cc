@@ -110,7 +110,9 @@ bool Variable::IsValid() const {
   return true;
 }
 
-void Variable::info_to_str(std::ostream& out, size_t indent) const {
+void Variable::info_to_str(const semantic::Info&,
+                           std::ostream& out,
+                           size_t indent) const {
   make_indent(out, indent);
   out << symbol_.to_str() << std::endl;
   make_indent(out, indent);
@@ -119,20 +121,24 @@ void Variable::info_to_str(std::ostream& out, size_t indent) const {
   out << type_->type_name() << std::endl;
 }
 
-void Variable::constructor_to_str(std::ostream& out, size_t indent) const {
+void Variable::constructor_to_str(const semantic::Info& sem,
+                                  std::ostream& out,
+                                  size_t indent) const {
   if (constructor_ == nullptr)
     return;
 
   make_indent(out, indent);
   out << "{" << std::endl;
 
-  constructor_->to_str(out, indent + 2);
+  constructor_->to_str(sem, out, indent + 2);
 
   make_indent(out, indent);
   out << "}" << std::endl;
 }
 
-void Variable::to_str(std::ostream& out, size_t indent) const {
+void Variable::to_str(const semantic::Info& sem,
+                      std::ostream& out,
+                      size_t indent) const {
   make_indent(out, indent);
   out << "Variable";
   if (is_const()) {
@@ -144,14 +150,14 @@ void Variable::to_str(std::ostream& out, size_t indent) const {
     make_indent(out, indent + 2);
     out << "Decorations{" << std::endl;
     for (auto* deco : decorations_) {
-      deco->to_str(out, indent + 4);
+      deco->to_str(sem, out, indent + 4);
     }
     make_indent(out, indent + 2);
     out << "}" << std::endl;
   }
 
-  info_to_str(out, indent + 2);
-  constructor_to_str(out, indent + 2);
+  info_to_str(sem, out, indent + 2);
+  constructor_to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

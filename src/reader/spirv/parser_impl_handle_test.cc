@@ -3788,7 +3788,7 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
       for (auto* expr : result) {
         ASSERT_NE(expr, nullptr);
         result_strings.push_back(
-            Demangler().Demangle(program.Symbols(), expr->str()));
+            Demangler().Demangle(program.Symbols(), expr->str(program.Sem())));
       }
       EXPECT_THAT(result_strings,
                   ::testing::ContainerEq(GetParam().expected_expressions));

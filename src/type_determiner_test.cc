@@ -76,7 +76,9 @@ class FakeStmt : public ast::Statement {
   explicit FakeStmt(Source source) : ast::Statement(source) {}
   FakeStmt* Clone(CloneContext*) const override { return nullptr; }
   bool IsValid() const override { return true; }
-  void to_str(std::ostream& out, size_t) const override { out << "Fake"; }
+  void to_str(const semantic::Info&, std::ostream& out, size_t) const override {
+    out << "Fake";
+  }
 };
 
 class FakeExpr : public ast::Expression {
@@ -84,7 +86,7 @@ class FakeExpr : public ast::Expression {
   explicit FakeExpr(Source source) : ast::Expression(source) {}
   FakeExpr* Clone(CloneContext*) const override { return nullptr; }
   bool IsValid() const override { return true; }
-  void to_str(std::ostream&, size_t) const override {}
+  void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
 
 class TypeDeterminerHelper : public ProgramBuilder {

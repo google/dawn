@@ -30,7 +30,7 @@ FloatLiteral::FloatLiteral(const Source& source, type::Type* type, float value)
 
 FloatLiteral::~FloatLiteral() = default;
 
-std::string FloatLiteral::to_str() const {
+std::string FloatLiteral::to_str(const semantic::Info&) const {
   return std::to_string(value_);
 }
 

@@ -39,10 +39,12 @@ bool VariableDeclStatement::IsValid() const {
   return variable_ != nullptr && variable_->IsValid();
 }
 
-void VariableDeclStatement::to_str(std::ostream& out, size_t indent) const {
+void VariableDeclStatement::to_str(const semantic::Info& sem,
+                                   std::ostream& out,
+                                   size_t indent) const {
   make_indent(out, indent);
   out << "VariableDeclStatement{" << std::endl;
-  variable_->to_str(out, indent + 2);
+  variable_->to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

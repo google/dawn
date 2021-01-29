@@ -139,7 +139,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -151,7 +151,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
@@ -166,7 +166,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -180,7 +180,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
@@ -195,7 +195,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -209,7 +209,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
@@ -224,7 +224,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -240,7 +240,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
@@ -255,7 +255,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -271,7 +271,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
@@ -286,7 +286,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -304,7 +304,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
@@ -319,7 +319,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -337,7 +337,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
@@ -352,7 +352,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -372,7 +372,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
@@ -387,7 +387,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -399,7 +399,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Vector) {
@@ -414,7 +414,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -430,7 +430,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 struct BinaryData {
@@ -478,8 +478,7 @@ TEST_P(SpvBinaryArithTest, EmitExpression) {
      << GetParam().ast_type << "\n    {\n      Binary[not set]{"
      << "\n        " << GetParam().ast_lhs << "\n        " << GetParam().ast_op
      << "\n        " << GetParam().ast_rhs;
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(ss.str()))
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(ss.str()))
       << assembly;
 }
 
@@ -702,7 +701,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
       << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -737,7 +736,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
       << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -760,7 +759,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -848,7 +847,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
       << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -883,7 +882,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
       << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -906,7 +905,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -936,8 +935,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(R"(VariableConst{
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __vec_2__f32
@@ -949,7 +947,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
@@ -966,8 +964,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(R"(VariableConst{
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
@@ -979,7 +976,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
@@ -996,8 +993,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(R"(VariableConst{
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
@@ -1009,7 +1005,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
@@ -1026,8 +1022,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(R"(VariableConst{
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
@@ -1039,7 +1034,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
@@ -1056,8 +1051,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(R"(VariableConst{
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
     __mat_2_2__f32
@@ -1069,7 +1063,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvBinaryArithTestBasic, Dot) {
@@ -1086,8 +1080,7 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(R"(VariableConst{
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_3
     none
     __f32
@@ -1101,7 +1094,7 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
@@ -1120,7 +1113,7 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder().Symbols(), fe.ast_body());
+  auto got = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(got, HasSubstr(R"(VariableConst{
     x_3
     none

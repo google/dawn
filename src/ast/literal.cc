@@ -28,9 +28,11 @@ bool Literal::IsValid() const {
   return true;
 }
 
-void Literal::to_str(std::ostream& out, size_t indent) const {
+void Literal::to_str(const semantic::Info& sem,
+                     std::ostream& out,
+                     size_t indent) const {
   make_indent(out, indent);
-  out << to_str();
+  out << to_str(sem);
 }
 
 }  // namespace ast

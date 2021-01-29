@@ -72,13 +72,15 @@ bool StructMember::IsValid() const {
   return true;
 }
 
-void StructMember::to_str(std::ostream& out, size_t indent) const {
+void StructMember::to_str(const semantic::Info& sem,
+                          std::ostream& out,
+                          size_t indent) const {
   make_indent(out, indent);
   out << "StructMember{";
   if (decorations_.size() > 0) {
     out << "[[ ";
     for (auto* deco : decorations_)
-      out << deco->str() << " ";
+      out << deco->str(sem) << " ";
     out << "]] ";
   }
 

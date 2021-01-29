@@ -206,7 +206,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -218,7 +218,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
@@ -233,7 +233,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -249,7 +249,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 struct BinaryData {
@@ -296,8 +296,7 @@ TEST_P(SpvBinaryLogicalTest, EmitExpression) {
      << GetParam().ast_type << "\n    {\n      Binary[not set]{"
      << "\n        " << GetParam().ast_lhs << "\n        " << GetParam().ast_op
      << "\n        " << GetParam().ast_rhs;
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-              HasSubstr(ss.str()))
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(ss.str()))
       << assembly;
 }
 
@@ -703,7 +702,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -719,7 +718,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
@@ -734,7 +733,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -758,7 +757,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
@@ -773,7 +772,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -789,7 +788,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
@@ -804,7 +803,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -828,7 +827,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
@@ -843,7 +842,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -859,7 +858,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
@@ -874,7 +873,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -898,7 +897,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
@@ -913,7 +912,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -929,7 +928,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
@@ -944,7 +943,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -968,7 +967,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
@@ -983,7 +982,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -999,7 +998,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
@@ -1014,7 +1013,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -1038,7 +1037,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
@@ -1053,7 +1052,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -1069,7 +1068,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
@@ -1084,7 +1083,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -1108,7 +1107,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, Select_BoolCond_BoolParams) {
@@ -1123,7 +1122,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_BoolParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1140,7 +1139,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_BoolParams) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
@@ -1155,7 +1154,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1172,7 +1171,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, Select_BoolCond_FloatScalarParams) {
@@ -1187,7 +1186,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_FloatScalarParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1204,7 +1203,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_FloatScalarParams) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
@@ -1219,7 +1218,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1244,7 +1243,7 @@ TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
@@ -1259,7 +1258,7 @@ TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1288,7 +1287,7 @@ TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 using SpvLogicalTest = SpvParserTestBase<::testing::Test>;
@@ -1305,7 +1304,7 @@ TEST_F(SpvLogicalTest, Any) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1324,7 +1323,7 @@ TEST_F(SpvLogicalTest, Any) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvLogicalTest, All) {
@@ -1339,7 +1338,7 @@ TEST_F(SpvLogicalTest, All) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1358,7 +1357,7 @@ TEST_F(SpvLogicalTest, All) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvLogicalTest, IsNan_Scalar) {
@@ -1373,7 +1372,7 @@ TEST_F(SpvLogicalTest, IsNan_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1388,7 +1387,7 @@ TEST_F(SpvLogicalTest, IsNan_Scalar) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvLogicalTest, IsNan_Vector) {
@@ -1403,7 +1402,7 @@ TEST_F(SpvLogicalTest, IsNan_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1422,7 +1421,7 @@ TEST_F(SpvLogicalTest, IsNan_Vector) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvLogicalTest, IsInf_Scalar) {
@@ -1437,7 +1436,7 @@ TEST_F(SpvLogicalTest, IsInf_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1452,7 +1451,7 @@ TEST_F(SpvLogicalTest, IsInf_Scalar) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvLogicalTest, IsInf_Vector) {
@@ -1467,7 +1466,7 @@ TEST_F(SpvLogicalTest, IsInf_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -1486,7 +1485,7 @@ TEST_F(SpvLogicalTest, IsInf_Vector) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 // TODO(dneto): Kernel-guarded instructions.

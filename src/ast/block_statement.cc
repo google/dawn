@@ -44,12 +44,14 @@ bool BlockStatement::IsValid() const {
   return true;
 }
 
-void BlockStatement::to_str(std::ostream& out, size_t indent) const {
+void BlockStatement::to_str(const semantic::Info& sem,
+                            std::ostream& out,
+                            size_t indent) const {
   make_indent(out, indent);
   out << "Block{" << std::endl;
 
   for (auto* stmt : *this) {
-    stmt->to_str(out, indent + 2);
+    stmt->to_str(sem, out, indent + 2);
   }
 
   make_indent(out, indent);

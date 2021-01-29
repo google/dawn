@@ -27,7 +27,7 @@ SintLiteral::SintLiteral(const Source& source, type::Type* type, int32_t value)
 
 SintLiteral::~SintLiteral() = default;
 
-std::string SintLiteral::to_str() const {
+std::string SintLiteral::to_str(const semantic::Info&) const {
   return std::to_string(value_);
 }
 

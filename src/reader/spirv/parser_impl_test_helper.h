@@ -62,16 +62,29 @@ class SpvParserTestBase : public T {
 using SpvParserTest = SpvParserTestBase<::testing::Test>;
 
 /// Returns the string dump of a statement list.
-/// @param symbols the SymbolTable
+/// @param program the Program
 /// @param stmts the statement list
 /// @returns the string dump of a statement list.
-inline std::string ToString(const SymbolTable& symbols,
+inline std::string ToString(const Program& program,
                             const ast::StatementList& stmts) {
   std::ostringstream outs;
   for (const auto* stmt : stmts) {
-    stmt->to_str(outs, 0);
+    stmt->to_str(program.Sem(), outs, 0);
   }
-  return Demangler().Demangle(symbols, outs.str());
+  return Demangler().Demangle(program.Symbols(), outs.str());
+}
+
+/// Returns the string dump of a statement list.
+/// @param builder the ProgramBuilder
+/// @param stmts the statement list
+/// @returns the string dump of a statement list.
+inline std::string ToString(ProgramBuilder& builder,
+                            const ast::StatementList& stmts) {
+  std::ostringstream outs;
+  for (const auto* stmt : stmts) {
+    stmt->to_str(builder.Sem(), outs, 0);
+  }
+  return Demangler().Demangle(builder.Symbols(), outs.str());
 }
 
 }  // namespace spirv

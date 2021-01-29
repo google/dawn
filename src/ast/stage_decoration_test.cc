@@ -39,7 +39,7 @@ TEST_F(StageDecorationTest, Is) {
 TEST_F(StageDecorationTest, ToStr) {
   auto* d = create<StageDecoration>(PipelineStage::kFragment);
   std::ostringstream out;
-  d->to_str(out, 0);
+  d->to_str(Sem(), out, 0);
   EXPECT_EQ(out.str(), R"(StageDecoration{fragment}
 )");
 }

@@ -97,7 +97,7 @@ TEST_F(CallExpressionTest, ToStr_NoParams) {
   auto* func = Expr("func");
   auto* stmt = create<CallExpression>(func, ExpressionList{});
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
     Identifier[not set]{func}
     (
@@ -114,7 +114,7 @@ TEST_F(CallExpressionTest, ToStr_WithParams) {
 
   auto* stmt = create<CallExpression>(func, params);
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
     Identifier[not set]{func}
     (

@@ -106,7 +106,7 @@ TEST_F(BinaryExpressionTest, ToStr) {
 
   auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
   std::ostringstream out;
-  r->to_str(out, 2);
+  r->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Binary[not set]{
     Identifier[not set]{lhs}
     equal

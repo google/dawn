@@ -39,7 +39,7 @@ TEST_F(ConstantIdDecorationTest, Is) {
 TEST_F(ConstantIdDecorationTest, ToStr) {
   auto* d = create<ConstantIdDecoration>(1200);
   std::ostringstream out;
-  d->to_str(out, 0);
+  d->to_str(Sem(), out, 0);
   EXPECT_EQ(out.str(), R"(ConstantIdDecoration{1200}
 )");
 }

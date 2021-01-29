@@ -353,7 +353,9 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
  private:
   bool IsValid() const override;
   Node* Clone(CloneContext*) const override;
-  void to_str(std::ostream& out, size_t indent) const override;
+  void to_str(const semantic::Info& sem,
+              std::ostream& out,
+              size_t indent) const override;
 };
 
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.

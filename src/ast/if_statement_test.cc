@@ -168,7 +168,7 @@ TEST_F(IfStatementTest, ToStr) {
   auto* stmt = create<IfStatement>(cond, body, ElseStatementList{});
 
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  If{
     (
       Identifier[not set]{cond}
@@ -196,7 +196,7 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
       });
 
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  If{
     (
       Identifier[not set]{cond}

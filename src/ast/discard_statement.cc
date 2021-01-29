@@ -36,7 +36,9 @@ bool DiscardStatement::IsValid() const {
   return true;
 }
 
-void DiscardStatement::to_str(std::ostream& out, size_t indent) const {
+void DiscardStatement::to_str(const semantic::Info&,
+                              std::ostream& out,
+                              size_t indent) const {
   make_indent(out, indent);
   out << "Discard{}" << std::endl;
 }

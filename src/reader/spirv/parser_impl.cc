@@ -1504,7 +1504,8 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
   }
   auto* type = expr.type;
   if (!type) {
-    Fail() << "internal error: unmapped type for: " << expr.expr->str() << "\n";
+    Fail() << "internal error: unmapped type for: "
+           << expr.expr->str(builder_.Sem()) << "\n";
     return {};
   }
   if (requires_unsigned) {

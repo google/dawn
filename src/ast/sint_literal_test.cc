@@ -46,7 +46,7 @@ TEST_F(SintLiteralTest, Is) {
 TEST_F(SintLiteralTest, ToStr) {
   auto* i = create<SintLiteral>(ty.i32(), -42);
 
-  EXPECT_EQ(i->to_str(), "-42");
+  EXPECT_EQ(i->to_str(Sem()), "-42");
 }
 
 TEST_F(SintLiteralTest, Name_I32) {

@@ -38,7 +38,9 @@ WorkgroupDecoration::WorkgroupDecoration(const Source& source,
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
 
-void WorkgroupDecoration::to_str(std::ostream& out, size_t indent) const {
+void WorkgroupDecoration::to_str(const semantic::Info&,
+                                 std::ostream& out,
+                                 size_t indent) const {
   make_indent(out, indent);
   out << "WorkgroupDecoration{" << x_ << " " << y_ << " " << z_ << "}"
       << std::endl;

@@ -54,7 +54,7 @@ TEST_F(DiscardStatementTest, IsValid) {
 TEST_F(DiscardStatementTest, ToStr) {
   auto* stmt = create<DiscardStatement>();
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Discard{}
 )");
 }

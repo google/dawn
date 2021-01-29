@@ -27,7 +27,7 @@ NullLiteral::NullLiteral(const Source& source, type::Type* type)
 
 NullLiteral::~NullLiteral() = default;
 
-std::string NullLiteral::to_str() const {
+std::string NullLiteral::to_str(const semantic::Info&) const {
   return "null " + type()->type_name();
 }
 

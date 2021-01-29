@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/node.h"
-
-#include <sstream>
-
-TINT_INSTANTIATE_CLASS_ID(tint::ast::Node);
+#ifndef SRC_SEMANTIC_INFO_H_
+#define SRC_SEMANTIC_INFO_H_
 
 namespace tint {
-namespace ast {
 
-Node::Node(const Source& source) : source_(source) {}
+namespace semantic {
 
-Node::Node(Node&&) = default;
+/// Info will hold all the resolved semantic information for a Program.
+class Info {
+ public:
+  /// Constructor
+  Info();
 
-Node::~Node() = default;
+  /// Move constructor
+  Info(Info&&);
 
-void Node::make_indent(std::ostream& out, size_t indent) const {
-  for (size_t i = 0; i < indent; ++i)
-    out << " ";
-}
+  /// Destructor
+  ~Info();
 
-std::string Node::str(const semantic::Info& sem) const {
-  std::ostringstream out;
-  to_str(sem, out, 0);
-  return out.str();
-}
+  /// Move assignment operator
+  /// @param rhs the Program to move
+  /// @return this Program
+  Info& operator=(Info&& rhs);
+};
 
-}  // namespace ast
+}  // namespace semantic
 }  // namespace tint
+
+#endif  // SRC_SEMANTIC_INFO_H_

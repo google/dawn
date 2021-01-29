@@ -40,7 +40,9 @@ bool CaseStatement::IsValid() const {
   return body_ != nullptr && body_->IsValid();
 }
 
-void CaseStatement::to_str(std::ostream& out, size_t indent) const {
+void CaseStatement::to_str(const semantic::Info& sem,
+                           std::ostream& out,
+                           size_t indent) const {
   make_indent(out, indent);
 
   if (IsDefault()) {
@@ -53,14 +55,14 @@ void CaseStatement::to_str(std::ostream& out, size_t indent) const {
         out << ", ";
 
       first = false;
-      out << selector->to_str();
+      out << selector->to_str(sem);
     }
     out << "{" << std::endl;
   }
 
   if (body_ != nullptr) {
     for (auto* stmt : *body_) {
-      stmt->to_str(out, indent + 2);
+      stmt->to_str(sem, out, indent + 2);
     }
   }
 

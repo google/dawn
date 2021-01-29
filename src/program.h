@@ -19,6 +19,7 @@
 
 #include "src/ast/function.h"
 #include "src/diagnostic/diagnostic.h"
+#include "src/semantic/info.h"
 #include "src/symbol_table.h"
 #include "src/type/type_manager.h"
 
@@ -76,6 +77,12 @@ class Program {
     return *ast_;
   }
 
+  /// @returns a reference to the program's semantic info
+  const semantic::Info& Sem() const {
+    AssertNotMoved();
+    return sem_;
+  }
+
   /// @returns a reference to the program's SymbolTable
   const SymbolTable& Symbols() const {
     AssertNotMoved();
@@ -110,6 +117,7 @@ class Program {
   type::Manager types_;
   ASTNodes nodes_;
   ast::Module* ast_;
+  semantic::Info sem_;
   SymbolTable symbols_;
   diag::List diagnostics_;
   bool is_valid_ = true;

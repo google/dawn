@@ -27,7 +27,7 @@ BoolLiteral::BoolLiteral(const Source& source, type::Type* type, bool value)
 
 BoolLiteral::~BoolLiteral() = default;
 
-std::string BoolLiteral::to_str() const {
+std::string BoolLiteral::to_str(const semantic::Info&) const {
   return value_ ? "true" : "false";
 }
 

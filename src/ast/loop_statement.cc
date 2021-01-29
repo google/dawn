@@ -46,13 +46,15 @@ bool LoopStatement::IsValid() const {
   return true;
 }
 
-void LoopStatement::to_str(std::ostream& out, size_t indent) const {
+void LoopStatement::to_str(const semantic::Info& sem,
+                           std::ostream& out,
+                           size_t indent) const {
   make_indent(out, indent);
   out << "Loop{" << std::endl;
 
   if (body_ != nullptr) {
     for (auto* stmt : *body_) {
-      stmt->to_str(out, indent + 2);
+      stmt->to_str(sem, out, indent + 2);
     }
   }
 
@@ -61,7 +63,7 @@ void LoopStatement::to_str(std::ostream& out, size_t indent) const {
     out << "continuing {" << std::endl;
 
     for (auto* stmt : *continuing_) {
-      stmt->to_str(out, indent + 4);
+      stmt->to_str(sem, out, indent + 4);
     }
 
     make_indent(out, indent + 2);

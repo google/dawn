@@ -38,7 +38,7 @@ class Expression : public Castable<Expression, Node> {
 
   /// @returns a string representation of the result type or 'not set' if no
   /// result type present
-  std::string result_type_str() const {
+  std::string result_type_str(const semantic::Info&) const {
     return result_type_ ? result_type_->type_name() : "not set";
   }
 

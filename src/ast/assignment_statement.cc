@@ -45,11 +45,13 @@ bool AssignmentStatement::IsValid() const {
   return true;
 }
 
-void AssignmentStatement::to_str(std::ostream& out, size_t indent) const {
+void AssignmentStatement::to_str(const semantic::Info& sem,
+                                 std::ostream& out,
+                                 size_t indent) const {
   make_indent(out, indent);
   out << "Assignment{" << std::endl;
-  lhs_->to_str(out, indent + 2);
-  rhs_->to_str(out, indent + 2);
+  lhs_->to_str(sem, out, indent + 2);
+  rhs_->to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

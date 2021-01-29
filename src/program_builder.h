@@ -37,6 +37,7 @@
 #include "src/ast/variable.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
+#include "src/semantic/info.h"
 #include "src/symbol_table.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -101,8 +102,20 @@ class ProgramBuilder {
     return types_;
   }
 
+  /// @returns a reference to the program's types
+  const type::Manager& Types() const {
+    AssertNotMoved();
+    return types_;
+  }
+
   /// @returns a reference to the program's AST nodes storage
   ASTNodes& Nodes() {
+    AssertNotMoved();
+    return nodes_;
+  }
+
+  /// @returns a reference to the program's AST nodes storage
+  const ASTNodes& Nodes() const {
     AssertNotMoved();
     return nodes_;
   }
@@ -113,6 +126,24 @@ class ProgramBuilder {
     return *ast_;
   }
 
+  /// @returns a reference to the program's AST root Module
+  const ast::Module& AST() const {
+    AssertNotMoved();
+    return *ast_;
+  }
+
+  /// @returns a reference to the program's semantic info
+  semantic::Info& Sem() {
+    AssertNotMoved();
+    return sem_;
+  }
+
+  /// @returns a reference to the program's semantic info
+  const semantic::Info& Sem() const {
+    AssertNotMoved();
+    return sem_;
+  }
+
   /// @returns a reference to the program's SymbolTable
   SymbolTable& Symbols() {
     AssertNotMoved();
@@ -121,6 +152,12 @@ class ProgramBuilder {
 
   /// @returns a reference to the program's diagnostics
   diag::List& Diagnostics() {
+    AssertNotMoved();
+    return diagnostics_;
+  }
+
+  /// @returns a reference to the program's diagnostics
+  const diag::List& Diagnostics() const {
     AssertNotMoved();
     return diagnostics_;
   }
@@ -853,6 +890,7 @@ class ProgramBuilder {
   type::Manager types_;
   ASTNodes nodes_;
   ast::Module* ast_;
+  semantic::Info sem_;
   SymbolTable symbols_;
   diag::List diagnostics_;
 

@@ -71,7 +71,7 @@ TEST_F(SpvModuleScopeVarParserTest, NoVar) {
   auto p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->program().AST().to_str();
+  const auto module_ast = p->program().to_str();
   EXPECT_THAT(module_ast, Not(HasSubstr("Variable")));
 }
 
@@ -2002,7 +2002,10 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), HasSubstr(R"(
+
+  Program program = p->program();
+
+  EXPECT_THAT(ToString(program, fe.ast_body()), HasSubstr(R"(
   VariableConst{
     x_1
     none
@@ -2015,7 +2018,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
       }
     }
   })"))
-      << ToString(p->builder().Symbols(), fe.ast_body());
+      << ToString(program, fe.ast_body());
 }
 
 }  // namespace

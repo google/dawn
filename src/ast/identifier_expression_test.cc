@@ -49,7 +49,7 @@ TEST_F(IdentifierExpressionTest, IsValid) {
 TEST_F(IdentifierExpressionTest, ToStr) {
   auto* i = Expr("ident");
   std::ostringstream out;
-  i->to_str(out, 2);
+  i->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Identifier[not set]{ident}
 )");
 }

@@ -122,8 +122,8 @@ fn main() -> void {
 
   // Expect the AST printed with to_str() to match
   Demangler demanger;
-  EXPECT_EQ(demanger.Demangle(src.Symbols(), src.AST().to_str()),
-            demanger.Demangle(dst.Symbols(), dst.AST().to_str()));
+  EXPECT_EQ(demanger.Demangle(src.Symbols(), src.AST().to_str(src.Sem())),
+            demanger.Demangle(dst.Symbols(), dst.AST().to_str(dst.Sem())));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<ast::Node*> src_nodes;
@@ -135,7 +135,7 @@ fn main() -> void {
     src_types.emplace(src_type);
   }
   for (auto* dst_node : dst.Nodes().Objects()) {
-    ASSERT_EQ(src_nodes.count(dst_node), 0u) << dst_node->str();
+    ASSERT_EQ(src_nodes.count(dst_node), 0u) << dst_node->str(dst.Sem());
   }
   for (auto* dst_type : dst.Types()) {
     ASSERT_EQ(src_types.count(dst_type), 0u) << dst_type->type_name();

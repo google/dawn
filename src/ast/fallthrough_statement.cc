@@ -37,7 +37,9 @@ bool FallthroughStatement::IsValid() const {
   return true;
 }
 
-void FallthroughStatement::to_str(std::ostream& out, size_t indent) const {
+void FallthroughStatement::to_str(const semantic::Info&,
+                                  std::ostream& out,
+                                  size_t indent) const {
   make_indent(out, indent);
   out << "Fallthrough{}" << std::endl;
 }

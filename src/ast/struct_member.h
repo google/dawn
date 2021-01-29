@@ -70,9 +70,12 @@ class StructMember : public Castable<StructMember, Node> {
   bool IsValid() const override;
 
   /// Writes a representation of the node to the output stream
+  /// @param sem the semantic info for the program
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
-  void to_str(std::ostream& out, size_t indent) const override;
+  void to_str(const semantic::Info& sem,
+              std::ostream& out,
+              size_t indent) const override;
 
  private:
   StructMember(const StructMember&) = delete;

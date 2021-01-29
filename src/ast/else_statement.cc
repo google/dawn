@@ -43,14 +43,16 @@ bool ElseStatement::IsValid() const {
   return condition_ == nullptr || condition_->IsValid();
 }
 
-void ElseStatement::to_str(std::ostream& out, size_t indent) const {
+void ElseStatement::to_str(const semantic::Info& sem,
+                           std::ostream& out,
+                           size_t indent) const {
   make_indent(out, indent);
   out << "Else{" << std::endl;
   if (condition_ != nullptr) {
     make_indent(out, indent + 2);
     out << "(" << std::endl;
 
-    condition_->to_str(out, indent + 4);
+    condition_->to_str(sem, out, indent + 4);
 
     make_indent(out, indent + 2);
     out << ")" << std::endl;
@@ -61,7 +63,7 @@ void ElseStatement::to_str(std::ostream& out, size_t indent) const {
 
   if (body_ != nullptr) {
     for (auto* stmt : *body_) {
-      stmt->to_str(out, indent + 4);
+      stmt->to_str(sem, out, indent + 4);
     }
   }
 

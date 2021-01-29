@@ -36,7 +36,7 @@ TEST_F(ModuleTest, Creation) {
 }
 
 TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
-  const auto str = Program(std::move(*this)).AST().to_str();
+  const auto str = Program(std::move(*this)).to_str();
   auto* const expected = "Module{\n}\n";
   EXPECT_EQ(str, expected);
 }

@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/node.h"
-
-#include <sstream>
-
-TINT_INSTANTIATE_CLASS_ID(tint::ast::Node);
+#include "src/semantic/info.h"
 
 namespace tint {
-namespace ast {
+namespace semantic {
 
-Node::Node(const Source& source) : source_(source) {}
+Info::Info() = default;
 
-Node::Node(Node&&) = default;
+Info::Info(Info&&) = default;
 
-Node::~Node() = default;
+Info::~Info() = default;
 
-void Node::make_indent(std::ostream& out, size_t indent) const {
-  for (size_t i = 0; i < indent; ++i)
-    out << " ";
-}
+Info& Info::operator=(Info&&) = default;
 
-std::string Node::str(const semantic::Info& sem) const {
-  std::ostringstream out;
-  to_str(sem, out, 0);
-  return out.str();
-}
-
-}  // namespace ast
+}  // namespace semantic
 }  // namespace tint

@@ -192,6 +192,8 @@ set(TINT_LIB_SRCS
   reader/reader.cc
   reader/reader.h
   scope_stack.h
+  semantic/info.h
+  semantic/sem_info.cc
   source.cc
   source.h
   symbol.cc
@@ -408,7 +410,6 @@ if(${TINT_BUILD_TESTS})
     ast/decoration_test.cc
     ast/discard_statement_test.cc
     ast/else_statement_test.cc
-    ast/expression_test.cc
     ast/fallthrough_statement_test.cc
     ast/float_literal_test.cc
     ast/function_test.cc

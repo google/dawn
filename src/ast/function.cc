@@ -247,13 +247,15 @@ bool Function::IsValid() const {
   return true;
 }
 
-void Function::to_str(std::ostream& out, size_t indent) const {
+void Function::to_str(const semantic::Info& sem,
+                      std::ostream& out,
+                      size_t indent) const {
   make_indent(out, indent);
   out << "Function " << symbol_.to_str() << " -> " << return_type_->type_name()
       << std::endl;
 
   for (auto* deco : decorations()) {
-    deco->to_str(out, indent);
+    deco->to_str(sem, out, indent);
   }
 
   make_indent(out, indent);
@@ -263,7 +265,7 @@ void Function::to_str(std::ostream& out, size_t indent) const {
     out << std::endl;
 
     for (auto* param : params_)
-      param->to_str(out, indent + 2);
+      param->to_str(sem, out, indent + 2);
 
     make_indent(out, indent);
   }
@@ -274,7 +276,7 @@ void Function::to_str(std::ostream& out, size_t indent) const {
 
   if (body_ != nullptr) {
     for (auto* stmt : *body_) {
-      stmt->to_str(out, indent + 2);
+      stmt->to_str(sem, out, indent + 2);
     }
   }
 

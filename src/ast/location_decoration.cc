@@ -27,7 +27,9 @@ LocationDecoration::LocationDecoration(const Source& source, uint32_t val)
 
 LocationDecoration::~LocationDecoration() = default;
 
-void LocationDecoration::to_str(std::ostream& out, size_t indent) const {
+void LocationDecoration::to_str(const semantic::Info&,
+                                std::ostream& out,
+                                size_t indent) const {
   make_indent(out, indent);
   out << "LocationDecoration{" << value_ << "}" << std::endl;
 }

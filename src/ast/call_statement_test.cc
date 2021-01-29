@@ -58,7 +58,7 @@ TEST_F(CallStatementTest, ToStr) {
       create<CallExpression>(Expr("func"), ExpressionList{}));
 
   std::ostringstream out;
-  c->to_str(out, 2);
+  c->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
     Identifier[not set]{func}
     (

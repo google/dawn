@@ -46,7 +46,7 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  const auto got = p->program().AST().to_str();
+  const auto got = p->program().to_str();
   const char* expect = R"(Module{
   Function tint_symbol_1 -> __void
   ()
@@ -91,7 +91,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
     EXPECT_TRUE(fe.EmitBody());
-    EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+    EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
                 HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_1
@@ -107,18 +107,17 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
   }
 }
 Return{})"))
-        << ToString(p->builder().Symbols(), fe.ast_body());
+        << ToString(p->builder(), fe.ast_body());
   }
 
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
     EXPECT_TRUE(fe.EmitBody());
-    EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-                HasSubstr(R"(Return{
+    EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
   {
     ScalarConstructor[not set]{42}
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
   }
 }
 
@@ -149,7 +148,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+    EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
                 HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_10
@@ -180,17 +179,16 @@ Assignment{
   Identifier[not set]{x_1}
 }
 Return{})"))
-        << ToString(p->builder().Symbols(), fe.ast_body());
+        << ToString(p->builder(), fe.ast_body());
   }
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
-                HasSubstr(R"(Return{
+    EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
   {
     ScalarConstructor[not set]{42}
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
   }
 }
 

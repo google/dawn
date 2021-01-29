@@ -27,7 +27,7 @@ UintLiteral::UintLiteral(const Source& source, type::Type* type, uint32_t value)
 
 UintLiteral::~UintLiteral() = default;
 
-std::string UintLiteral::to_str() const {
+std::string UintLiteral::to_str(const semantic::Info&) const {
   return std::to_string(value_);
 }
 

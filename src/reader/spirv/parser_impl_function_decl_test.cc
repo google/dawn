@@ -55,7 +55,7 @@ TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.AST().to_str();
+  const auto program_ast = program.to_str();
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
 }
 
@@ -67,7 +67,7 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.AST().to_str();
+  const auto program_ast = program.to_str();
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
 }
 
@@ -83,7 +83,7 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.AST().to_str();
+  const auto program_ast = program.to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
@@ -104,7 +104,7 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.AST().to_str();
+  const auto program_ast = program.to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
@@ -125,7 +125,7 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.AST().to_str();
+  const auto program_ast = program.to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
@@ -148,7 +148,7 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.AST().to_str();
+  const auto program_ast = program.to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("frag_main").to_str() +
                                      R"( -> __void
@@ -173,7 +173,7 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.AST().to_str();
+  const auto program_ast = program.to_str();
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void

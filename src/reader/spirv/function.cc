@@ -709,7 +709,9 @@ bool StatementBuilder::IsValid() const {
 ast::Node* StatementBuilder::Clone(CloneContext*) const {
   return nullptr;
 }
-void StatementBuilder::to_str(std::ostream& out, size_t indent) const {
+void StatementBuilder::to_str(const semantic::Info&,
+                              std::ostream& out,
+                              size_t indent) const {
   make_indent(out, indent);
   out << "StatementBuilder" << std::endl;
 }

@@ -39,7 +39,7 @@ struct Cloneable : public Castable<Cloneable, ast::Node> {
   }
 
   bool IsValid() const override { return true; }
-  void to_str(std::ostream&, size_t) const override {}
+  void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
 
 struct Replaceable : public Castable<Replaceable, Cloneable> {

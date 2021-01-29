@@ -36,7 +36,9 @@ bool ContinueStatement::IsValid() const {
   return true;
 }
 
-void ContinueStatement::to_str(std::ostream& out, size_t indent) const {
+void ContinueStatement::to_str(const semantic::Info&,
+                               std::ostream& out,
+                               size_t indent) const {
   make_indent(out, indent);
   out << "Continue{}" << std::endl;
 }

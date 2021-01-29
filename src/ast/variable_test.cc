@@ -103,7 +103,7 @@ TEST_F(VariableTest, to_str) {
   auto* v = Var("my_var", StorageClass::kFunction, ty.f32(), nullptr,
                 ast::VariableDecorationList{});
   std::ostringstream out;
-  v->to_str(out, 2);
+  v->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Variable{
     my_var
     function
@@ -146,7 +146,7 @@ TEST_F(VariableTest, Decorated_to_str) {
                   });
 
   std::ostringstream out;
-  var->to_str(out, 2);
+  var->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Variable{
     Decorations{
       BindingDecoration{2}

@@ -47,15 +47,17 @@ bool BinaryExpression::IsValid() const {
   return op_ != BinaryOp::kNone;
 }
 
-void BinaryExpression::to_str(std::ostream& out, size_t indent) const {
+void BinaryExpression::to_str(const semantic::Info& sem,
+                              std::ostream& out,
+                              size_t indent) const {
   make_indent(out, indent);
-  out << "Binary[" << result_type_str() << "]{" << std::endl;
-  lhs_->to_str(out, indent + 2);
+  out << "Binary[" << result_type_str(sem) << "]{" << std::endl;
+  lhs_->to_str(sem, out, indent + 2);
 
   make_indent(out, indent + 2);
   out << op_ << std::endl;
 
-  rhs_->to_str(out, indent + 2);
+  rhs_->to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

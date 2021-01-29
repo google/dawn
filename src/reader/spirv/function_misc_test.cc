@@ -68,7 +68,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_11
@@ -108,7 +108,7 @@ VariableDeclStatement{
       ScalarConstructor[not set]{0.000000}
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
@@ -129,7 +129,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_11
@@ -171,7 +171,7 @@ VariableDeclStatement{
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
@@ -190,7 +190,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_11
@@ -212,7 +212,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
@@ -232,7 +232,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_11
@@ -246,7 +246,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
@@ -265,7 +265,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()),
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
   VariableConst{
     x_11
@@ -281,7 +281,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
       }
     }
   }
-})")) << ToString(p->builder().Symbols(), fe.ast_body());
+})")) << ToString(p->builder(), fe.ast_body());
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpNop) {
@@ -297,8 +297,8 @@ TEST_F(SpvParserTestMiscInstruction, OpNop) {
       << p->error() << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder().Symbols(), fe.ast_body()), Eq(R"(Return{}
-)")) << ToString(p->builder().Symbols(), fe.ast_body());
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), Eq(R"(Return{}
+)")) << ToString(p->builder(), fe.ast_body());
 }
 
 // Test swizzle generation.
@@ -325,11 +325,12 @@ TEST_P(SpvParserSwizzleTest, Sample) {
 
   auto* result = fe.Swizzle(GetParam().index);
   if (GetParam().expected_error.empty()) {
+    Program program(p->program());
     EXPECT_TRUE(fe.success());
     ASSERT_NE(result, nullptr);
     std::ostringstream ss;
-    result->to_str(ss, 0);
-    auto str = Demangler().Demangle(p->program().Symbols(), ss.str());
+    result->to_str(program.Sem(), ss, 0);
+    auto str = Demangler().Demangle(program.Symbols(), ss.str());
     EXPECT_THAT(str, Eq(GetParam().expected_expr));
   } else {
     EXPECT_EQ(result, nullptr);

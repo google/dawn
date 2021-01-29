@@ -39,8 +39,10 @@ bool CallStatement::IsValid() const {
   return call_ != nullptr && call_->IsValid();
 }
 
-void CallStatement::to_str(std::ostream& out, size_t indent) const {
-  call_->to_str(out, indent);
+void CallStatement::to_str(const semantic::Info& sem,
+                           std::ostream& out,
+                           size_t indent) const {
+  call_->to_str(sem, out, indent);
 }
 
 }  // namespace ast

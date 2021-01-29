@@ -89,12 +89,16 @@ class Module : public Castable<Module, Node> {
   Module* Clone(CloneContext* ctx) const override;
 
   /// Writes a representation of the node to the output stream
+  /// @param sem the semantic info for the program
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
-  void to_str(std::ostream& out, size_t indent) const override;
+  void to_str(const semantic::Info& sem,
+              std::ostream& out,
+              size_t indent) const override;
 
+  /// @param sem the semantic info for the program
   /// @returns a string representation of the Builder
-  std::string to_str() const;
+  std::string to_str(const semantic::Info& sem) const;
 
  private:
   std::vector<type::Type*> constructed_types_;

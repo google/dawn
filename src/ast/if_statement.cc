@@ -67,7 +67,9 @@ bool IfStatement::IsValid() const {
   return true;
 }
 
-void IfStatement::to_str(std::ostream& out, size_t indent) const {
+void IfStatement::to_str(const semantic::Info& sem,
+                         std::ostream& out,
+                         size_t indent) const {
   make_indent(out, indent);
   out << "If{" << std::endl;
 
@@ -75,7 +77,7 @@ void IfStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent + 2);
   out << "(" << std::endl;
 
-  condition_->to_str(out, indent + 4);
+  condition_->to_str(sem, out, indent + 4);
 
   // Close if conditional
   make_indent(out, indent + 2);
@@ -87,7 +89,7 @@ void IfStatement::to_str(std::ostream& out, size_t indent) const {
 
   if (body_ != nullptr) {
     for (auto* stmt : *body_) {
-      stmt->to_str(out, indent + 4);
+      stmt->to_str(sem, out, indent + 4);
     }
   }
 
@@ -100,7 +102,7 @@ void IfStatement::to_str(std::ostream& out, size_t indent) const {
   out << "}" << std::endl;
 
   for (auto* e : else_statements_) {
-    e->to_str(out, indent);
+    e->to_str(sem, out, indent);
   }
 }
 

@@ -550,7 +550,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
   auto* impl = str->impl();
   for (auto* deco : impl->decorations()) {
     out_ << "[[";
-    deco->to_str(out_, 0);
+    deco->to_str(program_->Sem(), out_, 0);
     out_ << "]]" << std::endl;
   }
   out_ << "struct " << program_->Symbols().NameFor(str->symbol()) << " {"
@@ -817,7 +817,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(v->variable());
   }
 
-  error_ = "unknown statement type: " + stmt->str();
+  error_ = "unknown statement type: " + stmt->str(program_->Sem());
   return false;
 }
 

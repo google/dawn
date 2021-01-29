@@ -137,7 +137,7 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 
   auto* stmt = create<SwitchStatement>(ident, CaseStatementList{});
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Switch{
     Identifier[not set]{ident}
     {
@@ -157,7 +157,7 @@ TEST_F(SwitchStatementTest, ToStr) {
 
   auto* stmt = create<SwitchStatement>(ident, body);
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(demangle(out.str()), R"(  Switch{
     Identifier[not set]{ident}
     {

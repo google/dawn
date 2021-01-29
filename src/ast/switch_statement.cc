@@ -49,16 +49,18 @@ bool SwitchStatement::IsValid() const {
   return true;
 }
 
-void SwitchStatement::to_str(std::ostream& out, size_t indent) const {
+void SwitchStatement::to_str(const semantic::Info& sem,
+                             std::ostream& out,
+                             size_t indent) const {
   make_indent(out, indent);
   out << "Switch{" << std::endl;
-  condition_->to_str(out, indent + 2);
+  condition_->to_str(sem, out, indent + 2);
 
   make_indent(out, indent + 2);
   out << "{" << std::endl;
 
   for (auto* stmt : body_) {
-    stmt->to_str(out, indent + 4);
+    stmt->to_str(sem, out, indent + 4);
   }
 
   make_indent(out, indent + 2);

@@ -36,7 +36,9 @@ bool BreakStatement::IsValid() const {
   return true;
 }
 
-void BreakStatement::to_str(std::ostream& out, size_t indent) const {
+void BreakStatement::to_str(const semantic::Info&,
+                            std::ostream& out,
+                            size_t indent) const {
   make_indent(out, indent);
   out << "Break{}" << std::endl;
 }

@@ -93,7 +93,7 @@ TEST_F(ArrayAccessorExpressionTest, ToStr) {
 
   auto* exp = create<ArrayAccessorExpression>(ary, idx);
   std::ostringstream out;
-  exp->to_str(out, 2);
+  exp->to_str(Sem(), out, 2);
 
   EXPECT_EQ(demangle(out.str()), R"(  ArrayAccessor[not set]{
     Identifier[not set]{ary}

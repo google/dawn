@@ -81,7 +81,9 @@ Module* Module::Clone(CloneContext* ctx) const {
                                   ctx->Clone(global_variables_));
 }
 
-void Module::to_str(std::ostream& out, size_t indent) const {
+void Module::to_str(const semantic::Info& sem,
+                    std::ostream& out,
+                    size_t indent) const {
   make_indent(out, indent);
   out << "Module{" << std::endl;
   indent += 2;
@@ -91,25 +93,25 @@ void Module::to_str(std::ostream& out, size_t indent) const {
       out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
           << std::endl;
       if (auto* str = alias->type()->As<type::Struct>()) {
-        str->impl()->to_str(out, indent);
+        str->impl()->to_str(sem, out, indent);
       }
     } else if (auto* str = ty->As<type::Struct>()) {
       out << str->symbol().to_str() << " ";
-      str->impl()->to_str(out, indent);
+      str->impl()->to_str(sem, out, indent);
     }
   }
   for (auto* var : global_variables_) {
-    var->to_str(out, indent);
+    var->to_str(sem, out, indent);
   }
   for (auto* func : functions_) {
-    func->to_str(out, indent);
+    func->to_str(sem, out, indent);
   }
   out << "}" << std::endl;
 }
 
-std::string Module::to_str() const {
+std::string Module::to_str(const semantic::Info& sem) const {
   std::ostringstream out;
-  to_str(out, 0);
+  to_str(sem, out, 0);
   return out.str();
 }
 

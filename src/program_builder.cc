@@ -31,6 +31,7 @@ ProgramBuilder::ProgramBuilder(ProgramBuilder&& rhs)
       types_(std::move(rhs.types_)),
       nodes_(std::move(rhs.nodes_)),
       ast_(rhs.ast_),
+      sem_(std::move(rhs.sem_)),
       symbols_(std::move(rhs.symbols_)) {
   rhs.MarkAsMoved();
 }
@@ -44,6 +45,7 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
   types_ = std::move(rhs.types_);
   nodes_ = std::move(rhs.nodes_);
   ast_ = rhs.ast_;
+  sem_ = std::move(rhs.sem_);
   symbols_ = std::move(rhs.symbols_);
   return *this;
 }

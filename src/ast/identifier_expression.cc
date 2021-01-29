@@ -38,9 +38,11 @@ bool IdentifierExpression::IsValid() const {
   return sym_.IsValid();
 }
 
-void IdentifierExpression::to_str(std::ostream& out, size_t indent) const {
+void IdentifierExpression::to_str(const semantic::Info& sem,
+                                  std::ostream& out,
+                                  size_t indent) const {
   make_indent(out, indent);
-  out << "Identifier[" << result_type_str() << "]{" << sym_.to_str() << "}"
+  out << "Identifier[" << result_type_str(sem) << "]{" << sym_.to_str() << "}"
       << std::endl;
 }
 

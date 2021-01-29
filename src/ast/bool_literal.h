@@ -40,8 +40,9 @@ class BoolLiteral : public Castable<BoolLiteral, Literal> {
   /// @returns the name for this literal. This name is unique to this value.
   std::string name() const override;
 
+  /// @param sem the semantic info for the program
   /// @returns the literal as a string
-  std::string to_str() const override;
+  std::string to_str(const semantic::Info& sem) const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.

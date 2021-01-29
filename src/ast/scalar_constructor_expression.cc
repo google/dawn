@@ -41,11 +41,12 @@ bool ScalarConstructorExpression::IsValid() const {
   return literal_ != nullptr;
 }
 
-void ScalarConstructorExpression::to_str(std::ostream& out,
+void ScalarConstructorExpression::to_str(const semantic::Info& sem,
+                                         std::ostream& out,
                                          size_t indent) const {
   make_indent(out, indent);
-  out << "ScalarConstructor[" << result_type_str() << "]{" << literal_->to_str()
-      << "}" << std::endl;
+  out << "ScalarConstructor[" << result_type_str(sem) << "]{"
+      << literal_->to_str(sem) << "}" << std::endl;
 }
 
 }  // namespace ast

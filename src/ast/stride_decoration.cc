@@ -27,7 +27,9 @@ StrideDecoration::StrideDecoration(const Source& source, uint32_t stride)
 
 StrideDecoration::~StrideDecoration() = default;
 
-void StrideDecoration::to_str(std::ostream& out, size_t indent) const {
+void StrideDecoration::to_str(const semantic::Info&,
+                              std::ostream& out,
+                              size_t indent) const {
   make_indent(out, indent);
   out << "stride " << stride_;
 }

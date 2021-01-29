@@ -27,7 +27,9 @@ ConstantIdDecoration::ConstantIdDecoration(const Source& source, uint32_t val)
 
 ConstantIdDecoration::~ConstantIdDecoration() = default;
 
-void ConstantIdDecoration::to_str(std::ostream& out, size_t indent) const {
+void ConstantIdDecoration::to_str(const semantic::Info&,
+                                  std::ostream& out,
+                                  size_t indent) const {
   make_indent(out, indent);
   out << "ConstantIdDecoration{" << value_ << "}" << std::endl;
 }

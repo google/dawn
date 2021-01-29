@@ -28,7 +28,8 @@ StructMemberOffsetDecoration::StructMemberOffsetDecoration(const Source& source,
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
 
-void StructMemberOffsetDecoration::to_str(std::ostream& out,
+void StructMemberOffsetDecoration::to_str(const semantic::Info&,
+                                          std::ostream& out,
                                           size_t indent) const {
   make_indent(out, indent);
   out << "offset " << std::to_string(offset_);

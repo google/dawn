@@ -48,15 +48,17 @@ bool CallExpression::IsValid() const {
   return true;
 }
 
-void CallExpression::to_str(std::ostream& out, size_t indent) const {
+void CallExpression::to_str(const semantic::Info& sem,
+                            std::ostream& out,
+                            size_t indent) const {
   make_indent(out, indent);
-  out << "Call[" << result_type_str() << "]{" << std::endl;
-  func_->to_str(out, indent + 2);
+  out << "Call[" << result_type_str(sem) << "]{" << std::endl;
+  func_->to_str(sem, out, indent + 2);
 
   make_indent(out, indent + 2);
   out << "(" << std::endl;
   for (auto* param : params_)
-    param->to_str(out, indent + 4);
+    param->to_str(sem, out, indent + 4);
 
   make_indent(out, indent + 2);
   out << ")" << std::endl;

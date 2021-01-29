@@ -27,7 +27,9 @@ GroupDecoration::GroupDecoration(const Source& source, uint32_t val)
 
 GroupDecoration::~GroupDecoration() = default;
 
-void GroupDecoration::to_str(std::ostream& out, size_t indent) const {
+void GroupDecoration::to_str(const semantic::Info&,
+                             std::ostream& out,
+                             size_t indent) const {
   make_indent(out, indent);
   out << "GroupDecoration{" << value_ << "}" << std::endl;
 }

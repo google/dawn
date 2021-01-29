@@ -135,7 +135,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
   auto* c = create<CaseStatement>(CaseSelectorList{b}, body);
 
   std::ostringstream out;
-  c->to_str(out, 2);
+  c->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Case -2{
     Discard{}
   }
@@ -152,7 +152,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
   auto* c = create<CaseStatement>(CaseSelectorList{b}, body);
 
   std::ostringstream out;
-  c->to_str(out, 2);
+  c->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Case 2{
     Discard{}
   }
@@ -170,7 +170,7 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
   auto* c = create<CaseStatement>(b, body);
 
   std::ostringstream out;
-  c->to_str(out, 2);
+  c->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Case 1, 2{
     Discard{}
   }
@@ -184,7 +184,7 @@ TEST_F(CaseStatementTest, ToStr_WithoutSelectors) {
   auto* c = create<CaseStatement>(CaseSelectorList{}, body);
 
   std::ostringstream out;
-  c->to_str(out, 2);
+  c->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Default{
     Discard{}
   }

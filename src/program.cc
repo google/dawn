@@ -30,6 +30,7 @@ Program::Program(Program&& program)
     : types_(std::move(program.types_)),
       nodes_(std::move(program.nodes_)),
       ast_(std::move(program.ast_)),
+      sem_(std::move(program.sem_)),
       symbols_(std::move(program.symbols_)),
       diagnostics_(std::move(program.diagnostics_)),
       is_valid_(program.is_valid_) {
@@ -53,6 +54,7 @@ Program::Program(ProgramBuilder&& builder) {
   ast_ = nodes_.Create<ast::Module>(Source{}, builder.AST().ConstructedTypes(),
                                     builder.AST().Functions(),
                                     builder.AST().GlobalVariables());
+  sem_ = std::move(builder.Sem());
   symbols_ = std::move(builder.Symbols());
   diagnostics_ = std::move(builder.Diagnostics());
   builder.MarkAsMoved();
@@ -73,6 +75,7 @@ Program& Program::operator=(Program&& program) {
   types_ = std::move(program.types_);
   nodes_ = std::move(program.nodes_);
   ast_ = std::move(program.ast_);
+  sem_ = std::move(program.sem_);
   symbols_ = std::move(program.symbols_);
   is_valid_ = program.is_valid_;
   return *this;
@@ -97,7 +100,7 @@ bool Program::IsValid() const {
 
 std::string Program::to_str() const {
   AssertNotMoved();
-  return ast_->to_str();
+  return ast_->to_str(Sem());
 }
 
 void Program::AssertNotMoved() const {

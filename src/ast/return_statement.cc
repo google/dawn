@@ -44,7 +44,9 @@ bool ReturnStatement::IsValid() const {
   return true;
 }
 
-void ReturnStatement::to_str(std::ostream& out, size_t indent) const {
+void ReturnStatement::to_str(const semantic::Info& sem,
+                             std::ostream& out,
+                             size_t indent) const {
   make_indent(out, indent);
   out << "Return{";
 
@@ -54,7 +56,7 @@ void ReturnStatement::to_str(std::ostream& out, size_t indent) const {
     make_indent(out, indent + 2);
     out << "{" << std::endl;
 
-    value_->to_str(out, indent + 4);
+    value_->to_str(sem, out, indent + 4);
 
     make_indent(out, indent + 2);
     out << "}" << std::endl;

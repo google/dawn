@@ -171,7 +171,7 @@ TEST_F(LoopStatementTest, ToStr) {
 
   auto* l = create<LoopStatement>(body, nullptr);
   std::ostringstream out;
-  l->to_str(out, 2);
+  l->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Loop{
     Discard{}
   }
@@ -187,7 +187,7 @@ TEST_F(LoopStatementTest, ToStr_WithContinuing) {
 
   auto* l = create<LoopStatement>(body, continuing);
   std::ostringstream out;
-  l->to_str(out, 2);
+  l->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Loop{
     Discard{}
     continuing {

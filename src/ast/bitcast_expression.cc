@@ -41,11 +41,13 @@ bool BitcastExpression::IsValid() const {
   return type_ != nullptr;
 }
 
-void BitcastExpression::to_str(std::ostream& out, size_t indent) const {
+void BitcastExpression::to_str(const semantic::Info& sem,
+                               std::ostream& out,
+                               size_t indent) const {
   make_indent(out, indent);
-  out << "Bitcast[" << result_type_str() << "]<" << type_->type_name() << ">{"
-      << std::endl;
-  expr_->to_str(out, indent + 2);
+  out << "Bitcast[" << result_type_str(sem) << "]<" << type_->type_name()
+      << ">{" << std::endl;
+  expr_->to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

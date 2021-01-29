@@ -44,7 +44,7 @@ TEST_F(UintLiteralTest, Is) {
 
 TEST_F(UintLiteralTest, ToStr) {
   auto* u = create<UintLiteral>(ty.u32(), 42);
-  EXPECT_EQ(u->to_str(), "42");
+  EXPECT_EQ(u->to_str(Sem()), "42");
 }
 
 }  // namespace

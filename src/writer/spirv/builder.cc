@@ -533,7 +533,7 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
     return GenerateUnaryOpExpression(u);
   }
 
-  error_ = "unknown expression type: " + expr->str();
+  error_ = "unknown expression type: " + expr->str(program_->Sem());
   return 0;
 }
 
@@ -1091,7 +1091,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       }
 
     } else {
-      error_ = "invalid accessor in list: " + accessor->str();
+      error_ = "invalid accessor in list: " + accessor->str(program_->Sem());
       return 0;
     }
   }
@@ -2763,7 +2763,7 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
     return GenerateVariableDeclStatement(v);
   }
 
-  error_ = "Unknown statement: " + stmt->str();
+  error_ = "Unknown statement: " + stmt->str(program_->Sem());
   return false;
 }
 

@@ -42,7 +42,7 @@ TEST_F(BreakStatementTest, IsValid) {
 TEST_F(BreakStatementTest, ToStr) {
   auto* stmt = create<BreakStatement>();
   std::ostringstream out;
-  stmt->to_str(out, 2);
+  stmt->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Break{}
 )");
 }

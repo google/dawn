@@ -115,7 +115,7 @@ TEST_F(ElseStatementTest, ToStr) {
   });
   auto* e = create<ElseStatement>(cond, body);
   std::ostringstream out;
-  e->to_str(out, 2);
+  e->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
     (
       ScalarConstructor[not set]{true}
@@ -133,7 +133,7 @@ TEST_F(ElseStatementTest, ToStr_NoCondition) {
   });
   auto* e = create<ElseStatement>(nullptr, body);
   std::ostringstream out;
-  e->to_str(out, 2);
+  e->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
     {
       Discard{}

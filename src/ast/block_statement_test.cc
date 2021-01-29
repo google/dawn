@@ -87,7 +87,7 @@ TEST_F(BlockStatementTest, ToStr) {
   });
 
   std::ostringstream out;
-  b->to_str(out, 2);
+  b->to_str(Sem(), out, 2);
   EXPECT_EQ(out.str(), R"(  Block{
     Discard{}
   }

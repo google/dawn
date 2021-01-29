@@ -40,12 +40,14 @@ bool UnaryOpExpression::IsValid() const {
   return expr_ != nullptr && expr_->IsValid();
 }
 
-void UnaryOpExpression::to_str(std::ostream& out, size_t indent) const {
+void UnaryOpExpression::to_str(const semantic::Info& sem,
+                               std::ostream& out,
+                               size_t indent) const {
   make_indent(out, indent);
-  out << "UnaryOp[" << result_type_str() << "]{" << std::endl;
+  out << "UnaryOp[" << result_type_str(sem) << "]{" << std::endl;
   make_indent(out, indent + 2);
   out << op_ << std::endl;
-  expr_->to_str(out, indent + 2);
+  expr_->to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

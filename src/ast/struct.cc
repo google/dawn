@@ -66,16 +66,18 @@ bool Struct::IsValid() const {
   return true;
 }
 
-void Struct::to_str(std::ostream& out, size_t indent) const {
+void Struct::to_str(const semantic::Info& sem,
+                    std::ostream& out,
+                    size_t indent) const {
   out << "Struct{" << std::endl;
   for (auto* deco : decorations_) {
     make_indent(out, indent + 2);
     out << "[[";
-    deco->to_str(out, 0);
+    deco->to_str(sem, out, 0);
     out << "]]" << std::endl;
   }
   for (auto* member : members_) {
-    member->to_str(out, indent + 2);
+    member->to_str(sem, out, indent + 2);
   }
   make_indent(out, indent);
   out << "}" << std::endl;

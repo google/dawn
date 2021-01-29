@@ -59,7 +59,7 @@ std::string Demangler::Demangle(const SymbolTable& symbols,
 }
 
 std::string Demangler::Demangle(const Program& program) const {
-  return Demangle(program.Symbols(), program.AST().to_str());
+  return Demangle(program.Symbols(), program.AST().to_str(program.Sem()));
 }
 
 }  // namespace tint

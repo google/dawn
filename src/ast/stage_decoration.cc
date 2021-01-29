@@ -27,7 +27,9 @@ StageDecoration::StageDecoration(const Source& source, PipelineStage stage)
 
 StageDecoration::~StageDecoration() = default;
 
-void StageDecoration::to_str(std::ostream& out, size_t indent) const {
+void StageDecoration::to_str(const semantic::Info&,
+                             std::ostream& out,
+                             size_t indent) const {
   make_indent(out, indent);
   out << "StageDecoration{" << stage_ << "}" << std::endl;
 }
