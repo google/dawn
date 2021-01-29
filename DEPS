@@ -11,9 +11,9 @@ vars = {
   'clang_revision': 'eb5ab41f3801e2085208204fd71a490573d72dfd',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
   'googletest_revision': '389cb68b87193358358ae87cc56d257fd0d80189',
-  'gpuweb_cts_revision': '1ba84a62ae24c085faa8b74469907cf065a5d555',
-  'spirv_headers_revision': 'f027d53ded7e230e008d37c8b47ede7cd308e19d',
-  'spirv_tools_revision': 'f3ccb633dfd7c5de1f9f0a2d2e9d7a25f2478206',
+  'gpuweb_cts_revision': '89ba81c395d4b6ee00e5aa6f0d47451241d1d3e9',
+  'spirv_headers_revision': 'faa570afbc91ac73d594d787486bcf8f2df1ace0',
+  'spirv_tools_revision': '297723d75af4244d1cdad1178da0689dec8fd9a0',
   'testing_revision': '2691851e49de541c3fe42fa8692ddcdee938162f',
 }
 
