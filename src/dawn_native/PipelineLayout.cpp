@@ -176,7 +176,7 @@ namespace dawn_native {
 
         // Loops over all the reflected BindGroupLayoutEntries from shaders.
         for (const StageAndDescriptor& stage : stages) {
-            const EntryPointMetadata::BindingInfo& info =
+            const EntryPointMetadata::BindingInfoArray& info =
                 stage.second->module->GetEntryPoint(stage.second->entryPoint).bindings;
 
             for (BindGroupIndex group(0); group < info.size(); ++group) {

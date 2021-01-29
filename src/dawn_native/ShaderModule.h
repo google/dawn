@@ -105,8 +105,8 @@ namespace dawn_native {
         // bindings[G][B] is the reflection data for the binding defined with
         // [[group=G, binding=B]] in WGSL / SPIRV.
         using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
-        using BindingInfo = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
-        BindingInfo bindings;
+        using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
+        BindingInfoArray bindings;
 
         // The set of vertex attributes this entryPoint uses.
         std::bitset<kMaxVertexAttributes> usedVertexAttributes;

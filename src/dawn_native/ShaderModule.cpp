@@ -478,7 +478,7 @@ namespace dawn_native {
                 [](const DeviceBase* device,
                    const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
                    const spirv_cross::Compiler& compiler, BindingInfoType bindingType,
-                   EntryPointMetadata::BindingInfo* metadataBindings,
+                   EntryPointMetadata::BindingInfoArray* metadataBindings,
                    bool isStorageBuffer = false) -> MaybeError {
                 for (const auto& resource : resources) {
                     if (!compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding)) {

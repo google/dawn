@@ -285,7 +285,7 @@ namespace dawn_native { namespace d3d12 {
         compiler.set_hlsl_options(options_hlsl);
         compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
 
-        const EntryPointMetadata::BindingInfo& moduleBindingInfo =
+        const EntryPointMetadata::BindingInfoArray& moduleBindingInfo =
             GetEntryPoint(entryPointName).bindings;
 
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
