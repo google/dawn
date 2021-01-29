@@ -35,7 +35,12 @@ config("glfw_public") {
   }
 
   if (is_linux) {
-    defines = [ "_GLFW_X11" ]
+    # ANGLE builds only libEGL.so, so tell GLFW to load that instead of
+    # the default libEGL.so.1.
+    defines = [
+      "_GLFW_X11",
+      "_GLFW_EGL_LIBRARY=\"libEGL.so\"",
+    ]
   }
 }
 
