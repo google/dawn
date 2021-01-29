@@ -192,9 +192,13 @@ set(TINT_LIB_SRCS
   reader/reader.cc
   reader/reader.h
   scope_stack.h
+  semantic/expression.h
   semantic/info.h
   semantic/node.h
+  semantic/sem_expression.cc
   semantic/sem_info.cc
+  semantic/sem_node.cc
+  semantic/type_mappings.h
   source.cc
   source.h
   symbol.cc
@@ -451,7 +455,6 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     namer_test.cc
     program_test.cc
-    program_builder_test.cc
     scope_stack_test.cc
     symbol_table_test.cc
     symbol_test.cc

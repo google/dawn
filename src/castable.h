@@ -62,6 +62,9 @@ class ClassID {
 /// @see Castable
 class CastableBase {
  public:
+  /// Copy constructor
+  CastableBase(const CastableBase&) = default;
+
   /// Move constructor
   CastableBase(CastableBase&&) = default;
 
