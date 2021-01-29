@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/demangler.h"
 #include "src/program_builder.h"
 
 namespace tint {
@@ -28,18 +27,7 @@ namespace type {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public BASE, public ProgramBuilder {
- public:
-  /// Demangles the given string
-  /// @param s the string to demangle
-  /// @returns the demangled string
-  std::string demangle(const std::string& s) {
-    return demanger.Demangle(this, s);
-  }
-
-  /// A demangler
-  Demangler demanger;
-};
+class TestHelperBase : public BASE, public ProgramBuilder {};
 using TestHelper = TestHelperBase<testing::Test>;
 
 template <typename T>

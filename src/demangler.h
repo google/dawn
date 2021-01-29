@@ -19,7 +19,6 @@
 
 namespace tint {
 
-class Program;
 class SymbolTable;
 
 /// Helper to demangle strings and replace symbols with original names
@@ -36,12 +35,6 @@ class Demangler {
   /// @returns the string with any symbol replacements performed.
   std::string Demangle(const SymbolTable& symbols,
                        const std::string& str) const;
-
-  /// Returns the string returned by the `program.AST().to_str()` of the
-  /// program with all symbols replaced with their original names.
-  /// @param program the program where the symbols are registered
-  /// @returns the string with any symbol replacements performed.
-  std::string Demangle(const Program& program) const;
 };
 
 }  // namespace tint

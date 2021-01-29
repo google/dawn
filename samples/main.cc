@@ -499,11 +499,7 @@ int main(int argc, const char** argv) {
   }
 
   if (options.dump_ast) {
-    auto ast_str = program->to_str();
-    if (options.demangle) {
-      ast_str = tint::Demangler().Demangle(program->Symbols(), ast_str);
-    }
-    std::cout << std::endl << ast_str << std::endl;
+    std::cout << std::endl << program->to_str(options.demangle) << std::endl;
   }
   if (options.parse_only) {
     return 1;

@@ -96,13 +96,11 @@ TEST_F(CallExpressionTest, IsValid_InvalidParam) {
 TEST_F(CallExpressionTest, ToStr_NoParams) {
   auto* func = Expr("func");
   auto* stmt = create<CallExpression>(func, ExpressionList{});
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
-    Identifier[not set]{func}
-    (
-    )
-  }
+  EXPECT_EQ(str(stmt), R"(Call[not set]{
+  Identifier[not set]{func}
+  (
+  )
+}
 )");
 }
 
@@ -113,15 +111,13 @@ TEST_F(CallExpressionTest, ToStr_WithParams) {
   params.push_back(Expr("param2"));
 
   auto* stmt = create<CallExpression>(func, params);
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  Call[not set]{
-    Identifier[not set]{func}
-    (
-      Identifier[not set]{param1}
-      Identifier[not set]{param2}
-    )
-  }
+  EXPECT_EQ(str(stmt), R"(Call[not set]{
+  Identifier[not set]{func}
+  (
+    Identifier[not set]{param1}
+    Identifier[not set]{param2}
+  )
+}
 )");
 }
 

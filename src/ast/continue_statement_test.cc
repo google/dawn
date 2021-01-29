@@ -41,9 +41,7 @@ TEST_F(ContinueStatementTest, IsValid) {
 
 TEST_F(ContinueStatementTest, ToStr) {
   auto* stmt = create<ContinueStatement>();
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  Continue{}
+  EXPECT_EQ(str(stmt), R"(Continue{}
 )");
 }
 

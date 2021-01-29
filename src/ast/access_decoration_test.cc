@@ -36,9 +36,7 @@ TEST_F(AccessDecorationTest, Is) {
 
 TEST_F(AccessDecorationTest, ToStr) {
   auto* d = create<AccessDecoration>(ast::AccessControl::kReadOnly);
-  std::ostringstream out;
-  d->to_str(Sem(), out, 0);
-  EXPECT_EQ(out.str(), R"(AccessDecoration{read_only}
+  EXPECT_EQ(str(d), R"(AccessDecoration{read_only}
 )");
 }
 

@@ -92,13 +92,10 @@ TEST_F(AssignmentStatementTest, ToStr) {
   auto* rhs = Expr("rhs");
 
   auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-
-  EXPECT_EQ(demangle(out.str()), R"(  Assignment{
-    Identifier[not set]{lhs}
-    Identifier[not set]{rhs}
-  }
+  EXPECT_EQ(str(stmt), R"(Assignment{
+  Identifier[not set]{lhs}
+  Identifier[not set]{rhs}
+}
 )");
 }
 

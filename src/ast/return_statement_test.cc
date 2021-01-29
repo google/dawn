@@ -75,21 +75,17 @@ TEST_F(ReturnStatementTest, IsValid_InvalidValue) {
 TEST_F(ReturnStatementTest, ToStr_WithValue) {
   auto* expr = Expr("expr");
   auto* r = create<ReturnStatement>(expr);
-  std::ostringstream out;
-  r->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  Return{
-    {
-      Identifier[not set]{expr}
-    }
+  EXPECT_EQ(str(r), R"(Return{
+  {
+    Identifier[not set]{expr}
   }
+}
 )");
 }
 
 TEST_F(ReturnStatementTest, ToStr_WithoutValue) {
   auto* r = create<ReturnStatement>();
-  std::ostringstream out;
-  r->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  Return{}
+  EXPECT_EQ(str(r), R"(Return{}
 )");
 }
 

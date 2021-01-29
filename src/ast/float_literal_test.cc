@@ -45,8 +45,7 @@ TEST_F(FloatLiteralTest, Is) {
 
 TEST_F(FloatLiteralTest, ToStr) {
   auto* f = create<FloatLiteral>(ty.f32(), 42.1f);
-
-  EXPECT_EQ(f->to_str(Sem()), "42.099998");
+  EXPECT_EQ(str(f), "42.099998");
 }
 
 TEST_F(FloatLiteralTest, ToName) {

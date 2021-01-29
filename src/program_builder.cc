@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "src/clone_context.h"
+#include "src/demangler.h"
 #include "src/type/struct_type.h"
 
 namespace tint {
@@ -52,6 +53,10 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
 
 bool ProgramBuilder::IsValid() const {
   return !diagnostics_.contains_errors() && ast_->IsValid();
+}
+
+std::string ProgramBuilder::str(const ast::Node* node) const {
+  return Demangler().Demangle(Symbols(), node->str(Sem()));
 }
 
 void ProgramBuilder::MarkAsMoved() {

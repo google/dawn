@@ -59,8 +59,8 @@ TEST_F(BoolLiteralTest, ToStr) {
   auto* t = create<BoolLiteral>(&bool_type, true);
   auto* f = create<BoolLiteral>(&bool_type, false);
 
-  EXPECT_EQ(t->to_str(Sem()), "true");
-  EXPECT_EQ(f->to_str(Sem()), "false");
+  EXPECT_EQ(str(t), "true");
+  EXPECT_EQ(str(f), "false");
 }
 
 }  // namespace

@@ -167,16 +167,14 @@ TEST_F(IfStatementTest, ToStr) {
       create<BlockStatement>(StatementList{create<DiscardStatement>()});
   auto* stmt = create<IfStatement>(cond, body, ElseStatementList{});
 
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  If{
-    (
-      Identifier[not set]{cond}
-    )
-    {
-      Discard{}
-    }
+  EXPECT_EQ(str(stmt), R"(If{
+  (
+    Identifier[not set]{cond}
+  )
+  {
+    Discard{}
   }
+}
 )");
 }
 
@@ -195,30 +193,28 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
           create<ElseStatement>(nullptr, else_body),
       });
 
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  If{
-    (
-      Identifier[not set]{cond}
-    )
-    {
-      Discard{}
-    }
+  EXPECT_EQ(str(stmt), R"(If{
+  (
+    Identifier[not set]{cond}
+  )
+  {
+    Discard{}
   }
-  Else{
-    (
-      Identifier[not set]{ident}
-    )
-    {
-      Discard{}
-    }
+}
+Else{
+  (
+    Identifier[not set]{ident}
+  )
+  {
+    Discard{}
   }
-  Else{
-    {
-      Discard{}
-      Discard{}
-    }
+}
+Else{
+  {
+    Discard{}
+    Discard{}
   }
+}
 )");
 }
 

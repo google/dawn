@@ -3175,7 +3175,7 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
       ident->intrinsic_signature());
   ASSERT_NE(sig, nullptr);
 
-  auto got = to_str(param.function, sig);
+  auto got = ::tint::to_str(param.function, sig);
   auto* expected = expected_texture_overload(param.overload);
   EXPECT_EQ(got, expected);
 }

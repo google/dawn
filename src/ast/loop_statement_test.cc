@@ -170,11 +170,9 @@ TEST_F(LoopStatementTest, ToStr) {
       create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
   auto* l = create<LoopStatement>(body, nullptr);
-  std::ostringstream out;
-  l->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  Loop{
-    Discard{}
-  }
+  EXPECT_EQ(str(l), R"(Loop{
+  Discard{}
+}
 )");
 }
 
@@ -186,14 +184,12 @@ TEST_F(LoopStatementTest, ToStr_WithContinuing) {
       create<BlockStatement>(StatementList{create<DiscardStatement>()});
 
   auto* l = create<LoopStatement>(body, continuing);
-  std::ostringstream out;
-  l->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  Loop{
+  EXPECT_EQ(str(l), R"(Loop{
+  Discard{}
+  continuing {
     Discard{}
-    continuing {
-      Discard{}
-    }
   }
+}
 )");
 }
 

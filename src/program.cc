@@ -19,6 +19,7 @@
 
 #include "src/ast/module.h"
 #include "src/clone_context.h"
+#include "src/demangler.h"
 #include "src/program_builder.h"
 #include "src/type_determiner.h"
 
@@ -98,9 +99,17 @@ bool Program::IsValid() const {
   return is_valid_;
 }
 
-std::string Program::to_str() const {
+std::string Program::to_str(bool demangle) const {
   AssertNotMoved();
-  return ast_->to_str(Sem());
+  auto str = ast_->to_str(Sem());
+  if (demangle) {
+    str = Demangler().Demangle(Symbols(), str);
+  }
+  return str;
+}
+
+std::string Program::str(const ast::Node* node) const {
+  return Demangler().Demangle(Symbols(), node->str(Sem()));
 }
 
 void Program::AssertNotMoved() const {

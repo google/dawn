@@ -69,7 +69,7 @@ inline std::string ToString(const Program& program,
                             const ast::StatementList& stmts) {
   std::ostringstream outs;
   for (const auto* stmt : stmts) {
-    stmt->to_str(program.Sem(), outs, 0);
+    program.to_str(stmt, outs, 0);
   }
   return Demangler().Demangle(program.Symbols(), outs.str());
 }
@@ -82,7 +82,7 @@ inline std::string ToString(ProgramBuilder& builder,
                             const ast::StatementList& stmts) {
   std::ostringstream outs;
   for (const auto* stmt : stmts) {
-    stmt->to_str(builder.Sem(), outs, 0);
+    builder.to_str(stmt, outs, 0);
   }
   return Demangler().Demangle(builder.Symbols(), outs.str());
 }

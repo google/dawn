@@ -1177,7 +1177,7 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
     return EmitUnaryOp(u);
   }
 
-  error_ = "unknown expression type: " + expr->str(program_->Sem());
+  error_ = "unknown expression type: " + program_->str(expr);
   return false;
 }
 
@@ -1844,7 +1844,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(v->variable(), false);
   }
 
-  error_ = "unknown statement type: " + stmt->str(program_->Sem());
+  error_ = "unknown statement type: " + program_->str(stmt);
   return false;
 }
 
@@ -2032,7 +2032,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
         }
         current_offset = offset;
       } else {
-        error_ = "unsupported member decoration: " + deco->str(program_->Sem());
+        error_ = "unsupported member decoration: " + program_->str(deco);
         return false;
       }
     }

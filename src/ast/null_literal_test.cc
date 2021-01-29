@@ -39,8 +39,7 @@ TEST_F(NullLiteralTest, Is) {
 
 TEST_F(NullLiteralTest, ToStr) {
   auto* i = create<NullLiteral>(ty.i32());
-
-  EXPECT_EQ(i->to_str(Sem()), "null __i32");
+  EXPECT_EQ(str(i), "null __i32");
 }
 
 TEST_F(NullLiteralTest, Name_I32) {

@@ -144,7 +144,7 @@ TEST_F(SpvModuleScopeVarParserTest, AnonWorkgroupVar) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     x_52
@@ -163,7 +163,7 @@ TEST_F(SpvModuleScopeVarParserTest, NamedWorkgroupVar) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     the_counter
@@ -182,7 +182,7 @@ TEST_F(SpvModuleScopeVarParserTest, PrivateVar) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     my_own_private_idaho
@@ -201,7 +201,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
@@ -251,7 +251,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_MapsToModuleScopeVec4Var) {
   EXPECT_EQ(position_info.pointer_type_id, 11u);
   EXPECT_EQ(position_info.storage_class, SpvStorageClassOutput);
   EXPECT_EQ(position_info.per_vertex_var_id, 1u);
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
@@ -331,7 +331,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePosition) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
     Assignment{
       Identifier[not set]{gl_Position}
@@ -384,7 +384,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
     Assignment{
       Identifier[not set]{gl_Position}
@@ -415,7 +415,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
     Assignment{
       MemberAccessor[not set]{
@@ -446,7 +446,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   {
     Assignment{
@@ -476,7 +476,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
   Variable{
     Decorations{
@@ -532,7 +532,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
   Variable{
     x_900
@@ -599,7 +599,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
   Variable{
     Decorations{
@@ -650,7 +650,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_Write1_IsErased) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
   Function x_500 -> __void
   ()
@@ -694,7 +694,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_ReadReplaced) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
   Variable{
     x_900
@@ -730,7 +730,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
   Function x_500 -> __void
   ()
@@ -757,7 +757,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
   Function x_500 -> __void
   ()
@@ -861,7 +861,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_1
     private
@@ -918,7 +918,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_1
     private
@@ -967,7 +967,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_1
     private
@@ -1011,7 +1011,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1034,7 +1034,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1057,7 +1057,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1080,7 +1080,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintNullInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1103,7 +1103,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1126,7 +1126,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntNullInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1149,7 +1149,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1172,7 +1172,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatNullInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1195,7 +1195,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1224,7 +1224,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1260,7 +1260,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1296,7 +1296,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1333,7 +1333,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1356,7 +1356,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayNullInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1379,7 +1379,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1404,7 +1404,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1433,7 +1433,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1462,7 +1462,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
@@ -1493,7 +1493,7 @@ TEST_F(SpvModuleScopeVarParserTest, LocationDecoration_Valid) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
@@ -1545,7 +1545,7 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
@@ -1599,7 +1599,7 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
@@ -1653,7 +1653,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   S Struct{
     [[block]]
@@ -1684,7 +1684,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   S Struct{
     [[block]]
@@ -1713,7 +1713,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   S Struct{
     [[block]]
@@ -1762,7 +1762,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   S Struct{
     [[block]]
@@ -1791,7 +1791,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   S Struct{
     [[block]]
@@ -1823,7 +1823,7 @@ TEST_F(
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   S Struct{
     [[block]]
@@ -1847,7 +1847,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
@@ -1872,7 +1872,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
@@ -1897,7 +1897,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
@@ -1922,7 +1922,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
@@ -1947,7 +1947,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
@@ -1973,7 +1973,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     myconst

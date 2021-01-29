@@ -49,9 +49,7 @@ TEST_F(ScalarConstructorExpressionTest, IsValid_MissingLiteral) {
 
 TEST_F(ScalarConstructorExpressionTest, ToStr) {
   auto* c = Expr(true);
-  std::ostringstream out;
-  c->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  ScalarConstructor[not set]{true}
+  EXPECT_EQ(str(c), R"(ScalarConstructor[not set]{true}
 )");
 }
 

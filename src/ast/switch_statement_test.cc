@@ -136,13 +136,11 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
   auto* ident = Expr("ident");
 
   auto* stmt = create<SwitchStatement>(ident, CaseStatementList{});
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  Switch{
-    Identifier[not set]{ident}
-    {
-    }
+  EXPECT_EQ(str(stmt), R"(Switch{
+  Identifier[not set]{ident}
+  {
   }
+}
 )");
 }
 
@@ -156,15 +154,13 @@ TEST_F(SwitchStatementTest, ToStr) {
       create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
 
   auto* stmt = create<SwitchStatement>(ident, body);
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  Switch{
-    Identifier[not set]{ident}
-    {
-      Case 2{
-      }
+  EXPECT_EQ(str(stmt), R"(Switch{
+  Identifier[not set]{ident}
+  {
+    Case 2{
     }
   }
+}
 )");
 }
 

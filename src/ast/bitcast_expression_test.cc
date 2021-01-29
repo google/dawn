@@ -78,12 +78,9 @@ TEST_F(BitcastExpressionTest, ToStr) {
   auto* expr = Expr("expr");
 
   auto* exp = create<BitcastExpression>(ty.f32(), expr);
-  std::ostringstream out;
-  exp->to_str(Sem(), out, 2);
-
-  EXPECT_EQ(demangle(out.str()), R"(  Bitcast[not set]<__f32>{
-    Identifier[not set]{expr}
-  }
+  EXPECT_EQ(str(exp), R"(Bitcast[not set]<__f32>{
+  Identifier[not set]{expr}
+}
 )");
 }
 

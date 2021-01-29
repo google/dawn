@@ -74,16 +74,12 @@ TEST_F(StructMemberTest, IsValid_Null_Decoration) {
 
 TEST_F(StructMemberTest, ToStr) {
   auto* st = Member("a", ty.i32(), {MemberOffset(4)});
-  std::ostringstream out;
-  st->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), "  StructMember{[[ offset 4 ]] a: __i32}\n");
+  EXPECT_EQ(str(st), "StructMember{[[ offset 4 ]] a: __i32}\n");
 }
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {
   auto* st = Member("a", ty.i32());
-  std::ostringstream out;
-  st->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), "  StructMember{a: __i32}\n");
+  EXPECT_EQ(str(st), "StructMember{a: __i32}\n");
 }
 
 }  // namespace

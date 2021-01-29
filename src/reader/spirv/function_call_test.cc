@@ -46,7 +46,7 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  const auto got = p->program().to_str();
+  const auto got = p->program().to_str(false);
   const char* expect = R"(Module{
   Function tint_symbol_1 -> __void
   ()
@@ -217,7 +217,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast_str = Demangler().Demangle(p->program());
+  const auto program_ast_str = p->program().to_str();
   EXPECT_THAT(program_ast_str, HasSubstr(R"(Module{
   Function x_50 -> __u32
   (

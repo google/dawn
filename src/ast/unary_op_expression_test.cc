@@ -68,12 +68,10 @@ TEST_F(UnaryOpExpressionTest, IsValid_InvalidExpression) {
 TEST_F(UnaryOpExpressionTest, ToStr) {
   auto* ident = Expr("ident");
   auto* u = create<UnaryOpExpression>(UnaryOp::kNot, ident);
-  std::ostringstream out;
-  u->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  UnaryOp[not set]{
-    not
-    Identifier[not set]{ident}
-  }
+  EXPECT_EQ(str(u), R"(UnaryOp[not set]{
+  not
+  Identifier[not set]{ident}
+}
 )");
 }
 

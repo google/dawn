@@ -77,12 +77,10 @@ TEST_F(MemberAccessorExpressionTest, IsValid_InvalidMember) {
 TEST_F(MemberAccessorExpressionTest, ToStr) {
   auto* stmt =
       create<MemberAccessorExpression>(Expr("structure"), Expr("member"));
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  MemberAccessor[not set]{
-    Identifier[not set]{structure}
-    Identifier[not set]{member}
-  }
+  EXPECT_EQ(str(stmt), R"(MemberAccessor[not set]{
+  Identifier[not set]{structure}
+  Identifier[not set]{member}
+}
 )");
 }
 

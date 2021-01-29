@@ -16,7 +16,6 @@
 #include <string>
 #include <unordered_set>
 
-#include "src/demangler.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/writer/wgsl/generator.h"
 
@@ -62,8 +61,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::Program dst(src.Clone());
 
   // Expect the demangled AST printed with to_str() to match
-  tint::Demangler d;
-  ASSERT_EQ(d.Demangle(src), d.Demangle(dst));
+  ASSERT_EQ(src.to_str(), dst.to_str());
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<tint::ast::Node*> src_nodes;

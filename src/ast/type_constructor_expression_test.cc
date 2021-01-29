@@ -106,14 +106,12 @@ TEST_F(TypeConstructorExpressionTest, ToStr) {
   expr.push_back(Expr("expr_3"));
 
   auto* t = create<TypeConstructorExpression>(&vec, expr);
-  std::ostringstream out;
-  t->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  TypeConstructor[not set]{
-    __vec_3__f32
-    Identifier[not set]{expr_1}
-    Identifier[not set]{expr_2}
-    Identifier[not set]{expr_3}
-  }
+  EXPECT_EQ(str(t), R"(TypeConstructor[not set]{
+  __vec_3__f32
+  Identifier[not set]{expr_1}
+  Identifier[not set]{expr_2}
+  Identifier[not set]{expr_3}
+}
 )");
 }
 

@@ -92,12 +92,10 @@ TEST_F(StructTest, ToStr) {
   decos.push_back(create<StructBlockDecoration>());
   auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())}, decos);
 
-  std::ostringstream out;
-  s->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(Struct{
-    [[block]]
-    StructMember{a: __i32}
-  }
+  EXPECT_EQ(str(s), R"(Struct{
+  [[block]]
+  StructMember{a: __i32}
+}
 )");
 }
 

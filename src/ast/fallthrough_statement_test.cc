@@ -49,9 +49,7 @@ TEST_F(FallthroughStatementTest, IsValid) {
 
 TEST_F(FallthroughStatementTest, ToStr) {
   auto* stmt = create<FallthroughStatement>();
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  Fallthrough{}
+  EXPECT_EQ(str(stmt), R"(Fallthrough{}
 )");
 }
 

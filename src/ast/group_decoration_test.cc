@@ -39,9 +39,7 @@ TEST_F(GroupDecorationTest, Is) {
 
 TEST_F(GroupDecorationTest, ToStr) {
   auto* d = create<GroupDecoration>(2);
-  std::ostringstream out;
-  d->to_str(Sem(), out, 0);
-  EXPECT_EQ(out.str(), R"(GroupDecoration{2}
+  EXPECT_EQ(str(d), R"(GroupDecoration{2}
 )");
 }
 

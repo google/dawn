@@ -1141,7 +1141,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
     return EmitUnaryOp(pre, out, u);
   }
 
-  error_ = "unknown expression type: " + expr->str(program_->Sem());
+  error_ = "unknown expression type: " + program_->str(expr);
   return false;
 }
 
@@ -2179,7 +2179,7 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
     return EmitVariable(out, v->variable(), false);
   }
 
-  error_ = "unknown statement type: " + stmt->str(program_->Sem());
+  error_ = "unknown statement type: " + program_->str(stmt);
   return false;
 }
 

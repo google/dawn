@@ -150,6 +150,12 @@ class ProgramBuilder {
     return symbols_;
   }
 
+  /// @returns a reference to the program's SymbolTable
+  const SymbolTable& Symbols() const {
+    AssertNotMoved();
+    return symbols_;
+  }
+
   /// @returns a reference to the program's diagnostics
   diag::List& Diagnostics() {
     AssertNotMoved();
@@ -174,6 +180,20 @@ class ProgramBuilder {
   /// @returns true if the program has no error diagnostics and is not missing
   /// information
   bool IsValid() const;
+
+  /// Writes a representation of the node to the output stream
+  /// @note unlike str(), to_str() does not automatically demangle the string.
+  /// @param node the AST node
+  /// @param out the stream to write to
+  /// @param indent number of spaces to indent the node when writing
+  void to_str(const ast::Node* node, std::ostream& out, size_t indent) const {
+    node->to_str(Sem(), out, indent);
+  }
+
+  /// Returns a demangled, string representation of `node`.
+  /// @param node the AST node
+  /// @returns a string representation of the node
+  std::string str(const ast::Node* node) const;
 
   /// creates a new ast::Node owned by the Module. When the Module is
   /// destructed, the ast::Node will also be destructed.

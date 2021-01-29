@@ -70,15 +70,13 @@ TEST_F(VariableDeclStatementTest, ToStr) {
 
   auto* stmt =
       create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
-  std::ostringstream out;
-  stmt->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  VariableDeclStatement{
-    Variable{
-      a
-      none
-      __f32
-    }
+  EXPECT_EQ(str(stmt), R"(VariableDeclStatement{
+  Variable{
+    a
+    none
+    __f32
   }
+}
 )");
 }
 

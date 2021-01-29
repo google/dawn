@@ -114,16 +114,14 @@ TEST_F(ElseStatementTest, ToStr) {
       create<DiscardStatement>(),
   });
   auto* e = create<ElseStatement>(cond, body);
-  std::ostringstream out;
-  e->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  Else{
-    (
-      ScalarConstructor[not set]{true}
-    )
-    {
-      Discard{}
-    }
+  EXPECT_EQ(str(e), R"(Else{
+  (
+    ScalarConstructor[not set]{true}
+  )
+  {
+    Discard{}
   }
+}
 )");
 }
 
@@ -132,13 +130,11 @@ TEST_F(ElseStatementTest, ToStr_NoCondition) {
       create<DiscardStatement>(),
   });
   auto* e = create<ElseStatement>(nullptr, body);
-  std::ostringstream out;
-  e->to_str(Sem(), out, 2);
-  EXPECT_EQ(out.str(), R"(  Else{
-    {
-      Discard{}
-    }
+  EXPECT_EQ(str(e), R"(Else{
+  {
+    Discard{}
   }
+}
 )");
 }
 

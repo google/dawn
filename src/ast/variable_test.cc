@@ -102,13 +102,11 @@ TEST_F(VariableTest, IsValid_InvalidConstructor) {
 TEST_F(VariableTest, to_str) {
   auto* v = Var("my_var", StorageClass::kFunction, ty.f32(), nullptr,
                 ast::VariableDecorationList{});
-  std::ostringstream out;
-  v->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  Variable{
-    my_var
-    function
-    __f32
-  }
+  EXPECT_EQ(str(v), R"(Variable{
+  my_var
+  function
+  __f32
+}
 )");
 }
 
@@ -145,20 +143,18 @@ TEST_F(VariableTest, Decorated_to_str) {
                       create<GroupDecoration>(1),
                   });
 
-  std::ostringstream out;
-  var->to_str(Sem(), out, 2);
-  EXPECT_EQ(demangle(out.str()), R"(  Variable{
-    Decorations{
-      BindingDecoration{2}
-      GroupDecoration{1}
-    }
-    my_var
-    function
-    __f32
-    {
-      Identifier[not set]{expr}
-    }
+  EXPECT_EQ(str(var), R"(Variable{
+  Decorations{
+    BindingDecoration{2}
+    GroupDecoration{1}
   }
+  my_var
+  function
+  __f32
+  {
+    Identifier[not set]{expr}
+  }
+}
 )");
 }
 

@@ -289,7 +289,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   }
 
   set_error(stmt->source(), "unknown statement type for type determination: " +
-                                stmt->str(builder_->Sem()));
+                                builder_->str(stmt));
   return false;
 }
 

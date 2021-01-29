@@ -800,7 +800,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << assembly << p->error();
-  const auto module_str = Demangler().Demangle(p->program());
+  const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
   RTArr -> __array__u32_stride_4
   S Struct{
