@@ -23,6 +23,7 @@
 #include "dawn_wire/WireServer.h"
 #include "utils/TerribleCommandBuffer.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <set>
