@@ -38,6 +38,7 @@
 #include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
 #include "src/semantic/info.h"
+#include "src/semantic/node.h"
 #include "src/symbol_table.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -61,8 +62,11 @@ class CloneContext;
 /// Program.
 class ProgramBuilder {
  public:
-  /// ASTNodes is an alias to BlockAllocator<ast::Node>
-  using ASTNodes = BlockAllocator<ast::Node>;
+  /// ASTNodeAllocator is an alias to BlockAllocator<ast::Node>
+  using ASTNodeAllocator = BlockAllocator<ast::Node>;
+
+  /// SemNodeAllocator is an alias to BlockAllocator<semantic::Node>
+  using SemNodeAllocator = BlockAllocator<semantic::Node>;
 
   /// `i32` is a type alias to `int`.
   /// Useful for passing to template methods such as `vec2<i32>()` to imitate
@@ -121,15 +125,27 @@ class ProgramBuilder {
   }
 
   /// @returns a reference to the program's AST nodes storage
-  ASTNodes& Nodes() {
+  ASTNodeAllocator& ASTNodes() {
     AssertNotMoved();
-    return nodes_;
+    return ast_nodes_;
   }
 
   /// @returns a reference to the program's AST nodes storage
-  const ASTNodes& Nodes() const {
+  const ASTNodeAllocator& ASTNodes() const {
     AssertNotMoved();
-    return nodes_;
+    return ast_nodes_;
+  }
+
+  /// @returns a reference to the program's semantic nodes storage
+  SemNodeAllocator& SemNodes() {
+    AssertNotMoved();
+    return sem_nodes_;
+  }
+
+  /// @returns a reference to the program's semantic nodes storage
+  const SemNodeAllocator& SemNodes() const {
+    AssertNotMoved();
+    return sem_nodes_;
   }
 
   /// @returns a reference to the program's AST root Module
@@ -207,8 +223,8 @@ class ProgramBuilder {
   /// @returns a string representation of the node
   std::string str(const ast::Node* node) const;
 
-  /// creates a new ast::Node owned by the Module. When the Module is
-  /// destructed, the ast::Node will also be destructed.
+  /// Creates a new ast::Node owned by the ProgramBuilder. When the
+  /// ProgramBuilder is destructed, the ast::Node will also be destructed.
   /// @param source the Source of the node
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
@@ -216,24 +232,26 @@ class ProgramBuilder {
   traits::EnableIfIsType<T, ast::Node>* create(const Source& source,
                                                ARGS&&... args) {
     AssertNotMoved();
-    return nodes_.Create<T>(source, std::forward<ARGS>(args)...);
+    return ast_nodes_.Create<T>(source, std::forward<ARGS>(args)...);
   }
 
-  /// creates a new ast::Node owned by the Module, injecting the current Source
-  /// as set by the last call to SetSource() as the only argument to the
+  /// Creates a new ast::Node owned by the ProgramBuilder, injecting the current
+  /// Source as set by the last call to SetSource() as the only argument to the
   /// constructor.
-  /// When the Module is destructed, the ast::Node will also be destructed.
+  /// When the ProgramBuilder is destructed, the ast::Node will also be
+  /// destructed.
   /// @returns the node pointer
   template <typename T>
   traits::EnableIfIsType<T, ast::Node>* create() {
     AssertNotMoved();
-    return nodes_.Create<T>(source_);
+    return ast_nodes_.Create<T>(source_);
   }
 
-  /// creates a new ast::Node owned by the Module, injecting the current Source
-  /// as set by the last call to SetSource() as the first argument to the
+  /// Creates a new ast::Node owned by the ProgramBuilder, injecting the current
+  /// Source as set by the last call to SetSource() as the first argument to the
   /// constructor.
-  /// When the Module is destructed, the ast::Node will also be destructed.
+  /// When the ProgramBuilder is destructed, the ast::Node will also be
+  /// destructed.
   /// @param arg0 the first arguments to pass to the type constructor
   /// @param args the remaining arguments to pass to the type constructor
   /// @returns the node pointer
@@ -244,13 +262,24 @@ class ProgramBuilder {
                    T>*
   create(ARG0&& arg0, ARGS&&... args) {
     AssertNotMoved();
-    return nodes_.Create<T>(source_, std::forward<ARG0>(arg0),
-                            std::forward<ARGS>(args)...);
+    return ast_nodes_.Create<T>(source_, std::forward<ARG0>(arg0),
+                                std::forward<ARGS>(args)...);
   }
 
-  /// creates a new type::Type owned by the Module.
-  /// When the Module is destructed, owned Module and the returned
-  /// `Type` will also be destructed.
+  /// Creates a new semantic::Node owned by the ProgramBuilder.
+  /// When the ProgramBuilder is destructed, the semantic::Node will also be
+  /// destructed.
+  /// @param args the arguments to pass to the type constructor
+  /// @returns the node pointer
+  template <typename T, typename... ARGS>
+  traits::EnableIfIsType<T, semantic::Node>* create(ARGS&&... args) {
+    AssertNotMoved();
+    return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
+  }
+
+  /// Creates a new type::Type owned by the ProgramBuilder.
+  /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
+  /// returned`Type` will also be destructed.
   /// Types are unique (de-aliased), and so calling create() for the same `T`
   /// and arguments will return the same pointer.
   /// @warning Use this method to acquire a type only if all of its type
@@ -920,7 +949,8 @@ class ProgramBuilder {
 
  private:
   type::Manager types_;
-  ASTNodes nodes_;
+  ASTNodeAllocator ast_nodes_;
+  SemNodeAllocator sem_nodes_;
   ast::Module* ast_;
   semantic::Info sem_;
   SymbolTable symbols_;

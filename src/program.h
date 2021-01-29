@@ -20,6 +20,7 @@
 #include "src/ast/function.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/semantic/info.h"
+#include "src/semantic/node.h"
 #include "src/symbol_table.h"
 #include "src/type/type_manager.h"
 
@@ -37,8 +38,11 @@ class Module;
 /// Program holds the AST, Type information and SymbolTable for a tint program.
 class Program {
  public:
-  /// ASTNodes is an alias to BlockAllocator<ast::Node>
-  using ASTNodes = BlockAllocator<ast::Node>;
+  /// ASTNodeAllocator is an alias to BlockAllocator<ast::Node>
+  using ASTNodeAllocator = BlockAllocator<ast::Node>;
+
+  /// SemNodeAllocator is an alias to BlockAllocator<semantic::Node>
+  using SemNodeAllocator = BlockAllocator<semantic::Node>;
 
   /// Constructor
   Program();
@@ -66,9 +70,15 @@ class Program {
   }
 
   /// @returns a reference to the program's AST nodes storage
-  const ASTNodes& Nodes() const {
+  const ASTNodeAllocator& ASTNodes() const {
     AssertNotMoved();
-    return nodes_;
+    return ast_nodes_;
+  }
+
+  /// @returns a reference to the program's semantic nodes storage
+  const SemNodeAllocator& SemNodes() const {
+    AssertNotMoved();
+    return sem_nodes_;
   }
 
   /// @returns a reference to the program's AST root Module
@@ -134,7 +144,8 @@ class Program {
   void AssertNotMoved() const;
 
   type::Manager types_;
-  ASTNodes nodes_;
+  ASTNodeAllocator ast_nodes_;
+  SemNodeAllocator sem_nodes_;
   ast::Module* ast_;
   semantic::Info sem_;
   SymbolTable symbols_;

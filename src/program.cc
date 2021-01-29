@@ -29,7 +29,8 @@ Program::Program() = default;
 
 Program::Program(Program&& program)
     : types_(std::move(program.types_)),
-      nodes_(std::move(program.nodes_)),
+      ast_nodes_(std::move(program.ast_nodes_)),
+      sem_nodes_(std::move(program.sem_nodes_)),
       ast_(std::move(program.ast_)),
       sem_(std::move(program.sem_)),
       symbols_(std::move(program.symbols_)),
@@ -51,10 +52,11 @@ Program::Program(ProgramBuilder&& builder) {
   // The above must be called *before* the calls to std::move() below
 
   types_ = std::move(builder.Types());
-  nodes_ = std::move(builder.Nodes());
-  ast_ = nodes_.Create<ast::Module>(Source{}, builder.AST().ConstructedTypes(),
-                                    builder.AST().Functions(),
-                                    builder.AST().GlobalVariables());
+  ast_nodes_ = std::move(builder.ASTNodes());
+  sem_nodes_ = std::move(builder.SemNodes());
+  ast_ = ast_nodes_.Create<ast::Module>(
+      Source{}, builder.AST().ConstructedTypes(), builder.AST().Functions(),
+      builder.AST().GlobalVariables());
   sem_ = std::move(builder.Sem());
   symbols_ = std::move(builder.Symbols());
   diagnostics_ = std::move(builder.Diagnostics());
@@ -74,7 +76,8 @@ Program& Program::operator=(Program&& program) {
   program.AssertNotMoved();
   program.moved_ = true;
   types_ = std::move(program.types_);
-  nodes_ = std::move(program.nodes_);
+  ast_nodes_ = std::move(program.ast_nodes_);
+  sem_nodes_ = std::move(program.sem_nodes_);
   ast_ = std::move(program.ast_);
   sem_ = std::move(program.sem_);
   symbols_ = std::move(program.symbols_);

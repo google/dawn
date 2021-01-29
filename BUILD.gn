@@ -379,6 +379,7 @@ source_set("libtint_core_src") {
     "src/reader/reader.h",
     "src/scope_stack.h",
     "src/semantic/info.h",
+    "src/semantic/node.h",
     "src/semantic/sem_info.cc",
     "src/source.cc",
     "src/source.h",

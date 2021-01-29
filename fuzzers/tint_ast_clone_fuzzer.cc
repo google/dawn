@@ -65,14 +65,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<tint::ast::Node*> src_nodes;
-  for (auto* src_node : src.Nodes().Objects()) {
+  for (auto* src_node : src.ASTNodes().Objects()) {
     src_nodes.emplace(src_node);
   }
   std::unordered_set<tint::type::Type*> src_types;
   for (auto* src_type : src.Types()) {
     src_types.emplace(src_type);
   }
-  for (auto* dst_node : dst.Nodes().Objects()) {
+  for (auto* dst_node : dst.ASTNodes().Objects()) {
     ASSERT_EQ(src_nodes.count(dst_node), 0u);
   }
   for (auto* dst_type : dst.Types()) {

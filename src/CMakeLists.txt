@@ -193,6 +193,7 @@ set(TINT_LIB_SRCS
   reader/reader.h
   scope_stack.h
   semantic/info.h
+  semantic/node.h
   semantic/sem_info.cc
   source.cc
   source.h
