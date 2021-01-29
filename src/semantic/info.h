@@ -35,6 +35,18 @@ class Info {
   /// @param rhs the Program to move
   /// @return this Program
   Info& operator=(Info&& rhs);
+
+  /// Wrap returns a new Info created with the contents of `inner`.
+  /// The Info returned by Wrap is intended to temporarily extend the contents
+  /// of an existing immutable Info.
+  /// As the copied contents are owned by `inner`, `inner` must not be
+  /// destructed or assigned while using the returned Info.
+  /// @param inner the immutable Info to extend
+  /// @return the Info that wraps `inner`
+  static Info Wrap(const Info& inner) {
+    (void)inner;
+    return Info();
+  }
 };
 
 }  // namespace semantic

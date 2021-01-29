@@ -450,6 +450,7 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     namer_test.cc
     program_test.cc
+    program_builder_test.cc
     scope_stack_test.cc
     symbol_table_test.cc
     symbol_test.cc

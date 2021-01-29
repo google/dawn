@@ -43,7 +43,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/scope_stack.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
@@ -488,8 +488,7 @@ class Builder {
   /// automatically.
   Operand result_op();
 
-  const Program* program_;
-  type::Manager type_mgr_;
+  ProgramBuilder builder_;
   std::string error_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;

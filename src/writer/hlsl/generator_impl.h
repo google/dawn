@@ -39,7 +39,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/program.h"
+#include "src/program_builder.h"
 #include "src/scope_stack.h"
 #include "src/type/struct_type.h"
 #include "src/writer/hlsl/namer.h"
@@ -394,8 +394,7 @@ class GeneratorImpl {
   size_t indent_ = 0;
 
   Namer namer_;
-  const Program* program_ = nullptr;
-  type::Manager types_;
+  ProgramBuilder builder_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   uint32_t loop_emission_counter_ = 0;

@@ -96,6 +96,18 @@ class ProgramBuilder {
   /// @return this builder
   ProgramBuilder& operator=(ProgramBuilder&& rhs);
 
+  /// Wrap returns a new ProgramBuilder wrapping the Program `program` without
+  /// making a deep clone of the Program contents.
+  /// ProgramBuilder returned by Wrap() is intended to temporarily extend an
+  /// existing immutable program.
+  /// As the returned ProgramBuilder wraps `program`, `program` must not be
+  /// destructed or assigned while using the returned ProgramBuilder.
+  /// TODO(bclayton) - Evaluate whether there are safer alternatives to this
+  /// function. See crbug.com/tint/460.
+  /// @param program the immutable Program to wrap
+  /// @return the ProgramBuilder that wraps `program`
+  static ProgramBuilder Wrap(const Program* program);
+
   /// @returns a reference to the program's types
   type::Manager& Types() {
     AssertNotMoved();

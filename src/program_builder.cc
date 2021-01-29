@@ -51,6 +51,18 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
   return *this;
 }
 
+ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
+  ProgramBuilder builder;
+  builder.types_ = type::Manager::Wrap(program->Types());
+  builder.ast_ = builder.create<ast::Module>(
+      program->AST().source(), program->AST().ConstructedTypes(),
+      program->AST().Functions(), program->AST().GlobalVariables());
+  builder.sem_ = semantic::Info::Wrap(program->Sem());
+  builder.symbols_ = program->Symbols();
+  builder.diagnostics_ = program->Diagnostics();
+  return builder;
+}
+
 bool ProgramBuilder::IsValid() const {
   return !diagnostics_.contains_errors() && ast_->IsValid();
 }

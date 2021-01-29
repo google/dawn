@@ -68,6 +68,8 @@ class Manager {
   /// of an existing immutable Manager.
   /// As the copied types are owned by `inner`, `inner` must not be destructed
   /// or assigned while using the returned Manager.
+  /// TODO(bclayton) - Evaluate whether there are safer alternatives to this
+  /// function. See crbug.com/tint/460.
   /// @param inner the immutable Manager to extend
   /// @return the Manager that wraps `inner`
   static Manager Wrap(const Manager& inner) {

@@ -15,9 +15,7 @@
 #ifndef SRC_WRITER_APPEND_VECTOR_H_
 #define SRC_WRITER_APPEND_VECTOR_H_
 
-#include <functional>
-
-#include "src/source.h"
+#include "src/program_builder.h"
 
 namespace tint {
 
@@ -32,20 +30,16 @@ namespace writer {
 /// AppendVector is used to generate texture intrinsic function calls for
 /// backends that expect the texture coordinates to be packed with an additional
 /// mip-level or array-index parameter.
-/// AppendVector() calls the `callback` function with a vector
-/// expression containing the elements of `vector` followed by the single
-/// element of `scalar` cast to the `vector` element type.
 /// All types must have been assigned to the expressions and their child nodes
 /// before calling.
+/// @param builder the program builder.
 /// @param vector the vector to be appended. May be a scalar, `vec2` or `vec3`.
 /// @param scalar the scalar to append to the vector. Must be a scalar.
-/// @param callback the function called with the packed result. Note that the
-/// pointer argument is only valid for the duration of the call.
-/// @returns the value returned by `callback` to indicate success
-bool AppendVector(
-    ast::Expression* vector,
-    ast::Expression* scalar,
-    std::function<bool(ast::TypeConstructorExpression*)> callback);
+/// @returns a vector expression containing the elements of `vector` followed by
+/// the single element of `scalar` cast to the `vector` element type.
+ast::TypeConstructorExpression* AppendVector(ProgramBuilder* builder,
+                                             ast::Expression* vector,
+                                             ast::Expression* scalar);
 
 }  // namespace writer
 }  // namespace tint

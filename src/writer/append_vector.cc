@@ -18,6 +18,7 @@
 
 #include "src/ast/expression.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/semantic/info.h"
 #include "src/type/vector_type.h"
 
 namespace tint {
@@ -36,10 +37,9 @@ ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
 
 }  // namespace
 
-bool AppendVector(
-    ast::Expression* vector,
-    ast::Expression* scalar,
-    std::function<bool(ast::TypeConstructorExpression*)> callback) {
+ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
+                                             ast::Expression* vector,
+                                             ast::Expression* scalar) {
   uint32_t packed_size;
   type::Type* packed_el_ty;  // Currently must be f32.
   if (auto* vec = vector->result_type()->As<type::Vector>()) {
@@ -51,14 +51,14 @@ bool AppendVector(
   }
 
   if (!packed_el_ty) {
-    return false;  // missing type info
+    return nullptr;  // missing type info
   }
 
   // Cast scalar to the vector element type
-  ast::TypeConstructorExpression scalar_cast(Source{}, packed_el_ty, {scalar});
-  scalar_cast.set_result_type(packed_el_ty);
+  auto* scalar_cast = b->Construct(packed_el_ty, scalar);
+  scalar_cast->set_result_type(packed_el_ty);
 
-  type::Vector packed_ty(packed_el_ty, packed_size);
+  auto* packed_ty = b->create<type::Vector>(packed_el_ty, packed_size);
 
   // If the coordinates are already passed in a vector constructor, extract
   // the elements into the new vector instead of nesting a vector-in-vector.
@@ -69,16 +69,15 @@ bool AppendVector(
     packed.emplace_back(vector);
   }
   if (packed_el_ty != scalar->result_type()) {
-    packed.emplace_back(&scalar_cast);
+    packed.emplace_back(scalar_cast);
   } else {
     packed.emplace_back(scalar);
   }
 
-  ast::TypeConstructorExpression constructor{Source{}, &packed_ty,
-                                             std::move(packed)};
-  constructor.set_result_type(&packed_ty);
+  auto* constructor = b->Construct(packed_ty, std::move(packed));
+  constructor->set_result_type(packed_ty);
 
-  return callback(&constructor);
+  return constructor;
 }
 
 }  // namespace writer

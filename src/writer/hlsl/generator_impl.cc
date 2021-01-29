@@ -128,7 +128,7 @@ const char* image_format_to_rwtexture_type(type::ImageFormat image_format) {
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(const Program* program)
-    : program_(program), types_(type::Manager::Wrap(program->Types())) {}
+    : builder_(ProgramBuilder::Wrap(program)) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -139,20 +139,20 @@ void GeneratorImpl::make_indent(std::ostream& out) {
 }
 
 bool GeneratorImpl::Generate(std::ostream& out) {
-  for (auto* global : program_->AST().GlobalVariables()) {
+  for (auto* global : builder_.AST().GlobalVariables()) {
     register_global(global);
   }
 
-  for (auto* const ty : program_->AST().ConstructedTypes()) {
+  for (auto* const ty : builder_.AST().ConstructedTypes()) {
     if (!EmitConstructedType(out, ty)) {
       return false;
     }
   }
-  if (!program_->AST().ConstructedTypes().empty()) {
+  if (!builder_.AST().ConstructedTypes().empty()) {
     out << std::endl;
   }
 
-  for (auto* var : program_->AST().GlobalVariables()) {
+  for (auto* var : builder_.AST().GlobalVariables()) {
     if (!var->is_const()) {
       continue;
     }
@@ -163,7 +163,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
 
   std::unordered_set<Symbol> emitted_globals;
   // Make sure all entry point data is emitted before the entry point functions
-  for (auto* func : program_->AST().Functions()) {
+  for (auto* func : builder_.AST().Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -173,13 +173,13 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     }
   }
 
-  for (auto* func : program_->AST().Functions()) {
+  for (auto* func : builder_.AST().Functions()) {
     if (!EmitFunction(out, func)) {
       return false;
     }
   }
 
-  for (auto* func : program_->AST().Functions()) {
+  for (auto* func : builder_.AST().Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
     }
@@ -236,7 +236,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     // generate a secondary struct with the new name.
     if (auto* str = alias->type()->As<type::Struct>()) {
       if (!EmitStructType(out, str,
-                          program_->Symbols().NameFor(alias->symbol()))) {
+                          builder_.Symbols().NameFor(alias->symbol()))) {
         return false;
       }
       return true;
@@ -245,10 +245,10 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     if (!EmitType(out, alias->type(), "")) {
       return false;
     }
-    out << " " << namer_.NameFor(program_->Symbols().NameFor(alias->symbol()))
+    out << " " << namer_.NameFor(builder_.Symbols().NameFor(alias->symbol()))
         << ";" << std::endl;
   } else if (auto* str = ty->As<type::Struct>()) {
-    if (!EmitStructType(out, str, program_->Symbols().NameFor(str->symbol()))) {
+    if (!EmitStructType(out, str, builder_.Symbols().NameFor(str->symbol()))) {
       return false;
     }
   } else {
@@ -627,7 +627,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     return true;
   }
 
-  auto name = program_->Symbols().NameFor(ident->symbol());
+  auto name = builder_.Symbols().NameFor(ident->symbol());
   auto caller_sym = ident->symbol();
   auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
                                         caller_sym.to_str());
@@ -635,10 +635,10 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     name = it->second;
   }
 
-  auto* func = program_->AST().Functions().Find(ident->symbol());
+  auto* func = builder_.AST().Functions().Find(ident->symbol());
   if (func == nullptr) {
     error_ = "Unable to find function: " +
-             program_->Symbols().NameFor(ident->symbol());
+             builder_.Symbols().NameFor(ident->symbol());
     return false;
   }
 
@@ -872,7 +872,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
-               program_->Symbols().NameFor(ident->symbol()) + "'";
+               builder_.Symbols().NameFor(ident->symbol()) + "'";
       return false;
   }
 
@@ -885,28 +885,25 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto* param_coords = params[pidx.coords];
 
   auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
-    auto* i32 = types_.Get<type::I32>();
-    ast::SintLiteral zero_lit(Source{}, i32, 0);
-    ast::ScalarConstructorExpression zero(Source{}, &zero_lit);
-    zero.set_result_type(i32);
-    return AppendVector(vector, &zero,
-                        [&](ast::TypeConstructorExpression* packed) {
-                          return EmitExpression(pre, out, packed);
-                        });
+    auto* i32 = builder_.create<type::I32>();
+    auto* zero = builder_.Expr(0);
+    zero->set_result_type(i32);
+    auto* packed = AppendVector(&builder_, vector, zero);
+    return EmitExpression(pre, out, packed);
   };
 
   if (pidx.array_index != kNotUsed) {
     // Array index needs to be appended to the coordinates.
     auto* param_array_index = params[pidx.array_index];
-    if (!AppendVector(param_coords, param_array_index,
-                      [&](ast::TypeConstructorExpression* packed) {
-                        if (pack_mip_in_coords) {
-                          return emit_vector_appended_with_i32_zero(packed);
-                        } else {
-                          return EmitExpression(pre, out, packed);
-                        }
-                      })) {
-      return false;
+    auto* packed = AppendVector(&builder_, param_coords, param_array_index);
+    if (pack_mip_in_coords) {
+      if (!emit_vector_appended_with_i32_zero(packed)) {
+        return false;
+      }
+    } else {
+      if (!EmitExpression(pre, out, packed)) {
+        return false;
+      }
     }
   } else if (pack_mip_in_coords) {
     // Mip level needs to be appended to the coordinates, but is always zero.
@@ -935,7 +932,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   }
 
   return true;
-}
+}  // namespace hlsl
 
 std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
   std::string out;
@@ -975,7 +972,7 @@ std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
     case ast::Intrinsic::kMax:
     case ast::Intrinsic::kMin:
     case ast::Intrinsic::kClamp:
-      out = program_->Symbols().NameFor(ident->symbol());
+      out = builder_.Symbols().NameFor(ident->symbol());
       break;
     case ast::Intrinsic::kFaceForward:
       out = "faceforward";
@@ -991,7 +988,7 @@ std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
       break;
     default:
       error_ = "Unknown builtin method: " +
-               program_->Symbols().NameFor(ident->symbol());
+               builder_.Symbols().NameFor(ident->symbol());
       return "";
   }
 
@@ -1141,7 +1138,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
     return EmitUnaryOp(pre, out, u);
   }
 
-  error_ = "unknown expression type: " + program_->str(expr);
+  error_ = "unknown expression type: " + builder_.str(expr);
   return false;
 }
 
@@ -1174,9 +1171,9 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
 
   // Swizzles output the name directly
   if (ident->IsSwizzle()) {
-    out << program_->Symbols().NameFor(ident->symbol());
+    out << builder_.Symbols().NameFor(ident->symbol());
   } else {
-    out << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
+    out << namer_.NameFor(builder_.Symbols().NameFor(ident->symbol()));
   }
 
   return true;
@@ -1339,12 +1336,12 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     auto ep_name = ep_sym.to_str();
     // TODO(dsinclair): The SymbolToName should go away and just use
     // to_str() here when the conversion is complete.
-    name = generate_name(program_->Symbols().NameFor(func->symbol()) + "_" +
-                         program_->Symbols().NameFor(ep_sym));
+    name = generate_name(builder_.Symbols().NameFor(func->symbol()) + "_" +
+                         builder_.Symbols().NameFor(ep_sym));
     ep_func_name_remapped_[ep_name + "_" + func_name] = name;
   } else {
     // TODO(dsinclair): this should be updated to a remapped name
-    name = namer_.NameFor(program_->Symbols().NameFor(func->symbol()));
+    name = namer_.NameFor(builder_.Symbols().NameFor(func->symbol()));
   }
 
   out << name << "(";
@@ -1380,12 +1377,12 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     }
     first = false;
 
-    if (!EmitType(out, v->type(), program_->Symbols().NameFor(v->symbol()))) {
+    if (!EmitType(out, v->type(), builder_.Symbols().NameFor(v->symbol()))) {
       return false;
     }
     // Array name is output as part of the type
     if (!v->type()->Is<type::Array>()) {
-      out << " " << program_->Symbols().NameFor(v->symbol());
+      out << " " << builder_.Symbols().NameFor(v->symbol());
     }
   }
 
@@ -1439,7 +1436,7 @@ bool GeneratorImpl::EmitEntryPointData(
     auto* binding = data.second.binding;
     if (binding == nullptr) {
       error_ = "unable to find binding information for uniform: " +
-               program_->Symbols().NameFor(var->symbol());
+               builder_.Symbols().NameFor(var->symbol());
       return false;
     }
     // auto* set = data.second.set;
@@ -1453,8 +1450,8 @@ bool GeneratorImpl::EmitEntryPointData(
 
     auto* type = var->type()->UnwrapIfNeeded();
     if (auto* strct = type->As<type::Struct>()) {
-      out << "ConstantBuffer<" << program_->Symbols().NameFor(strct->symbol())
-          << "> " << program_->Symbols().NameFor(var->symbol())
+      out << "ConstantBuffer<" << builder_.Symbols().NameFor(strct->symbol())
+          << "> " << builder_.Symbols().NameFor(var->symbol())
           << " : register(b" << binding->value() << ");" << std::endl;
     } else {
       // TODO(dsinclair): There is outstanding spec work to require all uniform
@@ -1463,7 +1460,7 @@ bool GeneratorImpl::EmitEntryPointData(
       // is not a block.
       // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
       //           https://github.com/gpuweb/gpuweb/issues/1008
-      auto name = "cbuffer_" + program_->Symbols().NameFor(var->symbol());
+      auto name = "cbuffer_" + builder_.Symbols().NameFor(var->symbol());
       out << "cbuffer " << name << " : register(b" << binding->value() << ") {"
           << std::endl;
 
@@ -1472,7 +1469,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, type, "")) {
         return false;
       }
-      out << " " << program_->Symbols().NameFor(var->symbol()) << ";"
+      out << " " << builder_.Symbols().NameFor(var->symbol()) << ";"
           << std::endl;
       decrement_indent();
       out << "};" << std::endl;
@@ -1505,7 +1502,7 @@ bool GeneratorImpl::EmitEntryPointData(
     if (ac->IsReadWrite()) {
       out << "RW";
     }
-    out << "ByteAddressBuffer " << program_->Symbols().NameFor(var->symbol())
+    out << "ByteAddressBuffer " << builder_.Symbols().NameFor(var->symbol())
         << " : register(u" << binding->value() << ");" << std::endl;
     emitted_storagebuffer = true;
   }
@@ -1514,9 +1511,8 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   if (!in_variables.empty()) {
-    auto in_struct_name =
-        generate_name(program_->Symbols().NameFor(func->symbol()) + "_" +
-                      kInStructNameSuffix);
+    auto in_struct_name = generate_name(
+        builder_.Symbols().NameFor(func->symbol()) + "_" + kInStructNameSuffix);
     auto in_var_name = generate_name(kTintStructInVarPrefix);
     ep_sym_to_in_data_[func->symbol()] = {in_struct_name, in_var_name};
 
@@ -1531,11 +1527,11 @@ bool GeneratorImpl::EmitEntryPointData(
 
       make_indent(out);
       if (!EmitType(out, var->type(),
-                    program_->Symbols().NameFor(var->symbol()))) {
+                    builder_.Symbols().NameFor(var->symbol()))) {
         return false;
       }
 
-      out << " " << program_->Symbols().NameFor(var->symbol()) << " : ";
+      out << " " << builder_.Symbols().NameFor(var->symbol()) << " : ";
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
           error_ = "invalid location variable for pipeline stage";
@@ -1563,7 +1559,7 @@ bool GeneratorImpl::EmitEntryPointData(
 
   if (!outvariables.empty()) {
     auto outstruct_name =
-        generate_name(program_->Symbols().NameFor(func->symbol()) + "_" +
+        generate_name(builder_.Symbols().NameFor(func->symbol()) + "_" +
                       kOutStructNameSuffix);
     auto outvar_name = generate_name(kTintStructOutVarPrefix);
     ep_sym_to_out_data_[func->symbol()] = {outstruct_name, outvar_name};
@@ -1578,11 +1574,11 @@ bool GeneratorImpl::EmitEntryPointData(
 
       make_indent(out);
       if (!EmitType(out, var->type(),
-                    program_->Symbols().NameFor(var->symbol()))) {
+                    builder_.Symbols().NameFor(var->symbol()))) {
         return false;
       }
 
-      out << " " << program_->Symbols().NameFor(var->symbol()) << " : ";
+      out << " " << builder_.Symbols().NameFor(var->symbol()) << " : ";
 
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         auto loc = location->value();
@@ -1665,7 +1661,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     out << "void";
   }
   // TODO(dsinclair): This should output the remapped name
-  out << " " << namer_.NameFor(program_->Symbols().NameFor(current_ep_sym_))
+  out << " " << namer_.NameFor(builder_.Symbols().NameFor(current_ep_sym_))
       << "(";
 
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
@@ -1814,7 +1810,7 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
         }
         out << pre.str();
 
-        out << program_->Symbols().NameFor(var->symbol()) << " = ";
+        out << builder_.Symbols().NameFor(var->symbol()) << " = ";
         if (var->constructor() != nullptr) {
           out << constructor_out.str();
         } else {
@@ -1877,7 +1873,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         //
         // This must be a single element swizzle if we've got a vector at this
         // point.
-        if (program_->Symbols().NameFor(mem->member()->symbol()).size() != 1) {
+        if (builder_.Symbols().NameFor(mem->member()->symbol()).size() != 1) {
           error_ =
               "Encountered multi-element swizzle when should have only one "
               "level";
@@ -1889,7 +1885,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // f64 types.
         out << "(4 * "
             << convert_swizzle_to_index(
-                   program_->Symbols().NameFor(mem->member()->symbol()))
+                   builder_.Symbols().NameFor(mem->member()->symbol()))
             << ")";
       } else {
         error_ =
@@ -2068,7 +2064,7 @@ bool GeneratorImpl::is_storage_buffer_access(
   // If the data is a multi-element swizzle then we will not load the swizzle
   // portion through the Load command.
   if (data_type->Is<type::Vector>() &&
-      program_->Symbols().NameFor(expr->member()->symbol()).size() > 1) {
+      builder_.Symbols().NameFor(expr->member()->symbol()).size() > 1) {
     return false;
   }
 
@@ -2179,7 +2175,7 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
     return EmitVariable(out, v->variable(), false);
   }
 
-  error_ = "unknown statement type: " + program_->str(stmt);
+  error_ = "unknown statement type: " + builder_.str(stmt);
   return false;
 }
 
@@ -2220,7 +2216,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   }
 
   if (auto* alias = type->As<type::Alias>()) {
-    out << namer_.NameFor(program_->Symbols().NameFor(alias->symbol()));
+    out << namer_.NameFor(builder_.Symbols().NameFor(alias->symbol()));
   } else if (auto* ary = type->As<type::Array>()) {
     type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
@@ -2267,7 +2263,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
     out << "State";
   } else if (auto* str = type->As<type::Struct>()) {
-    out << program_->Symbols().NameFor(str->symbol());
+    out << builder_.Symbols().NameFor(str->symbol());
   } else if (auto* tex = type->As<type::Texture>()) {
     if (tex->Is<type::StorageTexture>()) {
       out << "RW";
@@ -2352,12 +2348,12 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
     // https://bugs.chromium.org/p/tint/issues/detail?id=184
 
     if (!EmitType(out, mem->type(),
-                  program_->Symbols().NameFor(mem->symbol()))) {
+                  builder_.Symbols().NameFor(mem->symbol()))) {
       return false;
     }
     // Array member name will be output with the type
     if (!mem->type()->Is<type::Array>()) {
-      out << " " << namer_.NameFor(program_->Symbols().NameFor(mem->symbol()));
+      out << " " << namer_.NameFor(builder_.Symbols().NameFor(mem->symbol()));
     }
     out << ";" << std::endl;
   }
@@ -2416,11 +2412,11 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   if (var->is_const()) {
     out << "const ";
   }
-  if (!EmitType(out, var->type(), program_->Symbols().NameFor(var->symbol()))) {
+  if (!EmitType(out, var->type(), builder_.Symbols().NameFor(var->symbol()))) {
     return false;
   }
   if (!var->type()->Is<type::Array>()) {
-    out << " " << program_->Symbols().NameFor(var->symbol());
+    out << " " << builder_.Symbols().NameFor(var->symbol());
   }
   out << constructor_out.str() << ";" << std::endl;
 
@@ -2466,20 +2462,20 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     out << "#endif" << std::endl;
     out << "static const ";
     if (!EmitType(out, var->type(),
-                  program_->Symbols().NameFor(var->symbol()))) {
+                  builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
-    out << " " << program_->Symbols().NameFor(var->symbol())
+    out << " " << builder_.Symbols().NameFor(var->symbol())
         << " = WGSL_SPEC_CONSTANT_" << const_id << ";" << std::endl;
     out << "#undef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
   } else {
     out << "static const ";
     if (!EmitType(out, var->type(),
-                  program_->Symbols().NameFor(var->symbol()))) {
+                  builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
     if (!var->type()->Is<type::Array>()) {
-      out << " " << program_->Symbols().NameFor(var->symbol());
+      out << " " << builder_.Symbols().NameFor(var->symbol());
     }
 
     if (var->constructor() != nullptr) {
@@ -2494,7 +2490,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
 std::string GeneratorImpl::get_buffer_name(ast::Expression* expr) {
   for (;;) {
     if (auto* ident = expr->As<ast::IdentifierExpression>()) {
-      return program_->Symbols().NameFor(ident->symbol());
+      return builder_.Symbols().NameFor(ident->symbol());
     } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
       expr = member->structure();
     } else if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
