@@ -163,7 +163,7 @@
 
     "bind group layout entry": {
         "category": "structure",
-        "extensible": false,
+        "extensible": true,
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage"},

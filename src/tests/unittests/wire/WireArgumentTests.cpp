@@ -307,7 +307,8 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
     WGPUBindGroupLayoutEntry entries[NUM_BINDINGS]{
-        {0,
+        {nullptr,
+         0,
          WGPUShaderStage_Vertex,
          WGPUBindingType_Sampler,
          false,
@@ -319,7 +320,8 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
          {},
          {},
          {}},
-        {1,
+        {nullptr,
+         1,
          WGPUShaderStage_Vertex,
          WGPUBindingType_SampledTexture,
          false,
@@ -331,7 +333,8 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
          {},
          {},
          {}},
-        {2,
+        {nullptr,
+         2,
          static_cast<WGPUShaderStage>(WGPUShaderStage_Vertex | WGPUShaderStage_Fragment),
          WGPUBindingType_UniformBuffer,
          false,
