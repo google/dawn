@@ -860,6 +860,12 @@ class FunctionEmitter {
   /// @returns an expression
   TypedExpression MakeOuterProduct(const spvtools::opt::Instruction& inst);
 
+  /// Generates statements for a SPIR-V OpVectorInsertDynamic instruction.
+  /// Registers a const declaration for the result.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  bool MakeVectorInsertDynamic(const spvtools::opt::Instruction& inst);
+
   /// Get the SPIR-V instruction for the image memory object declaration for
   /// the image operand to the given instruction.
   /// @param inst the SPIR-V instruction

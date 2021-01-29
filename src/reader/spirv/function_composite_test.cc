@@ -32,6 +32,11 @@ using ::testing::HasSubstr;
 
 std::string Preamble() {
   return R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint GLCompute %100 "main"
+  OpExecutionMode %100 LocalSize 1 1 1
+
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -862,6 +867,56 @@ TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
     }
   }
 })")) << got;
+}
+
+using SpvParserTest_VectorInsertDynamic = SpvParserTest;
+
+TEST_F(SpvParserTest_VectorExtractDynamic, Sample) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2uint %v2uint_3_4
+     %2 = OpCopyObject %uint %uint_3
+     %3 = OpCopyObject %int %int_1
+     %10 = OpVectorInsertDynamic %v2uint %1 %2 %3
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto got = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(R"(
+VariableDeclStatement{
+  Variable{
+    x_10_1
+    function
+    __vec_2__u32
+    {
+      Identifier[not set]{x_1}
+    }
+  }
+}
+Assignment{
+  ArrayAccessor[not set]{
+    Identifier[not set]{x_10_1}
+    Identifier[not set]{x_3}
+  }
+  Identifier[not set]{x_2}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_10
+    none
+    __vec_2__u32
+    {
+      Identifier[not set]{x_10_1}
+    }
+  }
+})")) << got
+      << assembly;
 }
 
 }  // namespace

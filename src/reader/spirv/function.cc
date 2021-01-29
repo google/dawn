@@ -3021,6 +3021,10 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // Synthesize an outer product expression in its own statement.
       return EmitConstDefOrWriteToHoistedVar(inst, MakeOuterProduct(inst));
 
+    case SpvOpVectorInsertDynamic:
+      // Synthesize a vector insertion in its own statements.
+      return MakeVectorInsertDynamic(inst);
+
     case SpvOpFunctionCall:
       return EmitFunctionCall(inst);
 
@@ -3171,7 +3175,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpGenericCastToPtrExplicit // Not in Vulkan
   //
   //    OpArrayLength
-  //    OpVectorInsertDynamic
   //    OpCompositeInsert
 
   return {};
@@ -4644,6 +4647,47 @@ TypedExpression FunctionEmitter::MakeOuterProduct(
   }
   return {result_ty, create<ast::TypeConstructorExpression>(Source{}, result_ty,
                                                             result_columns)};
+}
+
+bool FunctionEmitter::MakeVectorInsertDynamic(
+    const spvtools::opt::Instruction& inst) {
+  // For
+  //    %result = OpVectorInsertDynamic %type %src_vector %component %index
+  // generate statements like this:
+  //
+  //    var temp : type = src_vector;
+  //    temp[index] = component;
+  //    const result : type = temp;
+  //
+  // Then use result everywhere the original SPIR-V id is used.  Using a const
+  // like this avoids constantly reloading the value many times.
+
+  auto* ast_type = parser_impl_.ConvertType(inst.type_id());
+  auto src_vector = MakeOperand(inst, 0);
+  auto component = MakeOperand(inst, 1);
+  auto index = MakeOperand(inst, 2);
+
+  // Synthesize the temporary variable.
+  // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
+  // API in parser_impl_.
+  auto result_name = namer_.Name(inst.result_id());
+  auto temp_name = namer_.MakeDerivedName(result_name);
+  auto registered_temp_name = builder_.Symbols().Register(temp_name);
+
+  auto* temp_var = create<ast::Variable>(
+      Source{}, registered_temp_name, ast::StorageClass::kFunction, ast_type,
+      false, src_vector.expr, ast::VariableDecorationList{});
+  AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
+
+  auto* lhs = create<ast::ArrayAccessorExpression>(
+      Source{}, create<ast::IdentifierExpression>(registered_temp_name),
+      index.expr);
+
+  AddStatement(create<ast::AssignmentStatement>(Source{}, lhs, component.expr));
+
+  return EmitConstDefinition(
+      inst,
+      {ast_type, create<ast::IdentifierExpression>(registered_temp_name)});
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
