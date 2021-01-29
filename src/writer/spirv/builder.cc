@@ -59,6 +59,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program.h"
+#include "src/semantic/expression.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -405,7 +406,8 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
   }
 
   // If the thing we're assigning is a pointer then we must load it first.
-  rhs_id = GenerateLoadIfNeeded(assign->rhs()->result_type(), rhs_id);
+  auto* type = TypeOf(assign->rhs());
+  rhs_id = GenerateLoadIfNeeded(type, rhs_id);
 
   return GenerateStore(lhs_id, rhs_id);
 }
@@ -639,7 +641,8 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
     if (init_id == 0) {
       return false;
     }
-    init_id = GenerateLoadIfNeeded(var->constructor()->result_type(), init_id);
+    auto* type = TypeOf(var->constructor());
+    init_id = GenerateLoadIfNeeded(type, init_id);
   }
 
   if (var->is_const()) {
@@ -843,7 +846,8 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   if (idx_id == 0) {
     return 0;
   }
-  idx_id = GenerateLoadIfNeeded(expr->idx_expr()->result_type(), idx_id);
+  auto* type = TypeOf(expr->idx_expr());
+  idx_id = GenerateLoadIfNeeded(type, idx_id);
 
   // If the source is a pointer we access chain into it. We also access chain
   // into an array of non-scalar types.
@@ -851,11 +855,11 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
       (info->source_type->Is<type::Array>() &&
        !info->source_type->As<type::Array>()->type()->is_scalar())) {
     info->access_chain_indices.push_back(idx_id);
-    info->source_type = expr->result_type();
+    info->source_type = TypeOf(expr);
     return true;
   }
 
-  auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+  auto result_type_id = GenerateTypeIfNeeded(TypeOf(expr));
   if (result_type_id == 0) {
     return false;
   }
@@ -872,7 +876,7 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   }
 
   info->source_id = extract_id;
-  info->source_type = expr->result_type();
+  info->source_type = TypeOf(expr);
 
   return true;
 }
@@ -880,7 +884,8 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
 bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
                                      AccessorInfo* info) {
   auto* data_type =
-      expr->structure()->result_type()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
+      TypeOf(expr->structure())->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
+  auto* expr_type = TypeOf(expr);
 
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.
@@ -908,7 +913,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       return 0;
     }
     info->access_chain_indices.push_back(idx_id);
-    info->source_type = expr->result_type();
+    info->source_type = expr_type;
     return true;
   }
 
@@ -934,7 +939,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       }
       info->access_chain_indices.push_back(idx_id);
     } else {
-      auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+      auto result_type_id = GenerateTypeIfNeeded(expr_type);
       if (result_type_id == 0) {
         return 0;
       }
@@ -949,7 +954,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       }
 
       info->source_id = extract_id;
-      info->source_type = expr->result_type();
+      info->source_type = expr_type;
     }
     return true;
   }
@@ -977,12 +982,12 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       return false;
     }
 
-    info->source_id = GenerateLoadIfNeeded(expr->result_type(), extract_id);
-    info->source_type = expr->result_type()->UnwrapPtrIfNeeded();
+    info->source_id = GenerateLoadIfNeeded(expr_type, extract_id);
+    info->source_type = expr_type->UnwrapPtrIfNeeded();
     info->access_chain_indices.clear();
   }
 
-  auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+  auto result_type_id = GenerateTypeIfNeeded(expr_type);
   if (result_type_id == 0) {
     return false;
   }
@@ -1009,7 +1014,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     return false;
   }
   info->source_id = result_id;
-  info->source_type = expr->result_type();
+  info->source_type = expr_type;
 
   return true;
 }
@@ -1040,13 +1045,13 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   if (info.source_id == 0) {
     return 0;
   }
-  info.source_type = source->result_type();
+  info.source_type = TypeOf(source);
 
   // If our initial access is into an array of non-scalar types, and that array
   // is not a pointer, then we need to load that array into a variable in order
   // to access chain into the array.
   if (auto* array = accessors[0]->As<ast::ArrayAccessorExpression>()) {
-    auto* ary_res_type = array->array()->result_type();
+    auto* ary_res_type = TypeOf(array->array());
 
     if (!ary_res_type->Is<type::Pointer>() &&
         (ary_res_type->Is<type::Array>() &&
@@ -1095,7 +1100,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   }
 
   if (!info.access_chain_indices.empty()) {
-    auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+    auto result_type_id = GenerateTypeIfNeeded(TypeOf(expr));
     if (result_type_id == 0) {
       return 0;
     }
@@ -1153,16 +1158,16 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
   if (val_id == 0) {
     return 0;
   }
-  val_id = GenerateLoadIfNeeded(expr->expr()->result_type(), val_id);
+  val_id = GenerateLoadIfNeeded(TypeOf(expr->expr()), val_id);
 
-  auto type_id = GenerateTypeIfNeeded(expr->result_type());
+  auto type_id = GenerateTypeIfNeeded(TypeOf(expr));
   if (type_id == 0) {
     return 0;
   }
 
   spv::Op op = spv::Op::OpNop;
   if (expr->op() == ast::UnaryOp::kNegation) {
-    if (expr->result_type()->is_float_scalar_or_vector()) {
+    if (TypeOf(expr)->is_float_scalar_or_vector()) {
       op = spv::Op::OpFNegate;
     } else {
       op = spv::Op::OpSNegate;
@@ -1260,7 +1265,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
     } else if (auto* str = subtype->As<type::Struct>()) {
       subtype = str->impl()->members()[i]->type()->UnwrapAll();
     }
-    if (subtype != sc->result_type()->UnwrapAll()) {
+    if (subtype != TypeOf(sc)->UnwrapAll()) {
       return false;
     }
   }
@@ -1291,7 +1296,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   if (auto* res_vec = result_type->As<type::Vector>()) {
     if (res_vec->type()->is_scalar()) {
-      auto* value_type = values[0]->result_type()->UnwrapAll();
+      auto* value_type = TypeOf(values[0])->UnwrapAll();
       if (auto* val_vec = value_type->As<type::Vector>()) {
         if (val_vec->type()->is_scalar()) {
           can_cast_or_copy = res_vec->size() == val_vec->size();
@@ -1324,13 +1329,13 @@ uint32_t Builder::GenerateTypeConstructorExpression(
           nullptr, e->As<ast::ConstructorExpression>(), is_global_init);
     } else {
       id = GenerateExpression(e);
-      id = GenerateLoadIfNeeded(e->result_type(), id);
+      id = GenerateLoadIfNeeded(TypeOf(e), id);
     }
     if (id == 0) {
       return 0;
     }
 
-    auto* value_type = e->result_type()->UnwrapPtrIfNeeded();
+    auto* value_type = TypeOf(e)->UnwrapPtrIfNeeded();
     // If the result and value types are the same we can just use the object.
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
@@ -1445,9 +1450,9 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(type::Type* to_type,
   if (val_id == 0) {
     return 0;
   }
-  val_id = GenerateLoadIfNeeded(from_expr->result_type(), val_id);
+  val_id = GenerateLoadIfNeeded(TypeOf(from_expr), val_id);
 
-  auto* from_type = from_expr->result_type()->UnwrapPtrIfNeeded();
+  auto* from_type = TypeOf(from_expr)->UnwrapPtrIfNeeded();
 
   spv::Op op = spv::Op::OpNop;
   if ((from_type->Is<type::I32>() && to_type->Is<type::F32>()) ||
@@ -1557,13 +1562,13 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
   if (lhs_id == 0) {
     return false;
   }
-  lhs_id = GenerateLoadIfNeeded(expr->lhs()->result_type(), lhs_id);
+  lhs_id = GenerateLoadIfNeeded(TypeOf(expr->lhs()), lhs_id);
 
   // Get the ID of the basic block where control flow will diverge. It's the
   // last basic block generated for the left-hand-side of the operator.
   auto original_label_id = current_label_id_;
 
-  auto type_id = GenerateTypeIfNeeded(expr->result_type());
+  auto type_id = GenerateTypeIfNeeded(TypeOf(expr));
   if (type_id == 0) {
     return 0;
   }
@@ -1601,7 +1606,7 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
   if (rhs_id == 0) {
     return 0;
   }
-  rhs_id = GenerateLoadIfNeeded(expr->rhs()->result_type(), rhs_id);
+  rhs_id = GenerateLoadIfNeeded(TypeOf(expr->rhs()), rhs_id);
 
   // Get the block ID of the last basic block generated for the right-hand-side
   // expression. That block will be an immediate predecessor to the merge block.
@@ -1638,26 +1643,26 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   if (lhs_id == 0) {
     return 0;
   }
-  lhs_id = GenerateLoadIfNeeded(expr->lhs()->result_type(), lhs_id);
+  lhs_id = GenerateLoadIfNeeded(TypeOf(expr->lhs()), lhs_id);
 
   auto rhs_id = GenerateExpression(expr->rhs());
   if (rhs_id == 0) {
     return 0;
   }
-  rhs_id = GenerateLoadIfNeeded(expr->rhs()->result_type(), rhs_id);
+  rhs_id = GenerateLoadIfNeeded(TypeOf(expr->rhs()), rhs_id);
 
   auto result = result_op();
   auto result_id = result.to_i();
 
-  auto type_id = GenerateTypeIfNeeded(expr->result_type());
+  auto type_id = GenerateTypeIfNeeded(TypeOf(expr));
   if (type_id == 0) {
     return 0;
   }
 
   // Handle int and float and the vectors of those types. Other types
   // should have been rejected by validation.
-  auto* lhs_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
-  auto* rhs_type = expr->rhs()->result_type()->UnwrapPtrIfNeeded();
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapPtrIfNeeded();
   bool lhs_is_float_or_vec = lhs_type->is_float_scalar_or_vector();
   bool lhs_is_unsigned = lhs_type->is_unsigned_scalar_or_vector();
 
@@ -1806,7 +1811,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     return GenerateIntrinsic(ident, expr);
   }
 
-  auto type_id = GenerateTypeIfNeeded(expr->func()->result_type());
+  auto type_id = GenerateTypeIfNeeded(TypeOf(expr->func()));
   if (type_id == 0) {
     return 0;
   }
@@ -1829,7 +1834,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     if (id == 0) {
       return 0;
     }
-    id = GenerateLoadIfNeeded(param->result_type(), id);
+    id = GenerateLoadIfNeeded(TypeOf(param), id);
     ops.push_back(Operand::Int(id));
   }
 
@@ -1845,7 +1850,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   auto result = result_op();
   auto result_id = result.to_i();
 
-  auto result_type_id = GenerateTypeIfNeeded(call->result_type());
+  auto result_type_id = GenerateTypeIfNeeded(TypeOf(call));
   if (result_type_id == 0) {
     return 0;
   }
@@ -1895,7 +1900,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     }
     params.push_back(Operand::Int(struct_id));
 
-    auto* type = accessor->structure()->result_type()->UnwrapAll();
+    auto* type = TypeOf(accessor->structure())->UnwrapAll();
     if (!type->Is<type::Struct>()) {
       error_ =
           "invalid type (" + type->type_name() + ") for runtime array length";
@@ -1948,8 +1953,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
       return 0;
     }
     auto set_id = set_iter->second;
-    auto inst_id =
-        intrinsic_to_glsl_method(ident->result_type(), ident->intrinsic());
+    auto inst_id = intrinsic_to_glsl_method(TypeOf(ident), ident->intrinsic());
     if (inst_id == 0) {
       error_ = "unknown method " + builder_.Symbols().NameFor(ident->symbol());
       return 0;
@@ -1972,7 +1976,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     if (val_id == 0) {
       return false;
     }
-    val_id = GenerateLoadIfNeeded(p->result_type(), val_id);
+    val_id = GenerateLoadIfNeeded(TypeOf(p), val_id);
 
     params.emplace_back(Operand::Int(val_id));
   }
@@ -1995,10 +1999,8 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
   assert(pidx.texture != kNotUsed);
-  auto* texture_type = call->params()[pidx.texture]
-                           ->result_type()
-                           ->UnwrapAll()
-                           ->As<type::Texture>();
+  auto* texture_type =
+      TypeOf(call->params()[pidx.texture])->UnwrapAll()->As<type::Texture>();
 
   auto op = spv::Op::OpNop;
 
@@ -2008,7 +2010,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     if (val_id == 0) {
       return Operand::Int(0);
     }
-    val_id = GenerateLoadIfNeeded(p->result_type(), val_id);
+    val_id = GenerateLoadIfNeeded(TypeOf(p), val_id);
 
     return Operand::Int(val_id);
   };
@@ -2076,7 +2078,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
         } else {
           // Assign post_emission to swizzle the result of the call to
           // OpImageQuerySize[Lod].
-          auto* element_type = ElementTypeOf(call->result_type());
+          auto* element_type = ElementTypeOf(TypeOf(call));
           auto spirv_result = result_op();
           auto* spirv_result_type =
               builder_.create<type::Vector>(element_type, spirv_result_width);
@@ -2302,7 +2304,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       }
       assert(pidx.level != kNotUsed);
       auto level = Operand::Int(0);
-      if (call->params()[pidx.level]->result_type()->Is<type::I32>()) {
+      if (TypeOf(call->params()[pidx.level])->Is<type::I32>()) {
         // Depth textures have i32 parameters for the level, but SPIR-V expects
         // F32. Cast.
         auto* f32 = builder_.create<type::F32>();
@@ -2417,7 +2419,7 @@ uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
   auto result = result_op();
   auto result_id = result.to_i();
 
-  auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+  auto result_type_id = GenerateTypeIfNeeded(TypeOf(expr));
   if (result_type_id == 0) {
     return 0;
   }
@@ -2426,11 +2428,11 @@ uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
   if (val_id == 0) {
     return 0;
   }
-  val_id = GenerateLoadIfNeeded(expr->expr()->result_type(), val_id);
+  val_id = GenerateLoadIfNeeded(TypeOf(expr->expr()), val_id);
 
   // Bitcast does not allow same types, just emit a CopyObject
-  auto* to_type = expr->result_type()->UnwrapPtrIfNeeded();
-  auto* from_type = expr->expr()->result_type()->UnwrapPtrIfNeeded();
+  auto* to_type = TypeOf(expr)->UnwrapPtrIfNeeded();
+  auto* from_type = TypeOf(expr->expr())->UnwrapPtrIfNeeded();
   if (to_type->type_name() == from_type->type_name()) {
     if (!push_function_inst(
             spv::Op::OpCopyObject,
@@ -2457,7 +2459,7 @@ bool Builder::GenerateConditionalBlock(
   if (cond_id == 0) {
     return false;
   }
-  cond_id = GenerateLoadIfNeeded(cond->result_type(), cond_id);
+  cond_id = GenerateLoadIfNeeded(TypeOf(cond), cond_id);
 
   auto merge_block = result_op();
   auto merge_block_id = merge_block.to_i();
@@ -2545,7 +2547,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
   if (cond_id == 0) {
     return false;
   }
-  cond_id = GenerateLoadIfNeeded(stmt->condition()->result_type(), cond_id);
+  cond_id = GenerateLoadIfNeeded(TypeOf(stmt->condition()), cond_id);
 
   auto default_block = result_op();
   auto default_block_id = default_block.to_i();
@@ -2641,7 +2643,7 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
     if (val_id == 0) {
       return false;
     }
-    val_id = GenerateLoadIfNeeded(stmt->value()->result_type(), val_id);
+    val_id = GenerateLoadIfNeeded(TypeOf(stmt->value()), val_id);
     if (!push_function_inst(spv::Op::OpReturnValue, {Operand::Int(val_id)})) {
       return false;
     }

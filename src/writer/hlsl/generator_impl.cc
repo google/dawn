@@ -45,6 +45,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
+#include "src/semantic/expression.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -383,8 +384,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
     return true;
   }
 
-  auto* lhs_type = expr->lhs()->result_type()->UnwrapAll();
-  auto* rhs_type = expr->rhs()->result_type()->UnwrapAll();
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapAll();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapAll();
   // Multiplying by a matrix requires the use of `mul` in order to get the
   // type of multiply we desire.
   if (expr->op() == ast::BinaryOp::kMultiply &&
@@ -692,7 +693,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
 
   auto* texture = params[pidx.texture];
-  auto* texture_type = texture->result_type()->UnwrapAll()->As<type::Texture>();
+  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
 
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureDimensions:
@@ -887,7 +888,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
     auto* i32 = builder_.create<type::I32>();
     auto* zero = builder_.Expr(0);
-    zero->set_result_type(i32);
+    builder_.Sem().Add(zero, builder_.create<semantic::Expression>(i32));
     auto* packed = AppendVector(&builder_, vector, zero);
     return EmitExpression(pre, out, packed);
   };
@@ -1857,7 +1858,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
     }
     first = false;
     if (auto* mem = expr->As<ast::MemberAccessorExpression>()) {
-      auto* res_type = mem->structure()->result_type()->UnwrapAll();
+      auto* res_type = TypeOf(mem->structure())->UnwrapAll();
       if (auto* str = res_type->As<type::Struct>()) {
         auto* str_type = str->impl();
         auto* str_member = str_type->get_member(mem->member()->symbol());
@@ -1895,7 +1896,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
 
       expr = mem->structure();
     } else if (auto* ary = expr->As<ast::ArrayAccessorExpression>()) {
-      auto* ary_type = ary->array()->result_type()->UnwrapAll();
+      auto* ary_type = TypeOf(ary->array())->UnwrapAll();
 
       out << "(";
       if (auto* arr = ary_type->As<type::Array>()) {
@@ -1942,7 +1943,7 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
                                               std::ostream& out,
                                               ast::Expression* expr,
                                               ast::Expression* rhs) {
-  auto* result_type = expr->result_type()->UnwrapAll();
+  auto* result_type = TypeOf(expr)->UnwrapAll();
   bool is_store = rhs != nullptr;
 
   std::string access_method = is_store ? "Store" : "Load";
@@ -2058,7 +2059,7 @@ bool GeneratorImpl::is_storage_buffer_access(
 bool GeneratorImpl::is_storage_buffer_access(
     ast::MemberAccessorExpression* expr) {
   auto* structure = expr->structure();
-  auto* data_type = structure->result_type()->UnwrapAll();
+  auto* data_type = TypeOf(structure)->UnwrapAll();
   // TODO(dsinclair): Swizzle
   //
   // If the data is a multi-element swizzle then we will not load the swizzle

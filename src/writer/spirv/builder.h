@@ -488,6 +488,12 @@ class Builder {
   /// automatically.
   Operand result_op();
 
+  /// @returns the resolved type of the ast::Expression `expr`
+  /// @param expr the expression
+  type::Type* TypeOf(ast::Expression* expr) const {
+    return builder_.TypeOf(expr);
+  }
+
   ProgramBuilder builder_;
   std::string error_;
   uint32_t next_id_ = 1;

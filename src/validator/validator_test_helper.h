@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/program_builder.h"
+#include "src/semantic/expression.h"
 #include "src/type/void_type.h"
 #include "src/type_determiner.h"
 #include "src/validator/validator_impl.h"

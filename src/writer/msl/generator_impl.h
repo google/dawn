@@ -280,6 +280,12 @@ class GeneratorImpl : public TextGenerator {
 
   std::string current_ep_var_name(VarType type);
 
+  /// @returns the resolved type of the ast::Expression `expr`
+  /// @param expr the expression
+  type::Type* TypeOf(ast::Expression* expr) const {
+    return program_->TypeOf(expr);
+  }
+
   Namer namer_;
   ScopeStack<ast::Variable*> global_variables_;
   Symbol current_ep_sym_;

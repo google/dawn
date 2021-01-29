@@ -21,6 +21,7 @@
 #include "src/clone_context.h"
 #include "src/demangler.h"
 #include "src/program_builder.h"
+#include "src/semantic/expression.h"
 #include "src/type_determiner.h"
 
 namespace tint {
@@ -100,6 +101,11 @@ ProgramBuilder Program::CloneAsBuilder() const {
 bool Program::IsValid() const {
   AssertNotMoved();
   return is_valid_;
+}
+
+type::Type* Program::TypeOf(ast::Expression* expr) const {
+  auto* sem = Sem().Get(expr);
+  return sem ? sem->Type() : nullptr;
 }
 
 std::string Program::to_str(bool demangle) const {

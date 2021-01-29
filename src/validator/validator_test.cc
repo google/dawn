@@ -130,8 +130,8 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
       Source{Source::Location{12, 34}}, lhs, rhs);
   RegisterVariable(var);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -153,8 +153,8 @@ TEST_F(ValidatorTest, AssignCompatibleTypesThroughAlias_Pass) {
       Source{Source::Location{12, 34}}, lhs, rhs);
   RegisterVariable(var);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -178,8 +178,8 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInferRHSLoad_Pass) {
   RegisterVariable(var_a);
   RegisterVariable(var_b);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -203,8 +203,8 @@ TEST_F(ValidatorTest, AssignThroughPointer_Pass) {
   RegisterVariable(var_a);
   RegisterVariable(var_b);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -227,8 +227,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
       Source{Source::Location{12, 34}}, lhs, rhs);
   RegisterVariable(var);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -257,8 +257,8 @@ TEST_F(ValidatorTest, AssignThroughPointerWrongeStoreType_Fail) {
   RegisterVariable(var_a);
   RegisterVariable(var_b);
   EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -286,8 +286,8 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -313,8 +313,8 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -461,8 +461,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -494,8 +494,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -559,8 +559,8 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 
@@ -592,7 +592,6 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -622,7 +621,6 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   AST().Functions().Add(func);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
-  EXPECT_TRUE(td()->DetermineFunction(func)) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -747,8 +745,8 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   });
 
   EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(lhs->result_type(), nullptr);
-  ASSERT_NE(rhs->result_type(), nullptr);
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   ValidatorImpl& v = Build();
 

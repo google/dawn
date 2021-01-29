@@ -30,6 +30,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/semantic/expression.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/i32_type.h"
@@ -236,8 +237,9 @@ bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
   type::Type* func_type = current_function_->return_type();
 
   type::Void void_type;
-  auto* ret_type =
-      ret->has_value() ? ret->value()->result_type()->UnwrapAll() : &void_type;
+  auto* ret_type = ret->has_value()
+                       ? program_->Sem().Get(ret->value())->Type()->UnwrapAll()
+                       : &void_type;
 
   if (func_type->type_name() != ret_type->type_name()) {
     add_error(ret->source(), "v-000y",
@@ -328,7 +330,7 @@ bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
     return false;
   }
 
-  auto* cond_type = s->condition()->result_type()->UnwrapAll();
+  auto* cond_type = program_->Sem().Get(s->condition())->Type()->UnwrapAll();
   if (!cond_type->is_integer_scalar()) {
     add_error(s->condition()->source(), "v-0025",
               "switch statement selector expression must be of a "
@@ -472,14 +474,14 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
   // Pointers are not storable in WGSL, but the right-hand side must be
   // storable. The raw right-hand side might be a pointer value which must be
   // loaded (dereferenced) to provide the value to be stored.
-  auto* rhs_result_type = rhs->result_type()->UnwrapAll();
+  auto* rhs_result_type = program_->Sem().Get(rhs)->Type()->UnwrapAll();
   if (!IsStorable(rhs_result_type)) {
     add_error(assign->source(), "v-000x",
               "invalid assignment: right-hand-side is not storable: " +
-                  rhs->result_type()->type_name());
+                  program_->Sem().Get(rhs)->Type()->type_name());
     return false;
   }
-  auto* lhs_result_type = lhs->result_type()->UnwrapIfNeeded();
+  auto* lhs_result_type = program_->Sem().Get(lhs)->Type()->UnwrapIfNeeded();
   if (auto* lhs_reference_type = As<type::Pointer>(lhs_result_type)) {
     auto* lhs_store_type = lhs_reference_type->type()->UnwrapIfNeeded();
     if (lhs_store_type != rhs_result_type) {
@@ -497,7 +499,7 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
     add_error(
         assign->source(), "v-000x",
         "invalid assignment: left-hand-side does not reference storage: " +
-            lhs->result_type()->type_name());
+            program_->Sem().Get(lhs)->Type()->type_name());
     return false;
   }
 

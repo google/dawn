@@ -18,6 +18,7 @@
 
 #include "src/ast/expression.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/semantic/expression.h"
 #include "src/semantic/info.h"
 #include "src/type/vector_type.h"
 
@@ -42,21 +43,18 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
                                              ast::Expression* scalar) {
   uint32_t packed_size;
   type::Type* packed_el_ty;  // Currently must be f32.
-  if (auto* vec = vector->result_type()->As<type::Vector>()) {
+  auto* vector_sem = b->Sem().Get(vector);
+  if (auto* vec = vector_sem->Type()->As<type::Vector>()) {
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
   } else {
     packed_size = 2;
-    packed_el_ty = vector->result_type();
-  }
-
-  if (!packed_el_ty) {
-    return nullptr;  // missing type info
+    packed_el_ty = vector_sem->Type();
   }
 
   // Cast scalar to the vector element type
   auto* scalar_cast = b->Construct(packed_el_ty, scalar);
-  scalar_cast->set_result_type(packed_el_ty);
+  b->Sem().Add(scalar_cast, b->create<semantic::Expression>(packed_el_ty));
 
   auto* packed_ty = b->create<type::Vector>(packed_el_ty, packed_size);
 
@@ -68,14 +66,14 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   } else {
     packed.emplace_back(vector);
   }
-  if (packed_el_ty != scalar->result_type()) {
+  if (packed_el_ty != b->Sem().Get(scalar)->Type()) {
     packed.emplace_back(scalar_cast);
   } else {
     packed.emplace_back(scalar);
   }
 
   auto* constructor = b->Construct(packed_ty, std::move(packed));
-  constructor->set_result_type(packed_ty);
+  b->Sem().Add(constructor, b->create<semantic::Expression>(packed_ty));
 
   return constructor;
 }

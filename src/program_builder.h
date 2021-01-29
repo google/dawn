@@ -937,6 +937,15 @@ class ProgramBuilder {
     source_ = Source(loc);
   }
 
+  /// Helper for returning the resolved semantic type of the expression `expr`.
+  /// @note As the TypeDeterminator is run when the Program is built, this will
+  /// only be useful for the TypeDeterminer itself and tests that use their own
+  /// TypeDeterminer.
+  /// @param expr the AST expression
+  /// @return the resolved semantic type for the expression, or nullptr if the
+  /// expression has no resolved type.
+  type::Type* TypeOf(ast::Expression* expr) const;
+
   /// The builder types
   TypesBuilder ty;
 

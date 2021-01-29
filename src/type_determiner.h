@@ -21,6 +21,7 @@
 
 #include "src/ast/module.h"
 #include "src/diagnostic/diagnostic.h"
+#include "src/program_builder.h"
 #include "src/scope_stack.h"
 #include "src/type/storage_texture_type.h"
 
@@ -136,6 +137,18 @@ class TypeDeterminer {
                           ast::CallExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
+
+  /// @returns the resolved type of the ast::Expression `expr`
+  /// @param expr the expression
+  type::Type* TypeOf(ast::Expression* expr) const {
+    return builder_->TypeOf(expr);
+  }
+
+  /// Creates a semantic::Expression node with the resolved type `type`, and
+  /// assigns this semantic node to the expression `expr`.
+  /// @param expr the expression
+  /// @param type the resolved type
+  void SetType(ast::Expression* expr, type::Type* type) const;
 
   ProgramBuilder* builder_;
   std::string error_;

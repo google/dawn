@@ -20,6 +20,7 @@
 
 #include "src/clone_context.h"
 #include "src/demangler.h"
+#include "src/semantic/expression.h"
 #include "src/type/struct_type.h"
 
 namespace tint {
@@ -80,6 +81,11 @@ void ProgramBuilder::MarkAsMoved() {
 
 void ProgramBuilder::AssertNotMoved() const {
   assert(!moved_);
+}
+
+type::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {
+  auto* sem = Sem().Get(expr);
+  return sem ? sem->Type() : nullptr;
 }
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}

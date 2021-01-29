@@ -14,6 +14,9 @@
 
 #include "src/ast/expression.h"
 
+#include "src/semantic/expression.h"
+#include "src/semantic/info.h"
+
 TINT_INSTANTIATE_CLASS_ID(tint::ast::Expression);
 
 namespace tint {
@@ -25,9 +28,9 @@ Expression::Expression(Expression&&) = default;
 
 Expression::~Expression() = default;
 
-void Expression::set_result_type(type::Type* type) {
-  // The expression result should never be an alias or access-controlled type
-  result_type_ = type->UnwrapIfNeeded();
+std::string Expression::result_type_str(const semantic::Info& sem) const {
+  auto* sem_expr = sem.Get(this);
+  return sem_expr ? sem_expr->Type()->type_name() : "not set";
 }
 
 }  // namespace ast

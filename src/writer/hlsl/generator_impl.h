@@ -390,6 +390,12 @@ class GeneratorImpl {
   std::string current_ep_var_name(VarType type);
   std::string get_buffer_name(ast::Expression* expr);
 
+  /// @returns the resolved type of the ast::Expression `expr`
+  /// @param expr the expression
+  type::Type* TypeOf(ast::Expression* expr) const {
+    return builder_.TypeOf(expr);
+  }
+
   std::string error_;
   size_t indent_ = 0;
 

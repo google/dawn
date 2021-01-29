@@ -44,6 +44,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/clone_context.h"
 #include "src/program_builder.h"
+#include "src/semantic/expression.h"
 #include "src/type/array_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/u32_type.h"
@@ -70,7 +71,7 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     ast::ArrayAccessorExpression* expr,
     CloneContext* ctx,
     diag::List* diags) {
-  auto* ret_type = expr->array()->result_type()->UnwrapAll();
+  auto* ret_type = ctx->src->Sem().Get(expr->array())->Type()->UnwrapAll();
   if (!ret_type->Is<type::Array>() && !ret_type->Is<type::Matrix>() &&
       !ret_type->Is<type::Vector>()) {
     return nullptr;

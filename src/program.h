@@ -115,6 +115,12 @@ class Program {
   /// information
   bool IsValid() const;
 
+  /// Helper for returning the resolved semantic type of the expression `expr`.
+  /// @param expr the AST expression
+  /// @return the resolved semantic type for the expression, or nullptr if the
+  /// expression has no resolved type.
+  type::Type* TypeOf(ast::Expression* expr) const;
+
   /// @param demangle whether to automatically demangle the symbols in the
   /// returned string
   /// @returns a string describing this program.

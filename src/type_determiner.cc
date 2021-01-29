@@ -43,6 +43,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
+#include "src/semantic/expression.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
 #include "src/type/depth_texture_type.h"
@@ -308,6 +309,10 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
     return true;
   }
 
+  if (TypeOf(expr)) {
+    return true;  // Already resolved
+  }
+
   if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
     return DetermineArrayAccessor(a);
   }
@@ -346,7 +351,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
     return false;
   }
 
-  auto* res = expr->array()->result_type();
+  auto* res = TypeOf(expr->array());
   auto* parent_type = res->UnwrapAll();
   type::Type* ret = nullptr;
   if (auto* arr = parent_type->As<type::Array>()) {
@@ -373,7 +378,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
       ret = builder_->create<type::Pointer>(ret, ast::StorageClass::kFunction);
     }
   }
-  expr->set_result_type(ret);
+  SetType(expr, ret);
 
   return true;
 }
@@ -382,7 +387,7 @@ bool TypeDeterminer::DetermineBitcast(ast::BitcastExpression* expr) {
   if (!DetermineResultType(expr->expr())) {
     return false;
   }
-  expr->set_result_type(expr->type());
+  SetType(expr, expr->type());
   return true;
 }
 
@@ -420,12 +425,6 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
           set_referenced_from_function_if_needed(var, false);
         }
       }
-
-      // An identifier with a single name is a function call, not an import
-      // lookup which we can handle with the regular identifier lookup.
-      if (!DetermineResultType(ident)) {
-        return false;
-      }
     }
   } else {
     if (!DetermineResultType(expr->func())) {
@@ -433,7 +432,9 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     }
   }
 
-  if (!expr->func()->result_type()) {
+  if (auto* type = TypeOf(expr->func())) {
+    SetType(expr, type);
+  } else {
     auto func_sym = expr->func()->As<ast::IdentifierExpression>()->symbol();
     set_error(expr->source(),
               "v-0005: function must be declared before use: '" +
@@ -441,7 +442,6 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     return false;
   }
 
-  expr->set_result_type(expr->func()->result_type());
   return true;
 }
 
@@ -530,17 +530,17 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
 
     // The result type must be the same as the type of the parameter.
-    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-    expr->func()->set_result_type(param_type);
+    auto* param_type = TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
+    SetType(expr->func(), param_type);
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kAny ||
       ident->intrinsic() == ast::Intrinsic::kAll) {
-    expr->func()->set_result_type(builder_->create<type::Bool>());
+    SetType(expr->func(), builder_->create<type::Bool>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kArrayLength) {
-    expr->func()->set_result_type(builder_->create<type::U32>());
+    SetType(expr->func(), builder_->create<type::U32>());
     return true;
   }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
@@ -553,12 +553,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     auto* bool_type = builder_->create<type::Bool>();
 
-    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+    auto* param_type = TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
     if (auto* vec = param_type->As<type::Vector>()) {
-      expr->func()->set_result_type(
-          builder_->create<type::Vector>(bool_type, vec->size()));
+      SetType(expr->func(),
+              builder_->create<type::Vector>(bool_type, vec->size()));
     } else {
-      expr->func()->set_result_type(bool_type);
+      SetType(expr->func(), bool_type);
     }
     return true;
   }
@@ -566,14 +566,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     ast::intrinsic::TextureSignature::Parameters param;
 
     auto* texture_param = expr->params()[0];
-    if (!texture_param->result_type()->UnwrapAll()->Is<type::Texture>()) {
+    if (!TypeOf(texture_param)->UnwrapAll()->Is<type::Texture>()) {
       set_error(expr->source(),
                 "invalid first argument for " +
                     builder_->Symbols().NameFor(ident->symbol()));
       return false;
     }
     type::Texture* texture =
-        texture_param->result_type()->UnwrapAll()->As<type::Texture>();
+        TypeOf(texture_param)->UnwrapAll()->As<type::Texture>();
 
     bool is_array = type::IsTextureArray(texture->dim());
     bool is_multisampled = texture->Is<type::MultisampledTexture>();
@@ -744,12 +744,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         }
       }
     }
-    expr->func()->set_result_type(return_type);
+    SetType(expr->func(), return_type);
 
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kDot) {
-    expr->func()->set_result_type(builder_->create<type::F32>());
+    SetType(expr->func(), builder_->create<type::F32>());
     return true;
   }
   if (ident->intrinsic() == ast::Intrinsic::kSelect) {
@@ -762,8 +762,8 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     }
 
     // The result type must be the same as the type of the parameter.
-    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-    expr->func()->set_result_type(param_type);
+    auto* param_type = TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
+    SetType(expr->func(), param_type);
     return true;
   }
 
@@ -791,8 +791,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
   std::vector<type::Type*> result_types;
   for (uint32_t i = 0; i < data->param_count; ++i) {
-    result_types.push_back(
-        expr->params()[i]->result_type()->UnwrapPtrIfNeeded());
+    result_types.push_back(TypeOf(expr->params()[i])->UnwrapPtrIfNeeded());
 
     switch (data->data_type) {
       case IntrinsicDataType::kFloatOrIntScalarOrVector:
@@ -869,18 +868,17 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
   // provided.
   if (ident->intrinsic() == ast::Intrinsic::kLength ||
       ident->intrinsic() == ast::Intrinsic::kDistance) {
-    expr->func()->set_result_type(
-        result_types[0]->is_float_scalar()
-            ? result_types[0]
-            : result_types[0]->As<type::Vector>()->type());
+    SetType(expr->func(), result_types[0]->is_float_scalar()
+                              ? result_types[0]
+                              : result_types[0]->As<type::Vector>()->type());
     return true;
   }
   // The determinant returns the component type of the columns
   if (ident->intrinsic() == ast::Intrinsic::kDeterminant) {
-    expr->func()->set_result_type(result_types[0]->As<type::Matrix>()->type());
+    SetType(expr->func(), result_types[0]->As<type::Matrix>()->type());
     return true;
   }
-  expr->func()->set_result_type(result_types[0]);
+  SetType(expr->func(), result_types[0]);
   return true;
 }
 
@@ -891,10 +889,10 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
         return false;
       }
     }
-    expr->set_result_type(ty->type());
+    SetType(expr, ty->type());
   } else {
-    expr->set_result_type(
-        expr->As<ast::ScalarConstructorExpression>()->literal()->type());
+    SetType(expr,
+            expr->As<ast::ScalarConstructorExpression>()->literal()->type());
   }
   return true;
 }
@@ -906,12 +904,12 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     // A constant is the type, but a variable is always a pointer so synthesize
     // the pointer around the variable type.
     if (var->is_const()) {
-      expr->set_result_type(var->type());
+      SetType(expr, var->type());
     } else if (var->type()->Is<type::Pointer>()) {
-      expr->set_result_type(var->type());
+      SetType(expr, var->type());
     } else {
-      expr->set_result_type(
-          builder_->create<type::Pointer>(var->type(), var->storage_class()));
+      SetType(expr, builder_->create<type::Pointer>(var->type(),
+                                                    var->storage_class()));
     }
 
     set_referenced_from_function_if_needed(var, true);
@@ -920,7 +918,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
 
   auto iter = symbol_to_function_.find(symbol);
   if (iter != symbol_to_function_.end()) {
-    expr->set_result_type(iter->second->return_type());
+    SetType(expr, iter->second->return_type());
     return true;
   }
 
@@ -1091,7 +1089,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
 
-  auto* res = expr->structure()->result_type();
+  auto* res = TypeOf(expr->structure());
   auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   type::Type* ret = nullptr;
@@ -1143,7 +1141,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
 
-  expr->set_result_type(ret);
+  SetType(expr, ret);
 
   return true;
 }
@@ -1157,7 +1155,7 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   if (expr->IsAnd() || expr->IsOr() || expr->IsXor() || expr->IsShiftLeft() ||
       expr->IsShiftRight() || expr->IsAdd() || expr->IsSubtract() ||
       expr->IsDivide() || expr->IsModulo()) {
-    expr->set_result_type(expr->lhs()->result_type()->UnwrapPtrIfNeeded());
+    SetType(expr, TypeOf(expr->lhs())->UnwrapPtrIfNeeded());
     return true;
   }
   // Result type is a scalar or vector of boolean type
@@ -1165,18 +1163,17 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
     auto* bool_type = builder_->create<type::Bool>();
-    auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
+    auto* param_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
+    type::Type* result_type = bool_type;
     if (auto* vec = param_type->As<type::Vector>()) {
-      expr->set_result_type(
-          builder_->create<type::Vector>(bool_type, vec->size()));
-    } else {
-      expr->set_result_type(bool_type);
+      result_type = builder_->create<type::Vector>(bool_type, vec->size());
     }
+    SetType(expr, result_type);
     return true;
   }
   if (expr->IsMultiply()) {
-    auto* lhs_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
-    auto* rhs_type = expr->rhs()->result_type()->UnwrapPtrIfNeeded();
+    auto* lhs_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
+    auto* rhs_type = TypeOf(expr->rhs())->UnwrapPtrIfNeeded();
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.
@@ -1184,34 +1181,36 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     auto* rhs_mat = rhs_type->As<type::Matrix>();
     auto* lhs_vec = lhs_type->As<type::Vector>();
     auto* rhs_vec = rhs_type->As<type::Vector>();
+    type::Type* result_type;
     if (lhs_mat && rhs_mat) {
-      expr->set_result_type(builder_->create<type::Matrix>(
-          lhs_mat->type(), lhs_mat->rows(), rhs_mat->columns()));
+      result_type = builder_->create<type::Matrix>(
+          lhs_mat->type(), lhs_mat->rows(), rhs_mat->columns());
     } else if (lhs_mat && rhs_vec) {
-      expr->set_result_type(
-          builder_->create<type::Vector>(lhs_mat->type(), lhs_mat->rows()));
+      result_type =
+          builder_->create<type::Vector>(lhs_mat->type(), lhs_mat->rows());
     } else if (lhs_vec && rhs_mat) {
-      expr->set_result_type(
-          builder_->create<type::Vector>(rhs_mat->type(), rhs_mat->columns()));
+      result_type =
+          builder_->create<type::Vector>(rhs_mat->type(), rhs_mat->columns());
     } else if (lhs_mat) {
       // matrix * scalar
-      expr->set_result_type(lhs_type);
+      result_type = lhs_type;
     } else if (rhs_mat) {
       // scalar * matrix
-      expr->set_result_type(rhs_type);
+      result_type = rhs_type;
     } else if (lhs_vec && rhs_vec) {
-      expr->set_result_type(lhs_type);
+      result_type = lhs_type;
     } else if (lhs_vec) {
       // Vector * scalar
-      expr->set_result_type(lhs_type);
+      result_type = lhs_type;
     } else if (rhs_vec) {
       // Scalar * vector
-      expr->set_result_type(rhs_type);
+      result_type = rhs_type;
     } else {
       // Scalar * Scalar
-      expr->set_result_type(lhs_type);
+      result_type = lhs_type;
     }
 
+    SetType(expr, result_type);
     return true;
   }
 
@@ -1224,7 +1223,9 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
   if (!DetermineResultType(expr->expr())) {
     return false;
   }
-  expr->set_result_type(expr->expr()->result_type()->UnwrapPtrIfNeeded());
+
+  auto* result_type = TypeOf(expr->expr())->UnwrapPtrIfNeeded();
+  SetType(expr, result_type);
   return true;
 }
 
@@ -1286,6 +1287,11 @@ bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
   }
 
   return false;
+}
+
+void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) const {
+  return builder_->Sem().Add(expr,
+                             builder_->create<semantic::Expression>(type));
 }
 
 }  // namespace tint

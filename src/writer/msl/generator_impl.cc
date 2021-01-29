@@ -50,6 +50,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program.h"
+#include "src/semantic/expression.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -613,7 +614,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
 
   assert(pidx.texture != kNotUsed);
   auto* texture_type =
-      params[pidx.texture]->result_type()->UnwrapAll()->As<type::Texture>();
+      TypeOf(params[pidx.texture])->UnwrapAll()->As<type::Texture>();
 
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kTextureDimensions: {
@@ -658,7 +659,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
         get_dim(dims[0]);
         out_ << ")";
       } else {
-        EmitType(expr->result_type(), "");
+        EmitType(TypeOf(expr), "");
         out_ << "(";
         for (size_t i = 0; i < dims.size(); i++) {
           if (i > 0) {
@@ -764,8 +765,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
     }
   }
   if (pidx.ddx != kNotUsed) {
-    auto dim = params[pidx.texture]
-                   ->result_type()
+    auto dim = TypeOf(params[pidx.texture])
                    ->UnwrapPtrIfNeeded()
                    ->As<type::Texture>()
                    ->dim();
@@ -815,6 +815,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr) {
 
 std::string GeneratorImpl::generate_builtin_name(
     ast::IdentifierExpression* ident) {
+  auto* type = TypeOf(ident);
   std::string out = "metal::";
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kAcos:
@@ -852,26 +853,23 @@ std::string GeneratorImpl::generate_builtin_name(
       out += program_->Symbols().NameFor(ident->symbol());
       break;
     case ast::Intrinsic::kAbs:
-      if (ident->result_type()->Is<type::F32>()) {
+      if (type->Is<type::F32>()) {
         out += "fabs";
-      } else if (ident->result_type()->Is<type::U32>() ||
-                 ident->result_type()->Is<type::I32>()) {
+      } else if (type->Is<type::U32>() || type->Is<type::I32>()) {
         out += "abs";
       }
       break;
     case ast::Intrinsic::kMax:
-      if (ident->result_type()->Is<type::F32>()) {
+      if (type->Is<type::F32>()) {
         out += "fmax";
-      } else if (ident->result_type()->Is<type::U32>() ||
-                 ident->result_type()->Is<type::I32>()) {
+      } else if (type->Is<type::U32>() || type->Is<type::I32>()) {
         out += "max";
       }
       break;
     case ast::Intrinsic::kMin:
-      if (ident->result_type()->Is<type::F32>()) {
+      if (type->Is<type::F32>()) {
         out += "fmin";
-      } else if (ident->result_type()->Is<type::U32>() ||
-                 ident->result_type()->Is<type::I32>()) {
+      } else if (type->Is<type::U32>() || type->Is<type::I32>()) {
         out += "min";
       }
       break;

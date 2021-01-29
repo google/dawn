@@ -30,18 +30,6 @@ class Expression : public Castable<Expression, Node> {
  public:
   ~Expression() override;
 
-  /// Sets the resulting type of this expression
-  /// @param type the result type to set
-  void set_result_type(type::Type* type);
-  /// @returns the resulting type from this expression
-  type::Type* result_type() const { return result_type_; }
-
-  /// @returns a string representation of the result type or 'not set' if no
-  /// result type present
-  std::string result_type_str(const semantic::Info&) const {
-    return result_type_ ? result_type_->type_name() : "not set";
-  }
-
  protected:
   /// Constructor
   /// @param source the source of the expression
@@ -49,10 +37,13 @@ class Expression : public Castable<Expression, Node> {
   /// Move constructor
   Expression(Expression&&);
 
+  /// @param sem the semantic info for the program
+  /// @returns a string representation of the result type or 'not set' if no
+  /// result type present
+  std::string result_type_str(const semantic::Info& sem) const;
+
  private:
   Expression(const Expression&) = delete;
-
-  type::Type* result_type_ = nullptr;  // Semantic info
 };
 
 /// A list of expressions
