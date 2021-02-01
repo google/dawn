@@ -121,7 +121,7 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     FlushClient();
 }
 
-// Test that a chained struct with Invalid sType is an error.
+// Test that a chained struct with Invalid sType passes through as Invalid.
 TEST_F(WireExtensionTests, InvalidSType) {
     WGPUSamplerDescriptorDummyAnisotropicFiltering clientExt = {};
     clientExt.chain.sType = WGPUSType_Invalid;
@@ -132,7 +132,33 @@ TEST_F(WireExtensionTests, InvalidSType) {
     clientDesc.label = "sampler with anisotropic filtering";
 
     wgpuDeviceCreateSampler(device, &clientDesc);
-    FlushClient(false);
+    EXPECT_CALL(api, DeviceCreateSampler(apiDevice, NotNull()))
+        .WillOnce(Invoke([&](Unused, const WGPUSamplerDescriptor* desc) -> WGPUSampler {
+            EXPECT_EQ(desc->nextInChain->sType, WGPUSType_Invalid);
+            EXPECT_EQ(desc->nextInChain->next, nullptr);
+            return api.GetNewSampler();
+        }));
+    FlushClient();
+}
+
+// Test that a chained struct with unknown sType passes through as Invalid.
+TEST_F(WireExtensionTests, UnknownSType) {
+    WGPUSamplerDescriptorDummyAnisotropicFiltering clientExt = {};
+    clientExt.chain.sType = static_cast<WGPUSType>(-1);
+    clientExt.chain.next = nullptr;
+
+    WGPUSamplerDescriptor clientDesc = {};
+    clientDesc.nextInChain = &clientExt.chain;
+    clientDesc.label = "sampler with anisotropic filtering";
+
+    wgpuDeviceCreateSampler(device, &clientDesc);
+    EXPECT_CALL(api, DeviceCreateSampler(apiDevice, NotNull()))
+        .WillOnce(Invoke([&](Unused, const WGPUSamplerDescriptor* desc) -> WGPUSampler {
+            EXPECT_EQ(desc->nextInChain->sType, WGPUSType_Invalid);
+            EXPECT_EQ(desc->nextInChain->next, nullptr);
+            return api.GetNewSampler();
+        }));
+    FlushClient();
 }
 
 // Test that if both an invalid and valid stype are passed on the chain, it is an error.
@@ -152,7 +178,21 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     clientDesc.label = "sampler with anisotropic filtering";
 
     wgpuDeviceCreateSampler(device, &clientDesc);
-    FlushClient(false);
+    EXPECT_CALL(api, DeviceCreateSampler(apiDevice, NotNull()))
+        .WillOnce(Invoke([&](Unused, const WGPUSamplerDescriptor* desc) -> WGPUSampler {
+            const auto* ext =
+                reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
+                    desc->nextInChain);
+            EXPECT_EQ(ext->chain.sType, WGPUSType_SamplerDescriptorDummyAnisotropicFiltering);
+            EXPECT_EQ(ext->maxAnisotropy, clientExt1.maxAnisotropy);
+
+            EXPECT_EQ(ext->chain.next->sType, WGPUSType_Invalid);
+
+            EXPECT_EQ(ext->chain.next->next, nullptr);
+
+            return api.GetNewSampler();
+        }));
+    FlushClient();
 
     // Swap the order of the chained structs.
     clientDesc.nextInChain = &clientExt2.chain;
@@ -160,7 +200,21 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     clientExt1.chain.next = nullptr;
 
     wgpuDeviceCreateSampler(device, &clientDesc);
-    FlushClient(false);
+    EXPECT_CALL(api, DeviceCreateSampler(apiDevice, NotNull()))
+        .WillOnce(Invoke([&](Unused, const WGPUSamplerDescriptor* desc) -> WGPUSampler {
+            EXPECT_EQ(desc->nextInChain->sType, WGPUSType_Invalid);
+
+            const auto* ext =
+                reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
+                    desc->nextInChain->next);
+            EXPECT_EQ(ext->chain.sType, WGPUSType_SamplerDescriptorDummyAnisotropicFiltering);
+            EXPECT_EQ(ext->maxAnisotropy, clientExt1.maxAnisotropy);
+
+            EXPECT_EQ(ext->chain.next, nullptr);
+
+            return api.GetNewSampler();
+        }));
+    FlushClient();
 }
 
 // Test that (de)?serializing a chained struct with subdescriptors works.

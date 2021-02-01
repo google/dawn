@@ -101,11 +101,10 @@ namespace dawn_wire { namespace client {
                     case WGPUSType_Invalid:
                         break;
                     default:
-                        UNREACHABLE();
                         dawn::WarningLog()
                             << "All objects may not be from the same client. "
-                            << "Unknown sType " << chainedStruct->sType << " discarded.";
-                        return false;
+                            << "Unknown sType " << chainedStruct->sType << " ignored.";
+                        break;
                 }
                 chainedStruct = chainedStruct->next;
             }

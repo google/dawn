@@ -15,6 +15,7 @@
 #include "dawn_wire/WireCmd_autogen.h"
 
 #include "common/Assert.h"
+#include "common/Log.h"
 #include "dawn_wire/Wire.h"
 
 #include <algorithm>
@@ -529,11 +530,9 @@ namespace dawn_wire {
                     {% endfor %}
                     default:
                         // Invalid enum. Reserve space just for the transfer header (sType and hasNext).
-                        // Stop iterating because this is an error.
-                        // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
-                        ASSERT(chainedStruct->sType == WGPUSType_Invalid);
                         result += sizeof(WGPUChainedStructTransfer);
-                        return result;
+                        chainedStruct = chainedStruct->next;
+                        break;
                 }
             }
             return result;
@@ -567,13 +566,19 @@ namespace dawn_wire {
                     default: {
                         // Invalid enum. Serialize just the transfer header with Invalid as the sType.
                         // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
-                        ASSERT(chainedStruct->sType == WGPUSType_Invalid);
+                        if (chainedStruct->sType != WGPUSType_Invalid) {
+                            dawn::WarningLog() << "Unknown sType " << chainedStruct->sType << " discarded.";
+                        }
+
                         WGPUChainedStructTransfer* transfer = reinterpret_cast<WGPUChainedStructTransfer*>(*buffer);
                         transfer->sType = WGPUSType_Invalid;
-                        transfer->hasNext = false;
+                        transfer->hasNext = chainedStruct->next != nullptr;
 
                         *buffer += sizeof(WGPUChainedStructTransfer);
-                        return;
+
+                        // Still move on in case there are valid structs after this.
+                        chainedStruct = chainedStruct->next;
+                        break;
                     }
                 }
             } while (chainedStruct != nullptr);
@@ -615,8 +620,27 @@ namespace dawn_wire {
                             hasNext = transfer->chain.hasNext;
                         } break;
                     {% endfor %}
-                    default:
-                        return DeserializeResult::FatalError;
+                    default: {
+                        // Invalid enum. Deserialize just the transfer header with Invalid as the sType.
+                        // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
+                        if (sType != WGPUSType_Invalid) {
+                            dawn::WarningLog() << "Unknown sType " << sType << " discarded.";
+                        }
+
+                        const volatile WGPUChainedStructTransfer* transfer = nullptr;
+                        DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, 1, &transfer));
+
+                        WGPUChainedStruct* outStruct = nullptr;
+                        DESERIALIZE_TRY(GetSpace(allocator, sizeof(WGPUChainedStruct), &outStruct));
+                        outStruct->sType = WGPUSType_Invalid;
+                        outStruct->next = nullptr;
+
+                        // Still move on in case there are valid structs after this.
+                        *outChainNext = outStruct;
+                        outChainNext = &outStruct->next;
+                        hasNext = transfer->hasNext;
+                        break;
+                    }
                 }
             } while (hasNext);
 
