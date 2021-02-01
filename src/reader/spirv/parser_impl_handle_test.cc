@@ -4406,6 +4406,293 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"}}));
 
+INSTANTIATE_TEST_SUITE_P(
+    ImageQueryLevels_SignedResult,
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // In Vulkan:
+        //      Dim must be 1D, 2D, 3D, Cube
+        // WGSL allows 2d, 2d_array, 3d, cube, cube_array
+        // depth_2d, depth_2d_array, depth_cube, depth_cube_array
+
+        // 2D
+        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // 2D array
+        {"%float 2D 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // 3D
+        {"%float 3D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_3d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // Cube
+        {"%float Cube 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_cube__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // Cube array
+        {"%float Cube 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_cube_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // depth 2d
+        {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // depth 2d array
+        {"%float 2D 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d_array
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // depth cube
+        {"%float Cube 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_cube
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // depth cube array
+        {"%float Cube 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_cube_array
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumLevels}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // Spot check that a type conversion is inserted when SPIR-V asks for
+    // an unsigned int result.
+    ImageQueryLevels_UnsignedResult,
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %uint %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __u32
+        {
+          TypeConstructor[not set]{
+            __u32
+            Call[not set]{
+              Identifier[not set]{textureNumLevels}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
 struct ImageCoordsCase {
   // SPIR-V image type, excluding result ID and opcode
   std::string spirv_image_type_details;

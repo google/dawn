@@ -4365,6 +4365,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
 }
 
 bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
+  // TODO(dneto): Reject cases that are valid in Vulkan but invalid in WGSL.
   const spvtools::opt::Instruction* image = GetImage(inst);
   if (!image) {
     return false;
@@ -4406,7 +4407,22 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       return Fail() << "WGSL does not support querying the level of detail of "
                        "an image: "
                     << inst.PrettyPrint();
-    case SpvOpImageQueryLevels:   // TODO(dneto)
+    case SpvOpImageQueryLevels: {
+      auto* levels_ident = create<ast::IdentifierExpression>(
+          Source{}, builder_.Symbols().Register("textureNumLevels"));
+      ast::Expression* ast_expr = create<ast::CallExpression>(
+          Source{}, levels_ident,
+          ast::ExpressionList{GetImageExpression(inst)});
+      auto* result_type = parser_impl_.ConvertType(inst.type_id());
+      // The SPIR-V result type must be integer scalar. The WGSL bulitin
+      // returns i32. If they aren't the same then convert the result.
+      if (result_type != i32_) {
+        ast_expr = create<ast::TypeConstructorExpression>(
+            Source{}, result_type, ast::ExpressionList{ast_expr});
+      }
+      TypedExpression expr{result_type, ast_expr};
+      return EmitConstDefOrWriteToHoistedVar(inst, expr);
+    }
     case SpvOpImageQuerySamples:  // TODO(dneto)
     default:
       break;
