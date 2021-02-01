@@ -624,6 +624,9 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
 TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
     DAWN_SKIP_TEST_IF(!HasWGSL());
 
+    // TODO(tint:468): Reenable once the issue is fixed in Tint.
+    DAWN_SKIP_TEST_IF(true);
+
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> position : vec4<f32>;
         [[location(0)]] var<in> attrib0 : vec4<f32>;
