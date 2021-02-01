@@ -209,10 +209,10 @@ TEST_P(OpArrayLengthTest, Fragment) {
 // Test OpArrayLength in the vertex stage
 TEST_P(OpArrayLengthTest, Vertex) {
     // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
+    // Nvidia OpenGL. Also failing on SwANGLE. See
+    // https://bugs.chromium.org/p/dawn/issues/detail?id=197
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES());
-
+    DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES() || IsANGLE());
     // TODO(crbug.com/dawn/657): Returned data is slightly incorrect in this case.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") && IsIntel() && IsOpenGL());
 
