@@ -801,6 +801,9 @@ void DawnTestBase::SetUp() {
     deviceDescriptor.forceDisabledToggles = mParam.forceDisabledWorkarounds;
     deviceDescriptor.requiredExtensions = GetRequiredExtensions();
 
+    // Disabled disallowing unsafe APIs so we can test them.
+    deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+
     for (const std::string& toggle : gTestEnv->GetEnabledToggles()) {
         const dawn_native::ToggleInfo* info =
             gTestEnv->GetInstance()->GetToggleInfo(toggle.c_str());

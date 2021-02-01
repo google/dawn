@@ -155,7 +155,10 @@ bool ValidationTest::HasToggleEnabled(const char* toggle) const {
 }
 
 WGPUDevice ValidationTest::CreateTestDevice() {
-    return adapter.CreateDevice();
+    // Disabled disallowing unsafe APIs so we can test them.
+    dawn_native::DeviceDescriptor deviceDescriptor;
+    deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+    return adapter.CreateDevice(&deviceDescriptor);
 }
 
 // static
