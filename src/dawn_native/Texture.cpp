@@ -63,6 +63,7 @@ namespace dawn_native {
             uint32_t textureViewArrayLayer) {
             switch (textureViewDimension) {
                 case wgpu::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e3D:
                     return textureViewArrayLayer == 1u;
                 case wgpu::TextureViewDimension::e2DArray:
                     return true;
@@ -72,7 +73,6 @@ namespace dawn_native {
                     return textureViewArrayLayer % 6 == 0;
 
                 case wgpu::TextureViewDimension::e1D:
-                case wgpu::TextureViewDimension::e3D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }
@@ -87,10 +87,10 @@ namespace dawn_native {
                     return textureSize.width == textureSize.height;
                 case wgpu::TextureViewDimension::e2D:
                 case wgpu::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::e3D:
                     return true;
 
                 case wgpu::TextureViewDimension::e1D:
-                case wgpu::TextureViewDimension::e3D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }
@@ -287,9 +287,8 @@ namespace dawn_native {
         }
 
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
-        if (descriptor->dimension == wgpu::TextureViewDimension::e1D ||
-            descriptor->dimension == wgpu::TextureViewDimension::e3D) {
-            return DAWN_VALIDATION_ERROR("Texture view dimension must be 2D compatible.");
+        if (descriptor->dimension == wgpu::TextureViewDimension::e1D) {
+            return DAWN_VALIDATION_ERROR("1D texture views aren't supported (yet).");
         }
 
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
@@ -440,8 +439,11 @@ namespace dawn_native {
     }
     uint32_t TextureBase::GetArrayLayers() const {
         ASSERT(!IsError());
-        // TODO(cwallez@chromium.org): Update for 1D / 3D textures when they are supported.
-        ASSERT(mDimension == wgpu::TextureDimension::e2D);
+        // TODO(cwallez@chromium.org): Update for 1D textures when they are supported.
+        ASSERT(mDimension != wgpu::TextureDimension::e1D);
+        if (mDimension == wgpu::TextureDimension::e3D) {
+            return 1;
+        }
         return mSize.depth;
     }
     uint32_t TextureBase::GetNumMipLevels() const {
