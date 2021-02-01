@@ -4832,6 +4832,15 @@ TEST_F(SpvParserTest, CombinedImageSampler_IsError) {
               HasSubstr("WGSL does not support combined image-samplers: "));
 }
 
+INSTANTIATE_TEST_SUITE_P(
+    ImageQueryLod_IsError,
+    SpvParserTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        {"%float 2D 0 0 0 1 Unknown",
+         "%result = OpImageQueryLod %v2int %sampled_image %vf12",
+         "WGSL does not support querying the level of detail of an image: ",
+         {}}}));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

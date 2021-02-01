@@ -539,6 +539,7 @@ bool IsImageQuery(SpvOp opcode) {
     case SpvOpImageQuerySizeLod:
     case SpvOpImageQueryLevels:
     case SpvOpImageQuerySamples:
+    case SpvOpImageQueryLod:
       return true;
     default:
       break;
@@ -2945,12 +2946,12 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     return false;
   }
 
-  if (IsSampledImageAccess(inst.opcode()) || IsRawImageAccess(inst.opcode())) {
-    return EmitImageAccess(inst);
-  }
-
   if (IsImageQuery(inst.opcode())) {
     return EmitImageQuery(inst);
+  }
+
+  if (IsSampledImageAccess(inst.opcode()) || IsRawImageAccess(inst.opcode())) {
+    return EmitImageAccess(inst);
   }
 
   switch (inst.opcode()) {
@@ -4174,8 +4175,6 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     case SpvOpImageGather:
     case SpvOpImageDrefGather:
       return Fail() << " image gather is not yet supported";
-    case SpvOpImageQueryLod:
-      return Fail() << " image query Lod is not yet supported";
     case SpvOpImageFetch:
       // Read a single texel from a sampled image.
       builtin_name = "textureLoad";
@@ -4398,6 +4397,10 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
           create<ast::TypeConstructorExpression>(Source{}, result_type, exprs)};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
+    case SpvOpImageQueryLod:
+      return Fail() << "WGSL does not support querying the level of detail of "
+                       "an image: "
+                    << inst.PrettyPrint();
     case SpvOpImageQuerySizeLod:  // TODO(dneto)
     case SpvOpImageQueryLevels:   // TODO(dneto)
     case SpvOpImageQuerySamples:  // TODO(dneto)
