@@ -897,6 +897,11 @@ class FunctionEmitter {
   /// @returns an expression
   bool EmitImageAccess(const spvtools::opt::Instruction& inst);
 
+  /// Emits statements to implement a SPIR-V image query.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  bool EmitImageQuery(const spvtools::opt::Instruction& inst);
+
   /// Converts the given texel to match the type required for the storage
   /// texture with the given type. This can generate a swizzle to retain
   /// only the first few components of the texel vector, and maybe a bitcast

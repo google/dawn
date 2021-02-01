@@ -524,6 +524,18 @@ bool IsRawImageAccess(SpvOp opcode) {
     case SpvOpImageRead:
     case SpvOpImageWrite:
     case SpvOpImageFetch:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
+// @param opcode a SPIR-V opcode
+// @returns true if the given instruction is an image query instruction
+bool IsImageQuery(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpImageQuerySize:
     case SpvOpImageQuerySizeLod:
     case SpvOpImageQueryLevels:
     case SpvOpImageQuerySamples:
@@ -2937,6 +2949,10 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     return EmitImageAccess(inst);
   }
 
+  if (IsImageQuery(inst.opcode())) {
+    return EmitImageQuery(inst);
+  }
+
   switch (inst.opcode()) {
     case SpvOpNop:
       return true;
@@ -4347,6 +4363,48 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     AddStatement(create<ast::CallStatement>(Source{}, call_expr));
   }
   return success();
+}
+
+bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
+  const spvtools::opt::Instruction* image = GetImage(inst);
+  if (!image) {
+    return false;
+  }
+  auto* texture_type = GetImageType(*image);
+  if (!texture_type) {
+    return false;
+  }
+
+  const auto opcode = inst.opcode();
+  switch (opcode) {
+    case SpvOpImageQuerySize: {
+      ast::ExpressionList exprs;
+      // Invoke textureDimensions.
+      // If the texture is arrayed, combine with the result from
+      // textureNumLayers.
+      auto* dims_ident = create<ast::IdentifierExpression>(
+          Source{}, builder_.Symbols().Register("textureDimensions"));
+      exprs.push_back(create<ast::CallExpression>(
+          Source{}, dims_ident, ast::ExpressionList{GetImageExpression(inst)}));
+      if (type::IsTextureArray(texture_type->dim())) {
+        auto* layers_ident = create<ast::IdentifierExpression>(
+            Source{}, builder_.Symbols().Register("textureNumLayers"));
+        exprs.push_back(create<ast::CallExpression>(
+            Source{}, layers_ident, ast::ExpressionList{GetImageExpression(inst)}));
+      }
+      auto* result_type = parser_impl_.ConvertType(inst.type_id());
+      TypedExpression expr = {
+          result_type,
+          create<ast::TypeConstructorExpression>(Source{}, result_type, exprs)};
+      return EmitConstDefOrWriteToHoistedVar(inst, expr);
+    }
+    case SpvOpImageQuerySizeLod:  // TODO(dneto)
+    case SpvOpImageQueryLevels:   // TODO(dneto)
+    case SpvOpImageQuerySamples:  // TODO(dneto)
+    default:
+      break;
+  }
+  return Fail() << "unhandled image query: " << inst.PrettyPrint();
 }
 
 ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(

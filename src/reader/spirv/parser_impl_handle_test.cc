@@ -3670,6 +3670,260 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"}}));
 
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySize_NonArrayed_SignedResult,
+    // ImageQuerySize requires storage image or multisampled
+    // For storage image, use another instruction to indicate whether it
+    // is readonly or writeonly.
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // 1D storage image
+        {"%float 1D 0 0 0 2 Rgba32f",
+         "%99 = OpImageQuerySize %int %im \n"
+         "%98 = OpImageRead %v4float %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __access_control_read_only__storage_texture_1d_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          TypeConstructor[not set]{
+            __i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+        // 2D storage image
+        {"%float 2D 0 0 0 2 Rgba32f",
+         "%99 = OpImageQuerySize %v2int %im \n"
+         "%98 = OpImageRead %v4float %im %vi12\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __access_control_read_only__storage_texture_2d_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_2__i32
+        {
+          TypeConstructor[not set]{
+            __vec_2__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+        // 3D storage image
+        {"%float 3D 0 0 0 2 Rgba32f",
+         "%99 = OpImageQuerySize %v3int %im \n"
+         "%98 = OpImageRead %v4float %im %vi123\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __access_control_read_only__storage_texture_3d_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // Multisampled
+        {"%float 2D 0 0 1 1 Unknown",
+         "%99 = OpImageQuerySize %v2int %im \n"
+         "%98 = OpImageRead %v4float %im %vi12\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_2__i32
+        {
+          TypeConstructor[not set]{
+            __vec_2__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySize_Arrayed_SignedResult,
+    // ImageQuerySize requires storage image or multisampled
+    // For storage image, use another instruction to indicate whether it
+    // is readonly or writeonly.
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // 1D array storage image
+        {"%float 1D 0 1 0 2 Rgba32f",
+         "%99 = OpImageQuerySize %v2int %im \n"
+         "%98 = OpImageRead %v4float %im %vi12\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __access_control_read_only__storage_texture_1d_array_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_2__i32
+        {
+          TypeConstructor[not set]{
+            __vec_2__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+        // 2D array storage image
+        {"%float 2D 0 1 0 2 Rgba32f",
+         "%99 = OpImageQuerySize %v3int %im \n"
+         "%98 = OpImageRead %v4float %im %vi123\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __access_control_read_only__storage_texture_2d_array_rgba32float
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+        // 3D array storage image doesn't exist.
+
+        // Multisampled array
+        {"%float 2D 0 1 1 1 Unknown",
+         "%99 = OpImageQuerySize %v3int %im \n"
+         "%98 = OpImageRead %v4float %im %vi123\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
 struct ImageCoordsCase {
   // SPIR-V image type, excluding result ID and opcode
   std::string spirv_image_type_details;
