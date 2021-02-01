@@ -1735,35 +1735,15 @@ TEST_P(ImportData_SingleParamTest, Vector) {
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_P(ImportData_SingleParamTest, Error_Integer) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("incorrect type for ") + param.name +
-                ". Requires float scalar or float vector values");
-}
-
 TEST_P(ImportData_SingleParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
   EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 0");
-}
-
-TEST_P(ImportData_SingleParamTest, Error_MultipleParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 3");
+  EXPECT_EQ(td()->error(),
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(param.name));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1874,35 +1854,15 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_Bool) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, false);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("incorrect type for ") + param.name +
-                ". Requires float or int, scalar or vector values");
-}
-
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
   EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 0");
-}
-
-TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_MultipleParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 3");
+  EXPECT_EQ(td()->error(),
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(param.name));
 }
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -1933,36 +1893,6 @@ TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
-  ast::ExpressionList params;
-  params.push_back(Expr(1));
-
-  auto* call = Call("length", params);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect type for length. Requires float scalar or float vector "
-            "values");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Length_Error_NoParams) {
-  ast::ExpressionList params;
-
-  auto* call = Call("length");
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for length. Expected 1 got 0");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Length_Error_MultipleParams) {
-  auto* call = Call("length", 1.f, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for length. Expected 1 got 3");
-}
-
 using ImportData_TwoParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_TwoParamTest, Scalar) {
   auto param = GetParam();
@@ -1987,69 +1917,16 @@ TEST_P(ImportData_TwoParamTest, Vector) {
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
-
-TEST_P(ImportData_TwoParamTest, Error_Integer) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1, 2);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("incorrect type for ") + param.name +
-                ". Requires float scalar or float vector values");
-}
-
 TEST_P(ImportData_TwoParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
   EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 2 got 0");
-}
-
-TEST_P(ImportData_TwoParamTest, Error_OneParam) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 2 got 1");
-}
-
-TEST_P(ImportData_TwoParamTest, Error_MismatchedParamCount) {
-  auto param = GetParam();
-
-  auto* call =
-      Call(param.name, vec2<f32>(1.0f, 1.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
   EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(param.name));
 }
-
-TEST_P(ImportData_TwoParamTest, Error_MismatchedParamType) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.0f, vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
-}
-
-TEST_P(ImportData_TwoParamTest, Error_TooManyParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 2 got 3");
-}
-
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_TwoParamTest,
@@ -2079,54 +1956,6 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
-  auto* call = Call("distance", 1, 2);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect type for distance. Requires float scalar or float "
-            "vector values");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Distance_Error_NoParams) {
-  auto* call = Call("distance");
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for distance. Expected 2 got 0");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Distance_Error_OneParam) {
-  auto* call = Call("distance", 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for distance. Expected 2 got 1");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Distance_Error_MismatchedParamCount) {
-  auto* call =
-      Call("distance", vec2<f32>(1.0f, 1.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), "mismatched parameter types for distance");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Distance_Error_MismatchedParamType) {
-  auto* call = Call("distance", Expr(1.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), "mismatched parameter types for distance");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Distance_Error_TooManyParams) {
-  auto* call = Call("distance", Expr(1.f), Expr(1.f), Expr(1.f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for distance. Expected 2 got 3");
-}
-
 TEST_F(TypeDeterminerTest, ImportData_Cross) {
   auto* ident = Expr("cross");
 
@@ -2139,45 +1968,15 @@ TEST_F(TypeDeterminerTest, ImportData_Cross) {
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Cross_Error_Scalar) {
-  auto* call = Call("cross", 1.0f, 1.0f);
+TEST_F(TypeDeterminerTest, ImportData_Cross_AutoType) {
+  auto* ident = Expr("cross");
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect type for cross. Requires float vector values");
-}
+  auto* call = Call(ident);
 
-TEST_F(TypeDeterminerTest, ImportData_Cross_Error_IntType) {
-  auto* call = Call("cross", vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect type for cross. Requires float vector values");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Cross_Error_MissingParams) {
-  auto* call = Call("cross");
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for cross. Expected 2 got 0");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Cross_Error_TooFewParams) {
-  auto* call = Call("cross", vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for cross. Expected 2 got 1");
-}
-
-TEST_F(TypeDeterminerTest, ImportData_Cross_Error_TooManyParams) {
-  auto* call = Call("cross", vec3<f32>(1.0f, 1.0f, 3.0f),
-                    vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for cross. Expected 2 got 3");
+  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  ASSERT_NE(TypeOf(ident), nullptr);
+  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
+  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
 
 using ImportData_ThreeParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
@@ -2204,77 +2003,15 @@ TEST_P(ImportData_ThreeParamTest, Vector) {
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
-
-TEST_P(ImportData_ThreeParamTest, Error_Integer) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1, 2, 3);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("incorrect type for ") + param.name +
-                ". Requires float scalar or float vector values");
-}
-
 TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
   EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 0");
-}
-
-TEST_P(ImportData_ThreeParamTest, Error_OneParam) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 1");
-}
-
-TEST_P(ImportData_ThreeParamTest, Error_TwoParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 2");
-}
-
-TEST_P(ImportData_ThreeParamTest, Error_MismatchedParamCount) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, vec2<f32>(1.0f, 1.0f),
-                    vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
   EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
-}
-
-TEST_P(ImportData_ThreeParamTest, Error_MismatchedParamType) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.0f, 1.0f, vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
-}
-
-TEST_P(ImportData_ThreeParamTest, Error_TooManyParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f, 1.f, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 4");
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(param.name));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2360,76 +2097,15 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_Bool) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, true, false, true);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("incorrect type for ") + param.name +
-                ". Requires float or int, scalar or vector values");
-}
-
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
   EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 0");
-}
-
-TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_OneParam) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 1");
-}
-
-TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_TwoParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 2");
-}
-
-TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_MismatchedParamCount) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, vec2<f32>(1.0f, 1.0f),
-                    vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
   EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
-}
-
-TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_MismatchedParamType) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.0f, 1.0f, vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
-}
-
-TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_TooManyParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f, 1.f, 1.f, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 3 got 4");
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(param.name));
 }
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -2462,35 +2138,15 @@ TEST_P(ImportData_Int_SingleParamTest, Vector) {
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_P(ImportData_Int_SingleParamTest, Error_Float) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1.f);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("incorrect type for ") + param.name +
-                ". Requires integer scalar or integer vector values");
-}
-
 TEST_P(ImportData_Int_SingleParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
   EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 0");
-}
-
-TEST_P(ImportData_Int_SingleParamTest, Error_MultipleParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1, 1, 1);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 3");
+  EXPECT_EQ(td()->error(),
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(param.name));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2571,65 +2227,15 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_Bool) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, true, false);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("incorrect type for ") + param.name +
-                ". Requires float or int, scalar or vector values");
-}
-
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
   EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 2 got 0");
-}
-
-TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_OneParam) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 2 got 1");
-}
-
-TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_MismatchedParamCount) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, vec2<i32>(1, 1), vec3<i32>(1, 1, 3));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
   EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
-}
-
-TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_MismatchedParamType) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, Expr(1), vec3<i32>(1, 1, 3));
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(),
-            std::string("mismatched parameter types for ") + param.name);
-}
-
-TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_TooManyParams) {
-  auto param = GetParam();
-
-  auto* call = Call(param.name, 1, 1, 1);
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 2 got 3");
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(param.name));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2655,45 +2261,16 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
 
 using ImportData_Matrix_OneParam_Test =
     TypeDeterminerTestWithParam<IntrinsicData>;
-TEST_P(ImportData_Matrix_OneParam_Test, Error_Float) {
-  auto param = GetParam();
-
-  auto* var = Var("var", ast::StorageClass::kFunction, ty.f32());
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  auto* call = Call(param.name, "var");
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect type for ") + param.name +
-                               ". Requires matrix value");
-}
 
 TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 0");
+  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_P(ImportData_Matrix_OneParam_Test, TooManyParams) {
-  auto param = GetParam();
-
-  auto* var = Var("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
-
-  auto* call = Call(param.name, "var", "var");
-
-  EXPECT_FALSE(td()->DetermineResultType(call));
-  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
-                               param.name + ". Expected 1 got 2");
-}
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_Matrix_OneParam_Test,
                          testing::Values(IntrinsicData{

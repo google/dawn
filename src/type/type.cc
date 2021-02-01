@@ -75,47 +75,47 @@ uint64_t Type::BaseAlignment(MemoryLayout) const {
   return 0;
 }
 
-bool Type::is_scalar() {
+bool Type::is_scalar() const {
   return is_float_scalar() || is_integer_scalar() || Is<Bool>();
 }
 
-bool Type::is_float_scalar() {
+bool Type::is_float_scalar() const {
   return Is<F32>();
 }
 
-bool Type::is_float_matrix() {
+bool Type::is_float_matrix() const {
   return Is<Matrix>() && As<Matrix>()->type()->is_float_scalar();
 }
 
-bool Type::is_float_vector() {
+bool Type::is_float_vector() const {
   return Is<Vector>() && As<Vector>()->type()->is_float_scalar();
 }
 
-bool Type::is_float_scalar_or_vector() {
+bool Type::is_float_scalar_or_vector() const {
   return is_float_scalar() || is_float_vector();
 }
 
-bool Type::is_integer_scalar() {
+bool Type::is_integer_scalar() const {
   return Is<U32>() || Is<I32>();
 }
 
-bool Type::is_unsigned_integer_vector() {
+bool Type::is_unsigned_integer_vector() const {
   return Is<Vector>() && As<Vector>()->type()->Is<U32>();
 }
 
-bool Type::is_signed_integer_vector() {
+bool Type::is_signed_integer_vector() const {
   return Is<Vector>() && As<Vector>()->type()->Is<I32>();
 }
 
-bool Type::is_unsigned_scalar_or_vector() {
+bool Type::is_unsigned_scalar_or_vector() const {
   return Is<U32>() || (Is<Vector>() && As<Vector>()->type()->Is<U32>());
 }
 
-bool Type::is_signed_scalar_or_vector() {
+bool Type::is_signed_scalar_or_vector() const {
   return Is<I32>() || (Is<Vector>() && As<Vector>()->type()->Is<I32>());
 }
 
-bool Type::is_integer_scalar_or_vector() {
+bool Type::is_integer_scalar_or_vector() const {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 

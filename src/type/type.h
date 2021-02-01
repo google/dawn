@@ -74,27 +74,27 @@ class Type : public Castable<Type> {
   Type* UnwrapAll();
 
   /// @returns true if this type is a scalar
-  bool is_scalar();
+  bool is_scalar() const;
   /// @returns true if this type is a float scalar
-  bool is_float_scalar();
+  bool is_float_scalar() const;
   /// @returns true if this type is a float matrix
-  bool is_float_matrix();
+  bool is_float_matrix() const;
   /// @returns true if this type is a float vector
-  bool is_float_vector();
+  bool is_float_vector() const;
   /// @returns true if this type is a float scalar or vector
-  bool is_float_scalar_or_vector();
-  /// @returns ture if this type is an integer scalar
-  bool is_integer_scalar();
+  bool is_float_scalar_or_vector() const;
+  /// @returns true if this type is an integer scalar
+  bool is_integer_scalar() const;
   /// @returns true if this type is a signed integer vector
-  bool is_signed_integer_vector();
+  bool is_signed_integer_vector() const;
   /// @returns true if this type is an unsigned vector
-  bool is_unsigned_integer_vector();
+  bool is_unsigned_integer_vector() const;
   /// @returns true if this type is an unsigned scalar or vector
-  bool is_unsigned_scalar_or_vector();
+  bool is_unsigned_scalar_or_vector() const;
   /// @returns true if this type is a signed scalar or vector
-  bool is_signed_scalar_or_vector();
+  bool is_signed_scalar_or_vector() const;
   /// @returns true if this type is an integer scalar or vector
-  bool is_integer_scalar_or_vector();
+  bool is_integer_scalar_or_vector() const;
 
  protected:
   Type();

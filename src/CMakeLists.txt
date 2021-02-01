@@ -478,6 +478,7 @@ if(${TINT_BUILD_TESTS})
     type/type_manager_test.cc
     type/u32_type_test.cc
     type/vector_type_test.cc
+    validator/validator_builtins_test.cc
     validator/validator_control_block_test.cc
     validator/validator_function_test.cc
     validator/validator_test.cc

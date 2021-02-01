@@ -448,70 +448,65 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
 namespace {
 
 enum class IntrinsicDataType {
-  kFloatOrIntScalarOrVector,
-  kFloatScalarOrVector,
-  kIntScalarOrVector,
-  kFloatVector,
-  kMatrix,
+  kDependent,
+  kSignedInteger,
+  kUnsignedInteger,
+  kFloat,
 };
+
 struct IntrinsicData {
   ast::Intrinsic intrinsic;
-  uint8_t param_count;
-  IntrinsicDataType data_type;
-  uint8_t vector_size;
+  IntrinsicDataType result_type;
+  uint8_t result_vector_width;
+  uint8_t param_for_result_type;
 };
 
 // Note, this isn't all the intrinsics. Some are handled specially before
 // we get to the generic code. See the DetermineIntrinsic code below.
 constexpr const IntrinsicData kIntrinsicData[] = {
-    {ast::Intrinsic::kAbs, 1, IntrinsicDataType::kFloatOrIntScalarOrVector, 0},
-    {ast::Intrinsic::kAcos, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kAsin, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kAtan, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kAtan2, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kCeil, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kClamp, 3, IntrinsicDataType::kFloatOrIntScalarOrVector,
-     0},
-    {ast::Intrinsic::kCos, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kCosh, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kCountOneBits, 1, IntrinsicDataType::kIntScalarOrVector,
-     0},
-    {ast::Intrinsic::kCross, 2, IntrinsicDataType::kFloatVector, 3},
-    {ast::Intrinsic::kDeterminant, 1, IntrinsicDataType::kMatrix, 0},
-    {ast::Intrinsic::kDistance, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kExp, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kExp2, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kFaceForward, 3, IntrinsicDataType::kFloatScalarOrVector,
-     0},
-    {ast::Intrinsic::kFloor, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kFma, 3, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kFract, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kFrexp, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kInverseSqrt, 1, IntrinsicDataType::kFloatScalarOrVector,
-     0},
-    {ast::Intrinsic::kLdexp, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kLength, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kLog, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kLog2, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kMax, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0},
-    {ast::Intrinsic::kMin, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0},
-    {ast::Intrinsic::kMix, 3, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kModf, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kNormalize, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kPow, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kReflect, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kReverseBits, 1, IntrinsicDataType::kIntScalarOrVector, 0},
-    {ast::Intrinsic::kRound, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kSign, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kSin, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kSinh, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kSmoothStep, 3, IntrinsicDataType::kFloatScalarOrVector,
-     0},
-    {ast::Intrinsic::kSqrt, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kStep, 2, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kTan, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kTanh, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
-    {ast::Intrinsic::kTrunc, 1, IntrinsicDataType::kFloatScalarOrVector, 0},
+    {ast::Intrinsic::kAbs, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kAcos, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kAsin, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kAtan, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kAtan2, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kCeil, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kClamp, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kCos, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kCosh, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kCountOneBits, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kCross, IntrinsicDataType::kFloat, 3, 0},
+    {ast::Intrinsic::kDeterminant, IntrinsicDataType::kFloat, 1, 0},
+    {ast::Intrinsic::kDistance, IntrinsicDataType::kFloat, 1, 0},
+    {ast::Intrinsic::kExp, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kExp2, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFaceForward, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFloor, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFma, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFract, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFrexp, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kInverseSqrt, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kLdexp, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kLength, IntrinsicDataType::kFloat, 1, 0},
+    {ast::Intrinsic::kLog, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kLog2, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kMax, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kMin, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kMix, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kModf, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kNormalize, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kPow, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kReflect, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kReverseBits, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kRound, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kSign, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kSin, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kSinh, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kSmoothStep, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kSqrt, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kStep, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kTan, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kTanh, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kTrunc, IntrinsicDataType::kDependent, 0, 0},
 };
 
 constexpr const uint32_t kIntrinsicDataCount =
@@ -780,105 +775,42 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
     return false;
   }
 
-  if (expr->params().size() != data->param_count) {
-    set_error(expr->source(), "incorrect number of parameters for " +
-                                  builder_->Symbols().NameFor(ident->symbol()) +
-                                  ". Expected " +
-                                  std::to_string(data->param_count) + " got " +
-                                  std::to_string(expr->params().size()));
-    return false;
-  }
-
-  std::vector<type::Type*> result_types;
-  for (uint32_t i = 0; i < data->param_count; ++i) {
-    result_types.push_back(TypeOf(expr->params()[i])->UnwrapPtrIfNeeded());
-
-    switch (data->data_type) {
-      case IntrinsicDataType::kFloatOrIntScalarOrVector:
-        if (!result_types.back()->is_float_scalar_or_vector() &&
-            !result_types.back()->is_integer_scalar_or_vector()) {
-          set_error(expr->source(),
-                    "incorrect type for " +
-                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
-                        "Requires float or int, scalar or vector values");
-          return false;
-        }
-        break;
-      case IntrinsicDataType::kFloatScalarOrVector:
-        if (!result_types.back()->is_float_scalar_or_vector()) {
-          set_error(expr->source(),
-                    "incorrect type for " +
-                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
-                        "Requires float scalar or float vector values");
-          return false;
-        }
-
-        break;
-      case IntrinsicDataType::kIntScalarOrVector:
-        if (!result_types.back()->is_integer_scalar_or_vector()) {
-          set_error(expr->source(),
-                    "incorrect type for " +
-                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
-                        "Requires integer scalar or integer vector values");
-          return false;
-        }
-        break;
-      case IntrinsicDataType::kFloatVector:
-        if (!result_types.back()->is_float_vector()) {
-          set_error(expr->source(),
-                    "incorrect type for " +
-                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
-                        "Requires float vector values");
-          return false;
-        }
-        if (data->vector_size > 0 &&
-            result_types.back()->As<type::Vector>()->size() !=
-                data->vector_size) {
-          set_error(expr->source(),
-                    "incorrect vector size for " +
-                        builder_->Symbols().NameFor(ident->symbol()) + ". " +
-                        "Requires " + std::to_string(data->vector_size) +
-                        " elements");
-          return false;
-        }
-        break;
-      case IntrinsicDataType::kMatrix:
-        if (!result_types.back()->Is<type::Matrix>()) {
-          set_error(expr->source(),
-                    "incorrect type for " +
-                        builder_->Symbols().NameFor(ident->symbol()) +
-                        ". Requires matrix value");
-          return false;
-        }
-        break;
-    }
-  }
-
-  // Verify all the parameter types match
-  for (size_t i = 1; i < data->param_count; ++i) {
-    if (result_types[0] != result_types[i]) {
+  if (data->result_type == IntrinsicDataType::kDependent) {
+    const auto param_idx = data->param_for_result_type;
+    if (expr->params().size() <= param_idx) {
       set_error(expr->source(),
-                "mismatched parameter types for " +
+                "missing parameter " + std::to_string(param_idx) +
+                    " required for type determination in builtin " +
                     builder_->Symbols().NameFor(ident->symbol()));
       return false;
     }
+    SetType(expr->func(),
+            TypeOf(expr->params()[param_idx])->UnwrapPtrIfNeeded());
+  } else {
+    // The result type is not dependent on the parameter types.
+    type::Type* type = nullptr;
+    switch (data->result_type) {
+      case IntrinsicDataType::kSignedInteger:
+        type = builder_->create<type::I32>();
+        break;
+      case IntrinsicDataType::kUnsignedInteger:
+        type = builder_->create<type::U32>();
+        break;
+      case IntrinsicDataType::kFloat:
+        type = builder_->create<type::F32>();
+        break;
+      default:
+        error_ = "unhandled intrinsic data type for " +
+                 builder_->Symbols().NameFor(ident->symbol());
+        return false;
+    }
+
+    if (data->result_vector_width > 1) {
+      type = builder_->create<type::Vector>(type, data->result_vector_width);
+    }
+    SetType(expr->func(), type);
   }
 
-  // Handle functions which aways return the type, even if a vector is
-  // provided.
-  if (ident->intrinsic() == ast::Intrinsic::kLength ||
-      ident->intrinsic() == ast::Intrinsic::kDistance) {
-    SetType(expr->func(), result_types[0]->is_float_scalar()
-                              ? result_types[0]
-                              : result_types[0]->As<type::Vector>()->type());
-    return true;
-  }
-  // The determinant returns the component type of the columns
-  if (ident->intrinsic() == ast::Intrinsic::kDeterminant) {
-    SetType(expr->func(), result_types[0]->As<type::Matrix>()->type());
-    return true;
-  }
-  SetType(expr->func(), result_types[0]);
   return true;
 }
 
