@@ -2321,23 +2321,20 @@ Maybe<ast::Expression*> ParserImpl::additive_expression() {
 
 // shift_expr
 //   :
-//   | LESS_THAN LESS_THAN additive_expression shift_expr
-//   | GREATER_THAN GREATER_THAN additive_expression shift_expr
+//   | SHIFT_LEFT additive_expression shift_expr
+//   | SHIFT_RIGHT additive_expression shift_expr
 Expect<ast::Expression*> ParserImpl::expect_shift_expr(ast::Expression* lhs) {
   auto t = peek();
   auto source = t.source();
-  auto t2 = peek(1);
 
   auto* name = "";
   ast::BinaryOp op = ast::BinaryOp::kNone;
-  if (t.IsLessThan() && t2.IsLessThan()) {
-    next();  // Consume the t peek
-    next();  // Consume the t2 peek
+  if (t.IsShiftLeft()) {
+    next();  // Consume the peek
     op = ast::BinaryOp::kShiftLeft;
     name = "<<";
-  } else if (t.IsGreaterThan() && t2.IsGreaterThan()) {
-    next();  // Consume the t peek
-    next();  // Consume the t2 peek
+  } else if (t.IsShiftRight()) {
+    next();  // Consume the peek
     op = ast::BinaryOp::kShiftRight;
     name = ">>";
   } else {
@@ -3025,6 +3022,23 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
   auto t = peek();
   if (t.Is(tok)) {
     next();
+    synchronized_ = true;
+    return true;
+  }
+
+  // Special case to split `>>` and `>=` tokens if we are looking for a `>`.
+  if (tok == Token::Type::kGreaterThan &&
+      (t.IsShiftRight() || t.IsGreaterThanEqual())) {
+    next();
+
+    // Push the second character to the token queue.
+    auto source = t.source();
+    source.range.begin.column++;
+    if (t.IsShiftRight())
+      token_queue_.push_front(Token(Token::Type::kGreaterThan, source));
+    else if (t.IsGreaterThanEqual())
+      token_queue_.push_front(Token(Token::Type::kEqual, source));
+
     synchronized_ = true;
     return true;
   }

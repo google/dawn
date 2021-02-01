@@ -74,10 +74,14 @@ std::string Token::TypeToName(Type type) {
       return ">";
     case Token::Type::kGreaterThanEqual:
       return ">=";
+    case Token::Type::kShiftRight:
+      return ">>";
     case Token::Type::kLessThan:
       return "<";
     case Token::Type::kLessThanEqual:
       return "<=";
+    case Token::Type::kShiftLeft:
+      return "<<";
     case Token::Type::kMod:
       return "%";
     case Token::Type::kNotEqual:

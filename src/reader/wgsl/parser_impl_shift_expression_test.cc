@@ -71,6 +71,24 @@ TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRight) {
   ASSERT_TRUE(init->literal()->As<ast::BoolLiteral>()->IsTrue());
 }
 
+TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceLeft) {
+  auto p = parser("a < < true");
+  auto e = p->shift_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  ASSERT_NE(e.value, nullptr);
+  EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
+}
+
+TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceRight) {
+  auto p = parser("a > > true");
+  auto e = p->shift_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  ASSERT_NE(e.value, nullptr);
+  EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
+}
+
 TEST_F(ParserImplTest, ShiftExpression_InvalidLHS) {
   auto p = parser("if (a) {} << true");
   auto e = p->shift_expression();

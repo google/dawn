@@ -85,10 +85,14 @@ class Token {
     kGreaterThan,
     /// A '>='
     kGreaterThanEqual,
+    /// A '>>'
+    kShiftRight,
     /// A '<'
     kLessThan,
     /// A '<='
     kLessThanEqual,
+    /// A '<<'
+    kShiftLeft,
     /// A '%'
     kMod,
     /// A '-'
@@ -424,10 +428,14 @@ class Token {
   bool IsGreaterThan() const { return type_ == Type::kGreaterThan; }
   /// @returns true if token is a '>='
   bool IsGreaterThanEqual() const { return type_ == Type::kGreaterThanEqual; }
+  /// @returns true if token is a '>>'
+  bool IsShiftRight() const { return type_ == Type::kShiftRight; }
   /// @returns true if token is a '<'
   bool IsLessThan() const { return type_ == Type::kLessThan; }
   /// @returns true if token is a '<='
   bool IsLessThanEqual() const { return type_ == Type::kLessThanEqual; }
+  /// @returns true if token is a '<<'
+  bool IsShiftLeft() const { return type_ == Type::kShiftLeft; }
   /// @returns true if token is a '%'
   bool IsMod() const { return type_ == Type::kMod; }
   /// @returns true if token is a '-'

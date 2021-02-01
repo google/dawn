@@ -532,6 +532,20 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
   ASSERT_TRUE(a->type()->Is<type::U32>());
 }
 
+TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
+  auto p = parser("array<vec4<u32>>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t->Is<type::Array>());
+
+  auto* a = t->As<type::Array>();
+  ASSERT_TRUE(a->IsRuntimeArray());
+  ASSERT_TRUE(a->type()->is_unsigned_integer_vector());
+}
+
 TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
   auto p = parser("array<unknown, 3>");
   auto t = p->type_decl();

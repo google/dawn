@@ -431,12 +431,20 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kGreaterThanEqual;
     pos_ += 2;
     location_.column += 2;
+  } else if (matches(pos_, ">>")) {
+    type = Token::Type::kShiftRight;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, ">")) {
     type = Token::Type::kGreaterThan;
     pos_ += 1;
     location_.column += 1;
   } else if (matches(pos_, "<=")) {
     type = Token::Type::kLessThanEqual;
+    pos_ += 2;
+    location_.column += 2;
+  } else if (matches(pos_, "<<")) {
+    type = Token::Type::kShiftLeft;
     pos_ += 2;
     location_.column += 2;
   } else if (matches(pos_, "<")) {
