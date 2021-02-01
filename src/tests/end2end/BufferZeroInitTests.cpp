@@ -949,6 +949,9 @@ TEST_P(BufferZeroInitTest, Copy2DTextureToBuffer) {
 // Test that the code path of CopyTextureToBuffer clears the destination buffer correctly when it is
 // the first use of the buffer and the texture is a 2D array texture.
 TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     constexpr wgpu::Extent3D kTextureSize = {64u, 4u, 3u};
 
     // bytesPerRow == texelBlockSizeInBytes * copySize.width && rowsPerImage == copySize.height &&
@@ -1248,4 +1251,5 @@ DAWN_INSTANTIATE_TEST(BufferZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));

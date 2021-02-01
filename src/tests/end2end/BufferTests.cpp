@@ -437,6 +437,7 @@ DAWN_INSTANTIATE_TEST(BufferMappingTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class BufferMappedAtCreationTests : public DawnTest {
@@ -691,6 +692,7 @@ DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class BufferTests : public DawnTest {};

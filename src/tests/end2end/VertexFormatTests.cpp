@@ -924,4 +924,5 @@ DAWN_INSTANTIATE_TEST(VertexFormatTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

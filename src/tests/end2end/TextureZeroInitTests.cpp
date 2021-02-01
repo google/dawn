@@ -894,6 +894,9 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 // sampled and attachment (with LoadOp::Clear so the lazy clear can be skipped) then the sampled
 // subresource is correctly cleared.
 TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     // Create a 2D array texture, layer 0 will be used as attachment, layer 1 as sampled.
     wgpu::TextureDescriptor texDesc;
     texDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment |
@@ -1017,6 +1020,9 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
 TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
+    // TODO(crbug.com/dawn/660): Diagnose and fix this failure on SwANGLE.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
@@ -1046,6 +1052,9 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
+    // TODO(crbug.com/dawn/660): Diagnose and fix this failure on SwANGLE.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
     descriptor.size.width = kUnalignedSize;
@@ -1078,6 +1087,9 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
 // with more than 1 array layers
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
+    // TODO(crbug.com/dawn/660): Diagnose and fix this failure on SwANGLE.
+    DAWN_SKIP_TEST_IF(IsANGLE());
+
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 2, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
@@ -1335,6 +1347,9 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // Test that if one layer of a texture is initialized and another is uninitialized, lazy clearing
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         1, 2,
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled,
@@ -1687,6 +1702,7 @@ DAWN_INSTANTIATE_TEST(TextureZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                                    {"use_d3d12_render_pass"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
 
