@@ -119,5 +119,13 @@ bool Type::is_integer_scalar_or_vector() const {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
+bool Type::is_bool_vector() const {
+  return Is<Vector>() && As<Vector>()->type()->Is<Bool>();
+}
+
+bool Type::is_bool_scalar_or_vector() const {
+  return Is<Bool>() || is_bool_vector();
+}
+
 }  // namespace type
 }  // namespace tint

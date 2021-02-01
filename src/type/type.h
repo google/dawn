@@ -95,6 +95,10 @@ class Type : public Castable<Type> {
   bool is_signed_scalar_or_vector() const;
   /// @returns true if this type is an integer scalar or vector
   bool is_integer_scalar_or_vector() const;
+  /// @returns true if this type is a boolean vector
+  bool is_bool_vector() const;
+  /// @returns true if this type is boolean scalar or vector
+  bool is_bool_scalar_or_vector() const;
 
  protected:
   Type();

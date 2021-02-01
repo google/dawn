@@ -452,6 +452,7 @@ enum class IntrinsicDataType {
   kSignedInteger,
   kUnsignedInteger,
   kFloat,
+  kBool,
 };
 
 struct IntrinsicData {
@@ -466,6 +467,9 @@ struct IntrinsicData {
 constexpr const IntrinsicData kIntrinsicData[] = {
     {ast::Intrinsic::kAbs, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kAcos, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kAll, IntrinsicDataType::kBool, 1, 0},
+    {ast::Intrinsic::kAny, IntrinsicDataType::kBool, 1, 0},
+    {ast::Intrinsic::kArrayLength, IntrinsicDataType::kUnsignedInteger, 1, 0},
     {ast::Intrinsic::kAsin, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kAtan, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kAtan2, IntrinsicDataType::kDependent, 0, 0},
@@ -477,10 +481,20 @@ constexpr const IntrinsicData kIntrinsicData[] = {
     {ast::Intrinsic::kCross, IntrinsicDataType::kFloat, 3, 0},
     {ast::Intrinsic::kDeterminant, IntrinsicDataType::kFloat, 1, 0},
     {ast::Intrinsic::kDistance, IntrinsicDataType::kFloat, 1, 0},
+    {ast::Intrinsic::kDpdx, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kDpdxCoarse, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kDpdxFine, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kDpdy, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kDpdyCoarse, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kDpdyFine, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kDot, IntrinsicDataType::kFloat, 1, 0},
     {ast::Intrinsic::kExp, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kExp2, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kFaceForward, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kFloor, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFwidth, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFwidthCoarse, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kFwidthFine, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kFma, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kFract, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kFrexp, IntrinsicDataType::kDependent, 0, 0},
@@ -498,6 +512,7 @@ constexpr const IntrinsicData kIntrinsicData[] = {
     {ast::Intrinsic::kReflect, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kReverseBits, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kRound, IntrinsicDataType::kDependent, 0, 0},
+    {ast::Intrinsic::kSelect, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kSign, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kSin, IntrinsicDataType::kDependent, 0, 0},
     {ast::Intrinsic::kSinh, IntrinsicDataType::kDependent, 0, 0},
@@ -516,28 +531,6 @@ constexpr const uint32_t kIntrinsicDataCount =
 
 bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                                         ast::CallExpression* expr) {
-  if (ast::intrinsic::IsDerivative(ident->intrinsic())) {
-    if (expr->params().size() != 1) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " +
-                    builder_->Symbols().NameFor(ident->symbol()));
-      return false;
-    }
-
-    // The result type must be the same as the type of the parameter.
-    auto* param_type = TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
-    SetType(expr->func(), param_type);
-    return true;
-  }
-  if (ident->intrinsic() == ast::Intrinsic::kAny ||
-      ident->intrinsic() == ast::Intrinsic::kAll) {
-    SetType(expr->func(), builder_->create<type::Bool>());
-    return true;
-  }
-  if (ident->intrinsic() == ast::Intrinsic::kArrayLength) {
-    SetType(expr->func(), builder_->create<type::U32>());
-    return true;
-  }
   if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
     if (expr->params().size() != 1) {
       set_error(expr->source(),
@@ -743,24 +736,6 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     return true;
   }
-  if (ident->intrinsic() == ast::Intrinsic::kDot) {
-    SetType(expr->func(), builder_->create<type::F32>());
-    return true;
-  }
-  if (ident->intrinsic() == ast::Intrinsic::kSelect) {
-    if (expr->params().size() != 3) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " +
-                    builder_->Symbols().NameFor(ident->symbol()) +
-                    " expected 3 got " + std::to_string(expr->params().size()));
-      return false;
-    }
-
-    // The result type must be the same as the type of the parameter.
-    auto* param_type = TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
-    SetType(expr->func(), param_type);
-    return true;
-  }
 
   const IntrinsicData* data = nullptr;
   for (uint32_t i = 0; i < kIntrinsicDataCount; ++i) {
@@ -798,6 +773,9 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         break;
       case IntrinsicDataType::kFloat:
         type = builder_->create<type::F32>();
+        break;
+      case IntrinsicDataType::kBool:
+        type = builder_->create<type::Bool>();
         break;
       default:
         error_ = "unhandled intrinsic data type for " +

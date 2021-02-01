@@ -1196,23 +1196,11 @@ TEST_P(IntrinsicDerivativeTest, MissingParam) {
 
   auto* expr = Call(name);
   EXPECT_FALSE(td()->DetermineResultType(expr));
-  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
+  EXPECT_EQ(td()->error(),
+            "missing parameter 0 required for type determination in builtin " +
+                std::string(name));
 }
 
-TEST_P(IntrinsicDerivativeTest, ToomManyParams) {
-  auto name = GetParam();
-
-  auto* var1 = Var("ident1", ast::StorageClass::kNone, ty.vec4<f32>());
-  auto* var2 = Var("ident2", ast::StorageClass::kNone, ty.vec4<f32>());
-  AST().AddGlobalVariable(var1);
-  AST().AddGlobalVariable(var2);
-
-  EXPECT_TRUE(td()->Determine());
-
-  auto* expr = Call(name, "ident1", "ident2");
-  EXPECT_FALSE(td()->DetermineResultType(expr));
-  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
-}
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          IntrinsicDerivativeTest,
                          testing::Values("dpdx",
@@ -1520,32 +1508,15 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Select_TooFewParams) {
-  auto* var = Var("v", ast::StorageClass::kNone, ty.vec3<f32>());
-
-  AST().AddGlobalVariable(var);
-
-  auto* expr = Call("select", "v");
+TEST_F(TypeDeterminerTest, Intrinsic_Select_NoParams) {
+  auto* expr = Call("select");
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
   EXPECT_FALSE(td()->DetermineResultType(expr));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for select expected 3 got 1");
-}
-
-TEST_F(TypeDeterminerTest, Intrinsic_Select_TooManyParams) {
-  auto* var = Var("v", ast::StorageClass::kNone, ty.vec3<f32>());
-
-  AST().AddGlobalVariable(var);
-
-  auto* expr = Call("select", "v", "v", "v", "v");
-
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_FALSE(td()->DetermineResultType(expr));
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for select expected 3 got 4");
+  EXPECT_EQ(
+      td()->error(),
+      "missing parameter 0 required for type determination in builtin select");
 }
 
 using UnaryOpExpressionTest = TypeDeterminerTestWithParam<ast::UnaryOp>;
