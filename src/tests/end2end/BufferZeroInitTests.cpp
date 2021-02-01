@@ -1053,8 +1053,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 // storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     // TODO(crbug.com/tint/375): Enable once barriers are implemented
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") ||
-                      HasToggleEnabled("use_tint_inspector"));
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) buffer SSBO {
@@ -1190,8 +1189,7 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
 
     // TODO(crbug.com/tint/255, crbug.com/tint/256, crbug.com/tint/400, crbug.com/tint/417):
     // Skip due to runtime array not currently supported in WGSL
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") ||
-                      HasToggleEnabled("use_tint_inspector"));
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
 
     constexpr uint64_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =
