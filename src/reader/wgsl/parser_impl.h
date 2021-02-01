@@ -365,9 +365,11 @@ class ParserImpl {
   /// @returns the variable parsed or nullptr
   /// @param decos the list of decorations for the variable declaration.
   Maybe<ast::Variable*> global_variable_decl(ast::DecorationList& decos);
-  /// Parses a `global_constant_decl` grammar element
+  /// Parses a `global_constant_decl` grammar element with the initial
+  /// `variable_decoration_list*` provided as `decos`
   /// @returns the const object or nullptr
-  Maybe<ast::Variable*> global_constant_decl();
+  /// @param decos the list of decorations for the constant declaration.
+  Maybe<ast::Variable*> global_constant_decl(ast::DecorationList& decos);
   /// Parses a `variable_decl` grammar element
   /// @returns the parsed variable declaration info
   Maybe<VarDeclInfo> variable_decl();

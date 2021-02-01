@@ -27,6 +27,7 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
@@ -134,6 +135,7 @@ const char kAccessDecoration[] = "access";
 const char kBindingDecoration[] = "binding";
 const char kBlockDecoration[] = "block";
 const char kBuiltinDecoration[] = "builtin";
+const char kConstantIdDecoration[] = "constant_id";
 const char kGroupDecoration[] = "group";
 const char kLocationDecoration[] = "location";
 const char kOffsetDecoration[] = "offset";
@@ -149,10 +151,10 @@ bool is_decoration(Token t) {
   auto s = t.to_str();
   return s == kAccessDecoration || s == kBindingDecoration ||
          s == kBlockDecoration || s == kBuiltinDecoration ||
-         s == kLocationDecoration || s == kOffsetDecoration ||
-         s == kSetDecoration || s == kGroupDecoration ||
-         s == kStageDecoration || s == kStrideDecoration ||
-         s == kWorkgroupSizeDecoration;
+         s == kConstantIdDecoration || s == kLocationDecoration ||
+         s == kOffsetDecoration || s == kSetDecoration ||
+         s == kGroupDecoration || s == kStageDecoration ||
+         s == kStrideDecoration || s == kWorkgroupSizeDecoration;
 }
 
 /// Enter-exit counters for block token types.
@@ -323,7 +325,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       return true;
     }
 
-    auto gc = global_constant_decl();
+    auto gc = global_constant_decl(decos.value);
     if (gc.errored)
       return Failure::kErrored;
 
@@ -441,8 +443,9 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
 }
 
 // global_constant_decl
-//  : CONST variable_ident_decl EQUAL const_expr
-Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
+//  : variable_decoration_list* CONST variable_ident_decl EQUAL const_expr
+Maybe<ast::Variable*> ParserImpl::global_constant_decl(
+    ast::DecorationList& decos) {
   if (!match(Token::Type::kConst))
     return Failure::kNoMatch;
 
@@ -459,6 +462,10 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
   if (init.errored)
     return Failure::kErrored;
 
+  auto var_decos = cast_decorations<ast::VariableDecoration>(decos);
+  if (var_decos.errored)
+    return Failure::kErrored;
+
   return create<ast::Variable>(
       decl->source,                             // source
       builder_.Symbols().Register(decl->name),  // symbol
@@ -466,7 +473,7 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl() {
       decl->type,                               // type
       true,                                     // is_const
       init.value,                               // constructor
-      ast::VariableDecorationList{});           // decorations
+      std::move(var_decos.value));              // decorations
 }
 
 // variable_decl
@@ -2936,6 +2943,17 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
         return Failure::kErrored;
 
       return create<ast::StructMemberOffsetDecoration>(t.source(), val.value);
+    });
+  }
+
+  if (s == kConstantIdDecoration) {
+    const char* use = "constant_id decoration";
+    return expect_paren_block(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return Failure::kErrored;
+
+      return create<ast::ConstantIdDecoration>(t.source(), val.value);
     });
   }
 
