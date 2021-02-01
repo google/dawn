@@ -528,57 +528,6 @@ bool GeneratorImpl::EmitBreak(std::ostream& out, ast::BreakStatement*) {
   return true;
 }
 
-std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
-  if (intrinsic == ast::Intrinsic::kAny) {
-    return "any";
-  }
-  if (intrinsic == ast::Intrinsic::kAll) {
-    return "all";
-  }
-  if (intrinsic == ast::Intrinsic::kCountOneBits) {
-    return "countbits";
-  }
-  if (intrinsic == ast::Intrinsic::kDot) {
-    return "dot";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdy) {
-    return "ddy";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdyFine) {
-    return "ddy_fine";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdyCoarse) {
-    return "ddy_coarse";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdx) {
-    return "ddx";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdxFine) {
-    return "ddx_fine";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdxCoarse) {
-    return "ddx_coarse";
-  }
-  if (intrinsic == ast::Intrinsic::kFwidth ||
-      intrinsic == ast::Intrinsic::kFwidthFine ||
-      intrinsic == ast::Intrinsic::kFwidthCoarse) {
-    return "fwidth";
-  }
-  if (intrinsic == ast::Intrinsic::kIsFinite) {
-    return "isfinite";
-  }
-  if (intrinsic == ast::Intrinsic::kIsInf) {
-    return "isinf";
-  }
-  if (intrinsic == ast::Intrinsic::kIsNan) {
-    return "isnan";
-  }
-  if (intrinsic == ast::Intrinsic::kReverseBits) {
-    return "reversebits";
-  }
-  return "";
-}
-
 bool GeneratorImpl::EmitCall(std::ostream& pre,
                              std::ostream& out,
                              ast::CallExpression* expr) {
@@ -597,15 +546,12 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       error_ = "is_normal not supported in HLSL backend yet";
       return false;
     } else {
-      auto name = generate_intrinsic_name(ident->intrinsic());
+      if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
+        return EmitTextureCall(pre, out, expr);
+      }
+      auto name = generate_builtin_name(ident);
       if (name.empty()) {
-        if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-          return EmitTextureCall(pre, out, expr);
-        }
-        name = generate_builtin_name(expr);
-        if (name.empty()) {
-          return false;
-        }
+        return false;
       }
 
       make_indent(out);
@@ -935,11 +881,13 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   return true;
 }  // namespace hlsl
 
-std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
+std::string GeneratorImpl::generate_builtin_name(
+    ast::IdentifierExpression* ident) {
   std::string out;
-  auto* ident = expr->func()->As<ast::IdentifierExpression>();
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kAcos:
+    case ast::Intrinsic::kAny:
+    case ast::Intrinsic::kAll:
     case ast::Intrinsic::kAsin:
     case ast::Intrinsic::kAtan:
     case ast::Intrinsic::kAtan2:
@@ -949,10 +897,12 @@ std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
     case ast::Intrinsic::kCross:
     case ast::Intrinsic::kDeterminant:
     case ast::Intrinsic::kDistance:
+    case ast::Intrinsic::kDot:
     case ast::Intrinsic::kExp:
     case ast::Intrinsic::kExp2:
     case ast::Intrinsic::kFloor:
     case ast::Intrinsic::kFma:
+    case ast::Intrinsic::kLdexp:
     case ast::Intrinsic::kLength:
     case ast::Intrinsic::kLog:
     case ast::Intrinsic::kLog2:
@@ -975,14 +925,52 @@ std::string GeneratorImpl::generate_builtin_name(ast::CallExpression* expr) {
     case ast::Intrinsic::kClamp:
       out = builder_.Symbols().NameFor(ident->symbol());
       break;
+    case ast::Intrinsic::kCountOneBits:
+      out = "countbits";
+      break;
+    case ast::Intrinsic::kDpdx:
+      out = "ddx";
+      break;
+    case ast::Intrinsic::kDpdxCoarse:
+      out = "ddx_coarse";
+      break;
+    case ast::Intrinsic::kDpdxFine:
+      out = "ddx_fine";
+      break;
+    case ast::Intrinsic::kDpdy:
+      out = "ddy";
+      break;
+    case ast::Intrinsic::kDpdyCoarse:
+      out = "ddy_coarse";
+      break;
+    case ast::Intrinsic::kDpdyFine:
+      out = "ddy_fine";
+      break;
     case ast::Intrinsic::kFaceForward:
       out = "faceforward";
       break;
     case ast::Intrinsic::kFract:
       out = "frac";
       break;
+    case ast::Intrinsic::kFwidth:
+    case ast::Intrinsic::kFwidthCoarse:
+    case ast::Intrinsic::kFwidthFine:
+      out = "fwidth";
+      break;
     case ast::Intrinsic::kInverseSqrt:
       out = "rsqrt";
+      break;
+    case ast::Intrinsic::kIsFinite:
+      out = "isfinite";
+      break;
+    case ast::Intrinsic::kIsInf:
+      out = "isinf";
+      break;
+    case ast::Intrinsic::kIsNan:
+      out = "isnan";
+      break;
+    case ast::Intrinsic::kReverseBits:
+      out = "reversebits";
       break;
     case ast::Intrinsic::kSmoothStep:
       out = "smoothstep";

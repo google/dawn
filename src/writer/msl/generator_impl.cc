@@ -431,55 +431,6 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
   return name;
 }
 
-std::string GeneratorImpl::generate_intrinsic_name(ast::Intrinsic intrinsic) {
-  if (intrinsic == ast::Intrinsic::kAny) {
-    return "any";
-  }
-  if (intrinsic == ast::Intrinsic::kAll) {
-    return "all";
-  }
-  if (intrinsic == ast::Intrinsic::kCountOneBits) {
-    return "popcount";
-  }
-  if (intrinsic == ast::Intrinsic::kDot) {
-    return "dot";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdy ||
-      intrinsic == ast::Intrinsic::kDpdyFine ||
-      intrinsic == ast::Intrinsic::kDpdyCoarse) {
-    return "dfdy";
-  }
-  if (intrinsic == ast::Intrinsic::kDpdx ||
-      intrinsic == ast::Intrinsic::kDpdxFine ||
-      intrinsic == ast::Intrinsic::kDpdxCoarse) {
-    return "dfdx";
-  }
-  if (intrinsic == ast::Intrinsic::kFwidth ||
-      intrinsic == ast::Intrinsic::kFwidthFine ||
-      intrinsic == ast::Intrinsic::kFwidthCoarse) {
-    return "fwidth";
-  }
-  if (intrinsic == ast::Intrinsic::kIsFinite) {
-    return "isfinite";
-  }
-  if (intrinsic == ast::Intrinsic::kIsInf) {
-    return "isinf";
-  }
-  if (intrinsic == ast::Intrinsic::kIsNan) {
-    return "isnan";
-  }
-  if (intrinsic == ast::Intrinsic::kIsNormal) {
-    return "isnormal";
-  }
-  if (intrinsic == ast::Intrinsic::kReverseBits) {
-    return "reverse_bits";
-  }
-  if (intrinsic == ast::Intrinsic::kSelect) {
-    return "select";
-  }
-  return "";
-}
-
 bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   auto* ident = expr->func()->As<ast::IdentifierExpression>();
 
@@ -489,15 +440,12 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   }
 
   if (ident->IsIntrinsic()) {
-    auto name = generate_intrinsic_name(ident->intrinsic());
+    if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
+      return EmitTextureCall(expr);
+    }
+    auto name = generate_builtin_name(ident);
     if (name.empty()) {
-      if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-        return EmitTextureCall(expr);
-      }
-      name = generate_builtin_name(ident);
-      if (name.empty()) {
-        return false;
-      }
+      return false;
     }
 
     make_indent();
@@ -819,6 +767,8 @@ std::string GeneratorImpl::generate_builtin_name(
   std::string out = "metal::";
   switch (ident->intrinsic()) {
     case ast::Intrinsic::kAcos:
+    case ast::Intrinsic::kAll:
+    case ast::Intrinsic::kAny:
     case ast::Intrinsic::kAsin:
     case ast::Intrinsic::kAtan:
     case ast::Intrinsic::kAtan2:
@@ -828,12 +778,14 @@ std::string GeneratorImpl::generate_builtin_name(
     case ast::Intrinsic::kCross:
     case ast::Intrinsic::kDeterminant:
     case ast::Intrinsic::kDistance:
+    case ast::Intrinsic::kDot:
     case ast::Intrinsic::kExp:
     case ast::Intrinsic::kExp2:
     case ast::Intrinsic::kFloor:
     case ast::Intrinsic::kFma:
     case ast::Intrinsic::kFract:
     case ast::Intrinsic::kLength:
+    case ast::Intrinsic::kLdexp:
     case ast::Intrinsic::kLog:
     case ast::Intrinsic::kLog2:
     case ast::Intrinsic::kMix:
@@ -841,6 +793,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case ast::Intrinsic::kPow:
     case ast::Intrinsic::kReflect:
     case ast::Intrinsic::kRound:
+    case ast::Intrinsic::kSelect:
     case ast::Intrinsic::kSin:
     case ast::Intrinsic::kSinh:
     case ast::Intrinsic::kSqrt:
@@ -853,28 +806,61 @@ std::string GeneratorImpl::generate_builtin_name(
       out += program_->Symbols().NameFor(ident->symbol());
       break;
     case ast::Intrinsic::kAbs:
-      if (type->Is<type::F32>()) {
+      if (type->is_float_scalar_or_vector()) {
         out += "fabs";
-      } else if (type->Is<type::U32>() || type->Is<type::I32>()) {
+      } else {
         out += "abs";
       }
       break;
+    case ast::Intrinsic::kCountOneBits:
+      out += "popcount";
+      break;
+    case ast::Intrinsic::kDpdx:
+    case ast::Intrinsic::kDpdxCoarse:
+    case ast::Intrinsic::kDpdxFine:
+      out += "dfdx";
+      break;
+    case ast::Intrinsic::kDpdy:
+    case ast::Intrinsic::kDpdyCoarse:
+    case ast::Intrinsic::kDpdyFine:
+      out += "dfdy";
+      break;
+    case ast::Intrinsic::kFwidth:
+    case ast::Intrinsic::kFwidthCoarse:
+    case ast::Intrinsic::kFwidthFine:
+      out += "fwidth";
+      break;
+    case ast::Intrinsic::kIsFinite:
+      out += "isfinite";
+      break;
+    case ast::Intrinsic::kIsInf:
+      out += "isinf";
+      break;
+    case ast::Intrinsic::kIsNan:
+      out += "isnan";
+      break;
+    case ast::Intrinsic::kIsNormal:
+      out += "isnormal";
+      break;
     case ast::Intrinsic::kMax:
-      if (type->Is<type::F32>()) {
+      if (type->is_float_scalar_or_vector()) {
         out += "fmax";
-      } else if (type->Is<type::U32>() || type->Is<type::I32>()) {
+      } else {
         out += "max";
       }
       break;
     case ast::Intrinsic::kMin:
-      if (type->Is<type::F32>()) {
+      if (type->is_float_scalar_or_vector()) {
         out += "fmin";
-      } else if (type->Is<type::U32>() || type->Is<type::I32>()) {
+      } else {
         out += "min";
       }
       break;
     case ast::Intrinsic::kFaceForward:
       out += "faceforward";
+      break;
+    case ast::Intrinsic::kReverseBits:
+      out += "reverse_bits";
       break;
     case ast::Intrinsic::kSmoothStep:
       out += "smoothstep";

@@ -345,14 +345,10 @@ class GeneratorImpl {
   /// @returns the index string, or blank if unable to generate
   std::string generate_storage_buffer_index_expression(std::ostream& pre,
                                                        ast::Expression* expr);
-  /// Generates an intrinsic name from the given name
-  /// @param intrinsic the intrinsic to convert to a name
-  /// @returns the intrinsic name or blank on error
-  std::string generate_intrinsic_name(ast::Intrinsic intrinsic);
   /// Handles generating a builtin method name
   /// @param expr the expression
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(ast::CallExpression* expr);
+  std::string generate_builtin_name(ast::IdentifierExpression* expr);
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
