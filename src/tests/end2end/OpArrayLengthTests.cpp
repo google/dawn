@@ -102,7 +102,6 @@ TEST_P(OpArrayLengthTest, Compute) {
     // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES());
-
     // Create a buffer to hold the result sizes and create a bindgroup for it.
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
@@ -209,10 +208,11 @@ TEST_P(OpArrayLengthTest, Fragment) {
 // Test OpArrayLength in the vertex stage
 TEST_P(OpArrayLengthTest, Vertex) {
     // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL. Also failing on SwANGLE. See
+    // Nvidia OpenGL. Also failing on all GLES (NV, Intel, SwANGLE). See
     // https://bugs.chromium.org/p/dawn/issues/detail?id=197
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGLES() || IsANGLE());
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     // TODO(crbug.com/dawn/657): Returned data is slightly incorrect in this case.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") && IsIntel() && IsOpenGL());
 
