@@ -3924,6 +3924,488 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"}}));
 
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
+    // ImageQuerySize requires storage image or multisampled
+    // For storage image, use another instruction to indicate whether it
+    // is readonly or writeonly.
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+
+        // 1D
+        {"%float 1D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_1d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          TypeConstructor[not set]{
+            __i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // 2D
+        {"%float 2D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_2__i32
+        {
+          TypeConstructor[not set]{
+            __vec_2__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // 3D
+        {"%float 3D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_3d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // Cube
+        {"%float Cube 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_cube__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // Depth 2D
+        {"%float 2D 1 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_2__i32
+        {
+          TypeConstructor[not set]{
+            __vec_2__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // Depth Cube
+        {"%float Cube 1 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_cube
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySizeLod_Arrayed_SignedResult_SignedLevel,
+    // ImageQuerySize requires storage image or multisampled
+    // For storage image, use another instruction to indicate whether it
+    // is readonly or writeonly.
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+
+        // 1D arrayed
+        {"%float 1D 0 1 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_1d_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_2__i32
+        {
+          TypeConstructor[not set]{
+            __vec_2__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // 2D array
+        {"%float 2D 0 1 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_2d_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // There is no 3D array
+
+        // Cube array
+        {"%float Cube 0 1 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v4int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_cube_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          TypeConstructor[not set]{
+            __vec_4__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // Depth 2D array
+        {"%float 2D 1 1 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_2d_array
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_3__i32
+        {
+          TypeConstructor[not set]{
+            __vec_3__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // Depth Cube Array
+        {"%float Cube 1 1 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v4int %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __depth_texture_cube_array
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __vec_4__i32
+        {
+          TypeConstructor[not set]{
+            __vec_4__i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+            Call[not set]{
+              Identifier[not set]{textureNumLayers}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // When the level-of-detail value is given as an unsigned
+    // integer, we must convert it before using it as an argument
+    // to textureDimensions.
+    ImageQuerySizeLod_NonArrayed_SignedResult_UnsignedLevel,
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+
+        {"%float 1D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %int %im %u1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_1d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          TypeConstructor[not set]{
+            __i32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                TypeConstructor[not set]{
+                  __i32
+                  Identifier[not set]{u1}
+                }
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // When SPIR-V wants the result type to be unsigned, we have to
+    // insert a type constructor or bitcast for WGSL to do the type
+    // coercion. But the algorithm already does that as a matter
+    // of course.
+    ImageQuerySizeLod_NonArrayed_UnsignedResult_SignedLevel,
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+
+        {"%float 1D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %uint %im %i1\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __sampled_texture_1d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __u32
+        {
+          TypeConstructor[not set]{
+            __u32
+            Call[not set]{
+              Identifier[not set]{textureDimensions}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{i1}
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
 struct ImageCoordsCase {
   // SPIR-V image type, excluding result ID and opcode
   std::string spirv_image_type_details;

@@ -4376,15 +4376,20 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
 
   const auto opcode = inst.opcode();
   switch (opcode) {
-    case SpvOpImageQuerySize: {
+    case SpvOpImageQuerySize:
+    case SpvOpImageQuerySizeLod: {
       ast::ExpressionList exprs;
       // Invoke textureDimensions.
       // If the texture is arrayed, combine with the result from
       // textureNumLayers.
       auto* dims_ident = create<ast::IdentifierExpression>(
           Source{}, builder_.Symbols().Register("textureDimensions"));
-      exprs.push_back(create<ast::CallExpression>(
-          Source{}, dims_ident, ast::ExpressionList{GetImageExpression(inst)}));
+      ast::ExpressionList dims_args{GetImageExpression(inst)};
+      if (opcode == SpvOpImageQuerySizeLod) {
+        dims_args.push_back(ToI32(MakeOperand(inst, 1)).expr);
+      }
+      exprs.push_back(
+          create<ast::CallExpression>(Source{}, dims_ident, dims_args));
       if (type::IsTextureArray(texture_type->dim())) {
         auto* layers_ident = create<ast::IdentifierExpression>(
             Source{}, builder_.Symbols().Register("textureNumLayers"));
@@ -4401,7 +4406,6 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       return Fail() << "WGSL does not support querying the level of detail of "
                        "an image: "
                     << inst.PrettyPrint();
-    case SpvOpImageQuerySizeLod:  // TODO(dneto)
     case SpvOpImageQueryLevels:   // TODO(dneto)
     case SpvOpImageQuerySamples:  // TODO(dneto)
     default:
