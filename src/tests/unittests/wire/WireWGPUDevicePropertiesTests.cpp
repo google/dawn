@@ -34,8 +34,24 @@ TEST_F(WireWGPUDevicePropertiesTests, SerializeWGPUDeviceProperties) {
     dawn_wire::SerializeWGPUDeviceProperties(&sentWGPUDeviceProperties, buffer.data());
 
     WGPUDeviceProperties receivedWGPUDeviceProperties;
-    dawn_wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties, buffer.data());
+    ASSERT_TRUE(dawn_wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties,
+                                                           buffer.data(), buffer.size()));
     ASSERT_TRUE(receivedWGPUDeviceProperties.textureCompressionBC);
     ASSERT_FALSE(receivedWGPUDeviceProperties.pipelineStatisticsQuery);
     ASSERT_TRUE(receivedWGPUDeviceProperties.timestampQuery);
+}
+
+// Test that deserialization if the buffer is just one byte too small fails.
+TEST_F(WireWGPUDevicePropertiesTests, DeserializeBufferTooSmall) {
+    WGPUDeviceProperties sentWGPUDeviceProperties = {};
+
+    size_t sentWGPUDevicePropertiesSize =
+        dawn_wire::SerializedWGPUDevicePropertiesSize(&sentWGPUDeviceProperties);
+    std::vector<char> buffer;
+    buffer.resize(sentWGPUDevicePropertiesSize);
+    dawn_wire::SerializeWGPUDeviceProperties(&sentWGPUDeviceProperties, buffer.data());
+
+    WGPUDeviceProperties receivedWGPUDeviceProperties;
+    ASSERT_FALSE(dawn_wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties,
+                                                            buffer.data(), buffer.size() - 1));
 }
