@@ -100,6 +100,8 @@ namespace dawn_native {
         // Cache the width and height of all attachments for convenience
         uint32_t width;
         uint32_t height;
+
+        Ref<QuerySetBase> occlusionQuerySet;
     };
 
     struct BufferCopy {

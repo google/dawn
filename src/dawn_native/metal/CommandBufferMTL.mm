@@ -176,6 +176,11 @@ namespace dawn_native { namespace metal {
                 }
             }
 
+            if (renderPass->occlusionQuerySet.Get() != nullptr) {
+                descriptor.visibilityResultBuffer =
+                    ToBackend(renderPass->occlusionQuerySet.Get())->GetVisibilityBuffer();
+            }
+
             return descriptorRef;
         }
 
@@ -756,15 +761,24 @@ namespace dawn_native { namespace metal {
                     destination->EnsureDataInitializedAsDestination(
                         commandContext, cmd->destinationOffset, cmd->queryCount * sizeof(uint64_t));
 
-                    if (@available(macos 10.15, iOS 14.0, *)) {
+                    if (querySet->GetQueryType() == wgpu::QueryType::Occlusion) {
                         [commandContext->EnsureBlit()
-                              resolveCounters:querySet->GetCounterSampleBuffer()
-                                      inRange:NSMakeRange(cmd->firstQuery,
-                                                          cmd->firstQuery + cmd->queryCount)
-                            destinationBuffer:destination->GetMTLBuffer()
-                            destinationOffset:NSUInteger(cmd->destinationOffset)];
+                               copyFromBuffer:querySet->GetVisibilityBuffer()
+                                 sourceOffset:NSUInteger(cmd->firstQuery * sizeof(uint64_t))
+                                     toBuffer:destination->GetMTLBuffer()
+                            destinationOffset:NSUInteger(cmd->destinationOffset)
+                                         size:NSUInteger(cmd->queryCount * sizeof(uint64_t))];
                     } else {
-                        UNREACHABLE();
+                        if (@available(macos 10.15, iOS 14.0, *)) {
+                            [commandContext->EnsureBlit()
+                                  resolveCounters:querySet->GetCounterSampleBuffer()
+                                          inRange:NSMakeRange(cmd->firstQuery,
+                                                              cmd->firstQuery + cmd->queryCount)
+                                destinationBuffer:destination->GetMTLBuffer()
+                                destinationOffset:NSUInteger(cmd->destinationOffset)];
+                        } else {
+                            UNREACHABLE();
+                        }
                     }
                     break;
                 }
@@ -1284,11 +1298,19 @@ namespace dawn_native { namespace metal {
                 }
 
                 case Command::BeginOcclusionQuery: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
+
+                    [encoder setVisibilityResultMode:MTLVisibilityResultModeBoolean
+                                              offset:cmd->queryIndex * sizeof(uint64_t)];
+                    break;
                 }
 
                 case Command::EndOcclusionQuery: {
-                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                    EndOcclusionQueryCmd* cmd = mCommands.NextCommand<EndOcclusionQueryCmd>();
+
+                    [encoder setVisibilityResultMode:MTLVisibilityResultModeDisabled
+                                              offset:cmd->queryIndex * sizeof(uint64_t)];
+                    break;
                 }
 
                 case Command::WriteTimestamp: {
