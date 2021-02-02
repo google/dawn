@@ -24,3 +24,9 @@ group("all") {
     deps += [ "examples:dawn_samples" ]
   }
 }
+
+# This target is built when no specific target is specified on the command line.
+group("default") {
+  testonly = true
+  deps = [ ":all" ]
+}
