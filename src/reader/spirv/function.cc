@@ -4408,9 +4408,13 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       return Fail() << "WGSL does not support querying the level of detail of "
                        "an image: "
                     << inst.PrettyPrint();
-    case SpvOpImageQueryLevels: {
+    case SpvOpImageQueryLevels:
+    case SpvOpImageQuerySamples: {
+      const auto* name = (opcode == SpvOpImageQueryLevels)
+                             ? "textureNumLevels"
+                             : "textureNumSamples";
       auto* levels_ident = create<ast::IdentifierExpression>(
-          Source{}, builder_.Symbols().Register("textureNumLevels"));
+          Source{}, builder_.Symbols().Register(name));
       ast::Expression* ast_expr = create<ast::CallExpression>(
           Source{}, levels_ident,
           ast::ExpressionList{GetImageExpression(inst)});
@@ -4424,7 +4428,6 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       TypedExpression expr{result_type, ast_expr};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
-    case SpvOpImageQuerySamples:  // TODO(dneto)
     default:
       break;
   }

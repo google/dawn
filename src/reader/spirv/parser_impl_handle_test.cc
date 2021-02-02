@@ -4693,6 +4693,129 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"}}));
 
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySamples_SignedResult,
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Multsample 2D
+        {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumSamples}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"},
+
+        // Multisample 2D array
+        {"%float 2D 0 1 1 1 Unknown", "%99 = OpImageQuerySamples %int %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __i32
+        {
+          Call[not set]{
+            Identifier[not set]{textureNumSamples}
+            (
+              Identifier[not set]{x_20}
+            )
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // Translation must inject a type coersion from signed to unsigned.
+    ImageQuerySamples_UnsignedResult,
+    SpvParserTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Multsample 2D
+        {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %uint %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __u32
+        {
+          TypeConstructor[not set]{
+            __u32
+            Call[not set]{
+              Identifier[not set]{textureNumSamples}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"},
+
+        // Multisample 2D array
+        {"%float 2D 0 1 1 1 Unknown", "%99 = OpImageQuerySamples %uint %im\n",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    uniform_constant
+    __multisampled_texture_2d_array__f32
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        __u32
+        {
+          TypeConstructor[not set]{
+            __u32
+            Call[not set]{
+              Identifier[not set]{textureNumSamples}
+              (
+                Identifier[not set]{x_20}
+              )
+            }
+          }
+        }
+      }
+    })"}}));
+
 struct ImageCoordsCase {
   // SPIR-V image type, excluding result ID and opcode
   std::string spirv_image_type_details;
