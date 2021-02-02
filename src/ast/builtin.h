@@ -32,6 +32,9 @@ enum class Builtin {
   kLocalInvocationId,
   kLocalInvocationIndex,
   kGlobalInvocationId,
+  kSampleId,
+  kSampleMaskIn,
+  kSampleMaskOut,
 
   // Below are not currently WGSL builtins, but are included in this enum as
   // they are used by certain backends.
