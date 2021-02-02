@@ -19,6 +19,7 @@
 
 #include "gmock/gmock.h"
 #include "src/ast/function.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/test_helper.h"
 #include "src/ast/variable.h"
 #include "src/type/alias_type.h"
@@ -124,6 +125,18 @@ TEST_F(ProgramTest, IsValid_Invalid_Function) {
 
   Program program(std::move(*this));
   EXPECT_FALSE(program.IsValid());
+}
+
+TEST_F(ProgramTest, IsValid_Invalid_UnknownVar) {
+  Func("main", ast::VariableList{}, nullptr,
+       ast::StatementList{
+           create<ast::ReturnStatement>(Expr("unknown_ident")),
+       },
+       ast::FunctionDecorationList{});
+
+  Program program(std::move(*this));
+  EXPECT_FALSE(program.IsValid());
+  EXPECT_NE(program.Diagnostics().count(), 0u);
 }
 
 TEST_F(ProgramTest, IsValid_GeneratesError) {

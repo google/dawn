@@ -47,6 +47,7 @@ Program::Program(ProgramBuilder&& builder) {
     TypeDeterminer td(&builder);
     if (!td.Determine()) {
       diagnostics_.add_error(td.error());
+      is_valid_ = false;
     }
   }
 
@@ -60,7 +61,7 @@ Program::Program(ProgramBuilder&& builder) {
       builder.AST().GlobalVariables());
   sem_ = std::move(builder.Sem());
   symbols_ = std::move(builder.Symbols());
-  diagnostics_ = std::move(builder.Diagnostics());
+  diagnostics_.add(std::move(builder.Diagnostics()));
   builder.MarkAsMoved();
 
   if (!is_valid_ && !diagnostics_.contains_errors()) {
