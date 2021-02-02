@@ -21,9 +21,8 @@ class EntryPointTests : public DawnTest {};
 
 // Test creating a render pipeline from two entryPoints in the same module.
 TEST_P(EntryPointTests, FragAndVertexSameModule) {
-    // TODO: Reenable once Tint is able to produce Vulkan 1.0 / 1.1 SPIR-V.
-    DAWN_SKIP_TEST_IF(IsVulkan() || IsOpenGL() || IsOpenGLES());
-
+    // TODO(crbug.com/dawn/658): Crashes on bots
+    DAWN_SKIP_TEST_IF(IsOpenGL());
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -67,9 +66,6 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
 
 // Test creating two compute pipelines from the same module.
 TEST_P(EntryPointTests, TwoComputeInModule) {
-    // TODO: Reenable once Tint is able to produce Vulkan 1.0 / 1.1 SPIR-V.
-    DAWN_SKIP_TEST_IF(IsVulkan());
-
     // TODO: Reenable once Tint's HLSL writer supports multiple entryPoints on a single stage.
     // https://crbug.com/tint/297
     DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
