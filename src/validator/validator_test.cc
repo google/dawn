@@ -326,6 +326,44 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
             "'__f32' to '__i32'");
 }
 
+TEST_F(ValidatorTest, AssignIncompatibleTypesInNestedBlockStatement_Fail) {
+  // {
+  //  {
+  //   var a :i32 = 2;
+  //   a = 2.3;
+  //  }
+  // }
+
+  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
+                  ast::VariableDecorationList{});
+
+  auto* lhs = Expr("a");
+  auto* rhs = Expr(2.3f);
+
+  auto* inner_block = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
+                                       rhs),
+  });
+
+  auto* outer_block = create<ast::BlockStatement>(ast::StatementList{
+      inner_block,
+  });
+
+  EXPECT_TRUE(td()->DetermineStatements(outer_block)) << td()->error();
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(outer_block));
+  ASSERT_TRUE(v.has_error());
+  // TODO(sarahM0): figure out what should be the error number.
+  EXPECT_EQ(v.error(),
+            "12:34 v-000x: invalid assignment: can't assign value of type "
+            "'__f32' to '__i32'");
+}
+
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
   AST().AddGlobalVariable(Var(Source{Source::Location{12, 34}}, "global_var",
@@ -500,6 +538,40 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.ValidateStatements(outer_body)) << v.error();
+}
+
+TEST_F(ValidatorTest, UsingUndefinedVariableDifferentScope_Fail) {
+  // {
+  //  { var a : f32 = 2.0; }
+  //  { a = 3.14; }
+  // }
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
+                  ast::VariableDecorationList{});
+  auto* first_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+  });
+
+  SetSource(Source{Source::Location{12, 34}});
+  auto* lhs = Expr("a");
+  auto* rhs = Expr(3.14f);
+  auto* second_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
+                                       rhs),
+  });
+
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      first_body,
+      second_body,
+  });
+
+  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(outer_body));
+  EXPECT_EQ(v.error(), "12:34 v-0006: 'a' is not declared");
 }
 
 TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
@@ -678,6 +750,55 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
   auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var_a_float),
       create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
+  });
+
+  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.ValidateStatements(outer_body));
+  EXPECT_EQ(v.error(), "12:34 v-0014: redeclared identifier 'a'");
+}
+
+TEST_F(ValidatorTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
+  // {
+  //  { var a : f32; }
+  //  var a : f32;
+  // }
+  auto* var_inner = Var("a", ast::StorageClass::kNone, ty.f32());
+  auto* inner = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                         var_inner),
+  });
+
+  auto* var_outer = Var("a", ast::StorageClass::kNone, ty.f32());
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      inner,
+      create<ast::VariableDeclStatement>(var_outer),
+  });
+
+  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.ValidateStatements(outer_body));
+}
+
+TEST_F(ValidatorTest, RedeclaredIdentifierInnerScopeBlock_Fail) {
+  // {
+  //  var a : f32;
+  //  { var a : f32; }
+  // }
+  auto* var_inner = Var("a", ast::StorageClass::kNone, ty.f32());
+  auto* inner = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                         var_inner),
+  });
+
+  auto* var_outer = Var("a", ast::StorageClass::kNone, ty.f32());
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var_outer),
+      inner,
   });
 
   EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();

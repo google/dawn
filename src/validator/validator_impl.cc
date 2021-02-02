@@ -481,12 +481,18 @@ bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
   if (!block) {
     return false;
   }
+
+  bool is_valid = true;
+  variable_stack_.push_scope();
   for (auto* stmt : *block) {
     if (!ValidateStatement(stmt)) {
-      return false;
+      is_valid = false;
+      break;
     }
   }
-  return true;
+  variable_stack_.pop_scope();
+
+  return is_valid;
 }
 
 bool ValidatorImpl::ValidateDeclStatement(
@@ -545,6 +551,9 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   }
   if (auto* c = stmt->As<ast::CaseStatement>()) {
     return ValidateCase(c);
+  }
+  if (auto* b = stmt->As<ast::BlockStatement>()) {
+    return ValidateStatements(b);
   }
   return true;
 }
