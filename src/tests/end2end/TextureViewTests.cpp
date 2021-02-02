@@ -45,6 +45,20 @@ namespace {
         return device.CreateTexture(&descriptor);
     }
 
+    wgpu::Texture Create3DTexture(wgpu::Device device,
+                                  wgpu::Extent3D size,
+                                  uint32_t mipLevelCount,
+                                  wgpu::TextureUsage usage) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        descriptor.size = size;
+        descriptor.sampleCount = 1;
+        descriptor.format = kDefaultFormat;
+        descriptor.mipLevelCount = mipLevelCount;
+        descriptor.usage = usage;
+        return device.CreateTexture(&descriptor);
+    }
+
     wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
         return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
@@ -678,3 +692,13 @@ DAWN_INSTANTIATE_TEST(TextureViewTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+class TextureView3DTest : public DawnTest {};
+
+// Test that 3D textures and 3D texture views can be created successfully
+TEST_P(TextureView3DTest, BasicTest) {
+    wgpu::Texture texture = Create3DTexture(device, {4, 4, 4}, 3, wgpu::TextureUsage::Sampled);
+    wgpu::TextureView view = texture.CreateView();
+}
+
+DAWN_INSTANTIATE_TEST(TextureView3DTest, D3D12Backend());

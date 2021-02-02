@@ -96,9 +96,10 @@ namespace dawn_native { namespace d3d12 {
             switch (dimension) {
                 case wgpu::TextureDimension::e2D:
                     return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+                case wgpu::TextureDimension::e3D:
+                    return D3D12_RESOURCE_DIMENSION_TEXTURE3D;
 
                 case wgpu::TextureDimension::e1D:
-                case wgpu::TextureDimension::e3D:
                     UNREACHABLE();
             }
         }
@@ -1091,9 +1092,15 @@ namespace dawn_native { namespace d3d12 {
                     mSrvDesc.TextureCubeArray.MipLevels = descriptor->mipLevelCount;
                     mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
                     break;
+                case wgpu::TextureViewDimension::e3D:
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e3D);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
+                    mSrvDesc.Texture3D.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.Texture3D.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.Texture3D.ResourceMinLODClamp = 0;
+                    break;
 
                 case wgpu::TextureViewDimension::e1D:
-                case wgpu::TextureViewDimension::e3D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }
