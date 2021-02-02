@@ -44,7 +44,7 @@ TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
 TEST_F(ModuleTest, LookupFunction) {
   auto* func = Func("main", VariableList{}, ty.f32(), StatementList{},
                     ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+
   Program program(std::move(*this));
   EXPECT_EQ(func,
             program.AST().Functions().Find(program.Symbols().Get("main")));
@@ -111,10 +111,9 @@ TEST_F(ModuleTest, IsValid_Struct_EmptyName) {
 }
 
 TEST_F(ModuleTest, IsValid_Function) {
-  auto* func = Func("main", VariableList(), ty.f32(), StatementList{},
-                    ast::FunctionDecorationList{});
+  Func("main", VariableList(), ty.f32(), StatementList{},
+       ast::FunctionDecorationList{});
 
-  AST().Functions().Add(func);
   Program program(std::move(*this));
   EXPECT_TRUE(program.AST().IsValid());
 }
@@ -126,10 +125,9 @@ TEST_F(ModuleTest, IsValid_Null_Function) {
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_Function) {
-  auto* func = Func("main", VariableList{}, nullptr, StatementList{},
-                    ast::FunctionDecorationList{});
+  Func("main", VariableList{}, nullptr, StatementList{},
+       ast::FunctionDecorationList{});
 
-  AST().Functions().Add(func);
   Program program(std::move(*this));
   EXPECT_FALSE(program.AST().IsValid());
 }

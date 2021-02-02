@@ -168,16 +168,15 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   // fn func -> void { var a : array<i32>; }
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.array<i32>());
-  auto* func =
-      Func("func", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(
-                   Source{Source::Location{12, 34}}, var),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
-  AST().Functions().Add(func);
+
+  Func("func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                              var),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -197,22 +196,19 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
       Var(Source{Source::Location{12, 34}}, "a", ast::StorageClass::kNone,
           ty.array<i32>(), nullptr, ast::VariableDecorationList{});
 
-  auto* func = Func("func", ast::VariableList{param}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("func", ast::VariableList{param}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
-  auto* main =
-      Func("main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
-  AST().Functions().Add(main);
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 

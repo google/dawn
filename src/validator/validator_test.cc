@@ -431,13 +431,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   auto* lhs = Expr("not_global_var");
   auto* rhs = Expr(3.14f);
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.f32(),
-                    ast::StatementList{
-                        create<ast::AssignmentStatement>(
-                            Source{Source::Location{12, 34}}, lhs, rhs),
-                    },
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
+                                            lhs, rhs),
+       },
+       ast::FunctionDecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -456,17 +455,15 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
                               ty.f32(), Expr(2.1f),
                               ast::VariableDecorationList{}));
 
-  auto* func = Func(
-      "my_func", ast::VariableList{}, ty.void_(),
-      ast::StatementList{
-          create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
-                                           Expr("global_var"), Expr(3.14f)),
-          create<ast::ReturnStatement>(),
-      },
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
+                                            Expr("global_var"), Expr(3.14f)),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -654,14 +651,12 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                   ast::VariableDecorationList{});
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::VariableDeclStatement>(
-                            Source{Source::Location{12, 34}}, var),
-                    },
-                    ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                              var),
+       },
+       ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -682,15 +677,13 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
   auto* var_a_float = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(0.1f),
                           ast::VariableDecorationList{});
 
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::VariableDeclStatement>(var),
-                        create<ast::VariableDeclStatement>(
-                            Source{Source::Location{12, 34}}, var_a_float),
-                    },
-                    ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                              var_a_float),
+       },
+       ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -818,27 +811,23 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   auto* var1 = Var("a", ast::StorageClass::kNone, ty.void_(), Expr(1.0f),
                    ast::VariableDecorationList{});
 
-  auto* func0 = Func("func0", ast::VariableList{}, ty.void_(),
-                     ast::StatementList{
-                         create<ast::VariableDeclStatement>(
-                             Source{Source::Location{12, 34}}, var0),
-                         create<ast::ReturnStatement>(),
-                     },
-                     ast::FunctionDecorationList{});
+  Func("func0", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                              var0),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
-  auto* func1 =
-      Func("func1", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(
-                   Source{Source::Location{13, 34}}, var1),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
-
-  AST().Functions().Add(func0);
-  AST().Functions().Add(func1);
+  Func("func1", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(Source{Source::Location{13, 34}},
+                                              var1),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 

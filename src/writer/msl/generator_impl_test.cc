@@ -48,12 +48,10 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Generate) {
-  auto* func =
-      Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
 
   GeneratorImpl& gen = Build();
 

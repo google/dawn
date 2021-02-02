@@ -103,7 +103,6 @@ ast::CallExpression* GenerateCall(ast::Intrinsic intrinsic,
     case ast::Intrinsic::kTrunc:
     case ast::Intrinsic::kSign:
       return builder->Call(str.str(), "f1");
-      break;
     case ast::Intrinsic::kAtan2:
     case ast::Intrinsic::kCross:
     case ast::Intrinsic::kDot:

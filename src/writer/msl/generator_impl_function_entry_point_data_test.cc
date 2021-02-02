@@ -65,18 +65,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func =
-      Func("vtx_main", ast::VariableList{}, ty.f32(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("vtx_main", ast::VariableList{}, ty.f32(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct vtx_main_in {
   float foo [[attribute(0)]];
@@ -113,18 +110,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func =
-      Func("vtx_main", ast::VariableList{}, ty.f32(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("vtx_main", ast::VariableList{}, ty.f32(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct vtx_main_out {
   float foo [[user(locn0)]];
@@ -161,18 +155,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("main", ast::VariableList{}, ty.f32(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_in {
   float foo [[user(locn0)]];
@@ -209,18 +200,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("main", ast::VariableList{}, ty.f32(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_out {
   float foo [[color(0)]];
@@ -254,18 +242,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("main", ast::VariableList{}, ty.f32(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
 
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -294,18 +279,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("main", ast::VariableList{}, ty.f32(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
 
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -339,18 +321,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
 
   auto body = ast::StatementList{create<ast::AssignmentStatement>(
       Expr("depth"), MemberAccessor("coord", "x"))};
-  auto* func =
-      Func("main", ast::VariableList{}, ty.void_(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("main", ast::VariableList{}, ty.void_(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(func)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct main_out {
   float depth [[depth(any)]];

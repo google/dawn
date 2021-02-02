@@ -505,9 +505,8 @@ if (_tint_tmp) {
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 
-  auto* func = Func("foo", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{}, ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   ast::ExpressionList params;
   params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,

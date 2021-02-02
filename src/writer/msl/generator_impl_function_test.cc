@@ -56,13 +56,11 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Function) {
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -79,13 +77,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
-  auto* func = Func("main", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -106,13 +102,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   params.push_back(Var("a", ast::StorageClass::kNone, ty.f32()));
   params.push_back(Var("b", ast::StorageClass::kNone, ty.i32()));
 
-  auto* func = Func("my_func", params, ty.void_(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("my_func", params, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -129,14 +123,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_NoReturn_Void) {
-  auto* func = Func("main", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{/* no explicit return */},
-                    ast::FunctionDecorationList{create<ast::StageDecoration>(
-                        ast::PipelineStage::kFragment)});
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{/* no explicit return */},
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 
@@ -166,17 +156,12 @@ TEST_F(MslGeneratorImplTest,
   AST().AddGlobalVariable(foo_var);
   AST().AddGlobalVariable(bar_var);
 
-  auto* func =
-      Func("main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
-               /* no explicit return */},
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
+           /* no explicit return */},
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 
@@ -219,13 +204,9 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
       create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
       create<ast::ReturnStatement>(),
   };
-  auto* func = Func("frag_main", ast::VariableList{}, ty.void_(), body,
-                    ast::FunctionDecorationList{create<ast::StageDecoration>(
-                        ast::PipelineStage::kFragment)});
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 
@@ -272,15 +253,11 @@ TEST_F(MslGeneratorImplTest,
                                        MemberAccessor("coord", "x")),
       create<ast::ReturnStatement>(),
   };
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.void_(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
 
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -313,19 +290,14 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "x"), ast::VariableDecorationList{});
 
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(var),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -364,19 +336,14 @@ TEST_F(MslGeneratorImplTest,
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
 
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(var),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -418,19 +385,14 @@ TEST_F(MslGeneratorImplTest,
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
 
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(var),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -480,24 +442,18 @@ TEST_F(
       create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
       create<ast::AssignmentStatement>(Expr("val"), Expr("param")),
       create<ast::ReturnStatement>(Expr("foo"))};
-  auto* sub_func =
-      Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
-  AST().Functions().Add(sub_func);
+  Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
   body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("bar"), Call("sub_func", 1.0f)),
       create<ast::ReturnStatement>(),
   };
-  auto* func_1 =
-      Func("ep_1", ast::VariableList{}, ty.void_(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
 
-  AST().Functions().Add(func_1);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("ep_1", ast::VariableList{}, ty.void_(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -541,28 +497,21 @@ TEST_F(MslGeneratorImplTest,
   ast::VariableList params;
   params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32()));
 
-  auto* sub_func = Func("sub_func", params, ty.f32(),
-                        ast::StatementList{
-                            create<ast::ReturnStatement>(Expr("param")),
-                        },
-                        ast::FunctionDecorationList{});
-
-  AST().Functions().Add(sub_func);
+  Func("sub_func", params, ty.f32(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(Expr("param")),
+       },
+       ast::FunctionDecorationList{});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("depth"), Call("sub_func", 1.0f)),
       create<ast::ReturnStatement>(),
   };
 
-  auto* func_1 =
-      Func("ep_1", ast::VariableList{}, ty.void_(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func_1);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("ep_1", ast::VariableList{}, ty.void_(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -613,24 +562,18 @@ TEST_F(
                                        MemberAccessor("coord", "x")),
       create<ast::ReturnStatement>(Expr("param")),
   };
-  auto* sub_func =
-      Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
-  AST().Functions().Add(sub_func);
+  Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
   body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("depth"), Call("sub_func", 1.0f)),
       create<ast::ReturnStatement>(),
   };
-  auto* func_1 =
-      Func("ep_1", ast::VariableList{}, ty.void_(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
 
-  AST().Functions().Add(func_1);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("ep_1", ast::VariableList{}, ty.void_(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -671,10 +614,8 @@ TEST_F(MslGeneratorImplTest,
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "x")),
   };
-  auto* sub_func =
-      Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
-  AST().Functions().Add(sub_func);
+  Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
@@ -682,19 +623,14 @@ TEST_F(MslGeneratorImplTest,
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
 
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(var),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -738,27 +674,20 @@ TEST_F(MslGeneratorImplTest,
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "b"))};
-  auto* sub_func =
-      Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
-  AST().Functions().Add(sub_func);
+  Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
 
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(var),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -807,10 +736,8 @@ TEST_F(MslGeneratorImplTest,
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "b"))};
-  auto* sub_func =
-      Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
-  AST().Functions().Add(sub_func);
+  Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
@@ -818,19 +745,14 @@ TEST_F(MslGeneratorImplTest,
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
 
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::VariableDeclStatement>(var),
-               create<ast::ReturnStatement>(),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("frag_main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -875,15 +797,10 @@ TEST_F(MslGeneratorImplTest,
       create<ast::ReturnStatement>(),
   };
 
-  auto* func_1 =
-      Func("ep_1", ast::VariableList{}, ty.void_(), body,
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func_1);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
+  Func("ep_1", ast::VariableList{}, ty.void_(), body,
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -908,13 +825,10 @@ fragment ep_1_out ep_1() {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
-  auto* func =
-      Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
-
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -932,13 +846,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ast::VariableList params;
   params.push_back(Var("a", ast::StorageClass::kNone, ty.array<f32, 5>()));
 
-  auto* func = Func("my_func", params, ty.void_(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("my_func", params, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -994,34 +906,26 @@ TEST_F(MslGeneratorImplTest,
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func =
-        Func("a", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
-                 create<ast::VariableDeclStatement>(var),
-                 create<ast::ReturnStatement>(),
-             },
-             ast::FunctionDecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
-
-    AST().Functions().Add(func);
+    Func("a", ast::VariableList{}, ty.void_(),
+         ast::StatementList{
+             create<ast::VariableDeclStatement>(var),
+             create<ast::ReturnStatement>(),
+         },
+         ast::FunctionDecorationList{
+             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+         });
   }
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func =
-        Func("b", ast::VariableList{}, ty.void_(),
-             ast::StatementList{create<ast::VariableDeclStatement>(var),
-                                create<ast::ReturnStatement>()},
-             ast::FunctionDecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
-
-    AST().Functions().Add(func);
+    Func("b", ast::VariableList{}, ty.void_(),
+         ast::StatementList{create<ast::VariableDeclStatement>(var),
+                            create<ast::ReturnStatement>()},
+         ast::FunctionDecorationList{
+             create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
   }
-
-  ASSERT_TRUE(td.Determine()) << td.error();
 
   GeneratorImpl& gen = Build();
 

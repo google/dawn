@@ -419,7 +419,7 @@ class ProgramBuilder {
       return array(Of<T>(), N);
     }
 
-    /// creates an alias type
+    /// Creates an alias type
     /// @param name the alias name
     /// @param type the alias type
     /// @returns the alias pointer
@@ -847,14 +847,14 @@ class ProgramBuilder {
                                                  Expr(std::forward<IDX>(idx)));
   }
 
-  /// creates a ast::StructMemberOffsetDecoration
+  /// Creates a ast::StructMemberOffsetDecoration
   /// @param val the offset value
   /// @returns the offset decoration pointer
   ast::StructMemberOffsetDecoration* MemberOffset(uint32_t val) {
     return create<ast::StructMemberOffsetDecoration>(source_, val);
   }
 
-  /// creates a ast::Function
+  /// Creates an ast::Function and registers it with the ast::Module.
   /// @param source the source information
   /// @param name the function name
   /// @param params the function parameters
@@ -868,12 +868,14 @@ class ProgramBuilder {
                       type::Type* type,
                       ast::StatementList body,
                       ast::FunctionDecorationList decorations) {
-    return create<ast::Function>(source, Symbols().Register(name), params, type,
-                                 create<ast::BlockStatement>(body),
-                                 decorations);
+    auto* func =
+        create<ast::Function>(source, Symbols().Register(name), params, type,
+                              create<ast::BlockStatement>(body), decorations);
+    AST().Functions().Add(func);
+    return func;
   }
 
-  /// creates a ast::Function
+  /// Creates an ast::Function and registers it with the ast::Module.
   /// @param name the function name
   /// @param params the function parameters
   /// @param type the function return type
@@ -885,12 +887,14 @@ class ProgramBuilder {
                       type::Type* type,
                       ast::StatementList body,
                       ast::FunctionDecorationList decorations) {
-    return create<ast::Function>(Symbols().Register(name), params, type,
-                                 create<ast::BlockStatement>(body),
-                                 decorations);
+    auto* func =
+        create<ast::Function>(Symbols().Register(name), params, type,
+                              create<ast::BlockStatement>(body), decorations);
+    AST().Functions().Add(func);
+    return func;
   }
 
-  /// creates a ast::StructMember
+  /// Creates a ast::StructMember
   /// @param source the source information
   /// @param name the struct member name
   /// @param type the struct member type
@@ -902,7 +906,7 @@ class ProgramBuilder {
                                      ast::StructMemberDecorationList{});
   }
 
-  /// creates a ast::StructMember
+  /// Creates a ast::StructMember
   /// @param name the struct member name
   /// @param type the struct member type
   /// @returns the struct member pointer
@@ -911,7 +915,7 @@ class ProgramBuilder {
                                      ast::StructMemberDecorationList{});
   }
 
-  /// creates a ast::StructMember
+  /// Creates a ast::StructMember
   /// @param name the struct member name
   /// @param type the struct member type
   /// @param decorations the struct member decorations

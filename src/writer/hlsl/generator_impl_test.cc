@@ -28,9 +28,8 @@ namespace {
 using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{}, ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   GeneratorImpl& gen = Build();
 

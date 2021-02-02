@@ -43,13 +43,15 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     if (spirv_builder) {
       return *spirv_builder;
     }
-    program_ = std::make_unique<Program>(std::move(*this));
-    spirv_builder = std::make_unique<spirv::Builder>(program_.get());
+    program = std::make_unique<Program>(std::move(*this));
+    spirv_builder = std::make_unique<spirv::Builder>(program.get());
     return *spirv_builder;
   }
 
   /// The type determiner
   TypeDeterminer td;
+  /// The program built with a call to Build()
+  std::unique_ptr<Program> program;
 
  protected:
   /// Called whenever a new variable is built with `Var()`.
@@ -59,7 +61,6 @@ class TestHelperBase : public ProgramBuilder, public BASE {
   }
 
  private:
-  std::unique_ptr<Program> program_;
   std::unique_ptr<spirv::Builder> spirv_builder;
 };
 using TestHelper = TestHelperBase<testing::Test>;

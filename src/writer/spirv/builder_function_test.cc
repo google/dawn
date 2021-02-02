@@ -46,11 +46,12 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  Func("a_func", {}, ty.void_(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -63,14 +64,15 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Return) {
-  auto* func = Func("a_func", {}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
+  Func("a_func", {}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -83,16 +85,16 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-  auto* var_a = Var("a", ast::StorageClass::kPrivate, ty.f32());
-  td.RegisterVariableForTesting(var_a);
+  AST().AddGlobalVariable(Var("a", ast::StorageClass::kPrivate, ty.f32()));
 
-  auto* func = Func("a_func", {}, ty.void_(),
-                    ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
-                    ast::FunctionDecorationList{});
-
-  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
+  Func("a_func", {}, ty.void_(),
+       ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
+       ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
+
+  auto* var_a = program->AST().GlobalVariables()[0];
+  auto* func = program->AST().Functions()[0];
 
   ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
@@ -113,14 +115,15 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Discard) {
-  auto* func = Func("a_func", {}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::DiscardStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
+  Func("a_func", {}, ty.void_(),
+       ast::StatementList{
+           create<ast::DiscardStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -136,16 +139,13 @@ TEST_F(BuilderTest, Function_WithParams) {
   ast::VariableList params = {Var("a", ast::StorageClass::kFunction, ty.f32()),
                               Var("b", ast::StorageClass::kFunction, ty.i32())};
 
-  auto* func = Func("a_func", params, ty.f32(),
-                    ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
-                    ast::FunctionDecorationList{});
-
-  td.RegisterVariableForTesting(func->params()[0]);
-  td.RegisterVariableForTesting(func->params()[1]);
-  EXPECT_TRUE(td.DetermineFunction(func));
+  Func("a_func", params, ty.f32(),
+       ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
+       ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
 OpName %5 "a"
@@ -164,14 +164,15 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithBody) {
-  auto* func = Func("a_func", {}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
+  Func("a_func", {}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
@@ -184,11 +185,12 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  Func("a_func", {}, ty.void_(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   spirv::Builder& b = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(b.GenerateFunction(func));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -244,44 +246,35 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
   AST().AddConstructedType(s);
 
-  td.RegisterVariableForTesting(data_var);
   AST().AddGlobalVariable(data_var);
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func =
-        Func("a", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
-                 create<ast::VariableDeclStatement>(var),
-                 create<ast::ReturnStatement>(),
-             },
-             ast::FunctionDecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
-
-    AST().Functions().Add(func);
+    Func("a", ast::VariableList{}, ty.void_(),
+         ast::StatementList{
+             create<ast::VariableDeclStatement>(var),
+             create<ast::ReturnStatement>(),
+         },
+         ast::FunctionDecorationList{
+             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+         });
   }
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
-    auto* func =
-        Func("b", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
-                 create<ast::VariableDeclStatement>(var),
-                 create<ast::ReturnStatement>(),
-             },
-             ast::FunctionDecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
-
-    AST().Functions().Add(func);
+    Func("b", ast::VariableList{}, ty.void_(),
+         ast::StatementList{
+             create<ast::VariableDeclStatement>(var),
+             create<ast::ReturnStatement>(),
+         },
+         ast::FunctionDecorationList{
+             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+         });
   }
-
-  ASSERT_TRUE(td.Determine()) << td.error();
 
   spirv::Builder& b = Build();
 

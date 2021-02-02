@@ -202,17 +202,14 @@ TEST_F(WgslGeneratorImplTest,
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 
-    auto* func =
-        Func("a", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
-                 create<ast::VariableDeclStatement>(var),
-                 create<ast::ReturnStatement>(),
-             },
-             ast::FunctionDecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
-
-    AST().Functions().Add(func);
+    Func("a", ast::VariableList{}, ty.void_(),
+         ast::StatementList{
+             create<ast::VariableDeclStatement>(var),
+             create<ast::ReturnStatement>(),
+         },
+         ast::FunctionDecorationList{
+             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+         });
   }
 
   {
@@ -221,20 +218,15 @@ TEST_F(WgslGeneratorImplTest,
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 
-    auto* func =
-        Func("b", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
-                 create<ast::VariableDeclStatement>(var),
-                 create<ast::ReturnStatement>(),
-             },
-             ast::FunctionDecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
-
-    AST().Functions().Add(func);
+    Func("b", ast::VariableList{}, ty.void_(),
+         ast::StatementList{
+             create<ast::VariableDeclStatement>(var),
+             create<ast::ReturnStatement>(),
+         },
+         ast::FunctionDecorationList{
+             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+         });
   }
-
-  ASSERT_TRUE(td.Determine()) << td.error();
 
   GeneratorImpl& gen = Build();
 

@@ -25,8 +25,7 @@ TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
   Program inner([] {
     ProgramBuilder builder;
     auto* ty = builder.ty.f32();
-    auto* func = builder.Func("a", {}, ty, {}, {});
-    builder.AST().Functions().Add(func);
+    builder.Func("a", {}, ty, {}, {});
     return builder;
   }());
 
@@ -47,8 +46,7 @@ TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
   EXPECT_FALSE(outer.Symbols().Get("b").IsValid());
 
   auto* ty = outer.ty.f32();
-  auto* func = outer.Func("b", {}, ty, {}, {});
-  outer.AST().Functions().Add(func);
+  outer.Func("b", {}, ty, {}, {});
 
   ASSERT_EQ(inner.AST().Functions().size(), 1u);
   ASSERT_EQ(outer.AST().Functions().size(), 2u);

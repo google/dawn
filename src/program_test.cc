@@ -104,9 +104,8 @@ TEST_F(ProgramTest, IsValid_Struct_EmptyName) {
 }
 
 TEST_F(ProgramTest, IsValid_Function) {
-  auto* func = Func("main", ast::VariableList(), ty.f32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList(), ty.f32(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   Program program(std::move(*this));
   EXPECT_TRUE(program.IsValid());
@@ -120,9 +119,8 @@ TEST_F(ProgramTest, IsValid_Null_Function) {
 }
 
 TEST_F(ProgramTest, IsValid_Invalid_Function) {
-  auto* func = Func("main", ast::VariableList{}, nullptr, ast::StatementList{},
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, nullptr, ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   Program program(std::move(*this));
   EXPECT_FALSE(program.IsValid());

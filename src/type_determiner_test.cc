@@ -293,9 +293,8 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
 
 TEST_F(TypeDeterminerTest, Stmt_Call) {
   ast::VariableList params;
-  auto* func = Func("my_func", params, ty.f32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("my_func", params, ty.f32(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -316,20 +315,18 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
   auto* call_expr = Call("func");
   ast::VariableList params0;
 
-  auto* func_main = Func("main", params0, ty.f32(),
-                         ast::StatementList{
-                             create<ast::CallStatement>(call_expr),
-                             create<ast::ReturnStatement>(),
-                         },
-                         ast::FunctionDecorationList{});
-  AST().Functions().Add(func_main);
+  Func("main", params0, ty.f32(),
+       ast::StatementList{
+           create<ast::CallStatement>(call_expr),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
-  auto* func = Func("func", params0, ty.f32(),
-                    ast::StatementList{
-                        create<ast::ReturnStatement>(),
-                    },
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("func", params0, ty.f32(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{});
 
   EXPECT_FALSE(td()->Determine()) << td()->error();
   EXPECT_EQ(td()->error(),
@@ -471,9 +468,8 @@ TEST_F(TypeDeterminerTest, Expr_Bitcast) {
 
 TEST_F(TypeDeterminerTest, Expr_Call) {
   ast::VariableList params;
-  auto* func = Func("my_func", params, ty.f32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("my_func", params, ty.f32(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -486,9 +482,8 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
 
 TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   ast::VariableList params;
-  auto* func = Func("my_func", params, ty.f32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("my_func", params, ty.f32(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -621,9 +616,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
-  auto* func = Func("my_func", ast::VariableList{}, ty.f32(),
-                    ast::StatementList{}, ast::FunctionDecorationList{});
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.f32(), ast::StatementList{},
+       ast::FunctionDecorationList{});
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -662,8 +656,6 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
       },
       ast::FunctionDecorationList{});
 
-  AST().Functions().Add(func);
-
   // Register the function
   EXPECT_TRUE(td()->Determine());
 
@@ -689,17 +681,14 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   AST().AddGlobalVariable(wg_var);
   AST().AddGlobalVariable(priv_var);
 
-  auto* func = Func(
-      "my_func", ast::VariableList{}, ty.f32(),
-      ast::StatementList{
-          create<ast::AssignmentStatement>(Expr("out_var"), Expr("in_var")),
-          create<ast::AssignmentStatement>(Expr("wg_var"), Expr("wg_var")),
-          create<ast::AssignmentStatement>(Expr("sb_var"), Expr("sb_var")),
-          create<ast::AssignmentStatement>(Expr("priv_var"), Expr("priv_var")),
-      },
-      ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("my_func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("out_var"), Expr("in_var")),
+           create<ast::AssignmentStatement>(Expr("wg_var"), Expr("wg_var")),
+           create<ast::AssignmentStatement>(Expr("sb_var"), Expr("sb_var")),
+           create<ast::AssignmentStatement>(Expr("priv_var"), Expr("priv_var")),
+       },
+       ast::FunctionDecorationList{});
 
   auto* func2 = Func(
       "func", ast::VariableList{}, ty.f32(),
@@ -707,8 +696,6 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
           create<ast::AssignmentStatement>(Expr("out_var"), Call("my_func")),
       },
       ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func2);
 
   // Register the function
   EXPECT_TRUE(td()->Determine());
@@ -732,8 +719,6 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
                create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)),
            },
            ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
 
   auto* v = Var("var", ast::StorageClass::kFunction, ty.f32());
   td()->RegisterVariableForTesting(v);
@@ -1545,10 +1530,8 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
   auto* var = Var("var", ast::StorageClass::kNone, ty.i32());
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
-  auto* func = Func("func", ast::VariableList{}, ty.i32(),
-                    ast::StatementList{stmt}, ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
+       ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_EQ(var->storage_class(), ast::StorageClass::kFunction);
@@ -1557,10 +1540,8 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
   auto* var = Const("var", ast::StorageClass::kNone, ty.i32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
-  auto* func = Func("func", ast::VariableList{}, ty.i32(),
-                    ast::StatementList{stmt}, ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
+       ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_EQ(var->storage_class(), ast::StorageClass::kNone);
@@ -1570,10 +1551,8 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
   auto* var = Var("var", ast::StorageClass::kWorkgroup, ty.i32());
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
-  auto* func = Func("func", ast::VariableList{}, ty.i32(),
-                    ast::StatementList{stmt}, ast::FunctionDecorationList{});
-
-  AST().Functions().Add(func);
+  Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
+       ast::FunctionDecorationList{});
 
   EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
@@ -2295,12 +2274,6 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
            ast::FunctionDecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-
-  AST().Functions().Add(func_b);
-  AST().Functions().Add(func_c);
-  AST().Functions().Add(func_a);
-  AST().Functions().Add(ep_1);
-  AST().Functions().Add(ep_2);
 
   AST().AddGlobalVariable(Var("first", ast::StorageClass::kPrivate, ty.f32()));
   AST().AddGlobalVariable(Var("second", ast::StorageClass::kPrivate, ty.f32()));

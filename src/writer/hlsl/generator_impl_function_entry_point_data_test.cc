@@ -60,24 +60,20 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   AST().AddGlobalVariable(foo_var);
   AST().AddGlobalVariable(bar_var);
 
-  auto* func =
-      Func("vtx_main", ast::VariableList{}, ty.f32(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
-
-  AST().Functions().Add(func);
+  Func("vtx_main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   std::unordered_set<Symbol> globals;
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct vtx_main_in {
   float foo : TEXCOORD0;
@@ -113,24 +109,20 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   AST().AddGlobalVariable(foo_var);
   AST().AddGlobalVariable(bar_var);
 
-  auto* func =
-      Func("vtx_main", ast::VariableList{}, ty.f32(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
-
-  AST().Functions().Add(func);
+  Func("vtx_main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   std::unordered_set<Symbol> globals;
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct vtx_main_out {
   float foo : TEXCOORD0;
@@ -166,24 +158,20 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   AST().AddGlobalVariable(foo_var);
   AST().AddGlobalVariable(bar_var);
 
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           });
-
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   std::unordered_set<Symbol> globals;
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_in {
   float foo : TEXCOORD0;
@@ -219,24 +207,20 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   AST().AddGlobalVariable(foo_var);
   AST().AddGlobalVariable(bar_var);
 
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   std::unordered_set<Symbol> globals;
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_out {
   float foo : SV_Target0;
@@ -269,24 +253,20 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   AST().AddGlobalVariable(foo_var);
   AST().AddGlobalVariable(bar_var);
 
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
-
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
 
   std::unordered_set<Symbol> globals;
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_FALSE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -314,24 +294,20 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   AST().AddGlobalVariable(foo_var);
   AST().AddGlobalVariable(bar_var);
 
-  auto* func =
-      Func("main", ast::VariableList{}, ty.f32(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-               create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
-
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
+           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
 
   std::unordered_set<Symbol> globals;
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_FALSE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -367,24 +343,20 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   AST().AddGlobalVariable(coord_var);
   AST().AddGlobalVariable(depth_var);
 
-  auto* func =
-      Func("main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("depth"),
-                                                MemberAccessor("coord", "x")),
-           },
-           ast::FunctionDecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
-
-  AST().Functions().Add(func);
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("depth"),
+                                            MemberAccessor("coord", "x")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   std::unordered_set<Symbol> globals;
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   GeneratorImpl& gen = Build();
 
+  auto* func = program->AST().Functions()[0];
   ASSERT_TRUE(gen.EmitEntryPointData(out, func, globals)) << gen.error();
   EXPECT_EQ(result(), R"(struct main_in {
   float4 coord : SV_Position;

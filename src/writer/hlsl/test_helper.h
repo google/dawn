@@ -44,8 +44,8 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     if (gen_) {
       return *gen_;
     }
-    program_ = std::make_unique<Program>(std::move(*this));
-    gen_ = std::make_unique<GeneratorImpl>(program_.get());
+    program = std::make_unique<Program>(std::move(*this));
+    gen_ = std::make_unique<GeneratorImpl>(program.get());
     return *gen_;
   }
 
@@ -62,9 +62,10 @@ class TestHelperBase : public BODY, public ProgramBuilder {
   std::ostringstream out;
   /// The pre-output stream
   std::ostringstream pre;
+  /// The program built with a call to Build()
+  std::unique_ptr<Program> program;
 
  private:
-  std::unique_ptr<Program> program_;
   std::unique_ptr<GeneratorImpl> gen_;
 };
 using TestHelper = TestHelperBase<testing::Test>;

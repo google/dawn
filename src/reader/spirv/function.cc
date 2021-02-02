@@ -4395,7 +4395,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
         auto* layers_ident = create<ast::IdentifierExpression>(
             Source{}, builder_.Symbols().Register("textureNumLayers"));
         exprs.push_back(create<ast::CallExpression>(
-            Source{}, layers_ident, ast::ExpressionList{GetImageExpression(inst)}));
+            Source{}, layers_ident,
+            ast::ExpressionList{GetImageExpression(inst)}));
       }
       auto* result_type = parser_impl_.ConvertType(inst.type_id());
       TypedExpression expr = {
