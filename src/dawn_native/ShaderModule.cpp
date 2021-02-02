@@ -183,25 +183,12 @@ namespace dawn_native {
             std::ostringstream errorStream;
             errorStream << "Tint WGSL reader failure:" << std::endl;
 
-            tint::reader::wgsl::Parser parser(file);
-            if (!parser.Parse()) {
-                auto err = tint::diag::Formatter{}.format(parser.diagnostics());
+            tint::Program program = tint::reader::wgsl::Parse(file);
+            if (!program.IsValid()) {
+                auto err = tint::diag::Formatter{}.format(program.Diagnostics());
                 errorStream << "Parser: " << err << std::endl
                             << "Shader: " << std::endl
                             << file->content << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::Program program = parser.program();
-            if (!program.IsValid()) {
-                errorStream << "Invalid program generated..." << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::diag::List diagnostics = tint::TypeDeterminer::Run(&program);
-            if (diagnostics.contains_errors()) {
-                std::string err = tint::diag::Formatter{}.format(diagnostics);
-                errorStream << "Type Determination: " << err;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
@@ -212,22 +199,10 @@ namespace dawn_native {
             std::ostringstream errorStream;
             errorStream << "Tint SPIRV reader failure:" << std::endl;
 
-            tint::reader::spirv::Parser parser(spirv);
-            if (!parser.Parse()) {
-                errorStream << "Parser: " << parser.error() << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::Program program = parser.program();
+            tint::Program program = tint::reader::spirv::Parse(spirv);
             if (!program.IsValid()) {
-                errorStream << "Invalid program generated..." << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            tint::diag::List diagnostics = tint::TypeDeterminer::Run(&program);
-            if (diagnostics.contains_errors()) {
-                std::string err = tint::diag::Formatter{}.format(diagnostics);
-                errorStream << "Type Determination: " << err;
+                auto err = tint::diag::Formatter{}.format(program.Diagnostics());
+                errorStream << "Parser: " << err << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
@@ -248,11 +223,11 @@ namespace dawn_native {
             return {};
         }
 
-        ResultOrError<std::vector<uint32_t>> ModuleToSPIRV(tint::Program program) {
+        ResultOrError<std::vector<uint32_t>> ModuleToSPIRV(const tint::Program* program) {
             std::ostringstream errorStream;
             errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
-            tint::writer::spirv::Generator generator(&program);
+            tint::writer::spirv::Generator generator(program);
             if (!generator.Generate()) {
                 errorStream << "Generator: " << generator.error() << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -884,17 +859,14 @@ namespace dawn_native {
 
                 tint::Source::File file("", wgslDesc->source);
 
+                tint::Program program;
+                DAWN_TRY_ASSIGN(program, ParseWGSL(&file));
+
                 if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-                    tint::Program program;
-                    DAWN_TRY_ASSIGN(program, ParseWGSL(&file));
                     if (device->IsValidationEnabled()) {
                         DAWN_TRY(ValidateModule(&program));
                     }
-                    parseResult.tintProgram = std::make_unique<tint::Program>(std::move(program));
                 } else {
-                    tint::Program program;
-                    DAWN_TRY_ASSIGN(program, ParseWGSL(&file));
-
                     {
                         tint::transform::Manager transformManager;
                         transformManager.append(
@@ -906,18 +878,14 @@ namespace dawn_native {
                         DAWN_TRY(ValidateModule(&program));
                     }
 
-                    // Keep the Tint program around. The Metal backend will use it for vertex
-                    // pulling since we can't go WGSL->point size transform->spirv->Tint.
-                    // Tint's spirv reader doesn't understand point size. crbug.com/tint/412.
-                    auto tintProgram = std::make_unique<tint::Program>(program.Clone());
-
                     std::vector<uint32_t> spirv;
-                    DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(std::move(program)));
+                    DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(&program));
                     DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
 
-                    parseResult.tintProgram = std::move(tintProgram);
                     parseResult.spirv = std::move(spirv);
                 }
+
+                parseResult.tintProgram = std::make_unique<tint::Program>(std::move(program));
                 break;
 #else
                 return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
@@ -946,13 +914,17 @@ namespace dawn_native {
                                                tint::Program* program) {
         tint::transform::Transform::Output output = manager->Run(program);
         if (output.diagnostics.contains_errors()) {
+            // TODO(bclayton): Remove Transform::Output::diagnostics - just put diagnostics into
+            // output.program.
             std::string err =
                 "Tint transform failure: " + tint::diag::Formatter{}.format(output.diagnostics);
             return DAWN_VALIDATION_ERROR(err.c_str());
         }
 
         if (!output.program.IsValid()) {
-            return DAWN_VALIDATION_ERROR("Tint transform did not produce valid program.");
+            std::string err =
+                "Tint program failure: " + tint::diag::Formatter{}.format(program->Diagnostics());
+            return DAWN_VALIDATION_ERROR(err.c_str());
         }
         return std::move(output.program);
     }
@@ -1145,14 +1117,8 @@ namespace dawn_native {
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
 #ifdef DAWN_ENABLE_WGSL
             ASSERT(program != nullptr);
-            tint::Program clonedProgram = program->Clone();
 
-            tint::diag::List diagnostics = tint::TypeDeterminer::Run(&clonedProgram);
-            if (diagnostics.contains_errors()) {
-                std::string err = tint::diag::Formatter{}.format(diagnostics);
-                return DAWN_VALIDATION_ERROR(err.c_str());
-            }
-            DAWN_TRY_ASSIGN(localSpirv, ModuleToSPIRV(std::move(clonedProgram)));
+            DAWN_TRY_ASSIGN(localSpirv, ModuleToSPIRV(program));
             DAWN_TRY(ValidateSpirv(localSpirv.data(), localSpirv.size()));
             spirvPtr = &localSpirv;
 #else

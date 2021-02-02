@@ -73,23 +73,12 @@ namespace DawnSPIRVCrossFuzzer {
 
         // Using Tint SPIRV->SPIRV to normalize inputs if supported.
 #ifdef DAWN_ENABLE_WGSL
-        tint::reader::spirv::Parser parser(input);
-
-        if (!parser.Parse()) {
-            return 0;
-        }
-
-        tint::Program program = parser.program();
+        tint::Program program = tint::reader::wgsl::Parse(file);
         if (!program.IsValid()) {
             return 0;
         }
 
-        tint::TypeDeterminer type_determiner(&program);
-        if (!type_determiner.Determine()) {
-            return 0;
-        }
-
-       tint::writer::spirv::Generator generator(&program);
+        tint::writer::spirv::Generator generator(&program);
         if (!generator.Generate()) {
             return 0;
         }
