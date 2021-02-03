@@ -980,6 +980,9 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // uniform buffer.
 TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
+    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) uniform UBO {
@@ -1016,6 +1019,9 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // read-only storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
+    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+
     const char* computeShader = R"(
         #version 450
         layout(set = 0, binding = 0, std140) readonly buffer SSBO {
@@ -1052,6 +1058,9 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
+    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+
     // TODO(crbug.com/tint/375): Enable once barriers are implemented
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
     const char* computeShader = R"(
@@ -1162,6 +1171,9 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
 // Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DispatchIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
+    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+
     // Bind the whole buffer as an indirect buffer.
     {
         constexpr uint64_t kOffset = 0u;

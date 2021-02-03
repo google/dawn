@@ -439,7 +439,8 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::In
                 // If we ever have Swiftshader GL (unlikely), we could set the DeviceType properly.
                 (preferredDeviceType != dawn_native::DeviceType::CPU &&
                  adapter.GetDeviceType() == dawn_native::DeviceType::Unknown &&
-                 properties.backendType == wgpu::BackendType::OpenGL) ||
+                 (properties.backendType == wgpu::BackendType::OpenGL ||
+                  properties.backendType == wgpu::BackendType::OpenGLES)) ||
                 // Always select the Null backend. There are few tests on this backend, and they run
                 // quickly. This is temporary as to not lose coverage. We can group it with
                 // Swiftshader as a CPU adapter when we have Swiftshader tests.

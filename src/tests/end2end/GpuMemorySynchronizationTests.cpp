@@ -230,6 +230,10 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
 // Use an image as both sampled and readonly storage in a compute pass. This is a regression test
 // for the Vulkan backend choosing different layouts for Sampled and ReadOnlyStorage.
 TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
+    // TODO(crbug.com/dawn/646): diagnose and fix this OpenGL ES backend validation failure.
+    // "GL_INVALID_OPERATION error generated. Image variable update is not allowed."
+    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+
     // Create a storage + sampled texture of one texel initialized to 1
     wgpu::TextureDescriptor texDesc;
     texDesc.format = wgpu::TextureFormat::R32Uint;
