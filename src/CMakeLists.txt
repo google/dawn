@@ -196,6 +196,7 @@ set(TINT_LIB_SRCS
   semantic/info.h
   semantic/node.h
   semantic/sem_expression.cc
+  semantic/sem_function.cc
   semantic/sem_info.cc
   semantic/sem_node.cc
   semantic/type_mappings.h

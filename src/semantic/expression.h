@@ -17,8 +17,6 @@
 
 #include "src/semantic/node.h"
 
-#include "src/semantic/type_mappings.h"
-
 namespace tint {
 
 // Forward declarations

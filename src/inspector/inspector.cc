@@ -29,6 +29,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/program.h"
+#include "src/semantic/function.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
 #include "src/type/f32_type.h"
@@ -64,7 +65,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
 
-    for (auto* var : func->referenced_module_variables()) {
+    for (auto* var : program_->Sem().Get(func)->ReferencedModuleVariables()) {
       auto name = program_->Symbols().NameFor(var->symbol());
       if (var->HasBuiltinDecoration()) {
         continue;
@@ -185,10 +186,11 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
 
   std::vector<ResourceBinding> result;
 
-  for (auto& ruv : func->referenced_uniform_variables()) {
+  auto* func_sem = program_->Sem().Get(func);
+  for (auto& ruv : func_sem->ReferencedUniformVariables()) {
     ResourceBinding entry;
     ast::Variable* var = nullptr;
-    ast::Function::BindingInfo binding_info;
+    semantic::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = ruv;
     if (!var->type()->Is<type::AccessControl>()) {
       continue;
@@ -235,10 +237,11 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
 
   std::vector<ResourceBinding> result;
 
-  for (auto& rs : func->referenced_sampler_variables()) {
+  auto* func_sem = program_->Sem().Get(func);
+  for (auto& rs : func_sem->ReferencedSamplerVariables()) {
     ResourceBinding entry;
     ast::Variable* var = nullptr;
-    ast::Function::BindingInfo binding_info;
+    semantic::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rs;
 
     entry.bind_group = binding_info.group->value();
@@ -259,10 +262,11 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
 
   std::vector<ResourceBinding> result;
 
-  for (auto& rcs : func->referenced_comparison_sampler_variables()) {
+  auto* func_sem = program_->Sem().Get(func);
+  for (auto& rcs : func_sem->ReferencedComparisonSamplerVariables()) {
     ResourceBinding entry;
     ast::Variable* var = nullptr;
-    ast::Function::BindingInfo binding_info;
+    semantic::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rcs;
 
     entry.bind_group = binding_info.group->value();
@@ -307,11 +311,12 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     return {};
   }
 
+  auto* func_sem = program_->Sem().Get(func);
   std::vector<ResourceBinding> result;
-  for (auto& rsv : func->referenced_storagebuffer_variables()) {
+  for (auto& rsv : func_sem->ReferencedStoragebufferVariables()) {
     ResourceBinding entry;
     ast::Variable* var = nullptr;
-    ast::Function::BindingInfo binding_info;
+    semantic::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = rsv;
 
     auto* ac_type = var->type()->As<type::AccessControl>();
@@ -347,13 +352,14 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
   }
 
   std::vector<ResourceBinding> result;
+  auto* func_sem = program_->Sem().Get(func);
   auto& referenced_variables =
-      multisampled_only ? func->referenced_multisampled_texture_variables()
-                        : func->referenced_sampled_texture_variables();
+      multisampled_only ? func_sem->ReferencedMultisampledTextureVariables()
+                        : func_sem->ReferencedSampledTextureVariables();
   for (auto& ref : referenced_variables) {
     ResourceBinding entry;
     ast::Variable* var = nullptr;
-    ast::Function::BindingInfo binding_info;
+    semantic::Function::BindingInfo binding_info;
     std::tie(var, binding_info) = ref;
 
     entry.bind_group = binding_info.group->value();

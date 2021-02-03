@@ -60,6 +60,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/program.h"
 #include "src/semantic/expression.h"
+#include "src/semantic/function.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -457,7 +458,8 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
       Operand::Int(stage), Operand::Int(id),
       Operand::String(builder_.Symbols().NameFor(func->symbol()))};
 
-  for (const auto* var : func->referenced_module_variables()) {
+  auto* func_sem = builder_.Sem().Get(func);
+  for (const auto* var : func_sem->ReferencedModuleVariables()) {
     // For SPIR-V 1.3 we only output Input/output variables. If we update to
     // SPIR-V 1.4 or later this should be all variables.
     if (var->storage_class() != ast::StorageClass::kInput &&
@@ -496,7 +498,8 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
          Operand::Int(x), Operand::Int(y), Operand::Int(z)});
   }
 
-  for (auto builtin : func->referenced_builtin_variables()) {
+  auto* func_sem = builder_.Sem().Get(func);
+  for (auto builtin : func_sem->ReferencedBuiltinVariables()) {
     if (builtin.second->value() == ast::Builtin::kFragDepth) {
       push_execution_mode(
           spv::Op::OpExecutionMode,

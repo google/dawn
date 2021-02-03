@@ -44,6 +44,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
+#include "src/semantic/function.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
 #include "src/type/depth_texture_type.h"
@@ -97,9 +98,9 @@ void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
     return;
   }
 
-  current_function_->add_referenced_module_variable(var);
+  current_function_->referenced_module_vars.Add(var);
   if (local) {
-    current_function_->add_local_referenced_module_variable(var);
+    current_function_->local_referenced_module_vars.Add(var);
   }
 }
 
@@ -145,11 +146,14 @@ bool TypeDeterminer::Determine() {
     }
   }
 
+  CreateSemanticFunctions();
+
   return true;
 }
 
 void TypeDeterminer::set_entry_points(const Symbol& fn_sym, Symbol ep_sym) {
-  symbol_to_function_[fn_sym]->add_ancestor_entry_point(ep_sym);
+  auto* info = symbol_to_function_.at(fn_sym);
+  info->ancestor_entry_points.Add(ep_sym);
 
   for (const auto& callee : caller_to_callee_[fn_sym]) {
     set_entry_points(callee, ep_sym);
@@ -166,9 +170,11 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 }
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
-  symbol_to_function_[func->symbol()] = func;
+  auto* info = function_infos_.Create<FunctionInfo>(func);
+  symbol_to_function_[func->symbol()] = info;
+  function_to_info_.emplace(func, info);
 
-  current_function_ = func;
+  current_function_ = info;
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
@@ -409,19 +415,20 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
       }
     } else {
       if (current_function_) {
-        caller_to_callee_[current_function_->symbol()].push_back(
+        caller_to_callee_[current_function_->declaration->symbol()].push_back(
             ident->symbol());
 
-        auto* callee_func = builder_->AST().Functions().Find(ident->symbol());
-        if (callee_func == nullptr) {
+        auto callee_func_it = symbol_to_function_.find(ident->symbol());
+        if (callee_func_it == symbol_to_function_.end()) {
           set_error(expr->source(),
                     "unable to find called function: " +
                         builder_->Symbols().NameFor(ident->symbol()));
           return false;
         }
+        auto* callee_func = callee_func_it->second;
 
         // We inherit any referenced variables from the callee.
-        for (auto* var : callee_func->referenced_module_variables()) {
+        for (auto* var : callee_func->referenced_module_vars) {
           set_referenced_from_function_if_needed(var, false);
         }
       }
@@ -828,7 +835,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
 
   auto iter = symbol_to_function_.find(symbol);
   if (iter != symbol_to_function_.end()) {
-    SetType(expr, iter->second->return_type());
+    SetType(expr, iter->second->declaration->return_type());
     return true;
   }
 
@@ -1203,5 +1210,26 @@ void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) const {
   return builder_->Sem().Add(expr,
                              builder_->create<semantic::Expression>(type));
 }
+
+void TypeDeterminer::CreateSemanticFunctions() const {
+  for (auto it : function_to_info_) {
+    auto* func = it.first;
+    auto* info = it.second;
+    if (builder_->Sem().Get(func)) {
+      // ast::Function already has a semantic::Function node.
+      // This is likely via explicit call to DetermineXXX() in test.
+      continue;
+    }
+    builder_->Sem().Add(func, builder_->create<semantic::Function>(
+                                  info->referenced_module_vars,
+                                  info->local_referenced_module_vars,
+                                  info->ancestor_entry_points));
+  }
+}
+
+TypeDeterminer::FunctionInfo::FunctionInfo(ast::Function* decl)
+    : declaration(decl) {}
+
+TypeDeterminer::FunctionInfo::~FunctionInfo() = default;
 
 }  // namespace tint

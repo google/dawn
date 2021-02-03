@@ -52,6 +52,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
+#include "src/semantic/function.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -659,7 +660,10 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   // Register the function
   EXPECT_TRUE(td()->Determine());
 
-  const auto& vars = func->referenced_module_variables();
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  const auto& vars = func_sem->ReferencedModuleVariables();
   ASSERT_EQ(vars.size(), 5u);
   EXPECT_EQ(vars[0], out_var);
   EXPECT_EQ(vars[1], in_var);
@@ -700,7 +704,10 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   // Register the function
   EXPECT_TRUE(td()->Determine());
 
-  const auto& vars = func2->referenced_module_variables();
+  auto* func2_sem = Sem().Get(func2);
+  ASSERT_NE(func2_sem, nullptr);
+
+  const auto& vars = func2_sem->ReferencedModuleVariables();
   ASSERT_EQ(vars.size(), 5u);
   EXPECT_EQ(vars[0], out_var);
   EXPECT_EQ(vars[1], in_var);
@@ -726,7 +733,10 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   // Register the function
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  EXPECT_EQ(func->referenced_module_variables().size(), 0u);
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
@@ -2284,22 +2294,33 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   // Register the functions and calculate the callers
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
-  const auto& b_eps = func_b->ancestor_entry_points();
+  auto* func_b_sem = Sem().Get(func_b);
+  auto* func_a_sem = Sem().Get(func_a);
+  auto* func_c_sem = Sem().Get(func_c);
+  auto* ep_1_sem = Sem().Get(ep_1);
+  auto* ep_2_sem = Sem().Get(ep_2);
+  ASSERT_NE(func_b_sem, nullptr);
+  ASSERT_NE(func_a_sem, nullptr);
+  ASSERT_NE(func_c_sem, nullptr);
+  ASSERT_NE(ep_1_sem, nullptr);
+  ASSERT_NE(ep_2_sem, nullptr);
+
+  const auto& b_eps = func_b_sem->AncestorEntryPoints();
   ASSERT_EQ(2u, b_eps.size());
   EXPECT_EQ(Symbols().Register("ep_1"), b_eps[0]);
   EXPECT_EQ(Symbols().Register("ep_2"), b_eps[1]);
 
-  const auto& a_eps = func_a->ancestor_entry_points();
+  const auto& a_eps = func_a_sem->AncestorEntryPoints();
   ASSERT_EQ(1u, a_eps.size());
   EXPECT_EQ(Symbols().Register("ep_1"), a_eps[0]);
 
-  const auto& c_eps = func_c->ancestor_entry_points();
+  const auto& c_eps = func_c_sem->AncestorEntryPoints();
   ASSERT_EQ(2u, c_eps.size());
   EXPECT_EQ(Symbols().Register("ep_1"), c_eps[0]);
   EXPECT_EQ(Symbols().Register("ep_2"), c_eps[1]);
 
-  EXPECT_TRUE(ep_1->ancestor_entry_points().empty());
-  EXPECT_TRUE(ep_2->ancestor_entry_points().empty());
+  EXPECT_TRUE(ep_1_sem->AncestorEntryPoints().empty());
+  EXPECT_TRUE(ep_2_sem->AncestorEntryPoints().empty());
 }
 
 using TypeDeterminerTextureIntrinsicTest =

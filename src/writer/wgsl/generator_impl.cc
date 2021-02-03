@@ -58,6 +58,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/program.h"
+#include "src/semantic/function.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -146,7 +147,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
   }
 
   bool found_func_variable = false;
-  for (auto* var : func->referenced_module_variables()) {
+  for (auto* var : program_->Sem().Get(func)->ReferencedModuleVariables()) {
     if (!EmitVariable(var)) {
       return false;
     }
@@ -157,7 +158,8 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
   }
 
   for (auto* f : program_->AST().Functions()) {
-    if (!f->HasAncestorEntryPoint(program_->Symbols().Get(name))) {
+    auto* f_sem = program_->Sem().Get(f);
+    if (!f_sem->HasAncestorEntryPoint(program_->Symbols().Get(name))) {
       continue;
     }
 

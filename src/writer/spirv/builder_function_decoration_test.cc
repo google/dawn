@@ -24,6 +24,7 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/semantic/function.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -153,12 +154,6 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
   AST().AddGlobalVariable(v_out);
   AST().AddGlobalVariable(v_wg);
 
-  td.RegisterVariableForTesting(v_in);
-  td.RegisterVariableForTesting(v_out);
-  td.RegisterVariableForTesting(v_wg);
-
-  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
-
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
@@ -284,8 +279,6 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
                create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
            },
            ast::FunctionDecorationList{});
-
-  func->add_referenced_module_variable(fragdepth);
 
   spirv::Builder& b = Build();
 

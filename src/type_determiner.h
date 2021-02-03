@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "src/ast/module.h"
@@ -98,6 +99,10 @@ class TypeDeterminer {
   /// @returns false on error
   bool DetermineStorageTextureSubtype(type::StorageTexture* tex);
 
+  /// Creates the semantic::Function nodes and adds them to the semantic::Info
+  /// of the ProgramBuilder.
+  void CreateSemanticFunctions() const;
+
   /// Testing method to set a given variable into the type stack
   /// @param var the variable to set
   void RegisterVariableForTesting(ast::Variable* var) {
@@ -123,6 +128,37 @@ class TypeDeterminer {
   bool SetIntrinsicIfNeeded(ast::IdentifierExpression* ident);
 
  private:
+  template <typename T>
+  struct UniqueVector {
+    using ConstIterator = typename std::vector<T>::const_iterator;
+
+    void Add(const T& val) {
+      if (set.count(val) == 0) {
+        vector.emplace_back(val);
+        set.emplace(val);
+      }
+    }
+    ConstIterator begin() const { return vector.begin(); }
+    ConstIterator end() const { return vector.end(); }
+    operator const std::vector<T> &() const { return vector; }
+
+   private:
+    std::vector<T> vector;
+    std::unordered_set<T> set;
+  };
+
+  /// Structure holding semantic information about a function.
+  /// Used to build the semantic::Function nodes at the end of resolving.
+  struct FunctionInfo {
+    explicit FunctionInfo(ast::Function* decl);
+    ~FunctionInfo();
+
+    ast::Function* const declaration;
+    UniqueVector<ast::Variable*> referenced_module_vars;
+    UniqueVector<ast::Variable*> local_referenced_module_vars;
+    UniqueVector<Symbol> ancestor_entry_points;
+  };
+
   void set_error(const Source& src, const std::string& msg);
   void set_referenced_from_function_if_needed(ast::Variable* var, bool local);
   void set_entry_points(const Symbol& fn_sym, Symbol ep_sym);
@@ -153,8 +189,10 @@ class TypeDeterminer {
   ProgramBuilder* builder_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
-  std::unordered_map<Symbol, ast::Function*> symbol_to_function_;
-  ast::Function* current_function_ = nullptr;
+  std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
+  std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;
+  FunctionInfo* current_function_ = nullptr;
+  BlockAllocator<FunctionInfo> function_infos_;
 
   // Map from caller functions to callee functions.
   std::unordered_map<Symbol, std::vector<Symbol>> caller_to_callee_;

@@ -46,6 +46,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
+#include "src/semantic/function.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -591,15 +592,17 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
   out << name << "(";
 
+  auto* func_sem = builder_.Sem().Get(func);
+
   bool first = true;
-  if (has_referenced_in_var_needing_struct(func)) {
+  if (has_referenced_in_var_needing_struct(func_sem)) {
     auto var_name = current_ep_var_name(VarType::kIn);
     if (!var_name.empty()) {
       out << var_name;
       first = false;
     }
   }
-  if (has_referenced_out_var_needing_struct(func)) {
+  if (has_referenced_out_var_needing_struct(func_sem)) {
     auto var_name = current_ep_var_name(VarType::kOut);
     if (!var_name.empty()) {
       if (!first) {
@@ -1223,15 +1226,16 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::has_referenced_in_var_needing_struct(ast::Function* func) {
-  for (auto data : func->referenced_location_variables()) {
+bool GeneratorImpl::has_referenced_in_var_needing_struct(
+    const semantic::Function* func) {
+  for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kInput) {
       return true;
     }
   }
 
-  for (auto data : func->referenced_builtin_variables()) {
+  for (auto data : func->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kInput) {
       return true;
@@ -1240,15 +1244,16 @@ bool GeneratorImpl::has_referenced_in_var_needing_struct(ast::Function* func) {
   return false;
 }
 
-bool GeneratorImpl::has_referenced_out_var_needing_struct(ast::Function* func) {
-  for (auto data : func->referenced_location_variables()) {
+bool GeneratorImpl::has_referenced_out_var_needing_struct(
+    const semantic::Function* func) {
+  for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kOutput) {
       return true;
     }
   }
 
-  for (auto data : func->referenced_builtin_variables()) {
+  for (auto data : func->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kOutput) {
       return true;
@@ -1257,8 +1262,9 @@ bool GeneratorImpl::has_referenced_out_var_needing_struct(ast::Function* func) {
   return false;
 }
 
-bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
-  for (auto data : func->referenced_location_variables()) {
+bool GeneratorImpl::has_referenced_var_needing_struct(
+    const semantic::Function* func) {
+  for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kOutput ||
         var->storage_class() == ast::StorageClass::kInput) {
@@ -1266,7 +1272,7 @@ bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
     }
   }
 
-  for (auto data : func->referenced_builtin_variables()) {
+  for (auto data : func->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kOutput ||
         var->storage_class() == ast::StorageClass::kInput) {
@@ -1284,14 +1290,16 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
     return true;
   }
 
+  auto* func_sem = builder_.Sem().Get(func);
+
   // TODO(dsinclair): This could be smarter. If the input/outputs for multiple
   // entry points are the same we could generate a single struct and then have
   // this determine it's the same struct and just emit once.
-  bool emit_duplicate_functions = func->ancestor_entry_points().size() > 0 &&
-                                  has_referenced_var_needing_struct(func);
+  bool emit_duplicate_functions = func_sem->AncestorEntryPoints().size() > 0 &&
+                                  has_referenced_var_needing_struct(func_sem);
 
   if (emit_duplicate_functions) {
-    for (const auto& ep_sym : func->ancestor_entry_points()) {
+    for (const auto& ep_sym : func_sem->AncestorEntryPoints()) {
       if (!EmitFunctionInternal(out, func, emit_duplicate_functions, ep_sym)) {
         return false;
       }
@@ -1394,7 +1402,10 @@ bool GeneratorImpl::EmitEntryPointData(
     std::unordered_set<Symbol>& emitted_globals) {
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> in_variables;
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> outvariables;
-  for (auto data : func->referenced_location_variables()) {
+  auto* func_sem = builder_.Sem().Get(func);
+  auto func_sym = func->symbol();
+
+  for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
     auto* deco = data.second;
 
@@ -1405,7 +1416,7 @@ bool GeneratorImpl::EmitEntryPointData(
     }
   }
 
-  for (auto data : func->referenced_builtin_variables()) {
+  for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     auto* deco = data.second;
 
@@ -1417,7 +1428,7 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   bool emitted_uniform = false;
-  for (auto data : func->referenced_uniform_variables()) {
+  for (auto data : func_sem->ReferencedUniformVariables()) {
     auto* var = data.first;
     // TODO(dsinclair): We're using the binding to make up the buffer number but
     // we should instead be using a provided mapping that uses both buffer and
@@ -1471,7 +1482,7 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   bool emitted_storagebuffer = false;
-  for (auto data : func->referenced_storagebuffer_variables()) {
+  for (auto data : func_sem->ReferencedStoragebufferVariables()) {
     auto* var = data.first;
     auto* binding = data.second.binding;
 
@@ -1500,10 +1511,10 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   if (!in_variables.empty()) {
-    auto in_struct_name = generate_name(
-        builder_.Symbols().NameFor(func->symbol()) + "_" + kInStructNameSuffix);
+    auto in_struct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
+                                        "_" + kInStructNameSuffix);
     auto in_var_name = generate_name(kTintStructInVarPrefix);
-    ep_sym_to_in_data_[func->symbol()] = {in_struct_name, in_var_name};
+    ep_sym_to_in_data_[func_sym] = {in_struct_name, in_var_name};
 
     make_indent(out);
     out << "struct " << in_struct_name << " {" << std::endl;
@@ -1547,11 +1558,10 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   if (!outvariables.empty()) {
-    auto outstruct_name =
-        generate_name(builder_.Symbols().NameFor(func->symbol()) + "_" +
-                      kOutStructNameSuffix);
+    auto outstruct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
+                                        "_" + kOutStructNameSuffix);
     auto outvar_name = generate_name(kTintStructOutVarPrefix);
-    ep_sym_to_out_data_[func->symbol()] = {outstruct_name, outvar_name};
+    ep_sym_to_out_data_[func_sym] = {outstruct_name, outvar_name};
 
     make_indent(out);
     out << "struct " << outstruct_name << " {" << std::endl;

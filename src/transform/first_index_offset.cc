@@ -49,6 +49,7 @@
 #include "src/clone_context.h"
 #include "src/program.h"
 #include "src/program_builder.h"
+#include "src/semantic/function.h"
 #include "src/type/struct_type.h"
 #include "src/type/u32_type.h"
 #include "src/type_determiner.h"
@@ -143,9 +144,10 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
             if (buffer_var == nullptr) {
               return nullptr;  // no transform need, just clone func
             }
+            auto* func_sem = in->Sem().Get(func);
             ast::StatementList statements;
             for (const auto& data :
-                 func->local_referenced_builtin_variables()) {
+                 func_sem->LocalReferencedBuiltinVariables()) {
               if (data.second->value() == ast::Builtin::kVertexIndex) {
                 statements.emplace_back(CreateFirstIndexOffset(
                     in->Symbols().NameFor(vertex_index_sym), kFirstVertexName,
