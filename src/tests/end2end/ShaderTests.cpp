@@ -23,9 +23,6 @@ class ShaderTests : public DawnTest {};
 
 // Test that log2 is being properly calculated, base on crbug.com/1046622
 TEST_P(ShaderTests, ComputeLog2) {
-    // TODO(crbug.com/dawn/663): log2(32) is currently being incorrectly calculated.
-    DAWN_SKIP_TEST_IF(IsMacOS() && IsIntel());
-
     uint32_t const kSteps = 19;
     std::vector<uint32_t> data(kSteps, 0);
     std::vector<uint32_t> expected{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 32};
