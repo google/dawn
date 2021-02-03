@@ -71,9 +71,10 @@ namespace dawn_native { namespace metal {
                     return MTLTextureTypeCube;
                 case wgpu::TextureViewDimension::CubeArray:
                     return MTLTextureTypeCubeArray;
+                case wgpu::TextureViewDimension::e3D:
+                    return MTLTextureType3D;
 
                 case wgpu::TextureViewDimension::e1D:
-                case wgpu::TextureViewDimension::e3D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }
@@ -333,9 +334,12 @@ namespace dawn_native { namespace metal {
                     }
                 }
                 break;
+            case wgpu::TextureDimension::e3D:
+                ASSERT(mtlDesc.sampleCount == 1);
+                mtlDesc.textureType = MTLTextureType3D;
+                break;
 
             case wgpu::TextureDimension::e1D:
-            case wgpu::TextureDimension::e3D:
                 UNREACHABLE();
         }
 

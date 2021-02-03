@@ -45,9 +45,10 @@ namespace dawn_native { namespace vulkan {
                     return VK_IMAGE_VIEW_TYPE_CUBE;
                 case wgpu::TextureViewDimension::CubeArray:
                     return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+                case wgpu::TextureViewDimension::e3D:
+                    return VK_IMAGE_VIEW_TYPE_3D;
 
                 case wgpu::TextureViewDimension::e1D:
-                case wgpu::TextureViewDimension::e3D:
                 case wgpu::TextureViewDimension::Undefined:
                     UNREACHABLE();
             }
@@ -201,8 +202,13 @@ namespace dawn_native { namespace vulkan {
                     info->arrayLayers = size.depth;
                     break;
 
-                case wgpu::TextureDimension::e1D:
                 case wgpu::TextureDimension::e3D:
+                    info->imageType = VK_IMAGE_TYPE_3D;
+                    info->extent = {size.width, size.height, size.depth};
+                    info->arrayLayers = 1;
+                    break;
+
+                case wgpu::TextureDimension::e1D:
                     UNREACHABLE();
             }
         }

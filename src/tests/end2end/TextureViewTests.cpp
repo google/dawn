@@ -701,4 +701,9 @@ TEST_P(TextureView3DTest, BasicTest) {
     wgpu::TextureView view = texture.CreateView();
 }
 
-DAWN_INSTANTIATE_TEST(TextureView3DTest, D3D12Backend());
+DAWN_INSTANTIATE_TEST(TextureView3DTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
