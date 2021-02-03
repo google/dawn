@@ -48,8 +48,7 @@ TEST_F(BuilderTest, If_Empty) {
   auto* expr = create<ast::IfStatement>(
       cond, create<ast::BlockStatement>(ast::StatementList{}),
       ast::ElseStatementList{});
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -77,8 +76,7 @@ TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
   ast::ElseStatementList elses;
   auto* block = create<ast::BlockStatement>(ast::StatementList{});
   auto* expr = create<ast::IfStatement>(cond, block, elses);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -94,14 +92,12 @@ TEST_F(BuilderTest, If_WithStatements) {
   //   v = 2;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* expr =
       create<ast::IfStatement>(Expr(true), body, ast::ElseStatementList{});
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -134,7 +130,7 @@ TEST_F(BuilderTest, If_WithElse) {
   //   v = 3;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
@@ -143,10 +139,7 @@ TEST_F(BuilderTest, If_WithElse) {
   auto* expr = create<ast::IfStatement>(
       Expr(true), body,
       ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
-
-  td.RegisterVariableForTesting(var);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -183,7 +176,7 @@ TEST_F(BuilderTest, If_WithElseIf) {
   //   v = 3;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
@@ -194,10 +187,7 @@ TEST_F(BuilderTest, If_WithElseIf) {
       ast::ElseStatementList{
           create<ast::ElseStatement>(Expr(true), else_body),
       });
-
-  td.RegisterVariableForTesting(var);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -243,7 +233,7 @@ TEST_F(BuilderTest, If_WithMultiple) {
   //   v = 5;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* elseif_1_body = create<ast::BlockStatement>(
@@ -260,10 +250,7 @@ TEST_F(BuilderTest, If_WithMultiple) {
           create<ast::ElseStatement>(Expr(false), elseif_2_body),
           create<ast::ElseStatement>(nullptr, else_body),
       });
-
-  td.RegisterVariableForTesting(var);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -332,8 +319,7 @@ TEST_F(BuilderTest, If_WithBreak) {
 
   auto* expr = create<ast::LoopStatement>(
       loop_body, create<ast::BlockStatement>(ast::StatementList{}));
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -382,8 +368,7 @@ TEST_F(BuilderTest, If_WithElseBreak) {
 
   auto* expr = create<ast::LoopStatement>(
       loop_body, create<ast::BlockStatement>(ast::StatementList{}));
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -432,8 +417,7 @@ TEST_F(BuilderTest, If_WithContinue) {
 
   auto* expr = create<ast::LoopStatement>(
       loop_body, create<ast::BlockStatement>(ast::StatementList{}));
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -482,8 +466,7 @@ TEST_F(BuilderTest, If_WithElseContinue) {
 
   auto* expr = create<ast::LoopStatement>(
       loop_body, create<ast::BlockStatement>(ast::StatementList{}));
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -523,7 +506,7 @@ TEST_F(BuilderTest, If_WithReturn) {
 
   auto* expr =
       create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -552,7 +535,7 @@ TEST_F(BuilderTest, If_WithReturnValue) {
 
   auto* expr =
       create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -577,14 +560,12 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // if (a) {
   // }
 
-  auto* var = Var("a", ast::StorageClass::kFunction, ty.bool_());
-  td.RegisterVariableForTesting(var);
+  auto* var = Global("a", ast::StorageClass::kFunction, ty.bool_());
 
   auto* expr = create<ast::IfStatement>(
       Expr("a"), create<ast::BlockStatement>(ast::StatementList{}),
       ast::ElseStatementList{});
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 

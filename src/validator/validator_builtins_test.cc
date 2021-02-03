@@ -35,41 +35,46 @@ class ValidatorBuiltinsTest : public ValidatorTestHelper,
 
 TEST_F(ValidatorBuiltinsTest, Length_Float_Scalar) {
   auto* builtin = Call("length", 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Length_Float_Vec2) {
   auto* builtin = Call("length", vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Length_Float_Vec3) {
   auto* builtin = Call("length", vec3<float>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Length_Float_Vec4) {
   auto* builtin = Call("length", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Length_Integer_Scalar) {
   auto* builtin = Call("length", 1);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for length. Requires float scalar or vector value");
@@ -77,9 +82,10 @@ TEST_F(ValidatorBuiltinsTest, Length_Integer_Scalar) {
 
 TEST_F(ValidatorBuiltinsTest, Length_Integer_Vec2) {
   auto* builtin = Call("length", vec2<uint32_t>(1, 1));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for length. Requires float scalar or vector value");
@@ -87,9 +93,10 @@ TEST_F(ValidatorBuiltinsTest, Length_Integer_Vec2) {
 
 TEST_F(ValidatorBuiltinsTest, Length_TooManyParams) {
   auto* builtin = Call("length", 1.0f, 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for length expected 1 got 2");
@@ -97,9 +104,10 @@ TEST_F(ValidatorBuiltinsTest, Length_TooManyParams) {
 
 TEST_F(ValidatorBuiltinsTest, Length_TooFewParams) {
   auto* builtin = Call("length");
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for length expected 1 got 0");
@@ -107,44 +115,49 @@ TEST_F(ValidatorBuiltinsTest, Length_TooFewParams) {
 
 TEST_F(ValidatorBuiltinsTest, Distance_Float_Scalar) {
   auto* builtin = Call("distance", 1.0f, 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Distance_Float_Vec2) {
   auto* builtin =
       Call("distance", vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Distance_Float_Vec3) {
   auto* builtin = Call("distance", vec3<float>(1.0f, 1.0f, 1.0f),
                        vec3<float>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Distance_Float_Vec4) {
   auto* builtin = Call("distance", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                        vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Distance_Integer_Scalar) {
   auto* builtin = Call("distance", 1, 1);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -153,9 +166,10 @@ TEST_F(ValidatorBuiltinsTest, Distance_Integer_Scalar) {
 
 TEST_F(ValidatorBuiltinsTest, Distance_Integer_Vec2) {
   auto* builtin = Call("distance", vec2<uint32_t>(1, 1), vec2<uint32_t>(1, 1));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -164,9 +178,10 @@ TEST_F(ValidatorBuiltinsTest, Distance_Integer_Vec2) {
 
 TEST_F(ValidatorBuiltinsTest, Distance_TooManyParams) {
   auto* builtin = Call("distance", 1.0f, 1.0f, 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for distance expected 2 got 3");
@@ -174,9 +189,10 @@ TEST_F(ValidatorBuiltinsTest, Distance_TooManyParams) {
 
 TEST_F(ValidatorBuiltinsTest, Distance_TooFewParams) {
   auto* builtin = Call("distance", 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for distance expected 2 got 1");
@@ -185,9 +201,10 @@ TEST_F(ValidatorBuiltinsTest, Distance_TooFewParams) {
 TEST_F(ValidatorBuiltinsTest, Determinant_Mat2x2) {
   auto* builtin = Call("determinant", mat2x2<float>(vec2<float>(1.0f, 1.0f),
                                                     vec2<float>(1.0f, 1.0f)));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -196,9 +213,10 @@ TEST_F(ValidatorBuiltinsTest, Determinant_Mat3x3) {
       Call("determinant", mat3x3<float>(vec3<float>(1.0f, 1.0f, 1.0f),
                                         vec3<float>(1.0f, 1.0f, 1.0f),
                                         vec3<float>(1.0f, 1.0f, 1.0f)));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -208,9 +226,10 @@ TEST_F(ValidatorBuiltinsTest, Determinant_Mat4x4) {
                                         vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                                         vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                                         vec4<float>(1.0f, 1.0f, 1.0f, 1.0f)));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -218,9 +237,10 @@ TEST_F(ValidatorBuiltinsTest, Determinant_Mat3x2) {
   auto* builtin = Call("determinant", mat3x2<float>(vec2<float>(1.0f, 1.0f),
                                                     vec2<float>(1.0f, 1.0f),
                                                     vec2<float>(1.0f, 1.0f)));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for determinant. Requires a square matrix");
@@ -228,27 +248,30 @@ TEST_F(ValidatorBuiltinsTest, Determinant_Mat3x2) {
 
 TEST_F(ValidatorBuiltinsTest, Determinant_Float_Vec2) {
   auto* builtin = Call("determinant", vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for determinant. Requires matrix value");
 }
 
 TEST_F(ValidatorBuiltinsTest, Determinant_Float_Scalar) {
   auto* builtin = Call("determinant", 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for determinant. Requires matrix value");
 }
 
 TEST_F(ValidatorBuiltinsTest, Determinant_Integer_Scalar) {
   auto* builtin = Call("determinant", 1);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for determinant. Requires matrix value");
 }
@@ -258,9 +281,10 @@ TEST_F(ValidatorBuiltinsTest, Determinant_TooManyParams) {
       Call("determinant",
            mat2x2<float>(vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f)),
            mat2x2<float>(vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f)));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for determinant expected 1 got 2");
@@ -268,9 +292,10 @@ TEST_F(ValidatorBuiltinsTest, Determinant_TooManyParams) {
 
 TEST_F(ValidatorBuiltinsTest, Determinant_TooFewParams) {
   auto* builtin = Call("determinant");
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for determinant expected 1 got 0");
@@ -284,11 +309,12 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Scalar) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", 1.0f, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -301,11 +327,13 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec2) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec2<float>(1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -318,11 +346,12 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec3) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -335,11 +364,12 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec4) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -351,11 +381,12 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Integer_FirstParam) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", 1, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_FALSE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for frexp. Requires float scalar or vector value");
@@ -369,11 +400,12 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Float_SecondParam) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", 1.0f, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for frexp. Requires int scalar or vector value");
@@ -381,10 +413,11 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Float_SecondParam) {
 
 TEST_F(ValidatorBuiltinsTest, Frexp_NotAPointer) {
   auto* builtin = Call("frexp", 1.0f, 1);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for frexp. Requires pointer value");
 }
@@ -398,10 +431,11 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Scalar_Vector) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", 1.0f, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect types for frexp. Parameters must be matched scalars or "
@@ -416,11 +450,12 @@ TEST_F(ValidatorBuiltinsTest, Modf_Scalar) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", 1.0f, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -433,11 +468,12 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec2) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec2<float>(1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -450,11 +486,12 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec3) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -467,11 +504,12 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec4) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -483,11 +521,12 @@ TEST_F(ValidatorBuiltinsTest, Modf_Integer_FirstParam) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", 1, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_FALSE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for modf. Requires float scalar or vector value");
@@ -501,11 +540,12 @@ TEST_F(ValidatorBuiltinsTest, Modf_Integer_SecondParam) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", 1.0f, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -514,10 +554,11 @@ TEST_F(ValidatorBuiltinsTest, Modf_Integer_SecondParam) {
 
 TEST_F(ValidatorBuiltinsTest, Modf_NotAPointer) {
   auto* builtin = Call("modf", 1.0f, 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for modf. Requires pointer value");
 }
@@ -531,10 +572,11 @@ TEST_F(ValidatorBuiltinsTest, Modf_Scalar_Vector) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", 1.0f, Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -549,10 +591,11 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vector_Scalar) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec2<float>(1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -568,11 +611,12 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vector_Vector_MismatchedSize) {
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  ValidatorImpl& v = Build();
+
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  ValidatorImpl& v = Build();
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -582,17 +626,19 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vector_Vector_MismatchedSize) {
 TEST_F(ValidatorBuiltinsTest, Cross_Float_Vec3) {
   auto* builtin = Call("cross", vec3<float>(1.0f, 1.0f, 1.0f),
                        vec3<float>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Cross_Integer_Vec3) {
   auto* builtin = Call("cross", vec3<int>(1, 1, 1), vec3<int>(1, 1, 1));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -602,9 +648,10 @@ TEST_F(ValidatorBuiltinsTest, Cross_Integer_Vec3) {
 TEST_F(ValidatorBuiltinsTest, Cross_Float_Vec4) {
   auto* builtin = Call("cross", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                        vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -614,9 +661,10 @@ TEST_F(ValidatorBuiltinsTest, Cross_Float_Vec4) {
 TEST_F(ValidatorBuiltinsTest, Cross_Float_Vec2) {
   auto* builtin =
       Call("cross", vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -625,9 +673,10 @@ TEST_F(ValidatorBuiltinsTest, Cross_Float_Vec2) {
 
 TEST_F(ValidatorBuiltinsTest, Cross_Float_Scalar) {
   auto* builtin = Call("cross", 1.0f, 1.0f);
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(
       v.error(),
@@ -638,9 +687,10 @@ TEST_F(ValidatorBuiltinsTest, Cross_TooManyParams) {
   auto* builtin =
       Call("cross", vec3<float>(1.0f, 1.0f, 1.0f),
            vec3<float>(1.0f, 1.0f, 1.0f), vec3<float>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for cross expected 2 got 3");
@@ -648,9 +698,10 @@ TEST_F(ValidatorBuiltinsTest, Cross_TooManyParams) {
 
 TEST_F(ValidatorBuiltinsTest, Cross_TooFewParams) {
   auto* builtin = Call("cross", vec3<float>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for cross expected 2 got 1");
@@ -658,62 +709,69 @@ TEST_F(ValidatorBuiltinsTest, Cross_TooFewParams) {
 
 TEST_F(ValidatorBuiltinsTest, Dot_Float_Scalar) {
   auto* builtin = Call("dot", Expr(1.0f), Expr(1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for dot. Requires float vector value");
 }
 
 TEST_F(ValidatorBuiltinsTest, Dot_Integer_Scalar) {
   auto* builtin = Call("dot", Expr(1), Expr(1));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for dot. Requires float vector value");
 }
 
 TEST_F(ValidatorBuiltinsTest, Dot_Float_Vec2) {
   auto* builtin = Call("dot", vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Dot_Float_Vec3) {
   auto* builtin =
       Call("dot", vec3<float>(1.0f, 1.0f, 1.0f), vec3<float>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Dot_Float_Vec4) {
   auto* builtin = Call("dot", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                        vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Dot_Integer_Vector) {
   auto* builtin = Call("dot", vec2<int>(1, 1), vec2<int>(1, 1));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect type for dot. Requires float vector value");
 }
 
 TEST_F(ValidatorBuiltinsTest, Dot_TooFewParams) {
   auto* builtin = Call("dot", vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for dot expected 2 got 1");
@@ -722,9 +780,10 @@ TEST_F(ValidatorBuiltinsTest, Dot_TooFewParams) {
 TEST_F(ValidatorBuiltinsTest, Dot_TooManyParams) {
   auto* builtin = Call("dot", vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f),
                        vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect number of parameters for dot expected 2 got 3");
@@ -732,60 +791,67 @@ TEST_F(ValidatorBuiltinsTest, Dot_TooManyParams) {
 
 TEST_F(ValidatorBuiltinsTest, Select_Float_Scalar) {
   auto* builtin = Call("select", Expr(1.0f), Expr(1.0f), Expr(true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Select_Integer_Scalar) {
   auto* builtin = Call("select", Expr(1), Expr(1), Expr(true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Select_Boolean_Scalar) {
   auto* builtin = Call("select", Expr(true), Expr(true), Expr(true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Select_Float_Vec2) {
   auto* builtin = Call("select", vec2<float>(1.0f, 1.0f),
                        vec2<float>(1.0f, 1.0f), vec2<bool>(true, true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Select_Integer_Vec2) {
   auto* builtin =
       Call("select", vec2<int>(1, 1), vec2<int>(1, 1), vec2<bool>(true, true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Select_Boolean_Vec2) {
   auto* builtin = Call("select", vec2<bool>(true, true), vec2<bool>(true, true),
                        vec2<bool>(true, true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_F(ValidatorBuiltinsTest, Select_BadSelector) {
   auto* builtin = Call("select", Expr(1), Expr(1), Expr(1));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Selector must be a bool scalar or "
@@ -795,9 +861,10 @@ TEST_F(ValidatorBuiltinsTest, Select_BadSelector) {
 TEST_F(ValidatorBuiltinsTest, Select_Matrix) {
   auto* mat = mat2x2<float>(vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
   auto* builtin = Call("select", mat, mat, Expr(true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Requires bool, int or float scalar or "
@@ -806,9 +873,10 @@ TEST_F(ValidatorBuiltinsTest, Select_Matrix) {
 
 TEST_F(ValidatorBuiltinsTest, Select_Mismatch_Scalar) {
   auto* builtin = Call("select", Expr(1.0f), Expr(1), Expr(true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Value parameter types must match "
@@ -818,9 +886,10 @@ TEST_F(ValidatorBuiltinsTest, Select_Mismatch_Scalar) {
 TEST_F(ValidatorBuiltinsTest, Select_Mismatched_Vector) {
   auto* builtin =
       Call("select", Expr(1.0f), vec2<float>(1.0f, 1.0f), Expr(true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Value parameter types must match "
@@ -830,9 +899,10 @@ TEST_F(ValidatorBuiltinsTest, Select_Mismatched_Vector) {
 TEST_F(ValidatorBuiltinsTest, Select_Mismatched_VectorSize) {
   auto* builtin = Call("select", vec3<float>(1.0f, 1.0f, 1.0f),
                        vec2<float>(1.0f, 1.0f), vec3<bool>(true, true, true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Value parameter types must match "
@@ -842,9 +912,10 @@ TEST_F(ValidatorBuiltinsTest, Select_Mismatched_VectorSize) {
 TEST_F(ValidatorBuiltinsTest, Select_Mismatch_Selector_Vector) {
   auto* builtin =
       Call("select", Expr(1.0f), Expr(1.0f), vec2<bool>(true, true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Selector must be a bool scalar to "
@@ -854,9 +925,10 @@ TEST_F(ValidatorBuiltinsTest, Select_Mismatch_Selector_Vector) {
 TEST_F(ValidatorBuiltinsTest, Select_Mismatch_Selector_Scalar) {
   auto* builtin = Call("select", vec2<float>(1.0f, 1.0f),
                        vec2<float>(1.0f, 1.0f), Expr(true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Selector must be a vector with the "
@@ -866,9 +938,10 @@ TEST_F(ValidatorBuiltinsTest, Select_Mismatch_Selector_Scalar) {
 TEST_F(ValidatorBuiltinsTest, Select_Mismatch_Selector_VectorSize) {
   auto* builtin = Call("select", vec2<float>(1.0f, 1.0f),
                        vec2<float>(1.0f, 1.0f), vec3<bool>(true, true, true));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for select. Selector must be a vector with the "
@@ -879,9 +952,10 @@ TEST_F(ValidatorBuiltinsTest, ArrayLength_Sized) {
   auto* var = Var("a", ast::StorageClass::kWorkgroup, ty.array<int, 4>());
   RegisterVariable(var);
   auto* builtin = Call("arrayLength", Expr("a"));
+  WrapInFunction(builtin);
 
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for arrayLength. Input must be a runtime array");
@@ -903,9 +977,11 @@ TEST_P(FloatAllMatching, Scalar) {
     params.push_back(Expr(1.0f));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -918,9 +994,11 @@ TEST_P(FloatAllMatching, Vec2) {
     params.push_back(vec2<float>(1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -933,9 +1011,11 @@ TEST_P(FloatAllMatching, Vec3) {
     params.push_back(vec3<float>(1.0f, 1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -948,9 +1028,11 @@ TEST_P(FloatAllMatching, Vec4) {
     params.push_back(vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -963,9 +1045,11 @@ TEST_P(FloatAllMatching, Param_TooManyParams) {
     params.push_back(Expr(1.0f));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect number of parameters for " + name +
                            " expected " + std::to_string(num_params) + " got " +
@@ -981,18 +1065,21 @@ TEST_P(FloatAllMatching, Param_TooFewParams) {
     params.push_back(Expr(1.0f));
   }
   auto* builtin = Call(name, params);
+  WrapInFunction(builtin);
+
   // Most intrinsics require a parameter to determine the type so expect type
   // determination to fail at zero parameters.
   if (num_params > 1) {
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(), "incorrect number of parameters for " + name +
                              " expected " + std::to_string(num_params) +
                              " got " + std::to_string(num_params - 1));
   } else {
-    EXPECT_FALSE(td()->DetermineResultType(builtin));
+    auto program = std::make_unique<Program>(std::move(*this));
+    EXPECT_FALSE(program->IsValid());
   }
 }
 
@@ -1008,9 +1095,11 @@ TEST_P(FloatAllMatching, Param_Mismatch_Scalar) {
     std::string name = std::get<0>(GetParam());
     params.push_back(Expr(1));
     auto* builtin = Call(name, params);
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
+    WrapInFunction(builtin);
+
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(),
               "expected parameter " + std::to_string(num_params - 1) +
@@ -1030,9 +1119,11 @@ TEST_P(FloatAllMatching, Param_Mismatch_Vector) {
     std::string name = std::get<0>(GetParam());
     params.push_back(vec2<float>(1.0f, 1.0f));
     auto* builtin = Call(name, params);
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
+    WrapInFunction(builtin);
+
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(),
               "expected parameter " + std::to_string(num_params - 1) +
@@ -1051,9 +1142,11 @@ TEST_P(FloatAllMatching, Param_Integer) {
       params.push_back(Expr(1));
     }
     auto* builtin = Call(name, params);
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_FALSE(TypeOf(builtin)->Is<type::F32>());
+    WrapInFunction(builtin);
+
     ValidatorImpl& v = Build();
+
+    EXPECT_FALSE(TypeOf(builtin)->Is<type::F32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(), "incorrect type for " + name +
                              ". Requires float scalar or vector value");
@@ -1118,9 +1211,11 @@ TEST_P(IntegerAllMatching, ScalarUnsigned) {
     params.push_back(Construct<uint32_t>(1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1133,9 +1228,11 @@ TEST_P(IntegerAllMatching, Vec2Unsigned) {
     params.push_back(vec2<uint32_t>(1, 1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1148,9 +1245,11 @@ TEST_P(IntegerAllMatching, Vec3Unsigned) {
     params.push_back(vec3<uint32_t>(1, 1, 1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1163,9 +1262,11 @@ TEST_P(IntegerAllMatching, Vec4Unsigned) {
     params.push_back(vec4<uint32_t>(1, 1, 1, 1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1178,9 +1279,11 @@ TEST_P(IntegerAllMatching, ScalarSigned) {
     params.push_back(Construct<int32_t>(1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::I32>());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->Is<type::I32>());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1193,9 +1296,11 @@ TEST_P(IntegerAllMatching, Vec2Signed) {
     params.push_back(vec2<int32_t>(1, 1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1208,9 +1313,11 @@ TEST_P(IntegerAllMatching, Vec3Signed) {
     params.push_back(vec3<int32_t>(1, 1, 1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1223,9 +1330,11 @@ TEST_P(IntegerAllMatching, Vec4Signed) {
     params.push_back(vec4<int32_t>(1, 1, 1, 1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1238,9 +1347,11 @@ TEST_P(IntegerAllMatching, Param_TooManyParams) {
     params.push_back(Construct<uint32_t>(1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect number of parameters for " + name +
                            " expected " + std::to_string(num_params) + " got " +
@@ -1256,18 +1367,21 @@ TEST_P(IntegerAllMatching, Param_TooFewParams) {
     params.push_back(Construct<uint32_t>(1));
   }
   auto* builtin = Call(name, params);
+  WrapInFunction(builtin);
+
   // Most intrinsics require a parameter to determine the type so expect type
   // determination to fail at zero parameters.
   if (num_params > 1) {
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(), "incorrect number of parameters for " + name +
                              " expected " + std::to_string(num_params) +
                              " got " + std::to_string(num_params - 1));
   } else {
-    EXPECT_FALSE(td()->DetermineResultType(builtin));
+    auto program = std::make_unique<Program>(std::move(*this));
+    EXPECT_FALSE(program->IsValid());
   }
 }
 
@@ -1283,9 +1397,11 @@ TEST_P(IntegerAllMatching, Param_Mismatch_Scalar) {
     std::string name = std::get<0>(GetParam());
     params.push_back(Expr(1));
     auto* builtin = Call(name, params);
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
+    WrapInFunction(builtin);
+
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(),
               "expected parameter " + std::to_string(num_params - 1) +
@@ -1305,9 +1421,11 @@ TEST_P(IntegerAllMatching, Param_Mismatch_Vector) {
     std::string name = std::get<0>(GetParam());
     params.push_back(vec2<uint32_t>(1, 1));
     auto* builtin = Call(name, params);
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
+    WrapInFunction(builtin);
+
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(),
               "expected parameter " + std::to_string(num_params - 1) +
@@ -1327,9 +1445,11 @@ TEST_P(IntegerAllMatching, Param_Mismatch_Sign) {
     std::string name = std::get<0>(GetParam());
     params.push_back(Construct<int32_t>(1));
     auto* builtin = Call(name, params);
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
+    WrapInFunction(builtin);
+
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(),
               "expected parameter " + std::to_string(num_params - 1) +
@@ -1348,9 +1468,11 @@ TEST_P(IntegerAllMatching, Param_Float) {
       params.push_back(Expr(1.0f));
     }
     auto* builtin = Call(name, params);
-    EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
+    WrapInFunction(builtin);
+
     ValidatorImpl& v = Build();
+
+    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
     EXPECT_FALSE(v.ValidateCallExpr(builtin));
     EXPECT_EQ(v.error(), "incorrect type for " + name +
                              ". Requires int scalar or vector value");
@@ -1378,8 +1500,10 @@ TEST_P(BooleanVectorInput, Scalar) {
     params.push_back(Expr(true));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for " + name + ". Requires bool vector value");
@@ -1394,8 +1518,10 @@ TEST_P(BooleanVectorInput, Vec2) {
     params.push_back(vec2<bool>(true, true));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1408,8 +1534,10 @@ TEST_P(BooleanVectorInput, Vec3) {
     params.push_back(vec3<bool>(true, true, true));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1422,8 +1550,10 @@ TEST_P(BooleanVectorInput, Vec4) {
     params.push_back(vec4<bool>(true, true, true, true));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
@@ -1432,8 +1562,10 @@ TEST_P(BooleanVectorInput, NoParams) {
   uint32_t num_params = std::get<1>(GetParam());
 
   auto* builtin = Call(name);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect number of parameters for " + name +
                            " expected " + std::to_string(num_params) +
@@ -1449,8 +1581,10 @@ TEST_P(BooleanVectorInput, TooManyParams) {
     params.push_back(vec2<bool>(true, true));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(), "incorrect number of parameters for " + name +
                            " expected " + std::to_string(num_params) + " got " +
@@ -1466,8 +1600,10 @@ TEST_P(BooleanVectorInput, Integer) {
     params.push_back(vec2<uint32_t>(1, 1));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for " + name + ". Requires bool vector value");
@@ -1482,8 +1618,10 @@ TEST_P(BooleanVectorInput, Float) {
     params.push_back(vec2<float>(1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  EXPECT_TRUE(td()->DetermineResultType(builtin)) << td()->error();
+  WrapInFunction(builtin);
+
   ValidatorImpl& v = Build();
+
   EXPECT_FALSE(v.ValidateCallExpr(builtin));
   EXPECT_EQ(v.error(),
             "incorrect type for " + name + ". Requires bool vector value");

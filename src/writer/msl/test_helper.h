@@ -32,7 +32,7 @@ namespace msl {
 template <typename BASE>
 class TestHelperBase : public BASE, public ProgramBuilder {
  public:
-  TestHelperBase() : td(this) {}
+  TestHelperBase() = default;
   ~TestHelperBase() = default;
 
   /// Builds and returns a GeneratorImpl from the program.
@@ -48,8 +48,6 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     return *gen_;
   }
 
-  /// The type determiner
-  TypeDeterminer td;
   /// The program built with a call to Build()
   std::unique_ptr<Program> program;
 

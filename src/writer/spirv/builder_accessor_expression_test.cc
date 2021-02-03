@@ -49,14 +49,13 @@ TEST_F(BuilderTest, ArrayAccessor) {
   // vec3<f32> ary;
   // ary[1]  -> ptr<f32>
 
-  auto* var = Var("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* ary = Expr("ary");
   auto* idx_expr = Expr(1);
 
   auto* expr = IndexAccessor(ary, idx_expr);
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -86,17 +85,14 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   // idx : i32;
   // ary[idx]  -> ptr<f32>
 
-  auto* var = Var("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
-  auto* idx = Var("idx", ast::StorageClass::kFunction, ty.i32());
+  auto* var = Global("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* idx = Global("idx", ast::StorageClass::kFunction, ty.i32());
 
   auto* ary = Expr("ary");
   auto* idx_expr = Expr("idx");
 
   auto* expr = IndexAccessor(ary, idx_expr);
-
-  td.RegisterVariableForTesting(var);
-  td.RegisterVariableForTesting(idx);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -129,14 +125,12 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   // vec3<f32> ary;
   // ary[1 + 2]  -> ptr<f32>
 
-  auto* var = Var("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* ary = Expr("ary");
 
   auto* expr = IndexAccessor(ary, Add(1, 2));
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -169,12 +163,10 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
 
-  auto* var = Var("ary", ast::StorageClass::kFunction, &ary4);
+  auto* var = Global("ary", ast::StorageClass::kFunction, &ary4);
 
   auto* expr = IndexAccessor(IndexAccessor("ary", 3), 2);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -209,12 +201,10 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
 
-  auto* var = Var("ary", ast::StorageClass::kFunction, &ary4);
+  auto* var = Global("ary", ast::StorageClass::kFunction, &ary4);
 
   auto* expr = MemberAccessor(IndexAccessor("ary", 2), "xy");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -257,12 +247,10 @@ TEST_F(BuilderTest, MemberAccessor) {
       ast::StructDecorationList{});
 
   auto* s_type = ty.struct_("my_struct", s);
-  auto* var = Var("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
 
   auto* expr = MemberAccessor("ident", "b");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -307,11 +295,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
                           ast::StructDecorationList{}));
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -359,11 +345,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", alias)},
                           ast::StructDecorationList{}));
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -409,12 +393,10 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
                           ast::StructDecorationList{}));
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
   auto* expr = create<ast::AssignmentStatement>(
       MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2.0f));
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -463,15 +445,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
                           ast::StructDecorationList{}));
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, s_type);
-  auto* store = Var("store", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
+  auto* store = Global("store", ast::StorageClass::kFunction, ty.f32());
 
   auto* rhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
   auto* expr = create<ast::AssignmentStatement>(Expr("store"), rhs);
-
-  td.RegisterVariableForTesting(var);
-  td.RegisterVariableForTesting(store);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -505,12 +484,10 @@ OpStore %7 %13
 TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
   // ident.y
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* expr = MemberAccessor("ident", "y");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -538,12 +515,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
   // ident.yx
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* expr = MemberAccessor("ident", "yx");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -570,12 +545,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
   // ident.yxz.xz
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "xz");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -603,12 +576,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
   // ident.yxz.x
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "x");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -635,12 +606,10 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
   // index.yxz[1]
 
-  auto* var = Var("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* expr = IndexAccessor(MemberAccessor("ident", "yxz"), 1);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -693,7 +662,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   auto* a_type = ty.struct_("A", s);
 
   type::Array a_ary_type(a_type, 2, ast::ArrayDecorationList{});
-  auto* var = Var("index", ast::StorageClass::kFunction, &a_ary_type);
+  auto* var = Global("index", ast::StorageClass::kFunction, &a_ary_type);
   auto* expr = MemberAccessor(
       MemberAccessor(
           MemberAccessor(
@@ -702,9 +671,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
               "bar"),
           "baz"),
       "yx");
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -751,16 +718,14 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
 
   type::Array arr(ty.vec2<f32>(), 3, ast::ArrayDecorationList{});
 
-  auto* var = Const("pos", ast::StorageClass::kPrivate, &arr,
-                    Construct(&arr, vec2<f32>(0.0f, 0.5f),
-                              vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)),
-                    {});
+  auto* var =
+      GlobalConst("pos", ast::StorageClass::kPrivate, &arr,
+                  Construct(&arr, vec2<f32>(0.0f, 0.5f),
+                            vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)),
+                  ast::VariableDecorationList{});
 
   auto* expr = IndexAccessor("pos", 1u);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -798,14 +763,11 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   // const pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
-  auto* var = Const("pos", ast::StorageClass::kPrivate, ty.vec2<f32>(),
-                    vec2<f32>(0.0f, 0.5f), {});
+  auto* var = GlobalConst("pos", ast::StorageClass::kPrivate, ty.vec2<f32>(),
+                          vec2<f32>(0.0f, 0.5f), ast::VariableDecorationList{});
 
   auto* expr = IndexAccessor("pos", 1u);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(var->constructor())) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 

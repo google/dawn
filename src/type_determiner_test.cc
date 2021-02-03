@@ -98,10 +98,6 @@ class TypeDeterminerHelper : public ProgramBuilder {
   TypeDeterminer* td() const { return td_.get(); }
 
  private:
-  void OnVariableBuilt(ast::Variable* var) override {
-    td_->RegisterVariableForTesting(var);
-  }
-
   std::unique_ptr<TypeDeterminer> td_;
 };
 
@@ -113,16 +109,20 @@ class TypeDeterminerTestWithParam : public TypeDeterminerHelper,
 
 TEST_F(TypeDeterminerTest, Error_WithEmptySource) {
   auto* s = create<FakeStmt>();
+  WrapInFunction(s);
 
-  EXPECT_FALSE(td()->DetermineResultType(s));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "unknown statement type for type determination: Fake");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
   auto* s = create<FakeStmt>(Source{Source::Location{2, 30}});
+  WrapInFunction(s);
 
-  EXPECT_FALSE(td()->DetermineResultType(s));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "2:30: unknown statement type for type determination: Fake");
 }
@@ -132,8 +132,10 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
   auto* rhs = Expr(2.3f);
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  WrapInFunction(assign);
 
-  EXPECT_TRUE(td()->DetermineResultType(assign));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
 
@@ -151,8 +153,10 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(ty.i32(), 3));
   auto* cse = create<ast::CaseStatement>(lit, body);
+  WrapInFunction(cse);
 
-  EXPECT_TRUE(td()->DetermineResultType(cse));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());
@@ -166,8 +170,10 @@ TEST_F(TypeDeterminerTest, Stmt_Block) {
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::AssignmentStatement>(lhs, rhs),
   });
+  WrapInFunction(block);
 
-  EXPECT_TRUE(td()->DetermineResultType(block));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());
@@ -182,8 +188,10 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
       create<ast::AssignmentStatement>(lhs, rhs),
   });
   auto* stmt = create<ast::ElseStatement>(Expr(3), body);
+  WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->DetermineResultType(stmt));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(stmt->condition()), nullptr);
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
@@ -210,8 +218,10 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   });
   auto* stmt = create<ast::IfStatement>(Expr(3), body,
                                         ast::ElseStatementList{else_stmt});
+  WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->DetermineResultType(stmt));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(stmt->condition()), nullptr);
   ASSERT_NE(TypeOf(else_lhs), nullptr);
   ASSERT_NE(TypeOf(else_rhs), nullptr);
@@ -240,8 +250,10 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
           create<ast::AssignmentStatement>(continuing_lhs, continuing_rhs),
       });
   auto* stmt = create<ast::LoopStatement>(body, continuing);
+  WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->DetermineResultType(stmt));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(body_lhs), nullptr);
   ASSERT_NE(TypeOf(body_rhs), nullptr);
   ASSERT_NE(TypeOf(continuing_lhs), nullptr);
@@ -256,15 +268,19 @@ TEST_F(TypeDeterminerTest, Stmt_Return) {
   auto* cond = Expr(2);
 
   auto* ret = create<ast::ReturnStatement>(cond);
+  WrapInFunction(ret);
 
-  EXPECT_TRUE(td()->DetermineResultType(ret));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(cond), nullptr);
   EXPECT_TRUE(TypeOf(cond)->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Return_WithoutValue) {
   auto* ret = create<ast::ReturnStatement>();
-  EXPECT_TRUE(td()->DetermineResultType(ret));
+  WrapInFunction(ret);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Switch) {
@@ -281,8 +297,10 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   cases.push_back(create<ast::CaseStatement>(lit, body));
 
   auto* stmt = create<ast::SwitchStatement>(Expr(2), cases);
+  WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->DetermineResultType(stmt)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(stmt->condition()), nullptr);
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
@@ -297,13 +315,13 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   Func("my_func", params, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
 
-  // Register the function
-  EXPECT_TRUE(td()->Determine());
-
   auto* expr = Call("my_func");
 
   auto* call = create<ast::CallStatement>(expr);
-  EXPECT_TRUE(td()->DetermineResultType(call));
+  WrapInFunction(call);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
@@ -329,7 +347,8 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_FALSE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "12:34: v-0006: identifier must be declared before use: func");
 }
@@ -340,40 +359,43 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   auto* init = var->constructor();
 
   auto* decl = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(decl);
 
-  EXPECT_TRUE(td()->DetermineResultType(decl));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(init), nullptr);
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.i32(), Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Global("my_var", ast::StorageClass::kNone, ty.i32(), Expr(2),
+                     ast::VariableDecorationList{});
   auto* init = var->constructor();
 
-  AST().AddGlobalVariable(var);
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  EXPECT_TRUE(td()->Determine());
   ASSERT_NE(TypeOf(init), nullptr);
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
   FakeExpr e(Source{Source::Location{2, 30}});
+  WrapInFunction(&e);
 
-  EXPECT_FALSE(td()->DetermineResultType(&e));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(), "2:30: unknown expression for type determination");
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   auto* idx = Expr(2);
-  auto* var = Var("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
 
   auto* acc = IndexAccessor("my_var", idx);
-  EXPECT_TRUE(td()->DetermineResultType(acc));
+  WrapInFunction(acc);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
 
@@ -384,12 +406,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   auto* aary = ty.alias("myarrty", ty.array<f32, 3>());
 
-  AST().AddGlobalVariable(Var("my_var", ast::StorageClass::kFunction, aary));
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_var", ast::StorageClass::kFunction, aary);
 
   auto* acc = IndexAccessor("my_var", 2);
-  EXPECT_TRUE(td()->DetermineResultType(acc));
+  WrapInFunction(acc);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
 
@@ -398,25 +421,25 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
-  auto* var = Const("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  GlobalConst("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
 
   auto* acc = IndexAccessor("my_var", 2);
-  EXPECT_TRUE(td()->DetermineResultType(acc));
+  WrapInFunction(acc);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(acc), nullptr);
   EXPECT_TRUE(TypeOf(acc)->Is<type::F32>()) << TypeOf(acc)->type_name();
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.mat2x3<f32>());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_var", ast::StorageClass::kNone, ty.mat2x3<f32>());
 
   auto* acc = IndexAccessor("my_var", 2);
-  EXPECT_TRUE(td()->DetermineResultType(acc));
+  WrapInFunction(acc);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
 
@@ -426,14 +449,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.mat2x3<f32>());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_var", ast::StorageClass::kNone, ty.mat2x3<f32>());
 
   auto* acc = IndexAccessor(IndexAccessor("my_var", 2), 1);
+  WrapInFunction(acc);
 
-  EXPECT_TRUE(td()->DetermineResultType(acc));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
 
@@ -442,13 +464,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* acc = IndexAccessor("my_var", 2);
-  EXPECT_TRUE(td()->DetermineResultType(acc));
+  WrapInFunction(acc);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
 
@@ -458,11 +480,12 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
 
 TEST_F(TypeDeterminerTest, Expr_Bitcast) {
   auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("name"));
+  WrapInFunction(bitcast);
 
-  auto* v = Var("name", ast::StorageClass::kPrivate, ty.f32());
-  td()->RegisterVariableForTesting(v);
+  Global("name", ast::StorageClass::kPrivate, ty.f32());
 
-  EXPECT_TRUE(td()->DetermineResultType(bitcast));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(bitcast), nullptr);
   EXPECT_TRUE(TypeOf(bitcast)->Is<type::F32>());
 }
@@ -472,11 +495,11 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   Func("my_func", params, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
 
-  // Register the function
-  EXPECT_TRUE(td()->Determine());
-
   auto* call = Call("my_func");
-  EXPECT_TRUE(td()->DetermineResultType(call));
+  WrapInFunction(call);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
@@ -486,50 +509,55 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   Func("my_func", params, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
 
-  // Register the function
-  EXPECT_TRUE(td()->Determine());
-
   auto* param = Expr(2.4f);
 
   auto* call = Call("my_func", param);
-  EXPECT_TRUE(td()->DetermineResultType(call));
+  WrapInFunction(call);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(param), nullptr);
   EXPECT_TRUE(TypeOf(param)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
-  // Register the function
-  EXPECT_TRUE(td()->Determine());
-
   auto* call = Call("round", 2.4f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Cast) {
+  Global("name", ast::StorageClass::kPrivate, ty.f32());
+
   auto* cast = Construct(ty.f32(), "name");
+  WrapInFunction(cast);
 
-  auto* v = Var("name", ast::StorageClass::kPrivate, ty.f32());
-  td()->RegisterVariableForTesting(v);
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  EXPECT_TRUE(td()->DetermineResultType(cast));
   ASSERT_NE(TypeOf(cast), nullptr);
   EXPECT_TRUE(TypeOf(cast)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
   auto* s = Expr(1.0f);
-  EXPECT_TRUE(td()->DetermineResultType(s));
+  WrapInFunction(s);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(s), nullptr);
   EXPECT_TRUE(TypeOf(s)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
   auto* tc = vec3<f32>(1.0f, 1.0f, 3.0f);
+  WrapInFunction(tc);
 
-  EXPECT_TRUE(td()->DetermineResultType(tc));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
@@ -537,25 +565,26 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.f32());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_var", ast::StorageClass::kNone, ty.f32());
 
   auto* ident = Expr("my_var");
-  EXPECT_TRUE(td()->DetermineResultType(ident));
+  WrapInFunction(ident);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::Pointer>());
   EXPECT_TRUE(TypeOf(ident)->As<type::Pointer>()->type()->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
-  AST().AddGlobalVariable(Const("my_var", ast::StorageClass::kNone, ty.f32()));
-
-  EXPECT_TRUE(td()->Determine());
+  GlobalConst("my_var", ast::StorageClass::kNone, ty.f32());
 
   auto* ident = Expr("my_var");
-  EXPECT_TRUE(td()->DetermineResultType(ident));
+  WrapInFunction(ident);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
 }
@@ -565,14 +594,14 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
 
   auto* var = Const("my_var", ast::StorageClass::kNone, ty.f32());
 
-  auto* f = Func("my_func", ast::VariableList{}, ty.f32(),
-                 ast::StatementList{
-                     create<ast::VariableDeclStatement>(var),
-                     create<ast::AssignmentStatement>(my_var, Expr("my_var")),
-                 },
-                 ast::FunctionDecorationList{});
+  Func("my_func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::AssignmentStatement>(my_var, Expr("my_var")),
+       },
+       ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->DetermineFunction(f));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(my_var), nullptr);
   EXPECT_TRUE(TypeOf(my_var)->Is<type::F32>());
@@ -581,15 +610,15 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   auto* my_var = Expr("my_var");
 
-  auto* f = Func("my_func", ast::VariableList{}, ty.f32(),
-                 ast::StatementList{
-                     create<ast::VariableDeclStatement>(
-                         Var("my_var", ast::StorageClass::kNone, ty.f32())),
-                     create<ast::AssignmentStatement>(my_var, Expr("my_var")),
-                 },
-                 ast::FunctionDecorationList{});
+  Func("my_func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(
+               Var("my_var", ast::StorageClass::kNone, ty.f32())),
+           create<ast::AssignmentStatement>(my_var, Expr("my_var")),
+       },
+       ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->DetermineFunction(f));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(my_var), nullptr);
   EXPECT_TRUE(TypeOf(my_var)->Is<type::Pointer>());
@@ -601,15 +630,15 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
 
   auto* my_var = Expr("my_var");
 
-  auto* f = Func("my_func", ast::VariableList{}, ty.f32(),
-                 ast::StatementList{
-                     create<ast::VariableDeclStatement>(
-                         Var("my_var", ast::StorageClass::kNone, &ptr)),
-                     create<ast::AssignmentStatement>(my_var, Expr("my_var")),
-                 },
-                 ast::FunctionDecorationList{});
+  Func("my_func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(
+               Var("my_var", ast::StorageClass::kNone, &ptr)),
+           create<ast::AssignmentStatement>(my_var, Expr("my_var")),
+       },
+       ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->DetermineFunction(f));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(my_var), nullptr);
   EXPECT_TRUE(TypeOf(my_var)->Is<type::Pointer>());
@@ -620,32 +649,28 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   Func("my_func", ast::VariableList{}, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
 
-  // Register the function
-  EXPECT_TRUE(td()->Determine());
-
   auto* ident = Expr("my_func");
-  EXPECT_TRUE(td()->DetermineResultType(ident));
+  WrapInFunction(ident);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
   auto* a = Expr("a");
-  EXPECT_FALSE(td()->DetermineResultType(a));
+  WrapInFunction(a);
+
+  EXPECT_FALSE(td()->Determine());
 }
 
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
-  auto* in_var = Var("in_var", ast::StorageClass::kInput, ty.f32());
-  auto* out_var = Var("out_var", ast::StorageClass::kOutput, ty.f32());
-  auto* sb_var = Var("sb_var", ast::StorageClass::kStorage, ty.f32());
-  auto* wg_var = Var("wg_var", ast::StorageClass::kWorkgroup, ty.f32());
-  auto* priv_var = Var("priv_var", ast::StorageClass::kPrivate, ty.f32());
-
-  AST().AddGlobalVariable(in_var);
-  AST().AddGlobalVariable(out_var);
-  AST().AddGlobalVariable(sb_var);
-  AST().AddGlobalVariable(wg_var);
-  AST().AddGlobalVariable(priv_var);
+  auto* in_var = Global("in_var", ast::StorageClass::kInput, ty.f32());
+  auto* out_var = Global("out_var", ast::StorageClass::kOutput, ty.f32());
+  auto* sb_var = Global("sb_var", ast::StorageClass::kStorage, ty.f32());
+  auto* wg_var = Global("wg_var", ast::StorageClass::kWorkgroup, ty.f32());
+  auto* priv_var = Global("priv_var", ast::StorageClass::kPrivate, ty.f32());
 
   auto* func = Func(
       "my_func", ast::VariableList{}, ty.f32(),
@@ -657,8 +682,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
       },
       ast::FunctionDecorationList{});
 
-  // Register the function
-  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
@@ -673,17 +697,11 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
-  auto* in_var = Var("in_var", ast::StorageClass::kInput, ty.f32());
-  auto* out_var = Var("out_var", ast::StorageClass::kOutput, ty.f32());
-  auto* sb_var = Var("sb_var", ast::StorageClass::kStorage, ty.f32());
-  auto* wg_var = Var("wg_var", ast::StorageClass::kWorkgroup, ty.f32());
-  auto* priv_var = Var("priv_var", ast::StorageClass::kPrivate, ty.f32());
-
-  AST().AddGlobalVariable(in_var);
-  AST().AddGlobalVariable(out_var);
-  AST().AddGlobalVariable(sb_var);
-  AST().AddGlobalVariable(wg_var);
-  AST().AddGlobalVariable(priv_var);
+  auto* in_var = Global("in_var", ast::StorageClass::kInput, ty.f32());
+  auto* out_var = Global("out_var", ast::StorageClass::kOutput, ty.f32());
+  auto* sb_var = Global("sb_var", ast::StorageClass::kStorage, ty.f32());
+  auto* wg_var = Global("wg_var", ast::StorageClass::kWorkgroup, ty.f32());
+  auto* priv_var = Global("priv_var", ast::StorageClass::kPrivate, ty.f32());
 
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
@@ -701,8 +719,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
       },
       ast::FunctionDecorationList{});
 
-  // Register the function
-  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   auto* func2_sem = Sem().Get(func2);
   ASSERT_NE(func2_sem, nullptr);
@@ -727,10 +744,8 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
            },
            ast::FunctionDecorationList{});
 
-  auto* v = Var("var", ast::StorageClass::kFunction, ty.f32());
-  td()->RegisterVariableForTesting(v);
+  Global("var", ast::StorageClass::kFunction, ty.f32());
 
-  // Register the function
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   auto* func_sem = Sem().Get(func);
@@ -746,14 +761,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
       ast::StructDecorationList{});
 
   auto* st = ty.struct_("S", strct);
-  auto* var = Var("my_struct", ast::StorageClass::kNone, st);
-
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_struct", ast::StorageClass::kNone, st);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
-  EXPECT_TRUE(td()->DetermineResultType(mem));
+  WrapInFunction(mem);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Pointer>());
 
@@ -769,14 +783,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 
   auto* st = ty.struct_("alias", strct);
   auto* alias = ty.alias("alias", st);
-  auto* var = Var("my_struct", ast::StorageClass::kNone, alias);
-
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_struct", ast::StorageClass::kNone, alias);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
-  EXPECT_TRUE(td()->DetermineResultType(mem));
+  WrapInFunction(mem);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Pointer>());
 
@@ -785,13 +798,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
-  auto* var = Var("my_vec", ast::StorageClass::kNone, ty.vec3<f32>());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_vec", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* mem = MemberAccessor("my_vec", "xy");
-  EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
+  WrapInFunction(mem);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<type::Vector>()->type()->Is<type::F32>());
@@ -799,13 +812,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
-  auto* var = Var("my_vec", ast::StorageClass::kNone, ty.vec3<f32>());
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("my_vec", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* mem = MemberAccessor("my_vec", "x");
-  EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
+  WrapInFunction(mem);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Pointer>());
 
@@ -849,14 +862,14 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
       ast::StructMemberList{Member("mem", &vecB)}, ast::StructDecorationList{});
 
   auto* stA = ty.struct_("A", strctA);
-  auto* var = Var("c", ast::StorageClass::kNone, stA);
-  AST().AddGlobalVariable(var);
-  EXPECT_TRUE(td()->Determine());
+  Global("c", ast::StorageClass::kNone, stA);
 
   auto* mem = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("c", "mem"), 0), "foo"),
       "yx");
-  EXPECT_TRUE(td()->DetermineResultType(mem)) << td()->error();
+  WrapInFunction(mem);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
@@ -868,15 +881,12 @@ using Expr_Binary_BitwiseTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   auto op = GetParam();
 
-  auto* var = Var("val", ast::StorageClass::kNone, ty.i32());
-
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("val", ast::StorageClass::kNone, ty.i32());
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::I32>());
 }
@@ -884,15 +894,12 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
 TEST_P(Expr_Binary_BitwiseTest, Vector) {
   auto op = GetParam();
 
-  auto* var = Var("val", ast::StorageClass::kNone, ty.vec3<i32>());
-
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("val", ast::StorageClass::kNone, ty.vec3<i32>());
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::I32>());
@@ -914,15 +921,12 @@ using Expr_Binary_LogicalTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_LogicalTest, Scalar) {
   auto op = GetParam();
 
-  auto* var = Var("val", ast::StorageClass::kNone, ty.bool_());
-
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("val", ast::StorageClass::kNone, ty.bool_());
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
 }
@@ -930,15 +934,12 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
 TEST_P(Expr_Binary_LogicalTest, Vector) {
   auto op = GetParam();
 
-  auto* var = Var("val", ast::StorageClass::kNone, ty.vec3<bool>());
-
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("val", ast::StorageClass::kNone, ty.vec3<bool>());
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::Bool>());
@@ -953,15 +954,12 @@ using Expr_Binary_CompareTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_CompareTest, Scalar) {
   auto op = GetParam();
 
-  auto* var = Var("val", ast::StorageClass::kNone, ty.i32());
-
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("val", ast::StorageClass::kNone, ty.i32());
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
 }
@@ -969,15 +967,12 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
 TEST_P(Expr_Binary_CompareTest, Vector) {
   auto op = GetParam();
 
-  auto* var = Var("val", ast::StorageClass::kNone, ty.vec3<i32>());
-
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("val", ast::StorageClass::kNone, ty.vec3<i32>());
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::Bool>());
@@ -993,30 +988,24 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          ast::BinaryOp::kGreaterThanEqual));
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
-  auto* var = Var("val", ast::StorageClass::kNone, ty.i32());
-
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("val", ast::StorageClass::kNone, ty.i32());
 
   auto* expr = Mul("val", "val");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::I32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
-  auto* scalar = Var("scalar", ast::StorageClass::kNone, ty.f32());
-  auto* vector = Var("vector", ast::StorageClass::kNone, ty.vec3<f32>());
-  AST().AddGlobalVariable(scalar);
-  AST().AddGlobalVariable(vector);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("scalar", ast::StorageClass::kNone, ty.f32());
+  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* expr = Mul("vector", "scalar");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
@@ -1024,16 +1013,13 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
-  auto* scalar = Var("scalar", ast::StorageClass::kNone, ty.f32());
-  auto* vector = Var("vector", ast::StorageClass::kNone, ty.vec3<f32>());
-  AST().AddGlobalVariable(scalar);
-  AST().AddGlobalVariable(vector);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("scalar", ast::StorageClass::kNone, ty.f32());
+  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* expr = Mul("scalar", "vector");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
@@ -1041,14 +1027,12 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
-  auto* vector = Var("vector", ast::StorageClass::kNone, ty.vec3<f32>());
-  AST().AddGlobalVariable(vector);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* expr = Mul("vector", "vector");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
@@ -1056,16 +1040,13 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
-  auto* scalar = Var("scalar", ast::StorageClass::kNone, ty.f32());
-  auto* matrix = Var("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
-  AST().AddGlobalVariable(scalar);
-  AST().AddGlobalVariable(matrix);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("scalar", ast::StorageClass::kNone, ty.f32());
+  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
 
   auto* expr = Mul("matrix", "scalar");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Matrix>());
 
@@ -1076,16 +1057,13 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
-  auto* scalar = Var("scalar", ast::StorageClass::kNone, ty.f32());
-  auto* matrix = Var("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
-  AST().AddGlobalVariable(scalar);
-  AST().AddGlobalVariable(matrix);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("scalar", ast::StorageClass::kNone, ty.f32());
+  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
 
   auto* expr = Mul("scalar", "matrix");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Matrix>());
 
@@ -1096,16 +1074,13 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
-  auto* vector = Var("vector", ast::StorageClass::kNone, ty.vec3<f32>());
-  auto* matrix = Var("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
-  AST().AddGlobalVariable(vector);
-  AST().AddGlobalVariable(matrix);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
 
   auto* expr = Mul("matrix", "vector");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
@@ -1113,16 +1088,13 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
-  auto* vector = Var("vector", ast::StorageClass::kNone, ty.vec3<f32>());
-  auto* matrix = Var("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
-  AST().AddGlobalVariable(vector);
-  AST().AddGlobalVariable(matrix);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
 
   auto* expr = Mul("vector", "matrix");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
@@ -1130,16 +1102,13 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
-  auto* matrix1 = Var("mat3x4", ast::StorageClass::kNone, ty.mat3x4<f32>());
-  auto* matrix2 = Var("mat4x3", ast::StorageClass::kNone, ty.mat4x3<f32>());
-  AST().AddGlobalVariable(matrix1);
-  AST().AddGlobalVariable(matrix2);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("mat3x4", ast::StorageClass::kNone, ty.mat3x4<f32>());
+  Global("mat4x3", ast::StorageClass::kNone, ty.mat4x3<f32>());
 
   auto* expr = Mul("mat3x4", "mat4x3");
+  WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Matrix>());
 
@@ -1153,14 +1122,12 @@ using IntrinsicDerivativeTest = TypeDeterminerTestWithParam<std::string>;
 TEST_P(IntrinsicDerivativeTest, Scalar) {
   auto name = GetParam();
 
-  auto* var = Var("ident", ast::StorageClass::kNone, ty.f32());
-
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("ident", ast::StorageClass::kNone, ty.f32());
 
   auto* expr = Call(name, "ident");
-  EXPECT_TRUE(td()->DetermineResultType(expr));
+  WrapInFunction(expr);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::F32>());
@@ -1168,15 +1135,12 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
 
 TEST_P(IntrinsicDerivativeTest, Vector) {
   auto name = GetParam();
-
-  auto* var = Var("ident", ast::StorageClass::kNone, ty.vec4<f32>());
-
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
+  Global("ident", ast::StorageClass::kNone, ty.vec4<f32>());
 
   auto* expr = Call(name, "ident");
-  EXPECT_TRUE(td()->DetermineResultType(expr));
+  WrapInFunction(expr);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1187,10 +1151,11 @@ TEST_P(IntrinsicDerivativeTest, Vector) {
 TEST_P(IntrinsicDerivativeTest, MissingParam) {
   auto name = GetParam();
 
-  EXPECT_TRUE(td()->Determine());
-
   auto* expr = Call(name);
-  EXPECT_FALSE(td()->DetermineResultType(expr));
+  WrapInFunction(expr);
+
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(name));
@@ -1212,16 +1177,13 @@ using Intrinsic = TypeDeterminerTestWithParam<std::string>;
 TEST_P(Intrinsic, Test) {
   auto name = GetParam();
 
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.vec3<bool>());
-
-  AST().AddGlobalVariable(var);
+  Global("my_var", ast::StorageClass::kNone, ty.vec3<bool>());
 
   auto* expr = Call(name, "my_var");
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  EXPECT_TRUE(td()->DetermineResultType(expr));
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
 }
@@ -1233,15 +1195,12 @@ using Intrinsic_FloatMethod = TypeDeterminerTestWithParam<std::string>;
 TEST_P(Intrinsic_FloatMethod, Vector) {
   auto name = GetParam();
 
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
-
-  AST().AddGlobalVariable(var);
+  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* expr = Call(name, "my_var");
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(expr));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1252,15 +1211,13 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
 TEST_P(Intrinsic_FloatMethod, Scalar) {
   auto name = GetParam();
 
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.f32());
-
-  AST().AddGlobalVariable(var);
+  Global("my_var", ast::StorageClass::kNone, ty.f32());
 
   auto* expr = Call(name, "my_var");
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(expr));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
 }
@@ -1268,30 +1225,26 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
 TEST_P(Intrinsic_FloatMethod, MissingParam) {
   auto name = GetParam();
 
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.f32());
-
-  AST().AddGlobalVariable(var);
+  Global("my_var", ast::StorageClass::kNone, ty.f32());
 
   auto* expr = Call(name);
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_FALSE(td()->DetermineResultType(expr));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
 }
 
 TEST_P(Intrinsic_FloatMethod, TooManyParams) {
   auto name = GetParam();
 
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.f32());
-
-  AST().AddGlobalVariable(var);
+  Global("my_var", ast::StorageClass::kNone, ty.f32());
 
   auto* expr = Call(name, "my_var", "my_var");
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_FALSE(td()->DetermineResultType(expr));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -1346,8 +1299,7 @@ class Intrinsic_TextureOperation
   void add_call_param(std::string name,
                       type::Type* type,
                       ast::ExpressionList* call_params) {
-    auto* var = Var(name, ast::StorageClass::kNone, type);
-    AST().AddGlobalVariable(var);
+    Global(name, ast::StorageClass::kNone, type);
     call_params->push_back(Expr(name));
   }
 
@@ -1379,9 +1331,9 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   add_call_param("lod", ty.i32(), &call_params);
 
   auto* expr = Call("textureLoad", call_params);
+  WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(expr));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1446,9 +1398,9 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   add_call_param("lod", ty.i32(), &call_params);
 
   auto* expr = Call("textureLoad", call_params);
+  WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(expr));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1471,32 +1423,27 @@ INSTANTIATE_TEST_SUITE_P(
                     TextureTestParams{type::TextureDimension::kCubeArray}));
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
-
-  AST().AddGlobalVariable(var);
+  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
 
   auto* expr = Call("dot", "my_var", "my_var");
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(expr));
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Select) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
 
-  auto* bool_var = Var(  // source
-      "bool_var", ast::StorageClass::kNone, ty.vec3<bool>());
-  AST().AddGlobalVariable(var);
-  AST().AddGlobalVariable(bool_var);
+  Global("bool_var", ast::StorageClass::kNone, ty.vec3<bool>());
 
   auto* expr = Call("select", "my_var", "my_var", "bool_var");
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_TRUE(td()->DetermineResultType(expr)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
@@ -1505,10 +1452,10 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
 
 TEST_F(TypeDeterminerTest, Intrinsic_Select_NoParams) {
   auto* expr = Call("select");
+  WrapInFunction(expr);
 
-  // Register the variable
-  EXPECT_TRUE(td()->Determine());
-  EXPECT_FALSE(td()->DetermineResultType(expr));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(
       td()->error(),
       "missing parameter 0 required for type determination in builtin select");
@@ -1518,14 +1465,12 @@ using UnaryOpExpressionTest = TypeDeterminerTestWithParam<ast::UnaryOp>;
 TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto op = GetParam();
 
-  auto* var = Var("ident", ast::StorageClass::kNone, ty.vec4<f32>());
-
-  AST().AddGlobalVariable(var);
-
-  EXPECT_TRUE(td()->Determine());
-
+  Global("ident", ast::StorageClass::kNone, ty.vec4<f32>());
   auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
-  EXPECT_TRUE(td()->DetermineResultType(der));
+  WrapInFunction(der);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(der), nullptr);
   ASSERT_TRUE(TypeOf(der)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(der)->As<type::Vector>()->type()->Is<type::F32>());
@@ -1544,6 +1489,7 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
        ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
+
   EXPECT_EQ(var->storage_class(), ast::StorageClass::kFunction);
 }
 
@@ -1554,6 +1500,7 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
        ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
+
   EXPECT_EQ(var->storage_class(), ast::StorageClass::kNone);
 }
 
@@ -1565,6 +1512,7 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
        ast::FunctionDecorationList{});
 
   EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "function variable has a non-function storage class");
 }
@@ -1677,8 +1625,10 @@ TEST_P(ImportData_SingleParamTest, Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1.f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -1688,8 +1638,10 @@ TEST_P(ImportData_SingleParamTest, Vector) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1699,8 +1651,10 @@ TEST_P(ImportData_SingleParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(param.name));
@@ -1739,8 +1693,10 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1.f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -1750,8 +1706,10 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Vector) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1762,8 +1720,10 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, -1);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::I32>());
 }
@@ -1781,8 +1741,10 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Vector) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, params);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1796,8 +1758,10 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, params);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::U32>());
 }
@@ -1807,8 +1771,10 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<u32>(1u, 1u, 3u));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_unsigned_integer_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1818,8 +1784,10 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(param.name));
@@ -1834,8 +1802,10 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
   auto* ident = Expr("length");
 
   auto* call = Call(ident, 1.f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -1847,8 +1817,10 @@ TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
   auto* ident = Expr("length");
 
   auto* call = Call(ident, params);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -1859,8 +1831,10 @@ TEST_P(ImportData_TwoParamTest, Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1.f, 1.f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -1871,8 +1845,10 @@ TEST_P(ImportData_TwoParamTest, Vector) {
   auto* ident = Expr(param.name);
   auto* call =
       Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1881,8 +1857,10 @@ TEST_P(ImportData_TwoParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(param.name));
@@ -1899,8 +1877,10 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
   auto* ident = Expr("distance");
 
   auto* call = Call(ident, 1.f, 1.f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -1910,8 +1890,10 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
 
   auto* call =
       Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
 }
@@ -1921,8 +1903,10 @@ TEST_F(TypeDeterminerTest, ImportData_Cross) {
 
   auto* call =
       Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1932,8 +1916,10 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_AutoType) {
   auto* ident = Expr("cross");
 
   auto* call = Call(ident);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1945,8 +1931,10 @@ TEST_P(ImportData_ThreeParamTest, Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1.f, 1.f, 1.f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -1957,8 +1945,10 @@ TEST_P(ImportData_ThreeParamTest, Vector) {
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f),
                     vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -1967,8 +1957,10 @@ TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(param.name));
@@ -1990,8 +1982,10 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1.f, 1.f, 1.f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
 }
@@ -2002,8 +1996,10 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Vector) {
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f),
                     vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -2014,8 +2010,10 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1, 1, 1);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::I32>());
 }
@@ -2026,8 +2024,10 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
   auto* ident = Expr(param.name);
   auto* call =
       Call(ident, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -2038,8 +2038,10 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1u, 1u, 1u);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::U32>());
 }
@@ -2050,8 +2052,10 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u),
                     vec3<u32>(1u, 1u, 3u));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_unsigned_integer_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -2061,8 +2065,10 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(param.name));
@@ -2080,8 +2086,10 @@ TEST_P(ImportData_Int_SingleParamTest, Scalar) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_integer_scalar());
 }
@@ -2091,8 +2099,10 @@ TEST_P(ImportData_Int_SingleParamTest, Vector) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<i32>(1, 1, 3));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -2102,8 +2112,10 @@ TEST_P(ImportData_Int_SingleParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(param.name));
@@ -2123,8 +2135,10 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Signed) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1, 1);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::I32>());
 }
@@ -2134,8 +2148,10 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1u, 1u);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::U32>());
 }
@@ -2145,8 +2161,10 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, 1.0f, 1.0f);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
 }
@@ -2156,8 +2174,10 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -2168,8 +2188,10 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_unsigned_integer_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -2180,8 +2202,10 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
 
   auto* ident = Expr(param.name);
   auto* call = Call(ident, vec3<f32>(1.f, 1.f, 3.f), vec3<f32>(1.f, 1.f, 3.f));
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->is_float_vector());
   EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
@@ -2191,8 +2215,10 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_FALSE(td()->DetermineResultType(call));
+  EXPECT_FALSE(td()->Determine());
+
   EXPECT_EQ(td()->error(),
             "missing parameter 0 required for type determination in builtin " +
                 std::string(param.name));
@@ -2205,16 +2231,15 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"max", ast::Intrinsic::kMax}));
 
 TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
-  auto* var = Var("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  AST().AddGlobalVariable(var);
-
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
 
   auto* ident = Expr("determinant");
 
   auto* call = Call(ident, "var");
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
 }
@@ -2226,8 +2251,10 @@ TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
+  WrapInFunction(call);
 
-  EXPECT_TRUE(td()->DetermineResultType(call)) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
@@ -2285,13 +2312,12 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  AST().AddGlobalVariable(Var("first", ast::StorageClass::kPrivate, ty.f32()));
-  AST().AddGlobalVariable(Var("second", ast::StorageClass::kPrivate, ty.f32()));
-  AST().AddGlobalVariable(Var("call_a", ast::StorageClass::kPrivate, ty.f32()));
-  AST().AddGlobalVariable(Var("call_b", ast::StorageClass::kPrivate, ty.f32()));
-  AST().AddGlobalVariable(Var("call_c", ast::StorageClass::kPrivate, ty.f32()));
+  Global("first", ast::StorageClass::kPrivate, ty.f32());
+  Global("second", ast::StorageClass::kPrivate, ty.f32());
+  Global("call_a", ast::StorageClass::kPrivate, ty.f32());
+  Global("call_b", ast::StorageClass::kPrivate, ty.f32());
+  Global("call_c", ast::StorageClass::kPrivate, ty.f32());
 
-  // Register the functions and calculate the callers
   ASSERT_TRUE(td()->Determine()) << td()->error();
 
   auto* func_b_sem = Sem().Get(func_b);
@@ -2652,9 +2678,9 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
 
   auto* ident = Expr(param.function);
   auto* call = Call(ident, param.args(this));
+  WrapInFunction(call);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
-  ASSERT_TRUE(td()->DetermineResultType(call)) << td()->error();
 
   if (std::string(param.function) == "textureDimensions") {
     switch (param.texture_dimension) {

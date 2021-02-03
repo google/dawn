@@ -305,12 +305,7 @@ std::string expected_texture_overload(
 }  // NOLINT - Ignore the length of this function
 
 class MslGeneratorIntrinsicTextureTest
-    : public TestParamHelper<ast::intrinsic::test::TextureOverloadCase> {
- protected:
-  void OnVariableBuilt(ast::Variable* var) override {
-    td.RegisterVariableForTesting(var);
-  }
-};
+    : public TestParamHelper<ast::intrinsic::test::TextureOverloadCase> {};
 
 TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
   auto param = GetParam();
@@ -320,9 +315,7 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+  WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
 

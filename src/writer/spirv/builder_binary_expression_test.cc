@@ -59,7 +59,7 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -82,7 +82,7 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -100,12 +100,11 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   auto param = GetParam();
 
-  auto* var = Var("param", ast::StorageClass::kFunction, ty.i32());
+  auto* var = Global("param", ast::StorageClass::kFunction, ty.i32());
   auto* expr =
       create<ast::BinaryExpression>(param.op, Expr("param"), Expr("param"));
 
-  td.RegisterVariableForTesting(var);
-  EXPECT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -152,7 +151,7 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -174,7 +173,7 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -213,7 +212,8 @@ TEST_P(BinaryArithFloatTest, Scalar) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
+
   spirv::Builder& b = Build();
 
   b.push_function(Function{});
@@ -235,7 +235,7 @@ TEST_P(BinaryArithFloatTest, Vector) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -268,7 +268,7 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -292,7 +292,7 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -329,7 +329,7 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -353,7 +353,7 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -390,7 +390,7 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -414,7 +414,7 @@ TEST_P(BinaryCompareFloatTest, Vector) {
 
   auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -449,7 +449,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -473,7 +473,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -491,12 +491,12 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  td.RegisterVariableForTesting(var);
+  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr("mat"), Expr(1.f));
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -519,13 +519,12 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  td.RegisterVariableForTesting(var);
+  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr(1.f), Expr("mat"));
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -548,15 +547,13 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
-
-  td.RegisterVariableForTesting(var);
 
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -580,15 +577,13 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
-
-  td.RegisterVariableForTesting(var);
 
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, Expr("mat"));
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -612,13 +607,12 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  td.RegisterVariableForTesting(var);
+  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr("mat"), Expr("mat"));
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -650,7 +644,7 @@ TEST_F(BuilderTest, Binary_LogicalAnd) {
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -680,18 +674,15 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
-  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_(), Expr(true),
-                    ast::VariableDecorationList{});
-  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_(), Expr(false),
-                    ast::VariableDecorationList{});
-
-  td.RegisterVariableForTesting(a_var);
-  td.RegisterVariableForTesting(b_var);
+  auto* a_var = Global("a", ast::StorageClass::kFunction, ty.bool_(),
+                       Expr(true), ast::VariableDecorationList{});
+  auto* b_var = Global("b", ast::StorageClass::kFunction, ty.bool_(),
+                       Expr(false), ast::VariableDecorationList{});
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                              Expr("a"), Expr("b"));
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -733,7 +724,7 @@ TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                              Expr(true), logical_and_expr);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -773,7 +764,7 @@ TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                              Expr(true), logical_or_expr);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -812,7 +803,7 @@ TEST_F(BuilderTest, Binary_LogicalOr) {
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -842,18 +833,15 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
-  auto* a_var = Var("a", ast::StorageClass::kFunction, ty.bool_(), Expr(true),
-                    ast::VariableDecorationList{});
-  auto* b_var = Var("b", ast::StorageClass::kFunction, ty.bool_(), Expr(false),
-                    ast::VariableDecorationList{});
-
-  td.RegisterVariableForTesting(a_var);
-  td.RegisterVariableForTesting(b_var);
+  auto* a_var = Global("a", ast::StorageClass::kFunction, ty.bool_(),
+                       Expr(true), ast::VariableDecorationList{});
+  auto* b_var = Global("b", ast::StorageClass::kFunction, ty.bool_(),
+                       Expr(false), ast::VariableDecorationList{});
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                              Expr("a"), Expr("b"));
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 

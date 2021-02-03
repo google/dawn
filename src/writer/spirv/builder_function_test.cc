@@ -85,7 +85,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-  AST().AddGlobalVariable(Var("a", ast::StorageClass::kPrivate, ty.f32()));
+  Global("a", ast::StorageClass::kPrivate, ty.f32());
 
   Func("a_func", {}, ty.void_(),
        ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
@@ -238,15 +238,13 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  auto* data_var = Var("data", ast::StorageClass::kStorage, &ac, nullptr,
-                       ast::VariableDecorationList{
-                           create<ast::BindingDecoration>(0),
-                           create<ast::GroupDecoration>(0),
-                       });
+  Global("data", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   AST().AddConstructedType(s);
-
-  AST().AddGlobalVariable(data_var);
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),

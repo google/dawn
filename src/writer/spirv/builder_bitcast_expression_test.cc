@@ -34,7 +34,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Bitcast) {
   auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr(2.4f));
 
-  ASSERT_TRUE(td.DetermineResultType(bitcast)) << td.error();
+  WrapInFunction(bitcast);
 
   spirv::Builder& b = Build();
 
@@ -53,7 +53,7 @@ TEST_F(BuilderTest, Bitcast) {
 TEST_F(BuilderTest, Bitcast_DuplicateType) {
   auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(2.4f));
 
-  ASSERT_TRUE(td.DetermineResultType(bitcast)) << td.error();
+  WrapInFunction(bitcast);
 
   spirv::Builder& b = Build();
 

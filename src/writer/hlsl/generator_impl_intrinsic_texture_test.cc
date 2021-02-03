@@ -404,12 +404,7 @@ ExpectedResult expected_texture_overload(
 }  // NOLINT - Ignore the length of this function
 
 class HlslGeneratorIntrinsicTextureTest
-    : public TestParamHelper<ast::intrinsic::test::TextureOverloadCase> {
- protected:
-  void OnVariableBuilt(ast::Variable* var) override {
-    td.RegisterVariableForTesting(var);
-  }
-};
+    : public TestParamHelper<ast::intrinsic::test::TextureOverloadCase> {};
 
 TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   auto param = GetParam();
@@ -418,9 +413,7 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   param.buildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+  WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
 

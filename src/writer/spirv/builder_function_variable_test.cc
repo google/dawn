@@ -45,7 +45,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.f32());
+  auto* v = Global("var", ast::StorageClass::kNone, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -66,11 +66,9 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
-  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32(), init,
-                ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(v);
+  auto* v = Global("var", ast::StorageClass::kOutput, ty.f32(), init,
+                   ast::VariableDecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -98,12 +96,10 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   auto* init = vec2<f32>(1.f, Add(3.f, 3.f));
-  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Var("var", ast::StorageClass::kFunction, ty.vec2<f32>(), init,
-                ast::VariableDecorationList{});
+  auto* v = Global("var", ast::StorageClass::kFunction, ty.vec2<f32>(), init,
+                   ast::VariableDecorationList{});
 
-  td.RegisterVariableForTesting(v);
   spirv::Builder& b = Build();
 
   b.push_function(Function{});
@@ -133,16 +129,11 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   // var v : f32 = 1.0;
   // var v2 : f32 = v; // Should generate the load and store automatically.
 
-  auto* v = Var("v", ast::StorageClass::kFunction, ty.f32(), Expr(1.f),
-                ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(v);
+  auto* v = Global("v", ast::StorageClass::kFunction, ty.f32(), Expr(1.f),
+                   ast::VariableDecorationList{});
 
-  auto* v2 = Var("v2", ast::StorageClass::kFunction, ty.f32(), Expr("v"),
-                 ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(v2);
-
-  ASSERT_TRUE(td.DetermineResultType(v->constructor())) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(v2->constructor())) << td.error();
+  auto* v2 = Global("v2", ast::StorageClass::kFunction, ty.f32(), Expr("v"),
+                    ast::VariableDecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -174,16 +165,11 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   // var v : f32 = 1.0;
   // const v2 : f32 = v; // Should generate the load
 
-  auto* v = Var("v", ast::StorageClass::kFunction, ty.f32(), Expr(1.f),
-                ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(v);
+  auto* v = Global("v", ast::StorageClass::kFunction, ty.f32(), Expr(1.f),
+                   ast::VariableDecorationList{});
 
-  auto* v2 = Var("v2", ast::StorageClass::kFunction, ty.f32(), Expr("v"),
-                 ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(v2);
-
-  ASSERT_TRUE(td.DetermineResultType(v->constructor())) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(v2->constructor())) << td.error();
+  auto* v2 = Global("v2", ast::StorageClass::kFunction, ty.f32(), Expr("v"),
+                    ast::VariableDecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -213,12 +199,11 @@ OpStore %7 %6
 
 TEST_F(BuilderTest, FunctionVar_Const) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
-  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
 
-  td.RegisterVariableForTesting(v);
+  WrapInFunction(v);
 
   spirv::Builder& b = Build();
 

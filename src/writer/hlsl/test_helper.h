@@ -33,7 +33,7 @@ namespace hlsl {
 template <typename BODY>
 class TestHelperBase : public BODY, public ProgramBuilder {
  public:
-  TestHelperBase() : td(this) {}
+  TestHelperBase() = default;
   ~TestHelperBase() = default;
 
   /// Builds and returns a GeneratorImpl from the program.
@@ -54,9 +54,6 @@ class TestHelperBase : public BODY, public ProgramBuilder {
 
   /// @returns the pre result string
   std::string pre_result() const { return pre.str(); }
-
-  /// The type determiner
-  TypeDeterminer td;
 
   /// The output stream
   std::ostringstream out;

@@ -58,8 +58,18 @@ class ValidatorTestHelper : public ProgramBuilder {
   /// Inserts a variable into the current scope.
   /// @param var the variable to register.
   void RegisterVariable(ast::Variable* var) {
+    AST().AddGlobalVariable(var);
     vars_for_testing_.emplace_back(var);
-    td_->RegisterVariableForTesting(var);
+  }
+
+  /// Helper for returning the resolved semantic type of the expression `expr`
+  /// from the built program.
+  /// @param expr the AST expression
+  /// @return the resolved semantic type for the expression, or nullptr if the
+  /// expression has no resolved type.
+  type::Type* TypeOf(ast::Expression* expr) const {
+    auto* sem = program_->Sem().Get(expr);
+    return sem ? sem->Type() : nullptr;
   }
 
  private:

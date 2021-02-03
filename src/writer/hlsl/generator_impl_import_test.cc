@@ -52,8 +52,7 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
 
   auto* ident = Expr(param.name);
   auto* expr = Call(ident, 1.f);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -93,8 +92,7 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, Expr(1));
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -110,8 +108,7 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, 1.f, 2.f);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -134,8 +131,7 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
 
   auto* expr =
       Call(param.name, vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(4.f, 5.f, 6.f));
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -153,8 +149,7 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, 1, 2);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -171,8 +166,7 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, 1.f, 2.f, 3.f);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -196,8 +190,7 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, 1, 2, 3);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -209,15 +202,10 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          testing::Values(HlslImportData{"clamp", "clamp"}));
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
-  auto* var = Var("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
 
   auto* expr = Call("determinant", "var");
-
-  AST().AddGlobalVariable(var);
-
-  // Register the global
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 

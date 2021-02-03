@@ -155,24 +155,17 @@ TEST_P(HlslIntrinsicTest, Emit) {
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
+  WrapInFunction(call);
 
-  auto* f1 = Var("f1", ast::StorageClass::kFunction, ty.vec2<float>());
-  auto* f2 = Var("f2", ast::StorageClass::kFunction, ty.vec2<float>());
-  auto* f3 = Var("f3", ast::StorageClass::kFunction, ty.vec2<float>());
-  auto* u1 = Var("u1", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
-  auto* u2 = Var("u2", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
-  auto* u3 = Var("u3", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
-  auto* b1 = Var("b1", ast::StorageClass::kFunction, ty.vec2<bool>());
-  auto* m1 = Var("m1", ast::StorageClass::kFunction, ty.mat2x2<float>());
-  td.RegisterVariableForTesting(f1);
-  td.RegisterVariableForTesting(f2);
-  td.RegisterVariableForTesting(f3);
-  td.RegisterVariableForTesting(u1);
-  td.RegisterVariableForTesting(u2);
-  td.RegisterVariableForTesting(u3);
-  td.RegisterVariableForTesting(b1);
-  td.RegisterVariableForTesting(m1);
-  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+  Global("f1", ast::StorageClass::kFunction, ty.vec2<float>());
+  Global("f2", ast::StorageClass::kFunction, ty.vec2<float>());
+  Global("f3", ast::StorageClass::kFunction, ty.vec2<float>());
+  Global("u1", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
+  Global("u2", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
+  Global("u3", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
+  Global("b1", ast::StorageClass::kFunction, ty.vec2<bool>());
+  Global("m1", ast::StorageClass::kFunction, ty.mat2x2<float>());
+
   GeneratorImpl& gen = Build();
 
   EXPECT_EQ(
@@ -261,13 +254,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_Select) {
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   auto* call = Call("dot", "param1", "param2");
 
-  auto* v1 = Var("param1", ast::StorageClass::kFunction, ty.vec3<f32>());
-  auto* v2 = Var("param2", ast::StorageClass::kFunction, ty.vec3<f32>());
+  Global("param1", ast::StorageClass::kFunction, ty.vec3<f32>());
+  Global("param2", ast::StorageClass::kFunction, ty.vec3<f32>());
 
-  td.RegisterVariableForTesting(v1);
-  td.RegisterVariableForTesting(v2);
-
-  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+  WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
 

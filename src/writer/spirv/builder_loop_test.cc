@@ -42,8 +42,7 @@ TEST_F(BuilderTest, Loop_Empty) {
   auto* loop = create<ast::LoopStatement>(
       create<ast::BlockStatement>(ast::StatementList{}),
       create<ast::BlockStatement>(ast::StatementList{}));
-
-  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+  WrapInFunction(loop);
 
   spirv::Builder& b = Build();
 
@@ -68,15 +67,13 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   //   v = 2;
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
 
   auto* loop = create<ast::LoopStatement>(
       body, create<ast::BlockStatement>(ast::StatementList{}));
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+  WrapInFunction(loop);
 
   spirv::Builder& b = Build();
 
@@ -112,16 +109,14 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   //   }
   // }
 
-  auto* var = Var("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* continuing = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
 
   auto* loop = create<ast::LoopStatement>(body, continuing);
-
-  td.RegisterVariableForTesting(var);
-  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+  WrapInFunction(loop);
 
   spirv::Builder& b = Build();
 
@@ -160,8 +155,7 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   });
   auto* loop = create<ast::LoopStatement>(
       body, create<ast::BlockStatement>(ast::StatementList{}));
-
-  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+  WrapInFunction(loop);
 
   spirv::Builder& b = Build();
 
@@ -190,8 +184,7 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   });
   auto* loop = create<ast::LoopStatement>(
       body, create<ast::BlockStatement>(ast::StatementList{}));
-
-  ASSERT_TRUE(td.DetermineResultType(loop)) << td.error();
+  WrapInFunction(loop);
 
   spirv::Builder& b = Build();
 

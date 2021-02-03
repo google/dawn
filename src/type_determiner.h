@@ -65,49 +65,10 @@ class TypeDeterminer {
 
   /// @returns true if the type determiner was successful
   bool Determine();
-  /// Determines type information for functions
-  /// @param funcs the functions to check
-  /// @returns true if the determination was successful
-  bool DetermineFunctions(const ast::FunctionList& funcs);
-  /// Determines type information for a function
-  /// @param func the function to check
-  /// @returns true if the determination was successful
-  bool DetermineFunction(ast::Function* func);
-  /// Determines type information for a set of statements
-  /// @param stmts the statements to check
-  /// @returns true if the determination was successful
-  bool DetermineStatements(const ast::BlockStatement* stmts);
-  /// Determines type information for a statement
-  /// @param stmt the statement to check
-  /// @returns true if the determination was successful
-  bool DetermineResultType(ast::Statement* stmt);
-  /// Determines type information for an expression list
-  /// @param list the expression list to check
-  /// @returns true if the determination was successful
-  bool DetermineResultType(const ast::ExpressionList& list);
-  /// Determines type information for an expression
-  /// @param expr the expression to check
-  /// @returns true if the determination was successful
-  bool DetermineResultType(ast::Expression* expr);
-  /// Determines the storage class for variables. This assumes that it is only
-  /// called for things in function scope, not module scope.
-  /// @param stmt the statement to check
-  /// @returns false on error
-  bool DetermineVariableStorageClass(ast::Statement* stmt);
-  /// Determines the result type based off a storage texture format
-  /// @param tex the storage texture
-  /// @returns false on error
-  bool DetermineStorageTextureSubtype(type::StorageTexture* tex);
 
   /// Creates the semantic::Function nodes and adds them to the semantic::Info
   /// of the ProgramBuilder.
   void CreateSemanticFunctions() const;
-
-  /// Testing method to set a given variable into the type stack
-  /// @param var the variable to set
-  void RegisterVariableForTesting(ast::Variable* var) {
-    variable_stack_.set(var->symbol(), var);
-  }
 
   /// Retrieves information for the requested import.
   /// @param src the source of the import
@@ -158,6 +119,40 @@ class TypeDeterminer {
     UniqueVector<ast::Variable*> local_referenced_module_vars;
     UniqueVector<Symbol> ancestor_entry_points;
   };
+
+  /// Determines type information for functions
+  /// @param funcs the functions to check
+  /// @returns true if the determination was successful
+  bool DetermineFunctions(const ast::FunctionList& funcs);
+  /// Determines type information for a function
+  /// @param func the function to check
+  /// @returns true if the determination was successful
+  bool DetermineFunction(ast::Function* func);
+  /// Determines type information for a set of statements
+  /// @param stmts the statements to check
+  /// @returns true if the determination was successful
+  bool DetermineStatements(const ast::BlockStatement* stmts);
+  /// Determines type information for a statement
+  /// @param stmt the statement to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(ast::Statement* stmt);
+  /// Determines type information for an expression list
+  /// @param list the expression list to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(const ast::ExpressionList& list);
+  /// Determines type information for an expression
+  /// @param expr the expression to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(ast::Expression* expr);
+  /// Determines the storage class for variables. This assumes that it is only
+  /// called for things in function scope, not module scope.
+  /// @param stmt the statement to check
+  /// @returns false on error
+  bool DetermineVariableStorageClass(ast::Statement* stmt);
+  /// Determines the result type based off a storage texture format
+  /// @param tex the storage texture
+  /// @returns false on error
+  bool DetermineStorageTextureSubtype(type::StorageTexture* tex);
 
   void set_error(const Source& src, const std::string& msg);
   void set_referenced_from_function_if_needed(ast::Variable* var, bool local);

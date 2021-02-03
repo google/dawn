@@ -34,7 +34,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32());
+  auto* v = Global("a", ast::StorageClass::kNone, ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -44,7 +44,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
-  auto* v = Var("a", ast::StorageClass::kInput, ty.f32());
+  auto* v = Global("a", ast::StorageClass::kInput, ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -54,10 +54,10 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32(), nullptr,
-                ast::VariableDecorationList{
-                    create<ast::LocationDecoration>(2),
-                });
+  auto* v = Global("a", ast::StorageClass::kNone, ty.f32(), nullptr,
+                   ast::VariableDecorationList{
+                       create<ast::LocationDecoration>(2),
+                   });
 
   GeneratorImpl& gen = Build();
 
@@ -67,14 +67,14 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32(), nullptr,
-                ast::VariableDecorationList{
-                    create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
-                    create<ast::BindingDecoration>(0),
-                    create<ast::GroupDecoration>(1),
-                    create<ast::LocationDecoration>(2),
-                    create<ast::ConstantIdDecoration>(42),
-                });
+  auto* v = Global("a", ast::StorageClass::kNone, ty.f32(), nullptr,
+                   ast::VariableDecorationList{
+                       create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
+                       create<ast::BindingDecoration>(0),
+                       create<ast::GroupDecoration>(1),
+                       create<ast::LocationDecoration>(2),
+                       create<ast::ConstantIdDecoration>(42),
+                   });
 
   GeneratorImpl& gen = Build();
 
@@ -86,8 +86,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
-  auto* v = Var("a", ast::StorageClass::kNone, ty.f32(), Expr("initializer"),
-                ast::VariableDecorationList{});
+  auto* v = Global("a", ast::StorageClass::kNone, ty.f32(), Expr("initializer"),
+                   ast::VariableDecorationList{});
 
   GeneratorImpl& gen = Build();
 

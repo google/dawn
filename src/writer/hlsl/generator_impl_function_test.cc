@@ -132,21 +132,15 @@ TEST_F(HlslGeneratorImplTest_Function,
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_NoReturn_InOut) {
-  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(0),
-                      });
+  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(0),
+         });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(1),
-                      });
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(1),
+         });
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -178,21 +172,15 @@ main_out main(main_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
-  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(0),
-                      });
+  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(0),
+         });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(1),
-                      });
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(1),
+         });
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -225,23 +213,15 @@ frag_main_out frag_main(frag_main_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_WithInOut_Builtins) {
-  auto* coord_var =
-      Var("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
-          });
+  Global("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
+         });
 
-  auto* depth_var =
-      Var("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
-          });
-
-  td.RegisterVariableForTesting(coord_var);
-  td.RegisterVariableForTesting(depth_var);
-
-  AST().AddGlobalVariable(coord_var);
-  AST().AddGlobalVariable(depth_var);
+  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
+         });
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -275,15 +255,11 @@ frag_main_out frag_main(frag_main_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoint_With_Uniform) {
-  auto* coord_var =
-      Var("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BindingDecoration>(0),
-              create<ast::GroupDecoration>(1),
-          });
-
-  td.RegisterVariableForTesting(coord_var);
-  AST().AddGlobalVariable(coord_var);
+  Global("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "x"), ast::VariableDecorationList{});
@@ -320,16 +296,13 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* s = ty.struct_("Uniforms", str);
 
-  auto* coord_var = Var("uniforms", ast::StorageClass::kUniform, s, nullptr,
-                        ast::VariableDecorationList{
-                            create<ast::BindingDecoration>(0),
-                            create<ast::GroupDecoration>(1),
-                        });
+  Global("uniforms", ast::StorageClass::kUniform, s, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
 
   AST().AddConstructedType(s);
-
-  td.RegisterVariableForTesting(coord_var);
-  AST().AddGlobalVariable(coord_var);
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   create<ast::MemberAccessorExpression>(
@@ -372,14 +345,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
-                        ast::VariableDecorationList{
-                            create<ast::BindingDecoration>(0),
-                            create<ast::GroupDecoration>(1),
-                        });
-
-  td.RegisterVariableForTesting(coord_var);
-  AST().AddGlobalVariable(coord_var);
+  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
@@ -416,15 +386,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
-  auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
-                        ast::VariableDecorationList{
-                            // decorations
-                            create<ast::BindingDecoration>(0),
-                            create<ast::GroupDecoration>(1),
-                        });
-
-  td.RegisterVariableForTesting(coord_var);
-  AST().AddGlobalVariable(coord_var);
+  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
 
   auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
@@ -461,14 +427,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
-                        ast::VariableDecorationList{
-                            create<ast::BindingDecoration>(0),
-                            create<ast::GroupDecoration>(1),
-                        });
-
-  td.RegisterVariableForTesting(coord_var);
-  AST().AddGlobalVariable(coord_var);
+  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -496,28 +459,20 @@ void frag_main() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  auto* foo_var = Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(0),
-                      });
+  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(0),
+         });
 
-  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(1),
-                      });
+  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(1),
+         });
 
-  auto* val_var = Var("val", ast::StorageClass::kOutput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(0),
-                      });
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-  td.RegisterVariableForTesting(val_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
-  AST().AddGlobalVariable(val_var);
+  Global("val", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(0),
+         });
 
   Func("sub_func",
        ast::VariableList{Var("param", ast::StorageClass::kFunction, ty.f32())},
@@ -568,15 +523,10 @@ ep_1_out ep_1(ep_1_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_Called_By_EntryPoints_NoUsedGlobals) {
-  auto* depth_var =
-      Var("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
-          });
-
-  td.RegisterVariableForTesting(depth_var);
-
-  AST().AddGlobalVariable(depth_var);
+  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
+         });
 
   Func("sub_func",
        ast::VariableList{Var("param", ast::StorageClass::kFunction, ty.f32())},
@@ -619,23 +569,15 @@ ep_1_out ep_1() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  auto* coord_var =
-      Var("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
-          });
+  Global("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
+         });
 
-  auto* depth_var =
-      Var("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
-          });
-
-  td.RegisterVariableForTesting(coord_var);
-  td.RegisterVariableForTesting(depth_var);
-
-  AST().AddGlobalVariable(coord_var);
-  AST().AddGlobalVariable(depth_var);
+  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
+         });
 
   Func("sub_func",
        ast::VariableList{Var("param", ast::StorageClass::kFunction, ty.f32())},
@@ -684,16 +626,11 @@ ep_1_out ep_1(ep_1_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_Uniform) {
-  auto* coord_var =
-      Var("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BindingDecoration>(0),
-              create<ast::GroupDecoration>(1),
-          });
-
-  td.RegisterVariableForTesting(coord_var);
-
-  AST().AddGlobalVariable(coord_var);
+  Global("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
 
   Func("sub_func",
        ast::VariableList{Var("param", ast::StorageClass::kFunction, ty.f32())},
@@ -737,15 +674,11 @@ void frag_main() {
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_StorageBuffer) {
   type::AccessControl ac(ast::AccessControl::kReadWrite, ty.vec4<f32>());
-  auto* coord_var = Var("coord", ast::StorageClass::kStorage, &ac, nullptr,
-                        ast::VariableDecorationList{
-                            create<ast::BindingDecoration>(0),
-                            create<ast::GroupDecoration>(1),
-                        });
-
-  td.RegisterVariableForTesting(coord_var);
-
-  AST().AddGlobalVariable(coord_var);
+  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
 
   Func("sub_func",
        ast::VariableList{Var("param", ast::StorageClass::kFunction, ty.f32())},
@@ -786,13 +719,10 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_FunctionDecoration_EntryPoints_WithGlobal_Nested_Return) {
-  auto* bar_var = Var("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
-                      ast::VariableDecorationList{
-                          create<ast::LocationDecoration>(1),
-                      });
-
-  td.RegisterVariableForTesting(bar_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::LocationDecoration>(1),
+         });
 
   auto* list = create<ast::BlockStatement>(ast::StatementList{
       create<ast::ReturnStatement>(),
@@ -935,17 +865,15 @@ TEST_F(HlslGeneratorImplTest_Function,
       ast::StructDecorationList{create<ast::StructBlockDecoration>()});
 
   auto* s = ty.struct_("Data", str);
+  AST().AddConstructedType(s);
+
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  auto* data_var = Var("data", ast::StorageClass::kStorage, &ac, nullptr,
-                       ast::VariableDecorationList{
-                           create<ast::BindingDecoration>(0),
-                           create<ast::GroupDecoration>(0),
-                       });
-
-  AST().AddConstructedType(s);
-  td.RegisterVariableForTesting(data_var);
-  AST().AddGlobalVariable(data_var);
+  Global("data", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   {
     auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),

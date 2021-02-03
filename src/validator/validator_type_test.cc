@@ -178,8 +178,6 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.Validate());
@@ -209,8 +207,6 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
        ast::FunctionDecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 

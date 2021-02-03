@@ -56,7 +56,7 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
                                    body),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -87,7 +87,7 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
                                    body),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -129,7 +129,7 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
                                    switch_body),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -164,7 +164,7 @@ TEST_F(ValidateControlBlockTest,
       create<ast::VariableDeclStatement>(var),
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -199,7 +199,7 @@ TEST_F(ValidateControlBlockTest,
       create<ast::VariableDeclStatement>(var),
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -240,7 +240,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
       create<ast::VariableDeclStatement>(var),
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -283,7 +283,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
       create<ast::VariableDeclStatement>(var),
       create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -314,7 +314,7 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
       create<ast::VariableDeclStatement>(var),
       create<ast::SwitchStatement>(Expr("a"), body),
   });
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -347,7 +347,7 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
       create<ast::VariableDeclStatement>(var),
       create<ast::SwitchStatement>(Expr("a"), body),
   });
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 
@@ -377,7 +377,7 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   });
   AST().AddConstructedType(my_int);
 
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
 

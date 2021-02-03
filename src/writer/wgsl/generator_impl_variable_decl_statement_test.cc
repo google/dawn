@@ -31,9 +31,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32());
+  auto* var = Global("a", ast::StorageClass::kNone, ty.f32());
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 
@@ -48,9 +49,10 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   // storage class.  Rely on defaulting.
   // https://github.com/gpuweb/gpuweb/issues/654
 
-  auto* var = Var("a", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Global("a", ast::StorageClass::kFunction, ty.f32());
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 
@@ -61,9 +63,10 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32());
+  auto* var = Global("a", ast::StorageClass::kPrivate, ty.f32());
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 

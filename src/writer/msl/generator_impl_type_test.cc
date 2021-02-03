@@ -421,16 +421,17 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  type::StorageTexture s(params.dim, type::ImageFormat::kR16Float);
-  type::AccessControl ac(params.ro ? ast::AccessControl::kReadOnly
-                                   : ast::AccessControl::kWriteOnly,
-                         &s);
-
-  ASSERT_TRUE(td.DetermineStorageTextureSubtype(&s)) << td.error();
+  auto* s =
+      create<type::StorageTexture>(params.dim, type::ImageFormat::kR16Float);
+  auto* ac =
+      create<type::AccessControl>(params.ro ? ast::AccessControl::kReadOnly
+                                            : ast::AccessControl::kWriteOnly,
+                                  s);
+  Global("test_var", ast::StorageClass::kNone, ac);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(&ac, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ac, "")) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

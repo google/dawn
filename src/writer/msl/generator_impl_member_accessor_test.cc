@@ -30,6 +30,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
   auto* expr = MemberAccessor("str", "mem");
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -38,12 +39,10 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
-  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
-
-  td.RegisterVariableForTesting(vec);
+  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
 
   auto* expr = MemberAccessor("my_vec", "xyz");
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
@@ -51,11 +50,10 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
-  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
-  td.RegisterVariableForTesting(vec);
+  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
 
   auto* expr = MemberAccessor("my_vec", "gbr");
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();

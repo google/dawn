@@ -97,13 +97,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32());
-  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32());
-  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
-
-  AST().AddGlobalVariable(v_in);
-  AST().AddGlobalVariable(v_out);
-  AST().AddGlobalVariable(v_wg);
+  auto* v_in = Global("my_in", ast::StorageClass::kInput, ty.f32());
+  auto* v_out = Global("my_out", ast::StorageClass::kOutput, ty.f32());
+  auto* v_wg = Global("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -146,13 +142,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  auto* v_in = Var("my_in", ast::StorageClass::kInput, ty.f32());
-  auto* v_out = Var("my_out", ast::StorageClass::kOutput, ty.f32());
-  auto* v_wg = Var("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
-
-  AST().AddGlobalVariable(v_in);
-  AST().AddGlobalVariable(v_out);
-  AST().AddGlobalVariable(v_wg);
+  auto* v_in = Global("my_in", ast::StorageClass::kInput, ty.f32());
+  auto* v_out = Global("my_out", ast::StorageClass::kOutput, ty.f32());
+  auto* v_wg = Global("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -266,12 +258,10 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
-  auto* fragdepth =
-      Var("fragdepth", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
-          });
-  AST().AddGlobalVariable(fragdepth);
+  Global("fragdepth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
+         });
 
   auto* func =
       Func("main", ast::VariableList{}, ty.void_(),

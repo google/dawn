@@ -184,17 +184,13 @@ TEST_F(WgslGeneratorImplTest,
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  auto* data_var = Var("data", ast::StorageClass::kStorage, &ac, nullptr,
-                       ast::VariableDecorationList{
-                           // decorations
-                           create<ast::BindingDecoration>(0),
-                           create<ast::GroupDecoration>(0),
-                       });
+  Global("data", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   AST().AddConstructedType(s);
-
-  td.RegisterVariableForTesting(data_var);
-  AST().AddGlobalVariable(data_var);
 
   {
     auto* var =

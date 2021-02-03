@@ -55,6 +55,11 @@
 
 namespace tint {
 
+// Forward declarations
+namespace ast {
+class VariableDeclStatement;
+}  // namespace ast
+
 class CloneContext;
 
 /// ProgramBuilder is a mutable builder for a Program.
@@ -789,6 +794,28 @@ class ProgramBuilder {
                        ast::Expression* constructor,
                        ast::VariableDecorationList decorations);
 
+  /// @param args the arguments to pass to Var()
+  /// @returns a `ast::Variable` constructed by calling Var() with the arguments
+  /// of `args`, which is automatically registered as a global variable with the
+  /// ast::Module.
+  template <typename... ARGS>
+  ast::Variable* Global(ARGS&&... args) {
+    auto* var = Var(std::forward<ARGS>(args)...);
+    AST().AddGlobalVariable(var);
+    return var;
+  }
+
+  /// @param args the arguments to pass to Const()
+  /// @returns a const `ast::Variable` constructed by calling Var() with the
+  /// arguments of `args`, which is automatically registered as a global
+  /// variable with the ast::Module.
+  template <typename... ARGS>
+  ast::Variable* GlobalConst(ARGS&&... args) {
+    auto* var = Const(std::forward<ARGS>(args)...);
+    AST().AddGlobalVariable(var);
+    return var;
+  }
+
   /// @param func the function name
   /// @param args the function call arguments
   /// @returns a `ast::CallExpression` to the function `func`, with the
@@ -950,15 +977,41 @@ class ProgramBuilder {
   /// expression has no resolved type.
   type::Type* TypeOf(ast::Expression* expr) const;
 
+  /// Wraps the ast::Expression in a statement. This is used by tests that
+  /// construct a partial AST and require the TypeDeterminer to reach these
+  /// nodes.
+  /// @param expr the ast::Expression to be wrapped by an ast::Statement
+  /// @return the ast::Statement that wraps the ast::Expression
+  ast::Statement* WrapInStatement(ast::Expression* expr);
+  /// Wraps the ast::Variable in a ast::VariableDeclStatement. This is used by
+  /// tests that construct a partial AST and require the TypeDeterminer to reach
+  /// these nodes.
+  /// @param v the ast::Variable to be wrapped by an ast::VariableDeclStatement
+  /// @return the ast::VariableDeclStatement that wraps the ast::Variable
+  ast::VariableDeclStatement* WrapInStatement(ast::Variable* v);
+  /// Returns the statement argument. Used as a passthrough-overload by
+  /// WrapInFunction().
+  /// @param stmt the ast::Statement
+  /// @return `stmt`
+  ast::Statement* WrapInStatement(ast::Statement* stmt);
+  /// Wraps the list of arguments in a simple function so that each is reachable
+  /// by the TypeDeterminer.
+  /// @param args a mix of ast::Expression, ast::Statement, ast::Variables.
+  template <typename... ARGS>
+  void WrapInFunction(ARGS&&... args) {
+    ast::StatementList stmts{WrapInStatement(std::forward<ARGS>(args))...};
+    WrapInFunction(stmts);
+  }
+  /// @param stmts a list of ast::Statement that will be wrapped by a function,
+  /// so that each statement is reachable by the TypeDeterminer.
+  void WrapInFunction(ast::StatementList stmts);
+
   /// The builder types
   TypesBuilder ty;
 
  protected:
   /// Asserts that the builder has not been moved.
   void AssertNotMoved() const;
-
-  /// Called whenever a new variable is built with `Var()`.
-  virtual void OnVariableBuilt(ast::Variable*) {}
 
  private:
   type::Manager types_;

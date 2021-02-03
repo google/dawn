@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/module.h"
+#include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
@@ -32,7 +33,7 @@ namespace spirv {
 template <typename BASE>
 class TestHelperBase : public ProgramBuilder, public BASE {
  public:
-  TestHelperBase() : td(this) {}
+  TestHelperBase() = default;
   ~TestHelperBase() override = default;
 
   /// Builds and returns a spirv::Builder from the program.
@@ -43,22 +44,21 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     if (spirv_builder) {
       return *spirv_builder;
     }
+    [&]() {
+      ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
+                             << diag::Formatter().format(Diagnostics());
+    }();
     program = std::make_unique<Program>(std::move(*this));
+    [&]() {
+      ASSERT_TRUE(program->IsValid())
+          << diag::Formatter().format(program->Diagnostics());
+    }();
     spirv_builder = std::make_unique<spirv::Builder>(program.get());
     return *spirv_builder;
   }
 
-  /// The type determiner
-  TypeDeterminer td;
   /// The program built with a call to Build()
   std::unique_ptr<Program> program;
-
- protected:
-  /// Called whenever a new variable is built with `Var()`.
-  /// @param var the variable that was built
-  void OnVariableBuilt(ast::Variable* var) override {
-    td.RegisterVariableForTesting(var);
-  }
 
  private:
   std::unique_ptr<spirv::Builder> spirv_builder;

@@ -50,8 +50,6 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.Validate());
@@ -67,8 +65,6 @@ TEST_F(ValidateFunctionTest,
        ast::FunctionDecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -87,8 +83,6 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.Validate());
@@ -101,8 +95,6 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
        ast::StatementList{}, ast::FunctionDecorationList{});
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -123,8 +115,6 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  EXPECT_TRUE(td()->DetermineFunctions(AST().Functions())) << td()->error();
-
   ValidatorImpl& v = Build();
   const Program* program = v.program();
 
@@ -139,8 +129,6 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
                                         Expr(2)),
        },
        ast::FunctionDecorationList{});
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -159,8 +147,6 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
                                         Expr(2)),
        },
        ast::FunctionDecorationList{});
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -186,8 +172,6 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.Validate());
@@ -206,8 +190,6 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
            create<ast::ReturnStatement>(),
        },
        ast::FunctionDecorationList{});
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -230,8 +212,6 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.Validate()) << v.error();
@@ -250,8 +230,6 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
        ast::FunctionDecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -275,8 +253,6 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.Validate());
@@ -299,8 +275,6 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_FALSE(v.Validate());
@@ -321,8 +295,6 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.Validate()) << v.error();
@@ -335,8 +307,6 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
            create<ast::ReturnStatement>(),
        },
        ast::FunctionDecorationList{});
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 

@@ -160,18 +160,18 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
   };
   switch (texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
-      return b->Var(
+      return b->Global(
           "texture", ast::StorageClass::kUniformConstant,
           b->create<type::SampledTexture>(texture_dimension, datatype), nullptr,
           decos);
 
     case ast::intrinsic::test::TextureKind::kDepth:
-      return b->Var("texture", ast::StorageClass::kUniformConstant,
-                    b->create<type::DepthTexture>(texture_dimension), nullptr,
-                    decos);
+      return b->Global("texture", ast::StorageClass::kUniformConstant,
+                       b->create<type::DepthTexture>(texture_dimension),
+                       nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kMultisampled:
-      return b->Var(
+      return b->Global(
           "texture", ast::StorageClass::kUniformConstant,
           b->create<type::MultisampledTexture>(texture_dimension, datatype),
           nullptr, decos);
@@ -182,8 +182,8 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
       st->set_type(datatype);
 
       auto* ac = b->create<type::AccessControl>(access_control, st);
-      return b->Var("texture", ast::StorageClass::kUniformConstant, ac, nullptr,
-                    decos);
+      return b->Global("texture", ast::StorageClass::kUniformConstant, ac,
+                       nullptr, decos);
     }
   }
 
@@ -197,8 +197,8 @@ ast::Variable* TextureOverloadCase::buildSamplerVariable(
       b->create<ast::GroupDecoration>(0),
       b->create<ast::BindingDecoration>(1),
   };
-  return b->Var("sampler", ast::StorageClass::kUniformConstant,
-                b->create<type::Sampler>(sampler_kind), nullptr, decos);
+  return b->Global("sampler", ast::StorageClass::kUniformConstant,
+                   b->create<type::Sampler>(sampler_kind), nullptr, decos);
 }
 
 std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {

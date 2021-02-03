@@ -107,14 +107,12 @@ class InspectorHelper : public ProgramBuilder {
       std::string in, out;
       std::tie(in, out) = inout;
 
-      AST().AddGlobalVariable(
-          Var(in, ast::StorageClass::kInput, ty.u32(), nullptr,
-              ast::VariableDecorationList{
-                  create<ast::LocationDecoration>(location++)}));
-      AST().AddGlobalVariable(
-          Var(out, ast::StorageClass::kOutput, ty.u32(), nullptr,
-              ast::VariableDecorationList{
-                  create<ast::LocationDecoration>(location++)}));
+      Global(in, ast::StorageClass::kInput, ty.u32(), nullptr,
+             ast::VariableDecorationList{
+                 create<ast::LocationDecoration>(location++)});
+      Global(out, ast::StorageClass::kOutput, ty.u32(), nullptr,
+             ast::VariableDecorationList{
+                 create<ast::LocationDecoration>(location++)});
     }
   }
 
@@ -175,11 +173,10 @@ class InspectorHelper : public ProgramBuilder {
       constructor =
           create<ast::ScalarConstructorExpression>(MakeLiteral(type, val));
     }
-    auto* var = Const(name, ast::StorageClass::kNone, type, constructor,
-                      ast::VariableDecorationList{
-                          create<ast::ConstantIdDecoration>(id),
-                      });
-    AST().AddGlobalVariable(var);
+    GlobalConst(name, ast::StorageClass::kNone, type, constructor,
+                ast::VariableDecorationList{
+                    create<ast::ConstantIdDecoration>(id),
+                });
   }
 
   /// @param type AST type of the literal, must resolve to BoolLiteral
@@ -320,13 +317,11 @@ class InspectorHelper : public ProgramBuilder {
                   ast::StorageClass storage_class,
                   uint32_t group,
                   uint32_t binding) {
-    auto* var = Var(name, storage_class, type, nullptr,
-                    ast::VariableDecorationList{
-                        create<ast::BindingDecoration>(binding),
-                        create<ast::GroupDecoration>(group),
-                    });
-
-    AST().AddGlobalVariable(var);
+    GlobalConst(name, storage_class, type, nullptr,
+                ast::VariableDecorationList{
+                    create<ast::BindingDecoration>(binding),
+                    create<ast::GroupDecoration>(group),
+                });
   }
 
   /// Adds an uniform buffer variable to the program
@@ -460,16 +455,14 @@ class InspectorHelper : public ProgramBuilder {
   }
 
   void AddGlobalVariable(const std::string& name, type::Type* type) {
-    AST().AddGlobalVariable(
-        Var(name, ast::StorageClass::kUniformConstant, type));
+    Global(name, ast::StorageClass::kUniformConstant, type);
   }
 
   /// Adds a depth texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, type::Type* type) {
-    AST().AddGlobalVariable(
-        Var(name, ast::StorageClass::kUniformConstant, type));
+    Global(name, ast::StorageClass::kUniformConstant, type);
   }
 
   /// Generates a function that references a specific sampler variable
@@ -1104,13 +1097,11 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
-  AST().AddGlobalVariable(
-      Var("in_var", ast::StorageClass::kInput, ty.u32(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kPosition)}));
-  AST().AddGlobalVariable(
-      Var("out_var", ast::StorageClass::kOutput, ty.u32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(0)}));
+  Global("in_var", ast::StorageClass::kInput, ty.u32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
+  Global("out_var", ast::StorageClass::kOutput, ty.u32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
 

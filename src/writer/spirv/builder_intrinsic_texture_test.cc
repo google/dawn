@@ -4126,9 +4126,7 @@ TEST_P(IntrinsicTextureTest, Call) {
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
-
-  EXPECT_TRUE(td.Determine()) << td.error();
-  EXPECT_TRUE(td.DetermineResultType(call)) << td.error();
+  WrapInFunction(call);
 
   spirv::Builder& b = Build();
 
@@ -4149,8 +4147,8 @@ TEST_P(IntrinsicTextureTest, Call) {
 TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
   auto param = GetParam();
 
-  AST().AddGlobalVariable(param.buildTextureVariable(this));
-  AST().AddGlobalVariable(param.buildSamplerVariable(this));
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
@@ -4163,11 +4161,9 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-
   spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.Build()) << td.error();
+  ASSERT_TRUE(b.Build()) << b.error();
 
   BinaryWriter writer;
   writer.WriteHeader(b.id_bound());
@@ -4211,11 +4207,12 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
 
   auto* texture = param.buildTextureVariable(this);
   auto* sampler = param.buildSamplerVariable(this);
+  AST().AddGlobalVariable(texture);
+  AST().AddGlobalVariable(sampler);
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
-
-  EXPECT_TRUE(td.DetermineResultType(call)) << td.error();
+  WrapInFunction(call);
 
   spirv::Builder& b = Build();
 

@@ -49,8 +49,7 @@ TEST_F(ProgramTest, IsValid_Empty) {
 }
 
 TEST_F(ProgramTest, IsValid_GlobalVariable) {
-  auto* var = Var("var", ast::StorageClass::kInput, ty.f32());
-  AST().AddGlobalVariable(var);
+  Global("var", ast::StorageClass::kInput, ty.f32());
 
   Program program(std::move(*this));
   EXPECT_TRUE(program.IsValid());
@@ -64,8 +63,7 @@ TEST_F(ProgramTest, IsValid_Null_GlobalVariable) {
 }
 
 TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
-  auto* var = Var("var", ast::StorageClass::kInput, nullptr);
-  AST().AddGlobalVariable(var);
+  Global("var", ast::StorageClass::kInput, nullptr);
 
   Program program(std::move(*this));
   EXPECT_FALSE(program.IsValid());

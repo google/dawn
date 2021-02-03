@@ -51,8 +51,7 @@ TEST_F(BuilderTest, Return_WithValue) {
   auto* val = vec3<f32>(1.f, 1.f, 3.f);
 
   auto* ret = create<ast::ReturnStatement>(val);
-
-  EXPECT_TRUE(td.DetermineResultType(ret)) << td.error();
+  WrapInFunction(ret);
 
   spirv::Builder& b = Build();
 
@@ -72,12 +71,10 @@ TEST_F(BuilderTest, Return_WithValue) {
 }
 
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
-  auto* var = Var("param", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Global("param", ast::StorageClass::kFunction, ty.f32());
 
   auto* ret = create<ast::ReturnStatement>(Expr("param"));
-
-  td.RegisterVariableForTesting(var);
-  EXPECT_TRUE(td.DetermineResultType(ret)) << td.error();
+  WrapInFunction(ret);
 
   spirv::Builder& b = Build();
 

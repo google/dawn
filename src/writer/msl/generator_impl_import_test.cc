@@ -53,7 +53,7 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   auto* call = Call(param.name, 1.f);
 
   // The call type determination will set the intrinsic data for the ident
-  ASSERT_TRUE(td.DetermineResultType(call)) << td.error();
+  WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
 
@@ -89,7 +89,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
 
 TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
   auto* expr = Call("abs", 1);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -102,7 +102,7 @@ TEST_P(MslImportData_DualParamTest, FloatScalar) {
   auto param = GetParam();
   auto* expr = Call(param.name, 1.0f, 2.0f);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -126,7 +126,7 @@ TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
 
   auto* expr =
       Call(param.name, vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(4.f, 5.f, 6.f));
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -144,7 +144,7 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, 1, 2);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -161,7 +161,7 @@ TEST_P(MslImportData_TripleParamTest, FloatScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, 1.f, 2.f, 3.f);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -183,7 +183,7 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
   auto param = GetParam();
 
   auto* expr = Call(param.name, 1, 2, 3);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -197,14 +197,11 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                                          MslImportData{"clamp", "clamp"}));
 
 TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
-  auto* var = Var("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
-  AST().AddGlobalVariable(var);
+  Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
 
   auto* expr = Call("determinant", "var");
 
-  // Register the global
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 

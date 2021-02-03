@@ -60,18 +60,15 @@ using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit_f32) {
   auto params = GetParam();
 
-  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.f32());
-  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.f32());
+  Global("left", ast::StorageClass::kFunction, ty.f32());
+  Global("right", ast::StorageClass::kFunction, ty.f32());
 
   auto* left = Expr("left");
   auto* right = Expr("right");
 
-  td.RegisterVariableForTesting(left_var);
-  td.RegisterVariableForTesting(right_var);
-
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -81,18 +78,15 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 TEST_P(HlslBinaryTest, Emit_u32) {
   auto params = GetParam();
 
-  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.u32());
-  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.u32());
+  Global("left", ast::StorageClass::kFunction, ty.u32());
+  Global("right", ast::StorageClass::kFunction, ty.u32());
 
   auto* left = Expr("left");
   auto* right = Expr("right");
 
-  td.RegisterVariableForTesting(left_var);
-  td.RegisterVariableForTesting(right_var);
-
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -102,18 +96,15 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 TEST_P(HlslBinaryTest, Emit_i32) {
   auto params = GetParam();
 
-  auto* left_var = Var("left", ast::StorageClass::kFunction, ty.i32());
-  auto* right_var = Var("right", ast::StorageClass::kFunction, ty.i32());
+  Global("left", ast::StorageClass::kFunction, ty.i32());
+  Global("right", ast::StorageClass::kFunction, ty.i32());
 
   auto* left = Expr("left");
   auto* right = Expr("right");
 
-  td.RegisterVariableForTesting(left_var);
-  td.RegisterVariableForTesting(right_var);
-
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -148,7 +139,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -165,7 +156,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -176,16 +167,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   auto* lhs = Expr("mat");
   auto* rhs = Expr(1.f);
 
-  td.RegisterVariableForTesting(var);
-
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -194,16 +182,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   auto* lhs = Expr(1.f);
   auto* rhs = Expr("mat");
 
-  td.RegisterVariableForTesting(var);
-
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -212,16 +197,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   auto* lhs = Expr("mat");
   auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
-  td.RegisterVariableForTesting(var);
-
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -230,16 +212,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
   auto* rhs = Expr("mat");
 
-  td.RegisterVariableForTesting(var);
-
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -248,16 +227,13 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
-  auto* var = Var("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
   auto* lhs = Expr("mat");
   auto* rhs = Expr("mat");
 
-  td.RegisterVariableForTesting(var);
-
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 

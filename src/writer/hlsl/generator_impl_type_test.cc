@@ -407,14 +407,15 @@ using HlslStoragetexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStoragetexturesTest, Emit) {
   auto params = GetParam();
 
-  type::StorageTexture s(params.dim, params.imgfmt);
-  type::AccessControl ac(params.ro ? ast::AccessControl::kReadOnly
-                                   : ast::AccessControl::kWriteOnly,
-                         &s);
+  auto* s = create<type::StorageTexture>(params.dim, params.imgfmt);
+  auto* ac =
+      create<type::AccessControl>(params.ro ? ast::AccessControl::kReadOnly
+                                            : ast::AccessControl::kWriteOnly,
+                                  s);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, &ac, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(out, ac, "")) << gen.error();
   EXPECT_EQ(result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

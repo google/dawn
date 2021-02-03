@@ -40,6 +40,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
       create<ast::DiscardStatement>(),
   });
   auto* l = create<ast::LoopStatement>(body, nullptr);
+  WrapInFunction(l);
 
   GeneratorImpl& gen = Build();
 
@@ -60,6 +61,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
       create<ast::ReturnStatement>(),
   });
   auto* l = create<ast::LoopStatement>(body, continuing);
+  WrapInFunction(l);
 
   GeneratorImpl& gen = Build();
 
@@ -98,6 +100,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   });
 
   auto* outer = create<ast::LoopStatement>(body, continuing);
+  WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();
 
@@ -163,6 +166,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   });
 
   auto* outer = create<ast::LoopStatement>(body, continuing);
+  WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();
 

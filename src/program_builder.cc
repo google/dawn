@@ -18,6 +18,8 @@
 
 #include <sstream>
 
+#include "src/ast/assignment_statement.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/clone_context.h"
 #include "src/demangler.h"
 #include "src/semantic/expression.h"
@@ -101,10 +103,8 @@ ast::Variable* ProgramBuilder::Var(const std::string& name,
                                    type::Type* type,
                                    ast::Expression* constructor,
                                    ast::VariableDecorationList decorations) {
-  auto* var = create<ast::Variable>(Symbols().Register(name), storage, type,
-                                    false, constructor, decorations);
-  OnVariableBuilt(var);
-  return var;
+  return create<ast::Variable>(Symbols().Register(name), storage, type, false,
+                               constructor, decorations);
 }
 
 ast::Variable* ProgramBuilder::Var(const Source& source,
@@ -113,10 +113,8 @@ ast::Variable* ProgramBuilder::Var(const Source& source,
                                    type::Type* type,
                                    ast::Expression* constructor,
                                    ast::VariableDecorationList decorations) {
-  auto* var = create<ast::Variable>(source, Symbols().Register(name), storage,
-                                    type, false, constructor, decorations);
-  OnVariableBuilt(var);
-  return var;
+  return create<ast::Variable>(source, Symbols().Register(name), storage, type,
+                               false, constructor, decorations);
 }
 
 ast::Variable* ProgramBuilder::Const(const std::string& name,
@@ -130,10 +128,8 @@ ast::Variable* ProgramBuilder::Const(const std::string& name,
                                      type::Type* type,
                                      ast::Expression* constructor,
                                      ast::VariableDecorationList decorations) {
-  auto* var = create<ast::Variable>(Symbols().Register(name), storage, type,
-                                    true, constructor, decorations);
-  OnVariableBuilt(var);
-  return var;
+  return create<ast::Variable>(Symbols().Register(name), storage, type, true,
+                               constructor, decorations);
 }
 
 ast::Variable* ProgramBuilder::Const(const Source& source,
@@ -142,10 +138,26 @@ ast::Variable* ProgramBuilder::Const(const Source& source,
                                      type::Type* type,
                                      ast::Expression* constructor,
                                      ast::VariableDecorationList decorations) {
-  auto* var = create<ast::Variable>(source, Symbols().Register(name), storage,
-                                    type, true, constructor, decorations);
-  OnVariableBuilt(var);
-  return var;
+  return create<ast::Variable>(source, Symbols().Register(name), storage, type,
+                               true, constructor, decorations);
+}
+
+ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
+  return create<ast::VariableDeclStatement>(v);
+}
+
+ast::Statement* ProgramBuilder::WrapInStatement(ast::Expression* expr) {
+  // TODO(ben-clayton): This is valid enough for the TypeDeterminer, but the LHS
+  // may not be assignable, and so may not validate.
+  return create<ast::AssignmentStatement>(expr, expr);
+}
+
+ast::Statement* ProgramBuilder::WrapInStatement(ast::Statement* stmt) {
+  return stmt;
+}
+
+void ProgramBuilder::WrapInFunction(ast::StatementList stmts) {
+  Func("test_function", {}, ty.void_(), stmts, {});
 }
 
 }  // namespace tint

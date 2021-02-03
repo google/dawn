@@ -47,19 +47,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   //   int bar [[attribute(1)]];
   // };
 
-  auto* foo_var =
-      Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  auto* bar_var =
-      Var("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -92,19 +84,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   //   int bar [[user(locn1)]];
   // };
 
-  auto* foo_var =
-      Var("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  auto* bar_var =
-      Var("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -137,19 +121,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   //   int bar [[user(locn1)]];
   // };
 
-  auto* foo_var =
-      Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  auto* bar_var =
-      Var("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -182,19 +158,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   //   int bar [[color(1)]];
   // };
 
-  auto* foo_var =
-      Var("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  auto* bar_var =
-      Var("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -224,19 +192,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   //
   // -> Error, not allowed
 
-  auto* foo_var =
-      Var("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  auto* bar_var =
-      Var("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -261,19 +221,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   //
   // -> Error not allowed
 
-  auto* foo_var =
-      Var("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  auto* bar_var =
-      Var("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
-          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
-
-  td.RegisterVariableForTesting(foo_var);
-  td.RegisterVariableForTesting(bar_var);
-
-  AST().AddGlobalVariable(foo_var);
-  AST().AddGlobalVariable(bar_var);
+  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -303,21 +255,13 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   //   float depth [[depth(any)]];
   // };
 
-  auto* coord_var =
-      Var("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+  Global("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
 
-  auto* depth_var =
-      Var("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
-          ast::VariableDecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
-
-  td.RegisterVariableForTesting(coord_var);
-  td.RegisterVariableForTesting(depth_var);
-
-  AST().AddGlobalVariable(coord_var);
-  AST().AddGlobalVariable(depth_var);
+  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   auto body = ast::StatementList{create<ast::AssignmentStatement>(
       Expr("depth"), MemberAccessor("coord", "x"))};

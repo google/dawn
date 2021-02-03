@@ -66,14 +66,14 @@ TEST_F(ValidatorTest, AssignToScalar_Fail) {
 
   auto* var = Var("my_var", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
+  RegisterVariable(var);
 
   auto* lhs = Expr(1);
   auto* rhs = Expr("my_var");
+
   SetSource(Source{Source::Location{12, 34}});
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  RegisterVariable(var);
-
-  EXPECT_TRUE(td()->DetermineResultType(assign));
+  WrapInFunction(assign);
 
   ValidatorImpl& v = Build();
 
@@ -93,8 +93,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
   auto* lhs = Expr("b");
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  WrapInFunction(assign);
 
-  EXPECT_FALSE(td()->DetermineResultType(assign));
+  EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
             "12:34: v-0006: identifier must be declared before use: b");
 }
@@ -111,8 +112,9 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::AssignmentStatement>(lhs, rhs),
   });
+  WrapInFunction(body);
 
-  EXPECT_FALSE(td()->DetermineStatements(body));
+  EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
             "12:34: v-0006: identifier must be declared before use: b");
 }
@@ -122,18 +124,19 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   // a = 2
   auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
+  RegisterVariable(var);
 
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  RegisterVariable(var);
-  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(assign);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_TRUE(v.ValidateAssign(assign)) << v.error();
 }
@@ -145,18 +148,19 @@ TEST_F(ValidatorTest, AssignCompatibleTypesThroughAlias_Pass) {
   auto* myint = ty.alias("myint", ty.i32());
   auto* var = Var("a", ast::StorageClass::kNone, myint, Expr(2),
                   ast::VariableDecorationList{});
+  RegisterVariable(var);
 
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  RegisterVariable(var);
-  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(assign);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_TRUE(v.ValidateAssign(assign)) << v.error();
 }
@@ -169,19 +173,20 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInferRHSLoad_Pass) {
                     ast::VariableDecorationList{});
   auto* var_b = Var("b", ast::StorageClass::kNone, ty.i32(), Expr(3),
                     ast::VariableDecorationList{});
+  RegisterVariable(var_a);
+  RegisterVariable(var_b);
 
   auto* lhs = Expr("a");
   auto* rhs = Expr("b");
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  RegisterVariable(var_a);
-  RegisterVariable(var_b);
-  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(assign);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_TRUE(v.ValidateAssign(assign)) << v.error();
 }
@@ -194,19 +199,20 @@ TEST_F(ValidatorTest, AssignThroughPointer_Pass) {
   auto* var_a = Var("a", func, ty.i32(), Expr(2), {});
   auto* var_b = Const("b", ast::StorageClass::kNone, ty.pointer<int>(func),
                       Expr("a"), {});
+  RegisterVariable(var_a);
+  RegisterVariable(var_b);
 
   auto* lhs = Expr("b");
   auto* rhs = Expr(2);
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  RegisterVariable(var_a);
-  RegisterVariable(var_b);
-  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(assign);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_TRUE(v.ValidateAssign(assign)) << v.error();
 }
@@ -219,18 +225,19 @@ TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
                   ast::VariableDecorationList{});
+  RegisterVariable(var);
 
   auto* lhs = Expr("a");
   auto* rhs = Expr(2.3f);
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  RegisterVariable(var);
-  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(assign);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_FALSE(v.ValidateAssign(assign));
   ASSERT_TRUE(v.has_error());
@@ -248,19 +255,20 @@ TEST_F(ValidatorTest, AssignThroughPointerWrongeStoreType_Fail) {
   auto* var_a = Var("a", priv, ty.f32(), Expr(2), {});
   auto* var_b = Const("b", ast::StorageClass::kNone, ty.pointer<float>(priv),
                       Expr("a"), {});
+  RegisterVariable(var_a);
+  RegisterVariable(var_b);
 
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
   auto* assign = create<ast::AssignmentStatement>(
       Source{Source::Location{12, 34}}, lhs, rhs);
-  RegisterVariable(var_a);
-  RegisterVariable(var_b);
-  EXPECT_TRUE(td()->DetermineResultType(assign)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(assign);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_FALSE(v.ValidateAssign(assign));
   EXPECT_EQ(v.error(),
@@ -284,12 +292,12 @@ TEST_F(ValidatorTest, AssignCompatibleTypesInBlockStatement_Pass) {
       create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
                                        rhs),
   });
-
-  EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(body);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_TRUE(v.ValidateStatements(body)) << v.error();
 }
@@ -311,12 +319,12 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInBlockStatement_Fail) {
       create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
                                        rhs),
   });
-
-  EXPECT_TRUE(td()->DetermineStatements(block)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(block);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_FALSE(v.ValidateStatements(block));
   ASSERT_TRUE(v.has_error());
@@ -350,11 +358,12 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInNestedBlockStatement_Fail) {
       inner_block,
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_block)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(outer_block);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_FALSE(v.ValidateStatements(outer_block));
   ASSERT_TRUE(v.has_error());
@@ -366,9 +375,9 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInNestedBlockStatement_Fail) {
 
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
-  AST().AddGlobalVariable(Var(Source{Source::Location{12, 34}}, "global_var",
-                              ast::StorageClass::kInput, ty.f32(), nullptr,
-                              ast::VariableDecorationList{}));
+  Global(Source{Source::Location{12, 34}}, "global_var",
+         ast::StorageClass::kInput, ty.f32(), nullptr,
+         ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
   const Program* program = v.program();
@@ -379,10 +388,9 @@ TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
 
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
   // var gloabl_var: f32;
-  AST().AddGlobalVariable(Var(Source{Source::Location{12, 34}}, "global_var",
-                              ast::StorageClass::kNone, ty.f32(), nullptr,
-                              ast::VariableDecorationList{}));
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  Global(Source{Source::Location{12, 34}}, "global_var",
+         ast::StorageClass::kNone, ty.f32(), nullptr,
+         ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -393,10 +401,9 @@ TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
 
 TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> gloabl_var: f32;
-  AST().AddGlobalVariable(Const(Source{Source::Location{12, 34}}, "global_var",
-                                ast::StorageClass::kInput, ty.f32(), nullptr,
-                                ast::VariableDecorationList{}));
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  GlobalConst(Source{Source::Location{12, 34}}, "global_var",
+              ast::StorageClass::kInput, ty.f32(), nullptr,
+              ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -408,10 +415,9 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
 
 TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
   // const gloabl_var: f32;
-  AST().AddGlobalVariable(Const(Source{Source::Location{12, 34}}, "global_var",
-                                ast::StorageClass::kNone, ty.f32(), nullptr,
-                                ast::VariableDecorationList{}));
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  GlobalConst(Source{Source::Location{12, 34}}, "global_var",
+              ast::StorageClass::kNone, ty.f32(), nullptr,
+              ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -423,9 +429,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
   // fn my_func() -> f32 {
   //   not_global_var = 3.14f;
   // }
-  AST().AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate,
-                              ty.f32(), Expr(2.1f),
-                              ast::VariableDecorationList{}));
+  Global("global_var", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
+         ast::VariableDecorationList{});
 
   SetSource(Source{Source::Location{12, 34}});
   auto* lhs = Expr("not_global_var");
@@ -451,9 +456,8 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
   //   return;
   // }
 
-  AST().AddGlobalVariable(Var("global_var", ast::StorageClass::kPrivate,
-                              ty.f32(), Expr(2.1f),
-                              ast::VariableDecorationList{}));
+  Global("global_var", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
+         ast::VariableDecorationList{});
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -464,8 +468,6 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
        ast::FunctionDecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -495,11 +497,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInnerScope_Fail) {
                                        rhs),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(outer_body);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_FALSE(v.ValidateStatements(outer_body));
   EXPECT_EQ(v.error(), "12:34 v-0006: 'a' is not declared");
@@ -528,11 +531,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableOuterScope_Pass) {
       create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(outer_body);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_TRUE(v.ValidateStatements(outer_body)) << v.error();
 }
@@ -561,11 +565,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableDifferentScope_Fail) {
       second_body,
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(outer_body);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_FALSE(v.ValidateStatements(outer_body));
   EXPECT_EQ(v.error(), "12:34 v-0006: 'a' is not declared");
@@ -574,14 +579,12 @@ TEST_F(ValidatorTest, UsingUndefinedVariableDifferentScope_Fail) {
 TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   // var global_var0 : f32 = 0.1;
   // var global_var1 : i32 = 0;
-  auto* var0 = Var("global_var0", ast::StorageClass::kPrivate, ty.f32(),
-                   Expr(0.1f), ast::VariableDecorationList{});
-  AST().AddGlobalVariable(var0);
+  Global("global_var0", ast::StorageClass::kPrivate, ty.f32(), Expr(0.1f),
+         ast::VariableDecorationList{});
 
-  auto* var1 = Var(Source{Source::Location{12, 34}}, "global_var1",
-                   ast::StorageClass::kPrivate, ty.f32(), Expr(0),
-                   ast::VariableDecorationList{});
-  AST().AddGlobalVariable(var1);
+  Global(Source{Source::Location{12, 34}}, "global_var1",
+         ast::StorageClass::kPrivate, ty.f32(), Expr(0),
+         ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
   const Program* program = v.program();
@@ -593,14 +596,12 @@ TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
 TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
   // var global_var : f32 = 0.1;
   // var global_var : i32 = 0;
-  auto* var0 = Var("global_var", ast::StorageClass::kPrivate, ty.f32(),
-                   Expr(0.1f), ast::VariableDecorationList{});
-  AST().AddGlobalVariable(var0);
+  Global("global_var", ast::StorageClass::kPrivate, ty.f32(), Expr(0.1f),
+         ast::VariableDecorationList{});
 
-  auto* var1 = Var(Source{Source::Location{12, 34}}, "global_var",
-                   ast::StorageClass::kPrivate, ty.i32(), Expr(0),
-                   ast::VariableDecorationList{});
-  AST().AddGlobalVariable(var1);
+  Global(Source{Source::Location{12, 34}}, "global_var",
+         ast::StorageClass::kPrivate, ty.i32(), Expr(0),
+         ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
   const Program* program = v.program();
@@ -627,11 +628,12 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
                                        rhs),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(body);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_FALSE(v.ValidateStatements(body));
   EXPECT_EQ(v.error(), "12:34 v-0021: cannot re-assign a constant: 'a'");
@@ -644,9 +646,8 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   //   return 0;
   // }
 
-  auto* global_var = Var("a", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
-                         ast::VariableDecorationList{});
-  AST().AddGlobalVariable(global_var);
+  Global("a", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
+         ast::VariableDecorationList{});
 
   auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
                   ast::VariableDecorationList{});
@@ -657,8 +658,6 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
                                               var),
        },
        ast::FunctionDecorationList{});
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -684,8 +683,6 @@ TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
                                               var_a_float),
        },
        ast::FunctionDecorationList{});
-
-  EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ValidatorImpl& v = Build();
 
@@ -715,7 +712,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScope_Pass) {
                                          var_a_float),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
+  WrapInFunction(outer_body);
 
   ValidatorImpl& v = Build();
 
@@ -745,7 +742,7 @@ TEST_F(ValidatorTest, DISABLED_RedeclaredIdentifierInnerScope_False) {
       create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
+  WrapInFunction(outer_body);
 
   ValidatorImpl& v = Build();
 
@@ -770,7 +767,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
       create<ast::VariableDeclStatement>(var_outer),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
+  WrapInFunction(outer_body);
 
   ValidatorImpl& v = Build();
 
@@ -794,7 +791,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierInnerScopeBlock_Fail) {
       inner,
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(outer_body)) << td()->error();
+  WrapInFunction(outer_body);
 
   ValidatorImpl& v = Build();
 
@@ -829,8 +826,6 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
-
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.Validate()) << v.error();
@@ -843,8 +838,6 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
   // }
   auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), nullptr,
                   ast::VariableDecorationList{});
-
-  td()->RegisterVariableForTesting(var);
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
@@ -854,11 +847,12 @@ TEST_F(ValidatorTest, VariableDeclNoConstructor_Pass) {
                                        rhs),
   });
 
-  EXPECT_TRUE(td()->DetermineStatements(body)) << td()->error();
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
+  WrapInFunction(body);
 
   ValidatorImpl& v = Build();
+
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
 
   EXPECT_TRUE(v.ValidateStatements(body)) << v.error();
 }

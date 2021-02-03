@@ -53,9 +53,8 @@ TEST_F(BuilderTest, Expression_Call) {
                     ast::FunctionDecorationList{});
 
   auto* expr = Call("a_func", 1.f, 1.f);
-  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
-  ASSERT_TRUE(td.DetermineFunction(a_func)) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -104,9 +103,7 @@ TEST_F(BuilderTest, Statement_Call) {
 
   auto* expr = create<ast::CallStatement>(Call("a_func", 1.f, 1.f));
 
-  ASSERT_TRUE(td.DetermineFunction(func)) << td.error();
-  ASSERT_TRUE(td.DetermineFunction(a_func)) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 

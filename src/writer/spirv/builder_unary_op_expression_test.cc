@@ -39,7 +39,7 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
   auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1));
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -56,7 +56,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
 TEST_F(BuilderTest, UnaryOp_Negation_Float) {
   auto* expr =
       create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1.f));
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -72,7 +72,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 
 TEST_F(BuilderTest, UnaryOp_Not) {
   auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(false));
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -87,13 +87,11 @@ TEST_F(BuilderTest, UnaryOp_Not) {
 }
 
 TEST_F(BuilderTest, UnaryOp_LoadRequired) {
-  auto* var = Var("param", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("param", ast::StorageClass::kFunction, ty.vec3<f32>());
 
   auto* expr =
       create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("param"));
-
-  td.RegisterVariableForTesting(var);
-  EXPECT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 

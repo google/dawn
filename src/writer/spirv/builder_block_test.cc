@@ -47,7 +47,7 @@ TEST_F(BuilderTest, Block) {
       create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)), inner,
       create<ast::AssignmentStatement>(Expr("var"), Expr(3.f))});
 
-  ASSERT_TRUE(td.DetermineResultType(outer)) << td.error();
+  WrapInFunction(outer);
 
   spirv::Builder& b = Build();
 

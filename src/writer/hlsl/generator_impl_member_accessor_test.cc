@@ -45,13 +45,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Str", strct);
-  auto* str_var = Var("str", ast::StorageClass::kPrivate, s);
-  AST().AddGlobalVariable(str_var);
+  auto* str_var = Global("str", ast::StorageClass::kPrivate, s);
 
   auto* expr = MemberAccessor("str", "mem");
-
-  td.RegisterVariableForTesting(str_var);
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -78,14 +75,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = MemberAccessor("data", "b");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -111,14 +104,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = MemberAccessor("data", "a");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -148,21 +137,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* b_var = Var("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
-  AST().AddGlobalVariable(b_var);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
+  auto* b_var = Global("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr("b");
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-
-  td.RegisterVariableForTesting(coord_var);
-  td.RegisterVariableForTesting(b_var);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -196,17 +178,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -239,14 +217,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = MemberAccessor("data", "a");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -281,14 +255,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = MemberAccessor("data", "a");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -316,14 +286,10 @@ TEST_F(
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = MemberAccessor("data", "a");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -352,15 +318,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = IndexAccessor(
       IndexAccessor(MemberAccessor("data", "a"), Expr(2)), Expr(1));
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -388,14 +350,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -423,15 +381,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"),
                              Sub(Add(Expr(2), Expr(4)), Expr(3)));
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -458,16 +412,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = MemberAccessor("data", "b");
   auto* rhs = Expr(2.0f);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -498,16 +448,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign)) << td.error();
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -535,16 +481,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -572,14 +514,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* expr = MemberAccessor("data", "b");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -606,17 +544,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, s);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
 
   auto* lhs = MemberAccessor("data", "b");
   auto* rhs = vec3<f32>(1.f, 2.f, 3.f);
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -661,15 +596,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
 
   auto* expr =
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -710,17 +641,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  AST().AddGlobalVariable(coord_var);
-
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
 
   auto* expr = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
       "xy");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -764,16 +690,12 @@ TEST_F(
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
 
   auto* expr = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
       "g");
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -816,16 +738,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
 
   auto* expr = IndexAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
       Expr(1));
-
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -868,9 +786,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
 
   auto* lhs =
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
@@ -878,8 +794,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   auto* assign =
       create<ast::AssignmentStatement>(lhs, vec3<f32>(1.f, 2.f, 3.f));
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -924,9 +839,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Var("data", ast::StorageClass::kStorage, pre_struct);
-  AST().AddGlobalVariable(coord_var);
-  td.RegisterVariableForTesting(coord_var);
+  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
 
   auto* lhs = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
@@ -935,8 +848,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
 
-  ASSERT_TRUE(td.Determine()) << td.error();
-  ASSERT_TRUE(td.DetermineResultType(assign));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 
@@ -950,12 +862,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_Swizzle_xyz) {
-  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
-  td.RegisterVariableForTesting(vec);
+  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
 
   auto* expr = MemberAccessor("my_vec", "xyz");
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
@@ -964,12 +874,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_Swizzle_gbr) {
-  auto* vec = Var("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
-  td.RegisterVariableForTesting(vec);
+  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
 
   auto* expr = MemberAccessor("my_vec", "gbr");
-
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();

@@ -39,14 +39,12 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
-  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
-                  ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(v);
+  auto* v = GlobalConst("var", ast::StorageClass::kOutput, ty.f32(), init,
+                        ast::VariableDecorationList{});
 
   auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -64,11 +62,10 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-  auto* v = Var("var", ast::StorageClass::kOutput, ty.f32());
-  td.RegisterVariableForTesting(v);
+  auto* v = Global("var", ast::StorageClass::kOutput, ty.f32());
 
   auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -87,14 +84,12 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
-  EXPECT_TRUE(td.DetermineResultType(init)) << td.error();
 
   auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
                   ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(v);
 
   auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(v, expr);
 
   spirv::Builder& b = Build();
 
@@ -113,10 +108,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
   auto* v = Var("var", ast::StorageClass::kNone, ty.f32());
-  td.RegisterVariableForTesting(v);
-
   auto* expr = Expr("var");
-  ASSERT_TRUE(td.DetermineResultType(expr));
+  WrapInFunction(v, expr);
 
   spirv::Builder& b = Build();
 
@@ -138,11 +131,10 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-  auto* var = Var("var", ast::StorageClass::kPrivate, ty.i32());
-  td.RegisterVariableForTesting(var);
+  auto* var = Global("var", ast::StorageClass::kPrivate, ty.i32());
 
   auto* expr = Add("var", "var");
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
@@ -164,12 +156,11 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-  auto* var = Const("var", ast::StorageClass::kNone, ty.i32(), Expr(2),
-                    ast::VariableDecorationList{});
-  td.RegisterVariableForTesting(var);
+  auto* var = GlobalConst("var", ast::StorageClass::kNone, ty.i32(), Expr(2),
+                          ast::VariableDecorationList{});
 
   auto* expr = Add("var", "var");
-  ASSERT_TRUE(td.DetermineResultType(expr)) << td.error();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
