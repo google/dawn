@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
 
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_TRUE(e->type()->Is<type::F32>());
-  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
   EXPECT_EQ(e->source().range.begin.column, 10u);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_TRUE(e->type()->Is<type::F32>());
-  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
   EXPECT_EQ(e->source().range.begin.column, 10u);
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->type(), nullptr);
   EXPECT_TRUE(e->type()->Is<type::F32>());
-  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
   EXPECT_EQ(e->source().range.begin.column, 35u);
@@ -117,7 +117,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->type(), nullptr);
   EXPECT_TRUE(e->type()->Is<type::F32>());
-  EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
   EXPECT_EQ(e->source().range.begin.column, 38u);

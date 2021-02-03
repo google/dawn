@@ -19,6 +19,7 @@
 #include "src/ast/constant_id_decoration.h"
 #include "src/clone_context.h"
 #include "src/program_builder.h"
+#include "src/semantic/variable.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::ast::Variable);
 
@@ -38,7 +39,7 @@ Variable::Variable(const Source& source,
       is_const_(is_const),
       constructor_(constructor),
       decorations_(std::move(decorations)),
-      storage_class_(sc) {}
+      declared_storage_class_(sc) {}
 
 Variable::Variable(Variable&&) = default;
 
@@ -91,10 +92,10 @@ uint32_t Variable::constant_id() const {
 }
 
 Variable* Variable::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Variable>(ctx->Clone(source()), ctx->Clone(symbol_),
-                                    storage_class(), ctx->Clone(type()),
-                                    is_const_, ctx->Clone(constructor()),
-                                    ctx->Clone(decorations_));
+  return ctx->dst->create<Variable>(
+      ctx->Clone(source()), ctx->Clone(symbol_), declared_storage_class(),
+      ctx->Clone(type()), is_const_, ctx->Clone(constructor()),
+      ctx->Clone(decorations_));
 }
 
 bool Variable::IsValid() const {
@@ -110,13 +111,15 @@ bool Variable::IsValid() const {
   return true;
 }
 
-void Variable::info_to_str(const semantic::Info&,
+void Variable::info_to_str(const semantic::Info& sem,
                            std::ostream& out,
                            size_t indent) const {
+  auto* var_sem = sem.Get(this);
   make_indent(out, indent);
   out << symbol_.to_str() << std::endl;
   make_indent(out, indent);
-  out << storage_class_ << std::endl;
+  out << (var_sem ? var_sem->StorageClass() : declared_storage_class())
+      << std::endl;
   make_indent(out, indent);
   out << type_->type_name() << std::endl;
 }

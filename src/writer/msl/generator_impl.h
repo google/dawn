@@ -221,7 +221,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to generate
   /// @param skip_constructor set true if the constructor should be skipped
   /// @returns true if the variable was emitted
-  bool EmitVariable(ast::Variable* var, bool skip_constructor);
+  bool EmitVariable(const semantic::Variable* var, bool skip_constructor);
   /// Handles generating a program scope constant variable
   /// @param var the variable to emit
   /// @returns true if the variable was emitted
@@ -256,7 +256,7 @@ class GeneratorImpl : public TextGenerator {
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct
-  bool global_is_in_struct(ast::Variable* var) const;
+  bool global_is_in_struct(const semantic::Variable* var) const;
 
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
@@ -283,7 +283,7 @@ class GeneratorImpl : public TextGenerator {
   }
 
   Namer namer_;
-  ScopeStack<ast::Variable*> global_variables_;
+  ScopeStack<const semantic::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   const Program* program_ = nullptr;

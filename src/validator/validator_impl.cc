@@ -31,6 +31,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/semantic/expression.h"
+#include "src/semantic/variable.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -336,19 +337,26 @@ bool ValidatorImpl::ValidateConstructedTypes(
 bool ValidatorImpl::ValidateGlobalVariables(
     const ast::VariableList& global_vars) {
   for (auto* var : global_vars) {
+    auto* sem = program_->Sem().Get(var);
+    if (!sem) {
+      add_error(var->source(), "no semantic information for variable '" +
+                                   program_->Symbols().NameFor(var->symbol()) +
+                                   "'");
+      return false;
+    }
+
     if (variable_stack_.has(var->symbol())) {
       add_error(var->source(), "v-0011",
                 "redeclared global identifier '" +
                     program_->Symbols().NameFor(var->symbol()) + "'");
       return false;
     }
-    if (!var->is_const() && var->storage_class() == ast::StorageClass::kNone) {
+    if (!var->is_const() && sem->StorageClass() == ast::StorageClass::kNone) {
       add_error(var->source(), "v-0022",
                 "global variables must have a storage class");
       return false;
     }
-    if (var->is_const() &&
-        !(var->storage_class() == ast::StorageClass::kNone)) {
+    if (var->is_const() && !(sem->StorageClass() == ast::StorageClass::kNone)) {
       add_error(var->source(), "v-global01",
                 "global constants shouldn't have a storage class");
       return false;

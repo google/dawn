@@ -66,23 +66,6 @@ class TypeDeterminer {
   /// @returns true if the type determiner was successful
   bool Determine();
 
-  /// Creates the semantic::Function nodes and adds them to the semantic::Info
-  /// of the ProgramBuilder.
-  void CreateSemanticFunctions() const;
-
-  /// Retrieves information for the requested import.
-  /// @param src the source of the import
-  /// @param path the import path
-  /// @param name the method name to get information on
-  /// @param params the parameters to the method call
-  /// @param id out parameter for the external call ID. Must not be a nullptr.
-  /// @returns the return type of `name` in `path` or nullptr on error.
-  type::Type* GetImportData(const Source& src,
-                            const std::string& path,
-                            const std::string& name,
-                            const ast::ExpressionList& params,
-                            uint32_t* id);
-
   /// Sets the intrinsic data information for the identifier if needed
   /// @param ident the identifier expression
   /// @returns true if an intrinsic was set
@@ -99,6 +82,7 @@ class TypeDeterminer {
         set.emplace(val);
       }
     }
+    size_t size() const { return vector.size(); }
     ConstIterator begin() const { return vector.begin(); }
     ConstIterator end() const { return vector.end(); }
     operator const std::vector<T> &() const { return vector; }
@@ -110,15 +94,30 @@ class TypeDeterminer {
 
   /// Structure holding semantic information about a function.
   /// Used to build the semantic::Function nodes at the end of resolving.
+  struct VariableInfo {
+    explicit VariableInfo(ast::Variable* decl);
+    ~VariableInfo();
+
+    ast::Variable* const declaration;
+    ast::StorageClass storage_class;
+  };
+
+  /// Structure holding semantic information about a function.
+  /// Used to build the semantic::Function nodes at the end of resolving.
   struct FunctionInfo {
     explicit FunctionInfo(ast::Function* decl);
     ~FunctionInfo();
 
     ast::Function* const declaration;
-    UniqueVector<ast::Variable*> referenced_module_vars;
-    UniqueVector<ast::Variable*> local_referenced_module_vars;
+    UniqueVector<VariableInfo*> referenced_module_vars;
+    UniqueVector<VariableInfo*> local_referenced_module_vars;
     UniqueVector<Symbol> ancestor_entry_points;
   };
+
+  /// Determines type information for the program, without creating final the
+  /// semantic nodes.
+  /// @returns true if the determination was successful
+  bool DetermineInternal();
 
   /// Determines type information for functions
   /// @param funcs the functions to check
@@ -154,8 +153,25 @@ class TypeDeterminer {
   /// @returns false on error
   bool DetermineStorageTextureSubtype(type::StorageTexture* tex);
 
+  /// Creates the nodes and adds them to the semantic::Info mappings of the
+  /// ProgramBuilder.
+  void CreateSemanticNodes() const;
+
+  /// Retrieves information for the requested import.
+  /// @param src the source of the import
+  /// @param path the import path
+  /// @param name the method name to get information on
+  /// @param params the parameters to the method call
+  /// @param id out parameter for the external call ID. Must not be a nullptr.
+  /// @returns the return type of `name` in `path` or nullptr on error.
+  type::Type* GetImportData(const Source& src,
+                            const std::string& path,
+                            const std::string& name,
+                            const ast::ExpressionList& params,
+                            uint32_t* id);
+
   void set_error(const Source& src, const std::string& msg);
-  void set_referenced_from_function_if_needed(ast::Variable* var, bool local);
+  void set_referenced_from_function_if_needed(VariableInfo* var, bool local);
   void set_entry_points(const Symbol& fn_sym, Symbol ep_sym);
 
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
@@ -168,6 +184,8 @@ class TypeDeterminer {
                           ast::CallExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
+
+  VariableInfo* CreateVariableInfo(ast::Variable*);
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
@@ -183,10 +201,12 @@ class TypeDeterminer {
 
   ProgramBuilder* builder_;
   std::string error_;
-  ScopeStack<ast::Variable*> variable_stack_;
+  ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;
+  std::unordered_map<ast::Variable*, VariableInfo*> variable_to_info_;
   FunctionInfo* current_function_ = nullptr;
+  BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
 
   // Map from caller functions to callee functions.

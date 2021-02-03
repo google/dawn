@@ -61,6 +61,7 @@
 #include "src/program.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -462,15 +463,15 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
   for (const auto* var : func_sem->ReferencedModuleVariables()) {
     // For SPIR-V 1.3 we only output Input/output variables. If we update to
     // SPIR-V 1.4 or later this should be all variables.
-    if (var->storage_class() != ast::StorageClass::kInput &&
-        var->storage_class() != ast::StorageClass::kOutput) {
+    if (var->StorageClass() != ast::StorageClass::kInput &&
+        var->StorageClass() != ast::StorageClass::kOutput) {
       continue;
     }
 
     uint32_t var_id;
-    if (!scope_stack_.get(var->symbol(), &var_id)) {
+    if (!scope_stack_.get(var->Declaration()->symbol(), &var_id)) {
       error_ = "unable to find ID for global variable: " +
-               builder_.Symbols().NameFor(var->symbol());
+               builder_.Symbols().NameFor(var->Declaration()->symbol());
       return false;
     }
 
@@ -700,6 +701,8 @@ bool Builder::GenerateStore(uint32_t to, uint32_t from) {
 }
 
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
+  auto* sem = builder_.Sem().Get(var);
+
   uint32_t init_id = 0;
   if (var->has_constructor()) {
     if (!var->constructor()->Is<ast::ConstructorExpression>()) {
@@ -731,9 +734,9 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   auto result = result_op();
   auto var_id = result.to_i();
 
-  auto sc = var->storage_class() == ast::StorageClass::kNone
+  auto sc = sem->StorageClass() == ast::StorageClass::kNone
                 ? ast::StorageClass::kPrivate
-                : var->storage_class();
+                : sem->StorageClass();
 
   type::Pointer pt(var->type(), sc);
   auto type_id = GenerateTypeIfNeeded(&pt);
@@ -799,9 +802,9 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
         return 0;
       }
       ops.push_back(Operand::Int(init_id));
-    } else if (var->storage_class() == ast::StorageClass::kPrivate ||
-               var->storage_class() == ast::StorageClass::kNone ||
-               var->storage_class() == ast::StorageClass::kOutput) {
+    } else if (sem->StorageClass() == ast::StorageClass::kPrivate ||
+               sem->StorageClass() == ast::StorageClass::kNone ||
+               sem->StorageClass() == ast::StorageClass::kOutput) {
       ast::NullLiteral nl(Source{}, type);
       init_id = GenerateLiteralIfNeeded(var, &nl);
       if (init_id == 0) {

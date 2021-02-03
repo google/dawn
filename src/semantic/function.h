@@ -28,7 +28,6 @@ namespace tint {
 namespace ast {
 class BindingDecoration;
 class GroupDecoration;
-class Variable;
 class LocationDecoration;
 class BuiltinDecoration;
 }  // namespace ast
@@ -37,6 +36,8 @@ class Type;
 }  // namespace type
 
 namespace semantic {
+
+class Variable;
 
 /// Function holds the semantic information for function nodes.
 class Function : public Castable<Function, Node> {
@@ -54,8 +55,8 @@ class Function : public Castable<Function, Node> {
   /// @param local_referenced_module_vars the locally referenced module
   /// variables
   /// @param ancestor_entry_points the ancestor entry points
-  explicit Function(std::vector<ast::Variable*> referenced_module_vars,
-                    std::vector<ast::Variable*> local_referenced_module_vars,
+  explicit Function(std::vector<const Variable*> referenced_module_vars,
+                    std::vector<const Variable*> local_referenced_module_vars,
                     std::vector<Symbol> ancestor_entry_points);
 
   /// Destructor
@@ -64,11 +65,11 @@ class Function : public Castable<Function, Node> {
   /// Note: If this function calls other functions, the return will also include
   /// all of the referenced variables from the callees.
   /// @returns the referenced module variables
-  const std::vector<ast::Variable*>& ReferencedModuleVariables() const {
+  const std::vector<const Variable*>& ReferencedModuleVariables() const {
     return referenced_module_vars_;
   }
   /// @returns the locally referenced module variables
-  const std::vector<ast::Variable*>& LocalReferencedModuleVariables() const {
+  const std::vector<const Variable*>& LocalReferencedModuleVariables() const {
     return local_referenced_module_vars_;
   }
   /// @returns the ancestor entry points
@@ -77,53 +78,53 @@ class Function : public Castable<Function, Node> {
   }
   /// Retrieves any referenced location variables
   /// @returns the <variable, decoration> pair.
-  const std::vector<std::pair<ast::Variable*, ast::LocationDecoration*>>
+  const std::vector<std::pair<const Variable*, ast::LocationDecoration*>>
   ReferencedLocationVariables() const;
 
   /// Retrieves any referenced builtin variables
   /// @returns the <variable, decoration> pair.
-  const std::vector<std::pair<ast::Variable*, ast::BuiltinDecoration*>>
+  const std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
   ReferencedBuiltinVariables() const;
 
   /// Retrieves any referenced uniform variables. Note, the variables must be
   /// decorated with both binding and group decorations.
   /// @returns the referenced uniforms
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedUniformVariables() const;
 
   /// Retrieves any referenced storagebuffer variables. Note, the variables
   /// must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedStoragebufferVariables() const;
 
   /// Retrieves any referenced regular Sampler variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedSamplerVariables() const;
 
   /// Retrieves any referenced comparison Sampler variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedComparisonSamplerVariables() const;
 
   /// Retrieves any referenced sampled textures variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedSampledTextureVariables() const;
 
   /// Retrieves any referenced multisampled textures variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedMultisampledTextureVariables() const;
 
   /// Retrieves any locally referenced builtin variables
   /// @returns the <variable, decoration> pairs.
-  const std::vector<std::pair<ast::Variable*, ast::BuiltinDecoration*>>
+  const std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
   LocalReferencedBuiltinVariables() const;
 
   /// Checks if the given entry point is an ancestor
@@ -132,13 +133,13 @@ class Function : public Castable<Function, Node> {
   bool HasAncestorEntryPoint(Symbol sym) const;
 
  private:
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedSamplerVariablesImpl(type::SamplerKind kind) const;
-  const std::vector<std::pair<ast::Variable*, BindingInfo>>
+  const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
-  std::vector<ast::Variable*> const referenced_module_vars_;
-  std::vector<ast::Variable*> const local_referenced_module_vars_;
+  std::vector<const Variable*> const referenced_module_vars_;
+  std::vector<const Variable*> const local_referenced_module_vars_;
   std::vector<Symbol> const ancestor_entry_points_;
 };
 

@@ -58,7 +58,6 @@ Transform::Output EmitVertexPointSize::Run(const Program* in) {
       false,                                  // is_const
       nullptr,                                // constructor
       ast::VariableDecorationList{
-          // decorations
           out.create<ast::BuiltinDecoration>(Source{},
                                              ast::Builtin::kPointSize),
       });

@@ -59,6 +59,7 @@
 #include "src/ast/workgroup_decoration.h"
 #include "src/program.h"
 #include "src/semantic/function.h"
+#include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -148,7 +149,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
 
   bool found_func_variable = false;
   for (auto* var : program_->Sem().Get(func)->ReferencedModuleVariables()) {
-    if (!EmitVariable(var)) {
+    if (!EmitVariable(var->Declaration())) {
       return false;
     }
     found_func_variable = true;
@@ -583,9 +584,11 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
 }
 
 bool GeneratorImpl::EmitVariable(ast::Variable* var) {
+  auto* sem = program_->Sem().Get(var);
+
   make_indent();
 
-  if (!var->decorations().empty() && !EmitVariableDecorations(var)) {
+  if (!var->decorations().empty() && !EmitVariableDecorations(sem)) {
     return false;
   }
 
@@ -593,9 +596,9 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     out_ << "const";
   } else {
     out_ << "var";
-    if (var->storage_class() != ast::StorageClass::kNone &&
-        var->storage_class() != ast::StorageClass::kFunction) {
-      out_ << "<" << var->storage_class() << ">";
+    if (sem->StorageClass() != ast::StorageClass::kNone &&
+        sem->StorageClass() != ast::StorageClass::kFunction) {
+      out_ << "<" << sem->StorageClass() << ">";
     }
   }
 
@@ -615,10 +618,12 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   return true;
 }
 
-bool GeneratorImpl::EmitVariableDecorations(ast::Variable* var) {
+bool GeneratorImpl::EmitVariableDecorations(const semantic::Variable* var) {
+  auto* decl = var->Declaration();
+
   out_ << "[[";
   bool first = true;
-  for (auto* deco : var->decorations()) {
+  for (auto* deco : decl->decorations()) {
     if (!first) {
       out_ << ", ";
     }

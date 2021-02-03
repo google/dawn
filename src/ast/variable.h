@@ -84,7 +84,7 @@ class Variable : public Castable<Variable, Node> {
   /// Create a variable
   /// @param source the variable source
   /// @param sym the variable symbol
-  /// @param sc the variable storage class
+  /// @param sc the declared storage class
   /// @param type the value type
   /// @param is_const true if the variable is const
   /// @param constructor the constructor expression
@@ -107,12 +107,10 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the variable's type.
   type::Type* type() const { return type_; }
 
-  /// Sets the storage class
-  /// @param sc the storage class
-  void set_storage_class(StorageClass sc) { storage_class_ = sc; }
-  /// @returns the storage class
-  StorageClass storage_class() const { return storage_class_; }
-
+  /// @returns the declared storage class
+  StorageClass declared_storage_class() const {
+    return declared_storage_class_;
+  }
   /// @returns the constructor expression or nullptr if none set
   Expression* constructor() const { return constructor_; }
   /// @returns true if the variable has an constructor
@@ -126,7 +124,7 @@ class Variable : public Castable<Variable, Node> {
 
   /// @returns true if the decorations include a LocationDecoration
   bool HasLocationDecoration() const;
-  /// @returns true if the deocrations include a BuiltinDecoration
+  /// @returns true if the decorations include a BuiltinDecoration
   bool HasBuiltinDecoration() const;
   /// @returns true if the decorations include a ConstantIdDecoration
   bool HasConstantIdDecoration() const;
@@ -182,8 +180,7 @@ class Variable : public Castable<Variable, Node> {
   bool const is_const_;
   Expression* const constructor_;
   VariableDecorationList const decorations_;
-
-  StorageClass storage_class_ = StorageClass::kNone;  // Semantic info
+  StorageClass const declared_storage_class_;
 };
 
 /// A list of variables

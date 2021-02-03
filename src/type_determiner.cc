@@ -45,6 +45,7 @@
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/variable.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
 #include "src/type/depth_texture_type.h"
@@ -88,13 +89,13 @@ void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
   error_ += msg;
 }
 
-void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
+void TypeDeterminer::set_referenced_from_function_if_needed(VariableInfo* var,
                                                             bool local) {
   if (current_function_ == nullptr) {
     return;
   }
-  if (var->storage_class() == ast::StorageClass::kNone ||
-      var->storage_class() == ast::StorageClass::kFunction) {
+  if (var->storage_class == ast::StorageClass::kNone ||
+      var->storage_class == ast::StorageClass::kFunction) {
     return;
   }
 
@@ -105,7 +106,18 @@ void TypeDeterminer::set_referenced_from_function_if_needed(ast::Variable* var,
 }
 
 bool TypeDeterminer::Determine() {
+  bool result = DetermineInternal();
+
+  // Even if resolving failed, create all the semantic nodes for information we
+  // did generate.
+  CreateSemanticNodes();
+
+  return result;
+}
+
+bool TypeDeterminer::DetermineInternal() {
   std::vector<type::StorageTexture*> storage_textures;
+
   for (auto& it : builder_->Types().types()) {
     if (auto* storage =
             it.second->UnwrapIfNeeded()->As<type::StorageTexture>()) {
@@ -122,7 +134,7 @@ bool TypeDeterminer::Determine() {
   }
 
   for (auto* var : builder_->AST().GlobalVariables()) {
-    variable_stack_.set_global(var->symbol(), var);
+    variable_stack_.set_global(var->symbol(), CreateVariableInfo(var));
 
     if (var->has_constructor()) {
       if (!DetermineResultType(var->constructor())) {
@@ -135,8 +147,8 @@ bool TypeDeterminer::Determine() {
     return false;
   }
 
-  // Walk over the caller to callee information and update functions with which
-  // entry points call those functions.
+  // Walk over the caller to callee information and update functions with
+  // which entry points call those functions.
   for (auto* func : builder_->AST().Functions()) {
     if (!func->IsEntryPoint()) {
       continue;
@@ -145,8 +157,6 @@ bool TypeDeterminer::Determine() {
       set_entry_points(callee, func->symbol());
     }
   }
-
-  CreateSemanticFunctions();
 
   return true;
 }
@@ -170,15 +180,13 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 }
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
-  auto* info = function_infos_.Create<FunctionInfo>(func);
-  symbol_to_function_[func->symbol()] = info;
-  function_to_info_.emplace(func, info);
-
-  current_function_ = info;
+  current_function_ = function_infos_.Create<FunctionInfo>(func);
+  symbol_to_function_[func->symbol()] = current_function_;
+  function_to_info_.emplace(func, current_function_);
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
-    variable_stack_.set(param->symbol(), param);
+    variable_stack_.set(param->symbol(), CreateVariableInfo(param));
   }
 
   if (!DetermineStatements(func->body())) {
@@ -211,22 +219,26 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
   }
 
   auto* var = var_decl->variable();
+
+  auto* info = CreateVariableInfo(var);
+  variable_to_info_.emplace(var, info);
+
   // Nothing to do for const
   if (var->is_const()) {
     return true;
   }
 
-  if (var->storage_class() == ast::StorageClass::kFunction) {
+  if (info->storage_class == ast::StorageClass::kFunction) {
     return true;
   }
 
-  if (var->storage_class() != ast::StorageClass::kNone) {
+  if (info->storage_class != ast::StorageClass::kNone) {
     set_error(stmt->source(),
               "function variable has a non-function storage class");
     return false;
   }
 
-  var->set_storage_class(ast::StorageClass::kFunction);
+  info->storage_class = ast::StorageClass::kFunction;
   return true;
 }
 
@@ -291,7 +303,8 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-    variable_stack_.set(v->variable()->symbol(), v->variable());
+    variable_stack_.set(v->variable()->symbol(),
+                        variable_to_info_.at(v->variable()));
     return DetermineResultType(v->variable()->constructor());
   }
 
@@ -816,17 +829,17 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
 
 bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   auto symbol = expr->symbol();
-  ast::Variable* var;
+  VariableInfo* var;
   if (variable_stack_.get(symbol, &var)) {
     // A constant is the type, but a variable is always a pointer so synthesize
     // the pointer around the variable type.
-    if (var->is_const()) {
-      SetType(expr, var->type());
-    } else if (var->type()->Is<type::Pointer>()) {
-      SetType(expr, var->type());
+    if (var->declaration->is_const()) {
+      SetType(expr, var->declaration->type());
+    } else if (var->declaration->type()->Is<type::Pointer>()) {
+      SetType(expr, var->declaration->type());
     } else {
-      SetType(expr, builder_->create<type::Pointer>(var->type(),
-                                                    var->storage_class()));
+      SetType(expr, builder_->create<type::Pointer>(var->declaration->type(),
+                                                    var->storage_class));
     }
 
     set_referenced_from_function_if_needed(var, true);
@@ -1146,6 +1159,13 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
+TypeDeterminer::VariableInfo* TypeDeterminer::CreateVariableInfo(
+    ast::Variable* var) {
+  auto* info = variable_infos_.Create(var);
+  variable_to_info_.emplace(var, info);
+  return info;
+}
+
 bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
   if (tex->type() != nullptr) {
     return true;
@@ -1211,21 +1231,39 @@ void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) const {
                              builder_->create<semantic::Expression>(type));
 }
 
-void TypeDeterminer::CreateSemanticFunctions() const {
+void TypeDeterminer::CreateSemanticNodes() const {
+  auto& sem = builder_->Sem();
+
+  for (auto it : variable_to_info_) {
+    auto* var = it.first;
+    auto* info = it.second;
+    sem.Add(var,
+            builder_->create<semantic::Variable>(var, info->storage_class));
+  }
+
+  auto remap_vars = [&sem](const std::vector<VariableInfo*>& in) {
+    std::vector<const semantic::Variable*> out;
+    out.reserve(in.size());
+    for (auto* info : in) {
+      out.emplace_back(sem.Get(info->declaration));
+    }
+    return out;
+  };
+
   for (auto it : function_to_info_) {
     auto* func = it.first;
     auto* info = it.second;
-    if (builder_->Sem().Get(func)) {
-      // ast::Function already has a semantic::Function node.
-      // This is likely via explicit call to DetermineXXX() in test.
-      continue;
-    }
-    builder_->Sem().Add(func, builder_->create<semantic::Function>(
-                                  info->referenced_module_vars,
-                                  info->local_referenced_module_vars,
-                                  info->ancestor_entry_points));
+    sem.Add(func, builder_->create<semantic::Function>(
+                      remap_vars(info->referenced_module_vars),
+                      remap_vars(info->local_referenced_module_vars),
+                      info->ancestor_entry_points));
   }
 }
+
+TypeDeterminer::VariableInfo::VariableInfo(ast::Variable* decl)
+    : declaration(decl), storage_class(decl->declared_storage_class()) {}
+
+TypeDeterminer::VariableInfo::~VariableInfo() = default;
 
 TypeDeterminer::FunctionInfo::FunctionInfo(ast::Function* decl)
     : declaration(decl) {}

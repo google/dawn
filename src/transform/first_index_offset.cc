@@ -70,7 +70,7 @@ ast::Variable* clone_variable_with_new_name(CloneContext* ctx,
   return ctx->dst->create<ast::Variable>(
       ctx->Clone(in->source()),                // source
       ctx->dst->Symbols().Register(new_name),  // symbol
-      in->storage_class(),                     // storage_class
+      in->declared_storage_class(),            // declared_storage_class
       ctx->Clone(in->type()),                  // type
       in->is_const(),                          // is_const
       ctx->Clone(in->constructor()),           // constructor
@@ -226,7 +226,7 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ProgramBuilder* dst) {
       ast::VariableDecorationList{
           dst->create<ast::BindingDecoration>(Source{}, binding_),
           dst->create<ast::GroupDecoration>(Source{}, group_),
-      });  // decorations
+      });
 
   dst->AST().AddGlobalVariable(idx_var);
 

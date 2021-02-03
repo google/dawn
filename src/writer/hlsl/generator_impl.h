@@ -338,7 +338,7 @@ class GeneratorImpl {
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct
-  bool global_is_in_struct(ast::Variable* var) const;
+  bool global_is_in_struct(const semantic::Variable* var) const;
   /// Creates a text string representing the index into a storage buffer
   /// @param pre the pre stream
   /// @param expr the expression to use as the index
@@ -400,7 +400,7 @@ class GeneratorImpl {
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   uint32_t loop_emission_counter_ = 0;
-  ScopeStack<ast::Variable*> global_variables_;
+  ScopeStack<const semantic::Variable*> global_variables_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;
 

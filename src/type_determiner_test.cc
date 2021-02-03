@@ -53,6 +53,7 @@
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/variable.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -689,11 +690,11 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
 
   const auto& vars = func_sem->ReferencedModuleVariables();
   ASSERT_EQ(vars.size(), 5u);
-  EXPECT_EQ(vars[0], out_var);
-  EXPECT_EQ(vars[1], in_var);
-  EXPECT_EQ(vars[2], wg_var);
-  EXPECT_EQ(vars[3], sb_var);
-  EXPECT_EQ(vars[4], priv_var);
+  EXPECT_EQ(vars[0]->Declaration(), out_var);
+  EXPECT_EQ(vars[1]->Declaration(), in_var);
+  EXPECT_EQ(vars[2]->Declaration(), wg_var);
+  EXPECT_EQ(vars[3]->Declaration(), sb_var);
+  EXPECT_EQ(vars[4]->Declaration(), priv_var);
 }
 
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
@@ -726,11 +727,11 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   const auto& vars = func2_sem->ReferencedModuleVariables();
   ASSERT_EQ(vars.size(), 5u);
-  EXPECT_EQ(vars[0], out_var);
-  EXPECT_EQ(vars[1], in_var);
-  EXPECT_EQ(vars[2], wg_var);
-  EXPECT_EQ(vars[3], sb_var);
-  EXPECT_EQ(vars[4], priv_var);
+  EXPECT_EQ(vars[0]->Declaration(), out_var);
+  EXPECT_EQ(vars[1]->Declaration(), in_var);
+  EXPECT_EQ(vars[2]->Declaration(), wg_var);
+  EXPECT_EQ(vars[3]->Declaration(), sb_var);
+  EXPECT_EQ(vars[4]->Declaration(), priv_var);
 }
 
 TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
@@ -1490,7 +1491,7 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  EXPECT_EQ(var->storage_class(), ast::StorageClass::kFunction);
+  EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kFunction);
 }
 
 TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
@@ -1501,7 +1502,7 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  EXPECT_EQ(var->storage_class(), ast::StorageClass::kNone);
+  EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kNone);
 }
 
 TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {

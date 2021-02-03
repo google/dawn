@@ -35,6 +35,7 @@
 #include "src/clone_context.h"
 #include "src/program.h"
 #include "src/program_builder.h"
+#include "src/semantic/variable.h"
 #include "src/type/array_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
@@ -150,7 +151,8 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
 
   // Look for an existing vertex index builtin
   for (auto* v : ctx.src->AST().GlobalVariables()) {
-    if (v->storage_class() != ast::StorageClass::kInput) {
+    auto* sem = ctx.src->Sem().Get(v);
+    if (sem->StorageClass() != ast::StorageClass::kInput) {
       continue;
     }
 
@@ -196,7 +198,8 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
 
   // Look for an existing instance index builtin
   for (auto* v : ctx.src->AST().GlobalVariables()) {
-    if (v->storage_class() != ast::StorageClass::kInput) {
+    auto* sem = ctx.src->Sem().Get(v);
+    if (sem->StorageClass() != ast::StorageClass::kInput) {
       continue;
     }
 
@@ -229,7 +232,8 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
 
 void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
   for (auto* v : ctx.src->AST().GlobalVariables()) {
-    if (v->storage_class() != ast::StorageClass::kInput) {
+    auto* sem = ctx.src->Sem().Get(v);
+    if (sem->StorageClass() != ast::StorageClass::kInput) {
       continue;
     }
 

@@ -47,6 +47,7 @@
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -194,7 +195,8 @@ bool GeneratorImpl::Generate(std::ostream& out) {
 }
 
 void GeneratorImpl::register_global(ast::Variable* global) {
-  global_variables_.set(global->symbol(), global);
+  auto* sem = builder_.Sem().Get(global);
+  global_variables_.set(global->symbol(), sem);
 }
 
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
@@ -1134,10 +1136,11 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
   return false;
 }
 
-bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
-  if (var->HasLocationDecoration() || var->HasBuiltinDecoration()) {
-    return var->storage_class() == ast::StorageClass::kInput ||
-           var->storage_class() == ast::StorageClass::kOutput;
+bool GeneratorImpl::global_is_in_struct(const semantic::Variable* var) const {
+  if (var->Declaration()->HasLocationDecoration() ||
+      var->Declaration()->HasBuiltinDecoration()) {
+    return var->StorageClass() == ast::StorageClass::kInput ||
+           var->StorageClass() == ast::StorageClass::kOutput;
   }
   return false;
 }
@@ -1146,10 +1149,10 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
                                    std::ostream& out,
                                    ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
-  ast::Variable* var = nullptr;
+  const semantic::Variable* var = nullptr;
   if (global_variables_.get(ident->symbol(), &var)) {
     if (global_is_in_struct(var)) {
-      auto var_type = var->storage_class() == ast::StorageClass::kInput
+      auto var_type = var->StorageClass() == ast::StorageClass::kInput
                           ? VarType::kIn
                           : VarType::kOut;
       auto name = current_ep_var_name(var_type);
@@ -1230,14 +1233,14 @@ bool GeneratorImpl::has_referenced_in_var_needing_struct(
     const semantic::Function* func) {
   for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kInput) {
+    if (var->StorageClass() == ast::StorageClass::kInput) {
       return true;
     }
   }
 
   for (auto data : func->ReferencedBuiltinVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kInput) {
+    if (var->StorageClass() == ast::StorageClass::kInput) {
       return true;
     }
   }
@@ -1248,14 +1251,14 @@ bool GeneratorImpl::has_referenced_out_var_needing_struct(
     const semantic::Function* func) {
   for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kOutput) {
+    if (var->StorageClass() == ast::StorageClass::kOutput) {
       return true;
     }
   }
 
   for (auto data : func->ReferencedBuiltinVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kOutput) {
+    if (var->StorageClass() == ast::StorageClass::kOutput) {
       return true;
     }
   }
@@ -1266,16 +1269,16 @@ bool GeneratorImpl::has_referenced_var_needing_struct(
     const semantic::Function* func) {
   for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kOutput ||
-        var->storage_class() == ast::StorageClass::kInput) {
+    if (var->StorageClass() == ast::StorageClass::kOutput ||
+        var->StorageClass() == ast::StorageClass::kInput) {
       return true;
     }
   }
 
   for (auto data : func->ReferencedBuiltinVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kOutput ||
-        var->storage_class() == ast::StorageClass::kInput) {
+    if (var->StorageClass() == ast::StorageClass::kOutput ||
+        var->StorageClass() == ast::StorageClass::kInput) {
       return true;
     }
   }
@@ -1407,51 +1410,54 @@ bool GeneratorImpl::EmitEntryPointData(
 
   for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
+    auto* decl = var->Declaration();
     auto* deco = data.second;
 
-    if (var->storage_class() == ast::StorageClass::kInput) {
-      in_variables.push_back({var, deco});
-    } else if (var->storage_class() == ast::StorageClass::kOutput) {
-      outvariables.push_back({var, deco});
+    if (var->StorageClass() == ast::StorageClass::kInput) {
+      in_variables.push_back({decl, deco});
+    } else if (var->StorageClass() == ast::StorageClass::kOutput) {
+      outvariables.push_back({decl, deco});
     }
   }
 
   for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
+    auto* decl = var->Declaration();
     auto* deco = data.second;
 
-    if (var->storage_class() == ast::StorageClass::kInput) {
-      in_variables.push_back({var, deco});
-    } else if (var->storage_class() == ast::StorageClass::kOutput) {
-      outvariables.push_back({var, deco});
+    if (var->StorageClass() == ast::StorageClass::kInput) {
+      in_variables.push_back({decl, deco});
+    } else if (var->StorageClass() == ast::StorageClass::kOutput) {
+      outvariables.push_back({decl, deco});
     }
   }
 
   bool emitted_uniform = false;
   for (auto data : func_sem->ReferencedUniformVariables()) {
     auto* var = data.first;
+    auto* decl = var->Declaration();
     // TODO(dsinclair): We're using the binding to make up the buffer number but
     // we should instead be using a provided mapping that uses both buffer and
     // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
     auto* binding = data.second.binding;
     if (binding == nullptr) {
       error_ = "unable to find binding information for uniform: " +
-               builder_.Symbols().NameFor(var->symbol());
+               builder_.Symbols().NameFor(decl->symbol());
       return false;
     }
     // auto* set = data.second.set;
 
     // If the global has already been emitted we skip it, it's been emitted by
     // a previous entry point.
-    if (emitted_globals.count(var->symbol()) != 0) {
+    if (emitted_globals.count(decl->symbol()) != 0) {
       continue;
     }
-    emitted_globals.insert(var->symbol());
+    emitted_globals.insert(decl->symbol());
 
-    auto* type = var->type()->UnwrapIfNeeded();
+    auto* type = decl->type()->UnwrapIfNeeded();
     if (auto* strct = type->As<type::Struct>()) {
       out << "ConstantBuffer<" << builder_.Symbols().NameFor(strct->symbol())
-          << "> " << builder_.Symbols().NameFor(var->symbol())
+          << "> " << builder_.Symbols().NameFor(decl->symbol())
           << " : register(b" << binding->value() << ");" << std::endl;
     } else {
       // TODO(dsinclair): There is outstanding spec work to require all uniform
@@ -1460,7 +1466,7 @@ bool GeneratorImpl::EmitEntryPointData(
       // is not a block.
       // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
       //           https://github.com/gpuweb/gpuweb/issues/1008
-      auto name = "cbuffer_" + builder_.Symbols().NameFor(var->symbol());
+      auto name = "cbuffer_" + builder_.Symbols().NameFor(decl->symbol());
       out << "cbuffer " << name << " : register(b" << binding->value() << ") {"
           << std::endl;
 
@@ -1469,7 +1475,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, type, "")) {
         return false;
       }
-      out << " " << builder_.Symbols().NameFor(var->symbol()) << ";"
+      out << " " << builder_.Symbols().NameFor(decl->symbol()) << ";"
           << std::endl;
       decrement_indent();
       out << "};" << std::endl;
@@ -1484,16 +1490,17 @@ bool GeneratorImpl::EmitEntryPointData(
   bool emitted_storagebuffer = false;
   for (auto data : func_sem->ReferencedStoragebufferVariables()) {
     auto* var = data.first;
+    auto* decl = var->Declaration();
     auto* binding = data.second.binding;
 
     // If the global has already been emitted we skip it, it's been emitted by
     // a previous entry point.
-    if (emitted_globals.count(var->symbol()) != 0) {
+    if (emitted_globals.count(decl->symbol()) != 0) {
       continue;
     }
-    emitted_globals.insert(var->symbol());
+    emitted_globals.insert(decl->symbol());
 
-    auto* ac = var->type()->As<type::AccessControl>();
+    auto* ac = decl->type()->As<type::AccessControl>();
     if (ac == nullptr) {
       error_ = "access control type required for storage buffer";
       return false;
@@ -1502,7 +1509,7 @@ bool GeneratorImpl::EmitEntryPointData(
     if (ac->IsReadWrite()) {
       out << "RW";
     }
-    out << "ByteAddressBuffer " << builder_.Symbols().NameFor(var->symbol())
+    out << "ByteAddressBuffer " << builder_.Symbols().NameFor(decl->symbol())
         << " : register(u" << binding->value() << ");" << std::endl;
     emitted_storagebuffer = true;
   }
@@ -2069,11 +2076,11 @@ bool GeneratorImpl::is_storage_buffer_access(
 
   // Check if this is a storage buffer variable
   if (auto* ident = expr->structure()->As<ast::IdentifierExpression>()) {
-    ast::Variable* var = nullptr;
+    const semantic::Variable* var = nullptr;
     if (!global_variables_.get(ident->symbol(), &var)) {
       return false;
     }
-    return var->storage_class() == ast::StorageClass::kStorage;
+    return var->StorageClass() == ast::StorageClass::kStorage;
   } else if (auto* member = structure->As<ast::MemberAccessorExpression>()) {
     return is_storage_buffer_access(member);
   } else if (auto* array = structure->As<ast::ArrayAccessorExpression>()) {

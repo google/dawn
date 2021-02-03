@@ -30,6 +30,7 @@
 #include "src/ast/variable.h"
 #include "src/program.h"
 #include "src/semantic/function.h"
+#include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
 #include "src/type/f32_type.h"
@@ -66,14 +67,16 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
              entry_point.workgroup_size_z) = func->workgroup_size();
 
     for (auto* var : program_->Sem().Get(func)->ReferencedModuleVariables()) {
-      auto name = program_->Symbols().NameFor(var->symbol());
-      if (var->HasBuiltinDecoration()) {
+      auto* decl = var->Declaration();
+
+      auto name = program_->Symbols().NameFor(decl->symbol());
+      if (decl->HasBuiltinDecoration()) {
         continue;
       }
 
       StageVariable stage_variable;
       stage_variable.name = name;
-      auto* location_decoration = var->GetLocationDecoration();
+      auto* location_decoration = decl->GetLocationDecoration();
       if (location_decoration) {
         stage_variable.has_location_decoration = true;
         stage_variable.location_decoration = location_decoration->value();
@@ -81,9 +84,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         stage_variable.has_location_decoration = false;
       }
 
-      if (var->storage_class() == ast::StorageClass::kInput) {
+      if (var->StorageClass() == ast::StorageClass::kInput) {
         entry_point.input_variables.push_back(stage_variable);
-      } else if (var->storage_class() == ast::StorageClass::kOutput) {
+      } else if (var->StorageClass() == ast::StorageClass::kOutput) {
         entry_point.output_variables.push_back(stage_variable);
       }
     }
@@ -188,14 +191,14 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
 
   auto* func_sem = program_->Sem().Get(func);
   for (auto& ruv : func_sem->ReferencedUniformVariables()) {
-    ResourceBinding entry;
-    ast::Variable* var = nullptr;
-    semantic::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = ruv;
-    if (!var->type()->Is<type::AccessControl>()) {
+    auto* var = ruv.first;
+    auto* decl = var->Declaration();
+    auto binding_info = ruv.second;
+
+    if (!decl->type()->Is<type::AccessControl>()) {
       continue;
     }
-    auto* unwrapped_type = var->type()->UnwrapIfNeeded();
+    auto* unwrapped_type = decl->type()->UnwrapIfNeeded();
 
     auto* str = unwrapped_type->As<type::Struct>();
     if (str == nullptr) {
@@ -206,10 +209,11 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
       continue;
     }
 
+    ResourceBinding entry;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.min_buffer_binding_size =
-        var->type()->MinBufferBindingSize(type::MemoryLayout::kUniformBuffer);
+        decl->type()->MinBufferBindingSize(type::MemoryLayout::kUniformBuffer);
 
     result.push_back(entry);
   }
@@ -239,11 +243,9 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
 
   auto* func_sem = program_->Sem().Get(func);
   for (auto& rs : func_sem->ReferencedSamplerVariables()) {
-    ResourceBinding entry;
-    ast::Variable* var = nullptr;
-    semantic::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = rs;
+    auto binding_info = rs.second;
 
+    ResourceBinding entry;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
@@ -264,11 +266,9 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
 
   auto* func_sem = program_->Sem().Get(func);
   for (auto& rcs : func_sem->ReferencedComparisonSamplerVariables()) {
-    ResourceBinding entry;
-    ast::Variable* var = nullptr;
-    semantic::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = rcs;
+    auto binding_info = rcs.second;
 
+    ResourceBinding entry;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
@@ -314,12 +314,11 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
   auto* func_sem = program_->Sem().Get(func);
   std::vector<ResourceBinding> result;
   for (auto& rsv : func_sem->ReferencedStoragebufferVariables()) {
-    ResourceBinding entry;
-    ast::Variable* var = nullptr;
-    semantic::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = rsv;
+    auto* var = rsv.first;
+    auto* decl = var->Declaration();
+    auto binding_info = rsv.second;
 
-    auto* ac_type = var->type()->As<type::AccessControl>();
+    auto* ac_type = decl->type()->As<type::AccessControl>();
     if (ac_type == nullptr) {
       continue;
     }
@@ -328,14 +327,15 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    if (!var->type()->UnwrapIfNeeded()->Is<type::Struct>()) {
+    if (!decl->type()->UnwrapIfNeeded()->Is<type::Struct>()) {
       continue;
     }
 
+    ResourceBinding entry;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.min_buffer_binding_size =
-        var->type()->MinBufferBindingSize(type::MemoryLayout::kStorageBuffer);
+        decl->type()->MinBufferBindingSize(type::MemoryLayout::kStorageBuffer);
 
     result.push_back(entry);
   }
@@ -357,15 +357,15 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
       multisampled_only ? func_sem->ReferencedMultisampledTextureVariables()
                         : func_sem->ReferencedSampledTextureVariables();
   for (auto& ref : referenced_variables) {
-    ResourceBinding entry;
-    ast::Variable* var = nullptr;
-    semantic::Function::BindingInfo binding_info;
-    std::tie(var, binding_info) = ref;
+    auto* var = ref.first;
+    auto* decl = var->Declaration();
+    auto binding_info = ref.second;
 
+    ResourceBinding entry;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->type()->UnwrapIfNeeded()->As<type::Texture>();
+    auto* texture_type = decl->type()->UnwrapIfNeeded()->As<type::Texture>();
     switch (texture_type->dim()) {
       case type::TextureDimension::k1d:
         entry.dim = ResourceBinding::TextureDimension::k1d;

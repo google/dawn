@@ -24,6 +24,7 @@ namespace ast {
 
 class Expression;
 class Function;
+class Variable;
 
 }  // namespace ast
 
@@ -31,6 +32,7 @@ namespace semantic {
 
 class Expression;
 class Function;
+class Variable;
 
 /// TypeMappings is a struct that holds dummy `operator()` methods that's used
 /// by SemanticNodeTypeFor to map AST node types to their corresponding semantic
@@ -41,6 +43,7 @@ struct TypeMappings {
   //! @cond Doxygen_Suppress
   semantic::Expression* operator()(ast::Expression*);
   semantic::Function* operator()(ast::Function*);
+  semantic::Variable* operator()(ast::Variable*);
   //! @endcond
 };
 

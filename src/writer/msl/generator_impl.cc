@@ -52,6 +52,7 @@
 #include "src/program.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -120,7 +121,8 @@ bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
 
   for (auto* global : program_->AST().GlobalVariables()) {
-    global_variables_.set(global->symbol(), global);
+    auto* sem = program_->Sem().Get(global);
+    global_variables_.set(global->symbol(), sem);
   }
 
   for (auto* const ty : program_->AST().ConstructedTypes()) {
@@ -508,14 +510,14 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   auto* func_sem = program_->Sem().Get(func);
   for (const auto& data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
-    if (var->storage_class() != ast::StorageClass::kInput) {
+    if (var->StorageClass() != ast::StorageClass::kInput) {
       continue;
     }
     if (!first) {
       out_ << ", ";
     }
     first = false;
-    out_ << program_->Symbols().NameFor(var->symbol());
+    out_ << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
   for (const auto& data : func_sem->ReferencedUniformVariables()) {
@@ -524,7 +526,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << program_->Symbols().NameFor(var->symbol());
+    out_ << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
   for (const auto& data : func_sem->ReferencedStoragebufferVariables()) {
@@ -533,7 +535,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << ", ";
     }
     first = false;
-    out_ << program_->Symbols().NameFor(var->symbol());
+    out_ << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
   const auto& params = expr->params();
@@ -1033,10 +1035,10 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
     auto* var = data.first;
     auto* deco = data.second;
 
-    if (var->storage_class() == ast::StorageClass::kInput) {
-      in_locations.push_back({var, deco->value()});
-    } else if (var->storage_class() == ast::StorageClass::kOutput) {
-      out_variables.push_back({var, deco});
+    if (var->StorageClass() == ast::StorageClass::kInput) {
+      in_locations.push_back({var->Declaration(), deco->value()});
+    } else if (var->StorageClass() == ast::StorageClass::kOutput) {
+      out_variables.push_back({var->Declaration(), deco});
     }
   }
 
@@ -1044,8 +1046,8 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
     auto* var = data.first;
     auto* deco = data.second;
 
-    if (var->storage_class() == ast::StorageClass::kOutput) {
-      out_variables.push_back({var, deco});
+    if (var->StorageClass() == ast::StorageClass::kOutput) {
+      out_variables.push_back({var->Declaration(), deco});
     }
   }
 
@@ -1191,7 +1193,7 @@ bool GeneratorImpl::has_referenced_in_var_needing_struct(ast::Function* func) {
   auto* func_sem = program_->Sem().Get(func);
   for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kInput) {
+    if (var->StorageClass() == ast::StorageClass::kInput) {
       return true;
     }
   }
@@ -1203,14 +1205,14 @@ bool GeneratorImpl::has_referenced_out_var_needing_struct(ast::Function* func) {
 
   for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kOutput) {
+    if (var->StorageClass() == ast::StorageClass::kOutput) {
       return true;
     }
   }
 
   for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kOutput) {
+    if (var->StorageClass() == ast::StorageClass::kOutput) {
       return true;
     }
   }
@@ -1308,7 +1310,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
   for (const auto& data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
-    if (var->storage_class() != ast::StorageClass::kInput) {
+    if (var->StorageClass() != ast::StorageClass::kInput) {
       continue;
     }
     if (!first) {
@@ -1317,10 +1319,10 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     first = false;
 
     out_ << "thread ";
-    if (!EmitType(var->type(), "")) {
+    if (!EmitType(var->Declaration()->type(), "")) {
       return false;
     }
-    out_ << "& " << program_->Symbols().NameFor(var->symbol());
+    out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
   for (const auto& data : func_sem->ReferencedUniformVariables()) {
@@ -1332,10 +1334,10 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
     out_ << "constant ";
     // TODO(dsinclair): Can arrays be uniform? If so, fix this ...
-    if (!EmitType(var->type(), "")) {
+    if (!EmitType(var->Declaration()->type(), "")) {
       return false;
     }
-    out_ << "& " << program_->Symbols().NameFor(var->symbol());
+    out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
   for (const auto& data : func_sem->ReferencedStoragebufferVariables()) {
@@ -1345,7 +1347,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    auto* ac = var->type()->As<type::AccessControl>();
+    auto* ac = var->Declaration()->type()->As<type::AccessControl>();
     if (ac == nullptr) {
       error_ = "invalid type for storage buffer, expected access control";
       return false;
@@ -1358,7 +1360,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     if (!EmitType(ac->type(), "")) {
       return false;
     }
-    out_ << "& " << program_->Symbols().NameFor(var->symbol());
+    out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
   for (auto* v : func->params()) {
@@ -1447,7 +1449,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
   for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
-    if (var->storage_class() != ast::StorageClass::kInput) {
+    if (var->StorageClass() != ast::StorageClass::kInput) {
       continue;
     }
 
@@ -1458,7 +1460,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     auto* builtin = data.second;
 
-    if (!EmitType(var->type(), "")) {
+    if (!EmitType(var->Declaration()->type(), "")) {
       return false;
     }
 
@@ -1467,8 +1469,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
       error_ = "unknown builtin";
       return false;
     }
-    out_ << " " << program_->Symbols().NameFor(var->symbol()) << " [[" << attr
-         << "]]";
+    out_ << " " << program_->Symbols().NameFor(var->Declaration()->symbol())
+         << " [[" << attr << "]]";
   }
 
   for (auto data : func_sem->ReferencedUniformVariables()) {
@@ -1484,7 +1486,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     if (binding == nullptr) {
       error_ = "unable to find binding information for uniform: " +
-               program_->Symbols().NameFor(var->symbol());
+               program_->Symbols().NameFor(var->Declaration()->symbol());
       return false;
     }
     // auto* set = data.second.set;
@@ -1492,11 +1494,11 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     out_ << "constant ";
     // TODO(dsinclair): Can you have a uniform array? If so, this needs to be
     // updated to handle arrays property.
-    if (!EmitType(var->type(), "")) {
+    if (!EmitType(var->Declaration()->type(), "")) {
       return false;
     }
-    out_ << "& " << program_->Symbols().NameFor(var->symbol()) << " [[buffer("
-         << binding->value() << ")]]";
+    out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol())
+         << " [[buffer(" << binding->value() << ")]]";
   }
 
   for (auto data : func_sem->ReferencedStoragebufferVariables()) {
@@ -1512,7 +1514,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
-    auto* ac = var->type()->As<type::AccessControl>();
+    auto* ac = var->Declaration()->type()->As<type::AccessControl>();
     if (ac == nullptr) {
       error_ = "invalid type for storage buffer, expected access control";
       return false;
@@ -1525,8 +1527,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     if (!EmitType(ac->type(), "")) {
       return false;
     }
-    out_ << "& " << program_->Symbols().NameFor(var->symbol()) << " [[buffer("
-         << binding->value() << ")]]";
+    out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol())
+         << " [[buffer(" << binding->value() << ")]]";
   }
 
   out_ << ") {" << std::endl;
@@ -1563,23 +1565,23 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   return true;
 }
 
-bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
+bool GeneratorImpl::global_is_in_struct(const semantic::Variable* var) const {
   bool in_or_out_struct_has_location =
-      var != nullptr && var->HasLocationDecoration() &&
-      (var->storage_class() == ast::StorageClass::kInput ||
-       var->storage_class() == ast::StorageClass::kOutput);
+      var != nullptr && var->Declaration()->HasLocationDecoration() &&
+      (var->StorageClass() == ast::StorageClass::kInput ||
+       var->StorageClass() == ast::StorageClass::kOutput);
   bool in_struct_has_builtin =
-      var != nullptr && var->HasBuiltinDecoration() &&
-      var->storage_class() == ast::StorageClass::kOutput;
+      var != nullptr && var->Declaration()->HasBuiltinDecoration() &&
+      var->StorageClass() == ast::StorageClass::kOutput;
   return in_or_out_struct_has_location || in_struct_has_builtin;
 }
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
-  ast::Variable* var = nullptr;
+  const semantic::Variable* var = nullptr;
   if (global_variables_.get(ident->symbol(), &var)) {
     if (global_is_in_struct(var)) {
-      auto var_type = var->storage_class() == ast::StorageClass::kInput
+      auto var_type = var->StorageClass() == ast::StorageClass::kInput
                           ? VarType::kIn
                           : VarType::kOut;
       auto name = current_ep_var_name(var_type);
@@ -1623,7 +1625,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     // will be turned into assignments.
     for (auto* s : *(stmt->body())) {
       if (auto* decl = s->As<ast::VariableDeclStatement>()) {
-        if (!EmitVariable(decl->variable(), true)) {
+        if (!EmitVariable(program_->Sem().Get(decl->variable()), true)) {
           return false;
         }
       }
@@ -1839,7 +1841,8 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitSwitch(s);
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-    return EmitVariable(v->variable(), false);
+    auto* var = program_->Sem().Get(v->variable());
+    return EmitVariable(var, false);
   }
 
   error_ = "unknown statement type: " + program_->str(stmt);
@@ -2078,35 +2081,38 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitVariable(ast::Variable* var, bool skip_constructor) {
+bool GeneratorImpl::EmitVariable(const semantic::Variable* var,
+                                 bool skip_constructor) {
   make_indent();
 
+  auto* decl = var->Declaration();
+
   // TODO(dsinclair): Handle variable decorations
-  if (!var->decorations().empty()) {
+  if (!decl->decorations().empty()) {
     error_ = "Variable decorations are not handled yet";
     return false;
   }
-  if (var->is_const()) {
+  if (decl->is_const()) {
     out_ << "const ";
   }
-  if (!EmitType(var->type(), program_->Symbols().NameFor(var->symbol()))) {
+  if (!EmitType(decl->type(), program_->Symbols().NameFor(decl->symbol()))) {
     return false;
   }
-  if (!var->type()->Is<type::Array>()) {
-    out_ << " " << program_->Symbols().NameFor(var->symbol());
+  if (!decl->type()->Is<type::Array>()) {
+    out_ << " " << program_->Symbols().NameFor(decl->symbol());
   }
 
   if (!skip_constructor) {
     out_ << " = ";
-    if (var->constructor() != nullptr) {
-      if (!EmitExpression(var->constructor())) {
+    if (decl->constructor() != nullptr) {
+      if (!EmitExpression(decl->constructor())) {
         return false;
       }
-    } else if (var->storage_class() == ast::StorageClass::kPrivate ||
-               var->storage_class() == ast::StorageClass::kFunction ||
-               var->storage_class() == ast::StorageClass::kNone ||
-               var->storage_class() == ast::StorageClass::kOutput) {
-      if (!EmitZeroValue(var->type())) {
+    } else if (var->StorageClass() == ast::StorageClass::kPrivate ||
+               var->StorageClass() == ast::StorageClass::kFunction ||
+               var->StorageClass() == ast::StorageClass::kNone ||
+               var->StorageClass() == ast::StorageClass::kOutput) {
+      if (!EmitZeroValue(decl->type())) {
         return false;
       }
     }
