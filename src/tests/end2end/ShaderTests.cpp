@@ -41,25 +41,27 @@ TEST_P(ShaderTests, ComputeLog2) {
 [[group(0), binding(0)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
 
 [[stage(compute)]] fn main() -> void {
-    buf.data[0] = u32(log2(1.0));
-    buf.data[1] = u32(log2(2.0));
-    buf.data[2] = u32(log2(3.0));
-    buf.data[3] = u32(log2(4.0));
-    buf.data[4] = u32(log2(7.0));
-    buf.data[5] = u32(log2(8.0));
-    buf.data[6] = u32(log2(15.0));
-    buf.data[7] = u32(log2(16.0));
-    buf.data[8] = u32(log2(31.0));
-    buf.data[9] = u32(log2(32.0));
-    buf.data[10] = u32(log2(63.0));
-    buf.data[11] = u32(log2(64.0));
-    buf.data[12] = u32(log2(127.0));
-    buf.data[13] = u32(log2(128.0));
-    buf.data[14] = u32(log2(255.0));
-    buf.data[15] = u32(log2(256.0));
-    buf.data[16] = u32(log2(511.0));
-    buf.data[17] = u32(log2(512.0));
-    buf.data[18] = u32(log2(4294967295.0));
+    const factor : f32 = 1.0001;
+
+    buf.data[0] = u32(log2(1.0 * factor));
+    buf.data[1] = u32(log2(2.0 * factor));
+    buf.data[2] = u32(log2(3.0 * factor));
+    buf.data[3] = u32(log2(4.0 * factor));
+    buf.data[4] = u32(log2(7.0 * factor));
+    buf.data[5] = u32(log2(8.0 * factor));
+    buf.data[6] = u32(log2(15.0 * factor));
+    buf.data[7] = u32(log2(16.0 * factor));
+    buf.data[8] = u32(log2(31.0 * factor));
+    buf.data[9] = u32(log2(32.0 * factor));
+    buf.data[10] = u32(log2(63.0 * factor));
+    buf.data[11] = u32(log2(64.0 * factor));
+    buf.data[12] = u32(log2(127.0 * factor));
+    buf.data[13] = u32(log2(128.0 * factor));
+    buf.data[14] = u32(log2(255.0 * factor));
+    buf.data[15] = u32(log2(256.0 * factor));
+    buf.data[16] = u32(log2(511.0 * factor));
+    buf.data[17] = u32(log2(512.0 * factor));
+    buf.data[18] = u32(log2(4294967295.0 * factor));
 })";
 
     wgpu::ComputePipelineDescriptor csDesc;
