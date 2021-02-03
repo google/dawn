@@ -1265,8 +1265,18 @@ ast::Variable* ParserImpl::MakeVariable(
       const auto spv_builtin = static_cast<SpvBuiltIn>(deco[1]);
       switch (spv_builtin) {
         case SpvBuiltInPointSize:
-          ignored_builtins_[id] = spv_builtin;
+          special_builtins_[id] = spv_builtin;
           return nullptr;
+        case SpvBuiltInSampleId:
+          // The SPIR-V variable might is likely to be signed (because GLSL
+          // requires signed), but WGSL requires unsigned.  Handle specially
+          // so we always perform the conversion at load and store.
+          if (auto* forced_type = unsigned_type_for_[type]) {
+            // Requires conversion and special handling in code generation.
+            special_builtins_[id] = spv_builtin;
+            type = forced_type;
+          }
+          break;
         default:
           break;
       }

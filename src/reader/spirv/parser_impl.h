@@ -477,9 +477,22 @@ class ParserImpl : Reader {
   /// A map of SPIR-V identifiers to builtins
   using BuiltInsMap = std::unordered_map<uint32_t, SpvBuiltIn>;
 
-  /// @returns a map of builtins that should be ignored as they do not exist in
-  /// WGSL.
-  const BuiltInsMap& ignored_builtins() const { return ignored_builtins_; }
+  /// @returns a map of builtins that should be handled specially by code
+  /// generation. Either the builtin does not exist in WGSL, or a type
+  /// conversion must be implemented on load and store.
+  const BuiltInsMap& special_builtins() const { return special_builtins_; }
+
+  /// @param builtin the SPIR-V builtin variable kind
+  /// @returns the SPIR-V ID for the variable defining the given builtin, or 0
+  uint32_t IdForSpecialBuiltIn(SpvBuiltIn builtin) const {
+    // Do a linear search.
+    for (const auto& entry : special_builtins_) {
+      if (entry.second == builtin) {
+        return entry.first;
+      }
+    }
+    return 0;
+  }
 
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
@@ -634,8 +647,10 @@ class ParserImpl : Reader {
       handle_type_;
 
   /// Maps the SPIR-V ID of a module-scope builtin variable that should be
-  /// ignored, to its builtin kind.
-  BuiltInsMap ignored_builtins_;
+  /// ignored or type-converted, to its builtin kind.
+  /// See also BuiltInPositionInfo which is a separate mechanism for a more
+  /// complex case of replacing an entire structure.
+  BuiltInsMap special_builtins_;
 };
 
 }  // namespace spirv

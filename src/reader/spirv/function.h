@@ -223,6 +223,10 @@ enum class SkipReason {
   /// PointSize builtin. Use 1.0f instead, because that's the only value
   /// supported by WebGPU.
   kPointSizeBuiltinValue,
+
+  /// `kSampleIdBuiltinPointer`: the value is a pointer to the SampleId builtin
+  /// variable.  Don't generate its address.
+  kSampleIdBuiltinPointer,
 };
 
 /// Bookkeeping info for a SPIR-V ID defined in the function, or some
@@ -327,6 +331,9 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
       break;
     case SkipReason::kPointSizeBuiltinValue:
       o << " skip:pointsize_value";
+      break;
+    case SkipReason::kSampleIdBuiltinPointer:
+      o << " skip:sampleid_pointer";
       break;
   }
   o << "}";
@@ -467,10 +474,11 @@ class FunctionEmitter {
   bool FindIfSelectionInternalHeaders();
 
   /// Creates a DefInfo record for each module-scope builtin variable
-  /// that should be ignored.
+  /// that should be handled specially.  Either it's ignored, or its store
+  /// type is converted on load.
   /// Populates the `def_info_` mapping for such IDs.
   /// @returns false on failure
-  bool RegisterIgnoredBuiltInVariables();
+  bool RegisterSpecialBuiltInVariables();
 
   /// Creates a DefInfo record for each locally defined SPIR-V ID.
   /// Populates the `def_info_` mapping with basic results for such IDs.

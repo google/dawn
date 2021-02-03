@@ -991,7 +991,7 @@ bool FunctionEmitter::EmitBody() {
     return false;
   }
 
-  if (!RegisterIgnoredBuiltInVariables()) {
+  if (!RegisterSpecialBuiltInVariables()) {
     return false;
   }
   if (!RegisterLocallyDefinedValues()) {
@@ -2023,6 +2023,10 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
       Fail() << "unhandled use of a pointer to the PointSize builtin, with ID: "
              << id;
       return {};
+    case SkipReason::kSampleIdBuiltinPointer:
+      Fail() << "unhandled use of a pointer to the SampleId builtin, with ID: "
+             << id;
+      return {};
   }
   if (identifier_values_.count(id) || parser_impl_.IsScalarSpecConstant(id)) {
     auto name = namer_.Name(id);
@@ -2999,9 +3003,24 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // Memory accesses must be issued in SPIR-V program order.
       // So represent a load by a new const definition.
       const auto ptr_id = inst.GetSingleWordInOperand(0);
-      if (GetSkipReason(ptr_id) == SkipReason::kPointSizeBuiltinPointer) {
-        GetDefInfo(inst.result_id())->skip = SkipReason::kPointSizeBuiltinValue;
-        return true;
+      switch (GetSkipReason(ptr_id)) {
+        case SkipReason::kPointSizeBuiltinPointer:
+          GetDefInfo(inst.result_id())->skip =
+              SkipReason::kPointSizeBuiltinValue;
+          return true;
+        case SkipReason::kSampleIdBuiltinPointer: {
+          // The SPIR-V variable is i32, but WGSL requires u32.
+          auto var_id = parser_impl_.IdForSpecialBuiltIn(SpvBuiltInSampleId);
+          auto name = namer_.Name(var_id);
+          ast::Expression* id_expr = create<ast::IdentifierExpression>(
+              Source{}, builder_.Symbols().Register(name));
+          auto expr = TypedExpression{
+              i32_, create<ast::TypeConstructorExpression>(
+                        Source{}, i32_, ast::ExpressionList{id_expr})};
+          return EmitConstDefinition(inst, expr);
+        }
+        default:
+          break;
       }
       auto expr = MakeExpression(ptr_id);
       // The load result type is the pointee type of its operand.
@@ -3626,11 +3645,11 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
           create<ast::TypeConstructorExpression>(source, result_type, values)};
 }
 
-bool FunctionEmitter::RegisterIgnoredBuiltInVariables() {
+bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
   size_t index = def_info_.size();
-  for (auto& ignored_var : parser_impl_.ignored_builtins()) {
-    const auto id = ignored_var.first;
-    const auto builtin = ignored_var.second;
+  for (auto& special_var : parser_impl_.special_builtins()) {
+    const auto id = special_var.first;
+    const auto builtin = special_var.second;
     def_info_[id] =
         std::make_unique<DefInfo>(*(def_use_mgr_->GetDef(id)), 0, index);
     ++index;
@@ -3639,8 +3658,11 @@ bool FunctionEmitter::RegisterIgnoredBuiltInVariables() {
       case SpvBuiltInPointSize:
         def->skip = SkipReason::kPointSizeBuiltinPointer;
         break;
+      case SpvBuiltInSampleId:
+        def->skip = SkipReason::kSampleIdBuiltinPointer;
+        break;
       default:
-        return Fail() << "unrecognized ignored builtin: " << int(builtin);
+        return Fail() << "unrecognized special builtin: " << int(builtin);
     }
   }
   return true;

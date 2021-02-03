@@ -86,6 +86,8 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
       return ast::Builtin::kLocalInvocationIndex;
     case SpvBuiltInGlobalInvocationId:
       return ast::Builtin::kGlobalInvocationId;
+    case SpvBuiltInSampleId:
+      return ast::Builtin::kSampleId;
     default:
       break;
   }
