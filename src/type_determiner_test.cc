@@ -51,6 +51,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
+#include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
 #include "src/semantic/variable.h"
@@ -646,17 +647,17 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   EXPECT_TRUE(TypeOf(my_var)->As<type::Pointer>()->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
+TEST_F(TypeDeterminerTest, Expr_Call_Function) {
   Func("my_func", ast::VariableList{}, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
 
-  auto* ident = Expr("my_func");
-  WrapInFunction(ident);
+  auto* call = Call("my_func");
+  WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
@@ -1521,7 +1522,7 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
 
 struct IntrinsicData {
   const char* name;
-  ast::Intrinsic intrinsic;
+  semantic::Intrinsic intrinsic;
 };
 inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   out << data.name;
@@ -1531,94 +1532,95 @@ using IntrinsicDataTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDataTest, Lookup) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  EXPECT_TRUE(td()->SetIntrinsicIfNeeded(ident));
-  EXPECT_EQ(ident->intrinsic(), param.intrinsic);
-  EXPECT_TRUE(ident->IsIntrinsic());
+  EXPECT_EQ(TypeDeterminer::MatchIntrinsic(param.name), param.intrinsic);
 }
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     IntrinsicDataTest,
     testing::Values(
-        IntrinsicData{"abs", ast::Intrinsic::kAbs},
-        IntrinsicData{"acos", ast::Intrinsic::kAcos},
-        IntrinsicData{"all", ast::Intrinsic::kAll},
-        IntrinsicData{"any", ast::Intrinsic::kAny},
-        IntrinsicData{"arrayLength", ast::Intrinsic::kArrayLength},
-        IntrinsicData{"asin", ast::Intrinsic::kAsin},
-        IntrinsicData{"atan", ast::Intrinsic::kAtan},
-        IntrinsicData{"atan2", ast::Intrinsic::kAtan2},
-        IntrinsicData{"ceil", ast::Intrinsic::kCeil},
-        IntrinsicData{"clamp", ast::Intrinsic::kClamp},
-        IntrinsicData{"cos", ast::Intrinsic::kCos},
-        IntrinsicData{"cosh", ast::Intrinsic::kCosh},
-        IntrinsicData{"countOneBits", ast::Intrinsic::kCountOneBits},
-        IntrinsicData{"cross", ast::Intrinsic::kCross},
-        IntrinsicData{"determinant", ast::Intrinsic::kDeterminant},
-        IntrinsicData{"distance", ast::Intrinsic::kDistance},
-        IntrinsicData{"dot", ast::Intrinsic::kDot},
-        IntrinsicData{"dpdx", ast::Intrinsic::kDpdx},
-        IntrinsicData{"dpdxCoarse", ast::Intrinsic::kDpdxCoarse},
-        IntrinsicData{"dpdxFine", ast::Intrinsic::kDpdxFine},
-        IntrinsicData{"dpdy", ast::Intrinsic::kDpdy},
-        IntrinsicData{"dpdyCoarse", ast::Intrinsic::kDpdyCoarse},
-        IntrinsicData{"dpdyFine", ast::Intrinsic::kDpdyFine},
-        IntrinsicData{"exp", ast::Intrinsic::kExp},
-        IntrinsicData{"exp2", ast::Intrinsic::kExp2},
-        IntrinsicData{"faceForward", ast::Intrinsic::kFaceForward},
-        IntrinsicData{"floor", ast::Intrinsic::kFloor},
-        IntrinsicData{"fma", ast::Intrinsic::kFma},
-        IntrinsicData{"fract", ast::Intrinsic::kFract},
-        IntrinsicData{"frexp", ast::Intrinsic::kFrexp},
-        IntrinsicData{"fwidth", ast::Intrinsic::kFwidth},
-        IntrinsicData{"fwidthCoarse", ast::Intrinsic::kFwidthCoarse},
-        IntrinsicData{"fwidthFine", ast::Intrinsic::kFwidthFine},
-        IntrinsicData{"inverseSqrt", ast::Intrinsic::kInverseSqrt},
-        IntrinsicData{"isFinite", ast::Intrinsic::kIsFinite},
-        IntrinsicData{"isInf", ast::Intrinsic::kIsInf},
-        IntrinsicData{"isNan", ast::Intrinsic::kIsNan},
-        IntrinsicData{"isNormal", ast::Intrinsic::kIsNormal},
-        IntrinsicData{"ldexp", ast::Intrinsic::kLdexp},
-        IntrinsicData{"length", ast::Intrinsic::kLength},
-        IntrinsicData{"log", ast::Intrinsic::kLog},
-        IntrinsicData{"log2", ast::Intrinsic::kLog2},
-        IntrinsicData{"max", ast::Intrinsic::kMax},
-        IntrinsicData{"min", ast::Intrinsic::kMin},
-        IntrinsicData{"mix", ast::Intrinsic::kMix},
-        IntrinsicData{"modf", ast::Intrinsic::kModf},
-        IntrinsicData{"normalize", ast::Intrinsic::kNormalize},
-        IntrinsicData{"pow", ast::Intrinsic::kPow},
-        IntrinsicData{"reflect", ast::Intrinsic::kReflect},
-        IntrinsicData{"reverseBits", ast::Intrinsic::kReverseBits},
-        IntrinsicData{"round", ast::Intrinsic::kRound},
-        IntrinsicData{"select", ast::Intrinsic::kSelect},
-        IntrinsicData{"sign", ast::Intrinsic::kSign},
-        IntrinsicData{"sin", ast::Intrinsic::kSin},
-        IntrinsicData{"sinh", ast::Intrinsic::kSinh},
-        IntrinsicData{"smoothStep", ast::Intrinsic::kSmoothStep},
-        IntrinsicData{"sqrt", ast::Intrinsic::kSqrt},
-        IntrinsicData{"step", ast::Intrinsic::kStep},
-        IntrinsicData{"tan", ast::Intrinsic::kTan},
-        IntrinsicData{"tanh", ast::Intrinsic::kTanh},
-        IntrinsicData{"textureDimensions", ast::Intrinsic::kTextureDimensions},
-        IntrinsicData{"textureLoad", ast::Intrinsic::kTextureLoad},
-        IntrinsicData{"textureNumLayers", ast::Intrinsic::kTextureNumLayers},
-        IntrinsicData{"textureNumLevels", ast::Intrinsic::kTextureNumLevels},
-        IntrinsicData{"textureNumSamples", ast::Intrinsic::kTextureNumSamples},
-        IntrinsicData{"textureSample", ast::Intrinsic::kTextureSample},
-        IntrinsicData{"textureSampleBias", ast::Intrinsic::kTextureSampleBias},
+        IntrinsicData{"abs", semantic::Intrinsic::kAbs},
+        IntrinsicData{"acos", semantic::Intrinsic::kAcos},
+        IntrinsicData{"all", semantic::Intrinsic::kAll},
+        IntrinsicData{"any", semantic::Intrinsic::kAny},
+        IntrinsicData{"arrayLength", semantic::Intrinsic::kArrayLength},
+        IntrinsicData{"asin", semantic::Intrinsic::kAsin},
+        IntrinsicData{"atan", semantic::Intrinsic::kAtan},
+        IntrinsicData{"atan2", semantic::Intrinsic::kAtan2},
+        IntrinsicData{"ceil", semantic::Intrinsic::kCeil},
+        IntrinsicData{"clamp", semantic::Intrinsic::kClamp},
+        IntrinsicData{"cos", semantic::Intrinsic::kCos},
+        IntrinsicData{"cosh", semantic::Intrinsic::kCosh},
+        IntrinsicData{"countOneBits", semantic::Intrinsic::kCountOneBits},
+        IntrinsicData{"cross", semantic::Intrinsic::kCross},
+        IntrinsicData{"determinant", semantic::Intrinsic::kDeterminant},
+        IntrinsicData{"distance", semantic::Intrinsic::kDistance},
+        IntrinsicData{"dot", semantic::Intrinsic::kDot},
+        IntrinsicData{"dpdx", semantic::Intrinsic::kDpdx},
+        IntrinsicData{"dpdxCoarse", semantic::Intrinsic::kDpdxCoarse},
+        IntrinsicData{"dpdxFine", semantic::Intrinsic::kDpdxFine},
+        IntrinsicData{"dpdy", semantic::Intrinsic::kDpdy},
+        IntrinsicData{"dpdyCoarse", semantic::Intrinsic::kDpdyCoarse},
+        IntrinsicData{"dpdyFine", semantic::Intrinsic::kDpdyFine},
+        IntrinsicData{"exp", semantic::Intrinsic::kExp},
+        IntrinsicData{"exp2", semantic::Intrinsic::kExp2},
+        IntrinsicData{"faceForward", semantic::Intrinsic::kFaceForward},
+        IntrinsicData{"floor", semantic::Intrinsic::kFloor},
+        IntrinsicData{"fma", semantic::Intrinsic::kFma},
+        IntrinsicData{"fract", semantic::Intrinsic::kFract},
+        IntrinsicData{"frexp", semantic::Intrinsic::kFrexp},
+        IntrinsicData{"fwidth", semantic::Intrinsic::kFwidth},
+        IntrinsicData{"fwidthCoarse", semantic::Intrinsic::kFwidthCoarse},
+        IntrinsicData{"fwidthFine", semantic::Intrinsic::kFwidthFine},
+        IntrinsicData{"inverseSqrt", semantic::Intrinsic::kInverseSqrt},
+        IntrinsicData{"isFinite", semantic::Intrinsic::kIsFinite},
+        IntrinsicData{"isInf", semantic::Intrinsic::kIsInf},
+        IntrinsicData{"isNan", semantic::Intrinsic::kIsNan},
+        IntrinsicData{"isNormal", semantic::Intrinsic::kIsNormal},
+        IntrinsicData{"ldexp", semantic::Intrinsic::kLdexp},
+        IntrinsicData{"length", semantic::Intrinsic::kLength},
+        IntrinsicData{"log", semantic::Intrinsic::kLog},
+        IntrinsicData{"log2", semantic::Intrinsic::kLog2},
+        IntrinsicData{"max", semantic::Intrinsic::kMax},
+        IntrinsicData{"min", semantic::Intrinsic::kMin},
+        IntrinsicData{"mix", semantic::Intrinsic::kMix},
+        IntrinsicData{"modf", semantic::Intrinsic::kModf},
+        IntrinsicData{"normalize", semantic::Intrinsic::kNormalize},
+        IntrinsicData{"pow", semantic::Intrinsic::kPow},
+        IntrinsicData{"reflect", semantic::Intrinsic::kReflect},
+        IntrinsicData{"reverseBits", semantic::Intrinsic::kReverseBits},
+        IntrinsicData{"round", semantic::Intrinsic::kRound},
+        IntrinsicData{"select", semantic::Intrinsic::kSelect},
+        IntrinsicData{"sign", semantic::Intrinsic::kSign},
+        IntrinsicData{"sin", semantic::Intrinsic::kSin},
+        IntrinsicData{"sinh", semantic::Intrinsic::kSinh},
+        IntrinsicData{"smoothStep", semantic::Intrinsic::kSmoothStep},
+        IntrinsicData{"sqrt", semantic::Intrinsic::kSqrt},
+        IntrinsicData{"step", semantic::Intrinsic::kStep},
+        IntrinsicData{"tan", semantic::Intrinsic::kTan},
+        IntrinsicData{"tanh", semantic::Intrinsic::kTanh},
+        IntrinsicData{"textureDimensions",
+                      semantic::Intrinsic::kTextureDimensions},
+        IntrinsicData{"textureLoad", semantic::Intrinsic::kTextureLoad},
+        IntrinsicData{"textureNumLayers",
+                      semantic::Intrinsic::kTextureNumLayers},
+        IntrinsicData{"textureNumLevels",
+                      semantic::Intrinsic::kTextureNumLevels},
+        IntrinsicData{"textureNumSamples",
+                      semantic::Intrinsic::kTextureNumSamples},
+        IntrinsicData{"textureSample", semantic::Intrinsic::kTextureSample},
+        IntrinsicData{"textureSampleBias",
+                      semantic::Intrinsic::kTextureSampleBias},
         IntrinsicData{"textureSampleCompare",
-                      ast::Intrinsic::kTextureSampleCompare},
-        IntrinsicData{"textureSampleGrad", ast::Intrinsic::kTextureSampleGrad},
+                      semantic::Intrinsic::kTextureSampleCompare},
+        IntrinsicData{"textureSampleGrad",
+                      semantic::Intrinsic::kTextureSampleGrad},
         IntrinsicData{"textureSampleLevel",
-                      ast::Intrinsic::kTextureSampleLevel},
-        IntrinsicData{"trunc", ast::Intrinsic::kTrunc}));
+                      semantic::Intrinsic::kTextureSampleLevel},
+        IntrinsicData{"trunc", semantic::Intrinsic::kTrunc}));
 
-TEST_F(TypeDeterminerTest, IntrinsicNotSetIfNotMatched) {
-  auto* ident = Expr("not_intrinsic");
-  EXPECT_FALSE(td()->SetIntrinsicIfNeeded(ident));
-  EXPECT_EQ(ident->intrinsic(), ast::Intrinsic::kNone);
-  EXPECT_FALSE(ident->IsIntrinsic());
+TEST_F(TypeDeterminerTest, MatchIntrinsicNoMatch) {
+  EXPECT_EQ(TypeDeterminer::MatchIntrinsic("not_intrinsic"),
+            semantic::Intrinsic::kNone);
 }
 
 using ImportData_SingleParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
@@ -1631,8 +1633,8 @@ TEST_P(ImportData_SingleParamTest, Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 TEST_P(ImportData_SingleParamTest, Vector) {
@@ -1644,9 +1646,9 @@ TEST_P(ImportData_SingleParamTest, Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParamTest, Error_NoParams) {
@@ -1665,28 +1667,29 @@ TEST_P(ImportData_SingleParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_SingleParamTest,
-    testing::Values(IntrinsicData{"acos", ast::Intrinsic::kAcos},
-                    IntrinsicData{"asin", ast::Intrinsic::kAsin},
-                    IntrinsicData{"atan", ast::Intrinsic::kAtan},
-                    IntrinsicData{"ceil", ast::Intrinsic::kCeil},
-                    IntrinsicData{"cos", ast::Intrinsic::kCos},
-                    IntrinsicData{"cosh", ast::Intrinsic::kCosh},
-                    IntrinsicData{"exp", ast::Intrinsic::kExp},
-                    IntrinsicData{"exp2", ast::Intrinsic::kExp2},
-                    IntrinsicData{"floor", ast::Intrinsic::kFloor},
-                    IntrinsicData{"fract", ast::Intrinsic::kFract},
-                    IntrinsicData{"inverseSqrt", ast::Intrinsic::kInverseSqrt},
-                    IntrinsicData{"log", ast::Intrinsic::kLog},
-                    IntrinsicData{"log2", ast::Intrinsic::kLog2},
-                    IntrinsicData{"normalize", ast::Intrinsic::kNormalize},
-                    IntrinsicData{"round", ast::Intrinsic::kRound},
-                    IntrinsicData{"sign", ast::Intrinsic::kSign},
-                    IntrinsicData{"sin", ast::Intrinsic::kSin},
-                    IntrinsicData{"sinh", ast::Intrinsic::kSinh},
-                    IntrinsicData{"sqrt", ast::Intrinsic::kSqrt},
-                    IntrinsicData{"tan", ast::Intrinsic::kTan},
-                    IntrinsicData{"tanh", ast::Intrinsic::kTanh},
-                    IntrinsicData{"trunc", ast::Intrinsic::kTrunc}));
+    testing::Values(IntrinsicData{"acos", semantic::Intrinsic::kAcos},
+                    IntrinsicData{"asin", semantic::Intrinsic::kAsin},
+                    IntrinsicData{"atan", semantic::Intrinsic::kAtan},
+                    IntrinsicData{"ceil", semantic::Intrinsic::kCeil},
+                    IntrinsicData{"cos", semantic::Intrinsic::kCos},
+                    IntrinsicData{"cosh", semantic::Intrinsic::kCosh},
+                    IntrinsicData{"exp", semantic::Intrinsic::kExp},
+                    IntrinsicData{"exp2", semantic::Intrinsic::kExp2},
+                    IntrinsicData{"floor", semantic::Intrinsic::kFloor},
+                    IntrinsicData{"fract", semantic::Intrinsic::kFract},
+                    IntrinsicData{"inverseSqrt",
+                                  semantic::Intrinsic::kInverseSqrt},
+                    IntrinsicData{"log", semantic::Intrinsic::kLog},
+                    IntrinsicData{"log2", semantic::Intrinsic::kLog2},
+                    IntrinsicData{"normalize", semantic::Intrinsic::kNormalize},
+                    IntrinsicData{"round", semantic::Intrinsic::kRound},
+                    IntrinsicData{"sign", semantic::Intrinsic::kSign},
+                    IntrinsicData{"sin", semantic::Intrinsic::kSin},
+                    IntrinsicData{"sinh", semantic::Intrinsic::kSinh},
+                    IntrinsicData{"sqrt", semantic::Intrinsic::kSqrt},
+                    IntrinsicData{"tan", semantic::Intrinsic::kTan},
+                    IntrinsicData{"tanh", semantic::Intrinsic::kTanh},
+                    IntrinsicData{"trunc", semantic::Intrinsic::kTrunc}));
 
 using ImportData_SingleParam_FloatOrInt_Test =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -1699,8 +1702,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Vector) {
@@ -1712,9 +1715,9 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Scalar) {
@@ -1726,8 +1729,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::I32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::I32>());
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Vector) {
@@ -1747,9 +1750,9 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
@@ -1764,8 +1767,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::U32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
@@ -1777,9 +1780,9 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_unsigned_integer_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_NoParams) {
@@ -1797,8 +1800,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_NoParams) {
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_SingleParam_FloatOrInt_Test,
-                         testing::Values(IntrinsicData{"abs",
-                                                       ast::Intrinsic::kAbs}));
+                         testing::Values(IntrinsicData{
+                             "abs", semantic::Intrinsic::kAbs}));
 
 TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
   auto* ident = Expr("length");
@@ -1808,8 +1811,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
@@ -1823,8 +1826,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 using ImportData_TwoParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
@@ -1837,8 +1840,8 @@ TEST_P(ImportData_TwoParamTest, Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 TEST_P(ImportData_TwoParamTest, Vector) {
@@ -1851,9 +1854,9 @@ TEST_P(ImportData_TwoParamTest, Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 TEST_P(ImportData_TwoParamTest, Error_NoParams) {
   auto param = GetParam();
@@ -1870,10 +1873,10 @@ TEST_P(ImportData_TwoParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_TwoParamTest,
-    testing::Values(IntrinsicData{"atan2", ast::Intrinsic::kAtan2},
-                    IntrinsicData{"pow", ast::Intrinsic::kPow},
-                    IntrinsicData{"step", ast::Intrinsic::kStep},
-                    IntrinsicData{"reflect", ast::Intrinsic::kReflect}));
+    testing::Values(IntrinsicData{"atan2", semantic::Intrinsic::kAtan2},
+                    IntrinsicData{"pow", semantic::Intrinsic::kPow},
+                    IntrinsicData{"step", semantic::Intrinsic::kStep},
+                    IntrinsicData{"reflect", semantic::Intrinsic::kReflect}));
 
 TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
   auto* ident = Expr("distance");
@@ -1883,8 +1886,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
@@ -1896,8 +1899,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Cross) {
@@ -1909,9 +1912,9 @@ TEST_F(TypeDeterminerTest, ImportData_Cross) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Cross_AutoType) {
@@ -1922,9 +1925,9 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_AutoType) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 using ImportData_ThreeParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
@@ -1937,8 +1940,8 @@ TEST_P(ImportData_ThreeParamTest, Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 TEST_P(ImportData_ThreeParamTest, Vector) {
@@ -1951,9 +1954,9 @@ TEST_P(ImportData_ThreeParamTest, Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
   auto param = GetParam();
@@ -1971,11 +1974,11 @@ TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_ThreeParamTest,
-    testing::Values(IntrinsicData{"mix", ast::Intrinsic::kMix},
-                    IntrinsicData{"smoothStep", ast::Intrinsic::kSmoothStep},
-                    IntrinsicData{"fma", ast::Intrinsic::kFma},
-                    IntrinsicData{"faceForward",
-                                  ast::Intrinsic::kFaceForward}));
+    testing::Values(
+        IntrinsicData{"mix", semantic::Intrinsic::kMix},
+        IntrinsicData{"smoothStep", semantic::Intrinsic::kSmoothStep},
+        IntrinsicData{"fma", semantic::Intrinsic::kFma},
+        IntrinsicData{"faceForward", semantic::Intrinsic::kFaceForward}));
 
 using ImportData_ThreeParam_FloatOrInt_Test =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -1988,8 +1991,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Vector) {
@@ -2002,9 +2005,9 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
@@ -2016,8 +2019,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::I32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::I32>());
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
@@ -2030,9 +2033,9 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
@@ -2044,8 +2047,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::U32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
@@ -2058,9 +2061,9 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_unsigned_integer_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_NoParams) {
@@ -2079,7 +2082,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_ThreeParam_FloatOrInt_Test,
                          testing::Values(IntrinsicData{
-                             "clamp", ast::Intrinsic::kClamp}));
+                             "clamp", semantic::Intrinsic::kClamp}));
 
 using ImportData_Int_SingleParamTest =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -2092,8 +2095,8 @@ TEST_P(ImportData_Int_SingleParamTest, Scalar) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_integer_scalar());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_integer_scalar());
 }
 
 TEST_P(ImportData_Int_SingleParamTest, Vector) {
@@ -2105,9 +2108,9 @@ TEST_P(ImportData_Int_SingleParamTest, Vector) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_Int_SingleParamTest, Error_NoParams) {
@@ -2127,8 +2130,8 @@ INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_Int_SingleParamTest,
     testing::Values(
-        IntrinsicData{"countOneBits", ast::Intrinsic::kCountOneBits},
-        IntrinsicData{"reverseBits", ast::Intrinsic::kReverseBits}));
+        IntrinsicData{"countOneBits", semantic::Intrinsic::kCountOneBits},
+        IntrinsicData{"reverseBits", semantic::Intrinsic::kReverseBits}));
 
 using ImportData_FloatOrInt_TwoParamTest =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -2141,8 +2144,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Signed) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::I32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::I32>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
@@ -2154,8 +2157,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::U32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
@@ -2167,8 +2170,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
@@ -2180,9 +2183,9 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
@@ -2194,9 +2197,9 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_unsigned_integer_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
@@ -2208,9 +2211,9 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->is_float_vector());
-  EXPECT_EQ(TypeOf(ident)->As<type::Vector>()->size(), 3u);
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_NoParams) {
@@ -2229,8 +2232,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_FloatOrInt_TwoParamTest,
-    testing::Values(IntrinsicData{"min", ast::Intrinsic::kMin},
-                    IntrinsicData{"max", ast::Intrinsic::kMax}));
+    testing::Values(IntrinsicData{"min", semantic::Intrinsic::kMin},
+                    IntrinsicData{"max", semantic::Intrinsic::kMax}));
 
 TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
   Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
@@ -2242,8 +2245,8 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(ident), nullptr);
-  EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
 using ImportData_Matrix_OneParam_Test =
@@ -2263,7 +2266,8 @@ TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_Matrix_OneParam_Test,
                          testing::Values(IntrinsicData{
-                             "determinant", ast::Intrinsic::kDeterminant}));
+                             "determinant",
+                             semantic::Intrinsic::kDeterminant}));
 
 TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   // fn b() {}
@@ -2360,37 +2364,38 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(ast::intrinsic::test::TextureOverloadCase::ValidCases()));
 
 std::string to_str(const std::string& function,
-                   const ast::intrinsic::TextureSignature* sig) {
+                   const semantic::TextureIntrinsicCall::Parameters& params) {
   struct Parameter {
     size_t idx;
     std::string name;
   };
-  std::vector<Parameter> params;
-  auto maybe_add_param = [&params](size_t idx, const char* name) {
-    if (idx != ast::intrinsic::TextureSignature::Parameters::kNotUsed) {
-      params.emplace_back(Parameter{idx, name});
+  std::vector<Parameter> list;
+  auto maybe_add_param = [&list](size_t idx, const char* name) {
+    if (idx !=
+        semantic::TextureIntrinsicCall::Parameters::Parameters::kNotUsed) {
+      list.emplace_back(Parameter{idx, name});
     }
   };
-  maybe_add_param(sig->params.idx.array_index, "array_index");
-  maybe_add_param(sig->params.idx.bias, "bias");
-  maybe_add_param(sig->params.idx.coords, "coords");
-  maybe_add_param(sig->params.idx.depth_ref, "depth_ref");
-  maybe_add_param(sig->params.idx.ddx, "ddx");
-  maybe_add_param(sig->params.idx.ddy, "ddy");
-  maybe_add_param(sig->params.idx.level, "level");
-  maybe_add_param(sig->params.idx.offset, "offset");
-  maybe_add_param(sig->params.idx.sampler, "sampler");
-  maybe_add_param(sig->params.idx.sample_index, "sample_index");
-  maybe_add_param(sig->params.idx.texture, "texture");
-  maybe_add_param(sig->params.idx.value, "value");
+  maybe_add_param(params.idx.array_index, "array_index");
+  maybe_add_param(params.idx.bias, "bias");
+  maybe_add_param(params.idx.coords, "coords");
+  maybe_add_param(params.idx.depth_ref, "depth_ref");
+  maybe_add_param(params.idx.ddx, "ddx");
+  maybe_add_param(params.idx.ddy, "ddy");
+  maybe_add_param(params.idx.level, "level");
+  maybe_add_param(params.idx.offset, "offset");
+  maybe_add_param(params.idx.sampler, "sampler");
+  maybe_add_param(params.idx.sample_index, "sample_index");
+  maybe_add_param(params.idx.texture, "texture");
+  maybe_add_param(params.idx.value, "value");
   std::sort(
-      params.begin(), params.end(),
+      list.begin(), list.end(),
       [](const Parameter& a, const Parameter& b) { return a.idx < b.idx; });
 
   std::stringstream out;
   out << function << "(";
   bool first = true;
-  for (auto& param : params) {
+  for (auto& param : list) {
     if (!first) {
       out << ", ";
     }
@@ -2727,11 +2732,12 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
     }
   }
 
-  auto* sig = static_cast<const ast::intrinsic::TextureSignature*>(
-      ident->intrinsic_signature());
-  ASSERT_NE(sig, nullptr);
+  auto* sem = Sem().Get(call);
+  ASSERT_NE(sem, nullptr);
+  auto* intrinsic = sem->As<semantic::TextureIntrinsicCall>();
+  ASSERT_NE(intrinsic, nullptr);
 
-  auto got = ::tint::to_str(param.function, sig);
+  auto got = ::tint::to_str(param.function, intrinsic->Params());
   auto* expected = expected_texture_overload(param.overload);
   EXPECT_EQ(got, expected);
 }

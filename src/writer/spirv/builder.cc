@@ -40,7 +40,6 @@
 #include "src/ast/group_decoration.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -59,8 +58,10 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program.h"
+#include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/intrinsic.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
@@ -165,25 +166,26 @@ type::Matrix* GetNestedMatrixType(type::Type* type) {
   return type->As<type::Matrix>();
 }
 
-uint32_t intrinsic_to_glsl_method(type::Type* type, ast::Intrinsic intrinsic) {
+uint32_t intrinsic_to_glsl_method(type::Type* type,
+                                  semantic::Intrinsic intrinsic) {
   switch (intrinsic) {
-    case ast::Intrinsic::kAbs:
+    case semantic::Intrinsic::kAbs:
       if (type->is_float_scalar_or_vector()) {
         return GLSLstd450FAbs;
       } else {
         return GLSLstd450SAbs;
       }
-    case ast::Intrinsic::kAcos:
+    case semantic::Intrinsic::kAcos:
       return GLSLstd450Acos;
-    case ast::Intrinsic::kAsin:
+    case semantic::Intrinsic::kAsin:
       return GLSLstd450Asin;
-    case ast::Intrinsic::kAtan:
+    case semantic::Intrinsic::kAtan:
       return GLSLstd450Atan;
-    case ast::Intrinsic::kAtan2:
+    case semantic::Intrinsic::kAtan2:
       return GLSLstd450Atan2;
-    case ast::Intrinsic::kCeil:
+    case semantic::Intrinsic::kCeil:
       return GLSLstd450Ceil;
-    case ast::Intrinsic::kClamp:
+    case semantic::Intrinsic::kClamp:
       if (type->is_float_scalar_or_vector()) {
         return GLSLstd450NClamp;
       } else if (type->is_unsigned_scalar_or_vector()) {
@@ -191,41 +193,41 @@ uint32_t intrinsic_to_glsl_method(type::Type* type, ast::Intrinsic intrinsic) {
       } else {
         return GLSLstd450SClamp;
       }
-    case ast::Intrinsic::kCos:
+    case semantic::Intrinsic::kCos:
       return GLSLstd450Cos;
-    case ast::Intrinsic::kCosh:
+    case semantic::Intrinsic::kCosh:
       return GLSLstd450Cosh;
-    case ast::Intrinsic::kCross:
+    case semantic::Intrinsic::kCross:
       return GLSLstd450Cross;
-    case ast::Intrinsic::kDeterminant:
+    case semantic::Intrinsic::kDeterminant:
       return GLSLstd450Determinant;
-    case ast::Intrinsic::kDistance:
+    case semantic::Intrinsic::kDistance:
       return GLSLstd450Distance;
-    case ast::Intrinsic::kExp:
+    case semantic::Intrinsic::kExp:
       return GLSLstd450Exp;
-    case ast::Intrinsic::kExp2:
+    case semantic::Intrinsic::kExp2:
       return GLSLstd450Exp2;
-    case ast::Intrinsic::kFaceForward:
+    case semantic::Intrinsic::kFaceForward:
       return GLSLstd450FaceForward;
-    case ast::Intrinsic::kFloor:
+    case semantic::Intrinsic::kFloor:
       return GLSLstd450Floor;
-    case ast::Intrinsic::kFma:
+    case semantic::Intrinsic::kFma:
       return GLSLstd450Fma;
-    case ast::Intrinsic::kFract:
+    case semantic::Intrinsic::kFract:
       return GLSLstd450Fract;
-    case ast::Intrinsic::kFrexp:
+    case semantic::Intrinsic::kFrexp:
       return GLSLstd450Frexp;
-    case ast::Intrinsic::kInverseSqrt:
+    case semantic::Intrinsic::kInverseSqrt:
       return GLSLstd450InverseSqrt;
-    case ast::Intrinsic::kLdexp:
+    case semantic::Intrinsic::kLdexp:
       return GLSLstd450Ldexp;
-    case ast::Intrinsic::kLength:
+    case semantic::Intrinsic::kLength:
       return GLSLstd450Length;
-    case ast::Intrinsic::kLog:
+    case semantic::Intrinsic::kLog:
       return GLSLstd450Log;
-    case ast::Intrinsic::kLog2:
+    case semantic::Intrinsic::kLog2:
       return GLSLstd450Log2;
-    case ast::Intrinsic::kMax:
+    case semantic::Intrinsic::kMax:
       if (type->is_float_scalar_or_vector()) {
         return GLSLstd450NMax;
       } else if (type->is_unsigned_scalar_or_vector()) {
@@ -233,7 +235,7 @@ uint32_t intrinsic_to_glsl_method(type::Type* type, ast::Intrinsic intrinsic) {
       } else {
         return GLSLstd450SMax;
       }
-    case ast::Intrinsic::kMin:
+    case semantic::Intrinsic::kMin:
       if (type->is_float_scalar_or_vector()) {
         return GLSLstd450NMin;
       } else if (type->is_unsigned_scalar_or_vector()) {
@@ -241,35 +243,35 @@ uint32_t intrinsic_to_glsl_method(type::Type* type, ast::Intrinsic intrinsic) {
       } else {
         return GLSLstd450SMin;
       }
-    case ast::Intrinsic::kMix:
+    case semantic::Intrinsic::kMix:
       return GLSLstd450FMix;
-    case ast::Intrinsic::kModf:
+    case semantic::Intrinsic::kModf:
       return GLSLstd450Modf;
-    case ast::Intrinsic::kNormalize:
+    case semantic::Intrinsic::kNormalize:
       return GLSLstd450Normalize;
-    case ast::Intrinsic::kPow:
+    case semantic::Intrinsic::kPow:
       return GLSLstd450Pow;
-    case ast::Intrinsic::kReflect:
+    case semantic::Intrinsic::kReflect:
       return GLSLstd450Reflect;
-    case ast::Intrinsic::kRound:
+    case semantic::Intrinsic::kRound:
       return GLSLstd450Round;
-    case ast::Intrinsic::kSign:
+    case semantic::Intrinsic::kSign:
       return GLSLstd450FSign;
-    case ast::Intrinsic::kSin:
+    case semantic::Intrinsic::kSin:
       return GLSLstd450Sin;
-    case ast::Intrinsic::kSinh:
+    case semantic::Intrinsic::kSinh:
       return GLSLstd450Sinh;
-    case ast::Intrinsic::kSmoothStep:
+    case semantic::Intrinsic::kSmoothStep:
       return GLSLstd450SmoothStep;
-    case ast::Intrinsic::kSqrt:
+    case semantic::Intrinsic::kSqrt:
       return GLSLstd450Sqrt;
-    case ast::Intrinsic::kStep:
+    case semantic::Intrinsic::kStep:
       return GLSLstd450Step;
-    case ast::Intrinsic::kTan:
+    case semantic::Intrinsic::kTan:
       return GLSLstd450Tan;
-    case ast::Intrinsic::kTanh:
+    case semantic::Intrinsic::kTanh:
       return GLSLstd450Tanh;
-    case ast::Intrinsic::kTrunc:
+    case semantic::Intrinsic::kTrunc:
       return GLSLstd450Trunc;
     default:
       break;
@@ -1813,11 +1815,12 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     return 0;
   }
 
-  if (ident->IsIntrinsic()) {
-    return GenerateIntrinsic(ident, expr);
+  auto* sem = builder_.Sem().Get(expr);
+  if (auto* intrinsic = sem->As<semantic::IntrinsicCall>()) {
+    return GenerateIntrinsic(ident, expr, intrinsic);
   }
 
-  auto type_id = GenerateTypeIfNeeded(TypeOf(expr->func()));
+  auto type_id = GenerateTypeIfNeeded(sem->Type());
   if (type_id == 0) {
     return 0;
   }
@@ -1852,7 +1855,8 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
 }
 
 uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
-                                    ast::CallExpression* call) {
+                                    ast::CallExpression* call,
+                                    const semantic::IntrinsicCall* sem) {
   auto result = result_op();
   auto result_id = result.to_i();
 
@@ -1861,20 +1865,20 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
     return 0;
   }
 
-  auto intrinsic = ident->intrinsic();
+  auto intrinsic = sem->intrinsic();
 
-  if (ast::intrinsic::IsFineDerivative(intrinsic) ||
-      ast::intrinsic::IsCoarseDerivative(intrinsic)) {
+  if (semantic::intrinsic::IsFineDerivative(intrinsic) ||
+      semantic::intrinsic::IsCoarseDerivative(intrinsic)) {
     push_capability(SpvCapabilityDerivativeControl);
   }
 
-  if (ast::intrinsic::IsImageQueryIntrinsic(intrinsic)) {
+  if (semantic::intrinsic::IsImageQueryIntrinsic(intrinsic)) {
     push_capability(SpvCapabilityImageQuery);
   }
 
-  if (ast::intrinsic::IsTextureIntrinsic(intrinsic)) {
-    if (!GenerateTextureIntrinsic(ident, call, Operand::Int(result_type_id),
-                                  result)) {
+  if (auto* tex_sem = sem->As<semantic::TextureIntrinsicCall>()) {
+    if (!GenerateTextureIntrinsic(ident, call, tex_sem,
+                                  Operand::Int(result_type_id), result)) {
       return 0;
     }
     return result_id;
@@ -1883,11 +1887,11 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   OperandList params = {Operand::Int(result_type_id), result};
 
   spv::Op op = spv::Op::OpNop;
-  if (intrinsic == ast::Intrinsic::kAny) {
+  if (intrinsic == semantic::Intrinsic::kAny) {
     op = spv::Op::OpAny;
-  } else if (intrinsic == ast::Intrinsic::kAll) {
+  } else if (intrinsic == semantic::Intrinsic::kAll) {
     op = spv::Op::OpAll;
-  } else if (intrinsic == ast::Intrinsic::kArrayLength) {
+  } else if (intrinsic == semantic::Intrinsic::kArrayLength) {
     if (call->params().empty()) {
       error_ = "missing param for runtime array length";
       return 0;
@@ -1920,35 +1924,35 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
       return 0;
     }
     return result_id;
-  } else if (intrinsic == ast::Intrinsic::kCountOneBits) {
+  } else if (intrinsic == semantic::Intrinsic::kCountOneBits) {
     op = spv::Op::OpBitCount;
-  } else if (intrinsic == ast::Intrinsic::kDot) {
+  } else if (intrinsic == semantic::Intrinsic::kDot) {
     op = spv::Op::OpDot;
-  } else if (intrinsic == ast::Intrinsic::kDpdx) {
+  } else if (intrinsic == semantic::Intrinsic::kDpdx) {
     op = spv::Op::OpDPdx;
-  } else if (intrinsic == ast::Intrinsic::kDpdxCoarse) {
+  } else if (intrinsic == semantic::Intrinsic::kDpdxCoarse) {
     op = spv::Op::OpDPdxCoarse;
-  } else if (intrinsic == ast::Intrinsic::kDpdxFine) {
+  } else if (intrinsic == semantic::Intrinsic::kDpdxFine) {
     op = spv::Op::OpDPdxFine;
-  } else if (intrinsic == ast::Intrinsic::kDpdy) {
+  } else if (intrinsic == semantic::Intrinsic::kDpdy) {
     op = spv::Op::OpDPdy;
-  } else if (intrinsic == ast::Intrinsic::kDpdyCoarse) {
+  } else if (intrinsic == semantic::Intrinsic::kDpdyCoarse) {
     op = spv::Op::OpDPdyCoarse;
-  } else if (intrinsic == ast::Intrinsic::kDpdyFine) {
+  } else if (intrinsic == semantic::Intrinsic::kDpdyFine) {
     op = spv::Op::OpDPdyFine;
-  } else if (intrinsic == ast::Intrinsic::kFwidth) {
+  } else if (intrinsic == semantic::Intrinsic::kFwidth) {
     op = spv::Op::OpFwidth;
-  } else if (intrinsic == ast::Intrinsic::kFwidthCoarse) {
+  } else if (intrinsic == semantic::Intrinsic::kFwidthCoarse) {
     op = spv::Op::OpFwidthCoarse;
-  } else if (intrinsic == ast::Intrinsic::kFwidthFine) {
+  } else if (intrinsic == semantic::Intrinsic::kFwidthFine) {
     op = spv::Op::OpFwidthFine;
-  } else if (intrinsic == ast::Intrinsic::kIsInf) {
+  } else if (intrinsic == semantic::Intrinsic::kIsInf) {
     op = spv::Op::OpIsInf;
-  } else if (intrinsic == ast::Intrinsic::kIsNan) {
+  } else if (intrinsic == semantic::Intrinsic::kIsNan) {
     op = spv::Op::OpIsNan;
-  } else if (intrinsic == ast::Intrinsic::kReverseBits) {
+  } else if (intrinsic == semantic::Intrinsic::kReverseBits) {
     op = spv::Op::OpBitReverse;
-  } else if (intrinsic == ast::Intrinsic::kSelect) {
+  } else if (intrinsic == semantic::Intrinsic::kSelect) {
     op = spv::Op::OpSelect;
   } else {
     GenerateGLSLstd450Import();
@@ -1959,7 +1963,7 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
       return 0;
     }
     auto set_id = set_iter->second;
-    auto inst_id = intrinsic_to_glsl_method(TypeOf(ident), ident->intrinsic());
+    auto inst_id = intrinsic_to_glsl_method(sem->Type(), sem->intrinsic());
     if (inst_id == 0) {
       error_ = "unknown method " + builder_.Symbols().NameFor(ident->symbol());
       return 0;
@@ -1994,15 +1998,14 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   return result_id;
 }
 
-bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
-                                       ast::CallExpression* call,
-                                       Operand result_type,
-                                       Operand result_id) {
-  auto* sig = static_cast<const ast::intrinsic::TextureSignature*>(
-      ident->intrinsic_signature());
-  assert(sig != nullptr);
-  auto& pidx = sig->params.idx;
-  auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
+bool Builder::GenerateTextureIntrinsic(
+    ast::IdentifierExpression* ident,
+    ast::CallExpression* call,
+    const semantic::TextureIntrinsicCall* sem,
+    Operand result_type,
+    Operand result_id) {
+  auto& pidx = sem->Params().idx;
+  auto const kNotUsed = semantic::TextureIntrinsicCall::Parameters::kNotUsed;
 
   assert(pidx.texture != kNotUsed);
   auto* texture_type =
@@ -2149,8 +2152,8 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
     return append_coords_to_spirv_params();
   };
 
-  switch (ident->intrinsic()) {
-    case ast::Intrinsic::kTextureDimensions: {
+  switch (sem->intrinsic()) {
+    case semantic::Intrinsic::kTextureDimensions: {
       // Number of returned elements from OpImageQuerySize[Lod] may not match
       // those of textureDimensions().
       // This might be due to an extra vector scalar describing the number of
@@ -2206,7 +2209,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       }
       break;
     }
-    case ast::Intrinsic::kTextureNumLayers: {
+    case semantic::Intrinsic::kTextureNumLayers: {
       uint32_t spirv_dims = 0;
       switch (texture_type->dim()) {
         default:
@@ -2241,19 +2244,19 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       }
       break;
     }
-    case ast::Intrinsic::kTextureNumLevels: {
+    case semantic::Intrinsic::kTextureNumLevels: {
       op = spv::Op::OpImageQueryLevels;
       append_result_type_and_id_to_spirv_params();
       spirv_params.emplace_back(gen_param(pidx.texture));
       break;
     }
-    case ast::Intrinsic::kTextureNumSamples: {
+    case semantic::Intrinsic::kTextureNumSamples: {
       op = spv::Op::OpImageQuerySamples;
       append_result_type_and_id_to_spirv_params();
       spirv_params.emplace_back(gen_param(pidx.texture));
       break;
     }
-    case ast::Intrinsic::kTextureLoad: {
+    case semantic::Intrinsic::kTextureLoad: {
       op = texture_type->Is<type::StorageTexture>() ? spv::Op::OpImageRead
                                                     : spv::Op::OpImageFetch;
       append_result_type_and_id_to_spirv_params_for_read();
@@ -2274,7 +2277,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
 
       break;
     }
-    case ast::Intrinsic::kTextureStore: {
+    case semantic::Intrinsic::kTextureStore: {
       op = spv::Op::OpImageWrite;
       spirv_params.emplace_back(gen_param(pidx.texture));
       if (!append_coords_to_spirv_params()) {
@@ -2283,7 +2286,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       spirv_params.emplace_back(gen_param(pidx.value));
       break;
     }
-    case ast::Intrinsic::kTextureSample: {
+    case semantic::Intrinsic::kTextureSample: {
       op = spv::Op::OpImageSampleImplicitLod;
       append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
@@ -2291,7 +2294,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       }
       break;
     }
-    case ast::Intrinsic::kTextureSampleBias: {
+    case semantic::Intrinsic::kTextureSampleBias: {
       op = spv::Op::OpImageSampleImplicitLod;
       append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
@@ -2302,7 +2305,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
           ImageOperand{SpvImageOperandsBiasMask, gen_param(pidx.bias)});
       break;
     }
-    case ast::Intrinsic::kTextureSampleLevel: {
+    case semantic::Intrinsic::kTextureSampleLevel: {
       op = spv::Op::OpImageSampleExplicitLod;
       append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
@@ -2326,7 +2329,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
       image_operands.emplace_back(ImageOperand{SpvImageOperandsLodMask, level});
       break;
     }
-    case ast::Intrinsic::kTextureSampleGrad: {
+    case semantic::Intrinsic::kTextureSampleGrad: {
       op = spv::Op::OpImageSampleExplicitLod;
       append_result_type_and_id_to_spirv_params_for_read();
       if (!append_image_and_coords_to_spirv_params()) {
@@ -2340,7 +2343,7 @@ bool Builder::GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
           ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddy)});
       break;
     }
-    case ast::Intrinsic::kTextureSampleCompare: {
+    case semantic::Intrinsic::kTextureSampleCompare: {
       op = spv::Op::OpImageSampleDrefExplicitLod;
       append_result_type_and_id_to_spirv_params();
       if (!append_image_and_coords_to_spirv_params()) {

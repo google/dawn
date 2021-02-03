@@ -57,6 +57,13 @@
 #include "src/writer/spirv/instruction.h"
 
 namespace tint {
+
+// Forward declarations
+namespace semantic {
+class TextureIntrinsicCall;
+class IntrinsicCall;
+}  // namespace semantic
+
 namespace writer {
 namespace spirv {
 
@@ -354,19 +361,23 @@ class Builder {
   /// Generates an intrinsic call
   /// @param ident the intrinsic expression
   /// @param call the call expression
+  /// @param sem the semantic information for the intrinsic call
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateIntrinsic(ast::IdentifierExpression* ident,
-                             ast::CallExpression* call);
+                             ast::CallExpression* call,
+                             const semantic::IntrinsicCall* sem);
   /// Generates a texture intrinsic call. Emits an error and returns false if
   /// we're currently outside a function.
   /// @param ident the texture intrinsic
   /// @param call the call expression
+  /// @param sem the semantic information for the texture intrinsic call
   /// @param result_type result type operand of the texture instruction
   /// @param result_id result identifier operand of the texture instruction
   /// parameters
   /// @returns true on success
   bool GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
                                 ast::CallExpression* call,
+                                const semantic::TextureIntrinsicCall* sem,
                                 spirv::Operand result_type,
                                 spirv::Operand result_id);
   /// Generates a sampled image

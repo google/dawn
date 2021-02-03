@@ -18,6 +18,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/program.h"
+#include "src/semantic/call.h"
 #include "src/type/f32_type.h"
 #include "src/type/vector_type.h"
 #include "src/type_determiner.h"
@@ -38,7 +39,7 @@ enum class ParamType {
 };
 
 struct IntrinsicData {
-  ast::Intrinsic intrinsic;
+  semantic::Intrinsic intrinsic;
   ParamType type;
   const char* msl_name;
 };
@@ -59,92 +60,92 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   return out;
 }
 
-ast::CallExpression* GenerateCall(ast::Intrinsic intrinsic,
+ast::CallExpression* GenerateCall(semantic::Intrinsic intrinsic,
                                   ParamType type,
                                   ProgramBuilder* builder) {
   std::string name;
   std::ostringstream str(name);
   str << intrinsic;
   switch (intrinsic) {
-    case ast::Intrinsic::kAcos:
-    case ast::Intrinsic::kAsin:
-    case ast::Intrinsic::kAtan:
-    case ast::Intrinsic::kCeil:
-    case ast::Intrinsic::kCos:
-    case ast::Intrinsic::kCosh:
-    case ast::Intrinsic::kDpdx:
-    case ast::Intrinsic::kDpdxCoarse:
-    case ast::Intrinsic::kDpdxFine:
-    case ast::Intrinsic::kDpdy:
-    case ast::Intrinsic::kDpdyCoarse:
-    case ast::Intrinsic::kDpdyFine:
-    case ast::Intrinsic::kExp:
-    case ast::Intrinsic::kExp2:
-    case ast::Intrinsic::kFloor:
-    case ast::Intrinsic::kFract:
-    case ast::Intrinsic::kFwidth:
-    case ast::Intrinsic::kFwidthCoarse:
-    case ast::Intrinsic::kFwidthFine:
-    case ast::Intrinsic::kInverseSqrt:
-    case ast::Intrinsic::kIsFinite:
-    case ast::Intrinsic::kIsInf:
-    case ast::Intrinsic::kIsNan:
-    case ast::Intrinsic::kIsNormal:
-    case ast::Intrinsic::kLdexp:
-    case ast::Intrinsic::kLength:
-    case ast::Intrinsic::kLog:
-    case ast::Intrinsic::kLog2:
-    case ast::Intrinsic::kNormalize:
-    case ast::Intrinsic::kReflect:
-    case ast::Intrinsic::kRound:
-    case ast::Intrinsic::kSin:
-    case ast::Intrinsic::kSinh:
-    case ast::Intrinsic::kSqrt:
-    case ast::Intrinsic::kTan:
-    case ast::Intrinsic::kTanh:
-    case ast::Intrinsic::kTrunc:
-    case ast::Intrinsic::kSign:
+    case semantic::Intrinsic::kAcos:
+    case semantic::Intrinsic::kAsin:
+    case semantic::Intrinsic::kAtan:
+    case semantic::Intrinsic::kCeil:
+    case semantic::Intrinsic::kCos:
+    case semantic::Intrinsic::kCosh:
+    case semantic::Intrinsic::kDpdx:
+    case semantic::Intrinsic::kDpdxCoarse:
+    case semantic::Intrinsic::kDpdxFine:
+    case semantic::Intrinsic::kDpdy:
+    case semantic::Intrinsic::kDpdyCoarse:
+    case semantic::Intrinsic::kDpdyFine:
+    case semantic::Intrinsic::kExp:
+    case semantic::Intrinsic::kExp2:
+    case semantic::Intrinsic::kFloor:
+    case semantic::Intrinsic::kFract:
+    case semantic::Intrinsic::kFwidth:
+    case semantic::Intrinsic::kFwidthCoarse:
+    case semantic::Intrinsic::kFwidthFine:
+    case semantic::Intrinsic::kInverseSqrt:
+    case semantic::Intrinsic::kIsFinite:
+    case semantic::Intrinsic::kIsInf:
+    case semantic::Intrinsic::kIsNan:
+    case semantic::Intrinsic::kIsNormal:
+    case semantic::Intrinsic::kLdexp:
+    case semantic::Intrinsic::kLength:
+    case semantic::Intrinsic::kLog:
+    case semantic::Intrinsic::kLog2:
+    case semantic::Intrinsic::kNormalize:
+    case semantic::Intrinsic::kReflect:
+    case semantic::Intrinsic::kRound:
+    case semantic::Intrinsic::kSin:
+    case semantic::Intrinsic::kSinh:
+    case semantic::Intrinsic::kSqrt:
+    case semantic::Intrinsic::kTan:
+    case semantic::Intrinsic::kTanh:
+    case semantic::Intrinsic::kTrunc:
+    case semantic::Intrinsic::kSign:
       return builder->Call(str.str(), "f1");
-    case ast::Intrinsic::kAtan2:
-    case ast::Intrinsic::kCross:
-    case ast::Intrinsic::kDot:
-    case ast::Intrinsic::kDistance:
-    case ast::Intrinsic::kPow:
-    case ast::Intrinsic::kStep:
+    case semantic::Intrinsic::kAtan2:
+    case semantic::Intrinsic::kCross:
+    case semantic::Intrinsic::kDot:
+    case semantic::Intrinsic::kDistance:
+    case semantic::Intrinsic::kPow:
+    case semantic::Intrinsic::kStep:
       return builder->Call(str.str(), "f1", "f2");
-    case ast::Intrinsic::kFma:
-    case ast::Intrinsic::kMix:
-    case ast::Intrinsic::kFaceForward:
-    case ast::Intrinsic::kSmoothStep:
+    case semantic::Intrinsic::kFma:
+    case semantic::Intrinsic::kMix:
+    case semantic::Intrinsic::kFaceForward:
+    case semantic::Intrinsic::kSmoothStep:
       return builder->Call(str.str(), "f1", "f2", "f3");
-    case ast::Intrinsic::kAll:
-    case ast::Intrinsic::kAny:
+    case semantic::Intrinsic::kAll:
+    case semantic::Intrinsic::kAny:
       return builder->Call(str.str(), "b1");
-    case ast::Intrinsic::kAbs:
+    case semantic::Intrinsic::kAbs:
       if (type == ParamType::kF32) {
         return builder->Call(str.str(), "f1");
       } else {
         return builder->Call(str.str(), "u1");
       }
-    case ast::Intrinsic::kCountOneBits:
-    case ast::Intrinsic::kReverseBits:
+    case semantic::Intrinsic::kCountOneBits:
+    case semantic::Intrinsic::kReverseBits:
       return builder->Call(str.str(), "u1");
-    case ast::Intrinsic::kMax:
-    case ast::Intrinsic::kMin:
+    case semantic::Intrinsic::kMax:
+    case semantic::Intrinsic::kMin:
       if (type == ParamType::kF32) {
         return builder->Call(str.str(), "f1", "f2");
       } else {
         return builder->Call(str.str(), "u1", "u2");
       }
-    case ast::Intrinsic::kClamp:
+    case semantic::Intrinsic::kClamp:
       if (type == ParamType::kF32) {
         return builder->Call(str.str(), "f1", "f2", "f3");
       } else {
         return builder->Call(str.str(), "u1", "u2", "u3");
       }
-    case ast::Intrinsic::kSelect:
+    case semantic::Intrinsic::kSelect:
       return builder->Call(str.str(), "f1", "f2", "b1");
-    case ast::Intrinsic::kDeterminant:
+    case semantic::Intrinsic::kDeterminant:
       return builder->Call(str.str(), "m1");
     default:
       break;
@@ -171,95 +172,127 @@ TEST_P(MslIntrinsicTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(
-      gen.generate_builtin_name(call->func()->As<ast::IdentifierExpression>()),
-      param.msl_name);
+  auto* sem = program->Sem().Get(call);
+  ASSERT_NE(sem, nullptr);
+  auto* intrinsic = sem->As<semantic::IntrinsicCall>();
+  ASSERT_NE(intrinsic, nullptr);
+
+  EXPECT_EQ(gen.generate_builtin_name(intrinsic), param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
     MslIntrinsicTest,
     testing::Values(
-        IntrinsicData{ast::Intrinsic::kAbs, ParamType::kF32, "metal::fabs"},
-        IntrinsicData{ast::Intrinsic::kAbs, ParamType::kU32, "metal::abs"},
-        IntrinsicData{ast::Intrinsic::kAcos, ParamType::kF32, "metal::acos"},
-        IntrinsicData{ast::Intrinsic::kAll, ParamType::kBool, "metal::all"},
-        IntrinsicData{ast::Intrinsic::kAny, ParamType::kBool, "metal::any"},
-        IntrinsicData{ast::Intrinsic::kAsin, ParamType::kF32, "metal::asin"},
-        IntrinsicData{ast::Intrinsic::kAtan, ParamType::kF32, "metal::atan"},
-        IntrinsicData{ast::Intrinsic::kAtan2, ParamType::kF32, "metal::atan2"},
-        IntrinsicData{ast::Intrinsic::kCeil, ParamType::kF32, "metal::ceil"},
-        IntrinsicData{ast::Intrinsic::kClamp, ParamType::kF32, "metal::clamp"},
-        IntrinsicData{ast::Intrinsic::kClamp, ParamType::kU32, "metal::clamp"},
-        IntrinsicData{ast::Intrinsic::kCos, ParamType::kF32, "metal::cos"},
-        IntrinsicData{ast::Intrinsic::kCosh, ParamType::kF32, "metal::cosh"},
-        IntrinsicData{ast::Intrinsic::kCountOneBits, ParamType::kU32,
+        IntrinsicData{semantic::Intrinsic::kAbs, ParamType::kF32,
+                      "metal::fabs"},
+        IntrinsicData{semantic::Intrinsic::kAbs, ParamType::kU32, "metal::abs"},
+        IntrinsicData{semantic::Intrinsic::kAcos, ParamType::kF32,
+                      "metal::acos"},
+        IntrinsicData{semantic::Intrinsic::kAll, ParamType::kBool,
+                      "metal::all"},
+        IntrinsicData{semantic::Intrinsic::kAny, ParamType::kBool,
+                      "metal::any"},
+        IntrinsicData{semantic::Intrinsic::kAsin, ParamType::kF32,
+                      "metal::asin"},
+        IntrinsicData{semantic::Intrinsic::kAtan, ParamType::kF32,
+                      "metal::atan"},
+        IntrinsicData{semantic::Intrinsic::kAtan2, ParamType::kF32,
+                      "metal::atan2"},
+        IntrinsicData{semantic::Intrinsic::kCeil, ParamType::kF32,
+                      "metal::ceil"},
+        IntrinsicData{semantic::Intrinsic::kClamp, ParamType::kF32,
+                      "metal::clamp"},
+        IntrinsicData{semantic::Intrinsic::kClamp, ParamType::kU32,
+                      "metal::clamp"},
+        IntrinsicData{semantic::Intrinsic::kCos, ParamType::kF32, "metal::cos"},
+        IntrinsicData{semantic::Intrinsic::kCosh, ParamType::kF32,
+                      "metal::cosh"},
+        IntrinsicData{semantic::Intrinsic::kCountOneBits, ParamType::kU32,
                       "metal::popcount"},
-        IntrinsicData{ast::Intrinsic::kCross, ParamType::kF32, "metal::cross"},
-        IntrinsicData{ast::Intrinsic::kDeterminant, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kCross, ParamType::kF32,
+                      "metal::cross"},
+        IntrinsicData{semantic::Intrinsic::kDeterminant, ParamType::kF32,
                       "metal::determinant"},
-        IntrinsicData{ast::Intrinsic::kDistance, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kDistance, ParamType::kF32,
                       "metal::distance"},
-        IntrinsicData{ast::Intrinsic::kDot, ParamType::kF32, "metal::dot"},
-        IntrinsicData{ast::Intrinsic::kDpdx, ParamType::kF32, "metal::dfdx"},
-        IntrinsicData{ast::Intrinsic::kDpdxCoarse, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kDot, ParamType::kF32, "metal::dot"},
+        IntrinsicData{semantic::Intrinsic::kDpdx, ParamType::kF32,
                       "metal::dfdx"},
-        IntrinsicData{ast::Intrinsic::kDpdxFine, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kDpdxCoarse, ParamType::kF32,
                       "metal::dfdx"},
-        IntrinsicData{ast::Intrinsic::kDpdy, ParamType::kF32, "metal::dfdy"},
-        IntrinsicData{ast::Intrinsic::kDpdyCoarse, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kDpdxFine, ParamType::kF32,
+                      "metal::dfdx"},
+        IntrinsicData{semantic::Intrinsic::kDpdy, ParamType::kF32,
                       "metal::dfdy"},
-        IntrinsicData{ast::Intrinsic::kDpdyFine, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kDpdyCoarse, ParamType::kF32,
                       "metal::dfdy"},
-        IntrinsicData{ast::Intrinsic::kExp, ParamType::kF32, "metal::exp"},
-        IntrinsicData{ast::Intrinsic::kExp2, ParamType::kF32, "metal::exp2"},
-        IntrinsicData{ast::Intrinsic::kFaceForward, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kDpdyFine, ParamType::kF32,
+                      "metal::dfdy"},
+        IntrinsicData{semantic::Intrinsic::kExp, ParamType::kF32, "metal::exp"},
+        IntrinsicData{semantic::Intrinsic::kExp2, ParamType::kF32,
+                      "metal::exp2"},
+        IntrinsicData{semantic::Intrinsic::kFaceForward, ParamType::kF32,
                       "metal::faceforward"},
-        IntrinsicData{ast::Intrinsic::kFloor, ParamType::kF32, "metal::floor"},
-        IntrinsicData{ast::Intrinsic::kFma, ParamType::kF32, "metal::fma"},
-        IntrinsicData{ast::Intrinsic::kFract, ParamType::kF32, "metal::fract"},
-        IntrinsicData{ast::Intrinsic::kFwidth, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kFloor, ParamType::kF32,
+                      "metal::floor"},
+        IntrinsicData{semantic::Intrinsic::kFma, ParamType::kF32, "metal::fma"},
+        IntrinsicData{semantic::Intrinsic::kFract, ParamType::kF32,
+                      "metal::fract"},
+        IntrinsicData{semantic::Intrinsic::kFwidth, ParamType::kF32,
                       "metal::fwidth"},
-        IntrinsicData{ast::Intrinsic::kFwidthCoarse, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kFwidthCoarse, ParamType::kF32,
                       "metal::fwidth"},
-        IntrinsicData{ast::Intrinsic::kFwidthFine, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kFwidthFine, ParamType::kF32,
                       "metal::fwidth"},
-        IntrinsicData{ast::Intrinsic::kInverseSqrt, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kInverseSqrt, ParamType::kF32,
                       "metal::rsqrt"},
-        IntrinsicData{ast::Intrinsic::kIsFinite, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kIsFinite, ParamType::kF32,
                       "metal::isfinite"},
-        IntrinsicData{ast::Intrinsic::kIsInf, ParamType::kF32, "metal::isinf"},
-        IntrinsicData{ast::Intrinsic::kIsNan, ParamType::kF32, "metal::isnan"},
-        IntrinsicData{ast::Intrinsic::kIsNormal, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kIsInf, ParamType::kF32,
+                      "metal::isinf"},
+        IntrinsicData{semantic::Intrinsic::kIsNan, ParamType::kF32,
+                      "metal::isnan"},
+        IntrinsicData{semantic::Intrinsic::kIsNormal, ParamType::kF32,
                       "metal::isnormal"},
-        IntrinsicData{ast::Intrinsic::kLdexp, ParamType::kF32, "metal::ldexp"},
-        IntrinsicData{ast::Intrinsic::kLength, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kLdexp, ParamType::kF32,
+                      "metal::ldexp"},
+        IntrinsicData{semantic::Intrinsic::kLength, ParamType::kF32,
                       "metal::length"},
-        IntrinsicData{ast::Intrinsic::kLog, ParamType::kF32, "metal::log"},
-        IntrinsicData{ast::Intrinsic::kLog2, ParamType::kF32, "metal::log2"},
-        IntrinsicData{ast::Intrinsic::kMax, ParamType::kF32, "metal::fmax"},
-        IntrinsicData{ast::Intrinsic::kMax, ParamType::kU32, "metal::max"},
-        IntrinsicData{ast::Intrinsic::kMin, ParamType::kF32, "metal::fmin"},
-        IntrinsicData{ast::Intrinsic::kMin, ParamType::kU32, "metal::min"},
-        IntrinsicData{ast::Intrinsic::kNormalize, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kLog, ParamType::kF32, "metal::log"},
+        IntrinsicData{semantic::Intrinsic::kLog2, ParamType::kF32,
+                      "metal::log2"},
+        IntrinsicData{semantic::Intrinsic::kMax, ParamType::kF32,
+                      "metal::fmax"},
+        IntrinsicData{semantic::Intrinsic::kMax, ParamType::kU32, "metal::max"},
+        IntrinsicData{semantic::Intrinsic::kMin, ParamType::kF32,
+                      "metal::fmin"},
+        IntrinsicData{semantic::Intrinsic::kMin, ParamType::kU32, "metal::min"},
+        IntrinsicData{semantic::Intrinsic::kNormalize, ParamType::kF32,
                       "metal::normalize"},
-        IntrinsicData{ast::Intrinsic::kPow, ParamType::kF32, "metal::pow"},
-        IntrinsicData{ast::Intrinsic::kReflect, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kPow, ParamType::kF32, "metal::pow"},
+        IntrinsicData{semantic::Intrinsic::kReflect, ParamType::kF32,
                       "metal::reflect"},
-        IntrinsicData{ast::Intrinsic::kReverseBits, ParamType::kU32,
+        IntrinsicData{semantic::Intrinsic::kReverseBits, ParamType::kU32,
                       "metal::reverse_bits"},
-        IntrinsicData{ast::Intrinsic::kRound, ParamType::kU32, "metal::round"},
-        IntrinsicData{ast::Intrinsic::kSelect, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kRound, ParamType::kU32,
+                      "metal::round"},
+        IntrinsicData{semantic::Intrinsic::kSelect, ParamType::kF32,
                       "metal::select"},
-        IntrinsicData{ast::Intrinsic::kSign, ParamType::kF32, "metal::sign"},
-        IntrinsicData{ast::Intrinsic::kSin, ParamType::kF32, "metal::sin"},
-        IntrinsicData{ast::Intrinsic::kSinh, ParamType::kF32, "metal::sinh"},
-        IntrinsicData{ast::Intrinsic::kSmoothStep, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kSign, ParamType::kF32,
+                      "metal::sign"},
+        IntrinsicData{semantic::Intrinsic::kSin, ParamType::kF32, "metal::sin"},
+        IntrinsicData{semantic::Intrinsic::kSinh, ParamType::kF32,
+                      "metal::sinh"},
+        IntrinsicData{semantic::Intrinsic::kSmoothStep, ParamType::kF32,
                       "metal::smoothstep"},
-        IntrinsicData{ast::Intrinsic::kSqrt, ParamType::kF32, "metal::sqrt"},
-        IntrinsicData{ast::Intrinsic::kStep, ParamType::kF32, "metal::step"},
-        IntrinsicData{ast::Intrinsic::kTan, ParamType::kF32, "metal::tan"},
-        IntrinsicData{ast::Intrinsic::kTanh, ParamType::kF32, "metal::tanh"},
-        IntrinsicData{ast::Intrinsic::kTrunc, ParamType::kF32,
+        IntrinsicData{semantic::Intrinsic::kSqrt, ParamType::kF32,
+                      "metal::sqrt"},
+        IntrinsicData{semantic::Intrinsic::kStep, ParamType::kF32,
+                      "metal::step"},
+        IntrinsicData{semantic::Intrinsic::kTan, ParamType::kF32, "metal::tan"},
+        IntrinsicData{semantic::Intrinsic::kTanh, ParamType::kF32,
+                      "metal::tanh"},
+        IntrinsicData{semantic::Intrinsic::kTrunc, ParamType::kF32,
                       "metal::trunc"}));
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Call) {

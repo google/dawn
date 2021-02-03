@@ -45,6 +45,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
+#include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
 #include "src/semantic/variable.h"
@@ -540,19 +541,20 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     return 0;
   }
 
-  if (ident->IsIntrinsic()) {
+  auto* call_sem = builder_.Sem().Get(expr);
+  if (auto* sem = call_sem->As<semantic::TextureIntrinsicCall>()) {
+    return EmitTextureCall(pre, out, expr, sem);
+  }
+  if (auto* sem = call_sem->As<semantic::IntrinsicCall>()) {
     const auto& params = expr->params();
-    if (ident->intrinsic() == ast::Intrinsic::kSelect) {
+    if (sem->intrinsic() == semantic::Intrinsic::kSelect) {
       error_ = "select not supported in HLSL backend yet";
       return false;
-    } else if (ident->intrinsic() == ast::Intrinsic::kIsNormal) {
+    } else if (sem->intrinsic() == semantic::Intrinsic::kIsNormal) {
       error_ = "is_normal not supported in HLSL backend yet";
       return false;
     } else {
-      if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-        return EmitTextureCall(pre, out, expr);
-      }
-      auto name = generate_builtin_name(ident);
+      auto name = generate_builtin_name(sem);
       if (name.empty()) {
         return false;
       }
@@ -634,30 +636,29 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
 bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
                                     std::ostream& out,
-                                    ast::CallExpression* expr) {
+                                    ast::CallExpression* expr,
+                                    const semantic::TextureIntrinsicCall* sem) {
   auto* ident = expr->func()->As<ast::IdentifierExpression>();
 
   auto params = expr->params();
-  auto* signature = static_cast<const ast::intrinsic::TextureSignature*>(
-      ident->intrinsic_signature());
-  auto& pidx = signature->params.idx;
-  auto const kNotUsed = ast::intrinsic::TextureSignature::Parameters::kNotUsed;
+  auto& pidx = sem->Params().idx;
+  auto const kNotUsed = semantic::TextureIntrinsicCall::Parameters::kNotUsed;
 
   auto* texture = params[pidx.texture];
   auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
 
-  switch (ident->intrinsic()) {
-    case ast::Intrinsic::kTextureDimensions:
-    case ast::Intrinsic::kTextureNumLayers:
-    case ast::Intrinsic::kTextureNumLevels:
-    case ast::Intrinsic::kTextureNumSamples: {
+  switch (sem->intrinsic()) {
+    case semantic::Intrinsic::kTextureDimensions:
+    case semantic::Intrinsic::kTextureNumLayers:
+    case semantic::Intrinsic::kTextureNumLevels:
+    case semantic::Intrinsic::kTextureNumSamples: {
       // All of these intrinsics use the GetDimensions() method on the texture
       int num_dimensions = 0;
       const char* swizzle = "";
       bool add_mip_level_in = false;
 
-      switch (ident->intrinsic()) {
-        case ast::Intrinsic::kTextureDimensions:
+      switch (sem->intrinsic()) {
+        case semantic::Intrinsic::kTextureDimensions:
           switch (texture_type->dim()) {
             case type::TextureDimension::kNone:
               error_ = "texture dimension is kNone";
@@ -693,7 +694,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               break;
           }
           break;
-        case ast::Intrinsic::kTextureNumLayers:
+        case semantic::Intrinsic::kTextureNumLayers:
           switch (texture_type->dim()) {
             default:
               error_ = "texture dimension is not arrayed";
@@ -709,7 +710,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               break;
           }
           break;
-        case ast::Intrinsic::kTextureNumLevels:
+        case semantic::Intrinsic::kTextureNumLevels:
           add_mip_level_in = true;
           switch (texture_type->dim()) {
             default:
@@ -728,7 +729,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               break;
           }
           break;
-        case ast::Intrinsic::kTextureNumSamples:
+        case semantic::Intrinsic::kTextureNumSamples:
           switch (texture_type->dim()) {
             default:
               error_ = "texture dimension does not support multisampling";
@@ -797,29 +798,29 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
   bool pack_mip_in_coords = false;
 
-  switch (ident->intrinsic()) {
-    case ast::Intrinsic::kTextureSample:
+  switch (sem->intrinsic()) {
+    case semantic::Intrinsic::kTextureSample:
       out << ".Sample(";
       break;
-    case ast::Intrinsic::kTextureSampleBias:
+    case semantic::Intrinsic::kTextureSampleBias:
       out << ".SampleBias(";
       break;
-    case ast::Intrinsic::kTextureSampleLevel:
+    case semantic::Intrinsic::kTextureSampleLevel:
       out << ".SampleLevel(";
       break;
-    case ast::Intrinsic::kTextureSampleGrad:
+    case semantic::Intrinsic::kTextureSampleGrad:
       out << ".SampleGrad(";
       break;
-    case ast::Intrinsic::kTextureSampleCompare:
+    case semantic::Intrinsic::kTextureSampleCompare:
       out << ".SampleCmp(";
       break;
-    case ast::Intrinsic::kTextureLoad:
+    case semantic::Intrinsic::kTextureLoad:
       out << ".Load(";
       if (!texture_type->Is<type::StorageTexture>()) {
         pack_mip_in_coords = true;
       }
       break;
-    case ast::Intrinsic::kTextureStore:
+    case semantic::Intrinsic::kTextureStore:
       out << "[";
       break;
     default:
@@ -875,7 +876,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     }
   }
 
-  if (ident->intrinsic() == ast::Intrinsic::kTextureStore) {
+  if (sem->intrinsic() == semantic::Intrinsic::kTextureStore) {
     out << "] = ";
     if (!EmitExpression(pre, out, params[pidx.value]))
       return false;
@@ -887,102 +888,102 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 }  // namespace hlsl
 
 std::string GeneratorImpl::generate_builtin_name(
-    ast::IdentifierExpression* ident) {
+    const semantic::IntrinsicCall* call) {
   std::string out;
-  switch (ident->intrinsic()) {
-    case ast::Intrinsic::kAcos:
-    case ast::Intrinsic::kAny:
-    case ast::Intrinsic::kAll:
-    case ast::Intrinsic::kAsin:
-    case ast::Intrinsic::kAtan:
-    case ast::Intrinsic::kAtan2:
-    case ast::Intrinsic::kCeil:
-    case ast::Intrinsic::kCos:
-    case ast::Intrinsic::kCosh:
-    case ast::Intrinsic::kCross:
-    case ast::Intrinsic::kDeterminant:
-    case ast::Intrinsic::kDistance:
-    case ast::Intrinsic::kDot:
-    case ast::Intrinsic::kExp:
-    case ast::Intrinsic::kExp2:
-    case ast::Intrinsic::kFloor:
-    case ast::Intrinsic::kFma:
-    case ast::Intrinsic::kLdexp:
-    case ast::Intrinsic::kLength:
-    case ast::Intrinsic::kLog:
-    case ast::Intrinsic::kLog2:
-    case ast::Intrinsic::kNormalize:
-    case ast::Intrinsic::kPow:
-    case ast::Intrinsic::kReflect:
-    case ast::Intrinsic::kRound:
-    case ast::Intrinsic::kSin:
-    case ast::Intrinsic::kSinh:
-    case ast::Intrinsic::kSqrt:
-    case ast::Intrinsic::kStep:
-    case ast::Intrinsic::kTan:
-    case ast::Intrinsic::kTanh:
-    case ast::Intrinsic::kTrunc:
-    case ast::Intrinsic::kMix:
-    case ast::Intrinsic::kSign:
-    case ast::Intrinsic::kAbs:
-    case ast::Intrinsic::kMax:
-    case ast::Intrinsic::kMin:
-    case ast::Intrinsic::kClamp:
-      out = builder_.Symbols().NameFor(ident->symbol());
+  switch (call->intrinsic()) {
+    case semantic::Intrinsic::kAcos:
+    case semantic::Intrinsic::kAny:
+    case semantic::Intrinsic::kAll:
+    case semantic::Intrinsic::kAsin:
+    case semantic::Intrinsic::kAtan:
+    case semantic::Intrinsic::kAtan2:
+    case semantic::Intrinsic::kCeil:
+    case semantic::Intrinsic::kCos:
+    case semantic::Intrinsic::kCosh:
+    case semantic::Intrinsic::kCross:
+    case semantic::Intrinsic::kDeterminant:
+    case semantic::Intrinsic::kDistance:
+    case semantic::Intrinsic::kDot:
+    case semantic::Intrinsic::kExp:
+    case semantic::Intrinsic::kExp2:
+    case semantic::Intrinsic::kFloor:
+    case semantic::Intrinsic::kFma:
+    case semantic::Intrinsic::kLdexp:
+    case semantic::Intrinsic::kLength:
+    case semantic::Intrinsic::kLog:
+    case semantic::Intrinsic::kLog2:
+    case semantic::Intrinsic::kNormalize:
+    case semantic::Intrinsic::kPow:
+    case semantic::Intrinsic::kReflect:
+    case semantic::Intrinsic::kRound:
+    case semantic::Intrinsic::kSin:
+    case semantic::Intrinsic::kSinh:
+    case semantic::Intrinsic::kSqrt:
+    case semantic::Intrinsic::kStep:
+    case semantic::Intrinsic::kTan:
+    case semantic::Intrinsic::kTanh:
+    case semantic::Intrinsic::kTrunc:
+    case semantic::Intrinsic::kMix:
+    case semantic::Intrinsic::kSign:
+    case semantic::Intrinsic::kAbs:
+    case semantic::Intrinsic::kMax:
+    case semantic::Intrinsic::kMin:
+    case semantic::Intrinsic::kClamp:
+      out = semantic::intrinsic::str(call->intrinsic());
       break;
-    case ast::Intrinsic::kCountOneBits:
+    case semantic::Intrinsic::kCountOneBits:
       out = "countbits";
       break;
-    case ast::Intrinsic::kDpdx:
+    case semantic::Intrinsic::kDpdx:
       out = "ddx";
       break;
-    case ast::Intrinsic::kDpdxCoarse:
+    case semantic::Intrinsic::kDpdxCoarse:
       out = "ddx_coarse";
       break;
-    case ast::Intrinsic::kDpdxFine:
+    case semantic::Intrinsic::kDpdxFine:
       out = "ddx_fine";
       break;
-    case ast::Intrinsic::kDpdy:
+    case semantic::Intrinsic::kDpdy:
       out = "ddy";
       break;
-    case ast::Intrinsic::kDpdyCoarse:
+    case semantic::Intrinsic::kDpdyCoarse:
       out = "ddy_coarse";
       break;
-    case ast::Intrinsic::kDpdyFine:
+    case semantic::Intrinsic::kDpdyFine:
       out = "ddy_fine";
       break;
-    case ast::Intrinsic::kFaceForward:
+    case semantic::Intrinsic::kFaceForward:
       out = "faceforward";
       break;
-    case ast::Intrinsic::kFract:
+    case semantic::Intrinsic::kFract:
       out = "frac";
       break;
-    case ast::Intrinsic::kFwidth:
-    case ast::Intrinsic::kFwidthCoarse:
-    case ast::Intrinsic::kFwidthFine:
+    case semantic::Intrinsic::kFwidth:
+    case semantic::Intrinsic::kFwidthCoarse:
+    case semantic::Intrinsic::kFwidthFine:
       out = "fwidth";
       break;
-    case ast::Intrinsic::kInverseSqrt:
+    case semantic::Intrinsic::kInverseSqrt:
       out = "rsqrt";
       break;
-    case ast::Intrinsic::kIsFinite:
+    case semantic::Intrinsic::kIsFinite:
       out = "isfinite";
       break;
-    case ast::Intrinsic::kIsInf:
+    case semantic::Intrinsic::kIsInf:
       out = "isinf";
       break;
-    case ast::Intrinsic::kIsNan:
+    case semantic::Intrinsic::kIsNan:
       out = "isnan";
       break;
-    case ast::Intrinsic::kReverseBits:
+    case semantic::Intrinsic::kReverseBits:
       out = "reversebits";
       break;
-    case ast::Intrinsic::kSmoothStep:
+    case semantic::Intrinsic::kSmoothStep:
       out = "smoothstep";
       break;
     default:
       error_ = "Unknown builtin method: " +
-               builder_.Symbols().NameFor(ident->symbol());
+               std::string(semantic::intrinsic::str(call->intrinsic()));
       return "";
   }
 

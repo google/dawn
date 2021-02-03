@@ -119,7 +119,7 @@ class Program {
   /// @param expr the AST expression
   /// @return the resolved semantic type for the expression, or nullptr if the
   /// expression has no resolved type.
-  type::Type* TypeOf(ast::Expression* expr) const;
+  type::Type* TypeOf(const ast::Expression* expr) const;
 
   /// @param demangle whether to automatically demangle the symbols in the
   /// returned string

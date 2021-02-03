@@ -100,8 +100,6 @@ set(TINT_LIB_SRCS
   ast/if_statement.h
   ast/int_literal.cc
   ast/int_literal.h
-  ast/intrinsic.cc
-  ast/intrinsic.h
   ast/literal.cc
   ast/literal.h
   ast/location_decoration.cc
@@ -192,9 +190,13 @@ set(TINT_LIB_SRCS
   reader/reader.cc
   reader/reader.h
   scope_stack.h
+  semantic/call.h
   semantic/expression.h
   semantic/info.h
+  semantic/intrinsic.cc
+  semantic/intrinsic.h
   semantic/node.h
+  semantic/sem_call.cc
   semantic/sem_expression.cc
   semantic/sem_function.cc
   semantic/sem_info.cc

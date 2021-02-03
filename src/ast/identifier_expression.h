@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "src/ast/expression.h"
-#include "src/ast/intrinsic.h"
+#include "src/semantic/intrinsic.h"
 #include "src/symbol.h"
 
 namespace tint {
@@ -38,25 +38,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
 
   /// @returns the symbol for the identifier
   Symbol symbol() const { return sym_; }
-
-  /// Sets the intrinsic for this identifier
-  /// @param i the intrinsic to set
-  void set_intrinsic(Intrinsic i) { intrinsic_ = i; }
-  /// @returns the intrinsic this identifier represents
-  Intrinsic intrinsic() const { return intrinsic_; }
-
-  /// Sets the intrinsic signature
-  /// @param s the intrinsic signature to set
-  void set_intrinsic_signature(std::unique_ptr<intrinsic::Signature> s) {
-    intrinsic_sig_ = std::move(s);
-  }
-  /// @returns the intrinsic signature for this identifier.
-  const intrinsic::Signature* intrinsic_signature() const {
-    return intrinsic_sig_.get();
-  }
-
-  /// @returns true if this identifier is for an intrinsic
-  bool IsIntrinsic() const { return intrinsic_ != Intrinsic::kNone; }
 
   /// Sets the identifier as a swizzle
   void SetIsSwizzle() { is_swizzle_ = true; }
@@ -88,9 +69,7 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
 
   Symbol const sym_;
 
-  Intrinsic intrinsic_ = Intrinsic::kNone;               // Semantic info
-  std::unique_ptr<intrinsic::Signature> intrinsic_sig_;  // Semantic info
-  bool is_swizzle_ = false;                              // Semantic info
+  bool is_swizzle_ = false;  // Semantic info
 };
 
 }  // namespace ast

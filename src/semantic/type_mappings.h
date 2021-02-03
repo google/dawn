@@ -22,6 +22,7 @@ namespace tint {
 // Forward declarations
 namespace ast {
 
+class CallExpression;
 class Expression;
 class Function;
 class Variable;
@@ -30,6 +31,7 @@ class Variable;
 
 namespace semantic {
 
+class Call;
 class Expression;
 class Function;
 class Variable;
@@ -44,6 +46,7 @@ struct TypeMappings {
   semantic::Expression* operator()(ast::Expression*);
   semantic::Function* operator()(ast::Function*);
   semantic::Variable* operator()(ast::Variable*);
+  semantic::Call* operator()(ast::CallExpression*);
   //! @endcond
 };
 

@@ -44,7 +44,6 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -62,6 +61,7 @@
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/parser_impl.h"
+#include "src/semantic/intrinsic.h"
 #include "src/type/bool_type.h"
 #include "src/type/depth_texture_type.h"
 #include "src/type/f32_type.h"
@@ -464,20 +464,20 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
   return "";
 }
 
-// Returns the WGSL standard library function instrinsic for the
-// given instruction, or ast::Intrinsic::kNone
-ast::Intrinsic GetIntrinsic(SpvOp opcode) {
+// Returns the WGSL standard library function intrinsic for the
+// given instruction, or semantic::Intrinsic::kNone
+semantic::Intrinsic GetIntrinsic(SpvOp opcode) {
   switch (opcode) {
     case SpvOpBitCount:
-      return ast::Intrinsic::kCountOneBits;
+      return semantic::Intrinsic::kCountOneBits;
     case SpvOpBitReverse:
-      return ast::Intrinsic::kReverseBits;
+      return semantic::Intrinsic::kReverseBits;
     case SpvOpDot:
-      return ast::Intrinsic::kDot;
+      return semantic::Intrinsic::kDot;
     default:
       break;
   }
-  return ast::Intrinsic::kNone;
+  return semantic::Intrinsic::kNone;
 }
 
 // @param opcode a SPIR-V opcode
@@ -3102,7 +3102,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   const auto intrinsic = GetIntrinsic(opcode);
-  if (intrinsic != ast::Intrinsic::kNone) {
+  if (intrinsic != semantic::Intrinsic::kNone) {
     return MakeIntrinsicCall(inst);
   }
 
@@ -3990,7 +3990,6 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
   auto name = ss.str();
   auto* ident = create<ast::IdentifierExpression>(
       Source{}, builder_.Symbols().Register(name));
-  ident->set_intrinsic(intrinsic);
 
   ast::ExpressionList params;
   type::Type* first_operand_type = nullptr;
@@ -4679,7 +4678,6 @@ TypedExpression FunctionEmitter::MakeArrayLength(
   std::string call_ident_str = "arrayLength";
   auto* call_ident = create<ast::IdentifierExpression>(
       Source{}, builder_.Symbols().Register(call_ident_str));
-  call_ident->set_intrinsic(ast::Intrinsic::kArrayLength);
 
   ast::ExpressionList params{member_access};
   auto* call_expr =

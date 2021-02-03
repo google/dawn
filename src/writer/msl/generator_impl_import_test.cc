@@ -24,6 +24,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/program.h"
+#include "src/semantic/call.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
@@ -57,9 +58,13 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_EQ(
-      gen.generate_builtin_name(call->func()->As<ast::IdentifierExpression>()),
-      std::string("metal::") + param.msl_name);
+  auto* sem = program->Sem().Get(call);
+  ASSERT_NE(sem, nullptr);
+  auto* intrinsic = sem->As<semantic::IntrinsicCall>();
+  ASSERT_NE(intrinsic, nullptr);
+
+  ASSERT_EQ(gen.generate_builtin_name(intrinsic),
+            std::string("metal::") + param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_SingleParamTest,

@@ -31,7 +31,6 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic.h"
 #include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -42,11 +41,19 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program.h"
 #include "src/scope_stack.h"
+#include "src/semantic/intrinsic.h"
 #include "src/type/struct_type.h"
 #include "src/writer/msl/namer.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
+
+// Forward declarations
+namespace semantic {
+class TextureIntrinsicCall;
+class IntrinsicCall;
+}  // namespace semantic
+
 namespace writer {
 namespace msl {
 
@@ -114,8 +121,10 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param expr the call expression
+  /// @param sem the semantic information for the texture intrinsic call
   /// @returns true if the call expression is emitted
-  bool EmitTextureCall(ast::CallExpression* expr);
+  bool EmitTextureCall(ast::CallExpression* expr,
+                       const semantic::TextureIntrinsicCall* sem);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully
@@ -249,9 +258,9 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the name
   std::string generate_name(const std::string& prefix);
   /// Handles generating a builtin name
-  /// @param ident the identifier to build the name from
+  /// @param call the semantic info for the intrinsic call
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(ast::IdentifierExpression* ident);
+  std::string generate_builtin_name(const semantic::IntrinsicCall* call);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check

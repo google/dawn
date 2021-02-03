@@ -66,10 +66,10 @@ class TypeDeterminer {
   /// @returns true if the type determiner was successful
   bool Determine();
 
-  /// Sets the intrinsic data information for the identifier if needed
-  /// @param ident the identifier expression
-  /// @returns true if an intrinsic was set
-  bool SetIntrinsicIfNeeded(ast::IdentifierExpression* ident);
+  /// @param name the function name to try and match as an intrinsic.
+  /// @return the semantic::Intrinsic for the given name. If `name` does not
+  /// match an intrinsic, returns semantic::Intrinsic::kNone
+  static semantic::Intrinsic MatchIntrinsic(const std::string& name);
 
  private:
   template <typename T>
@@ -176,8 +176,8 @@ class TypeDeterminer {
   bool DetermineCall(ast::CallExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
-  bool DetermineIntrinsic(ast::IdentifierExpression* name,
-                          ast::CallExpression* expr);
+  bool DetermineIntrinsicCall(ast::CallExpression* call,
+                              semantic::Intrinsic intrinsic);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 

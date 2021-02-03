@@ -33,7 +33,6 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -43,8 +42,10 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
+#include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/intrinsic.h"
 #include "src/semantic/variable.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -393,56 +394,59 @@ bool TypeDeterminer::DetermineBitcast(ast::BitcastExpression* expr) {
   return true;
 }
 
-bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
-  if (!DetermineResultType(expr->func())) {
+bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
+  if (!DetermineResultType(call->func())) {
     return false;
   }
-  if (!DetermineResultType(expr->params())) {
+  if (!DetermineResultType(call->params())) {
     return false;
   }
 
   // The expression has to be an identifier as you can't store function pointers
   // but, if it isn't we'll just use the normal result determination to be on
   // the safe side.
-  if (auto* ident = expr->func()->As<ast::IdentifierExpression>()) {
-    if (ident->IsIntrinsic()) {
-      if (!DetermineIntrinsic(ident, expr)) {
-        return false;
-      }
-    } else {
-      if (current_function_) {
-        caller_to_callee_[current_function_->declaration->symbol()].push_back(
-            ident->symbol());
-
-        auto callee_func_it = symbol_to_function_.find(ident->symbol());
-        if (callee_func_it == symbol_to_function_.end()) {
-          set_error(expr->source(),
-                    "unable to find called function: " +
-                        builder_->Symbols().NameFor(ident->symbol()));
-          return false;
-        }
-        auto* callee_func = callee_func_it->second;
-
-        // We inherit any referenced variables from the callee.
-        for (auto* var : callee_func->referenced_module_vars) {
-          set_referenced_from_function_if_needed(var, false);
-        }
-      }
-    }
-  } else {
-    if (!DetermineResultType(expr->func())) {
-      return false;
-    }
+  auto* ident = call->func()->As<ast::IdentifierExpression>();
+  if (!ident) {
+    set_error(call->source(), "call target is not an identifier");
+    return false;
   }
 
-  if (auto* type = TypeOf(expr->func())) {
-    SetType(expr, type);
+  auto name = builder_->Symbols().NameFor(ident->symbol());
+
+  auto intrinsic = MatchIntrinsic(name);
+  if (intrinsic != semantic::Intrinsic::kNone) {
+    if (!DetermineIntrinsicCall(call, intrinsic)) {
+      return false;
+    }
   } else {
-    auto func_sym = expr->func()->As<ast::IdentifierExpression>()->symbol();
-    set_error(expr->source(),
-              "v-0005: function must be declared before use: '" +
-                  builder_->Symbols().NameFor(func_sym) + "'");
-    return false;
+    if (current_function_) {
+      caller_to_callee_[current_function_->declaration->symbol()].push_back(
+          ident->symbol());
+
+      auto callee_func_it = symbol_to_function_.find(ident->symbol());
+      if (callee_func_it == symbol_to_function_.end()) {
+        set_error(call->source(), "unable to find called function: " + name);
+        return false;
+      }
+      auto* callee_func = callee_func_it->second;
+
+      // We inherit any referenced variables from the callee.
+      for (auto* var : callee_func->referenced_module_vars) {
+        set_referenced_from_function_if_needed(var, false);
+      }
+    }
+
+    auto iter = symbol_to_function_.find(ident->symbol());
+    if (iter == symbol_to_function_.end()) {
+      set_error(call->source(),
+                "v-0005: function must be declared before use: '" + name + "'");
+      return false;
+    }
+
+    auto* function = iter->second;
+    auto* return_ty = function->declaration->return_type();
+    auto* sem = builder_->create<semantic::Call>(return_ty);
+    builder_->Sem().Add(call, sem);
   }
 
   return true;
@@ -459,7 +463,7 @@ enum class IntrinsicDataType {
 };
 
 struct IntrinsicData {
-  ast::Intrinsic intrinsic;
+  semantic::Intrinsic intrinsic;
   IntrinsicDataType result_type;
   uint8_t result_vector_width;
   uint8_t param_for_result_type;
@@ -468,63 +472,64 @@ struct IntrinsicData {
 // Note, this isn't all the intrinsics. Some are handled specially before
 // we get to the generic code. See the DetermineIntrinsic code below.
 constexpr const IntrinsicData kIntrinsicData[] = {
-    {ast::Intrinsic::kAbs, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kAcos, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kAll, IntrinsicDataType::kBool, 1, 0},
-    {ast::Intrinsic::kAny, IntrinsicDataType::kBool, 1, 0},
-    {ast::Intrinsic::kArrayLength, IntrinsicDataType::kUnsignedInteger, 1, 0},
-    {ast::Intrinsic::kAsin, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kAtan, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kAtan2, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kCeil, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kClamp, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kCos, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kCosh, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kCountOneBits, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kCross, IntrinsicDataType::kFloat, 3, 0},
-    {ast::Intrinsic::kDeterminant, IntrinsicDataType::kFloat, 1, 0},
-    {ast::Intrinsic::kDistance, IntrinsicDataType::kFloat, 1, 0},
-    {ast::Intrinsic::kDpdx, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kDpdxCoarse, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kDpdxFine, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kDpdy, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kDpdyCoarse, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kDpdyFine, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kDot, IntrinsicDataType::kFloat, 1, 0},
-    {ast::Intrinsic::kExp, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kExp2, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFaceForward, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFloor, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFwidth, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFwidthCoarse, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFwidthFine, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFma, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFract, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kFrexp, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kInverseSqrt, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kLdexp, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kLength, IntrinsicDataType::kFloat, 1, 0},
-    {ast::Intrinsic::kLog, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kLog2, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kMax, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kMin, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kMix, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kModf, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kNormalize, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kPow, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kReflect, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kReverseBits, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kRound, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kSelect, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kSign, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kSin, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kSinh, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kSmoothStep, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kSqrt, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kStep, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kTan, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kTanh, IntrinsicDataType::kDependent, 0, 0},
-    {ast::Intrinsic::kTrunc, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kAbs, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kAcos, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kAll, IntrinsicDataType::kBool, 1, 0},
+    {semantic::Intrinsic::kAny, IntrinsicDataType::kBool, 1, 0},
+    {semantic::Intrinsic::kArrayLength, IntrinsicDataType::kUnsignedInteger, 1,
+     0},
+    {semantic::Intrinsic::kAsin, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kAtan, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kAtan2, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kCeil, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kClamp, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kCos, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kCosh, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kCountOneBits, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kCross, IntrinsicDataType::kFloat, 3, 0},
+    {semantic::Intrinsic::kDeterminant, IntrinsicDataType::kFloat, 1, 0},
+    {semantic::Intrinsic::kDistance, IntrinsicDataType::kFloat, 1, 0},
+    {semantic::Intrinsic::kDpdx, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kDpdxCoarse, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kDpdxFine, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kDpdy, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kDpdyCoarse, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kDpdyFine, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kDot, IntrinsicDataType::kFloat, 1, 0},
+    {semantic::Intrinsic::kExp, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kExp2, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFaceForward, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFloor, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFwidth, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFwidthCoarse, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFwidthFine, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFma, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFract, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kFrexp, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kInverseSqrt, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kLdexp, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kLength, IntrinsicDataType::kFloat, 1, 0},
+    {semantic::Intrinsic::kLog, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kLog2, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kMax, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kMin, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kMix, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kModf, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kNormalize, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kPow, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kReflect, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kReverseBits, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kRound, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kSelect, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kSign, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kSin, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kSinh, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kSmoothStep, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kSqrt, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kStep, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kTan, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kTanh, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kTrunc, IntrinsicDataType::kDependent, 0, 0},
 };
 
 constexpr const uint32_t kIntrinsicDataCount =
@@ -532,35 +537,36 @@ constexpr const uint32_t kIntrinsicDataCount =
 
 }  // namespace
 
-bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
-                                        ast::CallExpression* expr) {
-  if (ast::intrinsic::IsFloatClassificationIntrinsic(ident->intrinsic())) {
-    if (expr->params().size() != 1) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " +
-                    builder_->Symbols().NameFor(ident->symbol()));
+bool TypeDeterminer::DetermineIntrinsicCall(ast::CallExpression* call,
+                                            semantic::Intrinsic intrinsic) {
+  auto create_sem = [&](type::Type* result) {
+    auto* sem = builder_->create<semantic::IntrinsicCall>(result, intrinsic);
+    builder_->Sem().Add(call, sem);
+  };
+
+  std::string name = semantic::intrinsic::str(intrinsic);
+  if (semantic::intrinsic::IsFloatClassificationIntrinsic(intrinsic)) {
+    if (call->params().size() != 1) {
+      set_error(call->source(), "incorrect number of parameters for " + name);
       return false;
     }
 
     auto* bool_type = builder_->create<type::Bool>();
 
-    auto* param_type = TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
+    auto* param_type = TypeOf(call->params()[0])->UnwrapPtrIfNeeded();
     if (auto* vec = param_type->As<type::Vector>()) {
-      SetType(expr->func(),
-              builder_->create<type::Vector>(bool_type, vec->size()));
+      create_sem(builder_->create<type::Vector>(bool_type, vec->size()));
     } else {
-      SetType(expr->func(), bool_type);
+      create_sem(bool_type);
     }
     return true;
   }
-  if (ast::intrinsic::IsTextureIntrinsic(ident->intrinsic())) {
-    ast::intrinsic::TextureSignature::Parameters param;
+  if (semantic::intrinsic::IsTextureIntrinsic(intrinsic)) {
+    semantic::TextureIntrinsicCall::Parameters param;
 
-    auto* texture_param = expr->params()[0];
+    auto* texture_param = call->params()[0];
     if (!TypeOf(texture_param)->UnwrapAll()->Is<type::Texture>()) {
-      set_error(expr->source(),
-                "invalid first argument for " +
-                    builder_->Symbols().NameFor(ident->symbol()));
+      set_error(call->source(), "invalid first argument for " + name);
       return false;
     }
     type::Texture* texture =
@@ -568,25 +574,25 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
 
     bool is_array = type::IsTextureArray(texture->dim());
     bool is_multisampled = texture->Is<type::MultisampledTexture>();
-    switch (ident->intrinsic()) {
-      case ast::Intrinsic::kTextureDimensions:
+    switch (intrinsic) {
+      case semantic::Intrinsic::kTextureDimensions:
         param.idx.texture = param.count++;
-        if (expr->params().size() > param.count) {
+        if (call->params().size() > param.count) {
           param.idx.level = param.count++;
         }
         break;
-      case ast::Intrinsic::kTextureNumLayers:
-      case ast::Intrinsic::kTextureNumLevels:
-      case ast::Intrinsic::kTextureNumSamples:
+      case semantic::Intrinsic::kTextureNumLayers:
+      case semantic::Intrinsic::kTextureNumLevels:
+      case semantic::Intrinsic::kTextureNumSamples:
         param.idx.texture = param.count++;
         break;
-      case ast::Intrinsic::kTextureLoad:
+      case semantic::Intrinsic::kTextureLoad:
         param.idx.texture = param.count++;
         param.idx.coords = param.count++;
         if (is_array) {
           param.idx.array_index = param.count++;
         }
-        if (expr->params().size() > param.count) {
+        if (call->params().size() > param.count) {
           if (is_multisampled) {
             param.idx.sample_index = param.count++;
           } else {
@@ -594,18 +600,18 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           }
         }
         break;
-      case ast::Intrinsic::kTextureSample:
+      case semantic::Intrinsic::kTextureSample:
         param.idx.texture = param.count++;
         param.idx.sampler = param.count++;
         param.idx.coords = param.count++;
         if (is_array) {
           param.idx.array_index = param.count++;
         }
-        if (expr->params().size() > param.count) {
+        if (call->params().size() > param.count) {
           param.idx.offset = param.count++;
         }
         break;
-      case ast::Intrinsic::kTextureSampleBias:
+      case semantic::Intrinsic::kTextureSampleBias:
         param.idx.texture = param.count++;
         param.idx.sampler = param.count++;
         param.idx.coords = param.count++;
@@ -613,11 +619,11 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           param.idx.array_index = param.count++;
         }
         param.idx.bias = param.count++;
-        if (expr->params().size() > param.count) {
+        if (call->params().size() > param.count) {
           param.idx.offset = param.count++;
         }
         break;
-      case ast::Intrinsic::kTextureSampleLevel:
+      case semantic::Intrinsic::kTextureSampleLevel:
         param.idx.texture = param.count++;
         param.idx.sampler = param.count++;
         param.idx.coords = param.count++;
@@ -625,11 +631,11 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           param.idx.array_index = param.count++;
         }
         param.idx.level = param.count++;
-        if (expr->params().size() > param.count) {
+        if (call->params().size() > param.count) {
           param.idx.offset = param.count++;
         }
         break;
-      case ast::Intrinsic::kTextureSampleCompare:
+      case semantic::Intrinsic::kTextureSampleCompare:
         param.idx.texture = param.count++;
         param.idx.sampler = param.count++;
         param.idx.coords = param.count++;
@@ -637,11 +643,11 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
           param.idx.array_index = param.count++;
         }
         param.idx.depth_ref = param.count++;
-        if (expr->params().size() > param.count) {
+        if (call->params().size() > param.count) {
           param.idx.offset = param.count++;
         }
         break;
-      case ast::Intrinsic::kTextureSampleGrad:
+      case semantic::Intrinsic::kTextureSampleGrad:
         param.idx.texture = param.count++;
         param.idx.sampler = param.count++;
         param.idx.coords = param.count++;
@@ -650,11 +656,11 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         }
         param.idx.ddx = param.count++;
         param.idx.ddy = param.count++;
-        if (expr->params().size() > param.count) {
+        if (call->params().size() > param.count) {
           param.idx.offset = param.count++;
         }
         break;
-      case ast::Intrinsic::kTextureStore:
+      case semantic::Intrinsic::kTextureStore:
         param.idx.texture = param.count++;
         param.idx.coords = param.count++;
         if (is_array) {
@@ -663,32 +669,28 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         param.idx.value = param.count++;
         break;
       default:
-        set_error(expr->source(),
+        set_error(call->source(),
                   "Internal compiler error: Unreachable intrinsic " +
-                      std::to_string(static_cast<int>(ident->intrinsic())));
+                      std::to_string(static_cast<int>(intrinsic)));
         return false;
     }
 
-    if (expr->params().size() != param.count) {
-      set_error(expr->source(),
-                "incorrect number of parameters for " +
-                    builder_->Symbols().NameFor(ident->symbol()) + ", got " +
-                    std::to_string(expr->params().size()) + " and expected " +
+    if (call->params().size() != param.count) {
+      set_error(call->source(),
+                "incorrect number of parameters for " + name + ", got " +
+                    std::to_string(call->params().size()) + " and expected " +
                     std::to_string(param.count));
       return false;
     }
 
-    ident->set_intrinsic_signature(
-        std::make_unique<ast::intrinsic::TextureSignature>(param));
-
     // Set the function return type
     type::Type* return_type = nullptr;
-    switch (ident->intrinsic()) {
-      case ast::Intrinsic::kTextureDimensions: {
+    switch (intrinsic) {
+      case semantic::Intrinsic::kTextureDimensions: {
         auto* i32 = builder_->create<type::I32>();
         switch (texture->dim()) {
           default:
-            set_error(expr->source(), "invalid texture dimensions");
+            set_error(call->source(), "invalid texture dimensions");
             break;
           case type::TextureDimension::k1d:
           case type::TextureDimension::k1dArray:
@@ -706,12 +708,12 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         }
         break;
       }
-      case ast::Intrinsic::kTextureNumLayers:
-      case ast::Intrinsic::kTextureNumLevels:
-      case ast::Intrinsic::kTextureNumSamples:
+      case semantic::Intrinsic::kTextureNumLayers:
+      case semantic::Intrinsic::kTextureNumLevels:
+      case semantic::Intrinsic::kTextureNumSamples:
         return_type = builder_->create<type::I32>();
         break;
-      case ast::Intrinsic::kTextureStore:
+      case semantic::Intrinsic::kTextureStore:
         return_type = builder_->create<type::Void>();
         break;
       default: {
@@ -727,7 +729,7 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
                          texture->As<type::MultisampledTexture>()) {
             type = msampled->type();
           } else {
-            set_error(expr->source(),
+            set_error(call->source(),
                       "unknown texture type for texture sampling");
             return false;
           }
@@ -735,35 +737,35 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         }
       }
     }
-    SetType(expr->func(), return_type);
+
+    auto* sem = builder_->create<semantic::TextureIntrinsicCall>(
+        return_type, intrinsic, param);
+    builder_->Sem().Add(call, sem);
 
     return true;
   }
 
   const IntrinsicData* data = nullptr;
   for (uint32_t i = 0; i < kIntrinsicDataCount; ++i) {
-    if (ident->intrinsic() == kIntrinsicData[i].intrinsic) {
+    if (intrinsic == kIntrinsicData[i].intrinsic) {
       data = &kIntrinsicData[i];
       break;
     }
   }
   if (data == nullptr) {
-    error_ = "unable to find intrinsic " +
-             builder_->Symbols().NameFor(ident->symbol());
+    error_ = "unable to find intrinsic " + name;
     return false;
   }
 
   if (data->result_type == IntrinsicDataType::kDependent) {
     const auto param_idx = data->param_for_result_type;
-    if (expr->params().size() <= param_idx) {
-      set_error(expr->source(),
+    if (call->params().size() <= param_idx) {
+      set_error(call->source(),
                 "missing parameter " + std::to_string(param_idx) +
-                    " required for type determination in builtin " +
-                    builder_->Symbols().NameFor(ident->symbol()));
+                    " required for type determination in builtin " + name);
       return false;
     }
-    SetType(expr->func(),
-            TypeOf(expr->params()[param_idx])->UnwrapPtrIfNeeded());
+    create_sem(TypeOf(call->params()[param_idx])->UnwrapPtrIfNeeded());
   } else {
     // The result type is not dependent on the parameter types.
     type::Type* type = nullptr;
@@ -781,15 +783,14 @@ bool TypeDeterminer::DetermineIntrinsic(ast::IdentifierExpression* ident,
         type = builder_->create<type::Bool>();
         break;
       default:
-        error_ = "unhandled intrinsic data type for " +
-                 builder_->Symbols().NameFor(ident->symbol());
+        error_ = "unhandled intrinsic data type for " + name;
         return false;
     }
 
     if (data->result_vector_width > 1) {
       type = builder_->create<type::Vector>(type, data->result_vector_width);
     }
-    SetType(expr->func(), type);
+    create_sem(type);
   }
 
   return true;
@@ -831,169 +832,168 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
 
   auto iter = symbol_to_function_.find(symbol);
   if (iter != symbol_to_function_.end()) {
-    SetType(expr, iter->second->declaration->return_type());
+    // Identifier is to a function, which has no type (currently).
     return true;
   }
 
-  if (!SetIntrinsicIfNeeded(expr)) {
-    set_error(expr->source(),
-              "v-0006: identifier must be declared before use: " +
-                  builder_->Symbols().NameFor(symbol));
-    return false;
+  std::string name = builder_->Symbols().NameFor(symbol);
+  if (MatchIntrinsic(name) != semantic::Intrinsic::kNone) {
+    // Identifier is to an intrinsic function, which has no type (currently).
+    return true;
   }
-  return true;
+
+  set_error(expr->source(),
+            "v-0006: identifier must be declared before use: " + name);
+  return false;
 }
 
-bool TypeDeterminer::SetIntrinsicIfNeeded(ast::IdentifierExpression* ident) {
-  auto name = builder_->Symbols().NameFor(ident->symbol());
+semantic::Intrinsic TypeDeterminer::MatchIntrinsic(const std::string& name) {
   if (name == "abs") {
-    ident->set_intrinsic(ast::Intrinsic::kAbs);
+    return semantic::Intrinsic::kAbs;
   } else if (name == "acos") {
-    ident->set_intrinsic(ast::Intrinsic::kAcos);
+    return semantic::Intrinsic::kAcos;
   } else if (name == "all") {
-    ident->set_intrinsic(ast::Intrinsic::kAll);
+    return semantic::Intrinsic::kAll;
   } else if (name == "any") {
-    ident->set_intrinsic(ast::Intrinsic::kAny);
+    return semantic::Intrinsic::kAny;
   } else if (name == "arrayLength") {
-    ident->set_intrinsic(ast::Intrinsic::kArrayLength);
+    return semantic::Intrinsic::kArrayLength;
   } else if (name == "asin") {
-    ident->set_intrinsic(ast::Intrinsic::kAsin);
+    return semantic::Intrinsic::kAsin;
   } else if (name == "atan") {
-    ident->set_intrinsic(ast::Intrinsic::kAtan);
+    return semantic::Intrinsic::kAtan;
   } else if (name == "atan2") {
-    ident->set_intrinsic(ast::Intrinsic::kAtan2);
+    return semantic::Intrinsic::kAtan2;
   } else if (name == "ceil") {
-    ident->set_intrinsic(ast::Intrinsic::kCeil);
+    return semantic::Intrinsic::kCeil;
   } else if (name == "clamp") {
-    ident->set_intrinsic(ast::Intrinsic::kClamp);
+    return semantic::Intrinsic::kClamp;
   } else if (name == "cos") {
-    ident->set_intrinsic(ast::Intrinsic::kCos);
+    return semantic::Intrinsic::kCos;
   } else if (name == "cosh") {
-    ident->set_intrinsic(ast::Intrinsic::kCosh);
+    return semantic::Intrinsic::kCosh;
   } else if (name == "countOneBits") {
-    ident->set_intrinsic(ast::Intrinsic::kCountOneBits);
+    return semantic::Intrinsic::kCountOneBits;
   } else if (name == "cross") {
-    ident->set_intrinsic(ast::Intrinsic::kCross);
+    return semantic::Intrinsic::kCross;
   } else if (name == "determinant") {
-    ident->set_intrinsic(ast::Intrinsic::kDeterminant);
+    return semantic::Intrinsic::kDeterminant;
   } else if (name == "distance") {
-    ident->set_intrinsic(ast::Intrinsic::kDistance);
+    return semantic::Intrinsic::kDistance;
   } else if (name == "dot") {
-    ident->set_intrinsic(ast::Intrinsic::kDot);
+    return semantic::Intrinsic::kDot;
   } else if (name == "dpdx") {
-    ident->set_intrinsic(ast::Intrinsic::kDpdx);
+    return semantic::Intrinsic::kDpdx;
   } else if (name == "dpdxCoarse") {
-    ident->set_intrinsic(ast::Intrinsic::kDpdxCoarse);
+    return semantic::Intrinsic::kDpdxCoarse;
   } else if (name == "dpdxFine") {
-    ident->set_intrinsic(ast::Intrinsic::kDpdxFine);
+    return semantic::Intrinsic::kDpdxFine;
   } else if (name == "dpdy") {
-    ident->set_intrinsic(ast::Intrinsic::kDpdy);
+    return semantic::Intrinsic::kDpdy;
   } else if (name == "dpdyCoarse") {
-    ident->set_intrinsic(ast::Intrinsic::kDpdyCoarse);
+    return semantic::Intrinsic::kDpdyCoarse;
   } else if (name == "dpdyFine") {
-    ident->set_intrinsic(ast::Intrinsic::kDpdyFine);
+    return semantic::Intrinsic::kDpdyFine;
   } else if (name == "exp") {
-    ident->set_intrinsic(ast::Intrinsic::kExp);
+    return semantic::Intrinsic::kExp;
   } else if (name == "exp2") {
-    ident->set_intrinsic(ast::Intrinsic::kExp2);
+    return semantic::Intrinsic::kExp2;
   } else if (name == "faceForward") {
-    ident->set_intrinsic(ast::Intrinsic::kFaceForward);
+    return semantic::Intrinsic::kFaceForward;
   } else if (name == "floor") {
-    ident->set_intrinsic(ast::Intrinsic::kFloor);
+    return semantic::Intrinsic::kFloor;
   } else if (name == "fma") {
-    ident->set_intrinsic(ast::Intrinsic::kFma);
+    return semantic::Intrinsic::kFma;
   } else if (name == "fract") {
-    ident->set_intrinsic(ast::Intrinsic::kFract);
+    return semantic::Intrinsic::kFract;
   } else if (name == "frexp") {
-    ident->set_intrinsic(ast::Intrinsic::kFrexp);
+    return semantic::Intrinsic::kFrexp;
   } else if (name == "fwidth") {
-    ident->set_intrinsic(ast::Intrinsic::kFwidth);
+    return semantic::Intrinsic::kFwidth;
   } else if (name == "fwidthCoarse") {
-    ident->set_intrinsic(ast::Intrinsic::kFwidthCoarse);
+    return semantic::Intrinsic::kFwidthCoarse;
   } else if (name == "fwidthFine") {
-    ident->set_intrinsic(ast::Intrinsic::kFwidthFine);
+    return semantic::Intrinsic::kFwidthFine;
   } else if (name == "inverseSqrt") {
-    ident->set_intrinsic(ast::Intrinsic::kInverseSqrt);
+    return semantic::Intrinsic::kInverseSqrt;
   } else if (name == "isFinite") {
-    ident->set_intrinsic(ast::Intrinsic::kIsFinite);
+    return semantic::Intrinsic::kIsFinite;
   } else if (name == "isInf") {
-    ident->set_intrinsic(ast::Intrinsic::kIsInf);
+    return semantic::Intrinsic::kIsInf;
   } else if (name == "isNan") {
-    ident->set_intrinsic(ast::Intrinsic::kIsNan);
+    return semantic::Intrinsic::kIsNan;
   } else if (name == "isNormal") {
-    ident->set_intrinsic(ast::Intrinsic::kIsNormal);
+    return semantic::Intrinsic::kIsNormal;
   } else if (name == "ldexp") {
-    ident->set_intrinsic(ast::Intrinsic::kLdexp);
+    return semantic::Intrinsic::kLdexp;
   } else if (name == "length") {
-    ident->set_intrinsic(ast::Intrinsic::kLength);
+    return semantic::Intrinsic::kLength;
   } else if (name == "log") {
-    ident->set_intrinsic(ast::Intrinsic::kLog);
+    return semantic::Intrinsic::kLog;
   } else if (name == "log2") {
-    ident->set_intrinsic(ast::Intrinsic::kLog2);
+    return semantic::Intrinsic::kLog2;
   } else if (name == "max") {
-    ident->set_intrinsic(ast::Intrinsic::kMax);
+    return semantic::Intrinsic::kMax;
   } else if (name == "min") {
-    ident->set_intrinsic(ast::Intrinsic::kMin);
+    return semantic::Intrinsic::kMin;
   } else if (name == "mix") {
-    ident->set_intrinsic(ast::Intrinsic::kMix);
+    return semantic::Intrinsic::kMix;
   } else if (name == "modf") {
-    ident->set_intrinsic(ast::Intrinsic::kModf);
+    return semantic::Intrinsic::kModf;
   } else if (name == "normalize") {
-    ident->set_intrinsic(ast::Intrinsic::kNormalize);
+    return semantic::Intrinsic::kNormalize;
   } else if (name == "pow") {
-    ident->set_intrinsic(ast::Intrinsic::kPow);
+    return semantic::Intrinsic::kPow;
   } else if (name == "reflect") {
-    ident->set_intrinsic(ast::Intrinsic::kReflect);
+    return semantic::Intrinsic::kReflect;
   } else if (name == "reverseBits") {
-    ident->set_intrinsic(ast::Intrinsic::kReverseBits);
+    return semantic::Intrinsic::kReverseBits;
   } else if (name == "round") {
-    ident->set_intrinsic(ast::Intrinsic::kRound);
+    return semantic::Intrinsic::kRound;
   } else if (name == "select") {
-    ident->set_intrinsic(ast::Intrinsic::kSelect);
+    return semantic::Intrinsic::kSelect;
   } else if (name == "sign") {
-    ident->set_intrinsic(ast::Intrinsic::kSign);
+    return semantic::Intrinsic::kSign;
   } else if (name == "sin") {
-    ident->set_intrinsic(ast::Intrinsic::kSin);
+    return semantic::Intrinsic::kSin;
   } else if (name == "sinh") {
-    ident->set_intrinsic(ast::Intrinsic::kSinh);
+    return semantic::Intrinsic::kSinh;
   } else if (name == "smoothStep") {
-    ident->set_intrinsic(ast::Intrinsic::kSmoothStep);
+    return semantic::Intrinsic::kSmoothStep;
   } else if (name == "sqrt") {
-    ident->set_intrinsic(ast::Intrinsic::kSqrt);
+    return semantic::Intrinsic::kSqrt;
   } else if (name == "step") {
-    ident->set_intrinsic(ast::Intrinsic::kStep);
+    return semantic::Intrinsic::kStep;
   } else if (name == "tan") {
-    ident->set_intrinsic(ast::Intrinsic::kTan);
+    return semantic::Intrinsic::kTan;
   } else if (name == "tanh") {
-    ident->set_intrinsic(ast::Intrinsic::kTanh);
+    return semantic::Intrinsic::kTanh;
   } else if (name == "textureDimensions") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureDimensions);
+    return semantic::Intrinsic::kTextureDimensions;
   } else if (name == "textureNumLayers") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureNumLayers);
+    return semantic::Intrinsic::kTextureNumLayers;
   } else if (name == "textureNumLevels") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureNumLevels);
+    return semantic::Intrinsic::kTextureNumLevels;
   } else if (name == "textureNumSamples") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureNumSamples);
+    return semantic::Intrinsic::kTextureNumSamples;
   } else if (name == "textureLoad") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureLoad);
+    return semantic::Intrinsic::kTextureLoad;
   } else if (name == "textureStore") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureStore);
+    return semantic::Intrinsic::kTextureStore;
   } else if (name == "textureSample") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureSample);
+    return semantic::Intrinsic::kTextureSample;
   } else if (name == "textureSampleBias") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureSampleBias);
+    return semantic::Intrinsic::kTextureSampleBias;
   } else if (name == "textureSampleCompare") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureSampleCompare);
+    return semantic::Intrinsic::kTextureSampleCompare;
   } else if (name == "textureSampleGrad") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureSampleGrad);
+    return semantic::Intrinsic::kTextureSampleGrad;
   } else if (name == "textureSampleLevel") {
-    ident->set_intrinsic(ast::Intrinsic::kTextureSampleLevel);
+    return semantic::Intrinsic::kTextureSampleLevel;
   } else if (name == "trunc") {
-    ident->set_intrinsic(ast::Intrinsic::kTrunc);
-  } else {
-    return false;
+    return semantic::Intrinsic::kTrunc;
   }
-  return true;
+  return semantic::Intrinsic::kNone;
 }
 
 bool TypeDeterminer::DetermineMemberAccessor(

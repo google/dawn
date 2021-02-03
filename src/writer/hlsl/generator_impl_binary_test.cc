@@ -483,6 +483,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::FunctionDecorationList{});
+  Global("a", ast::StorageClass::kNone, ty.bool_());
+  Global("b", ast::StorageClass::kNone, ty.bool_());
+  Global("c", ast::StorageClass::kNone, ty.bool_());
+  Global("d", ast::StorageClass::kNone, ty.bool_());
 
   ast::ExpressionList params;
   params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
@@ -497,6 +501,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
                                     Expr("d"))));
 
   auto* expr = create<ast::CallStatement>(Call("foo", params));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 

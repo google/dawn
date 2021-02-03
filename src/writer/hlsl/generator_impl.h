@@ -30,7 +30,6 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/intrinsic.h"
 #include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -41,10 +40,18 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
+#include "src/semantic/intrinsic.h"
 #include "src/type/struct_type.h"
 #include "src/writer/hlsl/namer.h"
 
 namespace tint {
+
+// Forward declarations
+namespace semantic {
+class TextureIntrinsicCall;
+class IntrinsicCall;
+}  // namespace semantic
+
 namespace writer {
 namespace hlsl {
 
@@ -146,10 +153,12 @@ class GeneratorImpl {
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
+  /// @param sem the semantic information for the texture intrinsic call
   /// @returns true if the call expression is emitted
   bool EmitTextureCall(std::ostream& pre,
                        std::ostream& out,
-                       ast::CallExpression* expr);
+                       ast::CallExpression* expr,
+                       const semantic::TextureIntrinsicCall* sem);
   /// Handles a case statement
   /// @param out the output stream
   /// @param stmt the statement
@@ -346,9 +355,9 @@ class GeneratorImpl {
   std::string generate_storage_buffer_index_expression(std::ostream& pre,
                                                        ast::Expression* expr);
   /// Handles generating a builtin method name
-  /// @param expr the expression
+  /// @param call the semantic info for the intrinsic call
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(ast::IdentifierExpression* expr);
+  std::string generate_builtin_name(const semantic::IntrinsicCall* call);
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
