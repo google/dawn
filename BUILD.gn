@@ -386,6 +386,7 @@ source_set("libtint_core_src") {
     "src/semantic/sem_expression.cc",
     "src/semantic/sem_function.cc",
     "src/semantic/sem_info.cc",
+    "src/semantic/sem_member_accessor_expression.cc",
     "src/semantic/sem_node.cc",
     "src/semantic/sem_variable.cc",
     "src/semantic/type_mappings.h",

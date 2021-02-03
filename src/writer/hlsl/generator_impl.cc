@@ -48,6 +48,7 @@
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/member_accessor_expression.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
@@ -2104,7 +2105,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& pre,
   out << ".";
 
   // Swizzles output the name directly
-  if (expr->IsSwizzle()) {
+  if (builder_.Sem().Get(expr)->IsSwizzle()) {
     out << builder_.Symbols().NameFor(expr->member()->symbol());
   } else if (!EmitExpression(pre, out, expr->member())) {
     return false;

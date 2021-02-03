@@ -198,6 +198,7 @@ set(TINT_LIB_SRCS
   semantic/node.h
   semantic/sem_call.cc
   semantic/sem_expression.cc
+  semantic/sem_member_accessor_expression.cc
   semantic/sem_function.cc
   semantic/sem_info.cc
   semantic/sem_node.cc

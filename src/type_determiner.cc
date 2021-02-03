@@ -46,6 +46,7 @@
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
 #include "src/semantic/intrinsic.h"
+#include "src/semantic/member_accessor_expression.h"
 #include "src/semantic/variable.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -1006,6 +1007,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
   auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   type::Type* ret = nullptr;
+  bool is_swizzle = false;
+
   if (auto* ty = data_type->As<type::Struct>()) {
     auto* strct = ty->impl();
     auto symbol = expr->member()->symbol();
@@ -1029,7 +1032,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
       ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
     }
   } else if (auto* vec = data_type->As<type::Vector>()) {
-    expr->SetIsSwizzle();
+    is_swizzle = true;
 
     auto size = builder_->Symbols().NameFor(expr->member()->symbol()).size();
     if (size == 1) {
@@ -1054,7 +1057,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
 
-  SetType(expr, ret);
+  builder_->Sem().Add(
+      expr,
+      builder_->create<semantic::MemberAccessorExpression>(ret, is_swizzle));
 
   return true;
 }

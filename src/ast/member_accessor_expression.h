@@ -45,12 +45,6 @@ class MemberAccessorExpression
   /// @returns the member expression
   IdentifierExpression* member() const { return member_; }
 
-  /// Sets the identifier as a swizzle
-  void SetIsSwizzle() { is_swizzle_ = true; }
-
-  /// @returns true if this is a swizzle identifier
-  bool IsSwizzle() const { return is_swizzle_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @note Semantic information such as resolved expression type and intrinsic
@@ -75,8 +69,6 @@ class MemberAccessorExpression
 
   Expression* const struct_;
   IdentifierExpression* const member_;
-
-  bool is_swizzle_ = false;  // Semantic info
 };
 
 }  // namespace ast

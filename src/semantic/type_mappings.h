@@ -25,6 +25,7 @@ namespace ast {
 class CallExpression;
 class Expression;
 class Function;
+class MemberAccessorExpression;
 class Variable;
 
 }  // namespace ast
@@ -34,6 +35,7 @@ namespace semantic {
 class Call;
 class Expression;
 class Function;
+class MemberAccessorExpression;
 class Variable;
 
 /// TypeMappings is a struct that holds dummy `operator()` methods that's used
@@ -47,6 +49,8 @@ struct TypeMappings {
   semantic::Function* operator()(ast::Function*);
   semantic::Variable* operator()(ast::Variable*);
   semantic::Call* operator()(ast::CallExpression*);
+  semantic::MemberAccessorExpression* operator()(
+      ast::MemberAccessorExpression*);
   //! @endcond
 };
 
