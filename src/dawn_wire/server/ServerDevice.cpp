@@ -22,21 +22,29 @@ namespace dawn_wire { namespace server {
         void HandleCreateReadyRenderPipelineCallbackResult(KnownObjects<Pipeline>* knownObjects,
                                                            WGPUCreateReadyPipelineStatus status,
                                                            Pipeline pipeline,
-                                                           const char* message,
                                                            CreateReadyPipelineUserData* data) {
-            auto* pipelineObject = knownObjects->Get(data->pipelineObjectID);
+            // May be null if the device was destroyed. Device destruction destroys child
+            // objects on the wire.
+            auto* pipelineObject =
+                knownObjects->Get(data->pipelineObjectID, AllocationState::Reserved);
+            // Should be impossible to fail. ObjectIds can't be freed by a destroy command until
+            // they move from Reserved to Allocated, or if they are destroyed here.
+            ASSERT(pipelineObject != nullptr);
 
             if (status == WGPUCreateReadyPipelineStatus_Success) {
-                ASSERT(pipelineObject != nullptr);
+                // Assign the handle and allocated status if the pipeline is created successfully.
+                pipelineObject->state = AllocationState::Allocated;
                 pipelineObject->handle = pipeline;
-            } else if (pipelineObject != nullptr) {
-                // May be null if the device was destroyed. Device destruction destroys child
-                // objects on the wire.
-                if (!UntrackDeviceChild(pipelineObject->deviceInfo, objectType,
-                                        data->pipelineObjectID)) {
-                    UNREACHABLE();
-                }
+
+                // This should be impossible to fail. It would require a command to be sent that
+                // creates a duplicate ObjectId, which would fail validation.
+                bool success = TrackDeviceChild(pipelineObject->deviceInfo, objectType,
+                                                data->pipelineObjectID);
+                ASSERT(success);
+            } else {
+                // Otherwise, free the ObjectId which will make it unusable.
                 knownObjects->Free(data->pipelineObjectID);
+                ASSERT(pipeline == nullptr);
             }
         }
 
@@ -103,17 +111,14 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        auto* resultData = ComputePipelineObjects().Allocate(pipelineObjectHandle.id);
+        auto* resultData =
+            ComputePipelineObjects().Allocate(pipelineObjectHandle.id, AllocationState::Reserved);
         if (resultData == nullptr) {
             return false;
         }
 
         resultData->generation = pipelineObjectHandle.generation;
         resultData->deviceInfo = device->info.get();
-        if (!TrackDeviceChild(resultData->deviceInfo, ObjectType::ComputePipeline,
-                              pipelineObjectHandle.id)) {
-            return false;
-        }
 
         auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
         userdata->device = ObjectHandle{deviceId, device->generation};
@@ -133,7 +138,7 @@ namespace dawn_wire { namespace server {
                                                       const char* message,
                                                       CreateReadyPipelineUserData* data) {
         HandleCreateReadyRenderPipelineCallbackResult<ObjectType::ComputePipeline>(
-            &ComputePipelineObjects(), status, pipeline, message, data);
+            &ComputePipelineObjects(), status, pipeline, data);
 
         ReturnDeviceCreateReadyComputePipelineCallbackCmd cmd;
         cmd.device = data->device;
@@ -153,17 +158,14 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        auto* resultData = RenderPipelineObjects().Allocate(pipelineObjectHandle.id);
+        auto* resultData =
+            RenderPipelineObjects().Allocate(pipelineObjectHandle.id, AllocationState::Reserved);
         if (resultData == nullptr) {
             return false;
         }
 
         resultData->generation = pipelineObjectHandle.generation;
         resultData->deviceInfo = device->info.get();
-        if (!TrackDeviceChild(resultData->deviceInfo, ObjectType::RenderPipeline,
-                              pipelineObjectHandle.id)) {
-            return false;
-        }
 
         auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
         userdata->device = ObjectHandle{deviceId, device->generation};
@@ -183,7 +185,7 @@ namespace dawn_wire { namespace server {
                                                      const char* message,
                                                      CreateReadyPipelineUserData* data) {
         HandleCreateReadyRenderPipelineCallbackResult<ObjectType::RenderPipeline>(
-            &RenderPipelineObjects(), status, pipeline, message, data);
+            &RenderPipelineObjects(), status, pipeline, data);
 
         ReturnDeviceCreateReadyRenderPipelineCallbackCmd cmd;
         cmd.device = data->device;

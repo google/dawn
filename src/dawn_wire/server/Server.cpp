@@ -66,7 +66,7 @@ namespace dawn_wire { namespace server {
 
         data->handle = texture;
         data->generation = generation;
-        data->allocated = true;
+        data->state = AllocationState::Allocated;
         data->deviceInfo = device->info.get();
 
         if (!TrackDeviceChild(data->deviceInfo, ObjectType::Texture, id)) {
@@ -89,7 +89,7 @@ namespace dawn_wire { namespace server {
 
         data->handle = device;
         data->generation = generation;
-        data->allocated = true;
+        data->state = AllocationState::Allocated;
         data->info->server = this;
         data->info->self = ObjectHandle{id, generation};
 

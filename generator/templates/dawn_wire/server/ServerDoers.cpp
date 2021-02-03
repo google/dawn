@@ -82,28 +82,33 @@ namespace dawn_wire { namespace server {
                             return false;
                         }
                     }
-                    {% if type.name.CamelCase() in server_reverse_lookup_objects %}
-                        {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
-                    {% endif %}
-                    {% if type.name.get() == "device" %}
-                        //* TODO(crbug.com/dawn/384): This is a hack to make sure that all child objects
-                        //* are destroyed before their device. We should have a solution in
-                        //* Dawn native that makes all child objects internally null if their
-                        //* Device is destroyed.
-                        while (data->info->childObjectTypesAndIds.size() > 0) {
-                            ObjectType childObjectType;
-                            ObjectId childObjectId;
-                            std::tie(childObjectType, childObjectId) = UnpackObjectTypeAndId(
-                                *data->info->childObjectTypesAndIds.begin());
-                            DoDestroyObject(childObjectType, childObjectId);
-                        }
-                        if (data->handle != nullptr) {
-                            //* Deregisters uncaptured error and device lost callbacks since
-                            //* they should not be forwarded if the device no longer exists on the wire.
-                            ClearDeviceCallbacks(data->handle);
-                        }
-                    {% endif %}
-                    if (data->handle != nullptr) {
+                    if (data->state == AllocationState::Allocated) {
+                        ASSERT(data->handle != nullptr);
+                        {% if type.name.CamelCase() in server_reverse_lookup_objects %}
+                            {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
+                        {% endif %}
+
+                        {% if type.name.get() == "device" %}
+                            //* TODO(crbug.com/dawn/384): This is a hack to make sure that all child objects
+                            //* are destroyed before their device. We should have a solution in
+                            //* Dawn native that makes all child objects internally null if their
+                            //* Device is destroyed.
+                            while (data->info->childObjectTypesAndIds.size() > 0) {
+                                ObjectType childObjectType;
+                                ObjectId childObjectId;
+                                std::tie(childObjectType, childObjectId) = UnpackObjectTypeAndId(
+                                    *data->info->childObjectTypesAndIds.begin());
+                                if (!DoDestroyObject(childObjectType, childObjectId)) {
+                                    return false;
+                                }
+                            }
+                            if (data->handle != nullptr) {
+                                //* Deregisters uncaptured error and device lost callbacks since
+                                //* they should not be forwarded if the device no longer exists on the wire.
+                                ClearDeviceCallbacks(data->handle);
+                            }
+                        {% endif %}
+
                         mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
                     }
                     {{type.name.CamelCase()}}Objects().Free(objectId);
