@@ -421,8 +421,10 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* s =
-      create<type::StorageTexture>(params.dim, type::ImageFormat::kR16Float);
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, this);
+  auto* s = create<type::StorageTexture>(params.dim,
+                                         type::ImageFormat::kR16Float, subtype);
   auto* ac =
       create<type::AccessControl>(params.ro ? ast::AccessControl::kReadOnly
                                             : ast::AccessControl::kWriteOnly,

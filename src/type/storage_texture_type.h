@@ -69,17 +69,15 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param format the image format of the texture
-  StorageTexture(TextureDimension dim, ImageFormat format);
+  /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
+  StorageTexture(TextureDimension dim, ImageFormat format, type::Type* subtype);
 
   /// Move constructor
   StorageTexture(StorageTexture&&);
   ~StorageTexture() override;
 
-  /// @param type the subtype of the storage texture
-  void set_type(Type* const type);
-
-  /// @returns the subtype of the storage texture set with set_type
-  Type* type() const;
+  /// @returns the storage subtype
+  Type* type() const { return subtype_; }
 
   /// @returns the image format
   ImageFormat image_format() const { return image_format_; }
@@ -92,10 +90,14 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @return the newly cloned type
   StorageTexture* Clone(CloneContext* ctx) const override;
 
+  /// @param format the storage texture image format
+  /// @param builder the ProgramBuilder used to build the returned type
+  /// @returns the storage texture subtype for the given ImageFormat
+  static type::Type* SubtypeFor(ImageFormat format, ProgramBuilder* builder);
+
  private:
   ImageFormat const image_format_;
-
-  Type* type_ = nullptr;  // Semantic info
+  Type* const subtype_;
 };
 
 }  // namespace type

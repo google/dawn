@@ -1894,8 +1894,9 @@ type::Pointer* ParserImpl::GetTypeForHandleVar(
       if (format == type::ImageFormat::kNone) {
         return nullptr;
       }
+      auto* subtype = type::StorageTexture::SubtypeFor(format, &builder_);
       ast_store_type = builder_.create<type::AccessControl>(
-          access, builder_.create<type::StorageTexture>(dim, format));
+          access, builder_.create<type::StorageTexture>(dim, format, subtype));
     }
   } else {
     Fail() << "unsupported: UniformConstant variable is not a recognized "

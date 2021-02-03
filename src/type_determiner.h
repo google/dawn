@@ -148,10 +148,6 @@ class TypeDeterminer {
   /// @param stmt the statement to check
   /// @returns false on error
   bool DetermineVariableStorageClass(ast::Statement* stmt);
-  /// Determines the result type based off a storage texture format
-  /// @param tex the storage texture
-  /// @returns false on error
-  bool DetermineStorageTextureSubtype(type::StorageTexture* tex);
 
   /// Creates the nodes and adds them to the semantic::Info mappings of the
   /// ProgramBuilder.

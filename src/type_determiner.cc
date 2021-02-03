@@ -116,23 +116,6 @@ bool TypeDeterminer::Determine() {
 }
 
 bool TypeDeterminer::DetermineInternal() {
-  std::vector<type::StorageTexture*> storage_textures;
-
-  for (auto& it : builder_->Types().types()) {
-    if (auto* storage =
-            it.second->UnwrapIfNeeded()->As<type::StorageTexture>()) {
-      storage_textures.emplace_back(storage);
-    }
-  }
-
-  for (auto* storage : storage_textures) {
-    if (!DetermineStorageTextureSubtype(storage)) {
-      set_error(Source{}, "unable to determine storage texture subtype for: " +
-                              storage->type_name());
-      return false;
-    }
-  }
-
   for (auto* var : builder_->AST().GlobalVariables()) {
     variable_stack_.set_global(var->symbol(), CreateVariableInfo(var));
 
@@ -1164,66 +1147,6 @@ TypeDeterminer::VariableInfo* TypeDeterminer::CreateVariableInfo(
   auto* info = variable_infos_.Create(var);
   variable_to_info_.emplace(var, info);
   return info;
-}
-
-bool TypeDeterminer::DetermineStorageTextureSubtype(type::StorageTexture* tex) {
-  if (tex->type() != nullptr) {
-    return true;
-  }
-
-  switch (tex->image_format()) {
-    case type::ImageFormat::kR8Uint:
-    case type::ImageFormat::kR16Uint:
-    case type::ImageFormat::kRg8Uint:
-    case type::ImageFormat::kR32Uint:
-    case type::ImageFormat::kRg16Uint:
-    case type::ImageFormat::kRgba8Uint:
-    case type::ImageFormat::kRg32Uint:
-    case type::ImageFormat::kRgba16Uint:
-    case type::ImageFormat::kRgba32Uint: {
-      tex->set_type(builder_->create<type::U32>());
-      return true;
-    }
-
-    case type::ImageFormat::kR8Sint:
-    case type::ImageFormat::kR16Sint:
-    case type::ImageFormat::kRg8Sint:
-    case type::ImageFormat::kR32Sint:
-    case type::ImageFormat::kRg16Sint:
-    case type::ImageFormat::kRgba8Sint:
-    case type::ImageFormat::kRg32Sint:
-    case type::ImageFormat::kRgba16Sint:
-    case type::ImageFormat::kRgba32Sint: {
-      tex->set_type(builder_->create<type::I32>());
-      return true;
-    }
-
-    case type::ImageFormat::kR8Unorm:
-    case type::ImageFormat::kRg8Unorm:
-    case type::ImageFormat::kRgba8Unorm:
-    case type::ImageFormat::kRgba8UnormSrgb:
-    case type::ImageFormat::kBgra8Unorm:
-    case type::ImageFormat::kBgra8UnormSrgb:
-    case type::ImageFormat::kRgb10A2Unorm:
-    case type::ImageFormat::kR8Snorm:
-    case type::ImageFormat::kRg8Snorm:
-    case type::ImageFormat::kRgba8Snorm:
-    case type::ImageFormat::kR16Float:
-    case type::ImageFormat::kR32Float:
-    case type::ImageFormat::kRg16Float:
-    case type::ImageFormat::kRg11B10Float:
-    case type::ImageFormat::kRg32Float:
-    case type::ImageFormat::kRgba16Float:
-    case type::ImageFormat::kRgba32Float: {
-      tex->set_type(builder_->create<type::F32>());
-      return true;
-    }
-
-    case type::ImageFormat::kNone:
-      break;
-  }
-
-  return false;
 }
 
 void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) const {

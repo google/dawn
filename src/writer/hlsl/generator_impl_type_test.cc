@@ -407,7 +407,8 @@ using HlslStoragetexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStoragetexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* s = create<type::StorageTexture>(params.dim, params.imgfmt);
+  auto* subtype = type::StorageTexture::SubtypeFor(params.imgfmt, this);
+  auto* s = create<type::StorageTexture>(params.dim, params.imgfmt, subtype);
   auto* ac =
       create<type::AccessControl>(params.ro ? ast::AccessControl::kReadOnly
                                             : ast::AccessControl::kWriteOnly,

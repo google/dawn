@@ -141,16 +141,10 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
   return out;
 }
 
-StorageTexture::StorageTexture(TextureDimension dim, ImageFormat format)
-    : Base(dim), image_format_(format) {}
-
-void StorageTexture::set_type(Type* const type) {
-  type_ = type;
-}
-
-Type* StorageTexture::type() const {
-  return type_;
-}
+StorageTexture::StorageTexture(TextureDimension dim,
+                               ImageFormat format,
+                               type::Type* subtype)
+    : Base(dim), image_format_(format), subtype_(subtype) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;
 
@@ -163,7 +157,62 @@ std::string StorageTexture::type_name() const {
 }
 
 StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<StorageTexture>(dim(), image_format_);
+  return ctx->dst->create<StorageTexture>(dim(), image_format_,
+                                          ctx->Clone(subtype_));
+}
+
+type::Type* StorageTexture::SubtypeFor(type::ImageFormat format,
+                                       ProgramBuilder* builder) {
+  switch (format) {
+    case type::ImageFormat::kR8Uint:
+    case type::ImageFormat::kR16Uint:
+    case type::ImageFormat::kRg8Uint:
+    case type::ImageFormat::kR32Uint:
+    case type::ImageFormat::kRg16Uint:
+    case type::ImageFormat::kRgba8Uint:
+    case type::ImageFormat::kRg32Uint:
+    case type::ImageFormat::kRgba16Uint:
+    case type::ImageFormat::kRgba32Uint: {
+      return builder->create<type::U32>();
+    }
+
+    case type::ImageFormat::kR8Sint:
+    case type::ImageFormat::kR16Sint:
+    case type::ImageFormat::kRg8Sint:
+    case type::ImageFormat::kR32Sint:
+    case type::ImageFormat::kRg16Sint:
+    case type::ImageFormat::kRgba8Sint:
+    case type::ImageFormat::kRg32Sint:
+    case type::ImageFormat::kRgba16Sint:
+    case type::ImageFormat::kRgba32Sint: {
+      return builder->create<type::I32>();
+    }
+
+    case type::ImageFormat::kR8Unorm:
+    case type::ImageFormat::kRg8Unorm:
+    case type::ImageFormat::kRgba8Unorm:
+    case type::ImageFormat::kRgba8UnormSrgb:
+    case type::ImageFormat::kBgra8Unorm:
+    case type::ImageFormat::kBgra8UnormSrgb:
+    case type::ImageFormat::kRgb10A2Unorm:
+    case type::ImageFormat::kR8Snorm:
+    case type::ImageFormat::kRg8Snorm:
+    case type::ImageFormat::kRgba8Snorm:
+    case type::ImageFormat::kR16Float:
+    case type::ImageFormat::kR32Float:
+    case type::ImageFormat::kRg16Float:
+    case type::ImageFormat::kRg11B10Float:
+    case type::ImageFormat::kRg32Float:
+    case type::ImageFormat::kRgba16Float:
+    case type::ImageFormat::kRgba32Float: {
+      return builder->create<type::F32>();
+    }
+
+    case type::ImageFormat::kNone:
+      break;
+  }
+
+  return nullptr;
 }
 
 }  // namespace type

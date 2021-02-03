@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2020 The Tint Authors->
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,8 +39,10 @@ namespace {
 using StorageTextureTest = TestHelper;
 
 TEST_F(StorageTextureTest, Is) {
-  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
-  Type* ty = &s;
+  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, this);
+  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
+                                   ImageFormat::kRgba32Float, subtype);
+  Type* ty = s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
   EXPECT_FALSE(ty->Is<Array>());
@@ -57,31 +59,41 @@ TEST_F(StorageTextureTest, Is) {
 }
 
 TEST_F(StorageTextureTest, IsTexture) {
-  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
-  Texture* ty = &s;
+  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, this);
+  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
+                                   ImageFormat::kRgba32Float, subtype);
+  Texture* ty = s;
   EXPECT_FALSE(ty->Is<DepthTexture>());
   EXPECT_FALSE(ty->Is<SampledTexture>());
   EXPECT_TRUE(ty->Is<StorageTexture>());
 }
 
 TEST_F(StorageTextureTest, Dim) {
-  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
-  EXPECT_EQ(s.dim(), TextureDimension::k2dArray);
+  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, this);
+  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
+                                   ImageFormat::kRgba32Float, subtype);
+  EXPECT_EQ(s->dim(), TextureDimension::k2dArray);
 }
 
 TEST_F(StorageTextureTest, Format) {
-  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
-  EXPECT_EQ(s.image_format(), ImageFormat::kRgba32Float);
+  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, this);
+  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
+                                   ImageFormat::kRgba32Float, subtype);
+  EXPECT_EQ(s->image_format(), ImageFormat::kRgba32Float);
 }
 
 TEST_F(StorageTextureTest, TypeName) {
-  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Float);
-  EXPECT_EQ(s.type_name(), "__storage_texture_2d_array_rgba32float");
+  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, this);
+  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
+                                   ImageFormat::kRgba32Float, subtype);
+  EXPECT_EQ(s->type_name(), "__storage_texture_2d_array_rgba32float");
 }
 
 TEST_F(StorageTextureTest, F32) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, this);
   Type* s = create<StorageTexture>(TextureDimension::k2dArray,
-                                   ImageFormat::kRgba32Float);
+                                   ImageFormat::kRgba32Float, subtype);
   TypeDeterminer td(this);
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -91,8 +103,10 @@ TEST_F(StorageTextureTest, F32) {
 }
 
 TEST_F(StorageTextureTest, U32) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(ImageFormat::kRg32Uint, this);
   Type* s = create<StorageTexture>(TextureDimension::k2dArray,
-                                   ImageFormat::kRg32Uint);
+                                   ImageFormat::kRg32Uint, subtype);
   TypeDeterminer td(this);
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -102,8 +116,10 @@ TEST_F(StorageTextureTest, U32) {
 }
 
 TEST_F(StorageTextureTest, I32) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(ImageFormat::kRgba32Sint, this);
   Type* s = create<StorageTexture>(TextureDimension::k2dArray,
-                                   ImageFormat::kRgba32Sint);
+                                   ImageFormat::kRgba32Sint, subtype);
   TypeDeterminer td(this);
 
   ASSERT_TRUE(td.Determine()) << td.error();
@@ -113,8 +129,10 @@ TEST_F(StorageTextureTest, I32) {
 }
 
 TEST_F(StorageTextureTest, MinBufferBindingSize) {
-  StorageTexture s(TextureDimension::k2dArray, ImageFormat::kRgba32Sint);
-  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
+  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Sint, this);
+  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
+                                   ImageFormat::kRgba32Sint, subtype);
+  EXPECT_EQ(0u, s->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 }  // namespace

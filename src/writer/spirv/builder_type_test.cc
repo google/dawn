@@ -874,8 +874,10 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R16Float) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
-                                         type::ImageFormat::kR16Float);
+                                         type::ImageFormat::kR16Float, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -894,8 +896,10 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8SNorm) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR8Snorm, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
-                                         type::ImageFormat::kR8Snorm);
+                                         type::ImageFormat::kR8Snorm, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -914,8 +918,10 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8UNorm) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR8Unorm, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
-                                         type::ImageFormat::kR8Unorm);
+                                         type::ImageFormat::kR8Unorm, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -934,8 +940,10 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Uint) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR8Uint, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
-                                         type::ImageFormat::kR8Uint);
+                                         type::ImageFormat::kR8Uint, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -949,8 +957,10 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Uint) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Sint) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR8Sint, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
-                                         type::ImageFormat::kR8Sint);
+                                         type::ImageFormat::kR8Sint, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -964,8 +974,10 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Sint) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_array) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1dArray,
-                                         type::ImageFormat::kR16Float);
+                                         type::ImageFormat::kR16Float, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -984,8 +996,10 @@ OpCapability StorageImageExtendedFormats
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
-                                         type::ImageFormat::kR16Float);
+                                         type::ImageFormat::kR16Float, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -999,8 +1013,10 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2dArray,
-                                         type::ImageFormat::kR16Float);
+                                         type::ImageFormat::kR16Float, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -1014,8 +1030,10 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k3d,
-                                         type::ImageFormat::kR16Float);
+                                         type::ImageFormat::kR16Float, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -1030,8 +1048,10 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
 
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeFloat_Format_r32float) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Float, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
-                                         type::ImageFormat::kR32Float);
+                                         type::ImageFormat::kR32Float, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -1046,8 +1066,10 @@ TEST_F(BuilderTest_Type,
 
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeSint_Format_r32sint) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Sint, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
-                                         type::ImageFormat::kR32Sint);
+                                         type::ImageFormat::kR32Sint, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
@@ -1062,8 +1084,10 @@ TEST_F(BuilderTest_Type,
 
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeUint_Format_r32uint) {
+  auto* subtype =
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, this);
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
-                                         type::ImageFormat::kR32Uint);
+                                         type::ImageFormat::kR32Uint, subtype);
 
   Global("test_var", ast::StorageClass::kNone, s);
 
