@@ -38,7 +38,7 @@ namespace utils {
             WireServerTraceLayer(const char* dir, dawn_wire::CommandHandler* handler)
                 : dawn_wire::CommandHandler(), mDir(dir), mHandler(handler) {
                 const char* sep = GetPathSeparator();
-                if (mDir.back() != *sep) {
+                if (mDir.size() > 0 && mDir.back() != *sep) {
                     mDir += sep;
                 }
             }
@@ -56,6 +56,12 @@ namespace utils {
                 ASSERT(!mFile.is_open());
                 mFile.open(filename,
                            std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
+
+                // Write the initial 8 bytes. This means the fuzzer should never inject an
+                // error.
+                const uint64_t injectedErrorIndex = 0xFFFF'FFFF'FFFF'FFFF;
+                mFile.write(reinterpret_cast<const char*>(&injectedErrorIndex),
+                            sizeof(injectedErrorIndex));
             }
 
             const volatile char* HandleCommands(const volatile char* commands,
