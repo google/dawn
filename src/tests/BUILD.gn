@@ -320,6 +320,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/SamplerTests.cpp",
     "end2end/ScissorTests.cpp",
     "end2end/ShaderFloat16Tests.cpp",
+    "end2end/ShaderTests.cpp",
     "end2end/StorageTextureTests.cpp",
     "end2end/SubresourceRenderAttachmentTests.cpp",
     "end2end/TextureFormatTests.cpp",
