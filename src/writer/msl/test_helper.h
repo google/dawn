@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/module.h"
+#include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
 #include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
@@ -43,7 +44,15 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     if (gen_) {
       return *gen_;
     }
+    [&]() {
+      ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
+                             << diag::Formatter().format(Diagnostics());
+    }();
     program = std::make_unique<Program>(std::move(*this));
+    [&]() {
+      ASSERT_TRUE(program->IsValid())
+          << diag::Formatter().format(program->Diagnostics());
+    }();
     gen_ = std::make_unique<GeneratorImpl>(program.get());
     return *gen_;
   }

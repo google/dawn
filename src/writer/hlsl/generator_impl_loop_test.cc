@@ -37,7 +37,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
-  auto* l = create<ast::LoopStatement>(body, nullptr);
+  auto* continuing = create<ast::BlockStatement>(ast::StatementList{});
+  auto* l = create<ast::LoopStatement>(body, continuing);
+
+  WrapInFunction(l);
 
   GeneratorImpl& gen = Build();
 
@@ -59,6 +62,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   });
   auto* l = create<ast::LoopStatement>(body, continuing);
 
+  WrapInFunction(l);
+
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
@@ -79,6 +84,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
+  Global("lhs", ast::StorageClass::kNone, ty.f32());
+  Global("rhs", ast::StorageClass::kNone, ty.f32());
+
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
   });
@@ -99,6 +107,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   });
 
   auto* outer = create<ast::LoopStatement>(body, continuing);
+  WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();
 
@@ -151,6 +160,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
   //   }
   // }
 
+  Global("rhs", ast::StorageClass::kNone, ty.f32());
+
   auto* var = Var("lhs", ast::StorageClass::kFunction, ty.f32(), Expr(2.4f),
                   ast::VariableDecorationList{});
 
@@ -167,6 +178,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
       create<ast::AssignmentStatement>(lhs, rhs),
   });
   auto* outer = create<ast::LoopStatement>(body, continuing);
+  WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();
 

@@ -129,9 +129,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  auto* var = Var("a", ast::StorageClass::kPrivate, ty.f32());
+  auto* var = Global("a", ast::StorageClass::kPrivate, ty.f32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
-  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 
@@ -142,10 +141,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
-  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr("initializer"),
-                  ast::VariableDecorationList{});
+  Global("initializer", ast::StorageClass::kNone, ty.f32());
+  auto* var = Global("a", ast::StorageClass::kPrivate, ty.f32(),
+                     Expr("initializer"), ast::VariableDecorationList{});
   auto* stmt = create<ast::VariableDeclStatement>(var);
-  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 
@@ -157,7 +156,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   auto* zero_vec = vec3<f32>();
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.vec3<f32>(), zero_vec,
+  auto* var = Var("a", ast::StorageClass::kFunction, ty.vec3<f32>(), zero_vec,
                   ast::VariableDecorationList{});
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
