@@ -1165,12 +1165,7 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
     }
   }
 
-  // Swizzles output the name directly
-  if (ident->IsSwizzle()) {
-    out << builder_.Symbols().NameFor(ident->symbol());
-  } else {
-    out << namer_.NameFor(builder_.Symbols().NameFor(ident->symbol()));
-  }
+  out << namer_.NameFor(builder_.Symbols().NameFor(ident->symbol()));
 
   return true;
 }
@@ -2107,7 +2102,15 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& pre,
     return false;
   }
   out << ".";
-  return EmitExpression(pre, out, expr->member());
+
+  // Swizzles output the name directly
+  if (expr->IsSwizzle()) {
+    out << builder_.Symbols().NameFor(expr->member()->symbol());
+  } else if (!EmitExpression(pre, out, expr->member())) {
+    return false;
+  }
+
+  return true;
 }
 
 bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {

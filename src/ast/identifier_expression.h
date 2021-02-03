@@ -39,12 +39,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   /// @returns the symbol for the identifier
   Symbol symbol() const { return sym_; }
 
-  /// Sets the identifier as a swizzle
-  void SetIsSwizzle() { is_swizzle_ = true; }
-
-  /// @returns true if this is a swizzle identifier
-  bool IsSwizzle() const { return is_swizzle_; }
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @note Semantic information such as resolved expression type and intrinsic
@@ -68,8 +62,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   IdentifierExpression(const IdentifierExpression&) = delete;
 
   Symbol const sym_;
-
-  bool is_swizzle_ = false;  // Semantic info
 };
 
 }  // namespace ast

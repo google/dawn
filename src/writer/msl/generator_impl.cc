@@ -1593,12 +1593,7 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
     }
   }
 
-  // Swizzles get written out directly
-  if (ident->IsSwizzle()) {
-    out_ << program_->Symbols().NameFor(ident->symbol());
-  } else {
-    out_ << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
-  }
+  out_ << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
 
   return true;
 }
@@ -1742,7 +1737,14 @@ bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
 
   out_ << ".";
 
-  return EmitExpression(expr->member());
+  // Swizzles get written out directly
+  if (expr->IsSwizzle()) {
+    out_ << program_->Symbols().NameFor(expr->member()->symbol());
+  } else if (!EmitExpression(expr->member())) {
+    return false;
+  }
+
+  return true;
 }
 
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
