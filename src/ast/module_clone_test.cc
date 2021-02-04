@@ -46,11 +46,11 @@ const c1 : bool = true;
 
 var<uniform> g0 : u32 = 20u;
 var<out> g1 : f32 = 123.0;
-var<uniform> g2 : texture_2d<f32>;
-var<uniform> g3 : [[access(read)]] texture_storage_2d<r32uint>;
-var<uniform> g4 : [[access(write)]] texture_storage_2d<rg32float>;
-var<uniform> g5 : [[access(read)]] texture_storage_2d<r32uint>;
-var<uniform> g6 : [[access(write)]] texture_storage_2d<rg32float>;
+var g2 : texture_2d<f32>;
+var g3 : [[access(read)]] texture_storage_2d<r32uint>;
+var g4 : [[access(write)]] texture_storage_2d<rg32float>;
+var g5 : [[access(read)]] texture_storage_2d<r32uint>;
+var g6 : [[access(write)]] texture_storage_2d<rg32float>;
 
 [[builtin(position)]] var<uniform> g7 : vec3<f32>;
 [[group(10), binding(20)]] var<storage> g7 : S;

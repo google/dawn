@@ -1083,6 +1083,24 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingType) {
          "             ^\n");
 }
 
+TEST_F(ParserImplErrorTest, DISABLED_GlobalDeclSamplerExplicitStorageClass) {
+  // TODO(jrprice): Enable this once downstream users have caught up.
+  EXPECT(
+      "var<uniform> x : sampler;",
+      "test.wgsl:1:5 error: sampler variables must not have a storage class\n"
+      "var<uniform> x : sampler;\n"
+      "    ^^^^^^^\n");
+}
+
+TEST_F(ParserImplErrorTest, DISABLED_GlobalDeclTextureExplicitStorageClass) {
+  // TODO(jrprice): Enable this once downstream users have caught up.
+  EXPECT(
+      "var<uniform> x : texture_1d<f32>;",
+      "test.wgsl:1:5 error: texture variables must not have a storage class\n"
+      "var<uniform> x : texture_1d<f32>;\n"
+      "    ^^^^^^^\n");
+}
+
 TEST_F(ParserImplErrorTest, IfStmtMissingLParen) {
   EXPECT("fn f() -> void { if true) {} }",
          "test.wgsl:1:21 error: expected '('\n"

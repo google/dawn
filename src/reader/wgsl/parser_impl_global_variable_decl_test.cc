@@ -174,6 +174,38 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
   EXPECT_EQ(p->error(), "1:5: invalid storage class for variable decoration");
 }
 
+TEST_F(ParserImplTest, GlobalVariableDecl_SamplerImplicitStorageClass) {
+  auto p = parser("var s : sampler;");
+  auto decos = p->decoration_list();
+  EXPECT_FALSE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  auto e = p->global_variable_decl(decos.value);
+  ASSERT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(e.errored);
+  EXPECT_TRUE(e.matched);
+  ASSERT_NE(e.value, nullptr);
+
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("s"));
+  EXPECT_TRUE(e->type()->Is<type::Sampler>());
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kUniformConstant);
+}
+
+TEST_F(ParserImplTest, GlobalVariableDecl_TextureImplicitStorageClass) {
+  auto p = parser("var s : texture_1d<f32>;");
+  auto decos = p->decoration_list();
+  EXPECT_FALSE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  auto e = p->global_variable_decl(decos.value);
+  ASSERT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(e.errored);
+  EXPECT_TRUE(e.matched);
+  ASSERT_NE(e.value, nullptr);
+
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("s"));
+  EXPECT_TRUE(e->type()->Is<type::Texture>());
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kUniformConstant);
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

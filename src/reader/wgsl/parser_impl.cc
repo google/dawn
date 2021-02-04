@@ -482,17 +482,24 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
   if (!match(Token::Type::kVar))
     return Failure::kNoMatch;
 
-  auto sc = variable_storage_decoration();
-  if (sc.errored)
+  ast::StorageClass sc = ast::StorageClass::kNone;
+  auto explicit_sc = variable_storage_decoration();
+  if (explicit_sc.errored)
     return Failure::kErrored;
+  if (explicit_sc.matched)
+    sc = explicit_sc.value;
 
   auto decl = expect_variable_ident_decl("variable declaration");
   if (decl.errored)
     return Failure::kErrored;
 
-  return VarDeclInfo{decl->source, decl->name,
-                     sc.matched ? sc.value : ast::StorageClass::kNone,
-                     decl->type};
+  if (decl->type->Is<type::Sampler>() || decl->type->Is<type::Texture>()) {
+    // sampler and texture variables implicitly have the storage class `handle`.
+    // TODO(jrprice): Produce an error if an explicit storage class is provided.
+    sc = ast::StorageClass::kUniformConstant;
+  }
+
+  return VarDeclInfo{decl->source, decl->name, sc, decl->type};
 }
 
 // texture_sampler_types
@@ -866,7 +873,7 @@ Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
   if (sc.errored)
     return Failure::kErrored;
 
-  return sc.value;
+  return sc;
 }
 
 // type_alias
@@ -1095,34 +1102,36 @@ Expect<type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
 //  | FUNCTION
 Expect<ast::StorageClass> ParserImpl::expect_storage_class(
     const std::string& use) {
+  auto source = peek().source();
+
   if (match(Token::Type::kIn))
-    return ast::StorageClass::kInput;
+    return {ast::StorageClass::kInput, source};
 
   if (match(Token::Type::kOut))
-    return ast::StorageClass::kOutput;
+    return {ast::StorageClass::kOutput, source};
 
   if (match(Token::Type::kUniform))
-    return ast::StorageClass::kUniform;
+    return {ast::StorageClass::kUniform, source};
 
   if (match(Token::Type::kWorkgroup))
-    return ast::StorageClass::kWorkgroup;
+    return {ast::StorageClass::kWorkgroup, source};
 
   if (match(Token::Type::kUniformConstant))
-    return ast::StorageClass::kUniformConstant;
+    return {ast::StorageClass::kUniformConstant, source};
 
   if (match(Token::Type::kStorage))
-    return ast::StorageClass::kStorage;
+    return {ast::StorageClass::kStorage, source};
 
   if (match(Token::Type::kImage))
-    return ast::StorageClass::kImage;
+    return {ast::StorageClass::kImage, source};
 
   if (match(Token::Type::kPrivate))
-    return ast::StorageClass::kPrivate;
+    return {ast::StorageClass::kPrivate, source};
 
   if (match(Token::Type::kFunction))
-    return ast::StorageClass::kFunction;
+    return {ast::StorageClass::kFunction, source};
 
-  return add_error(peek().source(), "invalid storage class", use);
+  return add_error(source, "invalid storage class", use);
 }
 
 // struct_decl
