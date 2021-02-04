@@ -32,6 +32,7 @@ namespace dawn_native {
         void TrackUntilLastSubmitComplete(ErrorScope* scope);
 
         void Tick(ExecutionSerial completedSerial);
+        void ClearForShutDown();
 
       protected:
         DeviceBase* mDevice;

@@ -25,13 +25,7 @@ namespace dawn_native {
     }
 
     ErrorScopeTracker::~ErrorScopeTracker() {
-        // The tracker is destroyed when the Device is destroyed. We need to
-        // call Destroy on all in-flight error scopes so they resolve their callbacks
-        // with UNKNOWN.
-        for (Ref<ErrorScope>& scope : mScopesInFlight.IterateUpTo(kMaxExecutionSerial)) {
-            scope->UnlinkForShutdown();
-        }
-        Tick(kMaxExecutionSerial);
+        ASSERT(mScopesInFlight.Empty());
     }
 
     void ErrorScopeTracker::TrackUntilLastSubmitComplete(ErrorScope* scope) {
@@ -41,6 +35,13 @@ namespace dawn_native {
 
     void ErrorScopeTracker::Tick(ExecutionSerial completedSerial) {
         mScopesInFlight.ClearUpTo(completedSerial);
+    }
+
+    void ErrorScopeTracker::ClearForShutDown() {
+        for (Ref<ErrorScope>& scope : mScopesInFlight.IterateAll()) {
+            scope->UnlinkForShutdown();
+        }
+        mScopesInFlight.Clear();
     }
 
 }  // namespace dawn_native

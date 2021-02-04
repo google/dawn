@@ -38,6 +38,10 @@ namespace dawn_wire { namespace client {
     }
 
     bool Client::DoDeviceLostCallback(Device* device, char const* message) {
+        if (device == nullptr) {
+            // The device might have been deleted or recreated so this isn't an error.
+            return true;
+        }
         device->HandleDeviceLost(message);
         return true;
     }
@@ -46,6 +50,10 @@ namespace dawn_wire { namespace client {
                                                uint64_t requestSerial,
                                                WGPUErrorType errorType,
                                                const char* message) {
+        if (device == nullptr) {
+            // The device might have been deleted or recreated so this isn't an error.
+            return true;
+        }
         return device->OnPopErrorScopeCallback(requestSerial, errorType, message);
     }
 

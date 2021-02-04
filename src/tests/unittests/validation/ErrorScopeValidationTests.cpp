@@ -199,16 +199,15 @@ TEST_F(ErrorScopeValidationTest, AsynchronousThenSynchronous) {
 // Test that if the device is destroyed before the callback occurs, it is called with NoError
 // because all previous operations are waited upon before the destruction returns.
 TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
-    // TODO(crbug.com/dawn/652): This has different behavior on the wire and should be consistent.
-    DAWN_SKIP_TEST_IF(UsesWire());
-
-    wgpu::Queue queue = device.GetQueue();
-
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
-    queue.Submit(0, nullptr);
+    {
+        // Note: this is in its own scope to be clear the queue does not outlive the device.
+        wgpu::Queue queue = device.GetQueue();
+        queue.Submit(0, nullptr);
+    }
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
 
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, this)).Times(1);
     device = nullptr;
 }
 
