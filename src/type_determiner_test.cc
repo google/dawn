@@ -380,6 +380,102 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
 }
 
+TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
+  // fn func_i32() -> i32 {
+  //   {
+  //     var foo : i32 = 2;
+  //     var bar : i32 = foo;
+  //   }
+  //   var foo : f32 = 2.0;
+  //   var bar : f32 = foo;
+  // }
+
+  ast::VariableList params;
+
+  // Declare i32 "foo" inside a block
+  auto* foo_i32 = Var("foo", ast::StorageClass::kNone, ty.i32(), Expr(2),
+                      ast::VariableDecorationList{});
+  auto* foo_i32_init = foo_i32->constructor();
+  auto* foo_i32_decl = create<ast::VariableDeclStatement>(foo_i32);
+
+  // Reference "foo" inside the block
+  auto* bar_i32 = Var("bar", ast::StorageClass::kNone, ty.i32(), Expr("foo"),
+                      ast::VariableDecorationList{});
+  auto* bar_i32_init = bar_i32->constructor();
+  auto* bar_i32_decl = create<ast::VariableDeclStatement>(bar_i32);
+
+  auto* inner = create<ast::BlockStatement>(
+      ast::StatementList{foo_i32_decl, bar_i32_decl});
+
+  // Declare f32 "foo" at function scope
+  auto* foo_f32 = Var("foo", ast::StorageClass::kNone, ty.f32(), Expr(2.f),
+                      ast::VariableDecorationList{});
+  auto* foo_f32_init = foo_f32->constructor();
+  auto* foo_f32_decl = create<ast::VariableDeclStatement>(foo_f32);
+
+  // Reference "foo" at function scope
+  auto* bar_f32 = Var("bar", ast::StorageClass::kNone, ty.f32(), Expr("foo"),
+                      ast::VariableDecorationList{});
+  auto* bar_f32_init = bar_f32->constructor();
+  auto* bar_f32_decl = create<ast::VariableDeclStatement>(bar_f32);
+
+  Func("func", params, ty.f32(),
+       ast::StatementList{inner, foo_f32_decl, bar_f32_decl},
+       ast::FunctionDecorationList{});
+
+  EXPECT_TRUE(td()->Determine());
+  ASSERT_NE(TypeOf(foo_i32_init), nullptr);
+  EXPECT_TRUE(TypeOf(foo_i32_init)->Is<type::I32>());
+  ASSERT_NE(TypeOf(foo_f32_init), nullptr);
+  EXPECT_TRUE(TypeOf(foo_f32_init)->Is<type::F32>());
+  ASSERT_NE(TypeOf(bar_i32_init), nullptr);
+  EXPECT_TRUE(TypeOf(bar_i32_init)->UnwrapAll()->Is<type::I32>());
+  ASSERT_NE(TypeOf(bar_f32_init), nullptr);
+  EXPECT_TRUE(TypeOf(bar_f32_init)->UnwrapAll()->Is<type::F32>());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
+  // fn func_i32() -> i32 {
+  //   var foo : i32 = 2;
+  // }
+  // var foo : f32 = 2.0;
+  // fn func_f32() -> f32 {
+  //   var bar : f32 = foo;
+  // }
+
+  ast::VariableList params;
+
+  // Declare i32 "foo" inside a function
+  auto* fn_i32 = Var("foo", ast::StorageClass::kNone, ty.i32(), Expr(2),
+                     ast::VariableDecorationList{});
+  auto* fn_i32_init = fn_i32->constructor();
+  auto* fn_i32_decl = create<ast::VariableDeclStatement>(fn_i32);
+  Func("func_i32", params, ty.i32(), ast::StatementList{fn_i32_decl},
+       ast::FunctionDecorationList{});
+
+  // Declare f32 "foo" at module scope
+  auto* mod_f32 = Var("foo", ast::StorageClass::kNone, ty.f32(), Expr(2.f),
+                      ast::VariableDecorationList{});
+  auto* mod_init = mod_f32->constructor();
+  AST().AddGlobalVariable(mod_f32);
+
+  // Reference "foo" in another function
+  auto* fn_f32 = Var("bar", ast::StorageClass::kNone, ty.f32(), Expr("foo"),
+                     ast::VariableDecorationList{});
+  auto* fn_f32_init = fn_f32->constructor();
+  auto* fn_f32_decl = create<ast::VariableDeclStatement>(fn_f32);
+  Func("func_f32", params, ty.f32(), ast::StatementList{fn_f32_decl},
+       ast::FunctionDecorationList{});
+
+  EXPECT_TRUE(td()->Determine());
+  ASSERT_NE(TypeOf(mod_init), nullptr);
+  EXPECT_TRUE(TypeOf(mod_init)->Is<type::F32>());
+  ASSERT_NE(TypeOf(fn_i32_init), nullptr);
+  EXPECT_TRUE(TypeOf(fn_i32_init)->Is<type::I32>());
+  ASSERT_NE(TypeOf(fn_f32_init), nullptr);
+  EXPECT_TRUE(TypeOf(fn_f32_init)->UnwrapAll()->Is<type::F32>());
+}
+
 TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
   FakeExpr e(Source{Source::Location{2, 30}});
   WrapInFunction(&e);
