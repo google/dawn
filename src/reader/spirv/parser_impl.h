@@ -287,6 +287,11 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool EmitFunction(const spvtools::opt::Function& f);
 
+  /// Returns the integer constant for the array size of the given variable.
+  /// @param var_id SPIR-V ID for an array variable
+  /// @returns the integer constant for its array size, or nullptr.
+  const spvtools::opt::analysis::IntConstant* GetArraySize(uint32_t var_id);
+
   /// Creates an AST Variable node for a SPIR-V ID, including any attached
   /// decorations, unless it's an ignorable builtin variable.
   /// @param id the SPIR-V result ID

@@ -1231,6 +1231,31 @@ bool ParserImpl::EmitModuleScopeVariables() {
   return success_;
 }
 
+// @param var_id SPIR-V id of an OpVariable, assumed to be pointer
+// to an array
+// @returns the IntConstant for the size of the array, or nullptr
+const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(
+    uint32_t var_id) {
+  auto* var = def_use_mgr_->GetDef(var_id);
+  if (!var || var->opcode() != SpvOpVariable) {
+    return nullptr;
+  }
+  auto* ptr_type = def_use_mgr_->GetDef(var->type_id());
+  if (!ptr_type || ptr_type->opcode() != SpvOpTypePointer) {
+    return nullptr;
+  }
+  auto* array_type = def_use_mgr_->GetDef(ptr_type->GetSingleWordInOperand(1));
+  if (!array_type || array_type->opcode() != SpvOpTypeArray) {
+    return nullptr;
+  }
+  auto* size = constant_mgr_->FindDeclaredConstant(
+      array_type->GetSingleWordInOperand(1));
+  if (!size) {
+    return nullptr;
+  }
+  return size->AsIntConstant();
+}
+
 ast::Variable* ParserImpl::MakeVariable(
     uint32_t id,
     ast::StorageClass sc,
@@ -1277,6 +1302,20 @@ ast::Variable* ParserImpl::MakeVariable(
             type = forced_type;
           }
           break;
+        case SpvBuiltInSampleMask: {
+          // In SPIR-V this is used for both input and output variable.
+          // The SPIR-V variable has store type of array of integer scalar,
+          // either signed or unsigned.
+          // WGSL requires the store type to be u32.
+          auto* size = GetArraySize(id);
+          if (!size || size->GetZeroExtendedValue() != 1) {
+            Fail() << "WGSL supports a sample mask of at most 32 bits. "
+                      "SampleMask must be an array of 1 element.";
+          }
+          special_builtins_[id] = spv_builtin;
+          type = builder_.create<type::U32>();
+          break;
+        }
         default:
           break;
       }

@@ -747,6 +747,9 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       namer_(pi->namer()),
       function_(function),
       i32_(builder_.create<type::I32>()),
+      u32_(builder_.create<type::U32>()),
+      sample_mask_in_id(0u),
+      sample_mask_out_id(0u),
       ep_info_(ep_info) {
   PushNewStatementBlock(nullptr, 0, nullptr);
 }
@@ -2032,6 +2035,17 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
       Fail() << "unhandled use of a pointer to the SampleId builtin, with ID: "
              << id;
       return {};
+    case SkipReason::kSampleMaskInBuiltinPointer:
+      Fail()
+          << "unhandled use of a pointer to the SampleMask builtin, with ID: "
+          << id;
+      return {};
+    case SkipReason::kSampleMaskOutBuiltinPointer:
+      // The result type is always u32.
+      auto name = namer_.Name(sample_mask_out_id);
+      return TypedExpression{u32_,
+                             create<ast::IdentifierExpression>(
+                                 Source{}, builder_.Symbols().Register(name))};
   }
   if (identifier_values_.count(id) || parser_impl_.IsScalarSpecConstant(id)) {
     auto name = namer_.Name(id);
@@ -2968,25 +2982,41 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       return true;
 
     case SpvOpStore: {
-      const auto ptr_id = inst.GetSingleWordInOperand(0);
+      auto ptr_id = inst.GetSingleWordInOperand(0);
       const auto value_id = inst.GetSingleWordInOperand(1);
 
+      auto rhs = MakeExpression(value_id);
+
       // Handle exceptional cases
-      if (GetSkipReason(ptr_id) == SkipReason::kPointSizeBuiltinPointer) {
-        if (const auto* c = constant_mgr_->FindDeclaredConstant(value_id)) {
-          // If we're writing a constant 1.0, then skip the write.  That's all
-          // that WebGPU handles.
-          auto* ct = c->type();
-          if (ct->AsFloat() && (ct->AsFloat()->width() == 32) &&
-              (c->GetFloat() == 1.0f)) {
-            // Don't store to PointSize
-            return true;
+      switch (GetSkipReason(ptr_id)) {
+        case SkipReason::kPointSizeBuiltinPointer:
+          if (const auto* c = constant_mgr_->FindDeclaredConstant(value_id)) {
+            // If we're writing a constant 1.0, then skip the write.  That's all
+            // that WebGPU handles.
+            auto* ct = c->type();
+            if (ct->AsFloat() && (ct->AsFloat()->width() == 32) &&
+                (c->GetFloat() == 1.0f)) {
+              // Don't store to PointSize
+              return true;
+            }
           }
-        }
-        return Fail() << "cannot store a value other than constant 1.0 to "
-                         "PointSize builtin: "
-                      << inst.PrettyPrint();
+          return Fail() << "cannot store a value other than constant 1.0 to "
+                           "PointSize builtin: "
+                        << inst.PrettyPrint();
+
+        case SkipReason::kSampleMaskOutBuiltinPointer:
+          ptr_id = sample_mask_out_id;
+          if (rhs.type != u32_) {
+            // WGSL requires sample_mask_out to be signed.
+            rhs = TypedExpression{
+                u32_, create<ast::TypeConstructorExpression>(
+                          Source{}, u32_, ast::ExpressionList{rhs.expr})};
+          }
+          break;
+        default:
+          break;
       }
+
       const auto ptr_type_id = def_use_mgr_->GetDef(ptr_id)->type_id();
       const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
       if (ptr_type_id == builtin_position_info.pointer_type_id) {
@@ -2996,9 +3026,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       }
 
       // Handle an ordinary store as an assignment.
-      // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(ptr_id);
-      auto rhs = MakeExpression(value_id);
       AddStatement(
           create<ast::AssignmentStatement>(Source{}, lhs.expr, rhs.expr));
       return success();
@@ -3023,6 +3051,25 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
               i32_, create<ast::TypeConstructorExpression>(
                         Source{}, i32_, ast::ExpressionList{id_expr})};
           return EmitConstDefinition(inst, expr);
+        }
+        case SkipReason::kSampleMaskInBuiltinPointer: {
+          auto name = namer_.Name(sample_mask_in_id);
+          ast::Expression* id_expr = create<ast::IdentifierExpression>(
+              Source{}, builder_.Symbols().Register(name));
+          auto* load_result_type = parser_impl_.ConvertType(inst.type_id());
+          ast::Expression* ast_expr = nullptr;
+          if (load_result_type == i32_) {
+            ast_expr = create<ast::TypeConstructorExpression>(
+                Source{}, i32_, ast::ExpressionList{id_expr});
+          } else if (load_result_type == u32_) {
+            ast_expr = id_expr;
+          } else {
+            return Fail() << "loading the whole SampleMask input array is not "
+                             "supported: "
+                          << inst.PrettyPrint();
+          }
+          return EmitConstDefinition(
+              inst, TypedExpression{load_result_type, ast_expr});
         }
         default:
           break;
@@ -3495,9 +3542,8 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   TypedExpression current_expr(MakeOperand(inst, 0));
 
   auto make_index = [this, source](uint32_t literal) {
-    auto* type = create<type::U32>();
     return create<ast::ScalarConstructorExpression>(
-        source, create<ast::UintLiteral>(source, type, literal));
+        source, create<ast::UintLiteral>(source, u32_, literal));
   };
 
   const auto composite = inst.GetSingleWordInOperand(0);
@@ -3655,8 +3701,8 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
   for (auto& special_var : parser_impl_.special_builtins()) {
     const auto id = special_var.first;
     const auto builtin = special_var.second;
-    def_info_[id] =
-        std::make_unique<DefInfo>(*(def_use_mgr_->GetDef(id)), 0, index);
+    const auto* var = def_use_mgr_->GetDef(id);
+    def_info_[id] = std::make_unique<DefInfo>(*var, 0, index);
     ++index;
     auto& def = def_info_[id];
     switch (builtin) {
@@ -3666,6 +3712,19 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
       case SpvBuiltInSampleId:
         def->skip = SkipReason::kSampleIdBuiltinPointer;
         break;
+      case SpvBuiltInSampleMask: {
+        // Distinguish between input and output variable.
+        const auto storage_class =
+            static_cast<SpvStorageClass>(var->GetSingleWordInOperand(0));
+        if (storage_class == SpvStorageClassInput) {
+          sample_mask_in_id = id;
+          def->skip = SkipReason::kSampleMaskInBuiltinPointer;
+        } else {
+          sample_mask_out_id = id;
+          def->skip = SkipReason::kSampleMaskOutBuiltinPointer;
+        }
+        break;
+      }
       default:
         return Fail() << "unrecognized special builtin: " << int(builtin);
     }

@@ -44,6 +44,7 @@
 #include "src/reader/spirv/parser_impl.h"
 #include "src/type/i32_type.h"
 #include "src/type/texture_type.h"
+#include "src/type/u32_type.h"
 
 namespace tint {
 namespace reader {
@@ -227,6 +228,14 @@ enum class SkipReason {
   /// `kSampleIdBuiltinPointer`: the value is a pointer to the SampleId builtin
   /// variable.  Don't generate its address.
   kSampleIdBuiltinPointer,
+
+  /// `kSampleMaskInBuiltinPointer`: the value is a pointer to the SampleMaskIn
+  /// builtin input variable.  Don't generate its address.
+  kSampleMaskInBuiltinPointer,
+
+  /// `kSampleMaskOutBuiltinPointer`: the value is a pointer to the SampleMask
+  /// builtin output variable.
+  kSampleMaskOutBuiltinPointer,
 };
 
 /// Bookkeeping info for a SPIR-V ID defined in the function, or some
@@ -334,6 +343,12 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
       break;
     case SkipReason::kSampleIdBuiltinPointer:
       o << " skip:sampleid_pointer";
+      break;
+    case SkipReason::kSampleMaskInBuiltinPointer:
+      o << " skip:samplemaskin_pointer";
+      break;
+    case SkipReason::kSampleMaskOutBuiltinPointer:
+      o << " skip:samplemaskout_pointer";
       break;
   }
   o << "}";
@@ -1085,6 +1100,12 @@ class FunctionEmitter {
   Namer& namer_;
   const spvtools::opt::Function& function_;
   type::I32* const i32_;  // The unique I32 type object.
+  type::U32* const u32_;  // The unique U32 type object.
+
+  // The SPIR-V ID for the SampleMask input variable.
+  uint32_t sample_mask_in_id;
+  // The SPIR-V ID for the SampleMask output variable.
+  uint32_t sample_mask_out_id;
 
   // A stack of statement lists. Each list is contained in a construct in
   // the next deeper element of stack. The 0th entry represents the statements

@@ -2403,6 +2403,571 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_FunctParam) {
 })")) << module_str;
 }
 
+// Returns the start of a shader for testing SampleMask
+// parameterized by store type.
+std::string SampleMaskPreamble(std::string store_type) {
+  return R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Fragment %main "main" %1
+    OpExecutionMode %main OriginUpperLeft
+    OpDecorate %1 BuiltIn SampleMask
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %uint = OpTypeInt 32 0
+    %int = OpTypeInt 32 1
+    %int_12 = OpConstant %int 12
+    %uint_0 = OpConstant %uint 0
+    %uint_1 = OpConstant %uint 1
+    %uint_2 = OpConstant %uint 2
+    %uarr1 = OpTypeArray %uint %uint_1
+    %uarr2 = OpTypeArray %uint %uint_2
+    %iarr1 = OpTypeArray %int %uint_1
+    %iarr2 = OpTypeArray %int %uint_2
+    %iptr_in_ty = OpTypePointer Input %int
+    %uptr_in_ty = OpTypePointer Input %uint
+    %iptr_out_ty = OpTypePointer Output %int
+    %uptr_out_ty = OpTypePointer Output %uint
+    %in_ty = OpTypePointer Input )" +
+         store_type + R"(
+    %out_ty = OpTypePointer Output )" +
+         store_type + R"(
+)";
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_ArraySize2_Error) {
+  const std::string assembly = SampleMaskPreamble("%uarr2") + R"(
+    %1 = OpVariable %in_ty Input
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_in_ty %1 %uint_0
+    %3 = OpLoad %int %2
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->error(),
+              HasSubstr("WGSL supports a sample mask of at most 32 bits. "
+                        "SampleMask must be an array of 1 element"))
+      << p->error() << assembly;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
+  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    %1 = OpVariable %in_ty Input
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_in_ty %1 %uint_0
+    %3 = OpLoad %uint %2
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_in}
+    }
+    x_1
+    in
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_3
+        none
+        __u32
+        {
+          Identifier[not set]{x_1}
+        }
+      }
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
+  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    %1 = OpVariable %in_ty Input
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_in_ty %1 %uint_0
+    %3 = OpCopyObject %uptr_in_ty %2
+    %4 = OpLoad %uint %3
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_in}
+    }
+    x_1
+    in
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_4
+        none
+        __u32
+        {
+          Identifier[not set]{x_1}
+        }
+      }
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
+  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    %1 = OpVariable %in_ty Input
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_in_ty %1 %uint_0
+    %3 = OpAccessChain %uptr_in_ty %2
+    %4 = OpLoad %uint %3
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_in}
+    }
+    x_1
+    in
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_4
+        none
+        __u32
+        {
+          Identifier[not set]{x_1}
+        }
+      }
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
+  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    %1 = OpVariable %in_ty Input
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %iptr_in_ty %1 %uint_0
+    %3 = OpLoad %int %2
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_in}
+    }
+    x_1
+    in
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_3
+        none
+        __i32
+        {
+          TypeConstructor[not set]{
+            __i32
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
+  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    %1 = OpVariable %in_ty Input
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %iptr_in_ty %1 %uint_0
+    %3 = OpCopyObject %iptr_in_ty %2
+    %4 = OpLoad %int %3
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_in}
+    }
+    x_1
+    in
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_4
+        none
+        __i32
+        {
+          TypeConstructor[not set]{
+            __i32
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
+  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    %1 = OpVariable %in_ty Input
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %iptr_in_ty %1 %uint_0
+    %3 = OpAccessChain %iptr_in_ty %2
+    %4 = OpLoad %int %3
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_in}
+    }
+    x_1
+    in
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_4
+        none
+        __i32
+        {
+          TypeConstructor[not set]{
+            __i32
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_ArraySize2_Error) {
+  const std::string assembly = SampleMaskPreamble("%uarr2") + R"(
+    %1 = OpVariable %out_ty Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_out_ty %1 %uint_0
+    OpStore %2 %uint_0
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->error(),
+              HasSubstr("WGSL supports a sample mask of at most 32 bits. "
+                        "SampleMask must be an array of 1 element"))
+      << p->error() << assembly;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_Direct) {
+  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    %1 = OpVariable %out_ty Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_out_ty %1 %uint_0
+    OpStore %2 %uint_0
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_out}
+    }
+    x_1
+    out
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    Assignment{
+      Identifier[not set]{x_1}
+      ScalarConstructor[not set]{0}
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_CopyObject) {
+  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    %1 = OpVariable %out_ty Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_out_ty %1 %uint_0
+    %3 = OpCopyObject %uptr_out_ty %2
+    OpStore %2 %uint_0
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_out}
+    }
+    x_1
+    out
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    Assignment{
+      Identifier[not set]{x_1}
+      ScalarConstructor[not set]{0}
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_AccessChain) {
+  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    %1 = OpVariable %out_ty Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %uptr_out_ty %1 %uint_0
+    %3 = OpAccessChain %uptr_out_ty %2
+    OpStore %2 %uint_0
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_out}
+    }
+    x_1
+    out
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+    Assignment{
+      Identifier[not set]{x_1}
+      ScalarConstructor[not set]{0}
+    })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_Direct) {
+  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    %1 = OpVariable %out_ty Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %iptr_out_ty %1 %uint_0
+    OpStore %2 %int_12
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_out}
+    }
+    x_1
+    out
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  {
+    Assignment{
+      Identifier[not set]{x_1}
+      TypeConstructor[not set]{
+        __u32
+        ScalarConstructor[not set]{12}
+      }
+    }
+    Return{}
+  })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_CopyObject) {
+  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    %1 = OpVariable %out_ty Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %iptr_out_ty %1 %uint_0
+    %3 = OpCopyObject %iptr_out_ty %2
+    OpStore %2 %int_12
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_out}
+    }
+    x_1
+    out
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  {
+    Assignment{
+      Identifier[not set]{x_1}
+      TypeConstructor[not set]{
+        __u32
+        ScalarConstructor[not set]{12}
+      }
+    }
+    Return{}
+  })"))
+      << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_AccessChain) {
+  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    %1 = OpVariable %out_ty Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpAccessChain %iptr_out_ty %1 %uint_0
+    %3 = OpAccessChain %iptr_out_ty %2
+    OpStore %2 %int_12
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  // Correct declaration
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    Decorations{
+      BuiltinDecoration{sample_mask_out}
+    }
+    x_1
+    out
+    __u32
+  })"));
+
+  // Correct bodies
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  {
+    Assignment{
+      Identifier[not set]{x_1}
+      TypeConstructor[not set]{
+        __u32
+        ScalarConstructor[not set]{12}
+      }
+    }
+    Return{}
+  })"))
+      << module_str;
+}
+
+// TODO(dneto): Test passing pointer to SampleMask as function parameter,
+// both input case and output case.
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
