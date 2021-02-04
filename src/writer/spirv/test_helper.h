@@ -19,10 +19,12 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "spirv-tools/libspirv.hpp"
 #include "src/ast/module.h"
 #include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
 #include "src/type_determiner.h"
+#include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
 
 namespace tint {
@@ -55,6 +57,44 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     }();
     spirv_builder = std::make_unique<spirv::Builder>(program.get());
     return *spirv_builder;
+  }
+
+  /// Validate passes the generated SPIR-V of the builder `b` to the SPIR-V
+  /// Tools Validator. If the validator finds problems the test will fail.
+  /// @param b the spirv::Builder containing the built SPIR-V module
+  void Validate(spirv::Builder& b) {
+    BinaryWriter writer;
+    writer.WriteHeader(b.id_bound());
+    writer.WriteBuilder(&b);
+    auto binary = writer.result();
+
+    std::string spv_errors;
+    auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
+                                      const spv_position_t& position,
+                                      const char* message) {
+      switch (level) {
+        case SPV_MSG_FATAL:
+        case SPV_MSG_INTERNAL_ERROR:
+        case SPV_MSG_ERROR:
+          spv_errors += "error: line " + std::to_string(position.index) + ": " +
+                        message + "\n";
+          break;
+        case SPV_MSG_WARNING:
+          spv_errors += "warning: line " + std::to_string(position.index) +
+                        ": " + message + "\n";
+          break;
+        case SPV_MSG_INFO:
+          spv_errors += "info: line " + std::to_string(position.index) + ": " +
+                        message + "\n";
+          break;
+        case SPV_MSG_DEBUG:
+          break;
+      }
+    };
+
+    spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_2);
+    tools.SetMessageConsumer(msg_consumer);
+    ASSERT_TRUE(tools.Validate(binary)) << spv_errors;
   }
 
   /// The program built with a call to Build()

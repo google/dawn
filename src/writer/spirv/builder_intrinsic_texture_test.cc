@@ -15,7 +15,6 @@
 #include <memory>
 
 #include "gmock/gmock.h"
-#include "spirv-tools/libspirv.hpp"
 #include "src/ast/call_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/stage_decoration.h"
@@ -24,7 +23,6 @@
 #include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type_determiner.h"
-#include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
@@ -4165,38 +4163,7 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
 
   ASSERT_TRUE(b.Build()) << b.error();
 
-  BinaryWriter writer;
-  writer.WriteHeader(b.id_bound());
-  writer.WriteBuilder(&b);
-  auto binary = writer.result();
-
-  std::string spv_errors;
-  auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
-                                    const spv_position_t& position,
-                                    const char* message) {
-    switch (level) {
-      case SPV_MSG_FATAL:
-      case SPV_MSG_INTERNAL_ERROR:
-      case SPV_MSG_ERROR:
-        spv_errors += "error: line " + std::to_string(position.index) + ": " +
-                      message + "\n";
-        break;
-      case SPV_MSG_WARNING:
-        spv_errors += "warning: line " + std::to_string(position.index) + ": " +
-                      message + "\n";
-        break;
-      case SPV_MSG_INFO:
-        spv_errors += "info: line " + std::to_string(position.index) + ": " +
-                      message + "\n";
-        break;
-      case SPV_MSG_DEBUG:
-        break;
-    }
-  };
-
-  spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_2);
-  tools.SetMessageConsumer(msg_consumer);
-  ASSERT_TRUE(tools.Validate(binary)) << spv_errors;
+  Validate(b);
 }
 
 TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
