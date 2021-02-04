@@ -407,6 +407,7 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450Reflect:
       return "reflect";
     case GLSLstd450Round:
+    case GLSLstd450RoundEven:
       return "round";
     case GLSLstd450Sin:
       return "sin";
@@ -428,7 +429,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     default:
     // TODO(dneto) - The following are not implemented.
     // They are grouped semantically, as in GLSL.std.450.h.
-    case GLSLstd450RoundEven:
     case GLSLstd450SSign:
 
     case GLSLstd450Radians:
