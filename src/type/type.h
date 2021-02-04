@@ -99,6 +99,8 @@ class Type : public Castable<Type> {
   bool is_bool_vector() const;
   /// @returns true if this type is boolean scalar or vector
   bool is_bool_scalar_or_vector() const;
+  /// @returns true if this type is a handle type
+  bool is_handle() const;
 
  protected:
   Type();

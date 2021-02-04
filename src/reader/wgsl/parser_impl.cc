@@ -493,8 +493,8 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  if (decl->type->Is<type::Sampler>() || decl->type->Is<type::Texture>()) {
-    // sampler and texture variables implicitly have the storage class `handle`.
+  if (decl->type->is_handle()) {
+    // handle types implicitly have the `UniformConstant` storage class.
     // TODO(jrprice): Produce an error if an explicit storage class is provided.
     sc = ast::StorageClass::kUniformConstant;
   }

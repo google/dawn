@@ -127,5 +127,9 @@ bool Type::is_bool_scalar_or_vector() const {
   return Is<Bool>() || is_bool_vector();
 }
 
+bool Type::is_handle() const {
+  return Is<type::Sampler>() || Is<type::Texture>();
+}
+
 }  // namespace type
 }  // namespace tint

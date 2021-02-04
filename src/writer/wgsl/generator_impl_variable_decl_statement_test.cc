@@ -20,6 +20,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/type/f32_type.h"
+#include "src/type/sampled_texture_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"
 
@@ -74,6 +75,35 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  var<private> a : f32;\n");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Sampler) {
+  auto* var = Global("s", ast::StorageClass::kUniformConstant,
+                     create<type::Sampler>(type::SamplerKind::kSampler));
+
+  auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var s : sampler;\n");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Texture) {
+  auto* var = Global(
+      "t", ast::StorageClass::kUniformConstant,
+      create<type::SampledTexture>(type::TextureDimension::k1d, ty.f32()));
+
+  auto* stmt = create<ast::VariableDeclStatement>(var);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var t : texture_1d<f32>;\n");
 }
 
 }  // namespace

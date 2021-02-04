@@ -597,7 +597,8 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   } else {
     out_ << "var";
     if (sem->StorageClass() != ast::StorageClass::kNone &&
-        sem->StorageClass() != ast::StorageClass::kFunction) {
+        sem->StorageClass() != ast::StorageClass::kFunction &&
+        !var->type()->is_handle()) {
       out_ << "<" << sem->StorageClass() << ">";
     }
   }
