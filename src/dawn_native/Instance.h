@@ -57,11 +57,9 @@ namespace dawn_native {
         ExtensionsSet ExtensionNamesToExtensionsSet(
             const std::vector<const char*>& requiredExtensions);
 
-        void EnableBackendValidation(bool enableBackendValidation);
         bool IsBackendValidationEnabled() const;
-
-        void EnableGPUBasedBackendValidation(bool enableGPUBasedBackendValidation);
-        bool IsGPUBasedBackendValidationEnabled() const;
+        void SetBackendValidationLevel(BackendValidationLevel level);
+        BackendValidationLevel GetBackendValidationLevel() const;
 
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
         bool IsBeginCaptureOnStartupEnabled() const;
@@ -89,9 +87,8 @@ namespace dawn_native {
         bool mBackendsConnected = false;
         bool mDiscoveredDefaultAdapters = false;
 
-        bool mEnableBackendValidation = false;
         bool mBeginCaptureOnStartup = false;
-        bool mEnableGPUValidation = false;
+        BackendValidationLevel mBackendValidationLevel = BackendValidationLevel::Disabled;
 
         dawn_platform::Platform* mPlatform = nullptr;
 

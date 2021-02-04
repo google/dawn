@@ -151,11 +151,13 @@ namespace dawn_native {
     }
 
     void Instance::EnableBackendValidation(bool enableBackendValidation) {
-        mImpl->EnableBackendValidation(enableBackendValidation);
+        if (enableBackendValidation) {
+            mImpl->SetBackendValidationLevel(BackendValidationLevel::Full);
+        }
     }
 
-    void Instance::EnableGPUBasedBackendValidation(bool enableGPUBasedBackendValidation) {
-        mImpl->EnableGPUBasedBackendValidation(enableGPUBasedBackendValidation);
+    void Instance::SetBackendValidationLevel(BackendValidationLevel level) {
+        mImpl->SetBackendValidationLevel(level);
     }
 
     void Instance::EnableBeginCaptureOnStartup(bool beginCaptureOnStartup) {

@@ -212,7 +212,7 @@ void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     ParseArgs(argc, argv);
 
-    if (mEnableBackendValidation) {
+    if (mBackendValidationLevel != dawn_native::BackendValidationLevel::Disabled) {
         mPlatformDebugLogger =
             std::unique_ptr<utils::PlatformDebugLogger>(utils::CreatePlatformDebugLogger());
     }
@@ -240,9 +240,24 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
-        if (strcmp("-d", argv[i]) == 0 || strcmp("--enable-backend-validation", argv[i]) == 0) {
-            mEnableBackendValidation = true;
-            continue;
+        constexpr const char kEnableBackendValidationSwitch[] = "--enable-backend-validation";
+        argLen = sizeof(kEnableBackendValidationSwitch) - 1;
+        if (strncmp(argv[i], kEnableBackendValidationSwitch, argLen) == 0) {
+            const char* level = argv[i] + argLen;
+            if (level[0] != '\0') {
+                if (strcmp(level, "=full") == 0) {
+                    mBackendValidationLevel = dawn_native::BackendValidationLevel::Full;
+                } else if (strcmp(level, "=partial") == 0) {
+                    mBackendValidationLevel = dawn_native::BackendValidationLevel::Partial;
+                } else if (strcmp(level, "=disabled") == 0) {
+                    mBackendValidationLevel = dawn_native::BackendValidationLevel::Disabled;
+                } else {
+                    dawn::ErrorLog() << "Invalid backend validation level" << level;
+                    UNREACHABLE();
+                }
+            } else {
+                mBackendValidationLevel = dawn_native::BackendValidationLevel::Full;
+            }
         }
 
         if (strcmp("-c", argv[i]) == 0 || strcmp("--begin-capture-on-startup", argv[i]) == 0) {
@@ -317,15 +332,18 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             dawn::InfoLog()
                 << "\n\nUsage: " << argv[0]
-                << " [GTEST_FLAGS...] [-w] [-d] [-c]\n"
+                << " [GTEST_FLAGS...] [-w] [-c]\n"
                    "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
-                   "    [--adapter-vendor-id=x]"
-                   " [--exclusive-device-type-preference=integrated,cpu,discrete]\n\n"
+                   "    [--adapter-vendor-id=x] "
+                   "[--enable-backend-validation[=full,partial,disabled]]\n"
+                   "    [--exclusive-device-type-preference=integrated,cpu,discrete]\n\n"
                    "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
-                   "  -d, --enable-backend-validation: Enable backend validation (defaults"
-                   " to disabled)\n"
                    "  -c, --begin-capture-on-startup: Begin debug capture on startup "
                    "(defaults to no capture)\n"
+                   "  --enable-backend-validation: Enables backend validation. Defaults to 'full'\n"
+                   "    to enable all available backend validation. Set to 'partial' to\n"
+                   "    enable a subset of backend validation with less performance overhead.\n"
+                   "    Set to 'disabled' to run with no validation (same as no flag).\n"
                    "  --enable-toggles: Comma-delimited list of Dawn toggles to enable.\n"
                    "    ex.) skip_validation,use_tint_generator,disable_robustness,turn_off_vsync\n"
                    "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n"
@@ -341,10 +359,8 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
 
 std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters() {
     auto instance = std::make_unique<dawn_native::Instance>();
-    instance->EnableBackendValidation(mEnableBackendValidation);
-    instance->EnableGPUBasedBackendValidation(mEnableBackendValidation);
     instance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
-
+    instance->SetBackendValidationLevel(mBackendValidationLevel);
     instance->DiscoverDefaultAdapters();
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGL
@@ -498,8 +514,21 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
            "UseWire: "
         << (mUseWire ? "true" : "false")
         << "\n"
-           "EnableBackendValidation: "
-        << (mEnableBackendValidation ? "true" : "false");
+           "BackendValidation: ";
+
+    switch (mBackendValidationLevel) {
+        case dawn_native::BackendValidationLevel::Full:
+            log << "full";
+            break;
+        case dawn_native::BackendValidationLevel::Partial:
+            log << "partial";
+            break;
+        case dawn_native::BackendValidationLevel::Disabled:
+            log << "disabled";
+            break;
+        default:
+            UNREACHABLE();
+    }
 
     if (GetEnabledToggles().size() > 0) {
         log << "\n"
@@ -563,8 +592,8 @@ bool DawnTestEnvironment::UsesWire() const {
     return mUseWire;
 }
 
-bool DawnTestEnvironment::IsBackendValidationEnabled() const {
-    return mEnableBackendValidation;
+dawn_native::BackendValidationLevel DawnTestEnvironment::GetBackendValidationLevel() const {
+    return mBackendValidationLevel;
 }
 
 dawn_native::Instance* DawnTestEnvironment::GetInstance() const {
@@ -700,7 +729,7 @@ bool DawnTestBase::UsesWire() const {
 }
 
 bool DawnTestBase::IsBackendValidationEnabled() const {
-    return gTestEnv->IsBackendValidationEnabled();
+    return gTestEnv->GetBackendValidationLevel() != dawn_native::BackendValidationLevel::Disabled;
 }
 
 bool DawnTestBase::HasWGSL() const {

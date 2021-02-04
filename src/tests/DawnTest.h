@@ -206,7 +206,7 @@ class DawnTestEnvironment : public testing::Environment {
     void TearDown() override;
 
     bool UsesWire() const;
-    bool IsBackendValidationEnabled() const;
+    dawn_native::BackendValidationLevel GetBackendValidationLevel() const;
     dawn_native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
@@ -227,7 +227,8 @@ class DawnTestEnvironment : public testing::Environment {
     void PrintTestConfigurationAndAdapterInfo(dawn_native::Instance* instance) const;
 
     bool mUseWire = false;
-    bool mEnableBackendValidation = false;
+    dawn_native::BackendValidationLevel mBackendValidationLevel =
+        dawn_native::BackendValidationLevel::Disabled;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;

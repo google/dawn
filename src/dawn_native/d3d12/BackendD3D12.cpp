@@ -25,23 +25,25 @@ namespace dawn_native { namespace d3d12 {
     namespace {
 
         ResultOrError<ComPtr<IDXGIFactory4>> CreateFactory(const PlatformFunctions* functions,
-                                                           bool enableBackendValidation,
-                                                           bool beginCaptureOnStartup,
-                                                           bool enableGPUBasedBackendValidation) {
+                                                           BackendValidationLevel validationLevel,
+                                                           bool beginCaptureOnStartup) {
             ComPtr<IDXGIFactory4> factory;
 
             uint32_t dxgiFactoryFlags = 0;
 
             // Enable the debug layer (requires the Graphics Tools "optional feature").
             {
-                if (enableBackendValidation) {
-                    ComPtr<ID3D12Debug1> debugController;
+                if (validationLevel != BackendValidationLevel::Disabled) {
+                    ComPtr<ID3D12Debug3> debugController;
                     if (SUCCEEDED(
                             functions->d3d12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
                         ASSERT(debugController != nullptr);
                         debugController->EnableDebugLayer();
-                        debugController->SetEnableGPUBasedValidation(
-                            enableGPUBasedBackendValidation);
+                        debugController->SetEnableGPUBasedValidation(true);
+                        if (validationLevel == BackendValidationLevel::Partial) {
+                            debugController->SetGPUBasedValidationFlags(
+                                D3D12_GPU_BASED_VALIDATION_FLAGS_DISABLE_STATE_TRACKING);
+                        }
 
                         // Enable additional debug layers.
                         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
@@ -97,9 +99,8 @@ namespace dawn_native { namespace d3d12 {
         const auto instance = GetInstance();
 
         DAWN_TRY_ASSIGN(mFactory,
-                        CreateFactory(mFunctions.get(), instance->IsBackendValidationEnabled(),
-                                      instance->IsBeginCaptureOnStartupEnabled(),
-                                      instance->IsGPUBasedBackendValidationEnabled()));
+                        CreateFactory(mFunctions.get(), instance->GetBackendValidationLevel(),
+                                      instance->IsBeginCaptureOnStartupEnabled()));
 
         return {};
     }
