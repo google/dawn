@@ -70,6 +70,11 @@ enum class Intrinsic {
   kMix,
   kModf,
   kNormalize,
+  kPack4x8Snorm,
+  kPack4x8Unorm,
+  kPack2x16Snorm,
+  kPack2x16Unorm,
+  kPack2x16Float,
   kPow,
   kReflect,
   kReverseBits,
@@ -132,6 +137,11 @@ bool IsTextureIntrinsic(Intrinsic i);
 /// @param i the intrinsic
 /// @returns true if the given `i` is a image query intrinsic
 bool IsImageQueryIntrinsic(Intrinsic i);
+
+/// Determines if the given `i` is a data packing intrinsic
+/// @param i the intrinsic
+/// @returns true if the given `i` is a data packing intrinsic
+bool IsDataPackingIntrinsic(Intrinsic i);
 
 /// @returns the name of the intrinsic function. The spelling, including case,
 /// matches the name in the WGSL spec.

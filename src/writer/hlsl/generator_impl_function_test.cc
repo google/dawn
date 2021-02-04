@@ -407,10 +407,49 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(ByteAddressBuffer coord : register(u0);
+  EXPECT_EQ(result(), R"(ByteAddressBuffer coord : register(t0);
 
 void frag_main() {
   float v = asfloat(coord.Load(4));
+  return;
+}
+
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_FunctionDecoration_EntryPoint_With_WO_StorageBuffer_Store) {
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
+                            Member("b", ty.f32(), {MemberOffset(4)})},
+      ast::StructDecorationList{});
+
+  auto* s = ty.struct_("Data", str);
+  type::AccessControl ac(ast::AccessControl::kWriteOnly, s);
+
+  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
+         });
+
+  Func("frag_main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(MemberAccessor("coord", "b"),
+                                            Expr(2.0f)),
+           create<ast::ReturnStatement>(),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
+
+void frag_main() {
+  coord.Store(4, asuint(2.0f));
   return;
 }
 

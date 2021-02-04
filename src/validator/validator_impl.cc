@@ -153,6 +153,16 @@ constexpr const IntrinsicData kIntrinsicData[] = {
      true},
     {semantic::Intrinsic::kNormalize, 1, IntrinsicDataType::kFloatVector, 0,
      true},
+    {semantic::Intrinsic::kPack4x8Snorm, 1, IntrinsicDataType::kFloatVector, 4,
+     false},
+    {semantic::Intrinsic::kPack4x8Unorm, 1, IntrinsicDataType::kFloatVector, 4,
+     false},
+    {semantic::Intrinsic::kPack2x16Snorm, 1, IntrinsicDataType::kFloatVector, 2,
+     false},
+    {semantic::Intrinsic::kPack2x16Unorm, 1, IntrinsicDataType::kFloatVector, 2,
+     false},
+    {semantic::Intrinsic::kPack2x16Float, 1, IntrinsicDataType::kFloatVector, 2,
+     false},
     {semantic::Intrinsic::kPow, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
     {semantic::Intrinsic::kReflect, 2, IntrinsicDataType::kFloatScalarOrVector,
@@ -841,6 +851,15 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
         if (data->intrinsic == semantic::Intrinsic::kDot) {
           if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
                            IntrinsicDataType::kFloatScalar, 0, this)) {
+            return false;
+          }
+        }
+
+        if (semantic::intrinsic::IsDataPackingIntrinsic(data->intrinsic)) {
+          if (!program_->TypeOf(expr)->Is<type::U32>()) {
+            add_error(expr->source(),
+                      "incorrect type for " + builtin +
+                          ". Result type must be an unsigned int scalar");
             return false;
           }
         }

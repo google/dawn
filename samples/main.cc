@@ -164,7 +164,13 @@ Format infer_format(const std::string& filename) {
   if (ends_with(filename, ".metal")) {
     return Format::kMsl;
   }
-#endif  // TINT_BUILD_WGSL_WRITER
+#endif  // TINT_BUILD_MSL_WRITER
+
+#if TINT_BUILD_HLSL_WRITER
+  if (ends_with(filename, ".hlsl")) {
+    return Format::kHlsl;
+  }
+#endif  // TINT_BUILD_HLSL_WRITER
 
   return Format::kNone;
 }

@@ -249,6 +249,16 @@ uint32_t intrinsic_to_glsl_method(type::Type* type,
       return GLSLstd450Modf;
     case semantic::Intrinsic::kNormalize:
       return GLSLstd450Normalize;
+    case semantic::Intrinsic::kPack4x8Snorm:
+      return GLSLstd450PackSnorm4x8;
+    case semantic::Intrinsic::kPack4x8Unorm:
+      return GLSLstd450PackUnorm4x8;
+    case semantic::Intrinsic::kPack2x16Snorm:
+      return GLSLstd450PackSnorm2x16;
+    case semantic::Intrinsic::kPack2x16Unorm:
+      return GLSLstd450PackUnorm2x16;
+    case semantic::Intrinsic::kPack2x16Float:
+      return GLSLstd450PackHalf2x16;
     case semantic::Intrinsic::kPow:
       return GLSLstd450Pow;
     case semantic::Intrinsic::kReflect:

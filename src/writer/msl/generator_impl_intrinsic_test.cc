@@ -96,6 +96,8 @@ ast::CallExpression* GenerateCall(semantic::Intrinsic intrinsic,
     case semantic::Intrinsic::kLog:
     case semantic::Intrinsic::kLog2:
     case semantic::Intrinsic::kNormalize:
+    case semantic::Intrinsic::kPack4x8Snorm:
+    case semantic::Intrinsic::kPack4x8Unorm:
     case semantic::Intrinsic::kReflect:
     case semantic::Intrinsic::kRound:
     case semantic::Intrinsic::kSin:
@@ -147,6 +149,9 @@ ast::CallExpression* GenerateCall(semantic::Intrinsic intrinsic,
       return builder->Call(str.str(), "f1", "f2", "b1");
     case semantic::Intrinsic::kDeterminant:
       return builder->Call(str.str(), "m1");
+    case semantic::Intrinsic::kPack2x16Snorm:
+    case semantic::Intrinsic::kPack2x16Unorm:
+      return builder->Call(str.str(), "f4");
     default:
       break;
   }
@@ -164,6 +169,7 @@ TEST_P(MslIntrinsicTest, Emit) {
   Global("f1", ast::StorageClass::kFunction, ty.vec2<float>());
   Global("f2", ast::StorageClass::kFunction, ty.vec2<float>());
   Global("f3", ast::StorageClass::kFunction, ty.vec2<float>());
+  Global("f4", ast::StorageClass::kFunction, ty.vec2<float>());
   Global("u1", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
   Global("u2", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
   Global("u3", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
@@ -269,6 +275,14 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{semantic::Intrinsic::kMin, ParamType::kU32, "metal::min"},
         IntrinsicData{semantic::Intrinsic::kNormalize, ParamType::kF32,
                       "metal::normalize"},
+        IntrinsicData{semantic::Intrinsic::kPack4x8Snorm, ParamType::kF32,
+                      "metal::pack_float_to_snorm4x8"},
+        IntrinsicData{semantic::Intrinsic::kPack4x8Unorm, ParamType::kF32,
+                      "metal::pack_float_to_unorm4x8"},
+        IntrinsicData{semantic::Intrinsic::kPack2x16Snorm, ParamType::kF32,
+                      "metal::pack_float_to_snorm2x16"},
+        IntrinsicData{semantic::Intrinsic::kPack2x16Unorm, ParamType::kF32,
+                      "metal::pack_float_to_unorm2x16"},
         IntrinsicData{semantic::Intrinsic::kPow, ParamType::kF32, "metal::pow"},
         IntrinsicData{semantic::Intrinsic::kReflect, ParamType::kF32,
                       "metal::reflect"},
@@ -307,6 +321,18 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
   EXPECT_EQ(gen.result(), "  metal::dot(param1, param2)");
+}
+
+TEST_F(MslGeneratorImplTest, Pack2x16Float) {
+  auto* call = Call("pack2x16float", "p1");
+  Global("p1", ast::StorageClass::kFunction, ty.vec2<f32>());
+  WrapInFunction(call);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  as_type<uint>(half2(p1))");
 }
 
 }  // namespace

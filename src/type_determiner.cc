@@ -517,6 +517,16 @@ constexpr const IntrinsicData kIntrinsicData[] = {
     {semantic::Intrinsic::kMix, IntrinsicDataType::kDependent, 0, 0},
     {semantic::Intrinsic::kModf, IntrinsicDataType::kDependent, 0, 0},
     {semantic::Intrinsic::kNormalize, IntrinsicDataType::kDependent, 0, 0},
+    {semantic::Intrinsic::kPack4x8Snorm, IntrinsicDataType::kUnsignedInteger, 1,
+     0},
+    {semantic::Intrinsic::kPack4x8Unorm, IntrinsicDataType::kUnsignedInteger, 1,
+     0},
+    {semantic::Intrinsic::kPack2x16Snorm, IntrinsicDataType::kUnsignedInteger,
+     1, 0},
+    {semantic::Intrinsic::kPack2x16Unorm, IntrinsicDataType::kUnsignedInteger,
+     1, 0},
+    {semantic::Intrinsic::kPack2x16Float, IntrinsicDataType::kUnsignedInteger,
+     1, 0},
     {semantic::Intrinsic::kPow, IntrinsicDataType::kDependent, 0, 0},
     {semantic::Intrinsic::kReflect, IntrinsicDataType::kDependent, 0, 0},
     {semantic::Intrinsic::kReverseBits, IntrinsicDataType::kDependent, 0, 0},
@@ -943,6 +953,16 @@ semantic::Intrinsic TypeDeterminer::MatchIntrinsic(const std::string& name) {
     return semantic::Intrinsic::kModf;
   } else if (name == "normalize") {
     return semantic::Intrinsic::kNormalize;
+  } else if (name == "pack4x8snorm") {
+    return semantic::Intrinsic::kPack4x8Snorm;
+  } else if (name == "pack4x8unorm") {
+    return semantic::Intrinsic::kPack4x8Unorm;
+  } else if (name == "pack2x16snorm") {
+    return semantic::Intrinsic::kPack2x16Snorm;
+  } else if (name == "pack2x16unorm") {
+    return semantic::Intrinsic::kPack2x16Unorm;
+  } else if (name == "pack2x16float") {
+    return semantic::Intrinsic::kPack2x16Float;
   } else if (name == "pow") {
     return semantic::Intrinsic::kPow;
   } else if (name == "reflect") {

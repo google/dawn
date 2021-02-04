@@ -449,6 +449,15 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return EmitTextureCall(expr, sem);
   }
   if (auto* sem = call_sem->As<semantic::IntrinsicCall>()) {
+    if (sem->intrinsic() == semantic::Intrinsic::kPack2x16Float) {
+      make_indent();
+      out_ << "as_type<uint>(half2(";
+      if (!EmitExpression(expr->params()[0])) {
+        return false;
+      }
+      out_ << "))";
+      return true;
+    }
     auto name = generate_builtin_name(sem);
     if (name.empty()) {
       return false;
@@ -863,6 +872,18 @@ std::string GeneratorImpl::generate_builtin_name(
       break;
     case semantic::Intrinsic::kFaceForward:
       out += "faceforward";
+      break;
+    case semantic::Intrinsic::kPack4x8Snorm:
+      out += "pack_float_to_snorm4x8";
+      break;
+    case semantic::Intrinsic::kPack4x8Unorm:
+      out += "pack_float_to_unorm4x8";
+      break;
+    case semantic::Intrinsic::kPack2x16Snorm:
+      out += "pack_float_to_snorm2x16";
+      break;
+    case semantic::Intrinsic::kPack2x16Unorm:
+      out += "pack_float_to_unorm2x16";
       break;
     case semantic::Intrinsic::kReverseBits:
       out += "reverse_bits";

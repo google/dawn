@@ -390,6 +390,16 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "mix";
     case GLSLstd450Normalize:
       return "normalize";
+    case GLSLstd450PackSnorm4x8:
+      return "pack4x8snorm";
+    case GLSLstd450PackUnorm4x8:
+      return "pack4x8unorm";
+    case GLSLstd450PackSnorm2x16:
+      return "pack2x16snorm";
+    case GLSLstd450PackUnorm2x16:
+      return "pack2x16unorm";
+    case GLSLstd450PackHalf2x16:
+      return "pack2x16float";
     case GLSLstd450Pow:
       return "pow";
     case GLSLstd450FSign:
@@ -437,11 +447,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450Frexp:
     case GLSLstd450FrexpStruct:
 
-    case GLSLstd450PackSnorm4x8:
-    case GLSLstd450PackUnorm4x8:
-    case GLSLstd450PackSnorm2x16:
-    case GLSLstd450PackUnorm2x16:
-    case GLSLstd450PackHalf2x16:
     case GLSLstd450PackDouble2x32:
     case GLSLstd450UnpackSnorm2x16:
     case GLSLstd450UnpackUnorm2x16:

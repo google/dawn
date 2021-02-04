@@ -554,29 +554,30 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     } else if (sem->intrinsic() == semantic::Intrinsic::kIsNormal) {
       error_ = "is_normal not supported in HLSL backend yet";
       return false;
-    } else {
-      auto name = generate_builtin_name(sem);
-      if (name.empty()) {
+    } else if (semantic::intrinsic::IsDataPackingIntrinsic(sem->intrinsic())) {
+      return EmitDataPackingCall(pre, out, expr);
+    }
+    auto name = generate_builtin_name(sem);
+    if (name.empty()) {
+      return false;
+    }
+
+    make_indent(out);
+    out << name << "(";
+
+    bool first = true;
+    for (auto* param : params) {
+      if (!first) {
+        out << ", ";
+      }
+      first = false;
+
+      if (!EmitExpression(pre, out, param)) {
         return false;
       }
-
-      make_indent(out);
-      out << name << "(";
-
-      bool first = true;
-      for (auto* param : params) {
-        if (!first) {
-          out << ", ";
-        }
-        first = false;
-
-        if (!EmitExpression(pre, out, param)) {
-          return false;
-        }
-      }
-
-      out << ")";
     }
+
+    out << ")";
     return true;
   }
 
@@ -631,6 +632,65 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   }
 
   out << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
+                                        std::ostream& out,
+                                        ast::CallExpression* expr) {
+  auto* ident = builder_.Sem().Get(expr)->As<semantic::IntrinsicCall>();
+
+  auto* param = expr->params()[0];
+  auto tmp_name = generate_name(kTempNamePrefix);
+  std::ostringstream expr_out;
+  if (!EmitExpression(pre, expr_out, param)) {
+    return false;
+  }
+  uint32_t dims = 2;
+  bool is_signed = false;
+  uint32_t scale = 65535;
+  if (ident->intrinsic() == semantic::Intrinsic::kPack4x8Snorm ||
+      ident->intrinsic() == semantic::Intrinsic::kPack4x8Unorm) {
+    dims = 4;
+    scale = 255;
+  }
+  if (ident->intrinsic() == semantic::Intrinsic::kPack4x8Snorm ||
+      ident->intrinsic() == semantic::Intrinsic::kPack2x16Snorm) {
+    is_signed = true;
+    scale = (scale - 1) / 2;
+  }
+  switch (ident->intrinsic()) {
+    case semantic::Intrinsic::kPack4x8Snorm:
+    case semantic::Intrinsic::kPack4x8Unorm:
+    case semantic::Intrinsic::kPack2x16Snorm:
+    case semantic::Intrinsic::kPack2x16Unorm:
+      pre << (is_signed ? "" : "u") << "int" << dims << " " << tmp_name << " = "
+          << (is_signed ? "" : "u") << "int" << dims << "(round(clamp("
+          << expr_out.str() << ", " << (is_signed ? "-1.0" : "0.0")
+          << ", 1.0) * " << scale << ".0))";
+      if (is_signed) {
+        pre << " & " << (dims == 4 ? "0xff" : "0xffff");
+      }
+      pre << ";\n";
+      if (is_signed) {
+        out << "asuint";
+      }
+      out << "(";
+      out << tmp_name << ".x | " << tmp_name << ".y << " << (32 / dims);
+      if (dims == 4) {
+        out << " | " << tmp_name << ".z << 16 | " << tmp_name << ".w << 24";
+      }
+      out << ")";
+      break;
+    case semantic::Intrinsic::kPack2x16Float:
+      pre << "uint2 " << tmp_name << " = f32tof16(" << expr_out.str() << ");\n";
+      out << "(" << tmp_name << ".x | " << tmp_name << ".y << 16)";
+      break;
+    default:
+      error_ = "Internal error: unhandled data packing intrinsic";
+      return false;
+  }
 
   return true;
 }
@@ -1503,11 +1563,12 @@ bool GeneratorImpl::EmitEntryPointData(
       return false;
     }
 
-    if (ac->IsReadWrite()) {
+    if (!ac->IsReadOnly()) {
       out << "RW";
     }
     out << "ByteAddressBuffer " << builder_.Symbols().NameFor(decl->symbol())
-        << " : register(u" << binding->value() << ");" << std::endl;
+        << " : register(" << (ac->IsReadOnly() ? "t" : "u") << binding->value()
+        << ");" << std::endl;
     emitted_storagebuffer = true;
   }
   if (emitted_storagebuffer) {

@@ -1632,4 +1632,136 @@ INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
                          ::testing::Values(std::make_tuple("all", 1),
                                            std::make_tuple("any", 1)));
 
+using DataPacking4x8 = ValidatorBuiltinsTestWithParams<std::string>;
+
+TEST_P(DataPacking4x8, Float_Vec4) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+}
+
+TEST_P(DataPacking4x8, Float_Vec2) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect vector size for " + name + ". Requires 4 elements");
+}
+
+TEST_P(DataPacking4x8, Int_Vec4) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec4<int>(1, 1, 1, 1));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect type for " + name + ". Requires float vector value");
+}
+
+TEST_P(DataPacking4x8, Float_Scalar) {
+  auto name = GetParam();
+  auto* builtin = Call(name, Expr(1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect type for " + name + ". Requires float vector value");
+}
+
+TEST_P(DataPacking4x8, TooFewParams) {
+  auto name = GetParam();
+  auto* builtin = Call(name);
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect number of parameters for " + name + " expected 1 got 0");
+}
+
+TEST_P(DataPacking4x8, TooManyParams) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
+                       vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect number of parameters for " + name + " expected 1 got 2");
+}
+
+INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
+                         DataPacking4x8,
+                         ::testing::Values("pack4x8snorm", "pack4x8unorm"));
+
+using DataPacking2x16 = ValidatorBuiltinsTestWithParams<std::string>;
+
+TEST_P(DataPacking2x16, Float_Vec4) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect vector size for " + name + ". Requires 2 elements");
+}
+
+TEST_P(DataPacking2x16, Float_Vec2) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec2<float>(1.0f, 1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+}
+
+TEST_P(DataPacking2x16, Int_Vec4) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec4<int>(1, 1, 1, 1));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect type for " + name + ". Requires float vector value");
+}
+
+TEST_P(DataPacking2x16, Float_Scalar) {
+  auto name = GetParam();
+  auto* builtin = Call(name, Expr(1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect type for " + name + ". Requires float vector value");
+}
+
+TEST_P(DataPacking2x16, TooFewParams) {
+  auto name = GetParam();
+  auto* builtin = Call(name);
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect number of parameters for " + name + " expected 1 got 0");
+}
+
+TEST_P(DataPacking2x16, TooManyParams) {
+  auto name = GetParam();
+  auto* builtin = Call(name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
+                       vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
+  ValidatorImpl& v = Build();
+  EXPECT_FALSE(v.ValidateCallExpr(builtin));
+  EXPECT_EQ(v.error(),
+            "incorrect number of parameters for " + name + " expected 1 got 2");
+}
+
+INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
+                         DataPacking2x16,
+                         ::testing::Values("pack2x16snorm",
+                                           "pack2x16unorm",
+                                           "pack2x16float"));
+
 }  // namespace tint

@@ -124,6 +124,16 @@ const char* str(Intrinsic i) {
       return "modf";
     case Intrinsic::kNormalize:
       return "normalize";
+    case Intrinsic::kPack4x8Snorm:
+      return "pack4x8snorm";
+    case Intrinsic::kPack4x8Unorm:
+      return "pack4x8unorm";
+    case Intrinsic::kPack2x16Snorm:
+      return "pack2x16snorm";
+    case Intrinsic::kPack2x16Unorm:
+      return "pack2x16unorm";
+    case Intrinsic::kPack2x16Float:
+      return "pack2x16float";
     case Intrinsic::kPow:
       return "pow";
     case Intrinsic::kReflect:
@@ -213,6 +223,12 @@ bool IsImageQueryIntrinsic(Intrinsic i) {
          i == Intrinsic::kTextureNumLayers ||
          i == Intrinsic::kTextureNumLevels ||
          i == Intrinsic::kTextureNumSamples;
+}
+
+bool IsDataPackingIntrinsic(Intrinsic i) {
+  return i == Intrinsic::kPack4x8Snorm || i == Intrinsic::kPack4x8Unorm ||
+         i == Intrinsic::kPack2x16Snorm || i == Intrinsic::kPack2x16Unorm ||
+         i == Intrinsic::kPack2x16Float;
 }
 
 }  // namespace intrinsic

@@ -1623,6 +1623,29 @@ TEST_F(TypeDeterminerTest, MatchIntrinsicNoMatch) {
             semantic::Intrinsic::kNone);
 }
 
+using ImportData_DataPackingTest = TypeDeterminerTestWithParam<IntrinsicData>;
+TEST_P(ImportData_DataPackingTest, InferType) {
+  auto param = GetParam();
+
+  auto* ident = Expr(param.name);
+  auto* call = Call(ident);
+  WrapInFunction(call);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    ImportData_DataPackingTest,
+    testing::Values(
+        IntrinsicData{"pack4x8snorm", semantic::Intrinsic::kPack4x8Snorm},
+        IntrinsicData{"pack4x8unorm", semantic::Intrinsic::kPack4x8Unorm},
+        IntrinsicData{"pack2x16snorm", semantic::Intrinsic::kPack2x16Snorm},
+        IntrinsicData{"pack2x16unorm", semantic::Intrinsic::kPack2x16Unorm},
+        IntrinsicData{"pack2x16float", semantic::Intrinsic::kPack2x16Float}));
+
 using ImportData_SingleParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_SingleParamTest, Scalar) {
   auto param = GetParam();
