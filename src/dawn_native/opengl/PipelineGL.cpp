@@ -173,9 +173,11 @@ namespace dawn_native { namespace opengl {
                         break;
 
                     case BindingInfoType::StorageTexture: {
-                        GLint location = gl.GetUniformLocation(mProgram, name.c_str());
-                        if (location != -1) {
-                            gl.Uniform1i(location, indices[group][bindingIndex]);
+                        if (gl.GetVersion().IsDesktop()) {
+                            GLint location = gl.GetUniformLocation(mProgram, name.c_str());
+                            if (location != -1) {
+                                gl.Uniform1i(location, indices[group][bindingIndex]);
+                            }
                         }
                         break;
                     }
