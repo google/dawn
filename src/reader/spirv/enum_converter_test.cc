@@ -165,11 +165,12 @@ INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
 
 struct BuiltinCase {
   SpvBuiltIn builtin;
+  ast::StorageClass sc;
   bool expect_success;
   ast::Builtin expected;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinCase bc) {
-  out << "BuiltinCase{ SpvBuiltIn:" << int(bc.builtin)
+  out << "BuiltinCase{ SpvBuiltIn:" << int(bc.builtin) << " sc:" << int(bc.sc)
       << " expect_success?:" << int(bc.expect_success)
       << " expected:" << int(bc.expected) << "}";
   return out;
@@ -194,7 +195,7 @@ class SpvBuiltinTest : public testing::TestWithParam<BuiltinCase> {
 TEST_P(SpvBuiltinTest, Samples) {
   const auto params = GetParam();
 
-  const auto result = converter_.ToBuiltin(params.builtin);
+  const auto result = converter_.ToBuiltin(params.builtin, params.sc);
   EXPECT_EQ(success_, params.expect_success);
   if (params.expect_success) {
     EXPECT_EQ(result, params.expected);
@@ -206,29 +207,49 @@ TEST_P(SpvBuiltinTest, Samples) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    EnumConverterGood,
+    EnumConverterGood_Input,
     SpvBuiltinTest,
     testing::Values(
-        BuiltinCase{SpvBuiltInPosition, true, ast::Builtin::kPosition},
-        BuiltinCase{SpvBuiltInVertexIndex, true, ast::Builtin::kVertexIndex},
-        BuiltinCase{SpvBuiltInInstanceIndex, true,
+        BuiltinCase{SpvBuiltInPosition, ast::StorageClass::kInput, true,
+                    ast::Builtin::kPosition},
+        BuiltinCase{SpvBuiltInInstanceIndex, ast::StorageClass::kInput, true,
                     ast::Builtin::kInstanceIndex},
-        BuiltinCase{SpvBuiltInFrontFacing, true, ast::Builtin::kFrontFacing},
-        BuiltinCase{SpvBuiltInFragCoord, true, ast::Builtin::kFragCoord},
-        BuiltinCase{SpvBuiltInFragDepth, true, ast::Builtin::kFragDepth},
-        BuiltinCase{SpvBuiltInLocalInvocationId, true,
-                    ast::Builtin::kLocalInvocationId},
-        BuiltinCase{SpvBuiltInLocalInvocationIndex, true,
-                    ast::Builtin::kLocalInvocationIndex},
-        BuiltinCase{SpvBuiltInGlobalInvocationId, true,
-                    ast::Builtin::kGlobalInvocationId}));
+        BuiltinCase{SpvBuiltInFrontFacing, ast::StorageClass::kInput, true,
+                    ast::Builtin::kFrontFacing},
+        BuiltinCase{SpvBuiltInFragCoord, ast::StorageClass::kInput, true,
+                    ast::Builtin::kFragCoord},
+        BuiltinCase{SpvBuiltInLocalInvocationId, ast::StorageClass::kInput,
+                    true, ast::Builtin::kLocalInvocationId},
+        BuiltinCase{SpvBuiltInLocalInvocationIndex, ast::StorageClass::kInput,
+                    true, ast::Builtin::kLocalInvocationIndex},
+        BuiltinCase{SpvBuiltInGlobalInvocationId, ast::StorageClass::kInput,
+                    true, ast::Builtin::kGlobalInvocationId},
+        BuiltinCase{SpvBuiltInSampleId, ast::StorageClass::kInput, true,
+                    ast::Builtin::kSampleId},
+        BuiltinCase{SpvBuiltInSampleMask, ast::StorageClass::kInput, true,
+                    ast::Builtin::kSampleMaskIn}));
+
+INSTANTIATE_TEST_SUITE_P(
+    EnumConverterGood_Output,
+    SpvBuiltinTest,
+    testing::Values(BuiltinCase{SpvBuiltInPosition, ast::StorageClass::kOutput,
+                                true, ast::Builtin::kPosition},
+                    BuiltinCase{SpvBuiltInFragDepth, ast::StorageClass::kOutput,
+                                true, ast::Builtin::kFragDepth},
+                    BuiltinCase{SpvBuiltInSampleMask,
+                                ast::StorageClass::kOutput, true,
+                                ast::Builtin::kSampleMaskOut}));
 
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterBad,
     SpvBuiltinTest,
     testing::Values(
-        BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::Builtin::kNone},
-        BuiltinCase{SpvBuiltInNumWorkgroups, false, ast::Builtin::kNone}));
+        BuiltinCase{static_cast<SpvBuiltIn>(9999), ast::StorageClass::kInput,
+                    false, ast::Builtin::kNone},
+        BuiltinCase{static_cast<SpvBuiltIn>(9999), ast::StorageClass::kOutput,
+                    false, ast::Builtin::kNone},
+        BuiltinCase{SpvBuiltInNumWorkgroups, ast::StorageClass::kInput, false,
+                    ast::Builtin::kNone}));
 
 // Dim
 

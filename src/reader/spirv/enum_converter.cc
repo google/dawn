@@ -66,7 +66,7 @@ ast::StorageClass EnumConverter::ToStorageClass(const SpvStorageClass sc) {
   return ast::StorageClass::kNone;
 }
 
-ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
+ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b, ast::StorageClass sc) {
   switch (b) {
     case SpvBuiltInPosition:
       return ast::Builtin::kPosition;
@@ -88,6 +88,9 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
       return ast::Builtin::kGlobalInvocationId;
     case SpvBuiltInSampleId:
       return ast::Builtin::kSampleId;
+    case SpvBuiltInSampleMask:
+      return sc == ast::StorageClass::kInput ? ast::Builtin::kSampleMaskIn
+                                             : ast::Builtin::kSampleMaskOut;
     default:
       break;
   }
