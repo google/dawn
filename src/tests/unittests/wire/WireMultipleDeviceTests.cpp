@@ -70,10 +70,10 @@ class WireMultipleDeviceTests : public testing::Test {
 
             mClientDevice = mWireClient->GetDevice();
 
-            // The GetDefaultQueue is done on WireClient startup so we expect it now.
-            mClientQueue = wgpuDeviceGetDefaultQueue(mClientDevice);
+            // The GetQueue is done on WireClient startup so we expect it now.
+            mClientQueue = wgpuDeviceGetQueue(mClientDevice);
             mServerQueue = mApi.GetNewQueue();
-            EXPECT_CALL(mApi, DeviceGetDefaultQueue(mServerDevice)).WillOnce(Return(mServerQueue));
+            EXPECT_CALL(mApi, DeviceGetQueue(mServerDevice)).WillOnce(Return(mServerQueue));
             FlushClient();
         }
 

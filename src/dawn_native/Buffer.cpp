@@ -287,8 +287,8 @@ namespace dawn_native {
         }
         std::unique_ptr<MapRequestTask> request =
             std::make_unique<MapRequestTask>(this, mLastMapID);
-        GetDevice()->GetDefaultQueue()->TrackTask(std::move(request),
-                                                  GetDevice()->GetPendingCommandSerial());
+        GetDevice()->GetQueue()->TrackTask(std::move(request),
+                                           GetDevice()->GetPendingCommandSerial());
     }
 
     void* BufferBase::GetMappedRange(size_t offset, size_t size) {

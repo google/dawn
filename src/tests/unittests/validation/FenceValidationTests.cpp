@@ -53,7 +53,7 @@ class FenceValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
-        queue = device.GetDefaultQueue();
+        queue = device.GetQueue();
     }
 
     void TearDown() override {
@@ -194,7 +194,7 @@ TEST_F(FenceValidationTest, SignalSuccess) {
 // Test it is invalid to signal a fence on a different queue than it was created on
 // DISABLED until we have support for multiple queues
 TEST_F(FenceValidationTest, DISABLED_SignalWrongQueue) {
-    wgpu::Queue queue2 = device.GetDefaultQueue();
+    wgpu::Queue queue2 = device.GetQueue();
 
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
@@ -206,7 +206,7 @@ TEST_F(FenceValidationTest, DISABLED_SignalWrongQueue) {
 // Test that signaling a fence on a wrong queue does not update fence signaled value
 // DISABLED until we have support for multiple queues
 TEST_F(FenceValidationTest, DISABLED_SignalWrongQueueDoesNotUpdateValue) {
-    wgpu::Queue queue2 = device.GetDefaultQueue();
+    wgpu::Queue queue2 = device.GetQueue();
 
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;

@@ -243,8 +243,7 @@ namespace dawn_native {
         uniformDesc.size = sizeof(uniformData);
         Ref<BufferBase> uniformBuffer = AcquireRef(device->CreateBuffer(&uniformDesc));
 
-        device->GetDefaultQueue()->WriteBuffer(uniformBuffer.Get(), 0, uniformData,
-                                               sizeof(uniformData));
+        device->GetQueue()->WriteBuffer(uniformBuffer.Get(), 0, uniformData, sizeof(uniformData));
 
         // Prepare binding 1 resource: sampler
         // Use default configuration, filterMode set to Nearest for min and mag.
@@ -306,7 +305,7 @@ namespace dawn_native {
         CommandBufferBase* submitCommandBuffer = commandBuffer.Get();
 
         // Submit command buffer.
-        Ref<QueueBase> queue = AcquireRef(device->GetDefaultQueue());
+        Ref<QueueBase> queue = AcquireRef(device->GetQueue());
         queue->Submit(1, &submitCommandBuffer);
 
         return {};

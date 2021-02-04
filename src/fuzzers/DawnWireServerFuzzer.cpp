@@ -163,7 +163,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     // Wait for all previous commands before destroying the server.
     // TODO(enga): Improve this when we improve/finalize how processing events happens.
     {
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         wgpu::Fence fence = queue.CreateFence();
         queue.Signal(fence, 1u);
         fence.OnCompletion(1u, CommandsCompleteCallback, 0);

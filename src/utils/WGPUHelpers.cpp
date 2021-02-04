@@ -170,7 +170,7 @@ namespace utils {
         descriptor.usage = usage | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
-        device.GetDefaultQueue().WriteBuffer(buffer, 0, data, size);
+        device.GetQueue().WriteBuffer(buffer, 0, data, size);
         return buffer;
     }
 

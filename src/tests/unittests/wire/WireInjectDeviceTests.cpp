@@ -107,16 +107,16 @@ TEST_F(WireInjectDeviceTests, InjectedDeviceLifetime) {
     Mock::VerifyAndClearExpectations(&api);
 }
 
-// Test that it is an error to get the default queue of a device before it has been
+// Test that it is an error to get the primary queue of a device before it has been
 // injected on the server.
 TEST_F(WireInjectDeviceTests, GetQueueBeforeInject) {
     ReservedDevice reservation = GetWireClient()->ReserveDevice();
 
-    wgpuDeviceGetDefaultQueue(reservation.device);
+    wgpuDeviceGetQueue(reservation.device);
     FlushClient(false);
 }
 
-// Test that it is valid to get the default queue of a device after it has been
+// Test that it is valid to get the primary queue of a device after it has been
 // injected on the server.
 TEST_F(WireInjectDeviceTests, GetQueueAfterInject) {
     ReservedDevice reservation = GetWireClient()->ReserveDevice();
@@ -128,10 +128,10 @@ TEST_F(WireInjectDeviceTests, GetQueueAfterInject) {
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice, reservation.id, reservation.generation));
 
-    wgpuDeviceGetDefaultQueue(reservation.device);
+    wgpuDeviceGetQueue(reservation.device);
 
     WGPUQueue apiQueue = api.GetNewQueue();
-    EXPECT_CALL(api, DeviceGetDefaultQueue(serverDevice)).WillOnce(Return(apiQueue));
+    EXPECT_CALL(api, DeviceGetQueue(serverDevice)).WillOnce(Return(apiQueue));
     FlushClient();
 
     // Called on shutdown.
@@ -187,7 +187,7 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
 // KnownObjects std::vector of devices. The fix was to store pointers to heap allocated
 // objects instead.
 TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
-    // Reserve one device, inject it, and get the default queue.
+    // Reserve one device, inject it, and get the primary queue.
     ReservedDevice reservation1 = GetWireClient()->ReserveDevice();
 
     WGPUDevice serverDevice1 = api.GetNewDevice();

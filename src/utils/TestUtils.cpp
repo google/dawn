@@ -129,7 +129,7 @@ namespace utils {
         wgpu::Extent3D copyExtent = {1, 1, 1};
 
         // WriteTexture with exactly 1 byte of data.
-        device.GetDefaultQueue().WriteTexture(&textureCopyView, data.data(), 1, &textureDataLayout,
-                                              &copyExtent);
+        device.GetQueue().WriteTexture(&textureCopyView, data.data(), 1, &textureDataLayout,
+                                       &copyExtent);
     }
 }  // namespace utils

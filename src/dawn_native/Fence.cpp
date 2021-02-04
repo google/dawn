@@ -136,8 +136,8 @@ namespace dawn_native {
             std::make_unique<FenceInFlight>(fence, value);
 
         // TODO: use GetLastSubmittedCommandSerial in the future for perforamnce
-        GetDevice()->GetDefaultQueue()->TrackTask(std::move(fenceInFlight),
-                                                  GetDevice()->GetPendingCommandSerial());
+        GetDevice()->GetQueue()->TrackTask(std::move(fenceInFlight),
+                                           GetDevice()->GetPendingCommandSerial());
     }
 
     MaybeError Fence::ValidateOnCompletion(FenceAPISerial value,

@@ -41,7 +41,7 @@ namespace {
             commands = encoder.Finish();
         }
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
 
         // Submitting when the buffer has never been mapped should succeed
         queue.Submit(1, &commands);
@@ -84,7 +84,7 @@ namespace {
       private:
         void SetUp() override {
             ValidationTest::SetUp();
-            queue = device.GetDefaultQueue();
+            queue = device.GetQueue();
         }
 
       protected:
@@ -193,7 +193,7 @@ namespace {
     // Test it is invalid to submit a command buffer twice
     TEST_F(QueueSubmitValidationTest, CommandBufferSubmittedTwice) {
         wgpu::CommandBuffer commandBuffer = device.CreateCommandEncoder().Finish();
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
 
         // Should succeed
         queue.Submit(1, &commandBuffer);
@@ -224,7 +224,7 @@ namespace {
             commands = encoder.Finish();
         }
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
 
         // Map the source buffer to force a failure
         buffer.MapAsync(wgpu::MapMode::Write, 0, kBufferSize, nullptr, nullptr);

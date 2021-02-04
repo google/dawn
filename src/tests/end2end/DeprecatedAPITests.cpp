@@ -151,6 +151,19 @@ TEST_P(DeprecationTests, BindGroupLayoutEntryViewDimensionDefaulting) {
     }
 }
 
+// Test Device::GetDefaultQueue deprecation.
+TEST_P(DeprecationTests, GetDefaultQueueDeprecation) {
+    // Using GetDefaultQueue emits a warning.
+    wgpu::Queue deprecatedQueue;
+    EXPECT_DEPRECATION_WARNING(deprecatedQueue = device.GetDefaultQueue());
+
+    // Using GetQueue doesn't emit a warning.
+    wgpu::Queue queue = device.GetQueue();
+
+    // Both objects are the same, even with dawn_wire.
+    EXPECT_EQ(deprecatedQueue.Get(), queue.Get());
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

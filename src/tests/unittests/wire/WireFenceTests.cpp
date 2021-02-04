@@ -231,9 +231,9 @@ TEST_F(WireFenceTests, DestroyBeforeOnCompletionEnd) {
 // Test that signaling a fence on a wrong queue is invalid
 // DISABLED until we have support for multiple queues.
 TEST_F(WireFenceTests, DISABLED_SignalWrongQueue) {
-    WGPUQueue queue2 = wgpuDeviceGetDefaultQueue(device);
+    WGPUQueue queue2 = wgpuDeviceGetQueue(device);
     WGPUQueue apiQueue2 = api.GetNewQueue();
-    EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue2));
+    EXPECT_CALL(api, DeviceGetQueue(apiDevice)).WillOnce(Return(apiQueue2));
     FlushClient();
 
     wgpuQueueSignal(queue2, fence, 2u);  // error
@@ -245,9 +245,9 @@ TEST_F(WireFenceTests, DISABLED_SignalWrongQueue) {
 // Test that signaling a fence on a wrong queue does not update fence signaled value
 // DISABLED until we have support for multiple queues.
 TEST_F(WireFenceTests, DISABLED_SignalWrongQueueDoesNotUpdateValue) {
-    WGPUQueue queue2 = wgpuDeviceGetDefaultQueue(device);
+    WGPUQueue queue2 = wgpuDeviceGetQueue(device);
     WGPUQueue apiQueue2 = api.GetNewQueue();
-    EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue2));
+    EXPECT_CALL(api, DeviceGetQueue(apiDevice)).WillOnce(Return(apiQueue2));
     FlushClient();
 
     wgpuQueueSignal(queue2, fence, 2u);  // error

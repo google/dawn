@@ -26,7 +26,7 @@ namespace {
         void SetUp() override {
             ValidationTest::SetUp();
 
-            queue = device.GetDefaultQueue();
+            queue = device.GetQueue();
         }
 
         wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {

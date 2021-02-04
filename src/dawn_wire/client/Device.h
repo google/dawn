@@ -61,7 +61,9 @@ namespace dawn_wire { namespace client {
                                                  WGPUCreateReadyPipelineStatus status,
                                                  const char* message);
 
+        // TODO(dawn:22): Remove once the deprecation period is finished.
         WGPUQueue GetDefaultQueue();
+        WGPUQueue GetQueue();
 
         void CancelCallbacksForDisconnect() override;
 
@@ -91,7 +93,7 @@ namespace dawn_wire { namespace client {
         void* mErrorUserdata = nullptr;
         void* mDeviceLostUserdata = nullptr;
 
-        Queue* mDefaultQueue = nullptr;
+        Queue* mQueue = nullptr;
 
         std::shared_ptr<bool> mIsAlive;
     };

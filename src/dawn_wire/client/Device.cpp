@@ -196,25 +196,29 @@ namespace dawn_wire { namespace client {
         return Buffer::CreateError(this);
     }
 
-    WGPUQueue Device::GetDefaultQueue() {
+    WGPUQueue Device::GetQueue() {
         // The queue is lazily created because if a Device is created by
-        // Reserve/Inject, we cannot send the getDefaultQueue message until
+        // Reserve/Inject, we cannot send the GetQueue message until
         // it has been injected on the Server. It cannot happen immediately
         // on construction.
-        if (mDefaultQueue == nullptr) {
-            // Get the default queue for this device.
+        if (mQueue == nullptr) {
+            // Get the primary queue for this device.
             auto* allocation = client->QueueAllocator().New(client);
-            mDefaultQueue = allocation->object.get();
+            mQueue = allocation->object.get();
 
-            DeviceGetDefaultQueueCmd cmd;
+            DeviceGetQueueCmd cmd;
             cmd.self = ToAPI(this);
             cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
 
             client->SerializeCommand(cmd);
         }
 
-        mDefaultQueue->refcount++;
-        return ToAPI(mDefaultQueue);
+        mQueue->refcount++;
+        return ToAPI(mQueue);
+    }
+
+    WGPUQueue Device::GetDefaultQueue() {
+        return GetQueue();
     }
 
     void Device::CreateReadyComputePipeline(WGPUComputePipelineDescriptor const* descriptor,

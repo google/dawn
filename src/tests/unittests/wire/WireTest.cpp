@@ -71,10 +71,10 @@ void WireTest::SetUp() {
 
     apiDevice = mockDevice;
 
-    // The GetDefaultQueue is done on WireClient startup so we expect it now.
-    queue = wgpuDeviceGetDefaultQueue(device);
+    // The GetQueue is done on WireClient startup so we expect it now.
+    queue = wgpuDeviceGetQueue(device);
     apiQueue = api.GetNewQueue();
-    EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue));
+    EXPECT_CALL(api, DeviceGetQueue(apiDevice)).WillOnce(Return(apiQueue));
     FlushClient();
 }
 

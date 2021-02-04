@@ -97,7 +97,7 @@ namespace dawn_native {
     DeviceBase::~DeviceBase() = default;
 
     MaybeError DeviceBase::Initialize(QueueBase* defaultQueue) {
-        mDefaultQueue = AcquireRef(defaultQueue);
+        mQueue = AcquireRef(defaultQueue);
         mRootErrorScope = AcquireRef(new ErrorScope());
         mCurrentErrorScope = mRootErrorScope.Get();
 
@@ -178,7 +178,7 @@ namespace dawn_native {
             // freed by backends in the ShutDownImpl() call. Still tick the ones that might have
             // pending callbacks.
             mErrorScopeTracker->Tick(GetCompletedCommandSerial());
-            GetDefaultQueue()->Tick(GetCompletedCommandSerial());
+            GetQueue()->Tick(GetCompletedCommandSerial());
 
             mCreateReadyPipelineTracker->ClearForShutDown();
 
@@ -240,7 +240,7 @@ namespace dawn_native {
 
         // The device was lost, call the application callback.
         if (type == InternalErrorType::DeviceLost && mDeviceLostCallback != nullptr) {
-            mDefaultQueue->HandleDeviceLoss();
+            mQueue->HandleDeviceLoss();
 
             mDeviceLostCallback(message, mDeviceLostUserdata);
             mDeviceLostCallback = nullptr;
@@ -865,7 +865,7 @@ namespace dawn_native {
             // reclaiming resources one tick earlier.
             mDynamicUploader->Deallocate(mCompletedSerial);
             mErrorScopeTracker->Tick(mCompletedSerial);
-            GetDefaultQueue()->Tick(mCompletedSerial);
+            GetQueue()->Tick(mCompletedSerial);
 
             mCreateReadyPipelineTracker->Tick(mCompletedSerial);
         }
@@ -886,13 +886,19 @@ namespace dawn_native {
         }
     }
 
-    QueueBase* DeviceBase::GetDefaultQueue() {
-        // Backends gave the default queue during initialization.
-        ASSERT(mDefaultQueue != nullptr);
+    QueueBase* DeviceBase::GetQueue() {
+        // Backends gave the primary queue during initialization.
+        ASSERT(mQueue != nullptr);
 
         // Returns a new reference to the queue.
-        mDefaultQueue->Reference();
-        return mDefaultQueue.Get();
+        mQueue->Reference();
+        return mQueue.Get();
+    }
+
+    QueueBase* DeviceBase::GetDefaultQueue() {
+        EmitDeprecationWarning(
+            "Device::GetDefaultQueue is deprecated, use Device::GetQueue() instead");
+        return GetQueue();
     }
 
     void DeviceBase::ApplyExtensions(const DeviceDescriptor* deviceDescriptor) {

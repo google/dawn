@@ -79,7 +79,7 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
         encoder.CopyBufferToBuffer(src, 0, dst, 0, 4 * sizeof(uint32_t));
 
         wgpu::CommandBuffer commands = encoder.Finish();
-        device.GetDefaultQueue().Submit(1, &commands);
+        device.GetQueue().Submit(1, &commands);
 
         bool done = false;
         dst.MapAsync(

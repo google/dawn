@@ -25,7 +25,7 @@ namespace {
       private:
         void SetUp() override {
             ValidationTest::SetUp();
-            queue = device.GetDefaultQueue();
+            queue = device.GetQueue();
         }
 
       protected:

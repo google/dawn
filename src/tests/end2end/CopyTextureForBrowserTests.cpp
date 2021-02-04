@@ -105,9 +105,9 @@ class CopyTextureForBrowserTests : public DawnTest {
         textureDataLayout.bytesPerRow = copyLayout.bytesPerRow;
         textureDataLayout.rowsPerImage = copyLayout.rowsPerImage;
 
-        device.GetDefaultQueue().WriteTexture(&textureCopyView, textureArrayCopyData.data(),
-                                              textureArrayCopyData.size() * sizeof(RGBA8),
-                                              &textureDataLayout, &copyLayout.mipSize);
+        device.GetQueue().WriteTexture(&textureCopyView, textureArrayCopyData.data(),
+                                       textureArrayCopyData.size() * sizeof(RGBA8),
+                                       &textureDataLayout, &copyLayout.mipSize);
 
         const wgpu::Extent3D copySizePerSlice = {copySize.width, copySize.height, 1};
         // Perform the texture to texture copy
@@ -120,8 +120,8 @@ class CopyTextureForBrowserTests : public DawnTest {
         queue.Submit(1, &commands);
 
         // Perform a copy here for testing.
-        device.GetDefaultQueue().CopyTextureForBrowser(&srcTextureCopyView, &dstTextureCopyView,
-                                                       &copySize, options);
+        device.GetQueue().CopyTextureForBrowser(&srcTextureCopyView, &dstTextureCopyView, &copySize,
+                                                options);
 
         // Texels in single slice.
         const uint32_t texelCountInCopyRegion = utils::GetTexelCountInCopyRegion(

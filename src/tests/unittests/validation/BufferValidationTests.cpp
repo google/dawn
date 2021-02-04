@@ -71,7 +71,7 @@ class BufferValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         mockBufferMapAsyncCallback = std::make_unique<MockBufferMapAsyncCallback>();
-        queue = device.GetDefaultQueue();
+        queue = device.GetQueue();
     }
 
     void TearDown() override {

@@ -26,10 +26,10 @@
 
 class QueueTests : public DawnTest {};
 
-// Test that GetDefaultQueue always returns the same object.
-TEST_P(QueueTests, GetDefaultQueueSameObject) {
-    wgpu::Queue q1 = device.GetDefaultQueue();
-    wgpu::Queue q2 = device.GetDefaultQueue();
+// Test that GetQueue always returns the same object.
+TEST_P(QueueTests, GetQueueSameObject) {
+    wgpu::Queue q1 = device.GetQueue();
+    wgpu::Queue q2 = device.GetQueue();
     EXPECT_EQ(q1.Get(), q2.Get());
 }
 

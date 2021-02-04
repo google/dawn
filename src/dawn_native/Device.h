@@ -169,7 +169,9 @@ namespace dawn_native {
         // For Dawn Wire
         BufferBase* CreateErrorBuffer();
 
+        // TODO(dawn:22): Remove once the deprecation period is finished.
         QueueBase* GetDefaultQueue();
+        QueueBase* GetQueue();
 
         void InjectError(wgpu::ErrorType type, const char* message);
         bool Tick();
@@ -384,7 +386,7 @@ namespace dawn_native {
         std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;
         std::unique_ptr<CreateReadyPipelineTracker> mCreateReadyPipelineTracker;
-        Ref<QueueBase> mDefaultQueue;
+        Ref<QueueBase> mQueue;
 
         struct DeprecationWarnings;
         std::unique_ptr<DeprecationWarnings> mDeprecationWarnings;

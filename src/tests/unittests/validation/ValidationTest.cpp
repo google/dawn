@@ -123,7 +123,7 @@ void ValidationTest::FlushWire() {
 }
 
 void ValidationTest::WaitForAllOperations(const wgpu::Device& device) {
-    wgpu::Queue queue = device.GetDefaultQueue();
+    wgpu::Queue queue = device.GetQueue();
     wgpu::Fence fence = queue.CreateFence();
 
     // Force the currently submitted operations to completed.

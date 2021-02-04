@@ -94,7 +94,7 @@ struct CameraData {
 void init() {
     device = CreateCppDawnDevice();
 
-    queue = device.GetDefaultQueue();
+    queue = device.GetQueue();
     swapchain = GetSwapChain(device);
     swapchain.Configure(GetPreferredSwapChainTextureFormat(), wgpu::TextureUsage::RenderAttachment,
                         640, 480);

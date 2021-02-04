@@ -133,7 +133,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
         pass.EndOcclusionQuery();
         pass.EndPass();
         wgpu::CommandBuffer commands = encoder.Finish();
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         occlusionQuerySet.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
@@ -292,7 +292,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnCommandEncoder) {
         encoder.WriteTimestamp(timestampQuerySet, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         timestampQuerySet.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
@@ -338,7 +338,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
         pass.EndPass();
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         timestampQuerySet.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
@@ -419,7 +419,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
         pass.EndPass();
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         timestampQuerySet.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
@@ -517,7 +517,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveInvalidQuerySetAndIndexCount) {
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         queue.Submit(1, &commands);
     }
 
@@ -542,7 +542,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveInvalidQuerySetAndIndexCount) {
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         querySet.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
@@ -562,7 +562,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
         encoder.ResolveQuerySet(querySet, 1, kQueryCount - 1, destination, 8);
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         queue.Submit(1, &commands);
     }
 
@@ -611,7 +611,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Queue queue = device.GetQueue();
         destination.Destroy();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }

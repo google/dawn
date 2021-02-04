@@ -752,6 +752,10 @@
                 ]
             },
             {
+                "name": "get queue",
+                "returns": "queue"
+            },
+            {
                 "name": "get default queue",
                 "returns": "queue"
             },
