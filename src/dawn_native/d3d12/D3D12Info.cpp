@@ -59,6 +59,20 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
+        // Used to share resources cross-API. If we query CheckFeatureSupport for
+        // D3D12_FEATURE_D3D12_OPTIONS4 successfully, then we can use cross-API sharing.
+        info.supportsSharedResourceCapabilityTier1 = false;
+        D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureOptions4 = {};
+        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+                D3D12_FEATURE_D3D12_OPTIONS4, &featureOptions4, sizeof(featureOptions4)))) {
+            // Tier 1 support additionally enables the NV12 format. Since only the NV12 format
+            // is used by Dawn, check for Tier 1.
+            if (featureOptions4.SharedResourceCompatibilityTier >=
+                D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1) {
+                info.supportsSharedResourceCapabilityTier1 = true;
+            }
+        }
+
         D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {{D3D_SHADER_MODEL_6_2},
                                                                {D3D_SHADER_MODEL_6_1},
                                                                {D3D_SHADER_MODEL_6_0},

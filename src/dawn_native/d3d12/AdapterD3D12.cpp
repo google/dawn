@@ -122,6 +122,7 @@ namespace dawn_native { namespace d3d12 {
         if (mDeviceInfo.supportsShaderFloat16 && GetBackend()->GetFunctions()->IsDXCAvailable()) {
             mSupportedExtensions.EnableExtension(Extension::ShaderFloat16);
         }
+        mSupportedExtensions.EnableExtension(Extension::MultiPlanarFormats);
     }
 
     MaybeError Adapter::InitializeDebugLayerFilters() {

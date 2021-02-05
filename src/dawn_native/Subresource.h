@@ -29,14 +29,18 @@ namespace dawn_native {
         Depth = 0x2,
         Stencil = 0x4,
 
+        // Aspects used to select individual planes in a multi-planar format.
+        Plane0 = 0x8,
+        Plane1 = 0x10,
+
         // An aspect for that represents the combination of both the depth and stencil aspects. It
         // can be ignored outside of the Vulkan backend.
-        CombinedDepthStencil = 0x8,
+        CombinedDepthStencil = 0x20,
     };
 
     template <>
     struct EnumBitmaskSize<Aspect> {
-        static constexpr unsigned value = 4;
+        static constexpr unsigned value = 6;
     };
 
     // Convert the TextureAspect to an Aspect mask for the format. ASSERTs if the aspect
@@ -52,6 +56,10 @@ namespace dawn_native {
     // Note that this can return Aspect::None if the Format doesn't have any of the
     // selected aspects.
     Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect);
+
+    // Convert TextureAspect to the aspect which corresponds to the view format. This
+    // special cases per plane view formats before calling ConvertAspect.
+    Aspect ConvertViewAspect(const Format& format, wgpu::TextureAspect aspect);
 
     // Helper struct to make it clear that what the parameters of a range mean.
     template <typename T>

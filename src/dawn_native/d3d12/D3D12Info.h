@@ -32,6 +32,7 @@ namespace dawn_native { namespace d3d12 {
         // indicates that current driver supports the maximum shader model is shader model 6.2.
         uint32_t shaderModel;
         PerStage<std::wstring> shaderProfiles;
+        bool supportsSharedResourceCapabilityTier1;
     };
 
     ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter);

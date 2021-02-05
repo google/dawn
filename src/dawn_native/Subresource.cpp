@@ -31,6 +31,21 @@ namespace dawn_native {
         return aspectMask;
     }
 
+    Aspect ConvertViewAspect(const Format& format, wgpu::TextureAspect aspect) {
+        // Color view |format| must be treated as the same plane |aspect|.
+        if (format.aspects == Aspect::Color) {
+            switch (aspect) {
+                case wgpu::TextureAspect::Plane0Only:
+                    return Aspect::Plane0;
+                case wgpu::TextureAspect::Plane1Only:
+                    return Aspect::Plane1;
+                default:
+                    break;
+            }
+        }
+        return ConvertAspect(format, aspect);
+    }
+
     Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect) {
         switch (aspect) {
             case wgpu::TextureAspect::All:
@@ -39,6 +54,10 @@ namespace dawn_native {
                 return format.aspects & Aspect::Depth;
             case wgpu::TextureAspect::StencilOnly:
                 return format.aspects & Aspect::Stencil;
+            case wgpu::TextureAspect::Plane0Only:
+                return format.aspects & Aspect::Plane0;
+            case wgpu::TextureAspect::Plane1Only:
+                return format.aspects & Aspect::Plane1;
         }
     }
 
@@ -47,8 +66,10 @@ namespace dawn_native {
         switch (aspect) {
             case Aspect::Color:
             case Aspect::Depth:
+            case Aspect::Plane0:
             case Aspect::CombinedDepthStencil:
                 return 0;
+            case Aspect::Plane1:
             case Aspect::Stencil:
                 return 1;
             default:
@@ -63,6 +84,8 @@ namespace dawn_native {
         if (aspects == Aspect::Color || aspects == Aspect::Depth ||
             aspects == Aspect::CombinedDepthStencil) {
             return 1;
+        } else if (aspects == (Aspect::Plane0 | Aspect::Plane1)) {
+            return 2;
         } else {
             ASSERT(aspects == (Aspect::Depth | Aspect::Stencil));
             return 2;

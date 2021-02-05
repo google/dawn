@@ -23,6 +23,22 @@
 
 #include <array>
 
+// About multi-planar formats.
+//
+// Dawn supports additional multi-planar formats when the multiplanar_formats extension is enabled.
+// When enabled, Dawn treats planar data as sub-resources (ie. 1 sub-resource == 1 view == 1 plane).
+// A multi-planar format name encodes the channel mapping and order of planes. For example,
+// R8BG8Biplanar420Unorm is YUV 4:2:0 where Plane 0 = R8, and Plane 1 = BG8.
+//
+// Requirements:
+// * Plane aspects cannot be combined with color, depth, or stencil aspects.
+// * Only compatible multi-planar formats of planes can be used with multi-planar texture
+// formats.
+// * Can't access multiple planes without creating per plane views (no color conversion).
+// * Multi-planar format cannot be written or read without a per plane view.
+//
+// TODO(dawn:551): Consider moving this comment.
+
 namespace dawn_native {
 
     enum class Aspect : uint8_t;
@@ -56,7 +72,7 @@ namespace dawn_native {
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
     // exact number of known format.
-    static constexpr size_t kKnownFormatCount = 53;
+    static constexpr size_t kKnownFormatCount = 54;
 
     struct Format;
     using FormatTable = std::array<Format, kKnownFormatCount>;
@@ -76,12 +92,20 @@ namespace dawn_native {
         bool HasStencil() const;
         bool HasDepthOrStencil() const;
 
+        // IsMultiPlanar() returns true if the format allows selecting a plane index. This is only
+        // allowed by multi-planar formats (ex. NV12).
+        bool IsMultiPlanar() const;
+
         const AspectInfo& GetAspectInfo(wgpu::TextureAspect aspect) const;
         const AspectInfo& GetAspectInfo(Aspect aspect) const;
 
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)
         size_t GetIndex() const;
+
+        // Used to lookup the compatible view format using an aspect which corresponds to the
+        // plane index. Returns Undefined if the wrong plane aspect is requested.
+        wgpu::TextureFormat GetAspectFormat(wgpu::TextureAspect aspect) const;
 
       private:
         // The most common aspect: the color aspect for color texture, the depth aspect for

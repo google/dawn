@@ -355,7 +355,8 @@ namespace dawn_native {
         return {};
     }
 
-    // Always returns a single aspect (color, stencil, or depth).
+    // Always returns a single aspect (color, stencil, depth, or ith plane for multi-planar
+    // formats).
     ResultOrError<Aspect> SingleAspectUsedByTextureCopyView(const TextureCopyView& view) {
         const Format& format = view.texture->GetFormat();
         switch (view.aspect) {
@@ -375,6 +376,9 @@ namespace dawn_native {
             case wgpu::TextureAspect::StencilOnly:
                 ASSERT(format.aspects & Aspect::Stencil);
                 return Aspect::Stencil;
+            case wgpu::TextureAspect::Plane0Only:
+            case wgpu::TextureAspect::Plane1Only:
+                UNREACHABLE();
         }
     }
 

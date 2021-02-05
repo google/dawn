@@ -65,6 +65,8 @@ namespace dawn_native { namespace vulkan {
                     flags |= VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
                     break;
 
+                case Aspect::Plane0:
+                case Aspect::Plane1:
                 case Aspect::None:
                     UNREACHABLE();
             }
