@@ -14,15 +14,15 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@3769c3b43c3804f9f7f14c6e37f545639fda2852',
+    'url': '{chromium_git}/chromium/src/build@6fa63e6b1506d6dce6c8e86c4dc2b70e4e6f1e6b',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@235cfe435ca5a9826569ee4ef603e226216bd768',
+    'url': '{chromium_git}/chromium/src/buildtools@fc5af1ac75d8a249d692fb3cbf707dd9f791ec3c',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@b12d1c836e2bb21b966bf86f7245bab9d257bb6b',
+    'url': '{chromium_git}/chromium/src/tools/clang@aecd85e062e006f47665ed6347e0cc1e9a116421',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
