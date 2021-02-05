@@ -307,8 +307,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
 
             wgpu::TextureView textureView = wrappingTexture.CreateView();
 
-            wgpu::SamplerDescriptor samplerDescriptor = utils::GetDefaultSamplerDescriptor();
-            wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
+            wgpu::Sampler sampler = device.CreateSampler();
 
             bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                              {{0, sampler}, {1, textureView}});

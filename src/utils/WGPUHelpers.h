@@ -98,7 +98,6 @@ namespace utils {
                                           uint32_t width,
                                           uint32_t height);
 
-    wgpu::SamplerDescriptor GetDefaultSamplerDescriptor();
     wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
                                                  const wgpu::BindGroupLayout* bindGroupLayout);
 

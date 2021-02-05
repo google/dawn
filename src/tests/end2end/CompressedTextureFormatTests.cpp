@@ -117,7 +117,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
                                            uint32_t baseMipLevel = 0) {
         ASSERT(IsBCFormatSupported());
 
-        wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+        wgpu::SamplerDescriptor samplerDesc;
         samplerDesc.minFilter = wgpu::FilterMode::Nearest;
         samplerDesc.magFilter = wgpu::FilterMode::Nearest;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);

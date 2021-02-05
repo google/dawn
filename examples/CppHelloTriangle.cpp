@@ -62,8 +62,7 @@ void initTextures() {
     descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
     texture = device.CreateTexture(&descriptor);
 
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    sampler = device.CreateSampler(&samplerDesc);
+    sampler = device.CreateSampler();
 
     // Initialize the texture with arbitrary data until we can load images
     std::vector<uint8_t> data(4 * 1024 * 1024, 0);

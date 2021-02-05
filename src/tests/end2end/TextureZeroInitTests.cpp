@@ -853,8 +853,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::Sampler sampler = device.CreateSampler();
 
     // Create render pipeline
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
@@ -923,8 +922,7 @@ TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     // Create bindgroup
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::Sampler sampler = device.CreateSampler();
 
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
                                                      {{0, sampler}, {1, sampleView}});
@@ -972,8 +970,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     uint32_t data = 100;
     queue.WriteBuffer(bufferTex, 0, &data, sizeof(data));
 
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::Sampler sampler = device.CreateSampler();
 
     // Create compute pipeline
     wgpu::ComputePipelineDescriptor computePipelineDescriptor;
@@ -1131,8 +1128,7 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::Sampler sampler = device.CreateSampler();
 
     // Fill the sample texture with data
     std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 1);
@@ -1274,8 +1270,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
         kColorFormat);
     wgpu::Texture sampleTexture = device.CreateTexture(&sampleTextureDescriptor);
 
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::Sampler sampler = device.CreateSampler();
 
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
@@ -1356,8 +1351,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
         kColorFormat);
     wgpu::Texture sampleTexture = device.CreateTexture(&sampleTextureDescriptor);
 
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::Sampler sampler = device.CreateSampler();
 
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);

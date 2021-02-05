@@ -311,45 +311,45 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
 
 // Test that Samplers are correctly deduplicated.
 TEST_P(ObjectCachingTest, SamplerDeduplication) {
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    wgpu::SamplerDescriptor samplerDesc;
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-    wgpu::SamplerDescriptor sameSamplerDesc = utils::GetDefaultSamplerDescriptor();
+    wgpu::SamplerDescriptor sameSamplerDesc;
     wgpu::Sampler sameSampler = device.CreateSampler(&sameSamplerDesc);
 
-    wgpu::SamplerDescriptor otherSamplerDescAddressModeU = utils::GetDefaultSamplerDescriptor();
-    otherSamplerDescAddressModeU.addressModeU = wgpu::AddressMode::ClampToEdge;
+    wgpu::SamplerDescriptor otherSamplerDescAddressModeU;
+    otherSamplerDescAddressModeU.addressModeU = wgpu::AddressMode::Repeat;
     wgpu::Sampler otherSamplerAddressModeU = device.CreateSampler(&otherSamplerDescAddressModeU);
 
-    wgpu::SamplerDescriptor otherSamplerDescAddressModeV = utils::GetDefaultSamplerDescriptor();
-    otherSamplerDescAddressModeV.addressModeV = wgpu::AddressMode::ClampToEdge;
+    wgpu::SamplerDescriptor otherSamplerDescAddressModeV;
+    otherSamplerDescAddressModeV.addressModeV = wgpu::AddressMode::Repeat;
     wgpu::Sampler otherSamplerAddressModeV = device.CreateSampler(&otherSamplerDescAddressModeV);
 
-    wgpu::SamplerDescriptor otherSamplerDescAddressModeW = utils::GetDefaultSamplerDescriptor();
-    otherSamplerDescAddressModeW.addressModeW = wgpu::AddressMode::ClampToEdge;
+    wgpu::SamplerDescriptor otherSamplerDescAddressModeW;
+    otherSamplerDescAddressModeW.addressModeW = wgpu::AddressMode::Repeat;
     wgpu::Sampler otherSamplerAddressModeW = device.CreateSampler(&otherSamplerDescAddressModeW);
 
-    wgpu::SamplerDescriptor otherSamplerDescMagFilter = utils::GetDefaultSamplerDescriptor();
-    otherSamplerDescMagFilter.magFilter = wgpu::FilterMode::Nearest;
+    wgpu::SamplerDescriptor otherSamplerDescMagFilter;
+    otherSamplerDescMagFilter.magFilter = wgpu::FilterMode::Linear;
     wgpu::Sampler otherSamplerMagFilter = device.CreateSampler(&otherSamplerDescMagFilter);
 
-    wgpu::SamplerDescriptor otherSamplerDescMinFilter = utils::GetDefaultSamplerDescriptor();
-    otherSamplerDescMinFilter.minFilter = wgpu::FilterMode::Nearest;
+    wgpu::SamplerDescriptor otherSamplerDescMinFilter;
+    otherSamplerDescMinFilter.minFilter = wgpu::FilterMode::Linear;
     wgpu::Sampler otherSamplerMinFilter = device.CreateSampler(&otherSamplerDescMinFilter);
 
-    wgpu::SamplerDescriptor otherSamplerDescMipmapFilter = utils::GetDefaultSamplerDescriptor();
-    otherSamplerDescMipmapFilter.mipmapFilter = wgpu::FilterMode::Nearest;
+    wgpu::SamplerDescriptor otherSamplerDescMipmapFilter;
+    otherSamplerDescMipmapFilter.mipmapFilter = wgpu::FilterMode::Linear;
     wgpu::Sampler otherSamplerMipmapFilter = device.CreateSampler(&otherSamplerDescMipmapFilter);
 
-    wgpu::SamplerDescriptor otherSamplerDescLodMinClamp = utils::GetDefaultSamplerDescriptor();
+    wgpu::SamplerDescriptor otherSamplerDescLodMinClamp;
     otherSamplerDescLodMinClamp.lodMinClamp += 1;
     wgpu::Sampler otherSamplerLodMinClamp = device.CreateSampler(&otherSamplerDescLodMinClamp);
 
-    wgpu::SamplerDescriptor otherSamplerDescLodMaxClamp = utils::GetDefaultSamplerDescriptor();
+    wgpu::SamplerDescriptor otherSamplerDescLodMaxClamp;
     otherSamplerDescLodMaxClamp.lodMaxClamp += 1;
     wgpu::Sampler otherSamplerLodMaxClamp = device.CreateSampler(&otherSamplerDescLodMaxClamp);
 
-    wgpu::SamplerDescriptor otherSamplerDescCompareFunction = utils::GetDefaultSamplerDescriptor();
+    wgpu::SamplerDescriptor otherSamplerDescCompareFunction;
     otherSamplerDescCompareFunction.compare = wgpu::CompareFunction::Always;
     wgpu::Sampler otherSamplerCompareFunction =
         device.CreateSampler(&otherSamplerDescCompareFunction);

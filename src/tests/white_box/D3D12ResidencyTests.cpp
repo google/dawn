@@ -357,8 +357,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
     constexpr uint32_t kSize = 512;
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kSize, kSize);
 
-    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::Sampler sampler = device.CreateSampler();
 
     dawn_native::d3d12::Device* d3dDevice =
         reinterpret_cast<dawn_native::d3d12::Device*>(device.Get());

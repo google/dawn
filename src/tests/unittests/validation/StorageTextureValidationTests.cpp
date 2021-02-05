@@ -617,8 +617,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureBindingTypeInBindGroup) {
 
         // Samplers are not allowed to be used as storage textures in a bind group.
         {
-            wgpu::SamplerDescriptor descriptor = utils::GetDefaultSamplerDescriptor();
-            wgpu::Sampler sampler = device.CreateSampler(&descriptor);
+            wgpu::Sampler sampler = device.CreateSampler();
             ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bindGroupLayout, {{0, sampler}}));
         }
 

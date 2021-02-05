@@ -51,10 +51,7 @@ class BindGroupValidationTest : public ValidationTest {
             descriptor.usage = wgpu::BufferUsage::Storage;
             mSSBO = device.CreateBuffer(&descriptor);
         }
-        {
-            wgpu::SamplerDescriptor descriptor = utils::GetDefaultSamplerDescriptor();
-            mSampler = device.CreateSampler(&descriptor);
-        }
+        { mSampler = device.CreateSampler(); }
         {
             mSampledTexture =
                 CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::RGBA8Unorm, 1);
@@ -164,7 +161,7 @@ TEST_F(BindGroupValidationTest, SamplerBindingType) {
 
     // Setting the sampler to an error sampler is an error.
     {
-        wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+        wgpu::SamplerDescriptor samplerDesc;
         samplerDesc.minFilter = static_cast<wgpu::FilterMode>(0xFFFFFFFF);
 
         wgpu::Sampler errorSampler;

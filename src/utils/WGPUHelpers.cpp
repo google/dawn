@@ -303,19 +303,6 @@ namespace utils {
         return textureDataLayout;
     }
 
-    wgpu::SamplerDescriptor GetDefaultSamplerDescriptor() {
-        wgpu::SamplerDescriptor desc = {};
-
-        desc.minFilter = wgpu::FilterMode::Linear;
-        desc.magFilter = wgpu::FilterMode::Linear;
-        desc.mipmapFilter = wgpu::FilterMode::Linear;
-        desc.addressModeU = wgpu::AddressMode::Repeat;
-        desc.addressModeV = wgpu::AddressMode::Repeat;
-        desc.addressModeW = wgpu::AddressMode::Repeat;
-
-        return desc;
-    }
-
     wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
                                                  const wgpu::BindGroupLayout* bindGroupLayout) {
         wgpu::PipelineLayoutDescriptor descriptor;
