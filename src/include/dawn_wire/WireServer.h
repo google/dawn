@@ -29,7 +29,6 @@ namespace dawn_wire {
     }  // namespace server
 
     struct DAWN_WIRE_EXPORT WireServerDescriptor {
-        WGPUDevice device;
         const DawnProcTable* procs;
         CommandSerializer* serializer;
         server::MemoryTransferService* memoryTransferService = nullptr;

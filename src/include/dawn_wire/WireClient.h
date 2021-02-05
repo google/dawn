@@ -54,7 +54,6 @@ namespace dawn_wire {
         WireClient(const WireClientDescriptor& descriptor);
         ~WireClient() override;
 
-        WGPUDevice GetDevice() const;
         const volatile char* HandleCommands(const volatile char* commands,
                                             size_t size) override final;
 

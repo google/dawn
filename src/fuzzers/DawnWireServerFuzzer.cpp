@@ -152,11 +152,12 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
 
     DevNull devNull;
     dawn_wire::WireServerDescriptor serverDesc = {};
-    serverDesc.device = device.Get();
     serverDesc.procs = &procs;
     serverDesc.serializer = &devNull;
 
     std::unique_ptr<dawn_wire::WireServer> wireServer(new dawn_wire::WireServer(serverDesc));
+    wireServer->InjectDevice(device.Get(), 1, 0);
+    device = nullptr;  // Server owns the device now.
 
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
 
@@ -173,9 +174,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
         }
     }
 
-    // Destroy the server before the device because it needs to free all objects.
     wireServer = nullptr;
-    device = nullptr;
 
     // If we support error injection, and an output directory was provided, output copies of the
     // original testcase data, prepended with the injected error index.

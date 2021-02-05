@@ -71,7 +71,7 @@ namespace {
                     clientDesc.serializer = mC2sBuf.get();
                     mWireClient = std::make_unique<dawn_wire::WireClient>(clientDesc);
 
-                    mDevice = wgpu::Device::Acquire(mWireClient->GetDevice());
+                    mDevice = wgpu::Device::Acquire(mWireClient->ReserveDevice().device);
                     mProcs = dawn_wire::client::GetProcs();
                     break;
                 }

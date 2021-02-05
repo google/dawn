@@ -49,10 +49,9 @@ namespace dawn_wire {
         const WGPUDeviceProperties* deviceProperties,
         char* serializeBuffer);
 
-    // TODO(enga): Remove the default value after updating Chromium.
     DAWN_WIRE_EXPORT bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
                                                           const volatile char* deserializeBuffer,
-                                                          size_t deserializeBufferSize = 0);
+                                                          size_t deserializeBufferSize);
 
 }  // namespace dawn_wire
 

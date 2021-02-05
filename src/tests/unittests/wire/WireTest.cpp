@@ -50,12 +50,10 @@ void WireTest::SetUp() {
     mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>(mWireServer.get());
 
     WireServerDescriptor serverDesc = {};
-    serverDesc.device = mockDevice;
     serverDesc.procs = &mockProcs;
     serverDesc.serializer = mS2cBuf.get();
     serverDesc.memoryTransferService = GetServerMemoryTransferService();
 
-    EXPECT_CALL(api, DeviceReference(mockDevice));
     mWireServer.reset(new WireServer(serverDesc));
     mC2sBuf->SetHandler(mWireServer.get());
 
@@ -66,9 +64,13 @@ void WireTest::SetUp() {
     mWireClient.reset(new WireClient(clientDesc));
     mS2cBuf->SetHandler(mWireClient.get());
 
-    device = mWireClient->GetDevice();
     dawnProcSetProcs(&dawn_wire::client::GetProcs());
 
+    auto deviceReservation = mWireClient->ReserveDevice();
+    EXPECT_CALL(api, DeviceReference(mockDevice));
+    mWireServer->InjectDevice(mockDevice, deviceReservation.id, deviceReservation.generation);
+
+    device = deviceReservation.device;
     apiDevice = mockDevice;
 
     // The GetQueue is done on WireClient startup so we expect it now.

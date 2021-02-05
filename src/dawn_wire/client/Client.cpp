@@ -84,18 +84,6 @@ namespace dawn_wire { namespace client {
         }
     }
 
-    WGPUDevice Client::GetDevice() {
-        // This function is deprecated. The concept of a "default" device on the wire
-        // will be removed in favor of ReserveDevice/InjectDevice.
-        if (mDevice == nullptr) {
-            ReservedDevice reservation = ReserveDevice();
-            mDevice = FromAPI(reservation.device);
-            ASSERT(reservation.id == 1);
-            ASSERT(reservation.generation == 0);
-        }
-        return reinterpret_cast<WGPUDeviceImpl*>(mDevice);
-    }
-
     ReservedTexture Client::ReserveTexture(WGPUDevice device) {
         auto* allocation = TextureAllocator().New(this);
 

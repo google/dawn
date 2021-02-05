@@ -17,8 +17,7 @@
 
 namespace dawn_wire { namespace server {
 
-    Server::Server(WGPUDevice device,
-                   const DawnProcTable& procs,
+    Server::Server(const DawnProcTable& procs,
                    CommandSerializer* serializer,
                    MemoryTransferService* memoryTransferService)
         : mSerializer(serializer),
@@ -29,13 +28,6 @@ namespace dawn_wire { namespace server {
             // If a MemoryTransferService is not provided, fallback to inline memory.
             mOwnedMemoryTransferService = CreateInlineMemoryTransferService();
             mMemoryTransferService = mOwnedMemoryTransferService.get();
-        }
-
-        // For the deprecated initialization path:
-        // The client-server knowledge is bootstrapped with device 1, generation 0.
-        if (device != nullptr) {
-            bool success = InjectDevice(device, 1, 0);
-            ASSERT(success);
         }
     }
 

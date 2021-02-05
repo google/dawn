@@ -142,7 +142,6 @@ wgpu::Device CreateCppDawnDevice() {
             s2cBuf = new utils::TerribleCommandBuffer();
 
             dawn_wire::WireServerDescriptor serverDesc = {};
-            serverDesc.device = backendDevice;
             serverDesc.procs = &backendProcs;
             serverDesc.serializer = s2cBuf;
 
@@ -153,9 +152,14 @@ wgpu::Device CreateCppDawnDevice() {
             clientDesc.serializer = c2sBuf;
 
             wireClient = new dawn_wire::WireClient(clientDesc);
-            cDevice = wireClient->GetDevice();
             procs = dawn_wire::client::GetProcs();
             s2cBuf->SetHandler(wireClient);
+
+            auto deviceReservation = wireClient->ReserveDevice();
+            wireServer->InjectDevice(backendDevice, deviceReservation.id,
+                                     deviceReservation.generation);
+
+            cDevice = deviceReservation.device;
         } break;
     }
 

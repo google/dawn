@@ -151,8 +151,7 @@ namespace dawn_wire { namespace server {
 
     class Server : public ServerBase {
       public:
-        Server(WGPUDevice device,
-               const DawnProcTable& procs,
+        Server(const DawnProcTable& procs,
                CommandSerializer* serializer,
                MemoryTransferService* memoryTransferService);
         ~Server() override;

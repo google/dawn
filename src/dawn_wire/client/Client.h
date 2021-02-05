@@ -39,8 +39,6 @@ namespace dawn_wire { namespace client {
         const volatile char* HandleCommandsImpl(const volatile char* commands,
                                                 size_t size) override;
 
-        WGPUDevice GetDevice();
-
         MemoryTransferService* GetMemoryTransferService() const {
             return mMemoryTransferService;
         }
@@ -76,7 +74,6 @@ namespace dawn_wire { namespace client {
 
 #include "dawn_wire/client/ClientPrototypes_autogen.inc"
 
-        Device* mDevice = nullptr;
         ChunkedCommandSerializer mSerializer;
         WireDeserializeAllocator mAllocator;
         MemoryTransferService* mMemoryTransferService = nullptr;

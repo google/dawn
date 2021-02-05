@@ -25,10 +25,6 @@ namespace dawn_wire {
         mImpl.reset();
     }
 
-    WGPUDevice WireClient::GetDevice() const {
-        return mImpl->GetDevice();
-    }
-
     const volatile char* WireClient::HandleCommands(const volatile char* commands, size_t size) {
         return mImpl->HandleCommands(commands, size);
     }
