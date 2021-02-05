@@ -2494,6 +2494,20 @@ INSTANTIATE_TEST_SUITE_P(
             ScalarConstructor[not set]{0.000000}
           })"}}));
 
+INSTANTIATE_TEST_SUITE_P(DISABLED_ImageSampleDrefExplicitLod,
+                         SpvParserTest_SampledImageAccessTest,
+                         // crbug.com/tint/482
+                         // Disabled pending the outcome of
+                         // https://github.com/gpuweb/gpuweb/issues/1319
+                         ::testing::Values(
+                             // depth 2D
+                             // depth 2D offset
+                             // depth 2D-array
+                             // depth 2D-array offset
+                             // depth cube
+                             // depth cube-array
+                             ));
+
 using SpvParserTest_ImageAccessTest =
     SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
 
