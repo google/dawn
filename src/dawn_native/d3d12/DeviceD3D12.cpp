@@ -558,7 +558,8 @@ namespace dawn_native { namespace d3d12 {
         }
 
         ComPtr<ID3D12InfoQueue> infoQueue;
-        ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
+        DAWN_TRY(CheckHRESULT(mD3d12Device.As(&infoQueue),
+                              "D3D12 QueryInterface ID3D12Device to ID3D12InfoQueue"));
         uint64_t totalErrors = infoQueue->GetNumStoredMessagesAllowedByRetrievalFilter();
 
         // Check if any errors have occurred otherwise we would be creating an empty error. Note

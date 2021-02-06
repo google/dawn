@@ -188,7 +188,8 @@ namespace dawn_native { namespace d3d12 {
         filter.DenyList.pIDList = denyIds;
 
         ComPtr<ID3D12InfoQueue> infoQueue;
-        ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
+        DAWN_TRY(CheckHRESULT(mD3d12Device.As(&infoQueue),
+                              "D3D12 QueryInterface ID3D12Device to ID3D12InfoQueue"));
 
         // To avoid flooding the console, a storage-filter is also used to
         // prevent messages from getting logged.
