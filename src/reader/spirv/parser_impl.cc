@@ -1294,6 +1294,7 @@ ast::Variable* ParserImpl::MakeVariable(
           return nullptr;
         case SpvBuiltInSampleId:
         case SpvBuiltInVertexIndex:
+        case SpvBuiltInInstanceIndex:
           // The SPIR-V variable is likely to be signed (because GLSL
           // requires signed), but WGSL requires unsigned.  Handle specially
           // so we always perform the conversion at load and store.

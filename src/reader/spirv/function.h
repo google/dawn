@@ -233,6 +233,11 @@ enum class SkipReason {
   /// builtin variable.  Don't generate its address.
   kVertexIndexBuiltinPointer,
 
+  /// `kInstanceIndexBuiltinPointer`: the value is a pointer to the
+  /// InstanceIndex
+  /// builtin variable.  Don't generate its address.
+  kInstanceIndexBuiltinPointer,
+
   /// `kSampleMaskInBuiltinPointer`: the value is a pointer to the SampleMaskIn
   /// builtin input variable.  Don't generate its address.
   kSampleMaskInBuiltinPointer,
@@ -350,6 +355,9 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
       break;
     case SkipReason::kVertexIndexBuiltinPointer:
       o << " skip:vertexindex_pointer";
+      break;
+    case SkipReason::kInstanceIndexBuiltinPointer:
+      o << " skip:instanceindex_pointer";
       break;
     case SkipReason::kSampleMaskInBuiltinPointer:
       o << " skip:samplemaskin_pointer";
@@ -761,6 +769,13 @@ class FunctionEmitter {
     }
     return SkipReason::kDontSkip;
   }
+
+  /// Returns the WGSL variable name for an input builtin variable whose
+  /// translation is managed via the SkipReason mechanism.
+  /// @param skip_reason the skip reason for the special variable
+  /// @returns the variable name for a special builtin variable
+  /// that is handled via the "skip" mechanism.
+  std::string NameForSpecialInputBuiltin(SkipReason skip_reason);
 
   /// Returns the most deeply nested structured construct which encloses the
   /// WGSL scopes of names declared in both block positions. Each position must

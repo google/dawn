@@ -2040,6 +2040,11 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
           << "unhandled use of a pointer to the VertexIndex builtin, with ID: "
           << id;
       return {};
+    case SkipReason::kInstanceIndexBuiltinPointer:
+      Fail() << "unhandled use of a pointer to the InstanceIndex builtin, with "
+                "ID: "
+             << id;
+      return {};
     case SkipReason::kSampleMaskInBuiltinPointer:
       Fail()
           << "unhandled use of a pointer to the SampleMask builtin, with ID: "
@@ -3048,13 +3053,15 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
               SkipReason::kPointSizeBuiltinValue;
           return true;
         case SkipReason::kSampleIdBuiltinPointer:
-        case SkipReason::kVertexIndexBuiltinPointer: {
+        case SkipReason::kVertexIndexBuiltinPointer:
+        case SkipReason::kInstanceIndexBuiltinPointer: {
           // The SPIR-V variable is i32, but WGSL requires u32.
-          auto var_id = parser_impl_.IdForSpecialBuiltIn(
-              (skip_reason == SkipReason::kSampleIdBuiltinPointer)
-                  ? SpvBuiltInSampleId
-                  : SpvBuiltInVertexIndex);
-          auto name = namer_.Name(var_id);
+          auto name = NameForSpecialInputBuiltin(skip_reason);
+          if (name.empty()) {
+            return Fail() << "internal error: unhandled special input builtin "
+                             "variable: "
+                          << inst.PrettyPrint();
+          }
           ast::Expression* id_expr = create<ast::IdentifierExpression>(
               Source{}, builder_.Symbols().Register(name));
           auto expr = TypedExpression{
@@ -3131,6 +3138,28 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   }
   return Fail() << "unhandled instruction with opcode " << inst.opcode() << ": "
                 << inst.PrettyPrint();
+}
+
+std::string FunctionEmitter::NameForSpecialInputBuiltin(
+    SkipReason skip_reason) {
+  SpvBuiltIn spv_builtin = SpvBuiltIn(0);
+  switch (skip_reason) {
+    case SkipReason::kSampleIdBuiltinPointer:
+      spv_builtin = SpvBuiltInSampleId;
+      break;
+    case SkipReason::kVertexIndexBuiltinPointer:
+      spv_builtin = SpvBuiltInVertexIndex;
+      break;
+    case SkipReason::kInstanceIndexBuiltinPointer:
+      spv_builtin = SpvBuiltInInstanceIndex;
+      break;
+    default:
+      // Invalid. Issue the error in the caller.
+      return "";
+  }
+  // The SPIR-V variable is i32, but WGSL requires u32.
+  auto var_id = parser_impl_.IdForSpecialBuiltIn(spv_builtin);
+  return namer_.Name(var_id);
 }
 
 TypedExpression FunctionEmitter::MakeOperand(
@@ -3724,6 +3753,9 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
         break;
       case SpvBuiltInVertexIndex:
         def->skip = SkipReason::kVertexIndexBuiltinPointer;
+        break;
+      case SpvBuiltInInstanceIndex:
+        def->skip = SkipReason::kInstanceIndexBuiltinPointer;
         break;
       case SpvBuiltInSampleMask: {
         // Distinguish between input and output variable.
