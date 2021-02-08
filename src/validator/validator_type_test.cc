@@ -79,8 +79,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
 
   EXPECT_FALSE(v.ValidateConstructedTypes(program->AST().ConstructedTypes()));
   EXPECT_EQ(v.error(),
-            "v-0031: a struct containing a runtime-sized array must be "
-            "in the 'storage' storage class: 'Foo'");
+            "v-0015: a struct containing a runtime-sized array requires the "
+            "[[block]] attribute: 'Foo'");
 }
 
 TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {

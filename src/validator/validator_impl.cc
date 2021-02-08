@@ -318,9 +318,9 @@ bool ValidatorImpl::ValidateConstructedTypes(
               return false;
             }
             if (!st->IsBlockDecorated()) {
-              add_error(member->source(), "v-0031",
+              add_error(member->source(), "v-0015",
                         "a struct containing a runtime-sized array "
-                        "must be in the 'storage' storage class: '" +
+                        "requires the [[block]] attribute: '" +
                             program_->Symbols().NameFor(st->symbol()) + "'");
               return false;
             }
