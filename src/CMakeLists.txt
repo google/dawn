@@ -193,7 +193,6 @@ set(TINT_LIB_SRCS
   semantic/call.h
   semantic/expression.h
   semantic/info.h
-  semantic/intrinsic.cc
   semantic/intrinsic.h
   semantic/node.h
   semantic/sem_call.cc
@@ -202,6 +201,7 @@ set(TINT_LIB_SRCS
   semantic/sem_member_accessor_expression.cc
   semantic/sem_function.cc
   semantic/sem_info.cc
+  semantic/sem_intrinsic.cc
   semantic/sem_node.cc
   semantic/sem_variable.cc
   semantic/type_mappings.h
