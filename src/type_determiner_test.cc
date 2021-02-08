@@ -1637,7 +1637,7 @@ using IntrinsicDataTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDataTest, Lookup) {
   auto param = GetParam();
 
-  EXPECT_EQ(TypeDeterminer::MatchIntrinsic(param.name), param.intrinsic);
+  EXPECT_EQ(TypeDeterminer::MatchIntrinsicType(param.name), param.intrinsic);
 }
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
@@ -1717,7 +1717,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"trunc", IntrinsicType::kTrunc}));
 
 TEST_F(TypeDeterminerTest, MatchIntrinsicNoMatch) {
-  EXPECT_EQ(TypeDeterminer::MatchIntrinsic("not_intrinsic"),
+  EXPECT_EQ(TypeDeterminer::MatchIntrinsicType("not_intrinsic"),
             IntrinsicType::kNone);
 }
 
@@ -2466,42 +2466,15 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(ast::intrinsic::test::TextureOverloadCase::ValidCases()));
 
 std::string to_str(const std::string& function,
-                   const semantic::TextureIntrinsicCall::Parameters& params) {
-  struct Parameter {
-    size_t idx;
-    std::string name;
-  };
-  std::vector<Parameter> list;
-  auto maybe_add_param = [&list](size_t idx, const char* name) {
-    if (idx !=
-        semantic::TextureIntrinsicCall::Parameters::Parameters::kNotUsed) {
-      list.emplace_back(Parameter{idx, name});
-    }
-  };
-  maybe_add_param(params.idx.array_index, "array_index");
-  maybe_add_param(params.idx.bias, "bias");
-  maybe_add_param(params.idx.coords, "coords");
-  maybe_add_param(params.idx.depth_ref, "depth_ref");
-  maybe_add_param(params.idx.ddx, "ddx");
-  maybe_add_param(params.idx.ddy, "ddy");
-  maybe_add_param(params.idx.level, "level");
-  maybe_add_param(params.idx.offset, "offset");
-  maybe_add_param(params.idx.sampler, "sampler");
-  maybe_add_param(params.idx.sample_index, "sample_index");
-  maybe_add_param(params.idx.texture, "texture");
-  maybe_add_param(params.idx.value, "value");
-  std::sort(
-      list.begin(), list.end(),
-      [](const Parameter& a, const Parameter& b) { return a.idx < b.idx; });
-
+                   const semantic::Parameters& params) {
   std::stringstream out;
   out << function << "(";
   bool first = true;
-  for (auto& param : list) {
+  for (auto& param : params) {
     if (!first) {
       out << ", ";
     }
-    out << param.name;
+    out << semantic::str(param.usage);
     first = false;
   }
   out << ")";
@@ -2833,12 +2806,12 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
     }
   }
 
-  auto* sem = Sem().Get(call);
-  ASSERT_NE(sem, nullptr);
-  auto* intrinsic = sem->As<semantic::TextureIntrinsicCall>();
-  ASSERT_NE(intrinsic, nullptr);
+  auto* call_sem = Sem().Get(call);
+  ASSERT_NE(call_sem, nullptr);
+  auto* target = call_sem->Target();
+  ASSERT_NE(target, nullptr);
 
-  auto got = ::tint::to_str(param.function, intrinsic->Params());
+  auto got = ::tint::to_str(param.function, target->Parameters());
   auto* expected = expected_texture_overload(param.overload);
   EXPECT_EQ(got, expected);
 }

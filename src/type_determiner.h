@@ -24,6 +24,7 @@
 #include "src/diagnostic/diagnostic.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
+#include "src/semantic/intrinsic.h"
 #include "src/type/storage_texture_type.h"
 
 namespace tint {
@@ -66,10 +67,10 @@ class TypeDeterminer {
   /// @returns true if the type determiner was successful
   bool Determine();
 
-  /// @param name the function name to try and match as an intrinsic.
+  /// @param name the function name to try and match as an intrinsic type.
   /// @return the semantic::IntrinsicType for the given name. If `name` does not
-  /// match an intrinsic, returns semantic::IntrinsicType::kNone
-  static semantic::IntrinsicType MatchIntrinsic(const std::string& name);
+  /// match an intrinsic, returns semantic::Intrinsic::kNone
+  static semantic::IntrinsicType MatchIntrinsicType(const std::string& name);
 
  private:
   template <typename T>
@@ -177,7 +178,7 @@ class TypeDeterminer {
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   bool DetermineIntrinsicCall(ast::CallExpression* call,
-                              semantic::IntrinsicType intrinsic);
+                              semantic::IntrinsicType intrinsic_type);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 
@@ -195,12 +196,13 @@ class TypeDeterminer {
   /// @param type the resolved type
   void SetType(ast::Expression* expr, type::Type* type) const;
 
-  ProgramBuilder* builder_;
+  ProgramBuilder* const builder_;
   std::string error_;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<ast::Variable*, VariableInfo*> variable_to_info_;
+  std::unordered_map<ast::CallExpression*, FunctionInfo*> function_calls_;
   FunctionInfo* current_function_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;

@@ -60,8 +60,7 @@ namespace tint {
 
 // Forward declarations
 namespace semantic {
-class TextureIntrinsicCall;
-class IntrinsicCall;
+class Call;
 }  // namespace semantic
 
 namespace writer {
@@ -359,25 +358,21 @@ class Builder {
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateCallExpression(ast::CallExpression* expr);
   /// Generates an intrinsic call
-  /// @param ident the intrinsic expression
   /// @param call the call expression
-  /// @param sem the semantic information for the intrinsic call
+  /// @param intrinsic the semantic information for the intrinsic
   /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateIntrinsic(ast::IdentifierExpression* ident,
-                             ast::CallExpression* call,
-                             const semantic::IntrinsicCall* sem);
+  uint32_t GenerateIntrinsic(ast::CallExpression* call,
+                             const semantic::Intrinsic* intrinsic);
   /// Generates a texture intrinsic call. Emits an error and returns false if
   /// we're currently outside a function.
-  /// @param ident the texture intrinsic
   /// @param call the call expression
-  /// @param sem the semantic information for the texture intrinsic call
+  /// @param intrinsic the semantic information for the texture intrinsic
   /// @param result_type result type operand of the texture instruction
   /// @param result_id result identifier operand of the texture instruction
   /// parameters
   /// @returns true on success
-  bool GenerateTextureIntrinsic(ast::IdentifierExpression* ident,
-                                ast::CallExpression* call,
-                                const semantic::TextureIntrinsicCall* sem,
+  bool GenerateTextureIntrinsic(ast::CallExpression* call,
+                                const semantic::Intrinsic* intrinsic,
                                 spirv::Operand result_type,
                                 spirv::Operand result_id);
   /// Generates a sampled image

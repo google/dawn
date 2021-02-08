@@ -21,10 +21,50 @@ TINT_INSTANTIATE_CLASS_ID(tint::semantic::CallTarget);
 namespace tint {
 namespace semantic {
 
-CallTarget::CallTarget(const semantic::Parameters& parameters)
-    : parameters_(parameters) {}
+CallTarget::CallTarget(type::Type* return_type,
+                       const semantic::Parameters& parameters)
+    : return_type_(return_type), parameters_(parameters) {}
 
 CallTarget::~CallTarget() = default;
 
+int IndexOf(const Parameters& parameters, Parameter::Usage usage) {
+  for (size_t i = 0; i < parameters.size(); i++) {
+    if (parameters[i].usage == usage) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
+}
+
+const char* str(Parameter::Usage usage) {
+  switch (usage) {
+    case Parameter::Usage::kArrayIndex:
+      return "array_index";
+    case Parameter::Usage::kBias:
+      return "bias";
+    case Parameter::Usage::kCoords:
+      return "coords";
+    case Parameter::Usage::kDepthRef:
+      return "depth_ref";
+    case Parameter::Usage::kDdx:
+      return "ddx";
+    case Parameter::Usage::kDdy:
+      return "ddy";
+    case Parameter::Usage::kLevel:
+      return "level";
+    case Parameter::Usage::kOffset:
+      return "offset";
+    case Parameter::Usage::kSampler:
+      return "sampler";
+    case Parameter::Usage::kSampleIndex:
+      return "sample_index";
+    case Parameter::Usage::kTexture:
+      return "texture";
+    case Parameter::Usage::kValue:
+      return "value";
+    default:
+      return "<unknown>";
+  }
+}
 }  // namespace semantic
 }  // namespace tint

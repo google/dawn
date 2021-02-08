@@ -14,15 +14,19 @@
 
 #include "src/semantic/intrinsic.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::semantic::Intrinsic);
+
 namespace tint {
 namespace semantic {
 
 std::ostream& operator<<(std::ostream& out, IntrinsicType i) {
-  out << intrinsic::str(i);
+  out << str(i);
   return out;
 }
 
-namespace intrinsic {
+const char* Intrinsic::str() const {
+  return semantic::str(type_);
+}
 
 const char* str(IntrinsicType i) {
   /// The emitted name matches the spelling in the WGSL spec.
@@ -188,20 +192,20 @@ const char* str(IntrinsicType i) {
   return "<unknown>";
 }
 
-bool IsCoarseDerivative(IntrinsicType i) {
+bool IsCoarseDerivativeIntrinsic(IntrinsicType i) {
   return i == IntrinsicType::kDpdxCoarse || i == IntrinsicType::kDpdyCoarse ||
          i == IntrinsicType::kFwidthCoarse;
 }
 
-bool IsFineDerivative(IntrinsicType i) {
+bool IsFineDerivativeIntrinsic(IntrinsicType i) {
   return i == IntrinsicType::kDpdxFine || i == IntrinsicType::kDpdyFine ||
          i == IntrinsicType::kFwidthFine;
 }
 
-bool IsDerivative(IntrinsicType i) {
+bool IsDerivativeIntrinsic(IntrinsicType i) {
   return i == IntrinsicType::kDpdx || i == IntrinsicType::kDpdy ||
-         i == IntrinsicType::kFwidth || IsCoarseDerivative(i) ||
-         IsFineDerivative(i);
+         i == IntrinsicType::kFwidth || IsCoarseDerivativeIntrinsic(i) ||
+         IsFineDerivativeIntrinsic(i);
 }
 
 bool IsFloatClassificationIntrinsic(IntrinsicType i) {
@@ -220,7 +224,7 @@ bool IsTextureIntrinsic(IntrinsicType i) {
 }
 
 bool IsImageQueryIntrinsic(IntrinsicType i) {
-  return i == semantic::IntrinsicType::kTextureDimensions ||
+  return i == IntrinsicType::kTextureDimensions ||
          i == IntrinsicType::kTextureNumLayers ||
          i == IntrinsicType::kTextureNumLevels ||
          i == IntrinsicType::kTextureNumSamples;
@@ -234,6 +238,40 @@ bool IsDataPackingIntrinsic(IntrinsicType i) {
          i == IntrinsicType::kPack2x16Float;
 }
 
-}  // namespace intrinsic
+Intrinsic::Intrinsic(IntrinsicType type,
+                     type::Type* return_type,
+                     const semantic::Parameters& parameters)
+    : Base(return_type, parameters), type_(type) {}
+
+Intrinsic::~Intrinsic() = default;
+
+bool Intrinsic::IsCoarseDerivative() const {
+  return IsCoarseDerivativeIntrinsic(type_);
+}
+
+bool Intrinsic::IsFineDerivative() const {
+  return IsFineDerivativeIntrinsic(type_);
+}
+
+bool Intrinsic::IsDerivative() const {
+  return IsDerivativeIntrinsic(type_);
+}
+
+bool Intrinsic::IsFloatClassification() const {
+  return IsFloatClassificationIntrinsic(type_);
+}
+
+bool Intrinsic::IsTexture() const {
+  return IsTextureIntrinsic(type_);
+}
+
+bool Intrinsic::IsImageQuery() const {
+  return IsImageQueryIntrinsic(type_);
+}
+
+bool Intrinsic::IsDataPacking() const {
+  return IsDataPackingIntrinsic(type_);
+}
+
 }  // namespace semantic
 }  // namespace tint

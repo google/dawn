@@ -419,9 +419,9 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
   auto name = builder_->Symbols().NameFor(ident->symbol());
 
-  auto intrinsic = MatchIntrinsic(name);
-  if (intrinsic != IntrinsicType::kNone) {
-    if (!DetermineIntrinsicCall(call, intrinsic)) {
+  auto intrinsic_type = MatchIntrinsicType(name);
+  if (intrinsic_type != IntrinsicType::kNone) {
+    if (!DetermineIntrinsicCall(call, intrinsic_type)) {
       return false;
     }
   } else {
@@ -450,9 +450,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
     }
 
     auto* function = iter->second;
-    auto* return_ty = function->declaration->return_type();
-    auto* sem = builder_->create<semantic::Call>(return_ty);
-    builder_->Sem().Add(call, sem);
+    function_calls_.emplace(call, function);
   }
 
   return true;
@@ -548,14 +546,26 @@ constexpr const uint32_t kIntrinsicDataCount =
 }  // namespace
 
 bool TypeDeterminer::DetermineIntrinsicCall(ast::CallExpression* call,
-                                            IntrinsicType intrinsic) {
-  auto create_sem = [&](type::Type* result) {
-    auto* sem = builder_->create<semantic::IntrinsicCall>(result, intrinsic);
-    builder_->Sem().Add(call, sem);
+                                            IntrinsicType intrinsic_type) {
+  using Parameter = semantic::Parameter;
+  using Parameters = semantic::Parameters;
+  using Usage = Parameter::Usage;
+
+  std::vector<type::Type*> arg_tys;
+  arg_tys.reserve(call->params().size());
+  for (auto* expr : call->params()) {
+    arg_tys.emplace_back(TypeOf(expr));
+  }
+
+  auto create_sem = [&](type::Type* return_type) {
+    semantic::Parameters params;  // TODO(bclayton): Populate this
+    auto* intrinsic = builder_->create<semantic::Intrinsic>(
+        intrinsic_type, return_type, params);
+    builder_->Sem().Add(call, builder_->create<semantic::Call>(intrinsic));
   };
 
-  std::string name = semantic::intrinsic::str(intrinsic);
-  if (semantic::intrinsic::IsFloatClassificationIntrinsic(intrinsic)) {
+  std::string name = semantic::str(intrinsic_type);
+  if (semantic::IsFloatClassificationIntrinsic(intrinsic_type)) {
     if (call->params().size() != 1) {
       set_error(call->source(), "incorrect number of parameters for " + name);
       return false;
@@ -571,131 +581,135 @@ bool TypeDeterminer::DetermineIntrinsicCall(ast::CallExpression* call,
     }
     return true;
   }
-  if (semantic::intrinsic::IsTextureIntrinsic(intrinsic)) {
-    semantic::TextureIntrinsicCall::Parameters param;
+  if (semantic::IsTextureIntrinsic(intrinsic_type)) {
+    Parameters params;
 
-    auto* texture_param = call->params()[0];
-    if (!TypeOf(texture_param)->UnwrapAll()->Is<type::Texture>()) {
+    auto& ty = builder_->ty;
+
+    auto* texture = arg_tys[0]->UnwrapAll()->As<type::Texture>();
+    if (!texture) {
       set_error(call->source(), "invalid first argument for " + name);
       return false;
     }
-    type::Texture* texture =
-        TypeOf(texture_param)->UnwrapAll()->As<type::Texture>();
 
     bool is_array = type::IsTextureArray(texture->dim());
     bool is_multisampled = texture->Is<type::MultisampledTexture>();
-    switch (intrinsic) {
+    switch (intrinsic_type) {
       case IntrinsicType::kTextureDimensions:
-        param.idx.texture = param.count++;
-        if (call->params().size() > param.count) {
-          param.idx.level = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        if (arg_tys.size() > params.size()) {
+          params.emplace_back(Parameter{ty.i32(), Usage::kLevel});
         }
         break;
       case IntrinsicType::kTextureNumLayers:
       case IntrinsicType::kTextureNumLevels:
       case IntrinsicType::kTextureNumSamples:
-        param.idx.texture = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
         break;
       case IntrinsicType::kTextureLoad:
-        param.idx.texture = param.count++;
-        param.idx.coords = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        params.emplace_back(Parameter{arg_tys[1], Usage::kCoords});
         if (is_array) {
-          param.idx.array_index = param.count++;
+          params.emplace_back(Parameter{ty.i32(), Usage::kArrayIndex});
         }
-        if (call->params().size() > param.count) {
+        if (arg_tys.size() > params.size()) {
           if (is_multisampled) {
-            param.idx.sample_index = param.count++;
+            params.emplace_back(Parameter{ty.i32(), Usage::kSampleIndex});
           } else {
-            param.idx.level = param.count++;
+            params.emplace_back(Parameter{ty.i32(), Usage::kLevel});
           }
         }
         break;
       case IntrinsicType::kTextureSample:
-        param.idx.texture = param.count++;
-        param.idx.sampler = param.count++;
-        param.idx.coords = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        params.emplace_back(Parameter{arg_tys[1], Usage::kSampler});
+        params.emplace_back(Parameter{arg_tys[2], Usage::kCoords});
         if (is_array) {
-          param.idx.array_index = param.count++;
+          params.emplace_back(Parameter{ty.i32(), Usage::kArrayIndex});
         }
-        if (call->params().size() > param.count) {
-          param.idx.offset = param.count++;
+        if (arg_tys.size() > params.size()) {
+          params.emplace_back(
+              Parameter{arg_tys[params.size()], Usage::kOffset});
         }
         break;
       case IntrinsicType::kTextureSampleBias:
-        param.idx.texture = param.count++;
-        param.idx.sampler = param.count++;
-        param.idx.coords = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        params.emplace_back(Parameter{arg_tys[1], Usage::kSampler});
+        params.emplace_back(Parameter{arg_tys[2], Usage::kCoords});
         if (is_array) {
-          param.idx.array_index = param.count++;
+          params.emplace_back(Parameter{ty.i32(), Usage::kArrayIndex});
         }
-        param.idx.bias = param.count++;
-        if (call->params().size() > param.count) {
-          param.idx.offset = param.count++;
+        params.emplace_back(Parameter{ty.f32(), Usage::kBias});
+        if (arg_tys.size() > params.size()) {
+          params.emplace_back(
+              Parameter{arg_tys[params.size()], Usage::kOffset});
         }
         break;
       case IntrinsicType::kTextureSampleLevel:
-        param.idx.texture = param.count++;
-        param.idx.sampler = param.count++;
-        param.idx.coords = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        params.emplace_back(Parameter{arg_tys[1], Usage::kSampler});
+        params.emplace_back(Parameter{arg_tys[2], Usage::kCoords});
         if (is_array) {
-          param.idx.array_index = param.count++;
+          params.emplace_back(Parameter{ty.i32(), Usage::kArrayIndex});
         }
-        param.idx.level = param.count++;
-        if (call->params().size() > param.count) {
-          param.idx.offset = param.count++;
+        params.emplace_back(Parameter{ty.i32(), Usage::kLevel});
+        if (arg_tys.size() > params.size()) {
+          params.emplace_back(
+              Parameter{arg_tys[params.size()], Usage::kOffset});
         }
         break;
       case IntrinsicType::kTextureSampleCompare:
-        param.idx.texture = param.count++;
-        param.idx.sampler = param.count++;
-        param.idx.coords = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        params.emplace_back(Parameter{arg_tys[1], Usage::kSampler});
+        params.emplace_back(Parameter{arg_tys[2], Usage::kCoords});
         if (is_array) {
-          param.idx.array_index = param.count++;
+          params.emplace_back(Parameter{ty.i32(), Usage::kArrayIndex});
         }
-        param.idx.depth_ref = param.count++;
-        if (call->params().size() > param.count) {
-          param.idx.offset = param.count++;
+        params.emplace_back(Parameter{ty.f32(), Usage::kDepthRef});
+        if (arg_tys.size() > params.size()) {
+          params.emplace_back(
+              Parameter{arg_tys[params.size()], Usage::kOffset});
         }
         break;
       case IntrinsicType::kTextureSampleGrad:
-        param.idx.texture = param.count++;
-        param.idx.sampler = param.count++;
-        param.idx.coords = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        params.emplace_back(Parameter{arg_tys[1], Usage::kSampler});
+        params.emplace_back(Parameter{arg_tys[2], Usage::kCoords});
         if (is_array) {
-          param.idx.array_index = param.count++;
+          params.emplace_back(Parameter{ty.i32(), Usage::kArrayIndex});
         }
-        param.idx.ddx = param.count++;
-        param.idx.ddy = param.count++;
-        if (call->params().size() > param.count) {
-          param.idx.offset = param.count++;
+        params.emplace_back(Parameter{arg_tys[params.size()], Usage::kDdx});
+        params.emplace_back(Parameter{arg_tys[params.size()], Usage::kDdy});
+        if (arg_tys.size() > params.size()) {
+          params.emplace_back(
+              Parameter{arg_tys[params.size()], Usage::kOffset});
         }
         break;
       case IntrinsicType::kTextureStore:
-        param.idx.texture = param.count++;
-        param.idx.coords = param.count++;
+        params.emplace_back(Parameter{texture, Usage::kTexture});
+        params.emplace_back(Parameter{arg_tys[1], Usage::kCoords});
         if (is_array) {
-          param.idx.array_index = param.count++;
+          params.emplace_back(Parameter{ty.i32(), Usage::kArrayIndex});
         }
-        param.idx.value = param.count++;
+        params.emplace_back(Parameter{arg_tys[params.size()], Usage::kValue});
         break;
       default:
         set_error(call->source(),
-                  "Internal compiler error: Unreachable intrinsic " +
-                      std::to_string(static_cast<int>(intrinsic)));
+                  "Internal compiler error: Unreachable intrinsic " + name);
         return false;
     }
 
-    if (call->params().size() != param.count) {
-      set_error(call->source(),
-                "incorrect number of parameters for " + name + ", got " +
-                    std::to_string(call->params().size()) + " and expected " +
-                    std::to_string(param.count));
+    if (arg_tys.size() != params.size()) {
+      set_error(call->source(), "incorrect number of arguments for " + name +
+                                    ", got " + std::to_string(arg_tys.size()) +
+                                    " and expected " +
+                                    std::to_string(params.size()));
       return false;
     }
 
     // Set the function return type
     type::Type* return_type = nullptr;
-    switch (intrinsic) {
+    switch (intrinsic_type) {
       case IntrinsicType::kTextureDimensions: {
         auto* i32 = builder_->create<type::I32>();
         switch (texture->dim()) {
@@ -748,16 +762,15 @@ bool TypeDeterminer::DetermineIntrinsicCall(ast::CallExpression* call,
       }
     }
 
-    auto* sem = builder_->create<semantic::TextureIntrinsicCall>(
-        return_type, intrinsic, param);
-    builder_->Sem().Add(call, sem);
-
+    auto* intrinsic = builder_->create<semantic::Intrinsic>(
+        intrinsic_type, return_type, params);
+    builder_->Sem().Add(call, builder_->create<semantic::Call>(intrinsic));
     return true;
   }
 
   const IntrinsicData* data = nullptr;
   for (uint32_t i = 0; i < kIntrinsicDataCount; ++i) {
-    if (intrinsic == kIntrinsicData[i].intrinsic) {
+    if (intrinsic_type == kIntrinsicData[i].intrinsic) {
       data = &kIntrinsicData[i];
       break;
     }
@@ -847,7 +860,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   }
 
   std::string name = builder_->Symbols().NameFor(symbol);
-  if (MatchIntrinsic(name) != IntrinsicType::kNone) {
+  if (MatchIntrinsicType(name) != IntrinsicType::kNone) {
     // Identifier is to an intrinsic function, which has no type (currently).
     return true;
   }
@@ -857,7 +870,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   return false;
 }
 
-IntrinsicType TypeDeterminer::MatchIntrinsic(const std::string& name) {
+IntrinsicType TypeDeterminer::MatchIntrinsicType(const std::string& name) {
   if (name == "abs") {
     return IntrinsicType::kAbs;
   } else if (name == "acos") {
@@ -1197,14 +1210,23 @@ void TypeDeterminer::CreateSemanticNodes() const {
     return out;
   };
 
+  std::unordered_map<FunctionInfo*, semantic::Function*> func_info_to_sem_func;
   for (auto it : function_to_info_) {
     auto* func = it.first;
     auto* info = it.second;
-    sem.Add(func,
-            builder_->create<semantic::Function>(
-                info->declaration, remap_vars(info->referenced_module_vars),
-                remap_vars(info->local_referenced_module_vars),
-                info->ancestor_entry_points));
+    auto* sem_func = builder_->create<semantic::Function>(
+        info->declaration, remap_vars(info->referenced_module_vars),
+        remap_vars(info->local_referenced_module_vars),
+        info->ancestor_entry_points);
+    func_info_to_sem_func.emplace(info, sem_func);
+    sem.Add(func, sem_func);
+  }
+
+  for (auto it : function_calls_) {
+    auto* call = it.first;
+    auto* func_info = it.second;
+    auto* sem_func = func_info_to_sem_func.at(func_info);
+    builder_->Sem().Add(call, builder_->create<semantic::Call>(sem_func));
   }
 }
 

@@ -168,10 +168,10 @@ type::Matrix* GetNestedMatrixType(type::Type* type) {
   return type->As<type::Matrix>();
 }
 
-uint32_t intrinsic_to_glsl_method(type::Type* type, IntrinsicType intrinsic) {
-  switch (intrinsic) {
+uint32_t intrinsic_to_glsl_method(const semantic::Intrinsic* intrinsic) {
+  switch (intrinsic->Type()) {
     case IntrinsicType::kAbs:
-      if (type->is_float_scalar_or_vector()) {
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         return GLSLstd450FAbs;
       } else {
         return GLSLstd450SAbs;
@@ -187,9 +187,9 @@ uint32_t intrinsic_to_glsl_method(type::Type* type, IntrinsicType intrinsic) {
     case IntrinsicType::kCeil:
       return GLSLstd450Ceil;
     case IntrinsicType::kClamp:
-      if (type->is_float_scalar_or_vector()) {
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         return GLSLstd450NClamp;
-      } else if (type->is_unsigned_scalar_or_vector()) {
+      } else if (intrinsic->ReturnType()->is_unsigned_scalar_or_vector()) {
         return GLSLstd450UClamp;
       } else {
         return GLSLstd450SClamp;
@@ -229,17 +229,17 @@ uint32_t intrinsic_to_glsl_method(type::Type* type, IntrinsicType intrinsic) {
     case IntrinsicType::kLog2:
       return GLSLstd450Log2;
     case IntrinsicType::kMax:
-      if (type->is_float_scalar_or_vector()) {
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         return GLSLstd450NMax;
-      } else if (type->is_unsigned_scalar_or_vector()) {
+      } else if (intrinsic->ReturnType()->is_unsigned_scalar_or_vector()) {
         return GLSLstd450UMax;
       } else {
         return GLSLstd450SMax;
       }
     case IntrinsicType::kMin:
-      if (type->is_float_scalar_or_vector()) {
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         return GLSLstd450NMin;
-      } else if (type->is_unsigned_scalar_or_vector()) {
+      } else if (intrinsic->ReturnType()->is_unsigned_scalar_or_vector()) {
         return GLSLstd450UMin;
       } else {
         return GLSLstd450SMin;
@@ -1826,12 +1826,13 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     return 0;
   }
 
-  auto* sem = builder_.Sem().Get(expr);
-  if (auto* intrinsic = sem->As<semantic::IntrinsicCall>()) {
-    return GenerateIntrinsic(ident, expr, intrinsic);
+  auto* call = builder_.Sem().Get(expr);
+  auto* target = call->Target();
+  if (auto* intrinsic = target->As<semantic::Intrinsic>()) {
+    return GenerateIntrinsic(expr, intrinsic);
   }
 
-  auto type_id = GenerateTypeIfNeeded(sem->Type());
+  auto type_id = GenerateTypeIfNeeded(target->ReturnType());
   if (type_id == 0) {
     return 0;
   }
@@ -1865,31 +1866,27 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   return result_id;
 }
 
-uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
-                                    ast::CallExpression* call,
-                                    const semantic::IntrinsicCall* sem) {
+uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
+                                    const semantic::Intrinsic* intrinsic) {
   auto result = result_op();
   auto result_id = result.to_i();
 
-  auto result_type_id = GenerateTypeIfNeeded(TypeOf(call));
+  auto result_type_id = GenerateTypeIfNeeded(intrinsic->ReturnType());
   if (result_type_id == 0) {
     return 0;
   }
 
-  auto intrinsic = sem->intrinsic();
-
-  if (semantic::intrinsic::IsFineDerivative(intrinsic) ||
-      semantic::intrinsic::IsCoarseDerivative(intrinsic)) {
+  if (intrinsic->IsFineDerivative() || intrinsic->IsCoarseDerivative()) {
     push_capability(SpvCapabilityDerivativeControl);
   }
 
-  if (semantic::intrinsic::IsImageQueryIntrinsic(intrinsic)) {
+  if (intrinsic->IsImageQuery()) {
     push_capability(SpvCapabilityImageQuery);
   }
 
-  if (auto* tex_sem = sem->As<semantic::TextureIntrinsicCall>()) {
-    if (!GenerateTextureIntrinsic(ident, call, tex_sem,
-                                  Operand::Int(result_type_id), result)) {
+  if (intrinsic->IsTexture()) {
+    if (!GenerateTextureIntrinsic(call, intrinsic, Operand::Int(result_type_id),
+                                  result)) {
       return 0;
     }
     return result_id;
@@ -1898,97 +1895,118 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   OperandList params = {Operand::Int(result_type_id), result};
 
   spv::Op op = spv::Op::OpNop;
-  if (intrinsic == IntrinsicType::kAny) {
-    op = spv::Op::OpAny;
-  } else if (intrinsic == IntrinsicType::kAll) {
-    op = spv::Op::OpAll;
-  } else if (intrinsic == IntrinsicType::kArrayLength) {
-    if (call->params().empty()) {
-      error_ = "missing param for runtime array length";
-      return 0;
-    }
-    auto* arg = call->params()[0];
+  switch (intrinsic->Type()) {
+    case IntrinsicType::kAny:
+      op = spv::Op::OpAny;
+      break;
+    case IntrinsicType::kAll:
+      op = spv::Op::OpAll;
+      break;
+    case IntrinsicType::kArrayLength: {
+      if (call->params().empty()) {
+        error_ = "missing param for runtime array length";
+        return 0;
+      }
+      auto* arg = call->params()[0];
 
-    auto* accessor = arg->As<ast::MemberAccessorExpression>();
-    if (accessor == nullptr) {
-      error_ = "invalid expression for array length";
-      return 0;
-    }
+      auto* accessor = arg->As<ast::MemberAccessorExpression>();
+      if (accessor == nullptr) {
+        error_ = "invalid expression for array length";
+        return 0;
+      }
 
-    auto struct_id = GenerateExpression(accessor->structure());
-    if (struct_id == 0) {
-      return 0;
-    }
-    params.push_back(Operand::Int(struct_id));
+      auto struct_id = GenerateExpression(accessor->structure());
+      if (struct_id == 0) {
+        return 0;
+      }
+      params.push_back(Operand::Int(struct_id));
 
-    auto* type = TypeOf(accessor->structure())->UnwrapAll();
-    if (!type->Is<type::Struct>()) {
-      error_ =
-          "invalid type (" + type->type_name() + ") for runtime array length";
-      return 0;
-    }
-    // Runtime array must be the last member in the structure
-    params.push_back(Operand::Int(
-        uint32_t(type->As<type::Struct>()->impl()->members().size() - 1)));
+      auto* type = TypeOf(accessor->structure())->UnwrapAll();
+      if (!type->Is<type::Struct>()) {
+        error_ =
+            "invalid type (" + type->type_name() + ") for runtime array length";
+        return 0;
+      }
+      // Runtime array must be the last member in the structure
+      params.push_back(Operand::Int(
+          uint32_t(type->As<type::Struct>()->impl()->members().size() - 1)));
 
-    if (!push_function_inst(spv::Op::OpArrayLength, params)) {
-      return 0;
+      if (!push_function_inst(spv::Op::OpArrayLength, params)) {
+        return 0;
+      }
+      return result_id;
     }
-    return result_id;
-  } else if (intrinsic == IntrinsicType::kCountOneBits) {
-    op = spv::Op::OpBitCount;
-  } else if (intrinsic == IntrinsicType::kDot) {
-    op = spv::Op::OpDot;
-  } else if (intrinsic == IntrinsicType::kDpdx) {
-    op = spv::Op::OpDPdx;
-  } else if (intrinsic == IntrinsicType::kDpdxCoarse) {
-    op = spv::Op::OpDPdxCoarse;
-  } else if (intrinsic == IntrinsicType::kDpdxFine) {
-    op = spv::Op::OpDPdxFine;
-  } else if (intrinsic == IntrinsicType::kDpdy) {
-    op = spv::Op::OpDPdy;
-  } else if (intrinsic == IntrinsicType::kDpdyCoarse) {
-    op = spv::Op::OpDPdyCoarse;
-  } else if (intrinsic == IntrinsicType::kDpdyFine) {
-    op = spv::Op::OpDPdyFine;
-  } else if (intrinsic == IntrinsicType::kFwidth) {
-    op = spv::Op::OpFwidth;
-  } else if (intrinsic == IntrinsicType::kFwidthCoarse) {
-    op = spv::Op::OpFwidthCoarse;
-  } else if (intrinsic == IntrinsicType::kFwidthFine) {
-    op = spv::Op::OpFwidthFine;
-  } else if (intrinsic == IntrinsicType::kIsInf) {
-    op = spv::Op::OpIsInf;
-  } else if (intrinsic == IntrinsicType::kIsNan) {
-    op = spv::Op::OpIsNan;
-  } else if (intrinsic == IntrinsicType::kReverseBits) {
-    op = spv::Op::OpBitReverse;
-  } else if (intrinsic == IntrinsicType::kSelect) {
-    op = spv::Op::OpSelect;
-  } else {
-    GenerateGLSLstd450Import();
+    case IntrinsicType::kCountOneBits:
+      op = spv::Op::OpBitCount;
+      break;
+    case IntrinsicType::kDot:
+      op = spv::Op::OpDot;
+      break;
+    case IntrinsicType::kDpdx:
+      op = spv::Op::OpDPdx;
+      break;
+    case IntrinsicType::kDpdxCoarse:
+      op = spv::Op::OpDPdxCoarse;
+      break;
+    case IntrinsicType::kDpdxFine:
+      op = spv::Op::OpDPdxFine;
+      break;
+    case IntrinsicType::kDpdy:
+      op = spv::Op::OpDPdy;
+      break;
+    case IntrinsicType::kDpdyCoarse:
+      op = spv::Op::OpDPdyCoarse;
+      break;
+    case IntrinsicType::kDpdyFine:
+      op = spv::Op::OpDPdyFine;
+      break;
+    case IntrinsicType::kFwidth:
+      op = spv::Op::OpFwidth;
+      break;
+    case IntrinsicType::kFwidthCoarse:
+      op = spv::Op::OpFwidthCoarse;
+      break;
+    case IntrinsicType::kFwidthFine:
+      op = spv::Op::OpFwidthFine;
+      break;
+    case IntrinsicType::kIsInf:
+      op = spv::Op::OpIsInf;
+      break;
+    case IntrinsicType::kIsNan:
+      op = spv::Op::OpIsNan;
+      break;
+    case IntrinsicType::kReverseBits:
+      op = spv::Op::OpBitReverse;
+      break;
+    case IntrinsicType::kSelect:
+      op = spv::Op::OpSelect;
+      break;
+    default: {
+      GenerateGLSLstd450Import();
 
-    auto set_iter = import_name_to_id_.find(kGLSLstd450);
-    if (set_iter == import_name_to_id_.end()) {
-      error_ = std::string("unknown import ") + kGLSLstd450;
-      return 0;
+      auto set_iter = import_name_to_id_.find(kGLSLstd450);
+      if (set_iter == import_name_to_id_.end()) {
+        error_ = std::string("unknown import ") + kGLSLstd450;
+        return 0;
+      }
+      auto set_id = set_iter->second;
+      auto inst_id = intrinsic_to_glsl_method(intrinsic);
+      if (inst_id == 0) {
+        error_ = "unknown method " + std::string(intrinsic->str());
+        return 0;
+      }
+
+      params.push_back(Operand::Int(set_id));
+      params.push_back(Operand::Int(inst_id));
+
+      op = spv::Op::OpExtInst;
+      break;
     }
-    auto set_id = set_iter->second;
-    auto inst_id = intrinsic_to_glsl_method(sem->Type(), sem->intrinsic());
-    if (inst_id == 0) {
-      error_ = "unknown method " + builder_.Symbols().NameFor(ident->symbol());
-      return 0;
-    }
-
-    params.push_back(Operand::Int(set_id));
-    params.push_back(Operand::Int(inst_id));
-
-    op = spv::Op::OpExtInst;
   }
 
   if (op == spv::Op::OpNop) {
-    error_ = "unable to determine operator for: " +
-             builder_.Symbols().NameFor(ident->symbol());
+    error_ =
+        "unable to determine operator for: " + std::string(intrinsic->str());
     return 0;
   }
 
@@ -2009,31 +2027,45 @@ uint32_t Builder::GenerateIntrinsic(ast::IdentifierExpression* ident,
   return result_id;
 }
 
-bool Builder::GenerateTextureIntrinsic(
-    ast::IdentifierExpression* ident,
-    ast::CallExpression* call,
-    const semantic::TextureIntrinsicCall* sem,
-    Operand result_type,
-    Operand result_id) {
-  auto& pidx = sem->Params().idx;
-  auto const kNotUsed = semantic::TextureIntrinsicCall::Parameters::kNotUsed;
+bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
+                                       const semantic::Intrinsic* intrinsic,
+                                       Operand result_type,
+                                       Operand result_id) {
+  using Usage = semantic::Parameter::Usage;
 
-  assert(pidx.texture != kNotUsed);
-  auto* texture_type =
-      TypeOf(call->params()[pidx.texture])->UnwrapAll()->As<type::Texture>();
+  auto parameters = intrinsic->Parameters();
+  auto arguments = call->params();
 
-  auto op = spv::Op::OpNop;
-
-  auto gen_param = [&](size_t idx) {
-    auto* p = call->params()[idx];
-    auto val_id = GenerateExpression(p);
+  // Generates the given expression, returning the operand ID
+  auto gen = [&](ast::Expression* expr) {
+    auto val_id = GenerateExpression(expr);
     if (val_id == 0) {
       return Operand::Int(0);
     }
-    val_id = GenerateLoadIfNeeded(TypeOf(p), val_id);
+    val_id = GenerateLoadIfNeeded(TypeOf(expr), val_id);
 
     return Operand::Int(val_id);
   };
+
+  // Returns the argument with the given usage
+  auto arg = [&](Usage usage) {
+    int idx = semantic::IndexOf(parameters, usage);
+    return (idx >= 0) ? arguments[idx] : nullptr;
+  };
+
+  // Generates the argument with the given usage, returning the operand ID
+  auto gen_arg = [&](Usage usage) {
+    auto* argument = arg(usage);
+    assert(argument);
+    return gen(argument);
+  };
+
+  auto* texture = arg(Usage::kTexture);
+  assert(texture);
+
+  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
+
+  auto op = spv::Op::OpNop;
 
   // Custom function to call after the texture-intrinsic op has been generated.
   std::function<bool()> post_emission = [] { return true; };
@@ -2133,28 +2165,23 @@ bool Builder::GenerateTextureIntrinsic(
       };
 
   auto append_coords_to_spirv_params = [&]() -> bool {
-    if (pidx.array_index != kNotUsed) {
+    if (auto* array_index = arg(Usage::kArrayIndex)) {
       // Array index needs to be appended to the coordinates.
-      auto* param_coords = call->params()[pidx.coords];
-      auto* param_array_index = call->params()[pidx.array_index];
-
-      auto* packed = AppendVector(&builder_, param_coords, param_array_index);
+      auto* packed = AppendVector(&builder_, arg(Usage::kCoords), array_index);
       auto param = GenerateTypeConstructorExpression(packed, false);
       if (param == 0) {
         return false;
       }
       spirv_params.emplace_back(Operand::Int(param));
     } else {
-      spirv_params.emplace_back(gen_param(pidx.coords));  // coordinates
+      spirv_params.emplace_back(gen_arg(Usage::kCoords));  // coordinates
     }
     return true;
   };
 
   auto append_image_and_coords_to_spirv_params = [&]() -> bool {
-    assert(pidx.sampler != kNotUsed);
-    assert(pidx.texture != kNotUsed);
-    auto sampler_param = gen_param(pidx.sampler);
-    auto texture_param = gen_param(pidx.texture);
+    auto sampler_param = gen_arg(Usage::kSampler);
+    auto texture_param = gen_arg(Usage::kTexture);
     auto sampled_image =
         GenerateSampledImage(texture_type, texture_param, sampler_param);
 
@@ -2163,7 +2190,7 @@ bool Builder::GenerateTextureIntrinsic(
     return append_coords_to_spirv_params();
   };
 
-  switch (sem->intrinsic()) {
+  switch (intrinsic->Type()) {
     case IntrinsicType::kTextureDimensions: {
       // Number of returned elements from OpImageQuerySize[Lod] may not match
       // those of textureDimensions().
@@ -2205,13 +2232,13 @@ bool Builder::GenerateTextureIntrinsic(
         return false;
       }
 
-      spirv_params.emplace_back(gen_param(pidx.texture));
+      spirv_params.emplace_back(gen_arg(Usage::kTexture));
       if (texture_type->Is<type::MultisampledTexture>() ||
           texture_type->Is<type::StorageTexture>()) {
         op = spv::Op::OpImageQuerySize;
-      } else if (pidx.level != kNotUsed) {
+      } else if (auto* level = arg(Usage::kLevel)) {
         op = spv::Op::OpImageQuerySizeLod;
-        spirv_params.emplace_back(gen_param(pidx.level));
+        spirv_params.emplace_back(gen(level));
       } else {
         ast::SintLiteral i32_0(Source{}, builder_.create<type::I32>(), 0);
         op = spv::Op::OpImageQuerySizeLod;
@@ -2242,7 +2269,7 @@ bool Builder::GenerateTextureIntrinsic(
         return false;
       }
 
-      spirv_params.emplace_back(gen_param(pidx.texture));
+      spirv_params.emplace_back(gen_arg(Usage::kTexture));
 
       if (texture_type->Is<type::MultisampledTexture>() ||
           texture_type->Is<type::StorageTexture>()) {
@@ -2258,43 +2285,43 @@ bool Builder::GenerateTextureIntrinsic(
     case IntrinsicType::kTextureNumLevels: {
       op = spv::Op::OpImageQueryLevels;
       append_result_type_and_id_to_spirv_params();
-      spirv_params.emplace_back(gen_param(pidx.texture));
+      spirv_params.emplace_back(gen_arg(Usage::kTexture));
       break;
     }
     case IntrinsicType::kTextureNumSamples: {
       op = spv::Op::OpImageQuerySamples;
       append_result_type_and_id_to_spirv_params();
-      spirv_params.emplace_back(gen_param(pidx.texture));
+      spirv_params.emplace_back(gen_arg(Usage::kTexture));
       break;
     }
     case IntrinsicType::kTextureLoad: {
       op = texture_type->Is<type::StorageTexture>() ? spv::Op::OpImageRead
                                                     : spv::Op::OpImageFetch;
       append_result_type_and_id_to_spirv_params_for_read();
-      spirv_params.emplace_back(gen_param(pidx.texture));
+      spirv_params.emplace_back(gen_arg(Usage::kTexture));
       if (!append_coords_to_spirv_params()) {
         return false;
       }
 
-      if (pidx.level != kNotUsed) {
+      if (auto* level = arg(Usage::kLevel)) {
         image_operands.emplace_back(
-            ImageOperand{SpvImageOperandsLodMask, gen_param(pidx.level)});
+            ImageOperand{SpvImageOperandsLodMask, gen(level)});
       }
 
-      if (pidx.sample_index != kNotUsed) {
-        image_operands.emplace_back(ImageOperand{SpvImageOperandsSampleMask,
-                                                 gen_param(pidx.sample_index)});
+      if (auto* sample_index = arg(Usage::kSampleIndex)) {
+        image_operands.emplace_back(
+            ImageOperand{SpvImageOperandsSampleMask, gen(sample_index)});
       }
 
       break;
     }
     case IntrinsicType::kTextureStore: {
       op = spv::Op::OpImageWrite;
-      spirv_params.emplace_back(gen_param(pidx.texture));
+      spirv_params.emplace_back(gen_arg(Usage::kTexture));
       if (!append_coords_to_spirv_params()) {
         return false;
       }
-      spirv_params.emplace_back(gen_param(pidx.value));
+      spirv_params.emplace_back(gen_arg(Usage::kValue));
       break;
     }
     case IntrinsicType::kTextureSample: {
@@ -2311,9 +2338,8 @@ bool Builder::GenerateTextureIntrinsic(
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
-      assert(pidx.bias != kNotUsed);
       image_operands.emplace_back(
-          ImageOperand{SpvImageOperandsBiasMask, gen_param(pidx.bias)});
+          ImageOperand{SpvImageOperandsBiasMask, gen_arg(Usage::kBias)});
       break;
     }
     case IntrinsicType::kTextureSampleLevel: {
@@ -2322,20 +2348,19 @@ bool Builder::GenerateTextureIntrinsic(
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
-      assert(pidx.level != kNotUsed);
       auto level = Operand::Int(0);
-      if (TypeOf(call->params()[pidx.level])->Is<type::I32>()) {
+      if (TypeOf(arg(Usage::kLevel))->Is<type::I32>()) {
         // Depth textures have i32 parameters for the level, but SPIR-V expects
         // F32. Cast.
         auto* f32 = builder_.create<type::F32>();
         ast::TypeConstructorExpression cast(Source{}, f32,
-                                            {call->params()[pidx.level]});
+                                            {arg(Usage::kLevel)});
         level = Operand::Int(GenerateExpression(&cast));
         if (level.to_i() == 0) {
           return false;
         }
       } else {
-        level = gen_param(pidx.level);
+        level = gen_arg(Usage::kLevel);
       }
       image_operands.emplace_back(ImageOperand{SpvImageOperandsLodMask, level});
       break;
@@ -2346,12 +2371,10 @@ bool Builder::GenerateTextureIntrinsic(
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
-      assert(pidx.ddx != kNotUsed);
-      assert(pidx.ddy != kNotUsed);
       image_operands.emplace_back(
-          ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddx)});
+          ImageOperand{SpvImageOperandsGradMask, gen_arg(Usage::kDdx)});
       image_operands.emplace_back(
-          ImageOperand{SpvImageOperandsGradMask, gen_param(pidx.ddy)});
+          ImageOperand{SpvImageOperandsGradMask, gen_arg(Usage::kDdy)});
       break;
     }
     case IntrinsicType::kTextureSampleCompare: {
@@ -2360,8 +2383,7 @@ bool Builder::GenerateTextureIntrinsic(
       if (!append_image_and_coords_to_spirv_params()) {
         return false;
       }
-      assert(pidx.depth_ref != kNotUsed);
-      spirv_params.emplace_back(gen_param(pidx.depth_ref));
+      spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
 
       type::F32 f32;
       ast::FloatLiteral float_0(Source{}, &f32, 0.0);
@@ -2374,9 +2396,9 @@ bool Builder::GenerateTextureIntrinsic(
       break;  // unreachable
   }
 
-  if (pidx.offset != kNotUsed) {
+  if (auto* offset = arg(Usage::kOffset)) {
     image_operands.emplace_back(
-        ImageOperand{SpvImageOperandsConstOffsetMask, gen_param(pidx.offset)});
+        ImageOperand{SpvImageOperandsConstOffsetMask, gen(offset)});
   }
 
   if (!image_operands.empty()) {
@@ -2393,8 +2415,8 @@ bool Builder::GenerateTextureIntrinsic(
   }
 
   if (op == spv::Op::OpNop) {
-    error_ = "unable to determine operator for: " +
-             builder_.Symbols().NameFor(ident->symbol());
+    error_ =
+        "unable to determine operator for: " + std::string(intrinsic->str());
     return false;
   }
 

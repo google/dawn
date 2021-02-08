@@ -37,7 +37,7 @@ Parameters GetParameters(ast::Function* ast) {
   semantic::Parameters parameters;
   parameters.reserve(ast->params().size());
   for (auto* param : ast->params()) {
-    parameters.emplace_back(Parameter{param->type()});
+    parameters.emplace_back(Parameter{param->type(), Parameter::Usage::kNone});
   }
   return parameters;
 }
@@ -48,7 +48,7 @@ Function::Function(ast::Function* ast,
                    std::vector<const Variable*> referenced_module_vars,
                    std::vector<const Variable*> local_referenced_module_vars,
                    std::vector<Symbol> ancestor_entry_points)
-    : Base(GetParameters(ast)),
+    : Base(ast->return_type(), GetParameters(ast)),
       referenced_module_vars_(std::move(referenced_module_vars)),
       local_referenced_module_vars_(std::move(local_referenced_module_vars)),
       ancestor_entry_points_(std::move(ancestor_entry_points)) {}

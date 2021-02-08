@@ -644,24 +644,23 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
     return false;
   }
 
-  auto* call_sem = program_->Sem().Get(expr);
-  if (call_sem == nullptr) {
+  auto* call = program_->Sem().Get(expr);
+  if (call == nullptr) {
     add_error(expr->source(), "CallExpression is missing semantic information");
     return false;
   }
 
-  if (auto* intrinsic_sem = call_sem->As<semantic::IntrinsicCall>()) {
+  if (auto* intrinsic = call->Target()->As<semantic::Intrinsic>()) {
     const IntrinsicData* data = nullptr;
     for (uint32_t i = 0; i < kIntrinsicDataCount; ++i) {
-      if (intrinsic_sem->intrinsic() == kIntrinsicData[i].intrinsic) {
+      if (intrinsic->Type() == kIntrinsicData[i].intrinsic) {
         data = &kIntrinsicData[i];
         break;
       }
     }
 
     if (data != nullptr) {
-      std::string builtin =
-          semantic::intrinsic::str(intrinsic_sem->intrinsic());
+      std::string builtin = intrinsic->str();
       if (expr->params().size() != data->param_count) {
         add_error(expr->source(),
                   "incorrect number of parameters for " + builtin +
@@ -832,7 +831,7 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
           }
         }
 
-        if (semantic::intrinsic::IsDataPackingIntrinsic(data->intrinsic)) {
+        if (semantic::IsDataPackingIntrinsic(data->intrinsic)) {
           if (!program_->TypeOf(expr)->Is<type::U32>()) {
             add_error(expr->source(),
                       "incorrect type for " + builtin +

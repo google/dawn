@@ -48,8 +48,8 @@ namespace tint {
 
 // Forward declarations
 namespace semantic {
-class TextureIntrinsicCall;
-class IntrinsicCall;
+class Call;
+class Intrinsic;
 }  // namespace semantic
 
 namespace writer {
@@ -153,20 +153,22 @@ class GeneratorImpl {
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param sem the semantic information for the texture intrinsic call
+  /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
   bool EmitTextureCall(std::ostream& pre,
                        std::ostream& out,
                        ast::CallExpression* expr,
-                       const semantic::TextureIntrinsicCall* sem);
+                       const semantic::Intrinsic* intrinsic);
   /// Handles generating a call to data packing intrinsic
   /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
+  /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
   bool EmitDataPackingCall(std::ostream& pre,
                            std::ostream& out,
-                           ast::CallExpression* expr);
+                           ast::CallExpression* expr,
+                           const semantic::Intrinsic* intrinsic);
   /// Handles a case statement
   /// @param out the output stream
   /// @param stmt the statement
@@ -363,9 +365,9 @@ class GeneratorImpl {
   std::string generate_storage_buffer_index_expression(std::ostream& pre,
                                                        ast::Expression* expr);
   /// Handles generating a builtin method name
-  /// @param call the semantic info for the intrinsic call
+  /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(const semantic::IntrinsicCall* call);
+  std::string generate_builtin_name(const semantic::Intrinsic* intrinsic);
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error

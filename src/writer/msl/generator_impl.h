@@ -50,8 +50,8 @@ namespace tint {
 
 // Forward declarations
 namespace semantic {
-class TextureIntrinsicCall;
-class IntrinsicCall;
+class Call;
+class Intrinsic;
 }  // namespace semantic
 
 namespace writer {
@@ -121,10 +121,10 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param expr the call expression
-  /// @param sem the semantic information for the texture intrinsic call
+  /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
   bool EmitTextureCall(ast::CallExpression* expr,
-                       const semantic::TextureIntrinsicCall* sem);
+                       const semantic::Intrinsic* intrinsic);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully
@@ -258,9 +258,9 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the name
   std::string generate_name(const std::string& prefix);
   /// Handles generating a builtin name
-  /// @param call the semantic info for the intrinsic call
+  /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(const semantic::IntrinsicCall* call);
+  std::string generate_builtin_name(const semantic::Intrinsic* intrinsic);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check

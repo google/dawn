@@ -60,7 +60,9 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
 
   auto* sem = program->Sem().Get(call);
   ASSERT_NE(sem, nullptr);
-  auto* intrinsic = sem->As<semantic::IntrinsicCall>();
+  auto* target = sem->Target();
+  ASSERT_NE(target, nullptr);
+  auto* intrinsic = target->As<semantic::Intrinsic>();
   ASSERT_NE(intrinsic, nullptr);
 
   ASSERT_EQ(gen.generate_builtin_name(intrinsic),

@@ -32,18 +32,52 @@ namespace semantic {
 
 /// Parameter describes a single parameter of a call target
 struct Parameter {
+  /// Usage is extra metadata for identifying a parameter based on its overload
+  /// position
+  enum class Usage {
+    kNone,
+    kArrayIndex,
+    kBias,
+    kCoords,
+    kDepthRef,
+    kDdx,
+    kDdy,
+    kLevel,
+    kOffset,
+    kSampler,
+    kSampleIndex,
+    kTexture,
+    kValue,
+  };
+
   /// Parameter type
-  type::Type* type;
+  type::Type* const type;
+  /// Parameter usage
+  Usage const usage = Usage::kNone;
 };
 
+/// @returns a string representation of the given parameter usage.
+const char* str(Parameter::Usage usage);
+
+/// Parameters is a list of Parameter
 using Parameters = std::vector<Parameter>;
+
+/// @param parameters the list of parameters
+/// @param usage the parameter usage to find
+/// @returns the index of the parameter with the given usage, or -1 if no
+/// parameter with the given usage exists.
+int IndexOf(const Parameters& parameters, Parameter::Usage usage);
 
 /// CallTarget is the base for callable functions
 class CallTarget : public Castable<CallTarget, Node> {
  public:
   /// Constructor
+  /// @param return_type the return type of the call target
   /// @param parameters the parameters for the call target
-  explicit CallTarget(const semantic::Parameters& parameters);
+  CallTarget(type::Type* return_type, const semantic::Parameters& parameters);
+
+  /// @return the return type of the call target
+  type::Type* ReturnType() const { return return_type_; }
 
   /// Destructor
   ~CallTarget() override;
@@ -52,7 +86,8 @@ class CallTarget : public Castable<CallTarget, Node> {
   const Parameters& Parameters() const { return parameters_; }
 
  private:
-  semantic::Parameters parameters_;
+  type::Type* const return_type_;
+  semantic::Parameters const parameters_;
 };
 
 }  // namespace semantic

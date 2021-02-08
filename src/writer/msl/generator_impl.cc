@@ -444,12 +444,12 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return 0;
   }
 
-  auto* call_sem = program_->Sem().Get(expr);
-  if (auto* sem = call_sem->As<semantic::TextureIntrinsicCall>()) {
-    return EmitTextureCall(expr, sem);
-  }
-  if (auto* sem = call_sem->As<semantic::IntrinsicCall>()) {
-    if (sem->intrinsic() == semantic::IntrinsicType::kPack2x16Float) {
+  auto* call = program_->Sem().Get(expr);
+  if (auto* intrinsic = call->Target()->As<semantic::Intrinsic>()) {
+    if (intrinsic->IsTexture()) {
+      return EmitTextureCall(expr, intrinsic);
+    }
+    if (intrinsic->Type() == semantic::IntrinsicType::kPack2x16Float) {
       make_indent();
       out_ << "as_type<uint>(half2(";
       if (!EmitExpression(expr->params()[0])) {
@@ -458,7 +458,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << "))";
       return true;
     }
-    auto name = generate_builtin_name(sem);
+    auto name = generate_builtin_name(intrinsic);
     if (name.empty()) {
       return false;
     }
@@ -568,18 +568,24 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 }
 
 bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
-                                    const semantic::TextureIntrinsicCall* sem) {
-  auto* ident = expr->func()->As<ast::IdentifierExpression>();
+                                    const semantic::Intrinsic* intrinsic) {
+  using Usage = semantic::Parameter::Usage;
 
-  auto params = expr->params();
-  auto& pidx = sem->Params().idx;
-  auto const kNotUsed = semantic::TextureIntrinsicCall::Parameters::kNotUsed;
+  auto parameters = intrinsic->Parameters();
+  auto arguments = expr->params();
 
-  assert(pidx.texture != kNotUsed);
-  auto* texture_type =
-      TypeOf(params[pidx.texture])->UnwrapAll()->As<type::Texture>();
+  // Returns the argument with the given usage
+  auto arg = [&](Usage usage) {
+    int idx = semantic::IndexOf(parameters, usage);
+    return (idx >= 0) ? arguments[idx] : nullptr;
+  };
 
-  switch (sem->intrinsic()) {
+  auto* texture = arg(Usage::kTexture);
+  assert(texture);
+
+  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
+
+  switch (intrinsic->Type()) {
     case semantic::IntrinsicType::kTextureDimensions: {
       std::vector<const char*> dims;
       switch (texture_type->dim()) {
@@ -606,12 +612,14 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       }
 
       auto get_dim = [&](const char* name) {
-        if (!EmitExpression(params[pidx.texture])) {
+        if (!EmitExpression(texture)) {
           return false;
         }
         out_ << ".get_" << name << "(";
-        if (pidx.level != kNotUsed) {
-          out_ << pidx.level;
+        if (auto* level = arg(Usage::kLevel)) {
+          if (!EmitExpression(level)) {
+            return false;
+          }
         }
         out_ << ")";
         return true;
@@ -636,7 +644,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     }
     case semantic::IntrinsicType::kTextureNumLayers: {
       out_ << "int(";
-      if (!EmitExpression(params[pidx.texture])) {
+      if (!EmitExpression(texture)) {
         return false;
       }
       out_ << ".get_array_size())";
@@ -644,7 +652,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     }
     case semantic::IntrinsicType::kTextureNumLevels: {
       out_ << "int(";
-      if (!EmitExpression(params[pidx.texture])) {
+      if (!EmitExpression(texture)) {
         return false;
       }
       out_ << ".get_num_mip_levels())";
@@ -652,7 +660,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     }
     case semantic::IntrinsicType::kTextureNumSamples: {
       out_ << "int(";
-      if (!EmitExpression(params[pidx.texture])) {
+      if (!EmitExpression(texture)) {
         return false;
       }
       out_ << ".get_num_samples())";
@@ -662,12 +670,12 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       break;
   }
 
-  if (!EmitExpression(params[pidx.texture]))
+  if (!EmitExpression(texture))
     return false;
 
   bool lod_param_is_named = true;
 
-  switch (sem->intrinsic()) {
+  switch (intrinsic->Type()) {
     case semantic::IntrinsicType::kTextureSample:
     case semantic::IntrinsicType::kTextureSampleBias:
     case semantic::IntrinsicType::kTextureSampleLevel:
@@ -686,7 +694,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       break;
     default:
       error_ = "Internal compiler error: Unhandled texture intrinsic '" +
-               program_->Symbols().NameFor(ident->symbol()) + "'";
+               std::string(intrinsic->str()) + "'";
       return false;
   }
 
@@ -698,40 +706,38 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     first_arg = false;
   };
 
-  for (auto idx : {pidx.value, pidx.sampler, pidx.coords, pidx.array_index,
-                   pidx.depth_ref, pidx.sample_index}) {
-    if (idx != kNotUsed) {
+  for (auto usage :
+       {Usage::kValue, Usage::kSampler, Usage::kCoords, Usage::kArrayIndex,
+        Usage::kDepthRef, Usage::kSampleIndex}) {
+    if (auto* e = arg(usage)) {
       maybe_write_comma();
-      if (!EmitExpression(params[idx]))
+      if (!EmitExpression(e))
         return false;
     }
   }
 
-  if (pidx.bias != kNotUsed) {
+  if (auto* bias = arg(Usage::kBias)) {
     maybe_write_comma();
     out_ << "bias(";
-    if (!EmitExpression(params[pidx.bias])) {
+    if (!EmitExpression(bias)) {
       return false;
     }
     out_ << ")";
   }
-  if (pidx.level != kNotUsed) {
+  if (auto* level = arg(Usage::kLevel)) {
     maybe_write_comma();
     if (lod_param_is_named) {
       out_ << "level(";
     }
-    if (!EmitExpression(params[pidx.level])) {
+    if (!EmitExpression(level)) {
       return false;
     }
     if (lod_param_is_named) {
       out_ << ")";
     }
   }
-  if (pidx.ddx != kNotUsed) {
-    auto dim = TypeOf(params[pidx.texture])
-                   ->UnwrapPtrIfNeeded()
-                   ->As<type::Texture>()
-                   ->dim();
+  if (auto* ddx = arg(Usage::kDdx)) {
+    auto dim = texture_type->dim();
     switch (dim) {
       case type::TextureDimension::k2d:
       case type::TextureDimension::k2dArray:
@@ -754,19 +760,19 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
         return false;
       }
     }
-    if (!EmitExpression(params[pidx.ddx])) {
+    if (!EmitExpression(ddx)) {
       return false;
     }
     out_ << ", ";
-    if (!EmitExpression(params[pidx.ddy])) {
+    if (!EmitExpression(arg(Usage::kDdy))) {
       return false;
     }
     out_ << ")";
   }
 
-  if (pidx.offset != kNotUsed) {
+  if (auto* offset = arg(Usage::kOffset)) {
     maybe_write_comma();
-    if (!EmitExpression(params[pidx.offset])) {
+    if (!EmitExpression(offset)) {
       return false;
     }
   }
@@ -777,9 +783,9 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
 }
 
 std::string GeneratorImpl::generate_builtin_name(
-    const semantic::IntrinsicCall* call) {
+    const semantic::Intrinsic* intrinsic) {
   std::string out = "metal::";
-  switch (call->intrinsic()) {
+  switch (intrinsic->Type()) {
     case semantic::IntrinsicType::kAcos:
     case semantic::IntrinsicType::kAll:
     case semantic::IntrinsicType::kAny:
@@ -817,10 +823,10 @@ std::string GeneratorImpl::generate_builtin_name(
     case semantic::IntrinsicType::kTrunc:
     case semantic::IntrinsicType::kSign:
     case semantic::IntrinsicType::kClamp:
-      out += semantic::intrinsic::str(call->intrinsic());
+      out += intrinsic->str();
       break;
     case semantic::IntrinsicType::kAbs:
-      if (call->Type()->is_float_scalar_or_vector()) {
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         out += "fabs";
       } else {
         out += "abs";
@@ -857,14 +863,14 @@ std::string GeneratorImpl::generate_builtin_name(
       out += "isnormal";
       break;
     case semantic::IntrinsicType::kMax:
-      if (call->Type()->is_float_scalar_or_vector()) {
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         out += "fmax";
       } else {
         out += "max";
       }
       break;
     case semantic::IntrinsicType::kMin:
-      if (call->Type()->is_float_scalar_or_vector()) {
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         out += "fmin";
       } else {
         out += "min";
@@ -895,8 +901,7 @@ std::string GeneratorImpl::generate_builtin_name(
       out += "rsqrt";
       break;
     default:
-      error_ = "Unknown import method: " +
-               std::string(semantic::intrinsic::str(call->intrinsic()));
+      error_ = "Unknown import method: " + std::string(intrinsic->str());
       return "";
   }
   return out;

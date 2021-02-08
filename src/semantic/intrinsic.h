@@ -17,6 +17,8 @@
 
 #include <ostream>
 
+#include "src/semantic/call_target.h"
+
 namespace tint {
 namespace semantic {
 
@@ -102,39 +104,37 @@ enum class IntrinsicType {
   kTrunc
 };
 
-/// Emits the name of the intrinsic function. The spelling,
-/// including case, matches the name in the WGSL spec.
-std::ostream& operator<<(std::ostream& out, IntrinsicType i);
-
-namespace intrinsic {
+/// @returns the name of the intrinsic function type. The spelling, including
+/// case, matches the name in the WGSL spec.
+const char* str(IntrinsicType i);
 
 /// Determines if the given `i` is a coarse derivative
-/// @param i the intrinsic
+/// @param i the intrinsic type
 /// @returns true if the given derivative is coarse.
-bool IsCoarseDerivative(IntrinsicType i);
+bool IsCoarseDerivativeIntrinsic(IntrinsicType i);
 
 /// Determines if the given `i` is a fine derivative
-/// @param i the intrinsic
+/// @param i the intrinsic type
 /// @returns true if the given derivative is fine.
-bool IsFineDerivative(IntrinsicType i);
+bool IsFineDerivativeIntrinsic(IntrinsicType i);
 
 /// Determine if the given `i` is a derivative intrinsic
-/// @param i the intrinsic
+/// @param i the intrinsic type
 /// @returns true if the given `i` is a derivative intrinsic
-bool IsDerivative(IntrinsicType i);
+bool IsDerivativeIntrinsic(IntrinsicType i);
 
 /// Determines if the given `i` is a float classification intrinsic
-/// @param i the intrinsic
+/// @param i the intrinsic type
 /// @returns true if the given `i` is a float intrinsic
 bool IsFloatClassificationIntrinsic(IntrinsicType i);
 
 /// Determines if the given `i` is a texture operation intrinsic
-/// @param i the intrinsic
+/// @param i the intrinsic type
 /// @returns true if the given `i` is a texture operation intrinsic
 bool IsTextureIntrinsic(IntrinsicType i);
 
 /// Determines if the given `i` is a image query intrinsic
-/// @param i the intrinsic
+/// @param i the intrinsic type
 /// @returns true if the given `i` is a image query intrinsic
 bool IsImageQueryIntrinsic(IntrinsicType i);
 
@@ -143,11 +143,56 @@ bool IsImageQueryIntrinsic(IntrinsicType i);
 /// @returns true if the given `i` is a data packing intrinsic
 bool IsDataPackingIntrinsic(IntrinsicType i);
 
-/// @returns the name of the intrinsic function. The spelling, including case,
-/// matches the name in the WGSL spec.
-const char* str(IntrinsicType i);
+/// Intrinsic holds the semantic information for an intrinsic function.
+class Intrinsic : public Castable<Intrinsic, CallTarget> {
+ public:
+  /// Constructor
+  /// @param type the intrinsic type
+  /// @param return_type the return type for the intrinsic call
+  /// @param parameters the parameters for the intrinsic overload
+  Intrinsic(IntrinsicType type,
+            type::Type* return_type,
+            const semantic::Parameters& parameters);
 
-}  // namespace intrinsic
+  /// Destructor
+  ~Intrinsic() override;
+
+  /// @return the type of the intrinsic
+  IntrinsicType Type() const { return type_; }
+
+  /// @returns the name of the intrinsic function type. The spelling, including
+  /// case, matches the name in the WGSL spec.
+  const char* str() const;
+
+  /// @returns true if intrinsic is a coarse derivative intrinsic
+  bool IsCoarseDerivative() const;
+
+  /// @returns true if intrinsic is a fine a derivative intrinsic
+  bool IsFineDerivative() const;
+
+  /// @returns true if intrinsic is a derivative intrinsic
+  bool IsDerivative() const;
+
+  /// @returns true if intrinsic is a float intrinsic
+  bool IsFloatClassification() const;
+
+  /// @returns true if intrinsic is a texture operation intrinsic
+  bool IsTexture() const;
+
+  /// @returns true if intrinsic is a image query intrinsic
+  bool IsImageQuery() const;
+
+  /// @returns true if intrinsic is a data packing intrinsic
+  bool IsDataPacking() const;
+
+ private:
+  IntrinsicType const type_;
+};
+
+/// Emits the name of the intrinsic function type. The spelling, including case,
+/// matches the name in the WGSL spec.
+std::ostream& operator<<(std::ostream& out, IntrinsicType i);
+
 }  // namespace semantic
 }  // namespace tint
 
