@@ -1377,23 +1377,27 @@ inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
 class Intrinsic_TextureOperation
     : public TypeDeterminerTestWithParam<TextureTestParams> {
  public:
-  type::Type* get_coords_type(type::TextureDimension dim, type::Type* type) {
-    if (dim == type::TextureDimension::k1d) {
-      if (type->Is<type::I32>()) {
-        return create<type::I32>();
-      } else if (type->Is<type::U32>()) {
-        return create<type::U32>();
-      } else {
-        return create<type::F32>();
-      }
-    } else if (dim == type::TextureDimension::k1dArray ||
-               dim == type::TextureDimension::k2d) {
-      return create<type::Vector>(type, 2);
-    } else if (dim == type::TextureDimension::kCubeArray) {
-      return create<type::Vector>(type, 4);
-    } else {
-      return create<type::Vector>(type, 3);
+  /// Gets an appropriate type for the coords parameter depending the the
+  /// dimensionality of the texture being sampled.
+  /// @param dim dimensionality of the texture being sampled
+  /// @param scalar the scalar type
+  /// @returns a pointer to a type appropriate for the coord param
+  type::Type* GetCoordsType(type::TextureDimension dim, type::Type* scalar) {
+    switch (dim) {
+      case type::TextureDimension::k1d:
+      case type::TextureDimension::k1dArray:
+        return scalar;
+      case type::TextureDimension::k2d:
+      case type::TextureDimension::k2dArray:
+        return create<type::Vector>(scalar, 2);
+      case type::TextureDimension::k3d:
+      case type::TextureDimension::kCube:
+      case type::TextureDimension::kCubeArray:
+        return create<type::Vector>(scalar, 3);
+      default:
+        [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
     }
+    return nullptr;
   }
 
   void add_call_param(std::string name,
@@ -1402,7 +1406,6 @@ class Intrinsic_TextureOperation
     Global(name, ast::StorageClass::kNone, type);
     call_params->push_back(Expr(name));
   }
-
   type::Type* subtype(Texture type) {
     if (type == Texture::kF32) {
       return create<type::F32>();
@@ -1420,7 +1423,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   auto type = GetParam().type;
   auto format = GetParam().format;
 
-  auto* coords_type = get_coords_type(dim, ty.i32());
+  auto* coords_type = GetCoordsType(dim, ty.i32());
 
   auto* subtype = type::StorageTexture::SubtypeFor(format, this);
   type::Type* texture_type = create<type::StorageTexture>(dim, format, subtype);
@@ -1429,7 +1432,10 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
 
   add_call_param("texture", texture_type, &call_params);
   add_call_param("coords", coords_type, &call_params);
-  add_call_param("lod", ty.i32(), &call_params);
+
+  if (type::IsTextureArray(dim)) {
+    add_call_param("array_index", ty.i32(), &call_params);
+  }
 
   auto* expr = Call("textureLoad", call_params);
   WrapInFunction(expr);
@@ -1489,7 +1495,7 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   auto type = GetParam().type;
 
   type::Type* s = subtype(type);
-  auto* coords_type = get_coords_type(dim, ty.i32());
+  auto* coords_type = GetCoordsType(dim, ty.i32());
   auto* texture_type = create<type::SampledTexture>(dim, s);
 
   ast::ExpressionList call_params;
@@ -1518,10 +1524,11 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     Intrinsic_SampledTextureOperation,
-    testing::Values(TextureTestParams{type::TextureDimension::k2d},
+    testing::Values(TextureTestParams{type::TextureDimension::k1d},
+                    TextureTestParams{type::TextureDimension::k1dArray},
+                    TextureTestParams{type::TextureDimension::k2d},
                     TextureTestParams{type::TextureDimension::k2dArray},
-                    TextureTestParams{type::TextureDimension::kCube},
-                    TextureTestParams{type::TextureDimension::kCubeArray}));
+                    TextureTestParams{type::TextureDimension::k3d}));
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());

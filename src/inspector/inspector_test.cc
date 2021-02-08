@@ -579,20 +579,24 @@ class InspectorHelper : public ProgramBuilder {
   /// Gets an appropriate type for the coords parameter depending the the
   /// dimensionality of the texture being sampled.
   /// @param dim dimensionality of the texture being sampled
-  /// @param sampled_kind type of data in the texture
+  /// @param scalar the scalar type
   /// @returns a pointer to a type appropriate for the coord param
-  type::Type* GetCoordsType(type::TextureDimension dim,
-                            ResourceBinding::SampledKind sampled_kind) {
-    type::Type* base_type = GetBaseType(sampled_kind);
-    if (dim == type::TextureDimension::k1d) {
-      return base_type;
-    } else if (dim == type::TextureDimension::k1dArray ||
-               dim == type::TextureDimension::k2d) {
-      return vec_type(base_type, 2);
-    } else if (dim == type::TextureDimension::kCubeArray) {
-      return vec_type(base_type, 4);
+  type::Type* GetCoordsType(type::TextureDimension dim, type::Type* scalar) {
+    switch (dim) {
+      case type::TextureDimension::k1d:
+      case type::TextureDimension::k1dArray:
+        return scalar;
+      case type::TextureDimension::k2d:
+      case type::TextureDimension::k2dArray:
+        return create<type::Vector>(scalar, 2);
+      case type::TextureDimension::k3d:
+      case type::TextureDimension::kCube:
+      case type::TextureDimension::kCubeArray:
+        return create<type::Vector>(scalar, 3);
+      default:
+        [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
     }
-    return vec_type(base_type, 3);
+    return nullptr;
   }
 
   Inspector& Build() {
@@ -1900,7 +1904,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type);
   AddComparisonSampler("foo_sampler", 0, 1);
-  AddGlobalVariable("foo_coords", ty.f32());
+  AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
 
   MakeComparisonSamplerReferenceBodyFunction(
@@ -1921,7 +1925,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type);
   AddComparisonSampler("foo_sampler", 0, 1);
-  AddGlobalVariable("foo_coords", ty.f32());
+  AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
 
   MakeComparisonSamplerReferenceBodyFunction(
@@ -1958,7 +1962,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type);
   AddComparisonSampler("foo_sampler", 0, 1);
-  AddGlobalVariable("foo_coords", ty.f32());
+  AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
 
   MakeComparisonSamplerReferenceBodyFunction("foo_func", "foo_texture",
@@ -1985,7 +1989,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
   AddDepthTexture("foo_texture", depth_texture_type);
   AddComparisonSampler("foo_sampler", 0, 1);
-  AddGlobalVariable("foo_coords", ty.f32());
+  AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
 
   MakeComparisonSamplerReferenceBodyFunction(
@@ -2040,8 +2044,7 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddSampledTexture("foo_texture", sampled_texture_type, 0, 0);
   AddSampler("foo_sampler", 0, 1);
-  auto* coord_type =
-      GetCoordsType(GetParam().type_dim, GetParam().sampled_kind);
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
   AddGlobalVariable("foo_coords", coord_type);
 
   MakeSamplerReferenceBodyFunction(
@@ -2079,49 +2082,17 @@ INSTANTIATE_TEST_SUITE_P(
             inspector::ResourceBinding::TextureDimension::k1d,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            type::TextureDimension::k1d,
-            inspector::ResourceBinding::TextureDimension::k1d,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            type::TextureDimension::k1d,
-            inspector::ResourceBinding::TextureDimension::k1d,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetSampledTextureTestParams{
             type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
             inspector::ResourceBinding::SampledKind::kFloat},
-        GetSampledTextureTestParams{
-            type::TextureDimension::k2d,
-            inspector::ResourceBinding::TextureDimension::k2d,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            type::TextureDimension::k2d,
-            inspector::ResourceBinding::TextureDimension::k2d,
-            inspector::ResourceBinding::SampledKind::kUInt},
         GetSampledTextureTestParams{
             type::TextureDimension::k3d,
             inspector::ResourceBinding::TextureDimension::k3d,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            type::TextureDimension::k3d,
-            inspector::ResourceBinding::TextureDimension::k3d,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            type::TextureDimension::k3d,
-            inspector::ResourceBinding::TextureDimension::k3d,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetSampledTextureTestParams{
             type::TextureDimension::kCube,
             inspector::ResourceBinding::TextureDimension::kCube,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetSampledTextureTestParams{
-            type::TextureDimension::kCube,
-            inspector::ResourceBinding::TextureDimension::kCube,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            type::TextureDimension::kCube,
-            inspector::ResourceBinding::TextureDimension::kCube,
-            inspector::ResourceBinding::SampledKind::kUInt}));
+            inspector::ResourceBinding::SampledKind::kFloat}));
 
 TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
        textureSample) {
@@ -2129,10 +2100,9 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddSampledTexture("foo_texture", sampled_texture_type, 0, 0);
   AddSampler("foo_sampler", 0, 1);
-  auto* coord_type =
-      GetCoordsType(GetParam().type_dim, GetParam().sampled_kind);
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
   AddGlobalVariable("foo_coords", coord_type);
-  AddGlobalVariable("foo_array_index", ty.u32());
+  AddGlobalVariable("foo_array_index", ty.i32());
 
   MakeSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_array_index",
@@ -2162,54 +2132,31 @@ INSTANTIATE_TEST_SUITE_P(
             inspector::ResourceBinding::TextureDimension::k1dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetSampledTextureTestParams{
             type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
         GetSampledTextureTestParams{
-            type::TextureDimension::k2dArray,
-            inspector::ResourceBinding::TextureDimension::k2dArray,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            type::TextureDimension::k2dArray,
-            inspector::ResourceBinding::TextureDimension::k2dArray,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetSampledTextureTestParams{
             type::TextureDimension::kCubeArray,
             inspector::ResourceBinding::TextureDimension::kCubeArray,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetSampledTextureTestParams{
-            type::TextureDimension::kCubeArray,
-            inspector::ResourceBinding::TextureDimension::kCubeArray,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetSampledTextureTestParams{
-            type::TextureDimension::kCubeArray,
-            inspector::ResourceBinding::TextureDimension::kCubeArray,
-            inspector::ResourceBinding::SampledKind::kUInt}));
+            inspector::ResourceBinding::SampledKind::kFloat}));
 
 TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
-       textureSample) {
+       textureLoad) {
   auto* multisampled_texture_type = MakeMultisampledTextureType(
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddMultisampledTexture("foo_texture", multisampled_texture_type, 0, 0);
-  AddSampler("foo_sampler", 0, 1);
-  auto* coord_type =
-      GetCoordsType(GetParam().type_dim, GetParam().sampled_kind);
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.i32());
   AddGlobalVariable("foo_coords", coord_type);
+  AddGlobalVariable("foo_sample_index", ty.i32());
 
-  MakeSamplerReferenceBodyFunction(
-      "ep", "foo_texture", "foo_sampler", "foo_coords",
-      GetBaseType(GetParam().sampled_kind),
-      ast::FunctionDecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-      });
+  Func("ep", ast::VariableList(), ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(Call("textureLoad", "foo_texture",
+                                           "foo_coords", "foo_sample_index")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   Inspector& inspector = Build();
 
@@ -2234,18 +2181,6 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetMultisampledTextureResourceBindingsTest,
     InspectorGetMultisampledTextureResourceBindingsTestWithParam,
     testing::Values(
-        GetMultisampledTextureTestParams{
-            type::TextureDimension::k1d,
-            inspector::ResourceBinding::TextureDimension::k1d,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetMultisampledTextureTestParams{
-            type::TextureDimension::k1d,
-            inspector::ResourceBinding::TextureDimension::k1d,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetMultisampledTextureTestParams{
-            type::TextureDimension::k1d,
-            inspector::ResourceBinding::TextureDimension::k1d,
-            inspector::ResourceBinding::SampledKind::kUInt},
         GetMultisampledTextureTestParams{
             type::TextureDimension::k2d,
             inspector::ResourceBinding::TextureDimension::k2d,
@@ -2274,15 +2209,14 @@ TEST_F(InspectorGetMultisampledArrayTextureResourceBindingsTest, Empty) {
 }
 
 TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
-       textureSample) {
+       DISABLED_textureSample) {
   auto* multisampled_texture_type = MakeMultisampledTextureType(
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddMultisampledTexture("foo_texture", multisampled_texture_type, 0, 0);
   AddSampler("foo_sampler", 0, 1);
-  auto* coord_type =
-      GetCoordsType(GetParam().type_dim, GetParam().sampled_kind);
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
   AddGlobalVariable("foo_coords", coord_type);
-  AddGlobalVariable("foo_array_index", ty.u32());
+  AddGlobalVariable("foo_array_index", ty.i32());
 
   MakeSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_array_index",
