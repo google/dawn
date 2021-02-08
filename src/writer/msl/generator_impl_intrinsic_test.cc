@@ -93,14 +93,10 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
     case IntrinsicType::kIsInf:
     case IntrinsicType::kIsNan:
     case IntrinsicType::kIsNormal:
-    case IntrinsicType::kLdexp:
     case IntrinsicType::kLength:
     case IntrinsicType::kLog:
     case IntrinsicType::kLog2:
     case IntrinsicType::kNormalize:
-    case IntrinsicType::kPack4x8Snorm:
-    case IntrinsicType::kPack4x8Unorm:
-    case IntrinsicType::kReflect:
     case IntrinsicType::kRound:
     case IntrinsicType::kSin:
     case IntrinsicType::kSinh:
@@ -109,50 +105,57 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
     case IntrinsicType::kTanh:
     case IntrinsicType::kTrunc:
     case IntrinsicType::kSign:
-      return builder->Call(str.str(), "f1");
+      return builder->Call(str.str(), "f2");
+    case IntrinsicType::kLdexp:
+      return builder->Call(str.str(), "f2", "u2");
     case IntrinsicType::kAtan2:
-    case IntrinsicType::kCross:
     case IntrinsicType::kDot:
     case IntrinsicType::kDistance:
     case IntrinsicType::kPow:
+    case IntrinsicType::kReflect:
     case IntrinsicType::kStep:
-      return builder->Call(str.str(), "f1", "f2");
+      return builder->Call(str.str(), "f2", "f2");
+    case IntrinsicType::kCross:
+      return builder->Call(str.str(), "f3", "f3");
     case IntrinsicType::kFma:
     case IntrinsicType::kMix:
     case IntrinsicType::kFaceForward:
     case IntrinsicType::kSmoothStep:
-      return builder->Call(str.str(), "f1", "f2", "f3");
+      return builder->Call(str.str(), "f2", "f2", "f2");
     case IntrinsicType::kAll:
     case IntrinsicType::kAny:
-      return builder->Call(str.str(), "b1");
+      return builder->Call(str.str(), "b2");
     case IntrinsicType::kAbs:
       if (type == ParamType::kF32) {
-        return builder->Call(str.str(), "f1");
+        return builder->Call(str.str(), "f2");
       } else {
-        return builder->Call(str.str(), "u1");
+        return builder->Call(str.str(), "u2");
       }
     case IntrinsicType::kCountOneBits:
     case IntrinsicType::kReverseBits:
-      return builder->Call(str.str(), "u1");
+      return builder->Call(str.str(), "u2");
     case IntrinsicType::kMax:
     case IntrinsicType::kMin:
       if (type == ParamType::kF32) {
-        return builder->Call(str.str(), "f1", "f2");
+        return builder->Call(str.str(), "f2", "f2");
       } else {
-        return builder->Call(str.str(), "u1", "u2");
+        return builder->Call(str.str(), "u2", "u2");
       }
     case IntrinsicType::kClamp:
       if (type == ParamType::kF32) {
-        return builder->Call(str.str(), "f1", "f2", "f3");
+        return builder->Call(str.str(), "f2", "f2", "f2");
       } else {
-        return builder->Call(str.str(), "u1", "u2", "u3");
+        return builder->Call(str.str(), "u2", "u2", "u2");
       }
     case IntrinsicType::kSelect:
-      return builder->Call(str.str(), "f1", "f2", "b1");
+      return builder->Call(str.str(), "f2", "f2", "b2");
     case IntrinsicType::kDeterminant:
-      return builder->Call(str.str(), "m1");
+      return builder->Call(str.str(), "m2x2");
     case IntrinsicType::kPack2x16Snorm:
     case IntrinsicType::kPack2x16Unorm:
+      return builder->Call(str.str(), "f2");
+    case IntrinsicType::kPack4x8Snorm:
+    case IntrinsicType::kPack4x8Unorm:
       return builder->Call(str.str(), "f4");
     default:
       break;
@@ -168,15 +171,12 @@ TEST_P(MslIntrinsicTest, Emit) {
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
   WrapInFunction(call);
 
-  Global("f1", ast::StorageClass::kFunction, ty.vec2<float>());
   Global("f2", ast::StorageClass::kFunction, ty.vec2<float>());
-  Global("f3", ast::StorageClass::kFunction, ty.vec2<float>());
-  Global("f4", ast::StorageClass::kFunction, ty.vec2<float>());
-  Global("u1", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
+  Global("f3", ast::StorageClass::kFunction, ty.vec3<float>());
+  Global("f4", ast::StorageClass::kFunction, ty.vec4<float>());
   Global("u2", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
-  Global("u3", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
-  Global("b1", ast::StorageClass::kFunction, ty.vec2<bool>());
-  Global("m1", ast::StorageClass::kFunction, ty.mat2x2<float>());
+  Global("b2", ast::StorageClass::kFunction, ty.vec2<bool>());
+  Global("m2x2", ast::StorageClass::kFunction, ty.mat2x2<float>());
 
   GeneratorImpl& gen = Build();
 

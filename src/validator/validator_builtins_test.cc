@@ -303,12 +303,8 @@ TEST_F(ValidatorBuiltinsTest, Determinant_TooFewParams) {
 
 TEST_F(ValidatorBuiltinsTest, Frexp_Scalar) {
   auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.i32());
-  auto* b =
-      Const("b", ast::StorageClass::kWorkgroup,
-            ty.pointer<int>(ast::StorageClass::kWorkgroup), Expr("a"), {});
   RegisterVariable(a);
-  RegisterVariable(b);
-  auto* builtin = Call("frexp", 1.0f, Expr("b"));
+  auto* builtin = Call("frexp", 1.0f, Expr("a"));
   WrapInFunction(builtin);
 
   ValidatorImpl& v = Build();

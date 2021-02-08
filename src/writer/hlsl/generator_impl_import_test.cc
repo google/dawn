@@ -76,8 +76,6 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"length", "length"},
                                          HlslImportData{"log", "log"},
                                          HlslImportData{"log2", "log2"},
-                                         HlslImportData{"normalize",
-                                                        "normalize"},
                                          HlslImportData{"round", "round"},
                                          HlslImportData{"sign", "sign"},
                                          HlslImportData{"sin", "sin"},
@@ -102,6 +100,48 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleIntParamTest,
                          testing::Values(HlslImportData{"abs", "abs"}));
+
+using HlslImportData_SingleVectorParamTest = TestParamHelper<HlslImportData>;
+TEST_P(HlslImportData_SingleVectorParamTest, FloatVector) {
+  auto param = GetParam();
+
+  auto* ident = Expr(param.name);
+  auto* expr = Call(ident, vec3<f32>(1.f, 2.f, 3.f));
+  WrapInFunction(expr);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
+  EXPECT_EQ(result(),
+            std::string(param.hlsl_name) + "(float3(1.0f, 2.0f, 3.0f))");
+}
+INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
+                         HlslImportData_SingleVectorParamTest,
+                         testing::Values(HlslImportData{"abs", "abs"},
+                                         HlslImportData{"acos", "acos"},
+                                         HlslImportData{"asin", "asin"},
+                                         HlslImportData{"atan", "atan"},
+                                         HlslImportData{"cos", "cos"},
+                                         HlslImportData{"cosh", "cosh"},
+                                         HlslImportData{"ceil", "ceil"},
+                                         HlslImportData{"exp", "exp"},
+                                         HlslImportData{"exp2", "exp2"},
+                                         HlslImportData{"floor", "floor"},
+                                         HlslImportData{"fract", "frac"},
+                                         HlslImportData{"inverseSqrt", "rsqrt"},
+                                         HlslImportData{"length", "length"},
+                                         HlslImportData{"log", "log"},
+                                         HlslImportData{"log2", "log2"},
+                                         HlslImportData{"normalize",
+                                                        "normalize"},
+                                         HlslImportData{"round", "round"},
+                                         HlslImportData{"sign", "sign"},
+                                         HlslImportData{"sin", "sin"},
+                                         HlslImportData{"sinh", "sinh"},
+                                         HlslImportData{"sqrt", "sqrt"},
+                                         HlslImportData{"tan", "tan"},
+                                         HlslImportData{"tanh", "tanh"},
+                                         HlslImportData{"trunc", "trunc"}));
 
 using HlslImportData_DualParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParamTest, FloatScalar) {

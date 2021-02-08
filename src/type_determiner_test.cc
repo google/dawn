@@ -1725,8 +1725,11 @@ using ImportData_DataPackingTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_DataPackingTest, InferType) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident);
+  bool pack4 = param.intrinsic == IntrinsicType::kPack4x8Snorm ||
+               param.intrinsic == IntrinsicType::kPack4x8Unorm;
+
+  auto* call = pack4 ? Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f))
+                     : Call(param.name, vec2<f32>(1.f, 2.f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1748,8 +1751,7 @@ using ImportData_SingleParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_SingleParamTest, Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1.f);
+  auto* call = Call(param.name, 1.f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1761,8 +1763,7 @@ TEST_P(ImportData_SingleParamTest, Scalar) {
 TEST_P(ImportData_SingleParamTest, Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f));
+  auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1801,7 +1802,6 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"inverseSqrt", IntrinsicType::kInverseSqrt},
                     IntrinsicData{"log", IntrinsicType::kLog},
                     IntrinsicData{"log2", IntrinsicType::kLog2},
-                    IntrinsicData{"normalize", IntrinsicType::kNormalize},
                     IntrinsicData{"round", IntrinsicType::kRound},
                     IntrinsicData{"sign", IntrinsicType::kSign},
                     IntrinsicData{"sin", IntrinsicType::kSin},
@@ -1811,13 +1811,34 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"tanh", IntrinsicType::kTanh},
                     IntrinsicData{"trunc", IntrinsicType::kTrunc}));
 
+TEST_F(IntrinsicDataTest, Normalize_Vector) {
+  auto* call = Call("normalize", vec3<f32>(1.0f, 1.0f, 3.0f));
+  WrapInFunction(call);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(IntrinsicDataTest, Normalize_Error_NoParams) {
+  auto* call = Call("normalize");
+  WrapInFunction(call);
+
+  EXPECT_FALSE(td()->Determine());
+
+  EXPECT_EQ(td()->error(),
+            "missing parameter 0 required for type determination in builtin "
+            "normalize");
+}
+
 using ImportData_SingleParam_FloatOrInt_Test =
     TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1.f);
+  auto* call = Call(param.name, 1.f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1829,8 +1850,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Scalar) {
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f));
+  auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1843,8 +1863,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Float_Vector) {
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, -1);
+  auto* call = Call(param.name, -1);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1864,8 +1883,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Sint_Vector) {
   ast::ExpressionList params;
   params.push_back(vec3<i32>(vals));
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, params);
+  auto* call = Call(param.name, params);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1881,8 +1899,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
   ast::ExpressionList params;
   params.push_back(Expr(1u));
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, params);
+  auto* call = Call(param.name, params);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1894,8 +1911,7 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Scalar) {
 TEST_P(ImportData_SingleParam_FloatOrInt_Test, Uint_Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<u32>(1u, 1u, 3u));
+  auto* call = Call(param.name, vec3<u32>(1u, 1u, 3u));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1924,9 +1940,7 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                                        IntrinsicType::kAbs}));
 
 TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
-  auto* ident = Expr("length");
-
-  auto* call = Call(ident, 1.f);
+  auto* call = Call("length", 1.f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1939,9 +1953,7 @@ TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
   ast::ExpressionList params;
   params.push_back(vec3<f32>(1.0f, 1.0f, 3.0f));
 
-  auto* ident = Expr("length");
-
-  auto* call = Call(ident, params);
+  auto* call = Call("length", params);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1954,8 +1966,7 @@ using ImportData_TwoParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_TwoParamTest, Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1.f, 1.f);
+  auto* call = Call(param.name, 1.f, 1.f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1967,9 +1978,8 @@ TEST_P(ImportData_TwoParamTest, Scalar) {
 TEST_P(ImportData_TwoParamTest, Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call =
-      Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+  auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f),
+                    vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1999,9 +2009,7 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"reflect", IntrinsicType::kReflect}));
 
 TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
-  auto* ident = Expr("distance");
-
-  auto* call = Call(ident, 1.f, 1.f);
+  auto* call = Call("distance", 1.f, 1.f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2011,10 +2019,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
-  auto* ident = Expr("distance");
-
-  auto* call =
-      Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+  auto* call = Call("distance", vec3<f32>(1.0f, 1.0f, 3.0f),
+                    vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2024,10 +2030,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Cross) {
-  auto* ident = Expr("cross");
-
   auto* call =
-      Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+      Call("cross", vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2038,9 +2042,7 @@ TEST_F(TypeDeterminerTest, ImportData_Cross) {
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Cross_AutoType) {
-  auto* ident = Expr("cross");
-
-  auto* call = Call(ident);
+  auto* call = Call("cross");
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2054,8 +2056,7 @@ using ImportData_ThreeParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_ThreeParamTest, Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1.f, 1.f, 1.f);
+  auto* call = Call(param.name, 1.f, 1.f, 1.f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2067,8 +2068,7 @@ TEST_P(ImportData_ThreeParamTest, Scalar) {
 TEST_P(ImportData_ThreeParamTest, Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f),
+  auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f),
                     vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
@@ -2104,8 +2104,7 @@ using ImportData_ThreeParam_FloatOrInt_Test =
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1.f, 1.f, 1.f);
+  auto* call = Call(param.name, 1.f, 1.f, 1.f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2117,8 +2116,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Scalar) {
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<f32>(1.0f, 1.0f, 3.0f),
+  auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f),
                     vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
@@ -2132,8 +2130,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Float_Vector) {
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1, 1, 1);
+  auto* call = Call(param.name, 1, 1, 1);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2145,9 +2142,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call =
-      Call(ident, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
+  auto* call = Call(param.name, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3),
+                    vec3<i32>(1, 1, 3));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2160,8 +2156,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Sint_Vector) {
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1u, 1u, 1u);
+  auto* call = Call(param.name, 1u, 1u, 1u);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2173,8 +2168,7 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
 TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Uint_Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u),
+  auto* call = Call(param.name, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u),
                     vec3<u32>(1u, 1u, 3u));
   WrapInFunction(call);
 
@@ -2208,8 +2202,7 @@ using ImportData_Int_SingleParamTest =
 TEST_P(ImportData_Int_SingleParamTest, Scalar) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1);
+  auto* call = Call(param.name, 1);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2221,8 +2214,7 @@ TEST_P(ImportData_Int_SingleParamTest, Scalar) {
 TEST_P(ImportData_Int_SingleParamTest, Vector) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<i32>(1, 1, 3));
+  auto* call = Call(param.name, vec3<i32>(1, 1, 3));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2256,8 +2248,7 @@ using ImportData_FloatOrInt_TwoParamTest =
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Signed) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1, 1);
+  auto* call = Call(param.name, 1, 1);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2269,8 +2260,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Signed) {
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1u, 1u);
+  auto* call = Call(param.name, 1u, 1u);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2282,8 +2272,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, 1.0f, 1.0f);
+  auto* call = Call(param.name, 1.0f, 1.0f);
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2295,8 +2284,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Scalar_Float) {
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
+  auto* call = Call(param.name, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2309,8 +2297,7 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Signed) {
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u));
+  auto* call = Call(param.name, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2323,8 +2310,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Unsigned) {
 TEST_P(ImportData_FloatOrInt_TwoParamTest, Vector_Float) {
   auto param = GetParam();
 
-  auto* ident = Expr(param.name);
-  auto* call = Call(ident, vec3<f32>(1.f, 1.f, 3.f), vec3<f32>(1.f, 1.f, 3.f));
+  auto* call =
+      Call(param.name, vec3<f32>(1.f, 1.f, 3.f), vec3<f32>(1.f, 1.f, 3.f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2356,9 +2343,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
   Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
 
-  auto* ident = Expr("determinant");
-
-  auto* call = Call(ident, "var");
+  auto* call = Call("determinant", "var");
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2800,8 +2785,7 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
   param.buildTextureVariable(this);
   param.buildSamplerVariable(this);
 
-  auto* ident = Expr(param.function);
-  auto* call = Call(ident, param.args(this));
+  auto* call = Call(param.function, param.args(this));
   WrapInFunction(call);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
