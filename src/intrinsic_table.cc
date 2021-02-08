@@ -23,7 +23,11 @@
 #include "src/block_allocator.h"
 #include "src/program_builder.h"
 #include "src/semantic/intrinsic.h"
+#include "src/type/depth_texture_type.h"
 #include "src/type/f32_type.h"
+#include "src/type/multisampled_texture_type.h"
+#include "src/type/sampled_texture_type.h"
+#include "src/type/storage_texture_type.h"
 
 namespace tint {
 namespace {
@@ -164,6 +168,18 @@ class OpenTypeBuilder : public Builder {
   OpenType open_type_;
 };
 
+/// VoidBuilder is a Matcher / Builder for void types.
+class VoidBuilder : public Builder {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->Is<type::Void>();
+  }
+  type::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<type::Void>();
+  }
+  std::string str() const override { return "void"; }
+};
+
 /// BoolBuilder is a Matcher / Builder for boolean types.
 class BoolBuilder : public Builder {
  public:
@@ -298,7 +314,7 @@ class VecBuilder : public Builder {
 
  protected:
   const uint32_t size_;
-  Builder* element_builder_;
+  Builder* const element_builder_;
 };
 
 /// OpenSizeVecBuilder is a Matcher / Builder for matrix types of an open number
@@ -399,6 +415,173 @@ class ArrayBuilder : public Builder {
   Builder* const element_builder_;
 };
 
+/// SampledTextureBuilder is a Matcher / Builder for sampled texture types.
+class SampledTextureBuilder : public Builder {
+ public:
+  explicit SampledTextureBuilder(type::TextureDimension dimensions,
+                                 Builder* type_builder)
+      : dimensions_(dimensions), type_builder_(type_builder) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* tex = ty->As<type::SampledTexture>()) {
+      if (tex->dim() == dimensions_) {
+        return type_builder_->Match(state, tex->type());
+      }
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* type = type_builder_->Build(state);
+    return state.ty_mgr.Get<type::SampledTexture>(dimensions_, type);
+  }
+
+  std::string str() const override {
+    std::stringstream ss;
+    ss << "texture_" << dimensions_ << "<" << type_builder_->str() << ">";
+    return ss.str();
+  }
+
+ private:
+  type::TextureDimension const dimensions_;
+  Builder* const type_builder_;
+};
+
+/// MultisampledTextureBuilder is a Matcher / Builder for multisampled texture
+/// types.
+class MultisampledTextureBuilder : public Builder {
+ public:
+  explicit MultisampledTextureBuilder(type::TextureDimension dimensions,
+                                      Builder* type_builder)
+      : dimensions_(dimensions), type_builder_(type_builder) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* tex = ty->As<type::MultisampledTexture>()) {
+      if (tex->dim() == dimensions_) {
+        return type_builder_->Match(state, tex->type());
+      }
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* type = type_builder_->Build(state);
+    return state.ty_mgr.Get<type::MultisampledTexture>(dimensions_, type);
+  }
+
+  std::string str() const override {
+    std::stringstream ss;
+    ss << "texture_multisampled_" << dimensions_ << "<" << type_builder_->str()
+       << ">";
+    return ss.str();
+  }
+
+ private:
+  type::TextureDimension const dimensions_;
+  Builder* const type_builder_;
+};
+
+/// DepthTextureBuilder is a Matcher / Builder for depth texture types.
+class DepthTextureBuilder : public Builder {
+ public:
+  explicit DepthTextureBuilder(type::TextureDimension dimensions)
+      : dimensions_(dimensions) {}
+
+  bool Match(MatchState&, type::Type* ty) const override {
+    if (auto* tex = ty->As<type::DepthTexture>()) {
+      return tex->dim() == dimensions_;
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<type::DepthTexture>(dimensions_);
+  }
+
+  std::string str() const override {
+    std::stringstream ss;
+    ss << "texture_depth_" << dimensions_;
+    return ss.str();
+  }
+
+ private:
+  type::TextureDimension const dimensions_;
+};
+
+/// StorageTextureBuilder is a Matcher / Builder for storage texture types of
+/// the given texel and channel formats.
+class StorageTextureBuilder : public Builder {
+ public:
+  explicit StorageTextureBuilder(
+      type::TextureDimension dimensions,
+      OpenNumber texel_format,  // a.k.a "image format"
+      OpenType channel_format)  // a.k.a "storage subtype"
+      : dimensions_(dimensions),
+        texel_format_(texel_format),
+        channel_format_(channel_format) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* tex = ty->As<type::StorageTexture>()) {
+      if (MatchOpenNumber(state, texel_format_,
+                          static_cast<uint32_t>(tex->image_format()))) {
+        if (MatchOpenType(state, channel_format_, tex->type())) {
+          return tex->dim() == dimensions_;
+        }
+      }
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto texel_format =
+        static_cast<type::ImageFormat>(state.open_numbers.at(texel_format_));
+    auto* channel_format = state.open_types.at(channel_format_);
+    return state.ty_mgr.Get<type::StorageTexture>(dimensions_, texel_format,
+                                                  channel_format);
+  }
+
+  std::string str() const override {
+    std::stringstream ss;
+    ss << "texture_storage_" << dimensions_ << "<F>";
+    return ss.str();
+  }
+
+ private:
+  type::TextureDimension const dimensions_;
+  OpenNumber const texel_format_;
+  OpenType const channel_format_;
+};
+
+/// SamplerBuilder is a Matcher / Builder for sampler types of the given kind.
+class SamplerBuilder : public Builder {
+ public:
+  explicit SamplerBuilder(type::SamplerKind kind) : kind_(kind) {}
+
+  bool Match(MatchState&, type::Type* ty) const override {
+    if (auto* sampler = ty->As<type::Sampler>()) {
+      return sampler->kind() == kind_;
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<type::Sampler>(kind_);
+  }
+
+  std::string str() const override {
+    switch (kind_) {
+      case type::SamplerKind::kSampler:
+        return "sampler";
+      case type::SamplerKind::kComparisonSampler:
+        return "sampler_comparison";
+    }
+    return "sampler";
+  }
+
+ private:
+  type::SamplerKind const kind_;
+};
+
 /// Impl is the private implementation of the IntrinsicTable interface.
 class Impl : public IntrinsicTable {
  public:
@@ -408,6 +591,18 @@ class Impl : public IntrinsicTable {
       ProgramBuilder& builder,
       semantic::IntrinsicType type,
       const std::vector<type::Type*>& args) const override;
+
+  /// Holds the information about a single overload parameter used for matching
+  struct Parameter {
+    Parameter(
+        Builder* m)  // NOLINT - implicit constructor required for Register()
+        : matcher(m) {}
+    Parameter(semantic::Parameter::Usage u, Builder* m)
+        : matcher(m), usage(u) {}
+
+    Builder* const matcher;
+    semantic::Parameter::Usage const usage = semantic::Parameter::Usage::kNone;
+  };
 
   /// A single overload definition.
   struct Overload {
@@ -425,7 +620,7 @@ class Impl : public IntrinsicTable {
 
     semantic::IntrinsicType type;
     Builder* return_type;
-    std::vector<Builder*> parameters;
+    std::vector<Parameter> parameters;
     std::unordered_map<OpenType, Matcher*> open_type_matchers;
   };
 
@@ -435,6 +630,7 @@ class Impl : public IntrinsicTable {
 
   /// Commonly used Matcher / Builders
   struct {
+    VoidBuilder void_;
     BoolBuilder bool_;
     F32Builder f32;
     I32Builder i32;
@@ -450,34 +646,32 @@ class Impl : public IntrinsicTable {
 
   /// @returns a Matcher / Builder that matches a pointer with the given element
   /// type
-  PtrBuilder* ptr(Builder* element_builder) {
+  Builder* ptr(Builder* element_builder) {
     return matcher_allocator_.Create<PtrBuilder>(element_builder);
   }
 
   /// @returns a Matcher / Builder that matches a vector of size OpenNumber::N
   /// with the given element type
-  OpenSizeVecBuilder* vecN(Builder* element_builder) {
+  Builder* vecN(Builder* element_builder) {
     return matcher_allocator_.Create<OpenSizeVecBuilder>(OpenNumber::N,
                                                          element_builder);
   }
 
   /// @returns a Matcher / Builder that matches a vector of the given size and
   /// element type
-  VecBuilder* vec(uint32_t size, Builder* element_builder) {
+  Builder* vec(uint32_t size, Builder* element_builder) {
     return matcher_allocator_.Create<VecBuilder>(size, element_builder);
   }
 
   /// @returns a Matcher / Builder that matches a runtime sized array with the
   /// given element type
-  ArrayBuilder* array(Builder* element_builder) {
+  Builder* array(Builder* element_builder) {
     return matcher_allocator_.Create<ArrayBuilder>(element_builder);
   }
 
   /// @returns a Matcher / Builder that matches a matrix with the given size and
   /// element type
-  OpenSizeMatBuilder* mat(OpenNumber columns,
-                          OpenNumber rows,
-                          Builder* element_builder) {
+  Builder* mat(OpenNumber columns, OpenNumber rows, Builder* element_builder) {
     return matcher_allocator_.Create<OpenSizeMatBuilder>(columns, rows,
                                                          element_builder);
   }
@@ -489,12 +683,46 @@ class Impl : public IntrinsicTable {
     return mat(OpenNumber::N, OpenNumber::N, std::forward<T>(in));
   }
 
+  /// @returns a Matcher / Builder that matches a sampled texture with the given
+  /// dimensions and type
+  Builder* sampled_texture(type::TextureDimension dimensions, Builder* type) {
+    return matcher_allocator_.Create<SampledTextureBuilder>(dimensions, type);
+  }
+
+  /// @returns a Matcher / Builder that matches a multisampled texture with the
+  /// given dimensions and type
+  Builder* multisampled_texture(type::TextureDimension dimensions,
+                                Builder* type) {
+    return matcher_allocator_.Create<MultisampledTextureBuilder>(dimensions,
+                                                                 type);
+  }
+
+  /// @returns a Matcher / Builder that matches a depth texture with the
+  /// given dimensions
+  Builder* depth_texture(type::TextureDimension dimensions) {
+    return matcher_allocator_.Create<DepthTextureBuilder>(dimensions);
+  }
+
+  /// @returns a Matcher / Builder that matches a storage texture of the given
+  /// format with the given dimensions
+  Builder* storage_texture(type::TextureDimension dimensions,
+                           OpenNumber texel_format,
+                           OpenType channel_format) {
+    return matcher_allocator_.Create<StorageTextureBuilder>(
+        dimensions, texel_format, channel_format);
+  }
+
+  /// @returns a Matcher / Builder that matches a sampler type
+  Builder* sampler(type::SamplerKind kind) {
+    return matcher_allocator_.Create<SamplerBuilder>(kind);
+  }
+
   /// Registers an overload with the given intrinsic type, return type Matcher /
   /// Builder, and parameter Matcher / Builders.
   /// This overload of Register does not constrain any OpenTypes.
   void Register(semantic::IntrinsicType type,
                 Builder* return_type,
-                std::vector<Builder*> parameters) {
+                std::vector<Parameter> parameters) {
     Overload overload{type, return_type, std::move(parameters), {}};
     overloads_.emplace_back(overload);
   }
@@ -505,7 +733,7 @@ class Impl : public IntrinsicTable {
   /// open_type_matcher.
   void Register(semantic::IntrinsicType type,
                 Builder* return_type,
-                std::vector<Builder*> parameters,
+                std::vector<Parameter> parameters,
                 std::pair<OpenType, Matcher*> open_type_matcher) {
     Overload overload{
         type, return_type, std::move(parameters), {open_type_matcher}};
@@ -515,9 +743,12 @@ class Impl : public IntrinsicTable {
 
 Impl::Impl() {
   using I = semantic::IntrinsicType;
+  using Dim = type::TextureDimension;
 
+  auto* void_ = &matchers_.void_;      // void
   auto* bool_ = &matchers_.bool_;      // bool
   auto* f32 = &matchers_.f32;          // f32
+  auto* i32 = &matchers_.i32;          // i32
   auto* u32 = &matchers_.u32;          // u32
   auto* iu32 = &matchers_.iu32;        // i32 or u32
   auto* fiu32 = &matchers_.fiu32;      // f32, i32 or u32
@@ -527,6 +758,9 @@ Impl::Impl() {
   auto* vec2_f32 = vec(2, f32);        // vec2<f32>
   auto* vec3_f32 = vec(3, f32);        // vec3<f32>
   auto* vec4_f32 = vec(4, f32);        // vec4<f32>
+  auto* vec4_T = vec(4, T);            // vec4<T>
+  auto* vec2_i32 = vec(2, i32);        // vec2<i32>
+  auto* vec3_i32 = vec(3, i32);        // vec3<i32>
   auto* vecN_f32 = vecN(f32);          // vecN<f32>
   auto* vecN_T = vecN(T);              // vecN<T>
   auto* vecN_bool = vecN(bool_);       // vecN<bool>
@@ -773,6 +1007,200 @@ Impl::Impl() {
   Register(I::kTanh,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
   Register(I::kTrunc,         f32,         {f32}                                                    ); // NOLINT
   Register(I::kTrunc,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  // clang-format on
+
+  auto* tex_1d_f32 = sampled_texture(Dim::k1d, f32);
+  auto* tex_1d_T = sampled_texture(Dim::k1d, T);
+  auto* tex_1d_array_f32 = sampled_texture(Dim::k1dArray, f32);
+  auto* tex_1d_array_T = sampled_texture(Dim::k1dArray, T);
+  auto* tex_2d_f32 = sampled_texture(Dim::k2d, f32);
+  auto* tex_2d_T = sampled_texture(Dim::k2d, T);
+  auto* tex_2d_array_f32 = sampled_texture(Dim::k2dArray, f32);
+  auto* tex_2d_array_T = sampled_texture(Dim::k2dArray, T);
+  auto* tex_3d_f32 = sampled_texture(Dim::k3d, f32);
+  auto* tex_3d_T = sampled_texture(Dim::k3d, T);
+  auto* tex_cube_f32 = sampled_texture(Dim::kCube, f32);
+  auto* tex_cube_T = sampled_texture(Dim::kCube, T);
+  auto* tex_cube_array_f32 = sampled_texture(Dim::kCubeArray, f32);
+  auto* tex_cube_array_T = sampled_texture(Dim::kCubeArray, T);
+  auto* tex_ms_2d_T = multisampled_texture(Dim::k2d, T);
+  auto* tex_ms_2d_array_T = multisampled_texture(Dim::k2dArray, T);
+  auto* tex_depth_2d = depth_texture(Dim::k2d);
+  auto* tex_depth_2d_array = depth_texture(Dim::k2dArray);
+  auto* tex_depth_cube = depth_texture(Dim::kCube);
+  auto* tex_depth_cube_array = depth_texture(Dim::kCubeArray);
+  auto* tex_storage_1d_FT =
+      storage_texture(Dim::k1d, OpenNumber::F, OpenType::T);
+  auto* tex_storage_1d_array_FT =
+      storage_texture(Dim::k1dArray, OpenNumber::F, OpenType::T);
+  auto* tex_storage_2d_FT =
+      storage_texture(Dim::k2d, OpenNumber::F, OpenType::T);
+  auto* tex_storage_2d_array_FT =
+      storage_texture(Dim::k2dArray, OpenNumber::F, OpenType::T);
+  auto* tex_storage_3d_FT =
+      storage_texture(Dim::k3d, OpenNumber::F, OpenType::T);
+  auto* sampler = this->sampler(type::SamplerKind::kSampler);
+  auto* sampler_comparison =
+      this->sampler(type::SamplerKind::kComparisonSampler);
+  auto t = semantic::Parameter::Usage::kTexture;
+  auto s = semantic::Parameter::Usage::kSampler;
+  auto coords = semantic::Parameter::Usage::kCoords;
+  auto array_index = semantic::Parameter::Usage::kArrayIndex;
+  auto ddx = semantic::Parameter::Usage::kDdx;
+  auto ddy = semantic::Parameter::Usage::kDdy;
+  auto depth_ref = semantic::Parameter::Usage::kDepthRef;
+  auto bias = semantic::Parameter::Usage::kBias;
+  auto level = semantic::Parameter::Usage::kLevel;
+  auto offset = semantic::Parameter::Usage::kOffset;
+  auto value = semantic::Parameter::Usage::kValue;
+  auto sample_index = semantic::Parameter::Usage::kSampleIndex;
+
+  // clang-format off
+
+  //       name                   return type  parameter types
+  Register(I::kTextureDimensions, i32,      {{t, tex_1d_T},                              }); // NOLINT
+  Register(I::kTextureDimensions, i32,      {{t, tex_1d_array_T},                        }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_2d_T},                              }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_2d_T},                {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_2d_array_T},                        }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_2d_array_T},          {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_3d_T},                              }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_3d_T},                {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_cube_T},                            }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_cube_T},              {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_cube_array_T},                      }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_cube_array_T},        {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_ms_2d_T},                           }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_ms_2d_array_T},                     }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_depth_2d},                          }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_depth_2d},            {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_depth_2d_array},                    }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_depth_2d_array},      {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_depth_cube},                        }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_depth_cube},          {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_depth_cube_array},                  }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_depth_cube_array},    {level, i32}, }); // NOLINT
+  Register(I::kTextureDimensions, i32,      {{t, tex_storage_1d_FT},                     }); // NOLINT
+  Register(I::kTextureDimensions, i32,      {{t, tex_storage_1d_array_FT},               }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_storage_2d_FT},                     }); // NOLINT
+  Register(I::kTextureDimensions, vec2_i32, {{t, tex_storage_2d_array_FT},               }); // NOLINT
+  Register(I::kTextureDimensions, vec3_i32, {{t, tex_storage_3d_FT},                     }); // NOLINT
+
+  Register(I::kTextureNumLayers,  i32, {{t, tex_1d_array_T},          });
+  Register(I::kTextureNumLayers,  i32, {{t, tex_2d_array_T},          });
+  Register(I::kTextureNumLayers,  i32, {{t, tex_cube_array_T},        });
+  Register(I::kTextureNumLayers,  i32, {{t, tex_ms_2d_array_T},       });
+  Register(I::kTextureNumLayers,  i32, {{t, tex_depth_2d_array},      });
+  Register(I::kTextureNumLayers,  i32, {{t, tex_depth_cube_array},    });
+  Register(I::kTextureNumLayers,  i32, {{t, tex_storage_1d_array_FT}, });
+  Register(I::kTextureNumLayers,  i32, {{t, tex_storage_2d_array_FT}, });
+
+  Register(I::kTextureNumLevels,  i32, {{t, tex_2d_T},             });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_2d_array_T},       });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_3d_T},             });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_cube_T},           });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_cube_array_T},     });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_depth_2d},         });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_depth_2d_array},   });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_depth_cube},       });
+  Register(I::kTextureNumLevels,  i32, {{t, tex_depth_cube_array}, });
+
+  Register(I::kTextureNumSamples, i32, {{t, tex_ms_2d_T},       });
+  Register(I::kTextureNumSamples, i32, {{t, tex_ms_2d_array_T}, });
+
+  Register(I::kTextureSample, vec4_f32, {{t, tex_1d_f32},           {s, sampler}, {coords, f32},                                              }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_1d_array_f32},     {s, sampler}, {coords, f32},      {array_index, i32},                     }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                                         }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                     {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_2d_array_f32},     {s, sampler}, {coords, vec2_f32}, {array_index, i32},                     }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_2d_array_f32},     {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_3d_f32},           {s, sampler}, {coords, vec3_f32},                                         }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_3d_f32},           {s, sampler}, {coords, vec3_f32},                     {offset, vec3_i32}, }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_cube_f32},         {s, sampler}, {coords, vec3_f32},                                         }); // NOLINT
+  Register(I::kTextureSample, vec4_f32, {{t, tex_cube_array_f32},   {s, sampler}, {coords, vec3_f32}, {array_index, i32},                     }); // NOLINT
+  Register(I::kTextureSample, f32,      {{t, tex_depth_2d},         {s, sampler}, {coords, vec2_f32},                                         }); // NOLINT
+  Register(I::kTextureSample, f32,      {{t, tex_depth_2d},         {s, sampler}, {coords, vec2_f32},                     {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSample, f32,      {{t, tex_depth_2d_array},   {s, sampler}, {coords, vec2_f32}, {array_index, i32},                     }); // NOLINT
+  Register(I::kTextureSample, f32,      {{t, tex_depth_2d_array},   {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSample, f32,      {{t, tex_depth_cube},       {s, sampler}, {coords, vec3_f32},                                         }); // NOLINT
+  Register(I::kTextureSample, f32,      {{t, tex_depth_cube_array}, {s, sampler}, {coords, vec3_f32}, {array_index, i32},                     }); // NOLINT
+
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                     {bias, f32},                     }); // NOLINT
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                     {bias, f32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_2d_array_f32},     {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {bias, f32},                     }); // NOLINT
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_2d_array_f32},     {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {bias, f32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_3d_f32},           {s, sampler}, {coords, vec3_f32},                     {bias, f32},                     }); // NOLINT
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_3d_f32},           {s, sampler}, {coords, vec3_f32},                     {bias, f32}, {offset, vec3_i32}, }); // NOLINT
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_cube_f32},         {s, sampler}, {coords, vec3_f32},                     {bias, f32},                     }); // NOLINT
+  Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_cube_array_f32},   {s, sampler}, {coords, vec3_f32}, {array_index, i32}, {bias, f32},                     }); // NOLINT
+
+  Register(I::kTextureSampleCompare, f32,      {{t, tex_depth_2d},         {s, sampler_comparison}, {coords, vec2_f32},                     {depth_ref, f32},                         }); // NOLINT
+  Register(I::kTextureSampleCompare, f32,      {{t, tex_depth_2d},         {s, sampler_comparison}, {coords, vec2_f32},                     {depth_ref, f32}, {offset, vec2_i32},     }); // NOLINT
+  Register(I::kTextureSampleCompare, f32,      {{t, tex_depth_2d_array},   {s, sampler_comparison}, {coords, vec2_f32}, {array_index, i32}, {depth_ref, f32},                         }); // NOLINT
+  Register(I::kTextureSampleCompare, f32,      {{t, tex_depth_2d_array},   {s, sampler_comparison}, {coords, vec2_f32}, {array_index, i32}, {depth_ref, f32}, {offset, vec2_i32},     }); // NOLINT
+  Register(I::kTextureSampleCompare, f32,      {{t, tex_depth_cube},       {s, sampler_comparison}, {coords, vec3_f32},                     {depth_ref, f32},                         }); // NOLINT
+  Register(I::kTextureSampleCompare, f32,      {{t, tex_depth_cube_array}, {s, sampler_comparison}, {coords, vec3_f32}, {array_index, i32}, {depth_ref, f32},                         }); // NOLINT
+
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_2d_f32},         {s, sampler}, {coords, vec2_f32},                     {ddx, vec2_f32}, {ddy, vec2_f32},                     }); // NOLINT
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_2d_f32},         {s, sampler}, {coords, vec2_f32},                     {ddx, vec2_f32}, {ddy, vec2_f32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_2d_array_f32},   {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {ddx, vec2_f32}, {ddy, vec2_f32},                     }); // NOLINT
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_2d_array_f32},   {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {ddx, vec2_f32}, {ddy, vec2_f32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_3d_f32},         {s, sampler}, {coords, vec3_f32},                     {ddx, vec3_f32}, {ddy, vec3_f32},                     }); // NOLINT
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_3d_f32},         {s, sampler}, {coords, vec3_f32},                     {ddx, vec3_f32}, {ddy, vec3_f32}, {offset, vec3_i32}, }); // NOLINT
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_cube_f32},       {s, sampler}, {coords, vec3_f32},                     {ddx, vec3_f32}, {ddy, vec3_f32},                     }); // NOLINT
+  Register(I::kTextureSampleGrad, vec4_f32,      {{t, tex_cube_array_f32}, {s, sampler}, {coords, vec3_f32}, {array_index, i32}, {ddx, vec3_f32}, {ddy, vec3_f32},                     }); // NOLINT
+
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_2d_f32},          {s, sampler}, {coords, vec2_f32},                     {level, f32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_2d_f32},          {s, sampler}, {coords, vec2_f32},                     {level, f32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_2d_array_f32},    {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {level, f32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_2d_array_f32},    {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {level, f32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_3d_f32},          {s, sampler}, {coords, vec3_f32},                     {level, f32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_3d_f32},          {s, sampler}, {coords, vec3_f32},                     {level, f32}, {offset, vec3_i32}, }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_cube_f32},        {s, sampler}, {coords, vec3_f32},                     {level, f32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_cube_array_f32},  {s, sampler}, {coords, vec3_f32}, {array_index, i32}, {level, f32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_2d},        {s, sampler}, {coords, vec2_f32},                     {level, i32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_2d},        {s, sampler}, {coords, vec2_f32},                     {level, i32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_2d_array},  {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {level, i32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_2d_array},  {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {level, i32}, {offset, vec2_i32}, }); // NOLINT
+  Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_cube},      {s, sampler}, {coords, vec3_f32},                     {level, i32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_cube_array},{s, sampler}, {coords, vec3_f32}, {array_index, i32}, {level, i32},                     }); // NOLINT
+
+  // TODO(bclayton): Check for [[access(write)]]
+  Register(I::kTextureStore, void_, {{t, tex_storage_1d_FT},      {coords, i32},                          {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_1d_array_FT},{coords, i32},      {array_index, i32}, {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_2d_FT},      {coords, vec2_i32},                     {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_2d_array_FT},{coords, vec2_i32}, {array_index, i32}, {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_3d_FT},      {coords, vec3_i32},                     {value, vec4_T}, }); // NOLINT
+
+  // TODO(bclayton): Check for [[access(read)]]
+  Register(I::kTextureLoad, vec4_T, {{t, tex_2d_T},               {coords, vec2_i32},                      {level, i32},                      }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_2d_array_T},         {coords, vec2_i32}, {array_index, i32},  {level, i32},                      }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_3d_T},               {coords, vec3_i32},                      {level, i32},                      }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_ms_2d_T},            {coords, vec2_i32},                                    {sample_index, i32}, }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_ms_2d_array_T},      {coords, vec2_i32}, {array_index, i32},                {sample_index, i32}, }); // NOLINT
+  Register(I::kTextureLoad, f32,    {{t, tex_depth_2d},           {coords, vec2_i32},                      {level, i32},                      }); // NOLINT
+  Register(I::kTextureLoad, f32,    {{t, tex_depth_2d_array},     {coords, vec2_i32}, {array_index, i32},  {level, i32},                      }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_1d_FT},      {coords, i32},                                                              }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_1d_array_FT},{coords, i32},      {array_index, i32},                                     }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_2d_FT},      {coords, vec2_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_2d_array_FT},{coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_3d_FT},      {coords, vec3_i32},                                                         }); // NOLINT
+
+  // TODO(bclayton): Update the rest of tint to reflect the spec changes made in
+  // https://github.com/gpuweb/gpuweb/pull/1301:
+
+  // Overloads added in https://github.com/gpuweb/gpuweb/pull/1301
+  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_T},               {coords, i32},                           {level, i32},                      }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_array_T},         {coords, i32},      {array_index, i32},  {level, i32},                      }); // NOLINT
+
+  // Overloads removed in https://github.com/gpuweb/gpuweb/pull/1301
+  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_T},               {coords, i32},                                                              }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_array_T},         {coords, i32},      {array_index, i32},                                     }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_2d_T},               {coords, vec2_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_2d_array_T},         {coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_3d_T},               {coords, vec3_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, f32,    {{t, tex_depth_2d},           {coords, vec2_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, f32,    {{t, tex_depth_2d_array},     {coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
 
   // clang-format on
 }
@@ -782,12 +1210,15 @@ std::string Impl::Overload::str() const {
   ss << type << "(";
   {
     bool first = true;
-    for (auto* param : parameters) {
+    for (auto param : parameters) {
       if (!first) {
         ss << ", ";
       }
       first = false;
-      ss << param->str();
+      if (param.usage != semantic::Parameter::Usage::kNone) {
+        ss << semantic::str(param.usage) << " : ";
+      }
+      ss << param.matcher->str();
     }
   }
   ss << ") -> ";
@@ -839,6 +1270,36 @@ std::string TypeName(type::Type* ty) {
   if (auto* mat = ty->As<type::Matrix>()) {
     return "mat" + std::to_string(mat->columns()) + "x" +
            std::to_string(mat->rows()) + "<" + TypeName(mat->type()) + ">";
+  }
+  if (auto* tex = ty->As<type::SampledTexture>()) {
+    std::stringstream ss;
+    ss << "texture_" << tex->dim() << "<" << TypeName(tex->type()) << ">";
+    return ss.str();
+  }
+  if (auto* tex = ty->As<type::MultisampledTexture>()) {
+    std::stringstream ss;
+    ss << "texture_multisampled_" << tex->dim() << "<" << TypeName(tex->type())
+       << ">";
+    return ss.str();
+  }
+  if (auto* tex = ty->As<type::DepthTexture>()) {
+    std::stringstream ss;
+    ss << "texture_depth_" << tex->dim();
+    return ss.str();
+  }
+  if (auto* tex = ty->As<type::StorageTexture>()) {
+    std::stringstream ss;
+    ss << "texture_storage_" << tex->dim() << "<" << tex->image_format() << ">";
+    return ss.str();
+  }
+  if (auto* sampler = ty->As<type::Sampler>()) {
+    switch (sampler->kind()) {
+      case type::SamplerKind::kSampler:
+        return "sampler";
+      case type::SamplerKind::kComparisonSampler:
+        return "sampler_comparison";
+    }
+    return "sampler";
   }
   return ty->type_name();
 }
@@ -925,7 +1386,7 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
   for (size_t i = 0; i < count; i++) {
     assert(args[i]);
     auto* arg_ty = args[i]->UnwrapAll();
-    if (!parameters[i]->Match(matcher_state, arg_ty)) {
+    if (!parameters[i].matcher->Match(matcher_state, arg_ty)) {
       matched = false;
       continue;
     }
@@ -976,8 +1437,9 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
   semantic::Parameters params;
   params.reserve(parameters.size());
   for (size_t i = 0; i < args.size(); i++) {
-    auto* ty = parameters[i]->Build(builder_state);
-    params.emplace_back(semantic::Parameter{ty});
+    auto& parameter = parameters[i];
+    auto* ty = parameter.matcher->Build(builder_state);
+    params.emplace_back(semantic::Parameter{ty, parameter.usage});
   }
 
   return builder.create<semantic::Intrinsic>(intrinsic, ret, params);
