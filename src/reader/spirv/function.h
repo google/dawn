@@ -229,6 +229,10 @@ enum class SkipReason {
   /// variable.  Don't generate its address.
   kSampleIdBuiltinPointer,
 
+  /// `kVertexIndexBuiltinPointer`: the value is a pointer to the VertexIndex
+  /// builtin variable.  Don't generate its address.
+  kVertexIndexBuiltinPointer,
+
   /// `kSampleMaskInBuiltinPointer`: the value is a pointer to the SampleMaskIn
   /// builtin input variable.  Don't generate its address.
   kSampleMaskInBuiltinPointer,
@@ -343,6 +347,9 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
       break;
     case SkipReason::kSampleIdBuiltinPointer:
       o << " skip:sampleid_pointer";
+      break;
+    case SkipReason::kVertexIndexBuiltinPointer:
+      o << " skip:vertexindex_pointer";
       break;
     case SkipReason::kSampleMaskInBuiltinPointer:
       o << " skip:samplemaskin_pointer";

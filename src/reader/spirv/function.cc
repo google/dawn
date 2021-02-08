@@ -2035,6 +2035,11 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
       Fail() << "unhandled use of a pointer to the SampleId builtin, with ID: "
              << id;
       return {};
+    case SkipReason::kVertexIndexBuiltinPointer:
+      Fail()
+          << "unhandled use of a pointer to the VertexIndex builtin, with ID: "
+          << id;
+      return {};
     case SkipReason::kSampleMaskInBuiltinPointer:
       Fail()
           << "unhandled use of a pointer to the SampleMask builtin, with ID: "
@@ -3036,14 +3041,19 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // Memory accesses must be issued in SPIR-V program order.
       // So represent a load by a new const definition.
       const auto ptr_id = inst.GetSingleWordInOperand(0);
-      switch (GetSkipReason(ptr_id)) {
+      const auto skip_reason = GetSkipReason(ptr_id);
+      switch (skip_reason) {
         case SkipReason::kPointSizeBuiltinPointer:
           GetDefInfo(inst.result_id())->skip =
               SkipReason::kPointSizeBuiltinValue;
           return true;
-        case SkipReason::kSampleIdBuiltinPointer: {
+        case SkipReason::kSampleIdBuiltinPointer:
+        case SkipReason::kVertexIndexBuiltinPointer: {
           // The SPIR-V variable is i32, but WGSL requires u32.
-          auto var_id = parser_impl_.IdForSpecialBuiltIn(SpvBuiltInSampleId);
+          auto var_id = parser_impl_.IdForSpecialBuiltIn(
+              (skip_reason == SkipReason::kSampleIdBuiltinPointer)
+                  ? SpvBuiltInSampleId
+                  : SpvBuiltInVertexIndex);
           auto name = namer_.Name(var_id);
           ast::Expression* id_expr = create<ast::IdentifierExpression>(
               Source{}, builder_.Symbols().Register(name));
@@ -3711,6 +3721,9 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
         break;
       case SpvBuiltInSampleId:
         def->skip = SkipReason::kSampleIdBuiltinPointer;
+        break;
+      case SpvBuiltInVertexIndex:
+        def->skip = SkipReason::kVertexIndexBuiltinPointer;
         break;
       case SpvBuiltInSampleMask: {
         // Distinguish between input and output variable.
