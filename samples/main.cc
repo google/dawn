@@ -593,7 +593,8 @@ int main(int argc, const char** argv) {
   bool dawn_validation_failed = false;
   std::ostringstream stream;
 
-  if (options.dawn_validation) {
+  if (options.dawn_validation &&
+      (options.format == Format::kSpvAsm || options.format == Format::kSpirv)) {
     // Use Vulkan 1.1, since this is what Tint, internally, uses.
     spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
     tools.SetMessageConsumer([&stream](spv_message_level_t, const char*,
