@@ -117,6 +117,13 @@ typedef struct WGPUChainedStruct {
 
 {% endfor %}
 
+{% for typeDef in by_category["typedef"] %}
+    // {{as_cType(typeDef.name)}} is deprecated.
+    // Use {{as_cType(typeDef.type.name)}} instead.
+    typedef {{as_cType(typeDef.type.name)}} {{as_cType(typeDef.name)}};
+
+{% endfor %}
+
 #ifdef __cplusplus
 extern "C" {
 #endif

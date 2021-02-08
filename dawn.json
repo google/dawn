@@ -954,7 +954,7 @@
         "extensible": true,
         "members": []
     },
-    "vertex attribute descriptor": {
+    "vertex attribute": {
         "category": "structure",
         "extensible": false,
         "members": [
@@ -963,15 +963,23 @@
             {"name": "shader location", "type": "uint32_t"}
         ]
     },
-    "vertex buffer layout descriptor": {
+    "vertex attribute descriptor": {
+        "category": "typedef",
+        "type": "vertex attribute"
+    },
+    "vertex buffer layout": {
         "category": "structure",
         "extensible": false,
         "members": [
             {"name": "array stride", "type": "uint64_t"},
             {"name": "step mode", "type": "input step mode", "default": "vertex"},
             {"name": "attribute count", "type": "uint32_t"},
-            {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "attribute count"}
+            {"name": "attributes", "type": "vertex attribute", "annotation": "const*", "length": "attribute count"}
         ]
+    },
+    "vertex buffer layout descriptor": {
+        "category": "typedef",
+        "type": "vertex buffer layout"
     },
     "vertex state descriptor": {
         "category": "structure",
@@ -979,7 +987,7 @@
         "members": [
             {"name": "index format", "type": "index format", "default": "undefined"},
             {"name": "vertex buffer count", "type": "uint32_t", "default": 0},
-            {"name": "vertex buffers", "type": "vertex buffer layout descriptor", "annotation": "const*", "length": "vertex buffer count"}
+            {"name": "vertex buffers", "type": "vertex buffer layout", "annotation": "const*", "length": "vertex buffer count"}
         ]
     },
     "input step mode": {

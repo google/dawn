@@ -63,6 +63,13 @@ namespace wgpu {
         struct {{as_cppType(type.name)}};
     {% endfor %}
 
+    {% for typeDef in by_category["typedef"] %}
+        // {{as_cppType(typeDef.name)}} is deprecated.
+        // Use {{as_cppType(typeDef.type.name)}} instead.
+        using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
+
+    {% endfor %}
+
     template<typename Derived, typename CType>
     class ObjectBase {
       public:
