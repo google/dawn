@@ -543,7 +543,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, this);
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, Types());
   auto* type = create<type::StorageTexture>(
       type::TextureDimension::k2d, type::ImageFormat::kR32Uint, subtype);
 
@@ -568,7 +568,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : [[access(write)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, this);
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, Types());
   auto* type = create<type::StorageTexture>(
       type::TextureDimension::k2d, type::ImageFormat::kR32Uint, subtype);
   Global("test_var", ast::StorageClass::kNone, type);
@@ -597,7 +597,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   // var<uniform_constant> b : [[access(write)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, this);
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, Types());
   auto* st = create<type::StorageTexture>(type::TextureDimension::k2d,
                                           type::ImageFormat::kR32Uint, subtype);
 

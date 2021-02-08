@@ -386,7 +386,7 @@ using WgslGenerator_StorageTextureTest = TestParamHelper<StorageTextureData>;
 TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
   auto param = GetParam();
 
-  auto* subtype = type::StorageTexture::SubtypeFor(param.fmt, this);
+  auto* subtype = type::StorageTexture::SubtypeFor(param.fmt, Types());
   auto* t = create<type::StorageTexture>(param.dim, param.fmt, subtype);
   auto* ac = create<type::AccessControl>(param.access, t);
 

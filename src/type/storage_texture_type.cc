@@ -162,7 +162,7 @@ StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
 }
 
 type::Type* StorageTexture::SubtypeFor(type::ImageFormat format,
-                                       ProgramBuilder* builder) {
+                                       type::Manager& type_mgr) {
   switch (format) {
     case type::ImageFormat::kR8Uint:
     case type::ImageFormat::kR16Uint:
@@ -173,7 +173,7 @@ type::Type* StorageTexture::SubtypeFor(type::ImageFormat format,
     case type::ImageFormat::kRg32Uint:
     case type::ImageFormat::kRgba16Uint:
     case type::ImageFormat::kRgba32Uint: {
-      return builder->create<type::U32>();
+      return type_mgr.Get<type::U32>();
     }
 
     case type::ImageFormat::kR8Sint:
@@ -185,7 +185,7 @@ type::Type* StorageTexture::SubtypeFor(type::ImageFormat format,
     case type::ImageFormat::kRg32Sint:
     case type::ImageFormat::kRgba16Sint:
     case type::ImageFormat::kRgba32Sint: {
-      return builder->create<type::I32>();
+      return type_mgr.Get<type::I32>();
     }
 
     case type::ImageFormat::kR8Unorm:
@@ -205,7 +205,7 @@ type::Type* StorageTexture::SubtypeFor(type::ImageFormat format,
     case type::ImageFormat::kRg32Float:
     case type::ImageFormat::kRgba16Float:
     case type::ImageFormat::kRgba32Float: {
-      return builder->create<type::F32>();
+      return type_mgr.Get<type::F32>();
     }
 
     case type::ImageFormat::kNone:

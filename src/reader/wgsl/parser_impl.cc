@@ -550,7 +550,8 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    auto* subtype = type::StorageTexture::SubtypeFor(format.value, &builder_);
+    auto* subtype =
+        type::StorageTexture::SubtypeFor(format.value, builder_.Types());
     return builder_.create<type::StorageTexture>(storage.value, format.value,
                                                  subtype);
   }

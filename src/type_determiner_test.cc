@@ -1425,7 +1425,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
 
   auto* coords_type = GetCoordsType(dim, ty.i32());
 
-  auto* subtype = type::StorageTexture::SubtypeFor(format, this);
+  auto* subtype = type::StorageTexture::SubtypeFor(format, Types());
   type::Type* texture_type = create<type::StorageTexture>(dim, format, subtype);
 
   ast::ExpressionList call_params;

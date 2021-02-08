@@ -22,6 +22,8 @@
 namespace tint {
 namespace type {
 
+class Manager;
+
 /// The image format in the storage texture
 enum class ImageFormat {
   kNone = -1,
@@ -91,9 +93,10 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   StorageTexture* Clone(CloneContext* ctx) const override;
 
   /// @param format the storage texture image format
-  /// @param builder the ProgramBuilder used to build the returned type
+  /// @param type_mgr the type::Manager used to build the returned type
   /// @returns the storage texture subtype for the given ImageFormat
-  static type::Type* SubtypeFor(ImageFormat format, ProgramBuilder* builder);
+  static type::Type* SubtypeFor(type::ImageFormat format,
+                                type::Manager& type_mgr);
 
  private:
   ImageFormat const image_format_;

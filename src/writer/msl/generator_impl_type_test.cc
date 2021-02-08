@@ -422,7 +422,7 @@ TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
   auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, this);
+      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, Types());
   auto* s = create<type::StorageTexture>(params.dim,
                                          type::ImageFormat::kR16Float, subtype);
   auto* ac =
