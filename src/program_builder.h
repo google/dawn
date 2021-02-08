@@ -29,6 +29,7 @@
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stride_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -418,12 +419,30 @@ class ProgramBuilder {
                                           ast::ArrayDecorationList{});
     }
 
+    /// @param subtype the array element type
+    /// @param n the array size. 0 represents a runtime-array.
+    /// @param stride the array stride.
+    /// @return the tint AST type for a array of size `n` of type `T`
+    type::Array* array(type::Type* subtype, uint32_t n, uint32_t stride) const {
+      return builder->create<type::Array>(
+          subtype, n,
+          ast::ArrayDecorationList{
+              builder->create<ast::StrideDecoration>(stride),
+          });
+    }
+
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
     type::Array* array() const {
       return array(Of<T>(), N);
     }
 
+    /// @param stride the array stride
+    /// @return the tint AST type for an array of size `N` of type `T`
+    template <typename T, int N = 0>
+    type::Array* array(uint32_t stride) const {
+      return array(Of<T>(), N, stride);
+    }
     /// Creates an alias type
     /// @param name the alias name
     /// @param type the alias type
@@ -952,6 +971,21 @@ class ProgramBuilder {
                             ast::StructMemberDecorationList decorations) {
     return create<ast::StructMember>(source_, Symbols().Register(name), type,
                                      decorations);
+  }
+
+  /// Creates a ast::StructMember with the given byte offset
+  /// @param offset the offset to use in the StructMemberOffsetDecoration
+  /// @param name the struct member name
+  /// @param type the struct member type
+  /// @returns the struct member pointer
+  ast::StructMember* Member(uint32_t offset,
+                            const std::string& name,
+                            type::Type* type) {
+    return create<ast::StructMember>(
+        source_, Symbols().Register(name), type,
+        ast::StructMemberDecorationList{
+            create<ast::StructMemberOffsetDecoration>(offset),
+        });
   }
 
   /// Sets the current builder source to `src`
