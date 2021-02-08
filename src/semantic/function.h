@@ -1,7 +1,6 @@
 // Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0(the "License");
-
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -19,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/semantic/node.h"
+#include "src/semantic/call_target.h"
 #include "src/type/sampler_type.h"
 
 namespace tint {
@@ -27,20 +26,18 @@ namespace tint {
 // Forward declarations
 namespace ast {
 class BindingDecoration;
+class BuiltinDecoration;
+class Function;
 class GroupDecoration;
 class LocationDecoration;
-class BuiltinDecoration;
 }  // namespace ast
-namespace type {
-class Type;
-}  // namespace type
 
 namespace semantic {
 
 class Variable;
 
 /// Function holds the semantic information for function nodes.
-class Function : public Castable<Function, Node> {
+class Function : public Castable<Function, CallTarget> {
  public:
   /// Information about a binding
   struct BindingInfo {
@@ -51,13 +48,15 @@ class Function : public Castable<Function, Node> {
   };
 
   /// Constructor
+  /// @param ast the ast::Function
   /// @param referenced_module_vars the referenced module variables
   /// @param local_referenced_module_vars the locally referenced module
   /// variables
   /// @param ancestor_entry_points the ancestor entry points
-  explicit Function(std::vector<const Variable*> referenced_module_vars,
-                    std::vector<const Variable*> local_referenced_module_vars,
-                    std::vector<Symbol> ancestor_entry_points);
+  Function(ast::Function* ast,
+           std::vector<const Variable*> referenced_module_vars,
+           std::vector<const Variable*> local_referenced_module_vars,
+           std::vector<Symbol> ancestor_entry_points);
 
   /// Destructor
   ~Function() override;

@@ -197,6 +197,7 @@ set(TINT_LIB_SRCS
   semantic/intrinsic.h
   semantic/node.h
   semantic/sem_call.cc
+  semantic/sem_call_target.cc
   semantic/sem_expression.cc
   semantic/sem_member_accessor_expression.cc
   semantic/sem_function.cc

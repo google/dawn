@@ -1201,10 +1201,11 @@ void TypeDeterminer::CreateSemanticNodes() const {
   for (auto it : function_to_info_) {
     auto* func = it.first;
     auto* info = it.second;
-    sem.Add(func, builder_->create<semantic::Function>(
-                      remap_vars(info->referenced_module_vars),
-                      remap_vars(info->local_referenced_module_vars),
-                      info->ancestor_entry_points));
+    sem.Add(func,
+            builder_->create<semantic::Function>(
+                info->declaration, remap_vars(info->referenced_module_vars),
+                remap_vars(info->local_referenced_module_vars),
+                info->ancestor_entry_points));
   }
 }
 

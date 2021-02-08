@@ -16,6 +16,7 @@
 
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/function.h"
 #include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/variable.h"
@@ -30,10 +31,25 @@ TINT_INSTANTIATE_CLASS_ID(tint::semantic::Function);
 namespace tint {
 namespace semantic {
 
-Function::Function(std::vector<const Variable*> referenced_module_vars,
+namespace {
+
+Parameters GetParameters(ast::Function* ast) {
+  semantic::Parameters parameters;
+  parameters.reserve(ast->params().size());
+  for (auto* param : ast->params()) {
+    parameters.emplace_back(Parameter{param->type()});
+  }
+  return parameters;
+}
+
+}  // namespace
+
+Function::Function(ast::Function* ast,
+                   std::vector<const Variable*> referenced_module_vars,
                    std::vector<const Variable*> local_referenced_module_vars,
                    std::vector<Symbol> ancestor_entry_points)
-    : referenced_module_vars_(std::move(referenced_module_vars)),
+    : Base(GetParameters(ast)),
+      referenced_module_vars_(std::move(referenced_module_vars)),
       local_referenced_module_vars_(std::move(local_referenced_module_vars)),
       ancestor_entry_points_(std::move(ancestor_entry_points)) {}
 

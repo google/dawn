@@ -12,52 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_VARIABLE_H_
-#define SRC_SEMANTIC_VARIABLE_H_
+#ifndef SRC_SEMANTIC_CALL_TARGET_H_
+#define SRC_SEMANTIC_CALL_TARGET_H_
 
 #include <utility>
 #include <vector>
 
-#include "src/ast/storage_class.h"
 #include "src/semantic/node.h"
 #include "src/type/sampler_type.h"
 
 namespace tint {
 
 // Forward declarations
-namespace ast {
-class Variable;
-}  // namespace ast
 namespace type {
 class Type;
 }  // namespace type
 
 namespace semantic {
 
-/// Variable holds the semantic information for variables.
-class Variable : public Castable<Variable, Node> {
+/// Parameter describes a single parameter of a call target
+struct Parameter {
+  /// Parameter type
+  type::Type* type;
+};
+
+using Parameters = std::vector<Parameter>;
+
+/// CallTarget is the base for callable functions
+class CallTarget : public Castable<CallTarget, Node> {
  public:
   /// Constructor
-  /// @param declaration the AST declaration node
-  /// @param storage_class the variable storage class
-  explicit Variable(ast::Variable* declaration,
-                    ast::StorageClass storage_class);
+  /// @param parameters the parameters for the call target
+  explicit CallTarget(const semantic::Parameters& parameters);
 
   /// Destructor
-  ~Variable() override;
+  ~CallTarget() override;
 
-  /// @returns the AST declaration node
-  ast::Variable* Declaration() const { return declaration_; }
-
-  /// @returns the storage class for the variable
-  ast::StorageClass StorageClass() const { return storage_class_; }
+  /// @return the parameters of the call target
+  const Parameters& Parameters() const { return parameters_; }
 
  private:
-  ast::Variable* const declaration_;
-  ast::StorageClass const storage_class_;
+  semantic::Parameters parameters_;
 };
 
 }  // namespace semantic
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_VARIABLE_H_
+#endif  // SRC_SEMANTIC_CALL_TARGET_H_

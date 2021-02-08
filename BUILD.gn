@@ -383,6 +383,7 @@ source_set("libtint_core_src") {
     "src/semantic/intrinsic.h",
     "src/semantic/node.h",
     "src/semantic/sem_call.cc",
+    "src/semantic/sem_call_target.cc",
     "src/semantic/sem_expression.cc",
     "src/semantic/sem_function.cc",
     "src/semantic/sem_info.cc",

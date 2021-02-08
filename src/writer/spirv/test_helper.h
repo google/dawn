@@ -16,6 +16,7 @@
 #define SRC_WRITER_SPIRV_TEST_HELPER_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
