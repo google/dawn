@@ -1095,9 +1095,9 @@ TEST_F(ParserImplErrorTest, DISABLED_GlobalDeclSamplerExplicitStorageClass) {
 TEST_F(ParserImplErrorTest, DISABLED_GlobalDeclTextureExplicitStorageClass) {
   // TODO(jrprice): Enable this once downstream users have caught up.
   EXPECT(
-      "var<uniform> x : texture_1d<f32>;",
+      "var<uniform> x : [[access(read)]] texture_1d<f32>;",
       "test.wgsl:1:5 error: texture variables must not have a storage class\n"
-      "var<uniform> x : texture_1d<f32>;\n"
+      "var<uniform> x : [[access(read)]] texture_1d<f32>;\n"
       "    ^^^^^^^\n");
 }
 

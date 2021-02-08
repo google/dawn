@@ -191,7 +191,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_SamplerImplicitStorageClass) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_TextureImplicitStorageClass) {
-  auto p = parser("var s : texture_1d<f32>;");
+  auto p = parser("var s : [[access(read)]] texture_1d<f32>;");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -202,7 +202,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_TextureImplicitStorageClass) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("s"));
-  EXPECT_TRUE(e->type()->Is<type::Texture>());
+  EXPECT_TRUE(e->type()->UnwrapAll()->Is<type::Texture>());
   EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kUniformConstant);
 }
 

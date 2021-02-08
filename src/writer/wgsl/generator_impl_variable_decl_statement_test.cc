@@ -19,6 +19,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/access_control_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/sampled_texture_type.h"
 #include "src/writer/wgsl/generator_impl.h"
@@ -92,9 +93,11 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Sampler) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Texture) {
-  auto* var = Global(
-      "t", ast::StorageClass::kUniformConstant,
-      create<type::SampledTexture>(type::TextureDimension::k1d, ty.f32()));
+  auto* st =
+      create<type::SampledTexture>(type::TextureDimension::k1d, ty.f32());
+  auto* var =
+      Global("t", ast::StorageClass::kUniformConstant,
+             create<type::AccessControl>(ast::AccessControl::kReadOnly, st));
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -103,7 +106,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Texture) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var t : texture_1d<f32>;\n");
+  EXPECT_EQ(gen.result(), "  var t : [[access(read)]]\ntexture_1d<f32>;\n");
 }
 
 }  // namespace
