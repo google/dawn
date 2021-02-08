@@ -2010,12 +2010,17 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     return 0;
   }
 
-  for (auto* p : call->params()) {
-    auto val_id = GenerateExpression(p);
+  for (size_t i = 0; i < call->params().size(); i++) {
+    auto* arg = call->params()[i];
+    auto& param = intrinsic->Parameters()[i];
+    auto val_id = GenerateExpression(arg);
     if (val_id == 0) {
       return false;
     }
-    val_id = GenerateLoadIfNeeded(TypeOf(p), val_id);
+
+    if (!param.type->Is<type::Pointer>()) {
+      val_id = GenerateLoadIfNeeded(TypeOf(arg), val_id);
+    }
 
     params.emplace_back(Operand::Int(val_id));
   }

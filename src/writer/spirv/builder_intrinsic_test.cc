@@ -16,12 +16,14 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/type_constructor_expression.h"
@@ -1278,6 +1280,94 @@ OpFunctionEnd
 INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_ThreeParam_Uint_Test,
                          testing::Values(IntrinsicData{"clamp", "UClamp"}));
+
+TEST_F(IntrinsicBuilderTest, Call_Modf) {
+  auto* out = Var("out", ast::StorageClass::kFunction, ty.vec2<f32>());
+  auto* expr = Call("modf", vec2<f32>(1.0f, 2.0f), "out");
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(out),
+           create<ast::CallStatement>(expr),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+  auto got = DumpBuilder(b);
+  auto* expect = R"(OpCapability Shader
+%11 = OpExtInstImport "GLSL.std.450"
+OpMemoryModel Logical GLSL450
+OpEntryPoint Vertex %3 "a_func"
+OpName %3 "a_func"
+OpName %5 "out"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%8 = OpTypeFloat 32
+%7 = OpTypeVector %8 2
+%6 = OpTypePointer Function %7
+%9 = OpConstantNull %7
+%12 = OpConstant %8 1
+%13 = OpConstant %8 2
+%14 = OpConstantComposite %7 %12 %13
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %9
+%10 = OpExtInst %7 %11 Modf %14 %5
+OpReturn
+OpFunctionEnd
+)";
+  EXPECT_EQ(expect, got);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_Frexp) {
+  auto* out = Var("out", ast::StorageClass::kFunction, ty.vec2<i32>());
+  auto* expr = Call("frexp", vec2<f32>(1.0f, 2.0f), "out");
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(out),
+           create<ast::CallStatement>(expr),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+  auto got = DumpBuilder(b);
+  auto* expect = R"(OpCapability Shader
+%13 = OpExtInstImport "GLSL.std.450"
+OpMemoryModel Logical GLSL450
+OpEntryPoint Vertex %3 "a_func"
+OpName %3 "a_func"
+OpName %5 "out"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%8 = OpTypeInt 32 1
+%7 = OpTypeVector %8 2
+%6 = OpTypePointer Function %7
+%9 = OpConstantNull %7
+%12 = OpTypeFloat 32
+%11 = OpTypeVector %12 2
+%14 = OpConstant %12 1
+%15 = OpConstant %12 2
+%16 = OpConstantComposite %11 %14 %15
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %9
+%10 = OpExtInst %11 %13 Frexp %16 %5
+OpReturn
+OpFunctionEnd
+)";
+  EXPECT_EQ(expect, got);
+
+  Validate(b);
+}
 
 TEST_F(IntrinsicBuilderTest, Call_Determinant) {
   auto* var = Global("var", ast::StorageClass::kPrivate, ty.mat3x3<f32>());
