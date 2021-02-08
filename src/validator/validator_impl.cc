@@ -49,6 +49,8 @@ namespace tint {
 
 namespace {
 
+using IntrinsicType = semantic::IntrinsicType;
+
 enum class IntrinsicDataType {
   kMixed,
   kFloatOrIntScalarOrVector,
@@ -63,7 +65,7 @@ enum class IntrinsicDataType {
 };
 
 struct IntrinsicData {
-  semantic::Intrinsic intrinsic;
+  IntrinsicType intrinsic;
   uint32_t param_count;
   IntrinsicDataType data_type;
   uint32_t vector_size;
@@ -73,122 +75,97 @@ struct IntrinsicData {
 // Note, this isn't all the intrinsics. Some are handled specially before
 // we get to the generic code. See the ValidateCallExpr code below.
 constexpr const IntrinsicData kIntrinsicData[] = {
-    {semantic::Intrinsic::kAbs, 1, IntrinsicDataType::kFloatOrIntScalarOrVector,
-     0, true},
-    {semantic::Intrinsic::kAcos, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kAbs, 1, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kAll, 1, IntrinsicDataType::kBoolVector, 0, false},
-    {semantic::Intrinsic::kAny, 1, IntrinsicDataType::kBoolVector, 0, false},
-    {semantic::Intrinsic::kArrayLength, 1, IntrinsicDataType::kMixed, 0, false},
-    {semantic::Intrinsic::kAsin, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kAcos, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kAll, 1, IntrinsicDataType::kBoolVector, 0, false},
+    {IntrinsicType::kAny, 1, IntrinsicDataType::kBoolVector, 0, false},
+    {IntrinsicType::kArrayLength, 1, IntrinsicDataType::kMixed, 0, false},
+    {IntrinsicType::kAsin, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kAtan, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kAtan2, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kAtan, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kCeil, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kClamp, 3, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kAtan2, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kCos, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kCosh, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kCountOneBits, 1, IntrinsicDataType::kIntScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kCeil, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kClamp, 3,
-     IntrinsicDataType::kFloatOrIntScalarOrVector, 0, true},
-    {semantic::Intrinsic::kCos, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kCosh, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kCountOneBits, 1,
-     IntrinsicDataType::kIntScalarOrVector, 0, true},
-    {semantic::Intrinsic::kCross, 2, IntrinsicDataType::kFloatVector, 3, true},
-    {semantic::Intrinsic::kDeterminant, 1, IntrinsicDataType::kMatrix, 0,
+    {IntrinsicType::kCross, 2, IntrinsicDataType::kFloatVector, 3, true},
+    {IntrinsicType::kDeterminant, 1, IntrinsicDataType::kMatrix, 0, false},
+    {IntrinsicType::kDistance, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
      false},
-    {semantic::Intrinsic::kDistance, 2, IntrinsicDataType::kFloatScalarOrVector,
-     0, false},
-    {semantic::Intrinsic::kDot, 2, IntrinsicDataType::kFloatVector, 0, false},
-    {semantic::Intrinsic::kDpdx, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kDot, 2, IntrinsicDataType::kFloatVector, 0, false},
+    {IntrinsicType::kDpdx, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kDpdxCoarse, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kDpdxCoarse, 1,
-     IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {semantic::Intrinsic::kDpdxFine, 1, IntrinsicDataType::kFloatScalarOrVector,
+    {IntrinsicType::kDpdxFine, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+     true},
+    {IntrinsicType::kDpdy, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kDpdyCoarse, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+     true},
+    {IntrinsicType::kDpdyFine, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+     true},
+    {IntrinsicType::kExp, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kExp2, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kFaceForward, 3, IntrinsicDataType::kFloatScalarOrVector, 0,
+     true},
+    {IntrinsicType::kFloor, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+     true},
+    {IntrinsicType::kFma, 3, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kFract, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+     true},
+    {IntrinsicType::kFrexp, 2, IntrinsicDataType::kMixed, 0, false},
+    {IntrinsicType::kFwidth, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+     true},
+    {IntrinsicType::kFwidthCoarse, 1, IntrinsicDataType::kFloatScalarOrVector,
      0, true},
-    {semantic::Intrinsic::kDpdy, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kFwidthFine, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kDpdyCoarse, 1,
-     IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {semantic::Intrinsic::kDpdyFine, 1, IntrinsicDataType::kFloatScalarOrVector,
-     0, true},
-    {semantic::Intrinsic::kExp, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kInverseSqrt, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kExp2, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kLdexp, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kFaceForward, 3,
-     IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {semantic::Intrinsic::kFloor, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kFma, 3, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kFract, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kFrexp, 2, IntrinsicDataType::kMixed, 0, false},
-    {semantic::Intrinsic::kFwidth, 1, IntrinsicDataType::kFloatScalarOrVector,
-     0, true},
-    {semantic::Intrinsic::kFwidthCoarse, 1,
-     IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {semantic::Intrinsic::kFwidthFine, 1,
-     IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {semantic::Intrinsic::kInverseSqrt, 1,
-     IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {semantic::Intrinsic::kLdexp, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kLength, 1, IntrinsicDataType::kFloatScalarOrVector,
-     0, false},
-    {semantic::Intrinsic::kLog, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kLog2, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kMax, 2, IntrinsicDataType::kFloatOrIntScalarOrVector,
-     0, true},
-    {semantic::Intrinsic::kMin, 2, IntrinsicDataType::kFloatOrIntScalarOrVector,
-     0, true},
-    {semantic::Intrinsic::kMix, 3, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kModf, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kNormalize, 1, IntrinsicDataType::kFloatVector, 0,
-     true},
-    {semantic::Intrinsic::kPack4x8Snorm, 1, IntrinsicDataType::kFloatVector, 4,
+    {IntrinsicType::kLength, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
      false},
-    {semantic::Intrinsic::kPack4x8Unorm, 1, IntrinsicDataType::kFloatVector, 4,
+    {IntrinsicType::kLog, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kLog2, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kMax, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
+     true},
+    {IntrinsicType::kMin, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
+     true},
+    {IntrinsicType::kMix, 3, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kModf, 2, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kNormalize, 1, IntrinsicDataType::kFloatVector, 0, true},
+    {IntrinsicType::kPack4x8Snorm, 1, IntrinsicDataType::kFloatVector, 4,
      false},
-    {semantic::Intrinsic::kPack2x16Snorm, 1, IntrinsicDataType::kFloatVector, 2,
+    {IntrinsicType::kPack4x8Unorm, 1, IntrinsicDataType::kFloatVector, 4,
      false},
-    {semantic::Intrinsic::kPack2x16Unorm, 1, IntrinsicDataType::kFloatVector, 2,
+    {IntrinsicType::kPack2x16Snorm, 1, IntrinsicDataType::kFloatVector, 2,
      false},
-    {semantic::Intrinsic::kPack2x16Float, 1, IntrinsicDataType::kFloatVector, 2,
+    {IntrinsicType::kPack2x16Unorm, 1, IntrinsicDataType::kFloatVector, 2,
      false},
-    {semantic::Intrinsic::kPow, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kPack2x16Float, 1, IntrinsicDataType::kFloatVector, 2,
+     false},
+    {IntrinsicType::kPow, 2, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kReflect, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kReflect, 2, IntrinsicDataType::kFloatScalarOrVector,
-     0, true},
-    {semantic::Intrinsic::kReverseBits, 1,
-     IntrinsicDataType::kIntScalarOrVector, 0, true},
-    {semantic::Intrinsic::kRound, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kReverseBits, 1, IntrinsicDataType::kIntScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kSelect, 3, IntrinsicDataType::kMixed, 0, false},
-    {semantic::Intrinsic::kSign, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kRound, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kSin, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kSelect, 3, IntrinsicDataType::kMixed, 0, false},
+    {IntrinsicType::kSign, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kSin, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kSinh, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kSmoothStep, 3, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
-    {semantic::Intrinsic::kSinh, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kSmoothStep, 3,
-     IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {semantic::Intrinsic::kSqrt, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kStep, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kTan, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kTanh, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {semantic::Intrinsic::kTrunc, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
+    {IntrinsicType::kSqrt, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kStep, 2, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kTan, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kTanh, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
+    {IntrinsicType::kTrunc, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
      true},
 };
 
@@ -731,7 +708,7 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
           }
         } else {
           // Special cases.
-          if (data->intrinsic == semantic::Intrinsic::kFrexp) {
+          if (data->intrinsic == IntrinsicType::kFrexp) {
             auto* p0 = expr->params()[0];
             auto* p1 = expr->params()[1];
             auto* t0 = program_->TypeOf(p0)->UnwrapPtrIfNeeded();
@@ -773,7 +750,7 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
             }
           }
 
-          if (data->intrinsic == semantic::Intrinsic::kSelect) {
+          if (data->intrinsic == IntrinsicType::kSelect) {
             auto* type = program_->TypeOf(expr);
             auto* t0 = program_->TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
             auto* t1 = program_->TypeOf(expr->params()[1])->UnwrapPtrIfNeeded();
@@ -819,7 +796,7 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
             }
           }
 
-          if (data->intrinsic == semantic::Intrinsic::kArrayLength) {
+          if (data->intrinsic == IntrinsicType::kArrayLength) {
             if (!program_->TypeOf(expr)->UnwrapPtrIfNeeded()->Is<type::U32>()) {
               add_error(
                   expr->source(),
@@ -840,15 +817,15 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
         }
 
         // Result types don't match parameter types.
-        if (data->intrinsic == semantic::Intrinsic::kAll ||
-            data->intrinsic == semantic::Intrinsic::kAny) {
+        if (data->intrinsic == IntrinsicType::kAll ||
+            data->intrinsic == IntrinsicType::kAny) {
           if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
                            IntrinsicDataType::kBoolScalar, 0, this)) {
             return false;
           }
         }
 
-        if (data->intrinsic == semantic::Intrinsic::kDot) {
+        if (data->intrinsic == IntrinsicType::kDot) {
           if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
                            IntrinsicDataType::kFloatScalar, 0, this)) {
             return false;
@@ -864,9 +841,9 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
           }
         }
 
-        if (data->intrinsic == semantic::Intrinsic::kLength ||
-            data->intrinsic == semantic::Intrinsic::kDistance ||
-            data->intrinsic == semantic::Intrinsic::kDeterminant) {
+        if (data->intrinsic == IntrinsicType::kLength ||
+            data->intrinsic == IntrinsicType::kDistance ||
+            data->intrinsic == IntrinsicType::kDeterminant) {
           if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
                            IntrinsicDataType::kFloatScalar, 0, this)) {
             return false;
@@ -874,7 +851,7 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
         }
 
         // Must be a square matrix.
-        if (data->intrinsic == semantic::Intrinsic::kDeterminant) {
+        if (data->intrinsic == IntrinsicType::kDeterminant) {
           const auto* matrix =
               program_->TypeOf(expr->params()[0])->As<type::Matrix>();
           if (matrix->rows() != matrix->columns()) {
@@ -887,8 +864,8 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
       }
 
       // Last parameter must be a pointer.
-      if (data->intrinsic == semantic::Intrinsic::kFrexp ||
-          data->intrinsic == semantic::Intrinsic::kModf) {
+      if (data->intrinsic == IntrinsicType::kFrexp ||
+          data->intrinsic == IntrinsicType::kModf) {
         auto* last_param = expr->params()[data->param_count - 1];
         if (!program_->TypeOf(last_param)->Is<type::Pointer>()) {
           add_error(last_param->source(), "incorrect type for " + builtin +

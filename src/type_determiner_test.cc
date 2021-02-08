@@ -75,6 +75,8 @@
 namespace tint {
 namespace {
 
+using IntrinsicType = semantic::IntrinsicType;
+
 class FakeStmt : public ast::Statement {
  public:
   explicit FakeStmt(Source source) : ast::Statement(source) {}
@@ -1618,7 +1620,7 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
 
 struct IntrinsicData {
   const char* name;
-  semantic::Intrinsic intrinsic;
+  IntrinsicType intrinsic;
 };
 inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   out << data.name;
@@ -1634,89 +1636,82 @@ INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     IntrinsicDataTest,
     testing::Values(
-        IntrinsicData{"abs", semantic::Intrinsic::kAbs},
-        IntrinsicData{"acos", semantic::Intrinsic::kAcos},
-        IntrinsicData{"all", semantic::Intrinsic::kAll},
-        IntrinsicData{"any", semantic::Intrinsic::kAny},
-        IntrinsicData{"arrayLength", semantic::Intrinsic::kArrayLength},
-        IntrinsicData{"asin", semantic::Intrinsic::kAsin},
-        IntrinsicData{"atan", semantic::Intrinsic::kAtan},
-        IntrinsicData{"atan2", semantic::Intrinsic::kAtan2},
-        IntrinsicData{"ceil", semantic::Intrinsic::kCeil},
-        IntrinsicData{"clamp", semantic::Intrinsic::kClamp},
-        IntrinsicData{"cos", semantic::Intrinsic::kCos},
-        IntrinsicData{"cosh", semantic::Intrinsic::kCosh},
-        IntrinsicData{"countOneBits", semantic::Intrinsic::kCountOneBits},
-        IntrinsicData{"cross", semantic::Intrinsic::kCross},
-        IntrinsicData{"determinant", semantic::Intrinsic::kDeterminant},
-        IntrinsicData{"distance", semantic::Intrinsic::kDistance},
-        IntrinsicData{"dot", semantic::Intrinsic::kDot},
-        IntrinsicData{"dpdx", semantic::Intrinsic::kDpdx},
-        IntrinsicData{"dpdxCoarse", semantic::Intrinsic::kDpdxCoarse},
-        IntrinsicData{"dpdxFine", semantic::Intrinsic::kDpdxFine},
-        IntrinsicData{"dpdy", semantic::Intrinsic::kDpdy},
-        IntrinsicData{"dpdyCoarse", semantic::Intrinsic::kDpdyCoarse},
-        IntrinsicData{"dpdyFine", semantic::Intrinsic::kDpdyFine},
-        IntrinsicData{"exp", semantic::Intrinsic::kExp},
-        IntrinsicData{"exp2", semantic::Intrinsic::kExp2},
-        IntrinsicData{"faceForward", semantic::Intrinsic::kFaceForward},
-        IntrinsicData{"floor", semantic::Intrinsic::kFloor},
-        IntrinsicData{"fma", semantic::Intrinsic::kFma},
-        IntrinsicData{"fract", semantic::Intrinsic::kFract},
-        IntrinsicData{"frexp", semantic::Intrinsic::kFrexp},
-        IntrinsicData{"fwidth", semantic::Intrinsic::kFwidth},
-        IntrinsicData{"fwidthCoarse", semantic::Intrinsic::kFwidthCoarse},
-        IntrinsicData{"fwidthFine", semantic::Intrinsic::kFwidthFine},
-        IntrinsicData{"inverseSqrt", semantic::Intrinsic::kInverseSqrt},
-        IntrinsicData{"isFinite", semantic::Intrinsic::kIsFinite},
-        IntrinsicData{"isInf", semantic::Intrinsic::kIsInf},
-        IntrinsicData{"isNan", semantic::Intrinsic::kIsNan},
-        IntrinsicData{"isNormal", semantic::Intrinsic::kIsNormal},
-        IntrinsicData{"ldexp", semantic::Intrinsic::kLdexp},
-        IntrinsicData{"length", semantic::Intrinsic::kLength},
-        IntrinsicData{"log", semantic::Intrinsic::kLog},
-        IntrinsicData{"log2", semantic::Intrinsic::kLog2},
-        IntrinsicData{"max", semantic::Intrinsic::kMax},
-        IntrinsicData{"min", semantic::Intrinsic::kMin},
-        IntrinsicData{"mix", semantic::Intrinsic::kMix},
-        IntrinsicData{"modf", semantic::Intrinsic::kModf},
-        IntrinsicData{"normalize", semantic::Intrinsic::kNormalize},
-        IntrinsicData{"pow", semantic::Intrinsic::kPow},
-        IntrinsicData{"reflect", semantic::Intrinsic::kReflect},
-        IntrinsicData{"reverseBits", semantic::Intrinsic::kReverseBits},
-        IntrinsicData{"round", semantic::Intrinsic::kRound},
-        IntrinsicData{"select", semantic::Intrinsic::kSelect},
-        IntrinsicData{"sign", semantic::Intrinsic::kSign},
-        IntrinsicData{"sin", semantic::Intrinsic::kSin},
-        IntrinsicData{"sinh", semantic::Intrinsic::kSinh},
-        IntrinsicData{"smoothStep", semantic::Intrinsic::kSmoothStep},
-        IntrinsicData{"sqrt", semantic::Intrinsic::kSqrt},
-        IntrinsicData{"step", semantic::Intrinsic::kStep},
-        IntrinsicData{"tan", semantic::Intrinsic::kTan},
-        IntrinsicData{"tanh", semantic::Intrinsic::kTanh},
-        IntrinsicData{"textureDimensions",
-                      semantic::Intrinsic::kTextureDimensions},
-        IntrinsicData{"textureLoad", semantic::Intrinsic::kTextureLoad},
-        IntrinsicData{"textureNumLayers",
-                      semantic::Intrinsic::kTextureNumLayers},
-        IntrinsicData{"textureNumLevels",
-                      semantic::Intrinsic::kTextureNumLevels},
-        IntrinsicData{"textureNumSamples",
-                      semantic::Intrinsic::kTextureNumSamples},
-        IntrinsicData{"textureSample", semantic::Intrinsic::kTextureSample},
-        IntrinsicData{"textureSampleBias",
-                      semantic::Intrinsic::kTextureSampleBias},
+        IntrinsicData{"abs", IntrinsicType::kAbs},
+        IntrinsicData{"acos", IntrinsicType::kAcos},
+        IntrinsicData{"all", IntrinsicType::kAll},
+        IntrinsicData{"any", IntrinsicType::kAny},
+        IntrinsicData{"arrayLength", IntrinsicType::kArrayLength},
+        IntrinsicData{"asin", IntrinsicType::kAsin},
+        IntrinsicData{"atan", IntrinsicType::kAtan},
+        IntrinsicData{"atan2", IntrinsicType::kAtan2},
+        IntrinsicData{"ceil", IntrinsicType::kCeil},
+        IntrinsicData{"clamp", IntrinsicType::kClamp},
+        IntrinsicData{"cos", IntrinsicType::kCos},
+        IntrinsicData{"cosh", IntrinsicType::kCosh},
+        IntrinsicData{"countOneBits", IntrinsicType::kCountOneBits},
+        IntrinsicData{"cross", IntrinsicType::kCross},
+        IntrinsicData{"determinant", IntrinsicType::kDeterminant},
+        IntrinsicData{"distance", IntrinsicType::kDistance},
+        IntrinsicData{"dot", IntrinsicType::kDot},
+        IntrinsicData{"dpdx", IntrinsicType::kDpdx},
+        IntrinsicData{"dpdxCoarse", IntrinsicType::kDpdxCoarse},
+        IntrinsicData{"dpdxFine", IntrinsicType::kDpdxFine},
+        IntrinsicData{"dpdy", IntrinsicType::kDpdy},
+        IntrinsicData{"dpdyCoarse", IntrinsicType::kDpdyCoarse},
+        IntrinsicData{"dpdyFine", IntrinsicType::kDpdyFine},
+        IntrinsicData{"exp", IntrinsicType::kExp},
+        IntrinsicData{"exp2", IntrinsicType::kExp2},
+        IntrinsicData{"faceForward", IntrinsicType::kFaceForward},
+        IntrinsicData{"floor", IntrinsicType::kFloor},
+        IntrinsicData{"fma", IntrinsicType::kFma},
+        IntrinsicData{"fract", IntrinsicType::kFract},
+        IntrinsicData{"frexp", IntrinsicType::kFrexp},
+        IntrinsicData{"fwidth", IntrinsicType::kFwidth},
+        IntrinsicData{"fwidthCoarse", IntrinsicType::kFwidthCoarse},
+        IntrinsicData{"fwidthFine", IntrinsicType::kFwidthFine},
+        IntrinsicData{"inverseSqrt", IntrinsicType::kInverseSqrt},
+        IntrinsicData{"isFinite", IntrinsicType::kIsFinite},
+        IntrinsicData{"isInf", IntrinsicType::kIsInf},
+        IntrinsicData{"isNan", IntrinsicType::kIsNan},
+        IntrinsicData{"isNormal", IntrinsicType::kIsNormal},
+        IntrinsicData{"ldexp", IntrinsicType::kLdexp},
+        IntrinsicData{"length", IntrinsicType::kLength},
+        IntrinsicData{"log", IntrinsicType::kLog},
+        IntrinsicData{"log2", IntrinsicType::kLog2},
+        IntrinsicData{"max", IntrinsicType::kMax},
+        IntrinsicData{"min", IntrinsicType::kMin},
+        IntrinsicData{"mix", IntrinsicType::kMix},
+        IntrinsicData{"modf", IntrinsicType::kModf},
+        IntrinsicData{"normalize", IntrinsicType::kNormalize},
+        IntrinsicData{"pow", IntrinsicType::kPow},
+        IntrinsicData{"reflect", IntrinsicType::kReflect},
+        IntrinsicData{"reverseBits", IntrinsicType::kReverseBits},
+        IntrinsicData{"round", IntrinsicType::kRound},
+        IntrinsicData{"select", IntrinsicType::kSelect},
+        IntrinsicData{"sign", IntrinsicType::kSign},
+        IntrinsicData{"sin", IntrinsicType::kSin},
+        IntrinsicData{"sinh", IntrinsicType::kSinh},
+        IntrinsicData{"smoothStep", IntrinsicType::kSmoothStep},
+        IntrinsicData{"sqrt", IntrinsicType::kSqrt},
+        IntrinsicData{"step", IntrinsicType::kStep},
+        IntrinsicData{"tan", IntrinsicType::kTan},
+        IntrinsicData{"tanh", IntrinsicType::kTanh},
+        IntrinsicData{"textureDimensions", IntrinsicType::kTextureDimensions},
+        IntrinsicData{"textureLoad", IntrinsicType::kTextureLoad},
+        IntrinsicData{"textureNumLayers", IntrinsicType::kTextureNumLayers},
+        IntrinsicData{"textureNumLevels", IntrinsicType::kTextureNumLevels},
+        IntrinsicData{"textureNumSamples", IntrinsicType::kTextureNumSamples},
+        IntrinsicData{"textureSample", IntrinsicType::kTextureSample},
+        IntrinsicData{"textureSampleBias", IntrinsicType::kTextureSampleBias},
         IntrinsicData{"textureSampleCompare",
-                      semantic::Intrinsic::kTextureSampleCompare},
-        IntrinsicData{"textureSampleGrad",
-                      semantic::Intrinsic::kTextureSampleGrad},
-        IntrinsicData{"textureSampleLevel",
-                      semantic::Intrinsic::kTextureSampleLevel},
-        IntrinsicData{"trunc", semantic::Intrinsic::kTrunc}));
+                      IntrinsicType::kTextureSampleCompare},
+        IntrinsicData{"textureSampleGrad", IntrinsicType::kTextureSampleGrad},
+        IntrinsicData{"textureSampleLevel", IntrinsicType::kTextureSampleLevel},
+        IntrinsicData{"trunc", IntrinsicType::kTrunc}));
 
 TEST_F(TypeDeterminerTest, MatchIntrinsicNoMatch) {
   EXPECT_EQ(TypeDeterminer::MatchIntrinsic("not_intrinsic"),
-            semantic::Intrinsic::kNone);
+            IntrinsicType::kNone);
 }
 
 using ImportData_DataPackingTest = TypeDeterminerTestWithParam<IntrinsicData>;
@@ -1736,11 +1731,11 @@ INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_DataPackingTest,
     testing::Values(
-        IntrinsicData{"pack4x8snorm", semantic::Intrinsic::kPack4x8Snorm},
-        IntrinsicData{"pack4x8unorm", semantic::Intrinsic::kPack4x8Unorm},
-        IntrinsicData{"pack2x16snorm", semantic::Intrinsic::kPack2x16Snorm},
-        IntrinsicData{"pack2x16unorm", semantic::Intrinsic::kPack2x16Unorm},
-        IntrinsicData{"pack2x16float", semantic::Intrinsic::kPack2x16Float}));
+        IntrinsicData{"pack4x8snorm", IntrinsicType::kPack4x8Snorm},
+        IntrinsicData{"pack4x8unorm", IntrinsicType::kPack4x8Unorm},
+        IntrinsicData{"pack2x16snorm", IntrinsicType::kPack2x16Snorm},
+        IntrinsicData{"pack2x16unorm", IntrinsicType::kPack2x16Unorm},
+        IntrinsicData{"pack2x16float", IntrinsicType::kPack2x16Float}));
 
 using ImportData_SingleParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_SingleParamTest, Scalar) {
@@ -1786,29 +1781,28 @@ TEST_P(ImportData_SingleParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_SingleParamTest,
-    testing::Values(IntrinsicData{"acos", semantic::Intrinsic::kAcos},
-                    IntrinsicData{"asin", semantic::Intrinsic::kAsin},
-                    IntrinsicData{"atan", semantic::Intrinsic::kAtan},
-                    IntrinsicData{"ceil", semantic::Intrinsic::kCeil},
-                    IntrinsicData{"cos", semantic::Intrinsic::kCos},
-                    IntrinsicData{"cosh", semantic::Intrinsic::kCosh},
-                    IntrinsicData{"exp", semantic::Intrinsic::kExp},
-                    IntrinsicData{"exp2", semantic::Intrinsic::kExp2},
-                    IntrinsicData{"floor", semantic::Intrinsic::kFloor},
-                    IntrinsicData{"fract", semantic::Intrinsic::kFract},
-                    IntrinsicData{"inverseSqrt",
-                                  semantic::Intrinsic::kInverseSqrt},
-                    IntrinsicData{"log", semantic::Intrinsic::kLog},
-                    IntrinsicData{"log2", semantic::Intrinsic::kLog2},
-                    IntrinsicData{"normalize", semantic::Intrinsic::kNormalize},
-                    IntrinsicData{"round", semantic::Intrinsic::kRound},
-                    IntrinsicData{"sign", semantic::Intrinsic::kSign},
-                    IntrinsicData{"sin", semantic::Intrinsic::kSin},
-                    IntrinsicData{"sinh", semantic::Intrinsic::kSinh},
-                    IntrinsicData{"sqrt", semantic::Intrinsic::kSqrt},
-                    IntrinsicData{"tan", semantic::Intrinsic::kTan},
-                    IntrinsicData{"tanh", semantic::Intrinsic::kTanh},
-                    IntrinsicData{"trunc", semantic::Intrinsic::kTrunc}));
+    testing::Values(IntrinsicData{"acos", IntrinsicType::kAcos},
+                    IntrinsicData{"asin", IntrinsicType::kAsin},
+                    IntrinsicData{"atan", IntrinsicType::kAtan},
+                    IntrinsicData{"ceil", IntrinsicType::kCeil},
+                    IntrinsicData{"cos", IntrinsicType::kCos},
+                    IntrinsicData{"cosh", IntrinsicType::kCosh},
+                    IntrinsicData{"exp", IntrinsicType::kExp},
+                    IntrinsicData{"exp2", IntrinsicType::kExp2},
+                    IntrinsicData{"floor", IntrinsicType::kFloor},
+                    IntrinsicData{"fract", IntrinsicType::kFract},
+                    IntrinsicData{"inverseSqrt", IntrinsicType::kInverseSqrt},
+                    IntrinsicData{"log", IntrinsicType::kLog},
+                    IntrinsicData{"log2", IntrinsicType::kLog2},
+                    IntrinsicData{"normalize", IntrinsicType::kNormalize},
+                    IntrinsicData{"round", IntrinsicType::kRound},
+                    IntrinsicData{"sign", IntrinsicType::kSign},
+                    IntrinsicData{"sin", IntrinsicType::kSin},
+                    IntrinsicData{"sinh", IntrinsicType::kSinh},
+                    IntrinsicData{"sqrt", IntrinsicType::kSqrt},
+                    IntrinsicData{"tan", IntrinsicType::kTan},
+                    IntrinsicData{"tanh", IntrinsicType::kTanh},
+                    IntrinsicData{"trunc", IntrinsicType::kTrunc}));
 
 using ImportData_SingleParam_FloatOrInt_Test =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -1919,8 +1913,8 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_NoParams) {
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_SingleParam_FloatOrInt_Test,
-                         testing::Values(IntrinsicData{
-                             "abs", semantic::Intrinsic::kAbs}));
+                         testing::Values(IntrinsicData{"abs",
+                                                       IntrinsicType::kAbs}));
 
 TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
   auto* ident = Expr("length");
@@ -1992,10 +1986,10 @@ TEST_P(ImportData_TwoParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_TwoParamTest,
-    testing::Values(IntrinsicData{"atan2", semantic::Intrinsic::kAtan2},
-                    IntrinsicData{"pow", semantic::Intrinsic::kPow},
-                    IntrinsicData{"step", semantic::Intrinsic::kStep},
-                    IntrinsicData{"reflect", semantic::Intrinsic::kReflect}));
+    testing::Values(IntrinsicData{"atan2", IntrinsicType::kAtan2},
+                    IntrinsicData{"pow", IntrinsicType::kPow},
+                    IntrinsicData{"step", IntrinsicType::kStep},
+                    IntrinsicData{"reflect", IntrinsicType::kReflect}));
 
 TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
   auto* ident = Expr("distance");
@@ -2093,11 +2087,10 @@ TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_ThreeParamTest,
-    testing::Values(
-        IntrinsicData{"mix", semantic::Intrinsic::kMix},
-        IntrinsicData{"smoothStep", semantic::Intrinsic::kSmoothStep},
-        IntrinsicData{"fma", semantic::Intrinsic::kFma},
-        IntrinsicData{"faceForward", semantic::Intrinsic::kFaceForward}));
+    testing::Values(IntrinsicData{"mix", IntrinsicType::kMix},
+                    IntrinsicData{"smoothStep", IntrinsicType::kSmoothStep},
+                    IntrinsicData{"fma", IntrinsicType::kFma},
+                    IntrinsicData{"faceForward", IntrinsicType::kFaceForward}));
 
 using ImportData_ThreeParam_FloatOrInt_Test =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -2200,8 +2193,8 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_NoParams) {
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_ThreeParam_FloatOrInt_Test,
-                         testing::Values(IntrinsicData{
-                             "clamp", semantic::Intrinsic::kClamp}));
+                         testing::Values(IntrinsicData{"clamp",
+                                                       IntrinsicType::kClamp}));
 
 using ImportData_Int_SingleParamTest =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -2248,9 +2241,8 @@ TEST_P(ImportData_Int_SingleParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_Int_SingleParamTest,
-    testing::Values(
-        IntrinsicData{"countOneBits", semantic::Intrinsic::kCountOneBits},
-        IntrinsicData{"reverseBits", semantic::Intrinsic::kReverseBits}));
+    testing::Values(IntrinsicData{"countOneBits", IntrinsicType::kCountOneBits},
+                    IntrinsicData{"reverseBits", IntrinsicType::kReverseBits}));
 
 using ImportData_FloatOrInt_TwoParamTest =
     TypeDeterminerTestWithParam<IntrinsicData>;
@@ -2351,8 +2343,8 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_NoParams) {
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     ImportData_FloatOrInt_TwoParamTest,
-    testing::Values(IntrinsicData{"min", semantic::Intrinsic::kMin},
-                    IntrinsicData{"max", semantic::Intrinsic::kMax}));
+    testing::Values(IntrinsicData{"min", IntrinsicType::kMin},
+                    IntrinsicData{"max", IntrinsicType::kMax}));
 
 TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
   Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
@@ -2385,8 +2377,7 @@ TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_Matrix_OneParam_Test,
                          testing::Values(IntrinsicData{
-                             "determinant",
-                             semantic::Intrinsic::kDeterminant}));
+                             "determinant", IntrinsicType::kDeterminant}));
 
 TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   // fn b() {}

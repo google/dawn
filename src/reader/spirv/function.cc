@@ -470,19 +470,19 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 }
 
 // Returns the WGSL standard library function intrinsic for the
-// given instruction, or semantic::Intrinsic::kNone
-semantic::Intrinsic GetIntrinsic(SpvOp opcode) {
+// given instruction, or semantic::IntrinsicType::kNone
+semantic::IntrinsicType GetIntrinsic(SpvOp opcode) {
   switch (opcode) {
     case SpvOpBitCount:
-      return semantic::Intrinsic::kCountOneBits;
+      return semantic::IntrinsicType::kCountOneBits;
     case SpvOpBitReverse:
-      return semantic::Intrinsic::kReverseBits;
+      return semantic::IntrinsicType::kReverseBits;
     case SpvOpDot:
-      return semantic::Intrinsic::kDot;
+      return semantic::IntrinsicType::kDot;
     default:
       break;
   }
-  return semantic::Intrinsic::kNone;
+  return semantic::IntrinsicType::kNone;
 }
 
 // @param opcode a SPIR-V opcode
@@ -3212,7 +3212,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   const auto intrinsic = GetIntrinsic(opcode);
-  if (intrinsic != semantic::Intrinsic::kNone) {
+  if (intrinsic != semantic::IntrinsicType::kNone) {
     return MakeIntrinsicCall(inst);
   }
 

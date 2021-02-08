@@ -20,7 +20,7 @@
 namespace tint {
 namespace semantic {
 
-enum class Intrinsic {
+enum class IntrinsicType {
   kNone = -1,
 
   kAbs,
@@ -104,48 +104,48 @@ enum class Intrinsic {
 
 /// Emits the name of the intrinsic function. The spelling,
 /// including case, matches the name in the WGSL spec.
-std::ostream& operator<<(std::ostream& out, Intrinsic i);
+std::ostream& operator<<(std::ostream& out, IntrinsicType i);
 
 namespace intrinsic {
 
 /// Determines if the given `i` is a coarse derivative
 /// @param i the intrinsic
 /// @returns true if the given derivative is coarse.
-bool IsCoarseDerivative(Intrinsic i);
+bool IsCoarseDerivative(IntrinsicType i);
 
 /// Determines if the given `i` is a fine derivative
 /// @param i the intrinsic
 /// @returns true if the given derivative is fine.
-bool IsFineDerivative(Intrinsic i);
+bool IsFineDerivative(IntrinsicType i);
 
 /// Determine if the given `i` is a derivative intrinsic
 /// @param i the intrinsic
 /// @returns true if the given `i` is a derivative intrinsic
-bool IsDerivative(Intrinsic i);
+bool IsDerivative(IntrinsicType i);
 
 /// Determines if the given `i` is a float classification intrinsic
 /// @param i the intrinsic
 /// @returns true if the given `i` is a float intrinsic
-bool IsFloatClassificationIntrinsic(Intrinsic i);
+bool IsFloatClassificationIntrinsic(IntrinsicType i);
 
 /// Determines if the given `i` is a texture operation intrinsic
 /// @param i the intrinsic
 /// @returns true if the given `i` is a texture operation intrinsic
-bool IsTextureIntrinsic(Intrinsic i);
+bool IsTextureIntrinsic(IntrinsicType i);
 
 /// Determines if the given `i` is a image query intrinsic
 /// @param i the intrinsic
 /// @returns true if the given `i` is a image query intrinsic
-bool IsImageQueryIntrinsic(Intrinsic i);
+bool IsImageQueryIntrinsic(IntrinsicType i);
 
 /// Determines if the given `i` is a data packing intrinsic
 /// @param i the intrinsic
 /// @returns true if the given `i` is a data packing intrinsic
-bool IsDataPackingIntrinsic(Intrinsic i);
+bool IsDataPackingIntrinsic(IntrinsicType i);
 
 /// @returns the name of the intrinsic function. The spelling, including case,
 /// matches the name in the WGSL spec.
-const char* str(Intrinsic i);
+const char* str(IntrinsicType i);
 
 }  // namespace intrinsic
 }  // namespace semantic

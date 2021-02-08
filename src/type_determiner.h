@@ -67,9 +67,9 @@ class TypeDeterminer {
   bool Determine();
 
   /// @param name the function name to try and match as an intrinsic.
-  /// @return the semantic::Intrinsic for the given name. If `name` does not
-  /// match an intrinsic, returns semantic::Intrinsic::kNone
-  static semantic::Intrinsic MatchIntrinsic(const std::string& name);
+  /// @return the semantic::IntrinsicType for the given name. If `name` does not
+  /// match an intrinsic, returns semantic::IntrinsicType::kNone
+  static semantic::IntrinsicType MatchIntrinsic(const std::string& name);
 
  private:
   template <typename T>
@@ -177,7 +177,7 @@ class TypeDeterminer {
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   bool DetermineIntrinsicCall(ast::CallExpression* call,
-                              semantic::Intrinsic intrinsic);
+                              semantic::IntrinsicType intrinsic);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 

@@ -449,7 +449,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return EmitTextureCall(expr, sem);
   }
   if (auto* sem = call_sem->As<semantic::IntrinsicCall>()) {
-    if (sem->intrinsic() == semantic::Intrinsic::kPack2x16Float) {
+    if (sem->intrinsic() == semantic::IntrinsicType::kPack2x16Float) {
       make_indent();
       out_ << "as_type<uint>(half2(";
       if (!EmitExpression(expr->params()[0])) {
@@ -580,7 +580,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       TypeOf(params[pidx.texture])->UnwrapAll()->As<type::Texture>();
 
   switch (sem->intrinsic()) {
-    case semantic::Intrinsic::kTextureDimensions: {
+    case semantic::IntrinsicType::kTextureDimensions: {
       std::vector<const char*> dims;
       switch (texture_type->dim()) {
         case type::TextureDimension::kNone:
@@ -634,7 +634,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       }
       return true;
     }
-    case semantic::Intrinsic::kTextureNumLayers: {
+    case semantic::IntrinsicType::kTextureNumLayers: {
       out_ << "int(";
       if (!EmitExpression(params[pidx.texture])) {
         return false;
@@ -642,7 +642,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       out_ << ".get_array_size())";
       return true;
     }
-    case semantic::Intrinsic::kTextureNumLevels: {
+    case semantic::IntrinsicType::kTextureNumLevels: {
       out_ << "int(";
       if (!EmitExpression(params[pidx.texture])) {
         return false;
@@ -650,7 +650,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       out_ << ".get_num_mip_levels())";
       return true;
     }
-    case semantic::Intrinsic::kTextureNumSamples: {
+    case semantic::IntrinsicType::kTextureNumSamples: {
       out_ << "int(";
       if (!EmitExpression(params[pidx.texture])) {
         return false;
@@ -668,20 +668,20 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
   bool lod_param_is_named = true;
 
   switch (sem->intrinsic()) {
-    case semantic::Intrinsic::kTextureSample:
-    case semantic::Intrinsic::kTextureSampleBias:
-    case semantic::Intrinsic::kTextureSampleLevel:
-    case semantic::Intrinsic::kTextureSampleGrad:
+    case semantic::IntrinsicType::kTextureSample:
+    case semantic::IntrinsicType::kTextureSampleBias:
+    case semantic::IntrinsicType::kTextureSampleLevel:
+    case semantic::IntrinsicType::kTextureSampleGrad:
       out_ << ".sample(";
       break;
-    case semantic::Intrinsic::kTextureSampleCompare:
+    case semantic::IntrinsicType::kTextureSampleCompare:
       out_ << ".sample_compare(";
       break;
-    case semantic::Intrinsic::kTextureLoad:
+    case semantic::IntrinsicType::kTextureLoad:
       out_ << ".read(";
       lod_param_is_named = false;
       break;
-    case semantic::Intrinsic::kTextureStore:
+    case semantic::IntrinsicType::kTextureStore:
       out_ << ".write(";
       break;
     default:
@@ -780,118 +780,118 @@ std::string GeneratorImpl::generate_builtin_name(
     const semantic::IntrinsicCall* call) {
   std::string out = "metal::";
   switch (call->intrinsic()) {
-    case semantic::Intrinsic::kAcos:
-    case semantic::Intrinsic::kAll:
-    case semantic::Intrinsic::kAny:
-    case semantic::Intrinsic::kAsin:
-    case semantic::Intrinsic::kAtan:
-    case semantic::Intrinsic::kAtan2:
-    case semantic::Intrinsic::kCeil:
-    case semantic::Intrinsic::kCos:
-    case semantic::Intrinsic::kCosh:
-    case semantic::Intrinsic::kCross:
-    case semantic::Intrinsic::kDeterminant:
-    case semantic::Intrinsic::kDistance:
-    case semantic::Intrinsic::kDot:
-    case semantic::Intrinsic::kExp:
-    case semantic::Intrinsic::kExp2:
-    case semantic::Intrinsic::kFloor:
-    case semantic::Intrinsic::kFma:
-    case semantic::Intrinsic::kFract:
-    case semantic::Intrinsic::kLength:
-    case semantic::Intrinsic::kLdexp:
-    case semantic::Intrinsic::kLog:
-    case semantic::Intrinsic::kLog2:
-    case semantic::Intrinsic::kMix:
-    case semantic::Intrinsic::kNormalize:
-    case semantic::Intrinsic::kPow:
-    case semantic::Intrinsic::kReflect:
-    case semantic::Intrinsic::kRound:
-    case semantic::Intrinsic::kSelect:
-    case semantic::Intrinsic::kSin:
-    case semantic::Intrinsic::kSinh:
-    case semantic::Intrinsic::kSqrt:
-    case semantic::Intrinsic::kStep:
-    case semantic::Intrinsic::kTan:
-    case semantic::Intrinsic::kTanh:
-    case semantic::Intrinsic::kTrunc:
-    case semantic::Intrinsic::kSign:
-    case semantic::Intrinsic::kClamp:
+    case semantic::IntrinsicType::kAcos:
+    case semantic::IntrinsicType::kAll:
+    case semantic::IntrinsicType::kAny:
+    case semantic::IntrinsicType::kAsin:
+    case semantic::IntrinsicType::kAtan:
+    case semantic::IntrinsicType::kAtan2:
+    case semantic::IntrinsicType::kCeil:
+    case semantic::IntrinsicType::kCos:
+    case semantic::IntrinsicType::kCosh:
+    case semantic::IntrinsicType::kCross:
+    case semantic::IntrinsicType::kDeterminant:
+    case semantic::IntrinsicType::kDistance:
+    case semantic::IntrinsicType::kDot:
+    case semantic::IntrinsicType::kExp:
+    case semantic::IntrinsicType::kExp2:
+    case semantic::IntrinsicType::kFloor:
+    case semantic::IntrinsicType::kFma:
+    case semantic::IntrinsicType::kFract:
+    case semantic::IntrinsicType::kLength:
+    case semantic::IntrinsicType::kLdexp:
+    case semantic::IntrinsicType::kLog:
+    case semantic::IntrinsicType::kLog2:
+    case semantic::IntrinsicType::kMix:
+    case semantic::IntrinsicType::kNormalize:
+    case semantic::IntrinsicType::kPow:
+    case semantic::IntrinsicType::kReflect:
+    case semantic::IntrinsicType::kRound:
+    case semantic::IntrinsicType::kSelect:
+    case semantic::IntrinsicType::kSin:
+    case semantic::IntrinsicType::kSinh:
+    case semantic::IntrinsicType::kSqrt:
+    case semantic::IntrinsicType::kStep:
+    case semantic::IntrinsicType::kTan:
+    case semantic::IntrinsicType::kTanh:
+    case semantic::IntrinsicType::kTrunc:
+    case semantic::IntrinsicType::kSign:
+    case semantic::IntrinsicType::kClamp:
       out += semantic::intrinsic::str(call->intrinsic());
       break;
-    case semantic::Intrinsic::kAbs:
+    case semantic::IntrinsicType::kAbs:
       if (call->Type()->is_float_scalar_or_vector()) {
         out += "fabs";
       } else {
         out += "abs";
       }
       break;
-    case semantic::Intrinsic::kCountOneBits:
+    case semantic::IntrinsicType::kCountOneBits:
       out += "popcount";
       break;
-    case semantic::Intrinsic::kDpdx:
-    case semantic::Intrinsic::kDpdxCoarse:
-    case semantic::Intrinsic::kDpdxFine:
+    case semantic::IntrinsicType::kDpdx:
+    case semantic::IntrinsicType::kDpdxCoarse:
+    case semantic::IntrinsicType::kDpdxFine:
       out += "dfdx";
       break;
-    case semantic::Intrinsic::kDpdy:
-    case semantic::Intrinsic::kDpdyCoarse:
-    case semantic::Intrinsic::kDpdyFine:
+    case semantic::IntrinsicType::kDpdy:
+    case semantic::IntrinsicType::kDpdyCoarse:
+    case semantic::IntrinsicType::kDpdyFine:
       out += "dfdy";
       break;
-    case semantic::Intrinsic::kFwidth:
-    case semantic::Intrinsic::kFwidthCoarse:
-    case semantic::Intrinsic::kFwidthFine:
+    case semantic::IntrinsicType::kFwidth:
+    case semantic::IntrinsicType::kFwidthCoarse:
+    case semantic::IntrinsicType::kFwidthFine:
       out += "fwidth";
       break;
-    case semantic::Intrinsic::kIsFinite:
+    case semantic::IntrinsicType::kIsFinite:
       out += "isfinite";
       break;
-    case semantic::Intrinsic::kIsInf:
+    case semantic::IntrinsicType::kIsInf:
       out += "isinf";
       break;
-    case semantic::Intrinsic::kIsNan:
+    case semantic::IntrinsicType::kIsNan:
       out += "isnan";
       break;
-    case semantic::Intrinsic::kIsNormal:
+    case semantic::IntrinsicType::kIsNormal:
       out += "isnormal";
       break;
-    case semantic::Intrinsic::kMax:
+    case semantic::IntrinsicType::kMax:
       if (call->Type()->is_float_scalar_or_vector()) {
         out += "fmax";
       } else {
         out += "max";
       }
       break;
-    case semantic::Intrinsic::kMin:
+    case semantic::IntrinsicType::kMin:
       if (call->Type()->is_float_scalar_or_vector()) {
         out += "fmin";
       } else {
         out += "min";
       }
       break;
-    case semantic::Intrinsic::kFaceForward:
+    case semantic::IntrinsicType::kFaceForward:
       out += "faceforward";
       break;
-    case semantic::Intrinsic::kPack4x8Snorm:
+    case semantic::IntrinsicType::kPack4x8Snorm:
       out += "pack_float_to_snorm4x8";
       break;
-    case semantic::Intrinsic::kPack4x8Unorm:
+    case semantic::IntrinsicType::kPack4x8Unorm:
       out += "pack_float_to_unorm4x8";
       break;
-    case semantic::Intrinsic::kPack2x16Snorm:
+    case semantic::IntrinsicType::kPack2x16Snorm:
       out += "pack_float_to_snorm2x16";
       break;
-    case semantic::Intrinsic::kPack2x16Unorm:
+    case semantic::IntrinsicType::kPack2x16Unorm:
       out += "pack_float_to_unorm2x16";
       break;
-    case semantic::Intrinsic::kReverseBits:
+    case semantic::IntrinsicType::kReverseBits:
       out += "reverse_bits";
       break;
-    case semantic::Intrinsic::kSmoothStep:
+    case semantic::IntrinsicType::kSmoothStep:
       out += "smoothstep";
       break;
-    case semantic::Intrinsic::kInverseSqrt:
+    case semantic::IntrinsicType::kInverseSqrt:
       out += "rsqrt";
       break;
     default:

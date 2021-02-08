@@ -40,16 +40,16 @@ class IntrinsicCall : public Castable<IntrinsicCall, Call> {
   /// Constructor
   /// @param return_type the return type of the call
   /// @param intrinsic the call target intrinsic
-  IntrinsicCall(type::Type* return_type, Intrinsic intrinsic);
+  IntrinsicCall(type::Type* return_type, IntrinsicType intrinsic);
 
   /// Destructor
   ~IntrinsicCall() override;
 
   /// @returns the target intrinsic for the call
-  Intrinsic intrinsic() const { return intrinsic_; }
+  IntrinsicType intrinsic() const { return intrinsic_; }
 
  private:
-  Intrinsic const intrinsic_;
+  IntrinsicType const intrinsic_;
 };
 
 /// TextureIntrinsicCall holds semantic information for ast::CallExpression
@@ -105,7 +105,7 @@ class TextureIntrinsicCall
   /// @param intrinsic the call target intrinsic
   /// @param params the overload parameter info
   TextureIntrinsicCall(type::Type* return_type,
-                       Intrinsic intrinsic,
+                       IntrinsicType intrinsic,
                        const Parameters& params);
 
   /// Destructor

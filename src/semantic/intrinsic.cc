@@ -17,218 +17,221 @@
 namespace tint {
 namespace semantic {
 
-std::ostream& operator<<(std::ostream& out, Intrinsic i) {
+std::ostream& operator<<(std::ostream& out, IntrinsicType i) {
   out << intrinsic::str(i);
   return out;
 }
 
 namespace intrinsic {
 
-const char* str(Intrinsic i) {
+const char* str(IntrinsicType i) {
   /// The emitted name matches the spelling in the WGSL spec.
   /// including case.
   switch (i) {
-    case Intrinsic::kNone:
+    case IntrinsicType::kNone:
       return "<not-an-intrinsic>";
-    case Intrinsic::kAbs:
+    case IntrinsicType::kAbs:
       return "abs";
-    case Intrinsic::kAcos:
+    case IntrinsicType::kAcos:
       return "acos";
-    case Intrinsic::kAll:
+    case IntrinsicType::kAll:
       return "all";
-    case Intrinsic::kAny:
+    case IntrinsicType::kAny:
       return "any";
-    case Intrinsic::kArrayLength:
+    case IntrinsicType::kArrayLength:
       return "arrayLength";
-    case Intrinsic::kAsin:
+    case IntrinsicType::kAsin:
       return "asin";
-    case Intrinsic::kAtan:
+    case IntrinsicType::kAtan:
       return "atan";
-    case Intrinsic::kAtan2:
+    case IntrinsicType::kAtan2:
       return "atan2";
-    case Intrinsic::kCeil:
+    case IntrinsicType::kCeil:
       return "ceil";
-    case Intrinsic::kClamp:
+    case IntrinsicType::kClamp:
       return "clamp";
-    case Intrinsic::kCos:
+    case IntrinsicType::kCos:
       return "cos";
-    case Intrinsic::kCosh:
+    case IntrinsicType::kCosh:
       return "cosh";
-    case Intrinsic::kCountOneBits:
+    case IntrinsicType::kCountOneBits:
       return "countOneBits";
-    case Intrinsic::kCross:
+    case IntrinsicType::kCross:
       return "cross";
-    case Intrinsic::kDeterminant:
+    case IntrinsicType::kDeterminant:
       return "determinant";
-    case Intrinsic::kDistance:
+    case IntrinsicType::kDistance:
       return "distance";
-    case Intrinsic::kDot:
+    case IntrinsicType::kDot:
       return "dot";
-    case Intrinsic::kDpdx:
+    case IntrinsicType::kDpdx:
       return "dpdx";
-    case Intrinsic::kDpdxCoarse:
+    case IntrinsicType::kDpdxCoarse:
       return "dpdxCoarse";
-    case Intrinsic::kDpdxFine:
+    case IntrinsicType::kDpdxFine:
       return "dpdxFine";
-    case Intrinsic::kDpdy:
+    case IntrinsicType::kDpdy:
       return "dpdy";
-    case Intrinsic::kDpdyCoarse:
+    case IntrinsicType::kDpdyCoarse:
       return "dpdyCoarse";
-    case Intrinsic::kDpdyFine:
+    case IntrinsicType::kDpdyFine:
       return "dpdyFine";
-    case Intrinsic::kExp:
+    case IntrinsicType::kExp:
       return "exp";
-    case Intrinsic::kExp2:
+    case IntrinsicType::kExp2:
       return "exp2";
-    case Intrinsic::kFaceForward:
+    case IntrinsicType::kFaceForward:
       return "faceForward";
-    case Intrinsic::kFloor:
+    case IntrinsicType::kFloor:
       return "floor";
-    case Intrinsic::kFma:
+    case IntrinsicType::kFma:
       return "fma";
-    case Intrinsic::kFract:
+    case IntrinsicType::kFract:
       return "fract";
-    case Intrinsic::kFrexp:
+    case IntrinsicType::kFrexp:
       return "frexp";
-    case Intrinsic::kFwidth:
+    case IntrinsicType::kFwidth:
       return "fwidth";
-    case Intrinsic::kFwidthCoarse:
+    case IntrinsicType::kFwidthCoarse:
       return "fwidthCoarse";
-    case Intrinsic::kFwidthFine:
+    case IntrinsicType::kFwidthFine:
       return "fwidthFine";
-    case Intrinsic::kInverseSqrt:
+    case IntrinsicType::kInverseSqrt:
       return "inverseSqrt";
-    case Intrinsic::kIsFinite:
+    case IntrinsicType::kIsFinite:
       return "isFinite";
-    case Intrinsic::kIsInf:
+    case IntrinsicType::kIsInf:
       return "isInf";
-    case Intrinsic::kIsNan:
+    case IntrinsicType::kIsNan:
       return "isNan";
-    case Intrinsic::kIsNormal:
+    case IntrinsicType::kIsNormal:
       return "isNormal";
-    case Intrinsic::kLdexp:
+    case IntrinsicType::kLdexp:
       return "ldexp";
-    case Intrinsic::kLength:
+    case IntrinsicType::kLength:
       return "length";
-    case Intrinsic::kLog:
+    case IntrinsicType::kLog:
       return "log";
-    case Intrinsic::kLog2:
+    case IntrinsicType::kLog2:
       return "log2";
-    case Intrinsic::kMax:
+    case IntrinsicType::kMax:
       return "max";
-    case Intrinsic::kMin:
+    case IntrinsicType::kMin:
       return "min";
-    case Intrinsic::kMix:
+    case IntrinsicType::kMix:
       return "mix";
-    case Intrinsic::kModf:
+    case IntrinsicType::kModf:
       return "modf";
-    case Intrinsic::kNormalize:
+    case IntrinsicType::kNormalize:
       return "normalize";
-    case Intrinsic::kPack4x8Snorm:
+    case IntrinsicType::kPack4x8Snorm:
       return "pack4x8snorm";
-    case Intrinsic::kPack4x8Unorm:
+    case IntrinsicType::kPack4x8Unorm:
       return "pack4x8unorm";
-    case Intrinsic::kPack2x16Snorm:
+    case IntrinsicType::kPack2x16Snorm:
       return "pack2x16snorm";
-    case Intrinsic::kPack2x16Unorm:
+    case IntrinsicType::kPack2x16Unorm:
       return "pack2x16unorm";
-    case Intrinsic::kPack2x16Float:
+    case IntrinsicType::kPack2x16Float:
       return "pack2x16float";
-    case Intrinsic::kPow:
+    case IntrinsicType::kPow:
       return "pow";
-    case Intrinsic::kReflect:
+    case IntrinsicType::kReflect:
       return "reflect";
-    case Intrinsic::kReverseBits:
+    case IntrinsicType::kReverseBits:
       return "reverseBits";
-    case Intrinsic::kRound:
+    case IntrinsicType::kRound:
       return "round";
-    case Intrinsic::kSelect:
+    case IntrinsicType::kSelect:
       return "select";
-    case Intrinsic::kSign:
+    case IntrinsicType::kSign:
       return "sign";
-    case Intrinsic::kSin:
+    case IntrinsicType::kSin:
       return "sin";
-    case Intrinsic::kSinh:
+    case IntrinsicType::kSinh:
       return "sinh";
-    case Intrinsic::kSmoothStep:
+    case IntrinsicType::kSmoothStep:
       return "smoothStep";
-    case Intrinsic::kSqrt:
+    case IntrinsicType::kSqrt:
       return "sqrt";
-    case Intrinsic::kStep:
+    case IntrinsicType::kStep:
       return "step";
-    case Intrinsic::kTan:
+    case IntrinsicType::kTan:
       return "tan";
-    case Intrinsic::kTanh:
+    case IntrinsicType::kTanh:
       return "tanh";
-    case Intrinsic::kTextureDimensions:
+    case IntrinsicType::kTextureDimensions:
       return "textureDimensions";
-    case Intrinsic::kTextureLoad:
+    case IntrinsicType::kTextureLoad:
       return "textureLoad";
-    case Intrinsic::kTextureNumLayers:
+    case IntrinsicType::kTextureNumLayers:
       return "textureNumLayers";
-    case Intrinsic::kTextureNumLevels:
+    case IntrinsicType::kTextureNumLevels:
       return "textureNumLevels";
-    case Intrinsic::kTextureNumSamples:
+    case IntrinsicType::kTextureNumSamples:
       return "textureNumSamples";
-    case Intrinsic::kTextureSample:
+    case IntrinsicType::kTextureSample:
       return "textureSample";
-    case Intrinsic::kTextureSampleBias:
+    case IntrinsicType::kTextureSampleBias:
       return "textureSampleBias";
-    case Intrinsic::kTextureSampleCompare:
+    case IntrinsicType::kTextureSampleCompare:
       return "textureSampleCompare";
-    case Intrinsic::kTextureSampleGrad:
+    case IntrinsicType::kTextureSampleGrad:
       return "textureSampleGrad";
-    case Intrinsic::kTextureSampleLevel:
+    case IntrinsicType::kTextureSampleLevel:
       return "textureSampleLevel";
-    case Intrinsic::kTextureStore:
+    case IntrinsicType::kTextureStore:
       return "textureStore";
-    case Intrinsic::kTrunc:
+    case IntrinsicType::kTrunc:
       return "trunc";
   }
   return "<unknown>";
 }
 
-bool IsCoarseDerivative(Intrinsic i) {
-  return i == Intrinsic::kDpdxCoarse || i == Intrinsic::kDpdyCoarse ||
-         i == Intrinsic::kFwidthCoarse;
+bool IsCoarseDerivative(IntrinsicType i) {
+  return i == IntrinsicType::kDpdxCoarse || i == IntrinsicType::kDpdyCoarse ||
+         i == IntrinsicType::kFwidthCoarse;
 }
 
-bool IsFineDerivative(Intrinsic i) {
-  return i == Intrinsic::kDpdxFine || i == Intrinsic::kDpdyFine ||
-         i == Intrinsic::kFwidthFine;
+bool IsFineDerivative(IntrinsicType i) {
+  return i == IntrinsicType::kDpdxFine || i == IntrinsicType::kDpdyFine ||
+         i == IntrinsicType::kFwidthFine;
 }
 
-bool IsDerivative(Intrinsic i) {
-  return i == Intrinsic::kDpdx || i == Intrinsic::kDpdy ||
-         i == Intrinsic::kFwidth || IsCoarseDerivative(i) ||
+bool IsDerivative(IntrinsicType i) {
+  return i == IntrinsicType::kDpdx || i == IntrinsicType::kDpdy ||
+         i == IntrinsicType::kFwidth || IsCoarseDerivative(i) ||
          IsFineDerivative(i);
 }
 
-bool IsFloatClassificationIntrinsic(Intrinsic i) {
-  return i == Intrinsic::kIsFinite || i == Intrinsic::kIsInf ||
-         i == Intrinsic::kIsNan || i == Intrinsic::kIsNormal;
+bool IsFloatClassificationIntrinsic(IntrinsicType i) {
+  return i == IntrinsicType::kIsFinite || i == IntrinsicType::kIsInf ||
+         i == IntrinsicType::kIsNan || i == IntrinsicType::kIsNormal;
 }
 
-bool IsTextureIntrinsic(Intrinsic i) {
-  return IsImageQueryIntrinsic(i) || i == Intrinsic::kTextureLoad ||
-         i == Intrinsic::kTextureSample ||
-         i == Intrinsic::kTextureSampleLevel ||
-         i == Intrinsic::kTextureSampleBias ||
-         i == Intrinsic::kTextureSampleCompare ||
-         i == Intrinsic::kTextureSampleGrad || i == Intrinsic::kTextureStore;
+bool IsTextureIntrinsic(IntrinsicType i) {
+  return IsImageQueryIntrinsic(i) || i == IntrinsicType::kTextureLoad ||
+         i == IntrinsicType::kTextureSample ||
+         i == IntrinsicType::kTextureSampleLevel ||
+         i == IntrinsicType::kTextureSampleBias ||
+         i == IntrinsicType::kTextureSampleCompare ||
+         i == IntrinsicType::kTextureSampleGrad ||
+         i == IntrinsicType::kTextureStore;
 }
 
-bool IsImageQueryIntrinsic(Intrinsic i) {
-  return i == semantic::Intrinsic::kTextureDimensions ||
-         i == Intrinsic::kTextureNumLayers ||
-         i == Intrinsic::kTextureNumLevels ||
-         i == Intrinsic::kTextureNumSamples;
+bool IsImageQueryIntrinsic(IntrinsicType i) {
+  return i == semantic::IntrinsicType::kTextureDimensions ||
+         i == IntrinsicType::kTextureNumLayers ||
+         i == IntrinsicType::kTextureNumLevels ||
+         i == IntrinsicType::kTextureNumSamples;
 }
 
-bool IsDataPackingIntrinsic(Intrinsic i) {
-  return i == Intrinsic::kPack4x8Snorm || i == Intrinsic::kPack4x8Unorm ||
-         i == Intrinsic::kPack2x16Snorm || i == Intrinsic::kPack2x16Unorm ||
-         i == Intrinsic::kPack2x16Float;
+bool IsDataPackingIntrinsic(IntrinsicType i) {
+  return i == IntrinsicType::kPack4x8Snorm ||
+         i == IntrinsicType::kPack4x8Unorm ||
+         i == IntrinsicType::kPack2x16Snorm ||
+         i == IntrinsicType::kPack2x16Unorm ||
+         i == IntrinsicType::kPack2x16Float;
 }
 
 }  // namespace intrinsic

@@ -25,13 +25,13 @@ Call::Call(type::Type* return_type) : Base(return_type) {}
 
 Call::~Call() = default;
 
-IntrinsicCall::IntrinsicCall(type::Type* return_type, Intrinsic intrinsic)
+IntrinsicCall::IntrinsicCall(type::Type* return_type, IntrinsicType intrinsic)
     : Base(return_type), intrinsic_(intrinsic) {}
 
 IntrinsicCall::~IntrinsicCall() = default;
 
 TextureIntrinsicCall::TextureIntrinsicCall(type::Type* return_type,
-                                           Intrinsic intrinsic,
+                                           IntrinsicType intrinsic,
                                            const Parameters& params)
     : Base(return_type, intrinsic), params_(params) {}
 
