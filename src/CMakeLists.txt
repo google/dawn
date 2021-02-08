@@ -169,6 +169,8 @@ set(TINT_LIB_SRCS
   clone_context.h
   demangler.cc
   demangler.h;
+  intrinsic_table.cc
+  intrinsic_table.h
   diagnostic/diagnostic.cc
   diagnostic/diagnostic.h
   diagnostic/formatter.cc
@@ -270,8 +272,6 @@ set(TINT_LIB_SRCS
   validator/validator.h
   validator/validator_impl.cc
   validator/validator_impl.h
-  validator/validator_test_helper.cc
-  validator/validator_test_helper.h
   writer/append_vector.cc
   writer/append_vector.h
   writer/float_to_string.cc
@@ -489,6 +489,8 @@ if(${TINT_BUILD_TESTS})
     validator/validator_function_test.cc
     validator/validator_test.cc
     validator/validator_type_test.cc
+    validator/validator_test_helper.cc
+    validator/validator_test_helper.h
     writer/float_to_string_test.cc
   )
 

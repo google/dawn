@@ -15,6 +15,7 @@
 #ifndef SRC_TYPE_DETERMINER_H_
 #define SRC_TYPE_DETERMINER_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -22,6 +23,7 @@
 
 #include "src/ast/module.h"
 #include "src/diagnostic/diagnostic.h"
+#include "src/intrinsic_table.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
 #include "src/semantic/intrinsic.h"
@@ -197,6 +199,7 @@ class TypeDeterminer {
   void SetType(ast::Expression* expr, type::Type* type) const;
 
   ProgramBuilder* const builder_;
+  std::unique_ptr<IntrinsicTable> const intrinsic_table_;
   std::string error_;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;

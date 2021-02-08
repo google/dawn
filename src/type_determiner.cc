@@ -71,7 +71,8 @@ using IntrinsicType = tint::semantic::IntrinsicType;
 
 }  // namespace
 
-TypeDeterminer::TypeDeterminer(ProgramBuilder* builder) : builder_(builder) {}
+TypeDeterminer::TypeDeterminer(ProgramBuilder* builder)
+    : builder_(builder), intrinsic_table_(IntrinsicTable::Create()) {}
 
 TypeDeterminer::~TypeDeterminer() = default;
 
@@ -456,97 +457,9 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
   return true;
 }
 
-namespace {
-
-enum class IntrinsicDataType {
-  kDependent,
-  kSignedInteger,
-  kUnsignedInteger,
-  kFloat,
-  kBool,
-};
-
-struct IntrinsicData {
-  IntrinsicType intrinsic;
-  IntrinsicDataType result_type;
-  uint8_t result_vector_width;
-  uint8_t param_for_result_type;
-};
-
-// Note, this isn't all the intrinsics. Some are handled specially before
-// we get to the generic code. See the DetermineIntrinsic code below.
-constexpr const IntrinsicData kIntrinsicData[] = {
-    {IntrinsicType::kAbs, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kAcos, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kAll, IntrinsicDataType::kBool, 1, 0},
-    {IntrinsicType::kAny, IntrinsicDataType::kBool, 1, 0},
-    {IntrinsicType::kArrayLength, IntrinsicDataType::kUnsignedInteger, 1, 0},
-    {IntrinsicType::kAsin, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kAtan, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kAtan2, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kCeil, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kClamp, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kCos, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kCosh, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kCountOneBits, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kCross, IntrinsicDataType::kFloat, 3, 0},
-    {IntrinsicType::kDeterminant, IntrinsicDataType::kFloat, 1, 0},
-    {IntrinsicType::kDistance, IntrinsicDataType::kFloat, 1, 0},
-    {IntrinsicType::kDpdx, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kDpdxCoarse, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kDpdxFine, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kDpdy, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kDpdyCoarse, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kDpdyFine, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kDot, IntrinsicDataType::kFloat, 1, 0},
-    {IntrinsicType::kExp, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kExp2, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFaceForward, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFloor, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFwidth, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFwidthCoarse, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFwidthFine, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFma, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFract, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kFrexp, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kInverseSqrt, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kLdexp, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kLength, IntrinsicDataType::kFloat, 1, 0},
-    {IntrinsicType::kLog, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kLog2, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kMax, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kMin, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kMix, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kModf, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kNormalize, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kPack4x8Snorm, IntrinsicDataType::kUnsignedInteger, 1, 0},
-    {IntrinsicType::kPack4x8Unorm, IntrinsicDataType::kUnsignedInteger, 1, 0},
-    {IntrinsicType::kPack2x16Snorm, IntrinsicDataType::kUnsignedInteger, 1, 0},
-    {IntrinsicType::kPack2x16Unorm, IntrinsicDataType::kUnsignedInteger, 1, 0},
-    {IntrinsicType::kPack2x16Float, IntrinsicDataType::kUnsignedInteger, 1, 0},
-    {IntrinsicType::kPow, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kReflect, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kReverseBits, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kRound, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kSelect, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kSign, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kSin, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kSinh, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kSmoothStep, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kSqrt, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kStep, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kTan, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kTanh, IntrinsicDataType::kDependent, 0, 0},
-    {IntrinsicType::kTrunc, IntrinsicDataType::kDependent, 0, 0},
-};
-
-constexpr const uint32_t kIntrinsicDataCount =
-    sizeof(kIntrinsicData) / sizeof(IntrinsicData);
-
-}  // namespace
-
-bool TypeDeterminer::DetermineIntrinsicCall(ast::CallExpression* call,
-                                            IntrinsicType intrinsic_type) {
+bool TypeDeterminer::DetermineIntrinsicCall(
+    ast::CallExpression* call,
+    semantic::IntrinsicType intrinsic_type) {
   using Parameter = semantic::Parameter;
   using Parameters = semantic::Parameters;
   using Usage = Parameter::Usage;
@@ -557,30 +470,9 @@ bool TypeDeterminer::DetermineIntrinsicCall(ast::CallExpression* call,
     arg_tys.emplace_back(TypeOf(expr));
   }
 
-  auto create_sem = [&](type::Type* return_type) {
-    semantic::Parameters params;  // TODO(bclayton): Populate this
-    auto* intrinsic = builder_->create<semantic::Intrinsic>(
-        intrinsic_type, return_type, params);
-    builder_->Sem().Add(call, builder_->create<semantic::Call>(intrinsic));
-  };
-
   std::string name = semantic::str(intrinsic_type);
-  if (semantic::IsFloatClassificationIntrinsic(intrinsic_type)) {
-    if (call->params().size() != 1) {
-      set_error(call->source(), "incorrect number of parameters for " + name);
-      return false;
-    }
 
-    auto* bool_type = builder_->create<type::Bool>();
-
-    auto* param_type = TypeOf(call->params()[0])->UnwrapPtrIfNeeded();
-    if (auto* vec = param_type->As<type::Vector>()) {
-      create_sem(builder_->create<type::Vector>(bool_type, vec->size()));
-    } else {
-      create_sem(bool_type);
-    }
-    return true;
-  }
+  // TODO(bclayton): Add these to the IntrinsicTable
   if (semantic::IsTextureIntrinsic(intrinsic_type)) {
     Parameters params;
 
@@ -768,54 +660,45 @@ bool TypeDeterminer::DetermineIntrinsicCall(ast::CallExpression* call,
     return true;
   }
 
-  const IntrinsicData* data = nullptr;
-  for (uint32_t i = 0; i < kIntrinsicDataCount; ++i) {
-    if (intrinsic_type == kIntrinsicData[i].intrinsic) {
-      data = &kIntrinsicData[i];
-      break;
+  auto result = intrinsic_table_->Lookup(*builder_, intrinsic_type, arg_tys);
+  if (!result.intrinsic) {
+    // Intrinsic lookup failed.
+    set_error(call->source(), result.error);
+
+    // TODO(bclayton): https://crbug.com/tint/487
+    // The Validator expects intrinsic signature mismatches to still produce
+    // type information. The rules for what the Validator expects are rather
+    // bespoke. Try to match what the Validator expects. As the Validator's
+    // checks on intrinsics is now almost entirely covered by the
+    // IntrinsicTable, we should remove the Validator checks on intrinsic
+    // signatures and remove these hacks.
+    semantic::Parameters parameters;
+    parameters.reserve(arg_tys.size());
+    for (auto* arg : arg_tys) {
+      parameters.emplace_back(semantic::Parameter{arg});
     }
-  }
-  if (data == nullptr) {
-    error_ = "unable to find intrinsic " + name;
+    type::Type* ret_ty = nullptr;
+    switch (intrinsic_type) {
+      case IntrinsicType::kCross:
+        ret_ty = builder_->ty.vec3<ProgramBuilder::f32>();
+        break;
+      case IntrinsicType::kDeterminant:
+        ret_ty = builder_->create<type::F32>();
+        break;
+      case IntrinsicType::kArrayLength:
+        ret_ty = builder_->create<type::U32>();
+        break;
+      default:
+        ret_ty = arg_tys.empty() ? builder_->ty.void_() : arg_tys[0];
+        break;
+    }
+    auto* intrinsic = builder_->create<semantic::Intrinsic>(intrinsic_type,
+                                                            ret_ty, parameters);
+    builder_->Sem().Add(call, builder_->create<semantic::Call>(intrinsic));
     return false;
   }
 
-  if (data->result_type == IntrinsicDataType::kDependent) {
-    const auto param_idx = data->param_for_result_type;
-    if (call->params().size() <= param_idx) {
-      set_error(call->source(),
-                "missing parameter " + std::to_string(param_idx) +
-                    " required for type determination in builtin " + name);
-      return false;
-    }
-    create_sem(TypeOf(call->params()[param_idx])->UnwrapPtrIfNeeded());
-  } else {
-    // The result type is not dependent on the parameter types.
-    type::Type* type = nullptr;
-    switch (data->result_type) {
-      case IntrinsicDataType::kSignedInteger:
-        type = builder_->create<type::I32>();
-        break;
-      case IntrinsicDataType::kUnsignedInteger:
-        type = builder_->create<type::U32>();
-        break;
-      case IntrinsicDataType::kFloat:
-        type = builder_->create<type::F32>();
-        break;
-      case IntrinsicDataType::kBool:
-        type = builder_->create<type::Bool>();
-        break;
-      default:
-        error_ = "unhandled intrinsic data type for " + name;
-        return false;
-    }
-
-    if (data->result_vector_width > 1) {
-      type = builder_->create<type::Vector>(type, data->result_vector_width);
-    }
-    create_sem(type);
-  }
-
+  builder_->Sem().Add(call, builder_->create<semantic::Call>(result.intrinsic));
   return true;
 }
 

@@ -355,6 +355,8 @@ source_set("libtint_core_src") {
     "src/clone_context.h",
     "src/demangler.cc",
     "src/demangler.h",
+    "src/intrinsic_table.cc",
+    "src/intrinsic_table.h",
     "src/diagnostic/diagnostic.cc",
     "src/diagnostic/diagnostic.h",
     "src/diagnostic/formatter.cc",
@@ -456,8 +458,6 @@ source_set("libtint_core_src") {
     "src/validator/validator.h",
     "src/validator/validator_impl.cc",
     "src/validator/validator_impl.h",
-    "src/validator/validator_test_helper.cc",
-    "src/validator/validator_test_helper.h",
     "src/writer/append_vector.cc",
     "src/writer/append_vector.h",
     "src/writer/float_to_string.cc",
@@ -864,6 +864,8 @@ source_set("tint_unittests_core_src") {
     "src/validator/validator_control_block_test.cc",
     "src/validator/validator_function_test.cc",
     "src/validator/validator_test.cc",
+    "src/validator/validator_test_helper.cc",
+    "src/validator/validator_test_helper.h",
     "src/writer/float_to_string_test.cc",
   ]
 

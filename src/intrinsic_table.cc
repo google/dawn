@@ -1,0 +1,994 @@
+// Copyright 2021 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "src/intrinsic_table.h"
+
+#include <algorithm>
+#include <limits>
+#include <string>
+#include <unordered_map>
+#include <utility>
+
+#include "src/block_allocator.h"
+#include "src/program_builder.h"
+#include "src/semantic/intrinsic.h"
+#include "src/type/f32_type.h"
+
+namespace tint {
+namespace {
+
+/// OpenTypes are the symbols used for templated types in overload signatures
+enum class OpenType {
+  T,
+  Count,  // Number of entries in the enum. Not a usable symbol.
+};
+
+/// OpenNumber are the symbols used for templated integers in overload
+/// signatures
+enum class OpenNumber {
+  N,  // Typically used for vecN
+  M,  // Typically used for matNxM
+  F,  // Typically used for texture_storage_2d<F>
+};
+
+/// @return a string of the OpenType symbol `ty`
+const char* str(OpenType ty) {
+  switch (ty) {
+    case OpenType::T:
+      return "T";
+
+    case OpenType::Count:
+      break;
+  }
+  return "";
+}
+
+/// @return a string of the OpenNumber symbol `num`
+const char* str(OpenNumber num) {
+  switch (num) {
+    case OpenNumber::N:
+      return "N";
+    case OpenNumber::M:
+      return "M";
+    case OpenNumber::F:
+      return "F";
+  }
+  return "";
+}
+
+/// A Matcher is an interface of a class used to match an overload parameter,
+/// return type, or open type.
+class Matcher {
+ public:
+  /// Current state passed to Match()
+  struct MatchState {
+    /// The map of open types. A new entry is assigned the first time an
+    /// OpenType is encountered. If the OpenType is encountered again, a
+    /// comparison is made to see if the type is consistent.
+    std::unordered_map<OpenType, type::Type*> open_types;
+    /// The map of open numbers. A new entry is assigned the first time an
+    /// OpenNumber is encountered. If the OpenNumber is encountered again, a
+    /// comparison is made to see if the number is consistent.
+    std::unordered_map<OpenNumber, uint32_t> open_numbers;
+  };
+
+  /// Destructor
+  virtual ~Matcher() = default;
+
+  /// Checks whether the given argument type matches.
+  /// Match may add to, or compare against the open types and numbers in state.
+  /// @returns true if the argument type is as expected.
+  virtual bool Match(MatchState& state, type::Type* argument_type) const = 0;
+
+  /// @return a string representation of the matcher. Used for printing error
+  /// messages when no overload is found.
+  virtual std::string str() const = 0;
+
+ protected:
+  /// Checks `state.open_type` to see if the OpenType `t` is equal to the type
+  /// `ty`. If `state.open_type` does not contain an entry for `t`, then `ty`
+  /// is added and returns true.
+  bool MatchOpenType(MatchState& state, OpenType t, type::Type* ty) const {
+    auto it = state.open_types.find(t);
+    if (it != state.open_types.end()) {
+      return it->second == ty;
+    }
+    state.open_types[t] = ty;
+    return true;
+  }
+
+  /// Checks `state.open_numbers` to see if the OpenNumber `n` is equal to
+  /// `val`. If `state.open_numbers` does not contain an entry for `n`, then
+  /// `val` is added and returns true.
+  bool MatchOpenNumber(MatchState& state, OpenNumber n, uint32_t val) const {
+    auto it = state.open_numbers.find(n);
+    if (it != state.open_numbers.end()) {
+      return it->second == val;
+    }
+    state.open_numbers[n] = val;
+    return true;
+  }
+};
+
+/// Builder is an extension of the Matcher interface that can also build the
+/// expected type. Builders are used to generate the parameter and return types
+/// on successful overload match.
+class Builder : public Matcher {
+ public:
+  /// Final matched state passed to Build()
+  struct BuildState {
+    /// The type manager used to construct new types
+    type::Manager& ty_mgr;
+    /// The final resolved list of open types
+    std::unordered_map<OpenType, type::Type*> const open_types;
+    /// The final resolved list of open numbers
+    std::unordered_map<OpenNumber, uint32_t> const open_numbers;
+  };
+
+  /// Destructor
+  ~Builder() override = default;
+
+  /// Constructs and returns the expected type
+  virtual type::Type* Build(BuildState& state) const = 0;
+};
+
+/// OpenTypeBuilder is a Matcher / Builder for an open type (T etc).
+/// The OpenTypeBuilder will match against any type (so long as it is consistent
+/// for the overload), and Build() will build the type it matched against.
+class OpenTypeBuilder : public Builder {
+ public:
+  explicit OpenTypeBuilder(OpenType open_type) : open_type_(open_type) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    return MatchOpenType(state, open_type_, ty);
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    return state.open_types.at(open_type_);
+  }
+
+  std::string str() const override { return tint::str(open_type_); }
+
+ private:
+  OpenType open_type_;
+};
+
+/// BoolBuilder is a Matcher / Builder for boolean types.
+class BoolBuilder : public Builder {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->Is<type::Bool>();
+  }
+  type::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<type::Bool>();
+  }
+  std::string str() const override { return "bool"; }
+};
+
+/// F32Builder is a Matcher / Builder for f32 types.
+class F32Builder : public Builder {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->Is<type::F32>();
+  }
+  type::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<type::F32>();
+  }
+  std::string str() const override { return "f32"; }
+};
+
+/// U32Builder is a Matcher / Builder for u32 types.
+class U32Builder : public Builder {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->Is<type::U32>();
+  }
+  type::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<type::U32>();
+  }
+  std::string str() const override { return "u32"; }
+};
+
+/// I32Builder is a Matcher / Builder for i32 types.
+class I32Builder : public Builder {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->Is<type::I32>();
+  }
+  type::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<type::I32>();
+  }
+  std::string str() const override { return "i32"; }
+};
+
+/// IU32Matcher is a Matcher for i32 or u32 types.
+class IU32Matcher : public Matcher {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->Is<type::I32>() || ty->Is<type::U32>();
+  }
+  std::string str() const override { return "i32 or u32"; }
+};
+
+/// FIU32Matcher is a Matcher for f32, i32 or u32 types.
+class FIU32Matcher : public Matcher {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->Is<type::F32>() || ty->Is<type::I32>() || ty->Is<type::U32>();
+  }
+  std::string str() const override { return "f32, i32 or u32"; }
+};
+
+/// ScalarMatcher is a Matcher for f32, i32, u32 or boolean types.
+class ScalarMatcher : public Matcher {
+ public:
+  bool Match(MatchState&, type::Type* ty) const override {
+    return ty->is_scalar();
+  }
+  std::string str() const override { return "scalar"; }
+};
+
+/// OpenSizeVecBuilder is a Matcher / Builder for vector types of an open number
+/// size.
+class OpenSizeVecBuilder : public Builder {
+ public:
+  OpenSizeVecBuilder(OpenNumber size, Builder* element_builder)
+      : size_(size), element_builder_(element_builder) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* vec = ty->UnwrapAll()->As<type::Vector>()) {
+      if (!MatchOpenNumber(state, size_, vec->size())) {
+        return false;
+      }
+      return element_builder_->Match(state, vec->type());
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* el = element_builder_->Build(state);
+    auto n = state.open_numbers.at(size_);
+    return state.ty_mgr.Get<type::Vector>(el, n);
+  }
+
+  std::string str() const override {
+    return "vec" + std::string(tint::str(size_)) + "<" +
+           element_builder_->str() + ">";
+  }
+
+ protected:
+  OpenNumber const size_;
+  Builder* const element_builder_;
+};
+
+/// VecBuilder is a Matcher / Builder for vector types of a fixed size.
+class VecBuilder : public Builder {
+ public:
+  VecBuilder(uint32_t size, Builder* element_builder)
+      : size_(size), element_builder_(element_builder) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* vec = ty->UnwrapAll()->As<type::Vector>()) {
+      if (vec->size() == size_) {
+        return element_builder_->Match(state, vec->type());
+      }
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* el = element_builder_->Build(state);
+    return state.ty_mgr.Get<type::Vector>(el, size_);
+  }
+
+  std::string str() const override {
+    return "vec" + std::to_string(size_) + "<" + element_builder_->str() + ">";
+  }
+
+ protected:
+  const uint32_t size_;
+  Builder* element_builder_;
+};
+
+/// OpenSizeVecBuilder is a Matcher / Builder for matrix types of an open number
+/// column and row size.
+class OpenSizeMatBuilder : public Builder {
+ public:
+  OpenSizeMatBuilder(OpenNumber columns,
+                     OpenNumber rows,
+                     Builder* element_builder)
+      : columns_(columns), rows_(rows), element_builder_(element_builder) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* mat = ty->UnwrapAll()->As<type::Matrix>()) {
+      if (!MatchOpenNumber(state, columns_, mat->columns())) {
+        return false;
+      }
+      if (!MatchOpenNumber(state, rows_, mat->rows())) {
+        return false;
+      }
+      return element_builder_->Match(state, mat->type());
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* el = element_builder_->Build(state);
+    auto columns = state.open_numbers.at(columns_);
+    auto rows = state.open_numbers.at(rows_);
+    return state.ty_mgr.Get<type::Matrix>(el, rows, columns);
+  }
+
+  std::string str() const override {
+    return "max" + std::string(tint::str(columns_)) + "x" +
+           std::string(tint::str(rows_)) + "<" + element_builder_->str() + ">";
+  }
+
+ protected:
+  OpenNumber const columns_;
+  OpenNumber const rows_;
+  Builder* const element_builder_;
+};
+
+/// PtrBuilder is a Matcher / Builder for pointer types.
+class PtrBuilder : public Builder {
+ public:
+  explicit PtrBuilder(Builder* element_builder)
+      : element_builder_(element_builder) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* ptr = ty->As<type::Pointer>()) {
+      return element_builder_->Match(state, ptr->type());
+    }
+    // TODO(bclayton): https://crbug.com/tint/486
+    // TypeDeterminer currently folds away the pointers on expressions.
+    // We'll need to fix this to ensure that pointer parameters are not fed
+    // non-pointer arguments, but for now just accept them.
+    return element_builder_->Match(state, ty);
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* el = element_builder_->Build(state);
+    return state.ty_mgr.Get<type::Pointer>(el, ast::StorageClass::kNone);
+  }
+
+  std::string str() const override {
+    return "ptr<" + element_builder_->str() + ">";
+  }
+
+ private:
+  Builder* const element_builder_;
+};
+
+/// ArrayBuilder is a Matcher / Builder for runtime sized array types.
+class ArrayBuilder : public Builder {
+ public:
+  explicit ArrayBuilder(Builder* element_builder)
+      : element_builder_(element_builder) {}
+
+  bool Match(MatchState& state, type::Type* ty) const override {
+    if (auto* arr = ty->As<type::Array>()) {
+      if (arr->size() == 0) {
+        return element_builder_->Match(state, arr->type());
+      }
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* el = element_builder_->Build(state);
+    return state.ty_mgr.Get<type::Array>(el, 0, ast::ArrayDecorationList{});
+  }
+
+  std::string str() const override {
+    return "array<" + element_builder_->str() + ">";
+  }
+
+ private:
+  Builder* const element_builder_;
+};
+
+/// Impl is the private implementation of the IntrinsicTable interface.
+class Impl : public IntrinsicTable {
+ public:
+  Impl();
+
+  IntrinsicTable::Result Lookup(
+      ProgramBuilder& builder,
+      semantic::IntrinsicType type,
+      const std::vector<type::Type*>& args) const override;
+
+  /// A single overload definition.
+  struct Overload {
+    /// @returns a human readable string representation of the overload
+    std::string str() const;
+
+    /// Attempts to match this overload given the IntrinsicType and argument
+    /// types. If a match is made, the build intrinsic is returned, otherwise
+    /// `match_score` is assigned a score of how closely the overload matched
+    /// (positive representing a greater match), and nullptr is returned.
+    semantic::Intrinsic* Match(ProgramBuilder& builder,
+                               semantic::IntrinsicType type,
+                               const std::vector<type::Type*>& arg_types,
+                               int& match_score) const;
+
+    semantic::IntrinsicType type;
+    Builder* return_type;
+    std::vector<Builder*> parameters;
+    std::unordered_map<OpenType, Matcher*> open_type_matchers;
+  };
+
+ private:
+  /// Allocator for the built Matcher / Builders
+  BlockAllocator<Matcher> matcher_allocator_;
+
+  /// Commonly used Matcher / Builders
+  struct {
+    BoolBuilder bool_;
+    F32Builder f32;
+    I32Builder i32;
+    IU32Matcher iu32;
+    FIU32Matcher fiu32;
+    ScalarMatcher scalar;
+    U32Builder u32;
+    OpenTypeBuilder T{OpenType::T};
+  } matchers_;
+
+  // TODO(bclayton): Sort by type, or array these by IntrinsicType
+  std::vector<Overload> overloads_;
+
+  /// @returns a Matcher / Builder that matches a pointer with the given element
+  /// type
+  PtrBuilder* ptr(Builder* element_builder) {
+    return matcher_allocator_.Create<PtrBuilder>(element_builder);
+  }
+
+  /// @returns a Matcher / Builder that matches a vector of size OpenNumber::N
+  /// with the given element type
+  OpenSizeVecBuilder* vecN(Builder* element_builder) {
+    return matcher_allocator_.Create<OpenSizeVecBuilder>(OpenNumber::N,
+                                                         element_builder);
+  }
+
+  /// @returns a Matcher / Builder that matches a vector of the given size and
+  /// element type
+  VecBuilder* vec(uint32_t size, Builder* element_builder) {
+    return matcher_allocator_.Create<VecBuilder>(size, element_builder);
+  }
+
+  /// @returns a Matcher / Builder that matches a runtime sized array with the
+  /// given element type
+  ArrayBuilder* array(Builder* element_builder) {
+    return matcher_allocator_.Create<ArrayBuilder>(element_builder);
+  }
+
+  /// @returns a Matcher / Builder that matches a matrix with the given size and
+  /// element type
+  OpenSizeMatBuilder* mat(OpenNumber columns,
+                          OpenNumber rows,
+                          Builder* element_builder) {
+    return matcher_allocator_.Create<OpenSizeMatBuilder>(columns, rows,
+                                                         element_builder);
+  }
+
+  /// @returns a Matcher / Builder that matches a square matrix with the column
+  /// / row count of OpenNumber::N
+  template <typename T>
+  auto matNxN(T&& in) {
+    return mat(OpenNumber::N, OpenNumber::N, std::forward<T>(in));
+  }
+
+  /// Registers an overload with the given intrinsic type, return type Matcher /
+  /// Builder, and parameter Matcher / Builders.
+  /// This overload of Register does not constrain any OpenTypes.
+  void Register(semantic::IntrinsicType type,
+                Builder* return_type,
+                std::vector<Builder*> parameters) {
+    Overload overload{type, return_type, std::move(parameters), {}};
+    overloads_.emplace_back(overload);
+  }
+
+  /// Registers an overload with the given intrinsic type, return type Matcher /
+  /// Builder, and parameter Matcher / Builders.
+  /// A single OpenType is contained with the given Matcher in
+  /// open_type_matcher.
+  void Register(semantic::IntrinsicType type,
+                Builder* return_type,
+                std::vector<Builder*> parameters,
+                std::pair<OpenType, Matcher*> open_type_matcher) {
+    Overload overload{
+        type, return_type, std::move(parameters), {open_type_matcher}};
+    overloads_.emplace_back(overload);
+  }
+};
+
+Impl::Impl() {
+  using I = semantic::IntrinsicType;
+
+  auto* bool_ = &matchers_.bool_;      // bool
+  auto* f32 = &matchers_.f32;          // f32
+  auto* u32 = &matchers_.u32;          // u32
+  auto* iu32 = &matchers_.iu32;        // i32 or u32
+  auto* fiu32 = &matchers_.fiu32;      // f32, i32 or u32
+  auto* scalar = &matchers_.scalar;    // f32, i32, u32 or bool
+  auto* T = &matchers_.T;              // Any T type
+  auto* array_T = array(T);            // array<T>
+  auto* vec2_f32 = vec(2, f32);        // vec2<f32>
+  auto* vec3_f32 = vec(3, f32);        // vec3<f32>
+  auto* vec4_f32 = vec(4, f32);        // vec4<f32>
+  auto* vecN_f32 = vecN(f32);          // vecN<f32>
+  auto* vecN_T = vecN(T);              // vecN<T>
+  auto* vecN_bool = vecN(bool_);       // vecN<bool>
+  auto* matNxN_f32 = matNxN(f32);      // matNxN<f32>
+  auto* ptr_T = ptr(T);                // ptr<T>
+  auto* ptr_f32 = ptr(f32);            // ptr<f32>
+  auto* ptr_vecN_T = ptr(vecN_T);      // ptr<vecN<T>>
+  auto* ptr_vecN_f32 = ptr(vecN_f32);  // ptr<vecN<f32>>
+
+  // Intrinsic overloads are registered with a call to the Register().
+  //
+  // The best way to explain Register() and the lookup process is by example.
+  //
+  // Let's begin with a simple overload declaration:
+  //
+  //   Register(I::kIsInf, bool_, {f32});
+  //
+  //   I     - is an alias to semantic::IntrinsicType.
+  //           I::kIsInf is shorthand for semantic::IntrinsicType::kIsInf.
+  //   bool_ - is a pointer to a pre-constructed BoolBuilder which matches and
+  //           builds type::Bool types.
+  //   {f32} - is the list of parameter Builders for the overload.
+  //           Builders are a type of Matcher that can also build the the type.
+  //           All Builders are Matchers, not all Matchers are Builders.
+  //   f32     is a pointer to a pre-constructed F32Builder which matches and
+  //           builds type::F32 types.
+  //
+  // This call registers the overload for the `isInf(f32) -> bool` intrinsic.
+  //
+  // Let's now see the process of Overload::Match() when passed a single f32
+  // argument:
+  //
+  //   (1) Overload::Match() begins by attempting to match the argument types
+  //       from left to right.
+  //       F32Builder::Match() is called with the type::F32 argument type.
+  //       F32Builder (only) matches the type::F32 type, so F32Builder::Match()
+  //       returns true.
+  //   (2) All the parameters have had their Matcher::Match() methods return
+  //       true, there are no open-types (more about these later), so the
+  //       overload has matched.
+  //   (3) The semantic::Intrinsic now needs to be built, so we begin by
+  //       building the overload's parameter types (these may not exactly match
+  //       the argument types). Build() is called for each parameter Builder,
+  //       returning the parameter type.
+  //   (4) Finally, Builder::Build() is called for the return_type, and the
+  //       semantic::Intrinsic is constructed and returned.
+  //       Job done.
+  //
+  // Overload resolution also supports basic pattern matching through the use of
+  // open-types and open-numbers.
+  //
+  // OpenTypeBuilder is a Matcher that matches a single open-type.
+  //
+  // An 'open-type' can be thought as a template type that is determined by the
+  // arguments to the intrinsic.
+  //
+  // At the beginning of Overload::Match(), all open-types are undefined.
+  // Open-types are closed (pinned to a fixed type) on the first attempt to
+  // match against that open-type (e.g. via OpenTypeBuilder::Match()).
+  // Once open-types are closed, they remain that type, and
+  // OpenTypeBuilder::Match() will only ever return true if the queried type
+  // matches the closed type.
+  //
+  // To better understand, let's consider the following hypothetical overload
+  // declaration:
+  //
+  //    Register(I::kFoo, T, {T, T}, {OpenType::T, scalar});
+  //
+  //    T                  - is the matcher for the open-type OpenType::T.
+  //    scalar             - is a pointer to a pre-constructed ScalarMatcher
+  //                         which matches scalar types (f32, i32, u32, bool).
+  // {OpenType::T, scalar} - is a constraint on the open-type OpenType::T that
+  //                         it needs to resolve to a scalar.
+  //
+  // This call to Register() declares the foo intrinsic which accepts the
+  // identical scalar type for both arguments, and returns that scalar type.
+  //
+  // The process for resolving this overload is as follows:
+  //
+  //   (1) Overload::Match() begins by attempting to match the argument types
+  //       from left to right.
+  //       OpenTypeBuilder::Match() is called for the first parameter, being
+  //       passed the type of the first argument.
+  //       The OpenType::T has not been closed yet, so the OpenType::T is closed
+  //       as the type of the first argument.
+  //       There's no verification that the T type is a scalar at this stage.
+  //   (2) OpenTypeBuilder::Match() is called again for the second parameter
+  //       with the type of the second argument.
+  //       As the OpenType::T is now closed, the argument type is compared
+  //       against the value of the closed-type of OpenType::T.
+  //       OpenTypeBuilder::Match() returns true if these type match, otherwise
+  //       false and the overload match fails.
+  //   (3) If all the parameters have had their Matcher::Match() methods return
+  //       true, then the open-type constraints need to be checked next.
+  //       The Matcher::Match() is called for each closed type. If any return
+  //       false then the overload match fails.
+  //   (4) Overload::Match() now needs to build and return the output
+  //       semantic::Intrinsic holding the matched overload signature.
+  //   (5) The parameter types are built by calling OpenTypeBuilder::Build().
+  //       This simply returns the closed type.
+  //   (6) OpenTypeBuilder::Build() is called again for the return_type, and the
+  //       semantic::Intrinsic is constructed and returned.
+  //       Job done.
+  //
+  // Open-numbers are very similar to open-types, except they match against
+  // integers instead of types. The rules for open-numbers are almost identical
+  // to open-types, except open-numbers do not support constraints.
+  //
+  // vecN(f32) is an example of a Matcher that uses open-numbers.
+  // vecN() constructs a OpenSizeVecBuilder that will match a vector of size
+  // OpenNumber::N and of element type f32. As vecN() always uses the
+  // OpenNumber::N, using vecN() multiple times in the same overload signature
+  // will ensure that the vector size is identical for all vector types.
+  //
+  // Some Matcher implementations accept other Matchers for matching sub-types.
+  // Consider:
+  //
+  //   Register(I::kClamp, vecN(T), {vecN(T), vecN(T), vecN(T)},
+  //           {OpenType::T, fiu32});
+  //
+  // vecN(T) is a OpenSizeVecBuilder that matches a vector of size OpenNumber::N
+  // and of element type OpenType::T, where T must be either a f32, i32, or u32.
+
+  // clang-format off
+
+  //       name               return type  parameter types                    open type constraints    // NOLINT
+  Register(I::kAbs,           T,           {T},                               {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kAbs,           vecN_T,      {vecN_T},                          {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kAcos,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kAcos,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kAll,           bool_,       {vecN_bool}                                              ); // NOLINT
+  Register(I::kAny,           bool_,       {vecN_bool}                                              ); // NOLINT
+  Register(I::kArrayLength,   u32,         {array_T}                                                ); // NOLINT
+  Register(I::kAsin,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kAsin,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kAtan,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kAtan,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kAtan2,         f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kAtan2,         vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kCeil,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kCeil,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kClamp,         T,           {T, T, T},                         {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kClamp,         vecN_T,      {vecN_T, vecN_T, vecN_T},          {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kCos,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kCos,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kCosh,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kCosh,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kCountOneBits,  T,           {T},                               {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kCountOneBits,  vecN_T,      {vecN_T},                          {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kCross,         vec3_f32,    {vec3_f32, vec3_f32}                                     ); // NOLINT
+  Register(I::kDeterminant,   f32,         {matNxN_f32}                                             ); // NOLINT
+  Register(I::kDistance,      f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kDistance,      f32,         {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kDot,           f32,         {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kDpdx,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdx,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdxCoarse,    f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdxCoarse,    vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdxFine,      f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdxFine,      vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdy,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdy,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdyCoarse,    f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdyCoarse,    vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdyFine,      f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdyFine,      vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kExp,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kExp,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kExp2,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kExp2,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFaceForward,   f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kFaceForward,   vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kFloor,         f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFloor,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFma,           f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kFma,           vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kFract,         f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFract,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFrexp,         f32,         {f32, ptr_T},                      {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kFrexp,         vecN_f32,    {vecN_f32, ptr_vecN_T},            {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kFwidth,        f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFwidth,        vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFwidthCoarse,  f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFwidthCoarse,  vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFwidthFine,    f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFwidthFine,    vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kInverseSqrt,   f32,         {f32}                                                    ); // NOLINT
+  Register(I::kInverseSqrt,   vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsFinite,      bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsFinite,      vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsInf,         bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsInf,         vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsNan,         bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsNan,         vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsNormal,      bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsNormal,      vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kLdexp,         f32,         {f32, T},                          {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kLdexp,         vecN_f32,    {vecN_f32, vecN_T},                {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kLength,        f32,         {f32}                                                    ); // NOLINT
+  Register(I::kLength,        f32,         {vecN_f32}                                               ); // NOLINT
+  Register(I::kLog,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kLog,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kLog2,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kLog2,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kMax,           T,           {T, T},                            {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMax,           vecN_T,      {vecN_T, vecN_T},                  {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMin,           T,           {T, T},                            {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMin,           vecN_T,      {vecN_T, vecN_T},                  {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMix,           f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kMix,           vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kModf,          f32,         {f32, ptr_f32}                                           ); // NOLINT
+  Register(I::kModf,          vecN_f32,    {vecN_f32, ptr_vecN_f32}                                 ); // NOLINT
+  Register(I::kNormalize,     vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kPack2x16Float, u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack2x16Snorm, u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack2x16Unorm, u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack4x8Snorm,  u32,         {vec4_f32}                                               ); // NOLINT
+  Register(I::kPack4x8Unorm,  u32,         {vec4_f32}                                               ); // NOLINT
+  Register(I::kPow,           f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kPow,           vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kReflect,       f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kReflect,       vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kReverseBits,   T,           {T},                               {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kReverseBits,   vecN_T,      {vecN_T},                          {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kRound,         f32,         {f32}                                                    ); // NOLINT
+  Register(I::kRound,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSelect,        T,           {T, T, bool_},                     {OpenType::T, scalar} ); // NOLINT
+  Register(I::kSelect,        vecN_T,      {vecN_T, vecN_T, vecN_bool},       {OpenType::T, scalar} ); // NOLINT
+  Register(I::kSign,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSign,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSin,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSin,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSinh,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSinh,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSmoothStep,    f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kSmoothStep,    vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kSqrt,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSqrt,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kStep,          f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kStep,          vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kTan,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kTan,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kTanh,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kTanh,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kTrunc,         f32,         {f32}                                                    ); // NOLINT
+  Register(I::kTrunc,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
+
+  // clang-format on
+}
+
+std::string Impl::Overload::str() const {
+  std::stringstream ss;
+  ss << type << "(";
+  {
+    bool first = true;
+    for (auto* param : parameters) {
+      if (!first) {
+        ss << ", ";
+      }
+      first = false;
+      ss << param->str();
+    }
+  }
+  ss << ") -> ";
+  ss << return_type->str();
+
+  if (!open_type_matchers.empty()) {
+    ss << "  where: ";
+
+    for (uint32_t i = 0; i < static_cast<uint32_t>(OpenType::Count); i++) {
+      auto open_type = static_cast<OpenType>(i);
+      auto it = open_type_matchers.find(open_type);
+      if (it != open_type_matchers.end()) {
+        if (i > 0) {
+          ss << ", ";
+        }
+        ss << tint::str(open_type) << " is " << it->second->str();
+      }
+    }
+  }
+  return ss.str();
+}
+/// TODO(bclayton): This really does not belong here. It would be nice if
+/// type::Type::type_name() returned these strings.
+/// @returns a human readable string for the type `ty`.
+std::string TypeName(type::Type* ty) {
+  ty = ty->UnwrapAll();
+  if (ty->Is<type::F32>()) {
+    return "f32";
+  }
+  if (ty->Is<type::U32>()) {
+    return "u32";
+  }
+  if (ty->Is<type::I32>()) {
+    return "i32";
+  }
+  if (ty->Is<type::Bool>()) {
+    return "bool";
+  }
+  if (ty->Is<type::Void>()) {
+    return "void";
+  }
+  if (auto* ptr = ty->As<type::Pointer>()) {
+    return "ptr<" + TypeName(ptr->type()) + ">";
+  }
+  if (auto* vec = ty->As<type::Vector>()) {
+    return "vec" + std::to_string(vec->size()) + "<" + TypeName(vec->type()) +
+           ">";
+  }
+  if (auto* mat = ty->As<type::Matrix>()) {
+    return "mat" + std::to_string(mat->columns()) + "x" +
+           std::to_string(mat->rows()) + "<" + TypeName(mat->type()) + ">";
+  }
+  return ty->type_name();
+}
+
+IntrinsicTable::Result Impl::Lookup(
+    ProgramBuilder& builder,
+    semantic::IntrinsicType type,
+    const std::vector<type::Type*>& args) const {
+  // Candidate holds information about a mismatched overload that could be what
+  // the user intended to call.
+  struct Candidate {
+    const Overload* overload;
+    int score;
+  };
+
+  // The list of failed matches that had promise.
+  std::vector<Candidate> candidates;
+
+  // TODO(bclayton) Sort overloads_, or place them into a map keyed by intrinsic
+  // type. This is horribly inefficient.
+  for (auto& overload : overloads_) {
+    int match_score = 0;
+    if (auto* intrinsic = overload.Match(builder, type, args, match_score)) {
+      return Result{intrinsic, ""};  // Match found
+    }
+    if (match_score > 0) {
+      candidates.emplace_back(Candidate{&overload, match_score});
+    }
+  }
+
+  // Sort the candidates with the most promising first
+  std::stable_sort(
+      candidates.begin(), candidates.end(),
+      [](const Candidate& a, const Candidate& b) { return a.score > b.score; });
+
+  // Generate an error message
+  std::stringstream ss;
+  ss << "no matching call to " << semantic::str(type) << "(";
+  {
+    bool first = true;
+    for (auto* arg : args) {
+      if (!first) {
+        ss << ", ";
+      }
+      first = false;
+      ss << TypeName(arg);
+    }
+  }
+  ss << ")" << std::endl;
+
+  if (!candidates.empty()) {
+    ss << std::endl;
+    ss << candidates.size() << " candidate function"
+       << (candidates.size() > 1 ? "s:" : ":") << std::endl;
+    for (auto& candidate : candidates) {
+      ss << "  " << candidate.overload->str() << std::endl;
+    }
+  }
+
+  return Result{nullptr, ss.str()};
+}
+
+semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
+                                           semantic::IntrinsicType intrinsic,
+                                           const std::vector<type::Type*>& args,
+                                           int& match_score) const {
+  if (type != intrinsic) {
+    match_score = std::numeric_limits<int>::min();
+    return nullptr;  // Incorrect function
+  }
+
+  // Penalize argument <-> parameter count mismatches
+  match_score = 1000;
+  match_score -= std::max(parameters.size(), args.size()) -
+                 std::min(parameters.size(), args.size());
+
+  bool matched = parameters.size() == args.size();
+
+  Matcher::MatchState matcher_state;
+
+  // Check that each of the parameters match.
+  // This stage also populates the open_types and open_numbers.
+  auto count = std::min(parameters.size(), args.size());
+  for (size_t i = 0; i < count; i++) {
+    assert(args[i]);
+    auto* arg_ty = args[i]->UnwrapAll();
+    if (!parameters[i]->Match(matcher_state, arg_ty)) {
+      matched = false;
+      continue;
+    }
+    // Weight correct parameter matches more than exact number of arguments
+    match_score += 2;
+  }
+  if (!matched) {
+    return nullptr;
+  }
+
+  // If any of the open-types are constrained, check that they match.
+  for (auto matcher_it : open_type_matchers) {
+    OpenType open_type = matcher_it.first;
+    auto* matcher = matcher_it.second;
+    auto type_it = matcher_state.open_types.find(open_type);
+    if (type_it == matcher_state.open_types.end()) {
+      // We have an overload that claims to have matched, but didn't actually
+      // resolve the open type. This is a bug that needs fixing.
+      assert(false);
+      return nullptr;
+    }
+    auto* resolved_type = type_it->second;
+    if (resolved_type == nullptr) {
+      // We have an overload that claims to have matched, but has a nullptr
+      // resolved open type. This is a bug that needs fixing.
+      assert(false);
+      return nullptr;
+    }
+    if (!matcher->Match(matcher_state, resolved_type)) {
+      matched = false;
+      continue;
+    }
+    match_score++;
+  }
+  if (!matched) {
+    return nullptr;
+  }
+
+  // Overload matched!
+
+  // Build the return type
+  Builder::BuildState builder_state{builder.Types(), matcher_state.open_types,
+                                    matcher_state.open_numbers};
+  auto* ret = return_type->Build(builder_state);
+  assert(ret);  // Build() must return a type
+
+  // Build the semantic parameters
+  semantic::Parameters params;
+  params.reserve(parameters.size());
+  for (size_t i = 0; i < args.size(); i++) {
+    auto* ty = parameters[i]->Build(builder_state);
+    params.emplace_back(semantic::Parameter{ty});
+  }
+
+  return builder.create<semantic::Intrinsic>(intrinsic, ret, params);
+}
+
+}  // namespace
+
+std::unique_ptr<IntrinsicTable> IntrinsicTable::Create() {
+  return std::make_unique<Impl>();
+}
+
+IntrinsicTable::~IntrinsicTable() = default;
+
+}  // namespace tint

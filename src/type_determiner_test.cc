@@ -1256,9 +1256,11 @@ TEST_P(IntrinsicDerivativeTest, MissingParam) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(name));
+  EXPECT_EQ(td()->error(), "no matching call to " + name +
+                               "()\n\n"
+                               "2 candidate functions:\n  " +
+                               name + "(f32) -> f32\n  " + name +
+                               "(vecN<f32>) -> vecN<f32>\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -1332,7 +1334,11 @@ TEST_P(Intrinsic_FloatMethod, MissingParam) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
+  EXPECT_EQ(td()->error(), "no matching call to " + name +
+                               "()\n\n"
+                               "2 candidate functions:\n  " +
+                               name + "(f32) -> bool\n  " + name +
+                               "(vecN<f32>) -> vecN<bool>\n");
 }
 
 TEST_P(Intrinsic_FloatMethod, TooManyParams) {
@@ -1345,7 +1351,11 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
+  EXPECT_EQ(td()->error(), "no matching call to " + name +
+                               "(f32, f32)\n\n"
+                               "2 candidate functions:\n  " +
+                               name + "(f32) -> bool\n  " + name +
+                               "(vecN<f32>) -> vecN<bool>\n");
 }
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
@@ -1564,9 +1574,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_NoParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(
-      td()->error(),
-      "missing parameter 0 required for type determination in builtin select");
+  EXPECT_EQ(td()->error(),
+            R"(no matching call to select()
+
+2 candidate functions:
+  select(T, T, bool) -> T  where: T is scalar
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is scalar
+)");
 }
 
 using UnaryOpExpressionTest = TypeDeterminerTestWithParam<ast::UnaryOp>;
@@ -1781,9 +1795,12 @@ TEST_P(ImportData_SingleParamTest, Error_NoParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(param.name));
+  EXPECT_EQ(td()->error(), "no matching call to " + std::string(param.name) +
+                               "()\n\n"
+                               "2 candidate functions:\n  " +
+                               std::string(param.name) + "(f32) -> f32\n  " +
+                               std::string(param.name) +
+                               "(vecN<f32>) -> vecN<f32>\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1829,8 +1846,9 @@ TEST_F(IntrinsicDataTest, Normalize_Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin "
-            "normalize");
+            "no matching call to normalize()\n\n"
+            "1 candidate function:\n  "
+            "normalize(vecN<f32>) -> vecN<f32>\n");
 }
 
 using ImportData_SingleParam_FloatOrInt_Test =
@@ -1930,8 +1948,13 @@ TEST_P(ImportData_SingleParam_FloatOrInt_Test, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(param.name));
+            "no matching call to " + std::string(param.name) +
+                "()\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) +
+                "(T) -> T  where: T is f32, i32 or u32\n  " +
+                std::string(param.name) +
+                "(vecN<T>) -> vecN<T>  where: T is f32, i32 or u32\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -1996,9 +2019,13 @@ TEST_P(ImportData_TwoParamTest, Error_NoParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(param.name));
+  EXPECT_EQ(td()->error(), "no matching call to " + std::string(param.name) +
+                               "()\n\n"
+                               "2 candidate functions:\n  " +
+                               std::string(param.name) +
+                               "(f32, f32) -> f32\n  " +
+                               std::string(param.name) +
+                               "(vecN<f32>, vecN<f32>) -> vecN<f32>\n");
 }
 INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
@@ -2041,8 +2068,21 @@ TEST_F(TypeDeterminerTest, ImportData_Cross) {
   EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Cross_AutoType) {
+TEST_F(TypeDeterminerTest, ImportData_Cross_NoArgs) {
   auto* call = Call("cross");
+  WrapInFunction(call);
+
+  EXPECT_FALSE(td()->Determine());
+
+  EXPECT_EQ(td()->error(), R"(no matching call to cross()
+
+1 candidate function:
+  cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+)");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Normalize) {
+  auto* call = Call("normalize", vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -2050,6 +2090,19 @@ TEST_F(TypeDeterminerTest, ImportData_Cross_AutoType) {
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
   EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Normalize_NoArgs) {
+  auto* call = Call("normalize");
+  WrapInFunction(call);
+
+  EXPECT_FALSE(td()->Determine());
+
+  EXPECT_EQ(td()->error(), R"(no matching call to normalize()
+
+1 candidate function:
+  normalize(vecN<f32>) -> vecN<f32>
+)");
 }
 
 using ImportData_ThreeParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
@@ -2087,8 +2140,12 @@ TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(param.name));
+            "no matching call to " + std::string(param.name) +
+                "()\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) + "(f32, f32, f32) -> f32\n  " +
+                std::string(param.name) +
+                "(vecN<f32>, vecN<f32>, vecN<f32>) -> vecN<f32>\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2188,8 +2245,14 @@ TEST_P(ImportData_ThreeParam_FloatOrInt_Test, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(param.name));
+            "no matching call to " + std::string(param.name) +
+                "()\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) +
+                "(T, T, T) -> T  where: T is f32, i32 or u32\n  " +
+                std::string(param.name) +
+                "(vecN<T>, vecN<T>, vecN<T>) -> vecN<T>  where: T is f32, i32 "
+                "or u32\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
@@ -2233,8 +2296,13 @@ TEST_P(ImportData_Int_SingleParamTest, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(param.name));
+            "no matching call to " + std::string(param.name) +
+                "()\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) +
+                "(T) -> T  where: T is i32 or u32\n  " +
+                std::string(param.name) +
+                "(vecN<T>) -> vecN<T>  where: T is i32 or u32\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2330,8 +2398,13 @@ TEST_P(ImportData_FloatOrInt_TwoParamTest, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "missing parameter 0 required for type determination in builtin " +
-                std::string(param.name));
+            "no matching call to " + std::string(param.name) +
+                "()\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) +
+                "(T, T) -> T  where: T is f32, i32 or u32\n  " +
+                std::string(param.name) +
+                "(vecN<T>, vecN<T>) -> vecN<T>  where: T is f32, i32 or u32\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2361,9 +2434,15 @@ TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_FALSE(td()->Determine());
 
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
+  EXPECT_EQ(td()->error(),
+            "no matching call to " + std::string(param.name) + R"(()
+
+1 candidate function:
+  determinant(maxNxN<f32>) -> f32
+)");
 }
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
