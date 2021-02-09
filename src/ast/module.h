@@ -71,11 +71,12 @@ class Module : public Castable<Module, Node> {
     return constructed_types_;
   }
 
-  /// @returns the functions declared in the translation unit
-  const FunctionList& Functions() const { return functions_; }
+  /// Add a function to the Builder
+  /// @param func the function to add
+  void AddFunction(ast::Function* func) { functions_.push_back(func); }
 
   /// @returns the functions declared in the translation unit
-  FunctionList& Functions() { return functions_; }
+  const FunctionList& Functions() const { return functions_; }
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const override;

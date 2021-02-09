@@ -111,7 +111,7 @@ TEST_F(ProgramTest, IsValid_Function) {
 }
 
 TEST_F(ProgramTest, IsValid_Null_Function) {
-  AST().Functions().Add(nullptr);
+  AST().AddFunction(nullptr);
 
   Program program(std::move(*this));
   EXPECT_FALSE(program.IsValid());

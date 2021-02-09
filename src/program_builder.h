@@ -917,7 +917,7 @@ class ProgramBuilder {
     auto* func =
         create<ast::Function>(source, Symbols().Register(name), params, type,
                               create<ast::BlockStatement>(body), decorations);
-    AST().Functions().Add(func);
+    AST().AddFunction(func);
     return func;
   }
 
@@ -936,7 +936,7 @@ class ProgramBuilder {
     auto* func =
         create<ast::Function>(Symbols().Register(name), params, type,
                               create<ast::BlockStatement>(body), decorations);
-    AST().Functions().Add(func);
+    AST().AddFunction(func);
     return func;
   }
 

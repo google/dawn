@@ -117,7 +117,7 @@ TEST_F(ModuleTest, IsValid_Function) {
 }
 
 TEST_F(ModuleTest, IsValid_Null_Function) {
-  AST().Functions().Add(nullptr);
+  AST().AddFunction(nullptr);
   Program program(std::move(*this));
   EXPECT_FALSE(program.AST().IsValid());
 }

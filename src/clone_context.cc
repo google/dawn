@@ -37,7 +37,7 @@ void CloneContext::Clone() {
     dst->AST().AddGlobalVariable(Clone(var));
   }
   for (auto* func : src->AST().Functions()) {
-    dst->AST().Functions().Add(Clone(func));
+    dst->AST().AddFunction(Clone(func));
   }
 }
 
