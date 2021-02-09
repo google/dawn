@@ -604,6 +604,20 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
+TEST_F(TypeDeterminerTest, Expr_Call_InBinaryOp) {
+  ast::VariableList params;
+  Func("func", params, ty.f32(), ast::StatementList{},
+       ast::FunctionDecorationList{});
+
+  auto* expr = Add(Call("func"), Call("func"));
+  WrapInFunction(expr);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
+  ASSERT_NE(TypeOf(expr), nullptr);
+  EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
+}
+
 TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   ast::VariableList params;
   Func("my_func", params, ty.f32(), ast::StatementList{},
@@ -975,6 +989,25 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(TypeDeterminerTest, Expr_MemberAccessor_InBinaryOp) {
+  auto* strct = create<ast::Struct>(
+      ast::StructMemberList{Member("first_member", ty.f32()),
+                            Member("second_member", ty.f32())},
+      ast::StructDecorationList{});
+
+  auto* st = ty.struct_("S", strct);
+  Global("my_struct", ast::StorageClass::kNone, st);
+
+  auto* expr = Add(MemberAccessor("my_struct", "first_member"),
+                   MemberAccessor("my_struct", "second_member"));
+  WrapInFunction(expr);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
+  ASSERT_NE(TypeOf(expr), nullptr);
+  EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
 
 using Expr_Binary_BitwiseTest = TypeDeterminerTestWithParam<ast::BinaryOp>;

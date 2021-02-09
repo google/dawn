@@ -452,6 +452,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
     auto* function = iter->second;
     function_calls_.emplace(call, function);
+    SetType(call, function->declaration->return_type());
   }
 
   return true;
@@ -501,10 +502,12 @@ bool TypeDeterminer::DetermineIntrinsicCall(
     auto* intrinsic = builder_->create<semantic::Intrinsic>(intrinsic_type,
                                                             ret_ty, parameters);
     builder_->Sem().Add(call, builder_->create<semantic::Call>(intrinsic));
+    SetType(call, ret_ty);
     return false;
   }
 
   builder_->Sem().Add(call, builder_->create<semantic::Call>(result.intrinsic));
+  SetType(call, result.intrinsic->ReturnType());
   return true;
 }
 
@@ -781,6 +784,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
   builder_->Sem().Add(
       expr,
       builder_->create<semantic::MemberAccessorExpression>(ret, is_swizzle));
+  SetType(expr, ret);
 
   return true;
 }
@@ -875,14 +879,23 @@ TypeDeterminer::VariableInfo* TypeDeterminer::CreateVariableInfo(
   return info;
 }
 
-void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) const {
-  return builder_->Sem().Add(expr,
-                             builder_->create<semantic::Expression>(type));
+type::Type* TypeDeterminer::TypeOf(ast::Expression* expr) {
+  auto it = expr_types_.find(expr);
+  if (it != expr_types_.end()) {
+    return it->second;
+  }
+  return nullptr;
+}
+
+void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) {
+  assert(expr_types_.count(expr) == 0);
+  expr_types_.emplace(expr, type);
 }
 
 void TypeDeterminer::CreateSemanticNodes() const {
   auto& sem = builder_->Sem();
 
+  // Create semantic nodes for all ast::Variables
   for (auto it : variable_to_info_) {
     auto* var = it.first;
     auto* info = it.second;
@@ -899,6 +912,7 @@ void TypeDeterminer::CreateSemanticNodes() const {
     return out;
   };
 
+  // Create semantic nodes for all ast::Functions
   std::unordered_map<FunctionInfo*, semantic::Function*> func_info_to_sem_func;
   for (auto it : function_to_info_) {
     auto* func = it.first;
@@ -911,11 +925,23 @@ void TypeDeterminer::CreateSemanticNodes() const {
     sem.Add(func, sem_func);
   }
 
+  // Create semantic nodes for all ast::CallExpressions
   for (auto it : function_calls_) {
     auto* call = it.first;
     auto* func_info = it.second;
     auto* sem_func = func_info_to_sem_func.at(func_info);
-    builder_->Sem().Add(call, builder_->create<semantic::Call>(sem_func));
+    sem.Add(call, builder_->create<semantic::Call>(sem_func));
+  }
+
+  // Create semantic nodes for all remaining expression types
+  for (auto it : expr_types_) {
+    auto* expr = it.first;
+    auto* type = it.second;
+    if (sem.Get(expr)) {
+      // Expression has already been assigned a semantic node
+      continue;
+    }
+    sem.Add(expr, builder_->create<semantic::Expression>(type));
   }
 }
 

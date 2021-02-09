@@ -188,15 +188,13 @@ class TypeDeterminer {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  type::Type* TypeOf(ast::Expression* expr) const {
-    return builder_->TypeOf(expr);
-  }
+  type::Type* TypeOf(ast::Expression* expr);
 
   /// Creates a semantic::Expression node with the resolved type `type`, and
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
-  void SetType(ast::Expression* expr, type::Type* type) const;
+  void SetType(ast::Expression* expr, type::Type* type);
 
   ProgramBuilder* const builder_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
@@ -206,6 +204,7 @@ class TypeDeterminer {
   std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionInfo*> function_calls_;
+  std::unordered_map<ast::Expression*, type::Type*> expr_types_;
   FunctionInfo* current_function_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
