@@ -125,6 +125,10 @@ namespace dawn_native {
               "Disables the use of indexed draw buffer state which is unsupported on some "
               "platforms.",
               "https://crbug.com/dawn/582"}},
+            {Toggle::DisableSnormRead,
+             {"disable_snorm_read",
+              "Disables reading from Snorm textures which is unsupported on some platforms.",
+              "https://crbug.com/dawn/667"}},
             {Toggle::UseD3D12SmallShaderVisibleHeapForTesting,
              {"use_d3d12_small_shader_visible_heap",
               "Enable use of a small D3D12 shader visible heap, instead of using a large one by "
