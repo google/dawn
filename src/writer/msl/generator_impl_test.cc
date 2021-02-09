@@ -119,7 +119,11 @@ INSTANTIATE_TEST_SUITE_P(
                     MslBuiltinData{ast::Builtin::kLocalInvocationIndex,
                                    "thread_index_in_threadgroup"},
                     MslBuiltinData{ast::Builtin::kGlobalInvocationId,
-                                   "thread_position_in_grid"}));
+                                   "thread_position_in_grid"},
+                    MslBuiltinData{ast::Builtin::kSampleId, "sample_id"},
+                    MslBuiltinData{ast::Builtin::kSampleMaskIn, "sample_mask"},
+                    MslBuiltinData{ast::Builtin::kSampleMaskOut,
+                                   "sample_mask"}));
 
 TEST_F(MslGeneratorImplTest, calculate_alignment_size_alias) {
   auto* alias = ty.alias("a", ty.f32());
