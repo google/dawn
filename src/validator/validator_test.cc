@@ -375,15 +375,13 @@ TEST_F(ValidatorTest, AssignIncompatibleTypesInNestedBlockStatement_Fail) {
 
 TEST_F(ValidatorTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> gloabl_var: f32;
-  Global(Source{Source::Location{12, 34}}, "global_var",
-         ast::StorageClass::kInput, ty.f32(), nullptr,
-         ast::VariableDecorationList{});
+  auto* var = Global(Source{Source::Location{12, 34}}, "global_var",
+                     ast::StorageClass::kInput, ty.f32(), nullptr,
+                     ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_TRUE(v.ValidateGlobalVariables(program->AST().GlobalVariables()))
-      << v.error();
+  EXPECT_TRUE(v.ValidateGlobalVariable(var)) << v.error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNoStorageClass_Fail) {
@@ -447,6 +445,32 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
 
   EXPECT_FALSE(v.Validate());
   EXPECT_EQ(v.error(), "12:34 v-0006: 'not_global_var' is not declared");
+}
+
+TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
+  // fn my_func() -> void {
+  //   global_var = 3.14f;
+  // }
+  // var global_var: f32 = 2.1;
+
+  SetSource(Source{Source::Location{12, 34}});
+  auto* lhs = Expr("global_var");
+  auto* rhs = Expr(3.14f);
+
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(lhs, rhs),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
+  Global("global_var", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
+         ast::VariableDecorationList{});
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(v.error(), "12:34 v-0006: 'global_var' is not declared");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
@@ -579,18 +603,17 @@ TEST_F(ValidatorTest, UsingUndefinedVariableDifferentScope_Fail) {
 TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {
   // var global_var0 : f32 = 0.1;
   // var global_var1 : i32 = 0;
-  Global("global_var0", ast::StorageClass::kPrivate, ty.f32(), Expr(0.1f),
-         ast::VariableDecorationList{});
+  auto* var0 = Global("global_var0", ast::StorageClass::kPrivate, ty.f32(),
+                      Expr(0.1f), ast::VariableDecorationList{});
 
-  Global(Source{Source::Location{12, 34}}, "global_var1",
-         ast::StorageClass::kPrivate, ty.f32(), Expr(0),
-         ast::VariableDecorationList{});
+  auto* var1 = Global(Source{Source::Location{12, 34}}, "global_var1",
+                      ast::StorageClass::kPrivate, ty.f32(), Expr(0),
+                      ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_TRUE(v.ValidateGlobalVariables(program->AST().GlobalVariables()))
-      << v.error();
+  EXPECT_TRUE(v.ValidateGlobalVariable(var0)) << v.error();
+  EXPECT_TRUE(v.ValidateGlobalVariable(var1)) << v.error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
@@ -604,9 +627,8 @@ TEST_F(ValidatorTest, GlobalVariableNotUnique_Fail) {
          ast::VariableDecorationList{});
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_FALSE(v.ValidateGlobalVariables(program->AST().GlobalVariables()));
+  EXPECT_FALSE(v.Validate());
   EXPECT_EQ(v.error(),
             "12:34 v-0011: redeclared global identifier 'global_var'");
 }
@@ -639,6 +661,30 @@ TEST_F(ValidatorTest, AssignToConstant_Fail) {
   EXPECT_EQ(v.error(), "12:34 v-0021: cannot re-assign a constant: 'a'");
 }
 
+TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Pass) {
+  // fn my_func -> void {
+  //   var a: f32 = 2.0;
+  // }
+  // var a: f32 = 2.1;
+
+  auto* var = Var("a", ast::StorageClass::kNone, ty.f32(), Expr(2.0f),
+                  ast::VariableDecorationList{});
+
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
+  Global("a", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
+         ast::VariableDecorationList{});
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate()) << v.error();
+}
+
 TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   // var a: f32 = 2.1;
   // fn my_func -> void {
@@ -665,7 +711,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
   EXPECT_EQ(v.error(), "12:34 v-0013: redeclared identifier 'a'");
 }
 
-TEST_F(ValidatorTest, RedeclaredIndentifier_Fail) {
+TEST_F(ValidatorTest, RedeclaredIdentifier_Fail) {
   // fn my_func() -> void {
   //  var a :i32 = 2;
   //  var a :f21 = 2.0;

@@ -54,9 +54,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   AST().AddConstructedType(struct_type);
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_TRUE(v.ValidateConstructedTypes(program->AST().ConstructedTypes()));
+  EXPECT_TRUE(v.ValidateConstructedType(struct_type));
 }
 
 TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
@@ -75,9 +74,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   AST().AddConstructedType(struct_type);
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_FALSE(v.ValidateConstructedTypes(program->AST().ConstructedTypes()));
+  EXPECT_FALSE(v.ValidateConstructedType(struct_type));
   EXPECT_EQ(v.error(),
             "v-0015: a struct containing a runtime-sized array requires the "
             "[[block]] attribute: 'Foo'");
@@ -104,9 +102,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   AST().AddConstructedType(struct_type);
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_FALSE(v.ValidateConstructedTypes(program->AST().ConstructedTypes()));
+  EXPECT_FALSE(v.ValidateConstructedType(struct_type));
   EXPECT_EQ(v.error(),
             "12:34 v-0015: runtime arrays may only appear as the last member "
             "of a struct");
@@ -131,9 +128,8 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
   AST().AddConstructedType(struct_type);
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_FALSE(v.ValidateConstructedTypes(program->AST().ConstructedTypes()));
+  EXPECT_FALSE(v.ValidateConstructedType(struct_type));
   EXPECT_EQ(v.error(),
             "v-0015: runtime arrays may only appear as the last member "
             "of a struct");
@@ -158,9 +154,8 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
   AST().AddConstructedType(struct_type);
 
   ValidatorImpl& v = Build();
-  const Program* program = v.program();
 
-  EXPECT_TRUE(v.ValidateConstructedTypes(program->AST().ConstructedTypes()));
+  EXPECT_TRUE(v.ValidateConstructedType(struct_type));
 }
 
 TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {

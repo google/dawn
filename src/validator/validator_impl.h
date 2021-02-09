@@ -76,14 +76,10 @@ class ValidatorImpl {
   /// @param msg the error message
   void add_error(const Source& src, const std::string& msg);
 
-  /// Validate global variables
-  /// @param global_vars list of global variables to check
+  /// Validates a global variable
+  /// @param var the global variable to check
   /// @returns true if the validation was successful
-  bool ValidateGlobalVariables(const ast::VariableList& global_vars);
-  /// Validates Functions
-  /// @param funcs the functions to check
-  /// @returns true if the validation was successful
-  bool ValidateFunctions(const ast::FunctionList& funcs);
+  bool ValidateGlobalVariable(const ast::Variable* var);
   /// Validates a function
   /// @param func the function to check
   /// @returns true if the validation was successful
@@ -144,11 +140,10 @@ class ValidatorImpl {
   /// @returns true if the valdiation was successful
   bool ValidateEntryPoint(const ast::FunctionList& funcs);
 
-  /// Validates constructed types
-  /// @param constructed_types the types to check
+  /// Validates a constructed type
+  /// @param type the type to check
   /// @returns true if the valdiation was successful
-  bool ValidateConstructedTypes(
-      const std::vector<type::Type*>& constructed_types);
+  bool ValidateConstructedType(const type::Type* type);
 
   /// Returns true if the given type is storable. This uses and
   /// updates `storable_` and `not_storable_`.
@@ -165,8 +160,8 @@ class ValidatorImpl {
  private:
   const Program* program_;
   diag::List diags_;
-  ScopeStack<ast::Variable*> variable_stack_;
-  ScopeStack<ast::Function*> function_stack_;
+  ScopeStack<const ast::Variable*> variable_stack_;
+  ScopeStack<const ast::Function*> function_stack_;
   ast::Function* current_function_ = nullptr;
 };
 

@@ -286,101 +286,85 @@ void ValidatorImpl::add_error(const Source& src, const std::string& msg) {
 }
 
 bool ValidatorImpl::Validate() {
-  function_stack_.push_scope();
-  if (!ValidateGlobalVariables(program_->AST().GlobalVariables())) {
-    return false;
-  }
-  if (!ValidateConstructedTypes(program_->AST().ConstructedTypes())) {
-    return false;
-  }
-  if (!ValidateFunctions(program_->AST().Functions())) {
-    return false;
+  // Validate global declarations in the order they appear in the module.
+  for (auto* decl : program_->AST().GlobalDeclarations()) {
+    if (auto* ty = decl->As<type::Type>()) {
+      if (!ValidateConstructedType(ty)) {
+        return false;
+      }
+    } else if (auto* func = decl->As<ast::Function>()) {
+      current_function_ = func;
+      if (!ValidateFunction(func)) {
+        return false;
+      }
+      current_function_ = nullptr;
+    } else if (auto* var = decl->As<ast::Variable>()) {
+      if (!ValidateGlobalVariable(var)) {
+        return false;
+      }
+    } else {
+      assert(false /* unreachable */);
+    }
   }
   if (!ValidateEntryPoint(program_->AST().Functions())) {
     return false;
   }
-  function_stack_.pop_scope();
 
   return true;
 }
 
-bool ValidatorImpl::ValidateConstructedTypes(
-    const std::vector<type::Type*>& constructed_types) {
-  for (auto* const ct : constructed_types) {
-    if (auto* st = ct->As<type::Struct>()) {
-      for (auto* member : st->impl()->members()) {
-        if (auto* r = member->type()->UnwrapAll()->As<type::Array>()) {
-          if (r->IsRuntimeArray()) {
-            if (member != st->impl()->members().back()) {
-              add_error(member->source(), "v-0015",
-                        "runtime arrays may only appear as the last member of "
-                        "a struct");
-              return false;
-            }
-            if (!st->IsBlockDecorated()) {
-              add_error(member->source(), "v-0015",
-                        "a struct containing a runtime-sized array "
-                        "requires the [[block]] attribute: '" +
-                            program_->Symbols().NameFor(st->symbol()) + "'");
-              return false;
-            }
+bool ValidatorImpl::ValidateConstructedType(const type::Type* type) {
+  if (auto* st = type->As<type::Struct>()) {
+    for (auto* member : st->impl()->members()) {
+      if (auto* r = member->type()->UnwrapAll()->As<type::Array>()) {
+        if (r->IsRuntimeArray()) {
+          if (member != st->impl()->members().back()) {
+            add_error(member->source(), "v-0015",
+                      "runtime arrays may only appear as the last member of "
+                      "a struct");
+            return false;
+          }
+          if (!st->IsBlockDecorated()) {
+            add_error(member->source(), "v-0015",
+                      "a struct containing a runtime-sized array "
+                      "requires the [[block]] attribute: '" +
+                          program_->Symbols().NameFor(st->symbol()) + "'");
+            return false;
           }
         }
       }
     }
   }
+
   return true;
 }
 
-bool ValidatorImpl::ValidateGlobalVariables(
-    const ast::VariableList& global_vars) {
-  for (auto* var : global_vars) {
-    auto* sem = program_->Sem().Get(var);
-    if (!sem) {
-      add_error(var->source(), "no semantic information for variable '" +
-                                   program_->Symbols().NameFor(var->symbol()) +
-                                   "'");
-      return false;
-    }
-
-    if (variable_stack_.has(var->symbol())) {
-      add_error(var->source(), "v-0011",
-                "redeclared global identifier '" +
-                    program_->Symbols().NameFor(var->symbol()) + "'");
-      return false;
-    }
-    if (!var->is_const() && sem->StorageClass() == ast::StorageClass::kNone) {
-      add_error(var->source(), "v-0022",
-                "global variables must have a storage class");
-      return false;
-    }
-    if (var->is_const() && !(sem->StorageClass() == ast::StorageClass::kNone)) {
-      add_error(var->source(), "v-global01",
-                "global constants shouldn't have a storage class");
-      return false;
-    }
-    variable_stack_.set_global(var->symbol(), var);
-  }
-  return true;
-}
-
-bool ValidatorImpl::ValidateFunctions(const ast::FunctionList& funcs) {
-  for (auto* func : funcs) {
-    if (function_stack_.has(func->symbol())) {
-      add_error(func->source(), "v-0016",
-                "function names must be unique '" +
-                    program_->Symbols().NameFor(func->symbol()) + "'");
-      return false;
-    }
-
-    function_stack_.set(func->symbol(), func);
-    current_function_ = func;
-    if (!ValidateFunction(func)) {
-      return false;
-    }
-    current_function_ = nullptr;
+bool ValidatorImpl::ValidateGlobalVariable(const ast::Variable* var) {
+  auto* sem = program_->Sem().Get(var);
+  if (!sem) {
+    add_error(var->source(), "no semantic information for variable '" +
+                                 program_->Symbols().NameFor(var->symbol()) +
+                                 "'");
+    return false;
   }
 
+  if (variable_stack_.has(var->symbol())) {
+    add_error(var->source(), "v-0011",
+              "redeclared global identifier '" +
+                  program_->Symbols().NameFor(var->symbol()) + "'");
+    return false;
+  }
+  if (!var->is_const() && sem->StorageClass() == ast::StorageClass::kNone) {
+    add_error(var->source(), "v-0022",
+              "global variables must have a storage class");
+    return false;
+  }
+  if (var->is_const() && !(sem->StorageClass() == ast::StorageClass::kNone)) {
+    add_error(var->source(), "v-global01",
+              "global constants shouldn't have a storage class");
+    return false;
+  }
+  variable_stack_.set_global(var->symbol(), var);
   return true;
 }
 
@@ -425,6 +409,15 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
 }
 
 bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
+  if (function_stack_.has(func->symbol())) {
+    add_error(func->source(), "v-0016",
+              "function names must be unique '" +
+                  program_->Symbols().NameFor(func->symbol()) + "'");
+    return false;
+  }
+
+  function_stack_.set(func->symbol(), func);
+
   variable_stack_.push_scope();
 
   for (auto* param : func->params()) {
@@ -906,7 +899,7 @@ bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
     // It wasn't an identifier in the first place.
     return true;
   }
-  ast::Variable* var;
+  const ast::Variable* var;
   if (variable_stack_.get(ident->symbol(), &var)) {
     // Give a nicer message if the LHS of the assignment is a const identifier.
     // It's likely to be a common programmer error.
@@ -989,7 +982,7 @@ bool ValidatorImpl::ValidateExpression(const ast::Expression* expr) {
 }
 
 bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
-  ast::Variable* var;
+  const ast::Variable* var;
   if (!variable_stack_.get(ident->symbol(), &var)) {
     add_error(ident->source(), "v-0006",
               "'" + program_->Symbols().NameFor(ident->symbol()) +
