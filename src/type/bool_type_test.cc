@@ -55,6 +55,11 @@ TEST_F(BoolTest, TypeName) {
   EXPECT_EQ(b.type_name(), "__bool");
 }
 
+TEST_F(BoolTest, FriendlyName) {
+  Bool b;
+  EXPECT_EQ(b.FriendlyName(Symbols()), "bool");
+}
+
 TEST_F(BoolTest, MinBufferBindingSize) {
   Bool b;
   EXPECT_EQ(0u, b.MinBufferBindingSize(MemoryLayout::kUniformBuffer));

@@ -80,6 +80,11 @@ TEST_F(SampledTextureTest, TypeName) {
   EXPECT_EQ(s.type_name(), "__sampled_texture_3d__f32");
 }
 
+TEST_F(SampledTextureTest, FriendlyName) {
+  SampledTexture s(TextureDimension::k3d, ty.f32());
+  EXPECT_EQ(s.FriendlyName(Symbols()), "texture_3d<f32>");
+}
+
 TEST_F(SampledTextureTest, MinBufferBindingSize) {
   F32 f32;
   SampledTexture s(TextureDimension::kCube, &f32);

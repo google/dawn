@@ -31,6 +31,16 @@ std::string Pointer::type_name() const {
   return out.str();
 }
 
+std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
+  std::ostringstream out;
+  out << "ptr<";
+  if (storage_class_ != ast::StorageClass::kNone) {
+    out << storage_class_ << ", ";
+  }
+  out << subtype_->FriendlyName(symbols) << ">";
+  return out.str();
+}
+
 Pointer::Pointer(Pointer&&) = default;
 
 Pointer::~Pointer() = default;

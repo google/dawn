@@ -65,6 +65,11 @@ TEST_F(MatrixTest, TypeName) {
   EXPECT_EQ(m.type_name(), "__mat_2_3__i32");
 }
 
+TEST_F(MatrixTest, FriendlyName) {
+  Matrix m{ty.i32(), 3, 2};
+  EXPECT_EQ(m.FriendlyName(Symbols()), "mat2x3<i32>");
+}
+
 TEST_F(MatrixTest, MinBufferBindingSize4x2) {
   I32 i32;
   Matrix m{&i32, 4, 2};

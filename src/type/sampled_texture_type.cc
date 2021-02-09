@@ -40,6 +40,12 @@ std::string SampledTexture::type_name() const {
   return out.str();
 }
 
+std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
+  std::ostringstream out;
+  out << "texture_" << dim() << "<" << type_->FriendlyName(symbols) << ">";
+  return out.str();
+}
+
 SampledTexture* SampledTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<SampledTexture>(dim(), ctx->Clone(type_));
 }

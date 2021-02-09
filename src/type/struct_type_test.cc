@@ -73,6 +73,13 @@ TEST_F(StructTypeTest, TypeName) {
   EXPECT_EQ(s->type_name(), "__struct_tint_symbol_1");
 }
 
+TEST_F(StructTypeTest, FriendlyName) {
+  auto* impl =
+      create<ast::Struct>(ast::StructMemberList{}, ast::StructDecorationList{});
+  auto* s = ty.struct_("my_struct", impl);
+  EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
+}
+
 TEST_F(StructTypeTest, MinBufferBindingSize) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),

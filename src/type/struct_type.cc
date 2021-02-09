@@ -40,6 +40,10 @@ std::string Struct::type_name() const {
   return "__struct_" + symbol_.to_str();
 }
 
+std::string Struct::FriendlyName(const SymbolTable& symbols) const {
+  return symbols.NameFor(symbol_);
+}
+
 uint64_t Struct::MinBufferBindingSize(MemoryLayout mem_layout) const {
   if (!struct_->members().size()) {
     return 0;

@@ -72,6 +72,16 @@ TEST_F(SamplerTest, TypeName_Comparison) {
   EXPECT_EQ(s.type_name(), "__sampler_comparison");
 }
 
+TEST_F(SamplerTest, FriendlyNameSampler) {
+  Sampler s{SamplerKind::kSampler};
+  EXPECT_EQ(s.FriendlyName(Symbols()), "sampler");
+}
+
+TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
+  Sampler s{SamplerKind::kComparisonSampler};
+  EXPECT_EQ(s.FriendlyName(Symbols()), "sampler_comparison");
+}
+
 TEST_F(SamplerTest, MinBufferBindingSize) {
   Sampler s{SamplerKind::kSampler};
   EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));

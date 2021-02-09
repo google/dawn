@@ -24,6 +24,7 @@ namespace tint {
 
 // Forward declarations
 class ProgramBuilder;
+class SymbolTable;
 
 namespace type {
 
@@ -44,6 +45,11 @@ class Type : public Castable<Type> {
 
   /// @returns the name for this type. The type name is unique over all types.
   virtual std::string type_name() const = 0;
+
+  /// @param symbols the program's symbol table
+  /// @returns the name for this type that closely resembles how it would be
+  /// declared in WGSL.
+  virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
 
   /// @param mem_layout type of memory layout to use in calculation.
   /// @returns minimum size required for this type, in bytes.

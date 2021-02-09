@@ -95,6 +95,19 @@ std::string Array::type_name() const {
   return type_name;
 }
 
+std::string Array::FriendlyName(const SymbolTable& symbols) const {
+  std::ostringstream out;
+  if (has_array_stride()) {
+    out << "[[stride(" << array_stride() << ")]] ";
+  }
+  out << "array<" << subtype_->FriendlyName(symbols);
+  if (!IsRuntimeArray()) {
+    out << ", " << size_;
+  }
+  out << ">";
+  return out.str();
+}
+
 Array* Array::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Array>(ctx->Clone(subtype_), size_,
                                  ctx->Clone(decorations()));

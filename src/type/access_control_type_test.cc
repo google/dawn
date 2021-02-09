@@ -97,6 +97,21 @@ TEST_F(AccessControlTest, AccessReadWrite) {
   EXPECT_EQ(at.type_name(), "__access_control_read_write__i32");
 }
 
+TEST_F(AccessControlTest, FriendlyNameReadOnly) {
+  AccessControl at{ast::AccessControl::kReadOnly, ty.i32()};
+  EXPECT_EQ(at.FriendlyName(Symbols()), "[[access(read)]] i32");
+}
+
+TEST_F(AccessControlTest, FriendlyNameWriteOnly) {
+  AccessControl at{ast::AccessControl::kWriteOnly, ty.i32()};
+  EXPECT_EQ(at.FriendlyName(Symbols()), "[[access(write)]] i32");
+}
+
+TEST_F(AccessControlTest, FriendlyNameReadWrite) {
+  AccessControl at{ast::AccessControl::kReadWrite, ty.i32()};
+  EXPECT_EQ(at.FriendlyName(Symbols()), "[[access(read_write)]] i32");
+}
+
 TEST_F(AccessControlTest, MinBufferBindingSizeU32) {
   U32 u32;
   AccessControl at{ast::AccessControl::kReadOnly, &u32};

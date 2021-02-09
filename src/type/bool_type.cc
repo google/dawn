@@ -32,6 +32,10 @@ std::string Bool::type_name() const {
   return "__bool";
 }
 
+std::string Bool::FriendlyName(const SymbolTable&) const {
+  return "bool";
+}
+
 Bool* Bool::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Bool>();
 }

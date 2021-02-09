@@ -55,6 +55,11 @@ TEST_F(F32Test, TypeName) {
   EXPECT_EQ(f.type_name(), "__f32");
 }
 
+TEST_F(F32Test, FriendlyName) {
+  F32 f;
+  EXPECT_EQ(f.FriendlyName(Symbols()), "f32");
+}
+
 TEST_F(F32Test, MinBufferBindingSize) {
   F32 f;
   EXPECT_EQ(4u, f.MinBufferBindingSize(MemoryLayout::kUniformBuffer));

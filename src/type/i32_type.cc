@@ -32,6 +32,10 @@ std::string I32::type_name() const {
   return "__i32";
 }
 
+std::string I32::FriendlyName(const SymbolTable&) const {
+  return "i32";
+}
+
 uint64_t I32::MinBufferBindingSize(MemoryLayout) const {
   return 4;
 }

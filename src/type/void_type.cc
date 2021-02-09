@@ -32,6 +32,10 @@ std::string Void::type_name() const {
   return "__void";
 }
 
+std::string Void::FriendlyName(const SymbolTable&) const {
+  return "void";
+}
+
 Void* Void::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Void>();
 }

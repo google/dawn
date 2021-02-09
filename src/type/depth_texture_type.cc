@@ -51,6 +51,12 @@ std::string DepthTexture::type_name() const {
   return out.str();
 }
 
+std::string DepthTexture::FriendlyName(const SymbolTable&) const {
+  std::ostringstream out;
+  out << "texture_depth_" << dim();
+  return out.str();
+}
+
 DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<DepthTexture>(dim());
 }

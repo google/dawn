@@ -55,6 +55,11 @@ TEST_F(I32Test, TypeName) {
   EXPECT_EQ(i.type_name(), "__i32");
 }
 
+TEST_F(I32Test, FriendlyName) {
+  I32 i;
+  EXPECT_EQ(i.FriendlyName(Symbols()), "i32");
+}
+
 TEST_F(I32Test, MinBufferBindingSize) {
   I32 i;
   EXPECT_EQ(4u, i.MinBufferBindingSize(MemoryLayout::kUniformBuffer));

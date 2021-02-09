@@ -32,6 +32,10 @@ std::string F32::type_name() const {
   return "__f32";
 }
 
+std::string F32::FriendlyName(const SymbolTable&) const {
+  return "f32";
+}
+
 uint64_t F32::MinBufferBindingSize(MemoryLayout) const {
   return 4;
 }

@@ -64,6 +64,16 @@ TEST_F(PointerTest, TypeName) {
   EXPECT_EQ(p.type_name(), "__ptr_workgroup__i32");
 }
 
+TEST_F(PointerTest, FriendlyNameWithStorageClass) {
+  Pointer p{ty.i32(), ast::StorageClass::kWorkgroup};
+  EXPECT_EQ(p.FriendlyName(Symbols()), "ptr<workgroup, i32>");
+}
+
+TEST_F(PointerTest, FriendlyNameWithoutStorageClass) {
+  Pointer p{ty.i32(), ast::StorageClass::kNone};
+  EXPECT_EQ(p.FriendlyName(Symbols()), "ptr<i32>");
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace tint

@@ -94,6 +94,15 @@ TEST_F(StorageTextureTest, TypeName) {
   EXPECT_EQ(s->type_name(), "__storage_texture_2d_array_rgba32float");
 }
 
+TEST_F(StorageTextureTest, FriendlyName) {
+  auto* subtype =
+      StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, Types());
+  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
+                                   ImageFormat::kRgba32Float, subtype);
+  EXPECT_EQ(s->FriendlyName(Symbols()),
+            "texture_storage_2d_array<rgba32float>");
+}
+
 TEST_F(StorageTextureTest, F32) {
   auto* subtype =
       type::StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, Types());

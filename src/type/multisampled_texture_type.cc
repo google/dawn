@@ -40,6 +40,14 @@ std::string MultisampledTexture::type_name() const {
   return out.str();
 }
 
+std::string MultisampledTexture::FriendlyName(
+    const SymbolTable& symbols) const {
+  std::ostringstream out;
+  out << "texture_multisampled_" << dim() << "<" << type_->FriendlyName(symbols)
+      << ">";
+  return out.str();
+}
+
 MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<MultisampledTexture>(dim(), ctx->Clone(type_));
 }

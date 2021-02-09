@@ -37,6 +37,10 @@ std::string Alias::type_name() const {
   return "__alias_" + symbol_.to_str() + subtype_->type_name();
 }
 
+std::string Alias::FriendlyName(const SymbolTable& symbols) const {
+  return symbols.NameFor(symbol_);
+}
+
 uint64_t Alias::MinBufferBindingSize(MemoryLayout mem_layout) const {
   return subtype_->MinBufferBindingSize(mem_layout);
 }

@@ -45,6 +45,10 @@ std::string Sampler::type_name() const {
          (kind_ == SamplerKind::kSampler ? "sampler" : "comparison");
 }
 
+std::string Sampler::FriendlyName(const SymbolTable&) const {
+  return kind_ == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
+}
+
 Sampler* Sampler::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Sampler>(kind_);
 }

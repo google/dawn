@@ -80,6 +80,22 @@ TEST_F(ArrayTest, TypeName) {
   EXPECT_EQ(arr.type_name(), "__array__i32");
 }
 
+TEST_F(ArrayTest, FriendlyNameRuntimeSized) {
+  Array arr{ty.i32(), 0, ast::ArrayDecorationList{}};
+  EXPECT_EQ(arr.FriendlyName(Symbols()), "array<i32>");
+}
+
+TEST_F(ArrayTest, FriendlyNameStaticSized) {
+  Array arr{ty.i32(), 5, ast::ArrayDecorationList{}};
+  EXPECT_EQ(arr.FriendlyName(Symbols()), "array<i32, 5>");
+}
+
+TEST_F(ArrayTest, FriendlyNameWithStride) {
+  Array arr{ty.i32(), 5,
+            ast::ArrayDecorationList{create<ast::StrideDecoration>(32)}};
+  EXPECT_EQ(arr.FriendlyName(Symbols()), "[[stride(32)]] array<i32, 5>");
+}
+
 TEST_F(ArrayTest, TypeName_RuntimeArray) {
   I32 i32;
   Array arr{&i32, 3, ast::ArrayDecorationList{}};

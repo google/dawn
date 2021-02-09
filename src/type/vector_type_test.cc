@@ -64,6 +64,11 @@ TEST_F(VectorTest, TypeName) {
   EXPECT_EQ(v.type_name(), "__vec_3__i32");
 }
 
+TEST_F(VectorTest, FriendlyName) {
+  auto* v = ty.vec3<f32>();
+  EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
+}
+
 TEST_F(VectorTest, MinBufferBindingSizeVec2) {
   I32 i32;
   Vector v{&i32, 2};

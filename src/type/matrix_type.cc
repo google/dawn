@@ -43,6 +43,13 @@ std::string Matrix::type_name() const {
          subtype_->type_name();
 }
 
+std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
+  std::ostringstream out;
+  out << "mat" << columns_ << "x" << rows_ << "<"
+      << subtype_->FriendlyName(symbols) << ">";
+  return out.str();
+}
+
 uint64_t Matrix::MinBufferBindingSize(MemoryLayout mem_layout) const {
   Vector vec(subtype_, rows_);
   return (columns_ - 1) * vec.BaseAlignment(mem_layout) +

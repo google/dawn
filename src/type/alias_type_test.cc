@@ -69,6 +69,11 @@ TEST_F(AliasTest, TypeName) {
   EXPECT_EQ(at->type_name(), "__alias_tint_symbol_1__i32");
 }
 
+TEST_F(AliasTest, FriendlyName) {
+  auto* at = ty.alias("Particle", ty.i32());
+  EXPECT_EQ(at->FriendlyName(Symbols()), "Particle");
+}
+
 TEST_F(AliasTest, UnwrapIfNeeded_Alias) {
   auto* a = ty.alias("a_type", ty.u32());
   EXPECT_EQ(a->symbol(), Symbol(1));

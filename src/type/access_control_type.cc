@@ -50,6 +50,24 @@ std::string AccessControl::type_name() const {
   return name + subtype_->type_name();
 }
 
+std::string AccessControl::FriendlyName(const SymbolTable& symbols) const {
+  std::ostringstream out;
+  out << "[[access(";
+  switch (access_) {
+    case ast::AccessControl::kReadOnly:
+      out << "read";
+      break;
+    case ast::AccessControl::kWriteOnly:
+      out << "write";
+      break;
+    case ast::AccessControl::kReadWrite:
+      out << "read_write";
+      break;
+  }
+  out << ")]] " << subtype_->FriendlyName(symbols);
+  return out.str();
+}
+
 uint64_t AccessControl::MinBufferBindingSize(MemoryLayout mem_layout) const {
   return subtype_->MinBufferBindingSize(mem_layout);
 }

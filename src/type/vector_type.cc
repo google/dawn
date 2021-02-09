@@ -38,6 +38,12 @@ std::string Vector::type_name() const {
   return "__vec_" + std::to_string(size_) + subtype_->type_name();
 }
 
+std::string Vector::FriendlyName(const SymbolTable& symbols) const {
+  std::ostringstream out;
+  out << "vec" << size_ << "<" << subtype_->FriendlyName(symbols) << ">";
+  return out.str();
+}
+
 uint64_t Vector::MinBufferBindingSize(MemoryLayout mem_layout) const {
   return size_ * subtype_->MinBufferBindingSize(mem_layout);
 }

@@ -1240,69 +1240,6 @@ std::string Impl::Overload::str() const {
   }
   return ss.str();
 }
-/// TODO(bclayton): This really does not belong here. It would be nice if
-/// type::Type::type_name() returned these strings.
-/// @returns a human readable string for the type `ty`.
-std::string TypeName(type::Type* ty) {
-  ty = ty->UnwrapAll();
-  if (ty->Is<type::F32>()) {
-    return "f32";
-  }
-  if (ty->Is<type::U32>()) {
-    return "u32";
-  }
-  if (ty->Is<type::I32>()) {
-    return "i32";
-  }
-  if (ty->Is<type::Bool>()) {
-    return "bool";
-  }
-  if (ty->Is<type::Void>()) {
-    return "void";
-  }
-  if (auto* ptr = ty->As<type::Pointer>()) {
-    return "ptr<" + TypeName(ptr->type()) + ">";
-  }
-  if (auto* vec = ty->As<type::Vector>()) {
-    return "vec" + std::to_string(vec->size()) + "<" + TypeName(vec->type()) +
-           ">";
-  }
-  if (auto* mat = ty->As<type::Matrix>()) {
-    return "mat" + std::to_string(mat->columns()) + "x" +
-           std::to_string(mat->rows()) + "<" + TypeName(mat->type()) + ">";
-  }
-  if (auto* tex = ty->As<type::SampledTexture>()) {
-    std::stringstream ss;
-    ss << "texture_" << tex->dim() << "<" << TypeName(tex->type()) << ">";
-    return ss.str();
-  }
-  if (auto* tex = ty->As<type::MultisampledTexture>()) {
-    std::stringstream ss;
-    ss << "texture_multisampled_" << tex->dim() << "<" << TypeName(tex->type())
-       << ">";
-    return ss.str();
-  }
-  if (auto* tex = ty->As<type::DepthTexture>()) {
-    std::stringstream ss;
-    ss << "texture_depth_" << tex->dim();
-    return ss.str();
-  }
-  if (auto* tex = ty->As<type::StorageTexture>()) {
-    std::stringstream ss;
-    ss << "texture_storage_" << tex->dim() << "<" << tex->image_format() << ">";
-    return ss.str();
-  }
-  if (auto* sampler = ty->As<type::Sampler>()) {
-    switch (sampler->kind()) {
-      case type::SamplerKind::kSampler:
-        return "sampler";
-      case type::SamplerKind::kComparisonSampler:
-        return "sampler_comparison";
-    }
-    return "sampler";
-  }
-  return ty->type_name();
-}
 
 IntrinsicTable::Result Impl::Lookup(
     ProgramBuilder& builder,
@@ -1345,7 +1282,7 @@ IntrinsicTable::Result Impl::Lookup(
         ss << ", ";
       }
       first = false;
-      ss << TypeName(arg);
+      ss << arg->UnwrapAll()->FriendlyName(builder.Symbols());
     }
   }
   ss << ")" << std::endl;

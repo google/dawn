@@ -156,6 +156,12 @@ std::string StorageTexture::type_name() const {
   return out.str();
 }
 
+std::string StorageTexture::FriendlyName(const SymbolTable&) const {
+  std::ostringstream out;
+  out << "texture_storage_" << dim() << "<" << image_format_ << ">";
+  return out.str();
+}
+
 StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StorageTexture>(dim(), image_format_,
                                           ctx->Clone(subtype_));
