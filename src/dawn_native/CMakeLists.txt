@@ -365,6 +365,8 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/NativeSwapChainImplGL.h"
         "opengl/OpenGLFunctions.cpp"
         "opengl/OpenGLFunctions.h"
+        "opengl/OpenGLVersion.cpp"
+        "opengl/OpenGLVersion.h"
         "opengl/PersistentPipelineStateGL.cpp"
         "opengl/PersistentPipelineStateGL.h"
         "opengl/PipelineGL.cpp"

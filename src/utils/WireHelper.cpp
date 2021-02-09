@@ -24,6 +24,7 @@
 #include "utils/TerribleCommandBuffer.h"
 
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <set>
