@@ -25,6 +25,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
@@ -1406,77 +1407,103 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
-  auto* s =
-      create<ast::Struct>(ast::StructMemberList{Member("a", ty.array<f32>())},
-                          ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member(0, "a", ty.array<f32>(4))},
+      ast::StructDecorationList{
+          create<ast::StructBlockDecoration>(),
+      });
   auto* s_type = ty.struct_("my_struct", s);
-  auto* var = Global("b", ast::StorageClass::kPrivate, s_type);
+  Global("b", ast::StorageClass::kStorage, s_type, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
 
   auto* expr = Call("arrayLength", MemberAccessor("b", "a"));
-  WrapInFunction(expr);
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{}, ast::FunctionDecorationList{});
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(expr),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(expr), 11u) << b.error();
+  ASSERT_TRUE(b.Build()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()),
-            R"(%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%9 = OpTypeFloat 32
-%8 = OpTypeRuntimeArray %9
-%7 = OpTypeStruct %8
-%6 = OpTypePointer Private %7
-%10 = OpConstantNull %7
-%5 = OpVariable %6 Private %10
-%12 = OpTypeInt 32 0
-)");
+  ASSERT_EQ(b.functions().size(), 1u);
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpArrayLength %12 %5 0
-)");
+  auto* expected_types = R"(%5 = OpTypeFloat 32
+%4 = OpTypeRuntimeArray %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpTypeInt 32 0
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  auto* s =
-      create<ast::Struct>(ast::StructMemberList{Member("z", ty.f32()),
-                                                Member("a", ty.array<f32>())},
-                          ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(
+      ast::StructMemberList{Member(0, "z", ty.f32()),
+                            Member(4, "a", ty.array<f32>(4))},
+      ast::StructDecorationList{
+          create<ast::StructBlockDecoration>(),
+      });
 
   auto* s_type = ty.struct_("my_struct", s);
-  auto* var = Global("b", ast::StorageClass::kPrivate, s_type);
+  Global("b", ast::StorageClass::kStorage, s_type, nullptr,
+         ast::VariableDecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
 
   auto* expr = Call("arrayLength", MemberAccessor("b", "a"));
-  WrapInFunction(expr);
 
-  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{}, ast::FunctionDecorationList{});
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(expr),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
 
   spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateExpression(expr), 11u) << b.error();
+  ASSERT_TRUE(b.Build()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()),
-            R"(%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%8 = OpTypeFloat 32
-%9 = OpTypeRuntimeArray %8
-%7 = OpTypeStruct %8 %9
-%6 = OpTypePointer Private %7
-%10 = OpConstantNull %7
-%5 = OpVariable %6 Private %10
-%12 = OpTypeInt 32 0
-)");
+  ASSERT_EQ(b.functions().size(), 1u);
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpArrayLength %12 %5 1
-)");
+  auto* expected_types = R"(%4 = OpTypeFloat 32
+%5 = OpTypeRuntimeArray %4
+%3 = OpTypeStruct %4 %5
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpTypeInt 32 0
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
 }
 
 }  // namespace
