@@ -162,6 +162,7 @@ namespace dawn_native { namespace vulkan {
 
 #if defined(DAWN_USE_X11)
 #    define VK_USE_PLATFORM_XLIB_KHR
+#    define VK_USE_PLATFORM_XCB_KHR
 #    include "common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 

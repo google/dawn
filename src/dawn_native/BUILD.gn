@@ -295,7 +295,10 @@ source_set("dawn_native_sources") {
   ]
 
   if (dawn_use_x11) {
-    libs += [ "X11" ]
+    libs += [
+      "X11",
+      "X11-xcb",
+    ]
   }
 
   if (is_win) {

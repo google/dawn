@@ -152,6 +152,10 @@ namespace dawn_native { namespace vulkan {
             GET_INSTANCE_PROC(CreateXlibSurfaceKHR);
             GET_INSTANCE_PROC(GetPhysicalDeviceXlibPresentationSupportKHR);
         }
+        if (globalInfo.HasExt(InstanceExt::XcbSurface)) {
+            GET_INSTANCE_PROC(CreateXcbSurfaceKHR);
+            GET_INSTANCE_PROC(GetPhysicalDeviceXcbPresentationSupportKHR);
+        }
 #endif  // defined(DAWN_USE_X11)
         return {};
     }
