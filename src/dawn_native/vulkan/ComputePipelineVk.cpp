@@ -51,14 +51,14 @@ namespace dawn_native { namespace vulkan {
 
         Device* device = ToBackend(GetDevice());
 
-        PNextChainBuilder extChain(&createInfo);
+        PNextChainBuilder stageExtChain(&createInfo.stage);
 
         VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
         uint32_t computeSubgroupSize = device->GetComputeSubgroupSize();
         if (computeSubgroupSize != 0u) {
             ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl));
             subgroupSizeInfo.requiredSubgroupSize = computeSubgroupSize;
-            extChain.Add(
+            stageExtChain.Add(
                 &subgroupSizeInfo,
                 VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT);
         }
