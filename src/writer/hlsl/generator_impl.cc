@@ -556,6 +556,8 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       return false;
     } else if (intrinsic->IsDataPacking()) {
       return EmitDataPackingCall(pre, out, expr, intrinsic);
+    } else if (intrinsic->IsDataUnpacking()) {
+      return EmitDataUnpackingCall(pre, out, expr, intrinsic);
     }
     auto name = generate_builtin_name(intrinsic);
     if (name.empty()) {
@@ -685,6 +687,77 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
     case semantic::IntrinsicType::kPack2x16Float:
       pre << "uint2 " << tmp_name << " = f32tof16(" << expr_out.str() << ");\n";
       out << "(" << tmp_name << ".x | " << tmp_name << ".y << 16)";
+      break;
+    default:
+      error_ = "Internal error: unhandled data packing intrinsic";
+      return false;
+  }
+
+  return true;
+}
+
+bool GeneratorImpl::EmitDataUnpackingCall(
+    std::ostream& pre,
+    std::ostream& out,
+    ast::CallExpression* expr,
+    const semantic::Intrinsic* intrinsic) {
+  auto* param = expr->params()[0];
+  auto tmp_name = generate_name(kTempNamePrefix);
+  std::ostringstream expr_out;
+  if (!EmitExpression(pre, expr_out, param)) {
+    return false;
+  }
+  uint32_t dims = 2;
+  bool is_signed = false;
+  uint32_t scale = 65535;
+  if (intrinsic->Type() == semantic::IntrinsicType::kUnpack4x8Snorm ||
+      intrinsic->Type() == semantic::IntrinsicType::kUnpack4x8Unorm) {
+    dims = 4;
+    scale = 255;
+  }
+  if (intrinsic->Type() == semantic::IntrinsicType::kUnpack4x8Snorm ||
+      intrinsic->Type() == semantic::IntrinsicType::kUnpack2x16Snorm) {
+    is_signed = true;
+    scale = (scale - 1) / 2;
+  }
+  switch (intrinsic->Type()) {
+    case semantic::IntrinsicType::kUnpack4x8Snorm:
+    case semantic::IntrinsicType::kUnpack2x16Snorm: {
+      auto tmp_name2 = generate_name(kTempNamePrefix);
+      pre << "int " << tmp_name2 << " = int(" << expr_out.str() << ");\n";
+      // Perform sign extension on the converted values.
+      pre << "int" << dims << " " << tmp_name << " = int" << dims << "(";
+      if (dims == 2) {
+        pre << tmp_name2 << " << 16, " << tmp_name2 << ") >> 16";
+      } else {
+        pre << tmp_name2 << " << 24, " << tmp_name2 << " << 16, " << tmp_name2
+            << " << 8, " << tmp_name2 << ") >> 24";
+      }
+      pre << ";\n";
+      out << "clamp(float" << dims << "(" << tmp_name << ") / " << scale
+          << ".0, " << (is_signed ? "-1.0" : "0.0") << ", 1.0)";
+      break;
+    }
+    case semantic::IntrinsicType::kUnpack4x8Unorm:
+    case semantic::IntrinsicType::kUnpack2x16Unorm: {
+      auto tmp_name2 = generate_name(kTempNamePrefix);
+      pre << "uint " << tmp_name2 << " = " << expr_out.str() << ";\n";
+      pre << "uint" << dims << " " << tmp_name << " = uint" << dims << "(";
+      pre << tmp_name2 << " & " << (dims == 2 ? "0xffff" : "0xff") << ", ";
+      if (dims == 4) {
+        pre << "(" << tmp_name2 << " >> " << (32 / dims) << ") & 0xff, ("
+            << tmp_name2 << " >> 16) & 0xff, " << tmp_name2 << " >> 24";
+      } else {
+        pre << tmp_name2 << " >> " << (32 / dims);
+      }
+      pre << ");\n";
+      out << "float" << dims << "(" << tmp_name << ") / " << scale << ".0";
+      break;
+    }
+    case semantic::IntrinsicType::kUnpack2x16Float:
+      pre << "uint " << tmp_name << " = " << expr_out.str() << ";\n";
+      out << "f16tof32(uint2(" << tmp_name << " & 0xffff, " << tmp_name
+          << " >> 16))";
       break;
     default:
       error_ = "Internal error: unhandled data packing intrinsic";

@@ -425,6 +425,16 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "tanh";
     case GLSLstd450Trunc:
       return "trunc";
+    case GLSLstd450UnpackSnorm4x8:
+      return "unpack4x8snorm";
+    case GLSLstd450UnpackUnorm4x8:
+      return "unpack4x8unorm";
+    case GLSLstd450UnpackSnorm2x16:
+      return "unpack2x16snorm";
+    case GLSLstd450UnpackUnorm2x16:
+      return "unpack2x16unorm";
+    case GLSLstd450UnpackHalf2x16:
+      return "unpack2x16float";
 
     default:
     // TODO(dneto) - The following are not implemented.
@@ -448,11 +458,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450FrexpStruct:
 
     case GLSLstd450PackDouble2x32:
-    case GLSLstd450UnpackSnorm2x16:
-    case GLSLstd450UnpackUnorm2x16:
-    case GLSLstd450UnpackHalf2x16:
-    case GLSLstd450UnpackSnorm4x8:
-    case GLSLstd450UnpackUnorm4x8:
     case GLSLstd450UnpackDouble2x32:
 
     case GLSLstd450Refract:

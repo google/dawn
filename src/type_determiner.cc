@@ -717,6 +717,16 @@ IntrinsicType TypeDeterminer::MatchIntrinsicType(const std::string& name) {
     return IntrinsicType::kTextureSampleLevel;
   } else if (name == "trunc") {
     return IntrinsicType::kTrunc;
+  } else if (name == "unpack4x8snorm") {
+    return IntrinsicType::kUnpack4x8Snorm;
+  } else if (name == "unpack4x8unorm") {
+    return IntrinsicType::kUnpack4x8Unorm;
+  } else if (name == "unpack2x16snorm") {
+    return IntrinsicType::kUnpack2x16Snorm;
+  } else if (name == "unpack2x16unorm") {
+    return IntrinsicType::kUnpack2x16Unorm;
+  } else if (name == "unpack2x16float") {
+    return IntrinsicType::kUnpack2x16Float;
   }
   return IntrinsicType::kNone;
 }

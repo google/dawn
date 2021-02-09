@@ -1548,6 +1548,50 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                              {"PackUnorm2x16", "pack2x16unorm", 2},
                              {"PackHalf2x16", "pack2x16float", 2}}));
 
+using SpvParserTest_GlslStd450_DataUnpacking =
+    SpvParserTestBase<::testing::TestWithParam<DataPackingCase>>;
+
+TEST_P(SpvParserTest_GlslStd450_DataUnpacking, Valid) {
+  auto param = GetParam();
+  const auto assembly = Preamble() + R"(
+  %1 = OpExtInst )" + (param.vec_size == 2 ? "%v2float" : "%v4float") +
+                        std::string(" %glsl ") + param.opcode + R"( %u1
+  OpReturn
+  OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    )" + std::string(param.vec_size == 2 ? "__vec_2__f32" : "__vec_4__f32") +
+                              R"(
+    {
+      Call[not set]{
+        Identifier[not set]{)" +
+                              param.wgsl_func + R"(}
+        (
+          Identifier[not set]{u1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_DataUnpacking,
+                         ::testing::ValuesIn(std::vector<DataPackingCase>{
+                             {"UnpackSnorm4x8", "unpack4x8snorm", 4},
+                             {"UnpackUnorm4x8", "unpack4x8unorm", 4},
+                             {"UnpackSnorm2x16", "unpack2x16snorm", 2},
+                             {"UnpackUnorm2x16", "unpack2x16unorm", 2},
+                             {"UnpackHalf2x16", "unpack2x16float", 2}}));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

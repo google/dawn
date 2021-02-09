@@ -330,7 +330,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Unorm) {
   EXPECT_THAT(result(), HasSubstr("(_tint_tmp.x | _tint_tmp.y << 16)"));
 }
 
-TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16float) {
+TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Float) {
   auto* call = Call("pack2x16float", "p1");
   Global("p1", ast::StorageClass::kPrivate, ty.vec2<f32>());
   WrapInFunction(call);
@@ -340,6 +340,85 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16float) {
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_THAT(pre_result(), HasSubstr("uint2 _tint_tmp = f32tof16(p1);"));
   EXPECT_THAT(result(), HasSubstr("(_tint_tmp.x | _tint_tmp.y << 16)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Snorm) {
+  auto* call = Call("unpack4x8snorm", "p1");
+  Global("p1", ast::StorageClass::kPrivate, ty.u32());
+  WrapInFunction(call);
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
+  EXPECT_THAT(pre_result(), HasSubstr("int _tint_tmp_0 = int(p1);"));
+  EXPECT_THAT(pre_result(),
+              HasSubstr("int4 _tint_tmp = int4(_tint_tmp_0 << 24, _tint_tmp_0 "
+                        "<< 16, _tint_tmp_0 << 8, _tint_tmp_0) >> 24;"));
+  EXPECT_THAT(result(),
+              HasSubstr("clamp(float4(_tint_tmp) / 127.0, -1.0, 1.0)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Unorm) {
+  auto* call = Call("unpack4x8unorm", "p1");
+  Global("p1", ast::StorageClass::kPrivate, ty.u32());
+  WrapInFunction(call);
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
+  EXPECT_THAT(pre_result(), HasSubstr("uint _tint_tmp_0 = p1;"));
+  EXPECT_THAT(
+      pre_result(),
+      HasSubstr("uint4 _tint_tmp = uint4(_tint_tmp_0 & 0xff, (_tint_tmp_0 >> "
+                "8) & 0xff, (_tint_tmp_0 >> 16) & 0xff, _tint_tmp_0 >> 24);"));
+  EXPECT_THAT(result(), HasSubstr("float4(_tint_tmp) / 255.0"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Snorm) {
+  auto* call = Call("unpack2x16snorm", "p1");
+  Global("p1", ast::StorageClass::kPrivate, ty.u32());
+  WrapInFunction(call);
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
+  EXPECT_THAT(pre_result(), HasSubstr("int _tint_tmp_0 = int(p1);"));
+  EXPECT_THAT(
+      pre_result(),
+      HasSubstr(
+          "int2 _tint_tmp = int2(_tint_tmp_0 << 16, _tint_tmp_0) >> 16;"));
+  EXPECT_THAT(result(),
+              HasSubstr("clamp(float2(_tint_tmp) / 32767.0, -1.0, 1.0)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Unorm) {
+  auto* call = Call("unpack2x16unorm", "p1");
+  Global("p1", ast::StorageClass::kPrivate, ty.u32());
+  WrapInFunction(call);
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
+  EXPECT_THAT(pre_result(), HasSubstr("uint _tint_tmp_0 = p1;"));
+  EXPECT_THAT(
+      pre_result(),
+      HasSubstr(
+          "uint2 _tint_tmp = uint2(_tint_tmp_0 & 0xffff, _tint_tmp_0 >> 16);"));
+  EXPECT_THAT(result(), HasSubstr("float2(_tint_tmp) / 65535.0"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
+  auto* call = Call("unpack2x16float", "p1");
+  Global("p1", ast::StorageClass::kPrivate, ty.u32());
+  WrapInFunction(call);
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
+  EXPECT_THAT(pre_result(), HasSubstr("uint _tint_tmp = p1;"));
+  EXPECT_THAT(
+      result(),
+      HasSubstr("f16tof32(uint2(_tint_tmp & 0xffff, _tint_tmp >> 16))"));
 }
 
 }  // namespace

@@ -169,6 +169,16 @@ class GeneratorImpl {
                            std::ostream& out,
                            ast::CallExpression* expr,
                            const semantic::Intrinsic* intrinsic);
+  /// Handles generating a call to data unpacking intrinsic
+  /// @param pre the preamble of the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the texture intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitDataUnpackingCall(std::ostream& pre,
+                             std::ostream& out,
+                             ast::CallExpression* expr,
+                             const semantic::Intrinsic* intrinsic);
   /// Handles a case statement
   /// @param out the output stream
   /// @param stmt the statement

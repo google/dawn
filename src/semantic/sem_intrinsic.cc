@@ -188,6 +188,16 @@ const char* str(IntrinsicType i) {
       return "textureStore";
     case IntrinsicType::kTrunc:
       return "trunc";
+    case IntrinsicType::kUnpack4x8Snorm:
+      return "unpack4x8snorm";
+    case IntrinsicType::kUnpack4x8Unorm:
+      return "unpack4x8unorm";
+    case IntrinsicType::kUnpack2x16Snorm:
+      return "unpack2x16snorm";
+    case IntrinsicType::kUnpack2x16Unorm:
+      return "unpack2x16unorm";
+    case IntrinsicType::kUnpack2x16Float:
+      return "unpack2x16float";
   }
   return "<unknown>";
 }
@@ -238,6 +248,14 @@ bool IsDataPackingIntrinsic(IntrinsicType i) {
          i == IntrinsicType::kPack2x16Float;
 }
 
+bool IsDataUnpackingIntrinsic(IntrinsicType i) {
+  return i == IntrinsicType::kUnpack4x8Snorm ||
+         i == IntrinsicType::kUnpack4x8Unorm ||
+         i == IntrinsicType::kUnpack2x16Snorm ||
+         i == IntrinsicType::kUnpack2x16Unorm ||
+         i == IntrinsicType::kUnpack2x16Float;
+}
+
 Intrinsic::Intrinsic(IntrinsicType type,
                      type::Type* return_type,
                      const ParameterList& parameters)
@@ -271,6 +289,10 @@ bool Intrinsic::IsImageQuery() const {
 
 bool Intrinsic::IsDataPacking() const {
   return IsDataPackingIntrinsic(type_);
+}
+
+bool Intrinsic::IsDataUnpacking() const {
+  return IsDataUnpackingIntrinsic(type_);
 }
 
 }  // namespace semantic

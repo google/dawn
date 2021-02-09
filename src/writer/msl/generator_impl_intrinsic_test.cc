@@ -157,6 +157,11 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
     case IntrinsicType::kPack4x8Snorm:
     case IntrinsicType::kPack4x8Unorm:
       return builder->Call(str.str(), "f4");
+    case IntrinsicType::kUnpack4x8Snorm:
+    case IntrinsicType::kUnpack4x8Unorm:
+    case IntrinsicType::kUnpack2x16Snorm:
+    case IntrinsicType::kUnpack2x16Unorm:
+      return builder->Call(str.str(), "u1");
     default:
       break;
   }
@@ -174,6 +179,7 @@ TEST_P(MslIntrinsicTest, Emit) {
   Global("f2", ast::StorageClass::kFunction, ty.vec2<float>());
   Global("f3", ast::StorageClass::kFunction, ty.vec3<float>());
   Global("f4", ast::StorageClass::kFunction, ty.vec4<float>());
+  Global("u1", ast::StorageClass::kFunction, ty.u32());
   Global("u2", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
   Global("b2", ast::StorageClass::kFunction, ty.vec2<bool>());
   Global("m2x2", ast::StorageClass::kFunction, ty.mat2x2<float>());
@@ -276,7 +282,15 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kStep, ParamType::kF32, "metal::step"},
         IntrinsicData{IntrinsicType::kTan, ParamType::kF32, "metal::tan"},
         IntrinsicData{IntrinsicType::kTanh, ParamType::kF32, "metal::tanh"},
-        IntrinsicData{IntrinsicType::kTrunc, ParamType::kF32, "metal::trunc"}));
+        IntrinsicData{IntrinsicType::kTrunc, ParamType::kF32, "metal::trunc"},
+        IntrinsicData{IntrinsicType::kUnpack4x8Snorm, ParamType::kU32,
+                      "metal::unpack_snorm4x8_to_float"},
+        IntrinsicData{IntrinsicType::kUnpack4x8Unorm, ParamType::kU32,
+                      "metal::unpack_unorm4x8_to_float"},
+        IntrinsicData{IntrinsicType::kUnpack2x16Snorm, ParamType::kU32,
+                      "metal::unpack_snorm2x16_to_float"},
+        IntrinsicData{IntrinsicType::kUnpack2x16Unorm, ParamType::kU32,
+                      "metal::unpack_unorm2x16_to_float"}));
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   Global("param1", ast::StorageClass::kFunction, ty.vec2<f32>());
@@ -302,6 +316,18 @@ TEST_F(MslGeneratorImplTest, Pack2x16Float) {
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
   EXPECT_EQ(gen.result(), "  as_type<uint>(half2(p1))");
+}
+
+TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
+  auto* call = Call("unpack2x16float", "p1");
+  Global("p1", ast::StorageClass::kFunction, ty.u32());
+  WrapInFunction(call);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float2(as_type<half2>(p1))");
 }
 
 }  // namespace

@@ -1794,6 +1794,36 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"pack2x16unorm", IntrinsicType::kPack2x16Unorm},
         IntrinsicData{"pack2x16float", IntrinsicType::kPack2x16Float}));
 
+using ImportData_DataUnpackingTest = TypeDeterminerTestWithParam<IntrinsicData>;
+TEST_P(ImportData_DataUnpackingTest, InferType) {
+  auto param = GetParam();
+
+  bool pack4 = param.intrinsic == IntrinsicType::kUnpack4x8Snorm ||
+               param.intrinsic == IntrinsicType::kUnpack4x8Unorm;
+
+  auto* call = Call(param.name, 1u);
+  WrapInFunction(call);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->is_float_vector());
+  if (pack4) {
+    EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 4u);
+  } else {
+    EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 2u);
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    ImportData_DataUnpackingTest,
+    testing::Values(
+        IntrinsicData{"unpack4x8snorm", IntrinsicType::kUnpack4x8Snorm},
+        IntrinsicData{"unpack4x8unorm", IntrinsicType::kUnpack4x8Unorm},
+        IntrinsicData{"unpack2x16snorm", IntrinsicType::kUnpack2x16Snorm},
+        IntrinsicData{"unpack2x16unorm", IntrinsicType::kUnpack2x16Unorm},
+        IntrinsicData{"unpack2x16float", IntrinsicType::kUnpack2x16Float}));
+
 using ImportData_SingleParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
 TEST_P(ImportData_SingleParamTest, Scalar) {
   auto param = GetParam();

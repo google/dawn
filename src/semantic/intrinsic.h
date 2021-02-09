@@ -101,7 +101,12 @@ enum class IntrinsicType {
   kTextureSampleGrad,
   kTextureSampleLevel,
   kTextureStore,
-  kTrunc
+  kTrunc,
+  kUnpack4x8Snorm,
+  kUnpack4x8Unorm,
+  kUnpack2x16Snorm,
+  kUnpack2x16Unorm,
+  kUnpack2x16Float,
 };
 
 /// @returns the name of the intrinsic function type. The spelling, including
@@ -142,6 +147,11 @@ bool IsImageQueryIntrinsic(IntrinsicType i);
 /// @param i the intrinsic
 /// @returns true if the given `i` is a data packing intrinsic
 bool IsDataPackingIntrinsic(IntrinsicType i);
+
+/// Determines if the given `i` is a data unpacking intrinsic
+/// @param i the intrinsic
+/// @returns true if the given `i` is a data unpacking intrinsic
+bool IsDataUnpackingIntrinsic(IntrinsicType i);
 
 /// Intrinsic holds the semantic information for an intrinsic function.
 class Intrinsic : public Castable<Intrinsic, CallTarget> {
@@ -184,6 +194,9 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
 
   /// @returns true if intrinsic is a data packing intrinsic
   bool IsDataPacking() const;
+
+  /// @returns true if intrinsic is a data unpacking intrinsic
+  bool IsDataUnpacking() const;
 
  private:
   IntrinsicType const type_;

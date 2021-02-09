@@ -1506,6 +1506,131 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   Validate(b);
 }
 
+using Intrinsic_Builtin_DataPacking_Test =
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_DataPacking_Test, Binary) {
+  auto param = GetParam();
+
+  bool pack4 = param.name == "pack4x8snorm" || param.name == "pack4x8unorm";
+  auto* call = pack4 ? Call(param.name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f))
+                     : Call(param.name, vec2<float>(1.0f, 1.0f));
+  WrapInFunction(call);
+
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(call), 5u) << b.error();
+  if (pack4) {
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 0
+%9 = OpTypeFloat 32
+%8 = OpTypeVector %9 4
+%10 = OpConstant %9 1
+%11 = OpConstantComposite %8 %10 %10 %10 %10
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                  R"( %11
+OpReturn
+OpFunctionEnd
+)");
+  } else {
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 0
+%9 = OpTypeFloat 32
+%8 = OpTypeVector %9 2
+%10 = OpConstant %9 1
+%11 = OpConstantComposite %8 %10 %10
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %7 )" + param.op +
+                                  R"( %11
+OpReturn
+OpFunctionEnd
+)");
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    IntrinsicBuilderTest,
+    Intrinsic_Builtin_DataPacking_Test,
+    testing::Values(IntrinsicData{"pack4x8snorm", "PackSnorm4x8"},
+                    IntrinsicData{"pack4x8unorm", "PackUnorm4x8"},
+                    IntrinsicData{"pack2x16snorm", "PackSnorm2x16"},
+                    IntrinsicData{"pack2x16unorm", "PackUnorm2x16"},
+                    IntrinsicData{"pack2x16float", "PackHalf2x16"}));
+
+using Intrinsic_Builtin_DataUnpacking_Test =
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_DataUnpacking_Test, Binary) {
+  auto param = GetParam();
+
+  bool pack4 = param.name == "unpack4x8snorm" || param.name == "unpack4x8unorm";
+  auto* call = Call(param.name, 1u);
+  WrapInFunction(call);
+
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(call), 5u) << b.error();
+  if (pack4) {
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 4
+%9 = OpTypeInt 32 0
+%10 = OpConstant %9 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                  R"( %10
+OpReturn
+OpFunctionEnd
+)");
+  } else {
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%9 = OpTypeInt 32 0
+%10 = OpConstant %9 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 )" + param.op +
+                                  R"( %10
+OpReturn
+OpFunctionEnd
+)");
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    IntrinsicBuilderTest,
+    Intrinsic_Builtin_DataUnpacking_Test,
+    testing::Values(IntrinsicData{"unpack4x8snorm", "UnpackSnorm4x8"},
+                    IntrinsicData{"unpack4x8unorm", "UnpackUnorm4x8"},
+                    IntrinsicData{"unpack2x16snorm", "UnpackSnorm2x16"},
+                    IntrinsicData{"unpack2x16unorm", "UnpackUnorm2x16"},
+                    IntrinsicData{"unpack2x16float", "UnpackHalf2x16"}));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

@@ -284,6 +284,16 @@ uint32_t intrinsic_to_glsl_method(const semantic::Intrinsic* intrinsic) {
       return GLSLstd450Tanh;
     case IntrinsicType::kTrunc:
       return GLSLstd450Trunc;
+    case IntrinsicType::kUnpack4x8Snorm:
+      return GLSLstd450UnpackSnorm4x8;
+    case IntrinsicType::kUnpack4x8Unorm:
+      return GLSLstd450UnpackUnorm4x8;
+    case IntrinsicType::kUnpack2x16Snorm:
+      return GLSLstd450UnpackSnorm2x16;
+    case IntrinsicType::kUnpack2x16Unorm:
+      return GLSLstd450UnpackUnorm2x16;
+    case IntrinsicType::kUnpack2x16Float:
+      return GLSLstd450UnpackHalf2x16;
     default:
       break;
   }

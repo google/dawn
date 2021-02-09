@@ -886,127 +886,132 @@ Impl::Impl() {
 
   // clang-format off
 
-  //       name               return type  parameter types                    open type constraints    // NOLINT
-  Register(I::kAbs,           T,           {T},                               {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kAbs,           vecN_T,      {vecN_T},                          {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kAcos,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kAcos,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kAll,           bool_,       {vecN_bool}                                              ); // NOLINT
-  Register(I::kAny,           bool_,       {vecN_bool}                                              ); // NOLINT
-  Register(I::kArrayLength,   u32,         {array_T}                                                ); // NOLINT
-  Register(I::kAsin,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kAsin,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kAtan,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kAtan,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kAtan2,         f32,         {f32, f32}                                               ); // NOLINT
-  Register(I::kAtan2,         vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
-  Register(I::kCeil,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kCeil,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kClamp,         T,           {T, T, T},                         {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kClamp,         vecN_T,      {vecN_T, vecN_T, vecN_T},          {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kCos,           f32,         {f32}                                                    ); // NOLINT
-  Register(I::kCos,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kCosh,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kCosh,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kCountOneBits,  T,           {T},                               {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kCountOneBits,  vecN_T,      {vecN_T},                          {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kCross,         vec3_f32,    {vec3_f32, vec3_f32}                                     ); // NOLINT
-  Register(I::kDeterminant,   f32,         {matNxN_f32}                                             ); // NOLINT
-  Register(I::kDistance,      f32,         {f32, f32}                                               ); // NOLINT
-  Register(I::kDistance,      f32,         {vecN_f32, vecN_f32}                                     ); // NOLINT
-  Register(I::kDot,           f32,         {vecN_f32, vecN_f32}                                     ); // NOLINT
-  Register(I::kDpdx,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kDpdx,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kDpdxCoarse,    f32,         {f32}                                                    ); // NOLINT
-  Register(I::kDpdxCoarse,    vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kDpdxFine,      f32,         {f32}                                                    ); // NOLINT
-  Register(I::kDpdxFine,      vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kDpdy,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kDpdy,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kDpdyCoarse,    f32,         {f32}                                                    ); // NOLINT
-  Register(I::kDpdyCoarse,    vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kDpdyFine,      f32,         {f32}                                                    ); // NOLINT
-  Register(I::kDpdyFine,      vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kExp,           f32,         {f32}                                                    ); // NOLINT
-  Register(I::kExp,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kExp2,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kExp2,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kFaceForward,   f32,         {f32, f32, f32}                                          ); // NOLINT
-  Register(I::kFaceForward,   vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
-  Register(I::kFloor,         f32,         {f32}                                                    ); // NOLINT
-  Register(I::kFloor,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kFma,           f32,         {f32, f32, f32}                                          ); // NOLINT
-  Register(I::kFma,           vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
-  Register(I::kFract,         f32,         {f32}                                                    ); // NOLINT
-  Register(I::kFract,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kFrexp,         f32,         {f32, ptr_T},                      {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kFrexp,         vecN_f32,    {vecN_f32, ptr_vecN_T},            {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kFwidth,        f32,         {f32}                                                    ); // NOLINT
-  Register(I::kFwidth,        vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kFwidthCoarse,  f32,         {f32}                                                    ); // NOLINT
-  Register(I::kFwidthCoarse,  vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kFwidthFine,    f32,         {f32}                                                    ); // NOLINT
-  Register(I::kFwidthFine,    vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kInverseSqrt,   f32,         {f32}                                                    ); // NOLINT
-  Register(I::kInverseSqrt,   vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kIsFinite,      bool_,       {f32}                                                    ); // NOLINT
-  Register(I::kIsFinite,      vecN_bool,   {vecN_f32}                                               ); // NOLINT
-  Register(I::kIsInf,         bool_,       {f32}                                                    ); // NOLINT
-  Register(I::kIsInf,         vecN_bool,   {vecN_f32}                                               ); // NOLINT
-  Register(I::kIsNan,         bool_,       {f32}                                                    ); // NOLINT
-  Register(I::kIsNan,         vecN_bool,   {vecN_f32}                                               ); // NOLINT
-  Register(I::kIsNormal,      bool_,       {f32}                                                    ); // NOLINT
-  Register(I::kIsNormal,      vecN_bool,   {vecN_f32}                                               ); // NOLINT
-  Register(I::kLdexp,         f32,         {f32, T},                          {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kLdexp,         vecN_f32,    {vecN_f32, vecN_T},                {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kLength,        f32,         {f32}                                                    ); // NOLINT
-  Register(I::kLength,        f32,         {vecN_f32}                                               ); // NOLINT
-  Register(I::kLog,           f32,         {f32}                                                    ); // NOLINT
-  Register(I::kLog,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kLog2,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kLog2,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kMax,           T,           {T, T},                            {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kMax,           vecN_T,      {vecN_T, vecN_T},                  {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kMin,           T,           {T, T},                            {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kMin,           vecN_T,      {vecN_T, vecN_T},                  {OpenType::T, fiu32}  ); // NOLINT
-  Register(I::kMix,           f32,         {f32, f32, f32}                                          ); // NOLINT
-  Register(I::kMix,           vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
-  Register(I::kModf,          f32,         {f32, ptr_f32}                                           ); // NOLINT
-  Register(I::kModf,          vecN_f32,    {vecN_f32, ptr_vecN_f32}                                 ); // NOLINT
-  Register(I::kNormalize,     vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kPack2x16Float, u32,         {vec2_f32}                                               ); // NOLINT
-  Register(I::kPack2x16Snorm, u32,         {vec2_f32}                                               ); // NOLINT
-  Register(I::kPack2x16Unorm, u32,         {vec2_f32}                                               ); // NOLINT
-  Register(I::kPack4x8Snorm,  u32,         {vec4_f32}                                               ); // NOLINT
-  Register(I::kPack4x8Unorm,  u32,         {vec4_f32}                                               ); // NOLINT
-  Register(I::kPow,           f32,         {f32, f32}                                               ); // NOLINT
-  Register(I::kPow,           vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
-  Register(I::kReflect,       f32,         {f32, f32}                                               ); // NOLINT
-  Register(I::kReflect,       vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
-  Register(I::kReverseBits,   T,           {T},                               {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kReverseBits,   vecN_T,      {vecN_T},                          {OpenType::T, iu32}   ); // NOLINT
-  Register(I::kRound,         f32,         {f32}                                                    ); // NOLINT
-  Register(I::kRound,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kSelect,        T,           {T, T, bool_},                     {OpenType::T, scalar} ); // NOLINT
-  Register(I::kSelect,        vecN_T,      {vecN_T, vecN_T, vecN_bool},       {OpenType::T, scalar} ); // NOLINT
-  Register(I::kSign,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kSign,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kSin,           f32,         {f32}                                                    ); // NOLINT
-  Register(I::kSin,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kSinh,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kSinh,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kSmoothStep,    f32,         {f32, f32, f32}                                          ); // NOLINT
-  Register(I::kSmoothStep,    vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
-  Register(I::kSqrt,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kSqrt,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kStep,          f32,         {f32, f32}                                               ); // NOLINT
-  Register(I::kStep,          vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
-  Register(I::kTan,           f32,         {f32}                                                    ); // NOLINT
-  Register(I::kTan,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kTanh,          f32,         {f32}                                                    ); // NOLINT
-  Register(I::kTanh,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kTrunc,         f32,         {f32}                                                    ); // NOLINT
-  Register(I::kTrunc,         vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  //       name                 return type  parameter types                    open type constraints    // NOLINT
+  Register(I::kAbs,             T,           {T},                               {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kAbs,             vecN_T,      {vecN_T},                          {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kAcos,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kAcos,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kAll,             bool_,       {vecN_bool}                                              ); // NOLINT
+  Register(I::kAny,             bool_,       {vecN_bool}                                              ); // NOLINT
+  Register(I::kArrayLength,     u32,         {array_T}                                                ); // NOLINT
+  Register(I::kAsin,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kAsin,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kAtan,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kAtan,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kAtan2,           f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kAtan2,           vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kCeil,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kCeil,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kClamp,           T,           {T, T, T},                         {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kClamp,           vecN_T,      {vecN_T, vecN_T, vecN_T},          {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kCos,             f32,         {f32}                                                    ); // NOLINT
+  Register(I::kCos,             vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kCosh,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kCosh,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kCountOneBits,    T,           {T},                               {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kCountOneBits,    vecN_T,      {vecN_T},                          {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kCross,           vec3_f32,    {vec3_f32, vec3_f32}                                     ); // NOLINT
+  Register(I::kDeterminant,     f32,         {matNxN_f32}                                             ); // NOLINT
+  Register(I::kDistance,        f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kDistance,        f32,         {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kDot,             f32,         {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kDpdx,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdx,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdxCoarse,      f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdxCoarse,      vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdxFine,        f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdxFine,        vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdy,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdy,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdyCoarse,      f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdyCoarse,      vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kDpdyFine,        f32,         {f32}                                                    ); // NOLINT
+  Register(I::kDpdyFine,        vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kExp,             f32,         {f32}                                                    ); // NOLINT
+  Register(I::kExp,             vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kExp2,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kExp2,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFaceForward,     f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kFaceForward,     vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kFloor,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFloor,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFma,             f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kFma,             vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kFract,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFract,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFrexp,           f32,         {f32, ptr_T},                      {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kFrexp,           vecN_f32,    {vecN_f32, ptr_vecN_T},            {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kFwidth,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFwidth,          vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFwidthCoarse,    f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFwidthCoarse,    vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kFwidthFine,      f32,         {f32}                                                    ); // NOLINT
+  Register(I::kFwidthFine,      vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kInverseSqrt,     f32,         {f32}                                                    ); // NOLINT
+  Register(I::kInverseSqrt,     vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsFinite,        bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsFinite,        vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsInf,           bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsInf,           vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsNan,           bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsNan,           vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kIsNormal,        bool_,       {f32}                                                    ); // NOLINT
+  Register(I::kIsNormal,        vecN_bool,   {vecN_f32}                                               ); // NOLINT
+  Register(I::kLdexp,           f32,         {f32, T},                          {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kLdexp,           vecN_f32,    {vecN_f32, vecN_T},                {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kLength,          f32,         {f32}                                                    ); // NOLINT
+  Register(I::kLength,          f32,         {vecN_f32}                                               ); // NOLINT
+  Register(I::kLog,             f32,         {f32}                                                    ); // NOLINT
+  Register(I::kLog,             vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kLog2,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kLog2,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kMax,             T,           {T, T},                            {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMax,             vecN_T,      {vecN_T, vecN_T},                  {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMin,             T,           {T, T},                            {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMin,             vecN_T,      {vecN_T, vecN_T},                  {OpenType::T, fiu32}  ); // NOLINT
+  Register(I::kMix,             f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kMix,             vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kModf,            f32,         {f32, ptr_f32}                                           ); // NOLINT
+  Register(I::kModf,            vecN_f32,    {vecN_f32, ptr_vecN_f32}                                 ); // NOLINT
+  Register(I::kNormalize,       vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kPack2x16Float,   u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack2x16Snorm,   u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack2x16Unorm,   u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack4x8Snorm,    u32,         {vec4_f32}                                               ); // NOLINT
+  Register(I::kPack4x8Unorm,    u32,         {vec4_f32}                                               ); // NOLINT
+  Register(I::kPow,             f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kPow,             vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kReflect,         f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kReflect,         vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kReverseBits,     T,           {T},                               {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kReverseBits,     vecN_T,      {vecN_T},                          {OpenType::T, iu32}   ); // NOLINT
+  Register(I::kRound,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kRound,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSelect,          T,           {T, T, bool_},                     {OpenType::T, scalar} ); // NOLINT
+  Register(I::kSelect,          vecN_T,      {vecN_T, vecN_T, vecN_bool},       {OpenType::T, scalar} ); // NOLINT
+  Register(I::kSign,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSign,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSin,             f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSin,             vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSinh,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSinh,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kSmoothStep,      f32,         {f32, f32, f32}                                          ); // NOLINT
+  Register(I::kSmoothStep,      vecN_f32,    {vecN_f32, vecN_f32, vecN_f32}                           ); // NOLINT
+  Register(I::kSqrt,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kSqrt,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kStep,            f32,         {f32, f32}                                               ); // NOLINT
+  Register(I::kStep,            vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kTan,             f32,         {f32}                                                    ); // NOLINT
+  Register(I::kTan,             vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kTanh,            f32,         {f32}                                                    ); // NOLINT
+  Register(I::kTanh,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kTrunc,           f32,         {f32}                                                    ); // NOLINT
+  Register(I::kTrunc,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
+  Register(I::kUnpack2x16Float, vec2_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack2x16Snorm, vec2_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack2x16Unorm, vec2_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack4x8Snorm,  vec4_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack4x8Unorm,  vec4_f32,    {u32}                                                    ); // NOLINT
   // clang-format on
 
   auto* tex_1d_f32 = sampled_texture(Dim::k1d, f32);

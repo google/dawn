@@ -449,9 +449,14 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     if (intrinsic->IsTexture()) {
       return EmitTextureCall(expr, intrinsic);
     }
-    if (intrinsic->Type() == semantic::IntrinsicType::kPack2x16Float) {
+    if (intrinsic->Type() == semantic::IntrinsicType::kPack2x16Float ||
+        intrinsic->Type() == semantic::IntrinsicType::kUnpack2x16Float) {
       make_indent();
-      out_ << "as_type<uint>(half2(";
+      if (intrinsic->Type() == semantic::IntrinsicType::kPack2x16Float) {
+        out_ << "as_type<uint>(half2(";
+      } else {
+        out_ << "float2(as_type<half2>(";
+      }
       if (!EmitExpression(expr->params()[0])) {
         return false;
       }
@@ -899,6 +904,18 @@ std::string GeneratorImpl::generate_builtin_name(
       break;
     case semantic::IntrinsicType::kInverseSqrt:
       out += "rsqrt";
+      break;
+    case semantic::IntrinsicType::kUnpack4x8Snorm:
+      out += "unpack_snorm4x8_to_float";
+      break;
+    case semantic::IntrinsicType::kUnpack4x8Unorm:
+      out += "unpack_unorm4x8_to_float";
+      break;
+    case semantic::IntrinsicType::kUnpack2x16Snorm:
+      out += "unpack_snorm2x16_to_float";
+      break;
+    case semantic::IntrinsicType::kUnpack2x16Unorm:
+      out += "unpack_unorm2x16_to_float";
       break;
     default:
       error_ = "Unknown import method: " + std::string(intrinsic->str());
