@@ -157,7 +157,6 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
 
     std::unique_ptr<dawn_wire::WireServer> wireServer(new dawn_wire::WireServer(serverDesc));
     wireServer->InjectDevice(device.Get(), 1, 0);
-    device = nullptr;  // Server owns the device now.
 
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
 
