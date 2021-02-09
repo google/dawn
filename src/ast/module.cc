@@ -29,18 +29,33 @@ namespace ast {
 
 Module::Module(const Source& source) : Base(source) {}
 
-Module::Module(const Source& source,
-               std::vector<type::Type*> constructed_types,
-               FunctionList functions,
-               VariableList global_variables)
-    : Base(source),
-      constructed_types_(std::move(constructed_types)),
-      functions_(std::move(functions)),
-      global_variables_(std::move(global_variables)) {}
+Module::Module(const Source& source, std::vector<CastableBase*> global_decls)
+    : Base(source), global_declarations_(std::move(global_decls)) {
+  for (auto* decl : global_declarations_) {
+    if (decl == nullptr) {
+      continue;
+    }
+
+    if (auto* ty = decl->As<type::Type>()) {
+      constructed_types_.push_back(ty);
+    } else if (auto* func = decl->As<Function>()) {
+      functions_.push_back(func);
+    } else if (auto* var = decl->As<Variable>()) {
+      global_variables_.push_back(var);
+    } else {
+      assert(false /* unreachable */);
+    }
+  }
+}
 
 Module::~Module() = default;
 
 bool Module::IsValid() const {
+  for (auto* decl : global_declarations_) {
+    if (decl == nullptr) {
+      return false;
+    }
+  }
   for (auto* var : global_variables_) {
     if (var == nullptr || !var->IsValid()) {
       return false;
@@ -76,9 +91,20 @@ bool Module::IsValid() const {
 }
 
 Module* Module::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Module>(ctx->Clone(constructed_types_),
-                                  ctx->Clone(functions_),
-                                  ctx->Clone(global_variables_));
+  std::vector<CastableBase*> global_decls;
+  for (auto* decl : global_declarations_) {
+    assert(decl);
+    if (auto* ty = decl->As<type::Type>()) {
+      global_decls.push_back(ctx->Clone(ty));
+    } else if (auto* func = decl->As<Function>()) {
+      global_decls.push_back(ctx->Clone(func));
+    } else if (auto* var = decl->As<Variable>()) {
+      global_decls.push_back(ctx->Clone(var));
+    } else {
+      assert(false /* unreachable */);
+    }
+  }
+  return ctx->dst->create<Module>(global_decls);
 }
 
 void Module::to_str(const semantic::Info& sem,

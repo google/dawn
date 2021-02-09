@@ -57,8 +57,7 @@ Program::Program(ProgramBuilder&& builder) {
   ast_nodes_ = std::move(builder.ASTNodes());
   sem_nodes_ = std::move(builder.SemNodes());
   ast_ = ast_nodes_.Create<ast::Module>(
-      Source{}, builder.AST().ConstructedTypes(), builder.AST().Functions(),
-      builder.AST().GlobalVariables());
+      Source{}, std::move(builder.AST().GlobalDeclarations()));
   sem_ = std::move(builder.Sem());
   symbols_ = std::move(builder.Symbols());
   diagnostics_.add(std::move(builder.Diagnostics()));
