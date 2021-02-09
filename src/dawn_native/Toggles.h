@@ -47,7 +47,6 @@ namespace dawn_native {
         MetalEnableVertexPulling,
         DisallowUnsafeAPIs,
         UseTintGenerator,
-        UseTintInspector,
         FlushBeforeClientWaitSync,
 
         EnumCount,

@@ -153,9 +153,6 @@ namespace dawn_native {
             {Toggle::UseTintGenerator,
              {"use_tint_generator", "Use Tint instead of SPRIV-cross to generate shaders.",
               "https://crbug.com/dawn/571"}},
-            {Toggle::UseTintInspector,
-             {"use_tint_inspector", "Use Tint instead of SPRIV-cross for shader reflection.",
-              "https://crbug.com/dawn/578"}},
             {Toggle::FlushBeforeClientWaitSync,
              {"flush_before_client_wait_sync",
               "Call glFlush before glClientWaitSync to work around bugs in the latter",
@@ -167,20 +164,12 @@ namespace dawn_native {
 
     void TogglesSet::Set(Toggle toggle, bool enabled) {
         ASSERT(toggle != Toggle::InvalidEnum);
-
-        if (toggle == Toggle::UseTintInspector)
-            toggle = Toggle::UseTintGenerator;
-
         const size_t toggleIndex = static_cast<size_t>(toggle);
         toggleBitset.set(toggleIndex, enabled);
     }
 
     bool TogglesSet::Has(Toggle toggle) const {
         ASSERT(toggle != Toggle::InvalidEnum);
-
-        if (toggle == Toggle::UseTintInspector)
-            toggle = Toggle::UseTintGenerator;
-
         const size_t toggleIndex = static_cast<size_t>(toggle);
         return toggleBitset.test(toggleIndex);
     }
