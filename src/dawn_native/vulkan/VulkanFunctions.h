@@ -137,11 +137,6 @@ namespace dawn_native { namespace vulkan {
         PFN_vkCreateXlibSurfaceKHR CreateXlibSurfaceKHR = nullptr;
         PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR
             GetPhysicalDeviceXlibPresentationSupportKHR = nullptr;
-
-        // KHR_xcb_surface
-        PFN_vkCreateXcbSurfaceKHR CreateXcbSurfaceKHR = nullptr;
-        PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR
-            GetPhysicalDeviceXcbPresentationSupportKHR = nullptr;
 #endif  // defined(DAWN_USE_X11)
 
         // ---------- Device procs

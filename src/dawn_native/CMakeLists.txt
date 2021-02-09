@@ -179,17 +179,8 @@ target_link_libraries(dawn_native
 )
 
 if (DAWN_USE_X11)
-    find_package(X11 REQUIRED OPTIONAL_COMPONENTS X11_xcb)
+    find_package(X11 REQUIRED)
     target_link_libraries(dawn_native PRIVATE ${X11_LIBRARIES})
-    target_include_directories(dawn_native PRIVATE ${X11_INCLUDE_DIR})
-
-    if (DAWN_ENABLE_VULKAN)
-        if (NOT X11_X11_xcb_FOUND)
-            message(FATAL_ERROR "X11::X11_xcb cannot be found, maybe because cmake < 3.18. Consider filing an issue for Dawn to bundle its own FindX11_XCB script")
-        endif()
-        target_link_libraries(dawn_native PRIVATE ${X11_X11_xcb_LIB})
-        target_include_directories(dawn_native PRIVATE ${X11_X11_xcb_INCLUDE_PATH})
-    endif()
 endif()
 
 if (WIN32)

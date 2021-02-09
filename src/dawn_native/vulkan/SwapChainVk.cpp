@@ -145,26 +145,6 @@ namespace dawn_native { namespace vulkan {
                             "CreateXlibSurface"));
                         return vkSurface;
                     }
-
-                    // Fall back to using XCB surfaces if the Xlib extension isn't available.
-                    // See https://xcb.freedesktop.org/MixingCalls/ for more information about
-                    // interoperability between Xlib and XCB
-                    if (info.HasExt(InstanceExt::XcbSurface)) {
-                        VkXcbSurfaceCreateInfoKHR createInfo;
-                        createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-                        createInfo.pNext = nullptr;
-                        createInfo.flags = 0;
-                        // The XCB connection lives as long as the X11 display.
-                        createInfo.connection =
-                            XGetXCBConnection(static_cast<Display*>(surface->GetXDisplay()));
-                        createInfo.window = surface->GetXWindow();
-
-                        VkSurfaceKHR vkSurface = VK_NULL_HANDLE;
-                        DAWN_TRY(CheckVkSuccess(
-                            fn.CreateXcbSurfaceKHR(instance, &createInfo, nullptr, &*vkSurface),
-                            "CreateXcbSurfaceKHR"));
-                        return vkSurface;
-                    }
                     break;
 #endif  // defined(DAWN_USE_X11)
 

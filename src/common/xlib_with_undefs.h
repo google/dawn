@@ -24,7 +24,6 @@
 // This header includes <X11/Xlib.h> but removes all the extra defines that conflict with
 // identifiers in internal code. It should never be included in something that is part of the public
 // interface.
-#include <X11/Xlib-xcb.h>
 #include <X11/Xlib.h>
 
 #undef Success
