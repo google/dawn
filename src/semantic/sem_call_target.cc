@@ -21,13 +21,12 @@ TINT_INSTANTIATE_CLASS_ID(tint::semantic::CallTarget);
 namespace tint {
 namespace semantic {
 
-CallTarget::CallTarget(type::Type* return_type,
-                       const semantic::Parameters& parameters)
+CallTarget::CallTarget(type::Type* return_type, const ParameterList& parameters)
     : return_type_(return_type), parameters_(parameters) {}
 
 CallTarget::~CallTarget() = default;
 
-int IndexOf(const Parameters& parameters, Parameter::Usage usage) {
+int IndexOf(const ParameterList& parameters, Parameter::Usage usage) {
   for (size_t i = 0; i < parameters.size(); i++) {
     if (parameters[i].usage == usage) {
       return static_cast<int>(i);

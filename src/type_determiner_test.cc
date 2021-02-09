@@ -2545,7 +2545,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(ast::intrinsic::test::TextureOverloadCase::ValidCases()));
 
 std::string to_str(const std::string& function,
-                   const semantic::Parameters& params) {
+                   const semantic::ParameterList& params) {
   std::stringstream out;
   out << function << "(";
   bool first = true;

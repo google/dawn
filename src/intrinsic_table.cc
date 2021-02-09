@@ -1434,7 +1434,7 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
   assert(ret);  // Build() must return a type
 
   // Build the semantic parameters
-  semantic::Parameters params;
+  semantic::ParameterList params;
   params.reserve(parameters.size());
   for (size_t i = 0; i < args.size(); i++) {
     auto& parameter = parameters[i];

@@ -478,7 +478,7 @@ bool TypeDeterminer::DetermineIntrinsicCall(
     // checks on intrinsics is now almost entirely covered by the
     // IntrinsicTable, we should remove the Validator checks on intrinsic
     // signatures and remove these hacks.
-    semantic::Parameters parameters;
+    semantic::ParameterList parameters;
     parameters.reserve(arg_tys.size());
     for (auto* arg : arg_tys) {
       parameters.emplace_back(semantic::Parameter{arg});

@@ -33,8 +33,8 @@ namespace semantic {
 
 namespace {
 
-Parameters GetParameters(ast::Function* ast) {
-  semantic::Parameters parameters;
+ParameterList GetParameters(ast::Function* ast) {
+  ParameterList parameters;
   parameters.reserve(ast->params().size());
   for (auto* param : ast->params()) {
     parameters.emplace_back(Parameter{param->type(), Parameter::Usage::kNone});

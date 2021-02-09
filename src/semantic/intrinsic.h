@@ -152,7 +152,7 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   /// @param parameters the parameters for the intrinsic overload
   Intrinsic(IntrinsicType type,
             type::Type* return_type,
-            const semantic::Parameters& parameters);
+            const ParameterList& parameters);
 
   /// Destructor
   ~Intrinsic() override;

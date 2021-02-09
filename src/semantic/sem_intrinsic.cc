@@ -240,7 +240,7 @@ bool IsDataPackingIntrinsic(IntrinsicType i) {
 
 Intrinsic::Intrinsic(IntrinsicType type,
                      type::Type* return_type,
-                     const semantic::Parameters& parameters)
+                     const ParameterList& parameters)
     : Base(return_type, parameters), type_(type) {}
 
 Intrinsic::~Intrinsic() = default;

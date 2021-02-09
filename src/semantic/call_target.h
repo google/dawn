@@ -59,14 +59,14 @@ struct Parameter {
 /// @returns a string representation of the given parameter usage.
 const char* str(Parameter::Usage usage);
 
-/// Parameters is a list of Parameter
-using Parameters = std::vector<Parameter>;
+/// ParameterList is a list of Parameter
+using ParameterList = std::vector<Parameter>;
 
 /// @param parameters the list of parameters
 /// @param usage the parameter usage to find
 /// @returns the index of the parameter with the given usage, or -1 if no
 /// parameter with the given usage exists.
-int IndexOf(const Parameters& parameters, Parameter::Usage usage);
+int IndexOf(const ParameterList& parameters, Parameter::Usage usage);
 
 /// CallTarget is the base for callable functions
 class CallTarget : public Castable<CallTarget, Node> {
@@ -74,7 +74,7 @@ class CallTarget : public Castable<CallTarget, Node> {
   /// Constructor
   /// @param return_type the return type of the call target
   /// @param parameters the parameters for the call target
-  CallTarget(type::Type* return_type, const semantic::Parameters& parameters);
+  CallTarget(type::Type* return_type, const ParameterList& parameters);
 
   /// @return the return type of the call target
   type::Type* ReturnType() const { return return_type_; }
@@ -83,11 +83,11 @@ class CallTarget : public Castable<CallTarget, Node> {
   ~CallTarget() override;
 
   /// @return the parameters of the call target
-  const Parameters& Parameters() const { return parameters_; }
+  const ParameterList& Parameters() const { return parameters_; }
 
  private:
   type::Type* const return_type_;
-  semantic::Parameters const parameters_;
+  ParameterList const parameters_;
 };
 
 }  // namespace semantic
