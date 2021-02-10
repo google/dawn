@@ -404,6 +404,87 @@ TEST_P(TimestampQueryTests, TimestampOnComputePass) {
     EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
 }
 
+// Test resolving timestamp query from another different encoder
+TEST_P(TimestampQueryTests, ResolveFromAnotherEncoder) {
+    // TODO(hao.x.li@intel.com): Fix queries reset on Vulkan backend, it does not allow to resolve
+    // unissued queries. Currently we reset the whole query set at the beginning of command buffer
+    // creation.
+    DAWN_SKIP_TEST_IF(IsVulkan());
+
+    constexpr uint32_t kQueryCount = 2;
+
+    wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+
+    wgpu::CommandEncoder timestampEncoder = device.CreateCommandEncoder();
+    timestampEncoder.WriteTimestamp(querySet, 0);
+    timestampEncoder.WriteTimestamp(querySet, 1);
+    wgpu::CommandBuffer timestampCommands = timestampEncoder.Finish();
+    queue.Submit(1, &timestampCommands);
+
+    wgpu::CommandEncoder resolveEncoder = device.CreateCommandEncoder();
+    resolveEncoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+    wgpu::CommandBuffer resolveCommands = resolveEncoder.Finish();
+    queue.Submit(1, &resolveCommands);
+
+    EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
+}
+
+// Test resolving timestamp query correctly if the queries are written sparsely
+TEST_P(TimestampQueryTests, ResolveSparseQueries) {
+    // TODO(hao.x.li@intel.com): Fix queries reset and sparsely resolving on Vulkan backend,
+    // otherwise its validation layer reports unissued queries resolving error
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
+    constexpr uint32_t kQueryCount = 4;
+    constexpr uint64_t kZero = 0;
+
+    wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+    // Set sentinel values to check the queries are resolved correctly if the queries are
+    // written sparsely
+    std::vector<uint64_t> sentinelValues{0, kSentinelValue, 0, kSentinelValue};
+    queue.WriteBuffer(destination, 0, sentinelValues.data(), kQueryCount * sizeof(uint64_t));
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.WriteTimestamp(querySet, 0);
+    encoder.WriteTimestamp(querySet, 2);
+    encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER(destination, 0, sizeof(uint64_t), new TimestampExpectation);
+    // The query with no value written should be resolved to 0.
+    EXPECT_BUFFER_U64_RANGE_EQ(&kZero, destination, sizeof(uint64_t), 1);
+    EXPECT_BUFFER(destination, 2 * sizeof(uint64_t), sizeof(uint64_t), new TimestampExpectation);
+    // The query with no value written should be resolved to 0.
+    EXPECT_BUFFER_U64_RANGE_EQ(&kZero, destination, 3 * sizeof(uint64_t), 1);
+}
+
+// Test resolving timestamp query to 0 if all queries are not written
+TEST_P(TimestampQueryTests, ResolveWithoutWritten) {
+    // TODO(hao.x.li@intel.com): Fix queries reset and sparsely resolving on Vulkan backend,
+    // otherwise its validation layer reports unissued queries resolving error
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
+    constexpr uint32_t kQueryCount = 2;
+
+    wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+    // Set sentinel values to check 0 is correctly written if resolving query set with no
+    // query is written
+    std::vector<uint64_t> sentinelValues(kQueryCount, kSentinelValue);
+    queue.WriteBuffer(destination, 0, sentinelValues.data(), kQueryCount * sizeof(uint64_t));
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint64_t> expectedZeros(kQueryCount);
+    EXPECT_BUFFER_U64_RANGE_EQ(expectedZeros.data(), destination, 0, kQueryCount);
+}
+
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
     // TODO(hao.x.li@intel.com): Fail to resolve query to buffer with offset on Windows Vulkan and

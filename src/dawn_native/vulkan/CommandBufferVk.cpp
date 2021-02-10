@@ -34,6 +34,8 @@
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
+#include <algorithm>
+
 namespace dawn_native { namespace vulkan {
 
     namespace {
@@ -386,6 +388,48 @@ namespace dawn_native { namespace vulkan {
             device->fn.CmdWriteTimestamp(commands, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
                                          querySet->GetHandle(), cmd->queryIndex);
         }
+
+        void RecordResolveQuerySetCmd(VkCommandBuffer commands,
+                                      Device* device,
+                                      QuerySet* querySet,
+                                      uint32_t firstQuery,
+                                      uint32_t queryCount,
+                                      Buffer* destination,
+                                      uint64_t destinationOffset) {
+            const std::vector<bool>& availability = querySet->GetQueryAvailability();
+
+            auto currentIt = availability.begin() + firstQuery;
+            auto lastIt = availability.begin() + firstQuery + queryCount;
+
+            // Traverse available queries in the range of [firstQuery, firstQuery +  queryCount - 1]
+            while (currentIt != lastIt) {
+                auto firstTrueIt = std::find(currentIt, lastIt, true);
+                // No available query found for resolving
+                if (firstTrueIt == lastIt) {
+                    break;
+                }
+                auto nextFalseIt = std::find(firstTrueIt, lastIt, false);
+
+                // The query index of firstTrueIt where the resolving starts
+                uint32_t resolveQueryIndex = std::distance(availability.begin(), firstTrueIt);
+                // The queries count between firstTrueIt and nextFalseIt need to be resolved
+                uint32_t resolveQueryCount = std::distance(firstTrueIt, nextFalseIt);
+
+                // Calculate destinationOffset based on the current resolveQueryIndex and firstQuery
+                uint32_t resolveDestinationOffset =
+                    destinationOffset + (resolveQueryIndex - firstQuery) * sizeof(uint64_t);
+
+                // Resolve the queries between firstTrueIt and nextFalseIt (which is at most lastIt)
+                device->fn.CmdCopyQueryPoolResults(
+                    commands, querySet->GetHandle(), resolveQueryIndex, resolveQueryCount,
+                    destination->GetHandle(), resolveDestinationOffset, sizeof(uint64_t),
+                    VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+
+                // Set current interator to next false
+                currentIt = nextFalseIt;
+            }
+        }
+
     }  // anonymous namespace
 
     // static
@@ -731,10 +775,9 @@ namespace dawn_native { namespace vulkan {
                         cmd->queryCount * sizeof(uint64_t));
                     destination->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
-                    device->fn.CmdCopyQueryPoolResults(
-                        commands, querySet->GetHandle(), cmd->firstQuery, cmd->queryCount,
-                        destination->GetHandle(), cmd->destinationOffset, sizeof(uint64_t),
-                        VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+                    RecordResolveQuerySetCmd(commands, device, querySet, cmd->firstQuery,
+                                             cmd->queryCount, destination, cmd->destinationOffset);
+
                     break;
                 }
 

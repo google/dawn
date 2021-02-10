@@ -35,6 +35,9 @@ namespace dawn_native {
         uint32_t GetQueryCount() const;
         const std::vector<wgpu::PipelineStatisticName>& GetPipelineStatistics() const;
 
+        const std::vector<bool>& GetQueryAvailability() const;
+        void SetQueryAvailability(uint32_t index, bool available);
+
         MaybeError ValidateCanUseInSubmitNow() const;
 
         void Destroy();
@@ -56,6 +59,9 @@ namespace dawn_native {
 
         enum class QuerySetState { Unavailable, Available, Destroyed };
         QuerySetState mState = QuerySetState::Unavailable;
+
+        // Indicates the available queries on the query set for resolving
+        std::vector<bool> mQueryAvailability;
     };
 
 }  // namespace dawn_native

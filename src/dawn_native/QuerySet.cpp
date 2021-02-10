@@ -107,6 +107,8 @@ namespace dawn_native {
         for (uint32_t i = 0; i < descriptor->pipelineStatisticsCount; i++) {
             mPipelineStatistics.push_back(descriptor->pipelineStatistics[i]);
         }
+
+        mQueryAvailability.resize(descriptor->count);
     }
 
     QuerySetBase::QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -133,6 +135,14 @@ namespace dawn_native {
 
     const std::vector<wgpu::PipelineStatisticName>& QuerySetBase::GetPipelineStatistics() const {
         return mPipelineStatistics;
+    }
+
+    const std::vector<bool>& QuerySetBase::GetQueryAvailability() const {
+        return mQueryAvailability;
+    }
+
+    void QuerySetBase::SetQueryAvailability(uint32_t index, bool available) {
+        mQueryAvailability[index] = available;
     }
 
     MaybeError QuerySetBase::ValidateCanUseInSubmitNow() const {
