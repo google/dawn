@@ -23,6 +23,7 @@
 #include "src/block_allocator.h"
 #include "src/program_builder.h"
 #include "src/semantic/intrinsic.h"
+#include "src/type/access_control_type.h"
 #include "src/type/depth_texture_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/multisampled_texture_type.h"
@@ -91,15 +92,33 @@ class Matcher {
   virtual ~Matcher() = default;
 
   /// Checks whether the given argument type matches.
+  /// Aliases are automatically unwrapped before matching.
   /// Match may add to, or compare against the open types and numbers in state.
   /// @returns true if the argument type is as expected.
-  virtual bool Match(MatchState& state, type::Type* argument_type) const = 0;
+  bool Match(MatchState& state, type::Type* argument_type) const {
+    auto* unwrapped = argument_type;
+    while (auto* alias = unwrapped->As<type::Alias>()) {
+      unwrapped = alias->type();
+    }
+    return MatchUnwrapped(state, unwrapped);
+  }
+
+  /// @return true if the matcher is expecting a pointer. If this method returns
+  /// false and the argument is a pointer type, then the argument should be
+  /// dereferenced before calling.
+  virtual bool ExpectsPointer() const { return false; }
 
   /// @return a string representation of the matcher. Used for printing error
   /// messages when no overload is found.
   virtual std::string str() const = 0;
 
  protected:
+  /// Checks whether the given alias-unwrapped argument type matches.
+  /// Match may add to, or compare against the open types and numbers in state.
+  /// @returns true if the argument type is as expected.
+  virtual bool MatchUnwrapped(MatchState& state,
+                              type::Type* argument_type) const = 0;
+
   /// Checks `state.open_type` to see if the OpenType `t` is equal to the type
   /// `ty`. If `state.open_type` does not contain an entry for `t`, then `ty`
   /// is added and returns true.
@@ -154,7 +173,7 @@ class OpenTypeBuilder : public Builder {
  public:
   explicit OpenTypeBuilder(OpenType open_type) : open_type_(open_type) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
     return MatchOpenType(state, open_type_, ty);
   }
 
@@ -171,7 +190,7 @@ class OpenTypeBuilder : public Builder {
 /// VoidBuilder is a Matcher / Builder for void types.
 class VoidBuilder : public Builder {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->Is<type::Void>();
   }
   type::Type* Build(BuildState& state) const override {
@@ -183,7 +202,7 @@ class VoidBuilder : public Builder {
 /// BoolBuilder is a Matcher / Builder for boolean types.
 class BoolBuilder : public Builder {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->Is<type::Bool>();
   }
   type::Type* Build(BuildState& state) const override {
@@ -195,7 +214,7 @@ class BoolBuilder : public Builder {
 /// F32Builder is a Matcher / Builder for f32 types.
 class F32Builder : public Builder {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->Is<type::F32>();
   }
   type::Type* Build(BuildState& state) const override {
@@ -207,7 +226,7 @@ class F32Builder : public Builder {
 /// U32Builder is a Matcher / Builder for u32 types.
 class U32Builder : public Builder {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->Is<type::U32>();
   }
   type::Type* Build(BuildState& state) const override {
@@ -219,7 +238,7 @@ class U32Builder : public Builder {
 /// I32Builder is a Matcher / Builder for i32 types.
 class I32Builder : public Builder {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->Is<type::I32>();
   }
   type::Type* Build(BuildState& state) const override {
@@ -231,7 +250,7 @@ class I32Builder : public Builder {
 /// IU32Matcher is a Matcher for i32 or u32 types.
 class IU32Matcher : public Matcher {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->Is<type::I32>() || ty->Is<type::U32>();
   }
   std::string str() const override { return "i32 or u32"; }
@@ -240,7 +259,7 @@ class IU32Matcher : public Matcher {
 /// FIU32Matcher is a Matcher for f32, i32 or u32 types.
 class FIU32Matcher : public Matcher {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->Is<type::F32>() || ty->Is<type::I32>() || ty->Is<type::U32>();
   }
   std::string str() const override { return "f32, i32 or u32"; }
@@ -249,7 +268,7 @@ class FIU32Matcher : public Matcher {
 /// ScalarMatcher is a Matcher for f32, i32, u32 or boolean types.
 class ScalarMatcher : public Matcher {
  public:
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     return ty->is_scalar();
   }
   std::string str() const override { return "scalar"; }
@@ -262,8 +281,8 @@ class OpenSizeVecBuilder : public Builder {
   OpenSizeVecBuilder(OpenNumber size, Builder* element_builder)
       : size_(size), element_builder_(element_builder) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
-    if (auto* vec = ty->UnwrapAll()->As<type::Vector>()) {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
+    if (auto* vec = ty->As<type::Vector>()) {
       if (!MatchOpenNumber(state, size_, vec->size())) {
         return false;
       }
@@ -294,8 +313,8 @@ class VecBuilder : public Builder {
   VecBuilder(uint32_t size, Builder* element_builder)
       : size_(size), element_builder_(element_builder) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
-    if (auto* vec = ty->UnwrapAll()->As<type::Vector>()) {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
+    if (auto* vec = ty->As<type::Vector>()) {
       if (vec->size() == size_) {
         return element_builder_->Match(state, vec->type());
       }
@@ -326,8 +345,8 @@ class OpenSizeMatBuilder : public Builder {
                      Builder* element_builder)
       : columns_(columns), rows_(rows), element_builder_(element_builder) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
-    if (auto* mat = ty->UnwrapAll()->As<type::Matrix>()) {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
+    if (auto* mat = ty->As<type::Matrix>()) {
       if (!MatchOpenNumber(state, columns_, mat->columns())) {
         return false;
       }
@@ -347,7 +366,7 @@ class OpenSizeMatBuilder : public Builder {
   }
 
   std::string str() const override {
-    return "max" + std::string(tint::str(columns_)) + "x" +
+    return "mat" + std::string(tint::str(columns_)) + "x" +
            std::string(tint::str(rows_)) + "<" + element_builder_->str() + ">";
   }
 
@@ -363,21 +382,19 @@ class PtrBuilder : public Builder {
   explicit PtrBuilder(Builder* element_builder)
       : element_builder_(element_builder) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
     if (auto* ptr = ty->As<type::Pointer>()) {
       return element_builder_->Match(state, ptr->type());
     }
-    // TODO(bclayton): https://crbug.com/tint/486
-    // TypeDeterminer currently folds away the pointers on expressions.
-    // We'll need to fix this to ensure that pointer parameters are not fed
-    // non-pointer arguments, but for now just accept them.
-    return element_builder_->Match(state, ty);
+    return false;
   }
 
   type::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
     return state.ty_mgr.Get<type::Pointer>(el, ast::StorageClass::kNone);
   }
+
+  bool ExpectsPointer() const override { return true; }
 
   std::string str() const override {
     return "ptr<" + element_builder_->str() + ">";
@@ -393,7 +410,7 @@ class ArrayBuilder : public Builder {
   explicit ArrayBuilder(Builder* element_builder)
       : element_builder_(element_builder) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
     if (auto* arr = ty->As<type::Array>()) {
       if (arr->size() == 0) {
         return element_builder_->Match(state, arr->type());
@@ -422,7 +439,7 @@ class SampledTextureBuilder : public Builder {
                                  Builder* type_builder)
       : dimensions_(dimensions), type_builder_(type_builder) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
     if (auto* tex = ty->As<type::SampledTexture>()) {
       if (tex->dim() == dimensions_) {
         return type_builder_->Match(state, tex->type());
@@ -455,7 +472,7 @@ class MultisampledTextureBuilder : public Builder {
                                       Builder* type_builder)
       : dimensions_(dimensions), type_builder_(type_builder) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
     if (auto* tex = ty->As<type::MultisampledTexture>()) {
       if (tex->dim() == dimensions_) {
         return type_builder_->Match(state, tex->type());
@@ -487,7 +504,7 @@ class DepthTextureBuilder : public Builder {
   explicit DepthTextureBuilder(type::TextureDimension dimensions)
       : dimensions_(dimensions) {}
 
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     if (auto* tex = ty->As<type::DepthTexture>()) {
       return tex->dim() == dimensions_;
     }
@@ -520,7 +537,15 @@ class StorageTextureBuilder : public Builder {
         texel_format_(texel_format),
         channel_format_(channel_format) {}
 
-  bool Match(MatchState& state, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
+    if (auto* ac = ty->As<type::AccessControl>()) {
+      // If we have an storage texture argument that's got an access control
+      // type wrapped around it, accept it. Signatures that don't include an
+      // access control imply any access. Example:
+      //   textureDimensions(t : texture_storage_1d<F>) -> i32
+      ty = ac->type();
+    }
+
     if (auto* tex = ty->As<type::StorageTexture>()) {
       if (MatchOpenNumber(state, texel_format_,
                           static_cast<uint32_t>(tex->image_format()))) {
@@ -557,7 +582,7 @@ class SamplerBuilder : public Builder {
  public:
   explicit SamplerBuilder(type::SamplerKind kind) : kind_(kind) {}
 
-  bool Match(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
     if (auto* sampler = ty->As<type::Sampler>()) {
       return sampler->kind() == kind_;
     }
@@ -580,6 +605,38 @@ class SamplerBuilder : public Builder {
 
  private:
   type::SamplerKind const kind_;
+};
+
+/// AccessControlBuilder is a Matcher / Builder for AccessControl types
+class AccessControlBuilder : public Builder {
+ public:
+  explicit AccessControlBuilder(ast::AccessControl access_control,
+                                Builder* type)
+      : access_control_(access_control), type_(type) {}
+
+  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
+    if (auto* ac = ty->As<type::AccessControl>()) {
+      if (ac->access_control() == access_control_) {
+        return type_->Match(state, ty);
+      }
+    }
+    return false;
+  }
+
+  type::Type* Build(BuildState& state) const override {
+    auto* ty = type_->Build(state);
+    return state.ty_mgr.Get<type::AccessControl>(access_control_, ty);
+  }
+
+  std::string str() const override {
+    std::stringstream ss;
+    ss << "[[access(" << access_control_ << ")]] " << type_->str();
+    return ss.str();
+  }
+
+ private:
+  ast::AccessControl const access_control_;
+  Builder* const type_;
 };
 
 /// Impl is the private implementation of the IntrinsicTable interface.
@@ -715,6 +772,12 @@ class Impl : public IntrinsicTable {
   /// @returns a Matcher / Builder that matches a sampler type
   Builder* sampler(type::SamplerKind kind) {
     return matcher_allocator_.Create<SamplerBuilder>(kind);
+  }
+
+  /// @returns a Matcher / Builder that matches an access control type
+  Builder* access_control(ast::AccessControl access_control, Builder* type) {
+    return matcher_allocator_.Create<AccessControlBuilder>(access_control,
+                                                           type);
   }
 
   /// Registers an overload with the given intrinsic type, return type Matcher /
@@ -1044,6 +1107,26 @@ Impl::Impl() {
       storage_texture(Dim::k2dArray, OpenNumber::F, OpenType::T);
   auto* tex_storage_3d_FT =
       storage_texture(Dim::k3d, OpenNumber::F, OpenType::T);
+  auto* tex_storage_ro_1d_FT =
+      access_control(ast::AccessControl::kReadOnly, tex_storage_1d_FT);
+  auto* tex_storage_ro_1d_array_FT =
+      access_control(ast::AccessControl::kReadOnly, tex_storage_1d_array_FT);
+  auto* tex_storage_ro_2d_FT =
+      access_control(ast::AccessControl::kReadOnly, tex_storage_2d_FT);
+  auto* tex_storage_ro_2d_array_FT =
+      access_control(ast::AccessControl::kReadOnly, tex_storage_2d_array_FT);
+  auto* tex_storage_ro_3d_FT =
+      access_control(ast::AccessControl::kReadOnly, tex_storage_3d_FT);
+  auto* tex_storage_wo_1d_FT =
+      access_control(ast::AccessControl::kWriteOnly, tex_storage_1d_FT);
+  auto* tex_storage_wo_1d_array_FT =
+      access_control(ast::AccessControl::kWriteOnly, tex_storage_1d_array_FT);
+  auto* tex_storage_wo_2d_FT =
+      access_control(ast::AccessControl::kWriteOnly, tex_storage_2d_FT);
+  auto* tex_storage_wo_2d_array_FT =
+      access_control(ast::AccessControl::kWriteOnly, tex_storage_2d_array_FT);
+  auto* tex_storage_wo_3d_FT =
+      access_control(ast::AccessControl::kWriteOnly, tex_storage_3d_FT);
   auto* sampler = this->sampler(type::SamplerKind::kSampler);
   auto* sampler_comparison =
       this->sampler(type::SamplerKind::kComparisonSampler);
@@ -1170,14 +1253,12 @@ Impl::Impl() {
   Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_cube},      {s, sampler}, {coords, vec3_f32},                     {level, i32},                     }); // NOLINT
   Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_cube_array},{s, sampler}, {coords, vec3_f32}, {array_index, i32}, {level, i32},                     }); // NOLINT
 
-  // TODO(bclayton): Check for [[access(write)]]
-  Register(I::kTextureStore, void_, {{t, tex_storage_1d_FT},      {coords, i32},                          {value, vec4_T}, }); // NOLINT
-  Register(I::kTextureStore, void_, {{t, tex_storage_1d_array_FT},{coords, i32},      {array_index, i32}, {value, vec4_T}, }); // NOLINT
-  Register(I::kTextureStore, void_, {{t, tex_storage_2d_FT},      {coords, vec2_i32},                     {value, vec4_T}, }); // NOLINT
-  Register(I::kTextureStore, void_, {{t, tex_storage_2d_array_FT},{coords, vec2_i32}, {array_index, i32}, {value, vec4_T}, }); // NOLINT
-  Register(I::kTextureStore, void_, {{t, tex_storage_3d_FT},      {coords, vec3_i32},                     {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_wo_1d_FT},      {coords, i32},                          {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_wo_1d_array_FT},{coords, i32},      {array_index, i32}, {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_wo_2d_FT},      {coords, vec2_i32},                     {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_wo_2d_array_FT},{coords, vec2_i32}, {array_index, i32}, {value, vec4_T}, }); // NOLINT
+  Register(I::kTextureStore, void_, {{t, tex_storage_wo_3d_FT},      {coords, vec3_i32},                     {value, vec4_T}, }); // NOLINT
 
-  // TODO(bclayton): Check for [[access(read)]]
   Register(I::kTextureLoad, vec4_T, {{t, tex_2d_T},               {coords, vec2_i32},                      {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_2d_array_T},         {coords, vec2_i32}, {array_index, i32},  {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_3d_T},               {coords, vec3_i32},                      {level, i32},                      }); // NOLINT
@@ -1185,11 +1266,11 @@ Impl::Impl() {
   Register(I::kTextureLoad, vec4_T, {{t, tex_ms_2d_array_T},      {coords, vec2_i32}, {array_index, i32},                {sample_index, i32}, }); // NOLINT
   Register(I::kTextureLoad, f32,    {{t, tex_depth_2d},           {coords, vec2_i32},                      {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, f32,    {{t, tex_depth_2d_array},     {coords, vec2_i32}, {array_index, i32},  {level, i32},                      }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_1d_FT},      {coords, i32},                                                              }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_1d_array_FT},{coords, i32},      {array_index, i32},                                     }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_2d_FT},      {coords, vec2_i32},                                                         }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_2d_array_FT},{coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_3d_FT},      {coords, vec3_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_1d_FT},      {coords, i32},                                                              }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_1d_array_FT},{coords, i32},      {array_index, i32},                                     }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_2d_FT},      {coords, vec2_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_2d_array_FT},{coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_3d_FT},      {coords, vec3_i32},                                                         }); // NOLINT
 
   // TODO(bclayton): Update the rest of tint to reflect the spec changes made in
   // https://github.com/gpuweb/gpuweb/pull/1301:
@@ -1287,7 +1368,7 @@ IntrinsicTable::Result Impl::Lookup(
         ss << ", ";
       }
       first = false;
-      ss << arg->UnwrapAll()->FriendlyName(builder.Symbols());
+      ss << arg->FriendlyName(builder.Symbols());
     }
   }
   ss << ")" << std::endl;
@@ -1327,13 +1408,21 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
   auto count = std::min(parameters.size(), args.size());
   for (size_t i = 0; i < count; i++) {
     assert(args[i]);
-    auto* arg_ty = args[i]->UnwrapAll();
-    if (!parameters[i].matcher->Match(matcher_state, arg_ty)) {
-      matched = false;
-      continue;
+    auto* arg_ty = args[i];
+    if (auto* ptr = arg_ty->As<type::Pointer>()) {
+      if (!parameters[i].matcher->ExpectsPointer()) {
+        // Argument is a pointer, but the matcher isn't expecting one.
+        // Perform an implicit dereference.
+        arg_ty = ptr->type();
+      }
     }
-    // Weight correct parameter matches more than exact number of arguments
-    match_score += 2;
+    if (parameters[i].matcher->Match(matcher_state, arg_ty)) {
+      // A correct parameter match is scored higher than number of parameters to
+      // arguments.
+      match_score += 2;
+    } else {
+      matched = false;
+    }
   }
   if (!matched) {
     return nullptr;

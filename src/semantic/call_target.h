@@ -56,6 +56,13 @@ struct Parameter {
   Usage const usage = Usage::kNone;
 };
 
+std::ostream& operator<<(std::ostream& out, Parameter parameter);
+
+/// Comparison operator for Parameters
+static inline bool operator==(const Parameter& a, const Parameter& b) {
+  return a.type == b.type && a.usage == b.usage;
+}
+
 /// @returns a string representation of the given parameter usage.
 const char* str(Parameter::Usage usage);
 

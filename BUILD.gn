@@ -835,6 +835,7 @@ source_set("tint_unittests_core_src") {
     "src/diagnostic/formatter_test.cc",
     "src/diagnostic/printer_test.cc",
     "src/inspector/inspector_test.cc",
+    "src/intrinsic_table_test.cc",
     "src/namer_test.cc",
     "src/program_builder_test.cc",
     "src/program_test.cc",

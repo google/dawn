@@ -465,6 +465,7 @@ if(${TINT_BUILD_TESTS})
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
     inspector/inspector_test.cc
+    intrinsic_table_test.cc
     namer_test.cc
     program_test.cc
     scope_stack_test.cc

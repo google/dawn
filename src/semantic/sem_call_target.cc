@@ -14,6 +14,7 @@
 
 #include "src/semantic/call_target.h"
 
+#include "src/symbol_table.h"
 #include "src/type/type.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::semantic::CallTarget);
@@ -65,5 +66,12 @@ const char* str(Parameter::Usage usage) {
       return "<unknown>";
   }
 }
+
+std::ostream& operator<<(std::ostream& out, Parameter parameter) {
+  out << "[type: " << parameter.type->FriendlyName(SymbolTable{})
+      << ", usage: " << str(parameter.usage) << "]";
+  return out;
+}
+
 }  // namespace semantic
 }  // namespace tint

@@ -55,6 +55,7 @@
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
 #include "src/semantic/variable.h"
+#include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -1379,13 +1380,13 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
 
   Global("my_var", ast::StorageClass::kNone, ty.f32());
 
-  auto* expr = Call(name, "my_var", "my_var");
+  auto* expr = Call(name, "my_var", 1.23f);
   WrapInFunction(expr);
 
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(), "no matching call to " + name +
-                               "(f32, f32)\n\n"
+                               "(ptr<f32>, f32)\n\n"
                                "2 candidate functions:\n  " +
                                name + "(f32) -> bool\n  " + name +
                                "(vecN<f32>) -> vecN<bool>\n");
@@ -1469,11 +1470,13 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   auto* coords_type = GetCoordsType(dim, ty.i32());
 
   auto* subtype = type::StorageTexture::SubtypeFor(format, Types());
-  type::Type* texture_type = create<type::StorageTexture>(dim, format, subtype);
+  auto* texture_type = create<type::StorageTexture>(dim, format, subtype);
+  auto* ro_texture_type =
+      create<type::AccessControl>(ast::AccessControl::kReadOnly, texture_type);
 
   ast::ExpressionList call_params;
 
-  add_call_param("texture", texture_type, &call_params);
+  add_call_param("texture", ro_texture_type, &call_params);
   add_call_param("coords", coords_type, &call_params);
 
   if (type::IsTextureArray(dim)) {
@@ -2504,7 +2507,7 @@ TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
             "no matching call to " + std::string(param.name) + R"(()
 
 1 candidate function:
-  determinant(maxNxN<f32>) -> f32
+  determinant(matNxN<f32>) -> f32
 )");
 }
 
