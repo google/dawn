@@ -156,8 +156,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
                 return;
             })");
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
-            [[group(0), binding(1)]] var<uniform_constant> texture0 : texture_2d<f32>;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;

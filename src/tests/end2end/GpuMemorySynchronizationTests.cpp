@@ -258,8 +258,8 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
             [[offset(4)]] storageOut: u32;
         };
         [[group(0), binding(0)]] var<storage_buffer> output : [[access(write)]] Output;
-        [[group(0), binding(1)]] var<uniform_constant> sampledTex : texture_2d<u32>;
-        [[group(0), binding(2)]] var<uniform_constant> storageTex : [[access(read)]] texture_storage_2d<r32uint>;
+        [[group(0), binding(1)]] var sampledTex : texture_2d<u32>;
+        [[group(0), binding(2)]] var storageTex : [[access(read)]] texture_storage_2d<r32uint>;
 
         [[stage(compute)]] fn main() -> void {
             output.sampledOut = textureLoad(sampledTex, vec2<i32>(0, 0), 0).x;

@@ -57,8 +57,8 @@ namespace dawn_native {
         )";
 
         static const char sPassthrough2D4ChannelFrag[] = R"(
-            [[binding(1), group(0)]] var<uniform_constant> mySampler: sampler;
-            [[binding(2), group(0)]] var<uniform_constant> myTexture: texture_2d<f32>;
+            [[binding(1), group(0)]] var mySampler: sampler;
+            [[binding(2), group(0)]] var myTexture: texture_2d<f32>;
             [[location(0)]] var<in> v_texcoord : vec2<f32>;
             [[location(0)]] var<out> rgbaColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {

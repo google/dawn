@@ -163,8 +163,7 @@ class TextureFormatTest : public DawnTest {
         const char* type = utils::GetWGSLColorTextureComponentType(sampleFormatInfo.format);
 
         std::ostringstream fsSource;
-        fsSource << "[[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<" << type
-                 << ">;\n";
+        fsSource << "[[group(0), binding(0)]] var myTexture : texture_2d<" << type << ">;\n";
         fsSource << "[[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;\n";
         fsSource << "[[location(0)]] var<out> fragColor : vec4<" << type << ">;\n";
         fsSource << "[[stage(fragment)]] fn main() -> void {\n";

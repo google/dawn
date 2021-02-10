@@ -270,8 +270,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     renderPipelineDescriptor.vertexStage.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
-            [[set(0), binding(1)]] var<uniform_constant> texture : texture_2d<f32>;
+            [[set(0), binding(0)]] var sampler0 : sampler;
+            [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
@@ -321,8 +321,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     renderPipelineDescriptor.vertexStage.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
-            [[set(0), binding(1)]] var<uniform_constant> texture : texture_2d<f32>;
+            [[set(0), binding(0)]] var sampler0 : sampler;
+            [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
@@ -377,9 +377,9 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     renderPipelineDescriptor.vertexStage.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[set(0), binding(0)]] var<uniform_constant> sampler0 : sampler;
-            [[set(0), binding(1)]] var<uniform_constant> lumaTexture : texture_2d<f32>;
-            [[set(0), binding(2)]] var<uniform_constant> chromaTexture : texture_2d<f32>;
+            [[set(0), binding(0)]] var sampler0 : sampler;
+            [[set(0), binding(1)]] var lumaTexture : texture_2d<f32>;
+            [[set(0), binding(2)]] var chromaTexture : texture_2d<f32>;
 
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;

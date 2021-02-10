@@ -231,7 +231,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     {
         binding.texture.sampleType = wgpu::TextureSampleType::Float;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -241,7 +241,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     {
         binding.texture.multisampled = true;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_multisampled_2d<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -252,7 +252,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     {
         binding.sampler.type = wgpu::SamplerBindingType::Filtering;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+            [[group(0), binding(0)]] var mySampler: sampler;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -279,7 +279,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     {
         binding.texture.viewDimension = wgpu::TextureViewDimension::e1D;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_1d<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_1d<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -289,7 +289,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     {
         binding.texture.viewDimension = wgpu::TextureViewDimension::e2D;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -299,7 +299,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     {
         binding.texture.viewDimension = wgpu::TextureViewDimension::e2DArray;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -309,7 +309,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     {
         binding.texture.viewDimension = wgpu::TextureViewDimension::e3D;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_3d<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -319,7 +319,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     {
         binding.texture.viewDimension = wgpu::TextureViewDimension::Cube;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_cube<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_cube<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -329,7 +329,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     {
         binding.texture.viewDimension = wgpu::TextureViewDimension::CubeArray;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_cube_array<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_cube_array<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -355,7 +355,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
     {
         binding.texture.sampleType = wgpu::TextureSampleType::Float;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+            [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -365,7 +365,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
     {
         binding.texture.sampleType = wgpu::TextureSampleType::Sint;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<i32>;
+            [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -375,7 +375,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
     {
         binding.texture.sampleType = wgpu::TextureSampleType::Uint;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
-            [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<u32>;
+            [[group(0), binding(0)]] var myTexture : texture_2d<u32>;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -567,7 +567,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
         })");
 
     wgpu::ShaderModule vsModuleSampler = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+        [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(vertex)]] fn main() -> void {
         })");
 
@@ -576,7 +576,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
         })");
 
     wgpu::ShaderModule fsModuleSampler = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+        [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(fragment)]] fn main() -> void {
         })");
 
@@ -654,13 +654,13 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
 // Test it is invalid to have conflicting binding texture multisampling in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> void {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_multisampled_2d<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
         [[stage(fragment)]] fn main() -> void {
         })");
@@ -676,13 +676,13 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
 // Test it is invalid to have conflicting binding texture dimension in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> void {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_3d<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
         [[stage(fragment)]] fn main() -> void {
         })");
@@ -698,13 +698,13 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
 // Test it is invalid to have conflicting binding texture component type in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> void {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<i32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
         [[stage(fragment)]] fn main() -> void {
         })");

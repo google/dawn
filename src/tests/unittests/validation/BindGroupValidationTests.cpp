@@ -1787,11 +1787,11 @@ TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
 
 TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DShaderFS[] = R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(fragment)]] fn main() -> void {
         })";
     constexpr char kTexture2DShaderCS[] = R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(compute)]] fn main() -> void {
         })";
 
@@ -1824,11 +1824,11 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
                                       wgpu::TextureViewDimension::e2DArray}})}));
 
     constexpr char kTexture2DArrayShaderFS[] = R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(fragment)]] fn main() -> void {
         })";
     constexpr char kTexture2DArrayShaderCS[] = R"(
-        [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d_array<f32>;
+        [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(compute)]] fn main() -> void {
         })";
 
@@ -2077,7 +2077,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
 
         CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+            [[group(0), binding(0)]] var mySampler: sampler;
             [[stage(fragment)]] fn main() -> void {
             })");
     }
@@ -2088,7 +2088,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison}});
 
         CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
+            [[group(0), binding(0)]] var mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() -> void {
             })");
     }
@@ -2099,7 +2099,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
 
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler_comparison;
+            [[group(0), binding(0)]] var mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() -> void {
             })"));
     }
@@ -2110,7 +2110,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison}});
 
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
-            [[group(0), binding(0)]] var<uniform_constant> mySampler: sampler;
+            [[group(0), binding(0)]] var mySampler: sampler;
             [[stage(fragment)]] fn main() -> void {
             })"));
     }

@@ -268,8 +268,8 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[group(0), binding(1)]] var <uniform_constant> samp : sampler;
-        [[group(0), binding(2)]] var <uniform_constant> tex : texture_2d<f32>;
+        [[group(0), binding(1)]] var samp : sampler;
+        [[group(0), binding(2)]] var tex : texture_2d<f32>;
         [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
@@ -1218,12 +1218,12 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
         interface << "[[group(0), binding(" << binding++ << ")]] "
-                  << "var<uniform_constant> tex" << i << " : texture_2d<f32>;\n";
+                  << "var tex" << i << " : texture_2d<f32>;\n";
 
         bgEntries.push_back({binding, nullptr, 0, 0, device.CreateSampler(), nullptr});
 
         interface << "[[group(0), binding(" << binding++ << ")]]"
-                  << "var<uniform_constant> samp" << i << " : sampler;\n";
+                  << "var samp" << i << " : sampler;\n";
 
         body << "if (abs(textureSampleLevel(tex" << i << ", samp" << i
              << ", vec2<f32>(0.5, 0.5), 0.0).r - " << expectedValue++
@@ -1237,8 +1237,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
         interface << "[[group(0), binding(" << binding++ << ")]] "
-                  << "var<uniform_constant> image" << i
-                  << " : [[access(read)]] texture_storage_2d<r32uint>;\n";
+                  << "var image" << i << " : [[access(read)]] texture_storage_2d<r32uint>;\n";
 
         body << "if (textureLoad(image" << i << ", vec2<i32>(0, 0)).r != " << expectedValue++
              << "u) {\n";

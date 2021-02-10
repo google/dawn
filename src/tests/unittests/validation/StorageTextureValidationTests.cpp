@@ -84,7 +84,7 @@ class StorageTextureValidationTests : public ValidationTest {
         }
 
         std::ostringstream ostream;
-        ostream << "[[group(0), binding(0)]] var<uniform_constant> image0 : "
+        ostream << "[[group(0), binding(0)]] var image0 : "
                 << "[[access(" << access << ")]] " << imageTypeDeclaration << "<"
                 << imageFormatQualifier
                 << ">;\n"
@@ -121,7 +121,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     // Readonly storage texture can be declared in a vertex shader.
     {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
@@ -138,7 +138,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     // Read-only storage textures can be declared in a fragment shader.
     {
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
@@ -156,7 +156,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     if ((false) /* TODO(https://crbug.com/tint/449) */) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(vertex_index)]] var<in> vertex_index : u32;
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
             [[stage(vertex)]] fn main() -> void {
                 textureStore(image0, vec2<i32>(i32(vertex_index), 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
@@ -172,7 +172,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     {
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(frag_coord)]] var<in> frag_coord : vec4<f32>;
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
             [[stage(fragment)]] fn main() -> void {
                 textureStore(image0, vec2<i32>(frag_coord.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
@@ -191,7 +191,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
     // Read-only storage textures can be declared in a compute shader.
     {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(local_invocation_id)]] var<in> LocalInvocationID : vec3<u32>;
 
             [[block]] struct Buf {
@@ -214,7 +214,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
     // Write-only storage textures can be declared in a compute shader.
     {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
             [[builtin(local_invocation_id)]] var<in> LocalInvocationID : vec3<u32>;
 
             [[stage(compute)]] fn main() -> void {
@@ -235,7 +235,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     // Read-write storage textures cannot be declared in a vertex shader by default.
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
             [[stage(vertex)]] fn main() -> void {
             })"));
     }
@@ -243,7 +243,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     // Read-write storage textures cannot be declared in a fragment shader by default.
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
             [[stage(fragment)]] fn main() -> void {
             })"));
     }
@@ -251,7 +251,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     // Read-write storage textures cannot be declared in a compute shader by default.
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromWGSL(device, R"(
-            [[group(0), binding(0)]] var<uniform_constant> image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
+            [[group(0), binding(0)]] var image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
             [[stage(compute)]] fn main() -> void {
             })"));
     }

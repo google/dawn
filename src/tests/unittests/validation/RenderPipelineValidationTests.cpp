@@ -397,7 +397,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                [[group(0), binding(0)]] var<uniform_constant> myTexture : texture_2d<)"
+                [[group(0), binding(0)]] var myTexture : texture_2d<)"
                    << kScalarTypes[i] << R"(>;
 
                 [[stage(fragment)]] fn main() -> void {
@@ -446,7 +446,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                [[group(0), binding(0)]] var<uniform_constant> myTexture : )"
+                [[group(0), binding(0)]] var myTexture : )"
                    << kTextureKeywords[i] << R"(<f32>;
                 [[stage(fragment)]] fn main() -> void {
                 })";
