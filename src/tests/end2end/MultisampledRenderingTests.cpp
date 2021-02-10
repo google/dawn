@@ -736,7 +736,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
     // TODO(crbug.com/tint/372): Support sample mask builtin.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
 
-    // TODO(crbug.com/dawn/672): Work around or enforce via validation that sample variables are not
+    // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_sample_variables"));
 
@@ -786,7 +786,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     // TODO(crbug.com/tint/372): Support sample mask builtin.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
 
-    // TODO(crbug.com/dawn/672): Work around or enforce via validation that sample variables are not
+    // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.
     DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_sample_variables"));
 
