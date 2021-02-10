@@ -82,19 +82,21 @@ class InspectorHelper : public ProgramBuilder {
          ast::StatementList{create<ast::ReturnStatement>()}, decorations);
   }
 
-  /// Generates a function that calls another
+  /// Generates a function that calls other functions
   /// @param caller name of the function created
-  /// @param callee name of the function to be called
+  /// @param callees names of the functions to be called
   /// @param decorations the function decorations
   void MakeCallerBodyFunction(std::string caller,
-                              std::string callee,
+                              std::vector<std::string> callees,
                               ast::FunctionDecorationList decorations) {
-    Func(caller, ast::VariableList(), ty.void_(),
-         ast::StatementList{
-             create<ast::CallStatement>(Call(callee)),
-             create<ast::ReturnStatement>(),
-         },
-         decorations);
+    ast::StatementList body;
+    body.reserve(callees.size() + 1);
+    for (auto callee : callees) {
+      body.push_back(create<ast::CallStatement>(Call(callee)));
+    }
+    body.push_back(create<ast::ReturnStatement>());
+
+    Func(caller, ast::VariableList(), ty.void_(), body, decorations);
   }
 
   /// Add In/Out variables to the global variables
@@ -649,6 +651,8 @@ class InspectorGetRemappedNameForEntryPointTest : public InspectorHelper,
                                                   public testing::Test {};
 class InspectorGetConstantIDsTest : public InspectorHelper,
                                     public testing::Test {};
+class InspectorGetResourceBindingsTest : public InspectorHelper,
+                                         public testing::Test {};
 class InspectorGetUniformBufferResourceBindingsTest : public InspectorHelper,
                                                       public testing::Test {};
 class InspectorGetStorageBufferResourceBindingsTest : public InspectorHelper,
@@ -759,13 +763,13 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   MakeEmptyBodyFunction("func", {});
 
   MakeCallerBodyFunction(
-      "foo", "func",
+      "foo", {"func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
 
   MakeCallerBodyFunction(
-      "bar", "func",
+      "bar", {"func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
       });
@@ -829,7 +833,7 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   MakeEmptyBodyFunction("func", {});
 
   MakeCallerBodyFunction(
-      "foo", "func",
+      "foo", {"func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -876,7 +880,7 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
 
   MakeCallerBodyFunction(
-      "foo", "func",
+      "foo", {"func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -965,7 +969,7 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
       "func", {{"in_var", "out_var"}, {"in2_var", "out2_var"}}, {});
 
   MakeCallerBodyFunction(
-      "foo", "func",
+      "foo", {"func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1054,7 +1058,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
       });
 
   MakeCallerBodyFunction(
-      "bar", "func",
+      "bar", {"func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
       });
@@ -1110,7 +1114,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
 
   MakeCallerBodyFunction(
-      "foo", "func",
+      "foo", {"func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1301,6 +1305,101 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
   EXPECT_FLOAT_EQ(15.0, result[4000].AsFloat());
 }
 
+TEST_F(InspectorGetResourceBindingsTest, Empty) {
+  MakeCallerBodyFunction(
+      "ep_func", {},
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+      });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(0u, result.size());
+}
+
+TEST_F(InspectorGetResourceBindingsTest, Simple) {
+  type::Struct* ub_struct_type;
+  type::AccessControl* ub_control_type;
+  std::tie(ub_struct_type, ub_control_type) =
+      MakeUniformBufferTypes("ub_type", {{ty.i32(), 0}});
+  AddUniformBuffer("ub_var", ub_control_type, 0, 0);
+  MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
+
+  type::Struct* sb_struct_type;
+  type::AccessControl* sb_control_type;
+  std::tie(sb_struct_type, sb_control_type) =
+      MakeStorageBufferTypes("sb_type", {{ty.i32(), 0}});
+  AddStorageBuffer("sb_var", sb_control_type, 1, 0);
+  MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
+
+  type::Struct* ro_struct_type;
+  type::AccessControl* ro_control_type;
+  std::tie(ro_struct_type, ro_control_type) =
+      MakeReadOnlyStorageBufferTypes("ro_type", {{ty.i32(), 0}});
+  AddStorageBuffer("ro_var", ro_control_type, 1, 1);
+  MakeStructVariableReferenceBodyFunction("ro_func", "ro_var", {{0, ty.i32()}});
+
+  auto* s_texture_type =
+      MakeSampledTextureType(type::TextureDimension::k1d, ty.f32());
+  AddSampledTexture("s_texture", s_texture_type, 2, 0);
+  AddSampler("s_var", 3, 0);
+  AddGlobalVariable("s_coords", ty.f32());
+  MakeSamplerReferenceBodyFunction("s_func", "s_texture", "s_var", "s_coords",
+                                   ty.f32(), {});
+
+  auto* cs_depth_texture_type =
+      MakeDepthTextureType(type::TextureDimension::k2d);
+  AddDepthTexture("cs_texture", cs_depth_texture_type);
+  AddComparisonSampler("cs_var", 3, 1);
+  AddGlobalVariable("cs_coords", ty.vec2<f32>());
+  AddGlobalVariable("cs_depth", ty.f32());
+  MakeComparisonSamplerReferenceBodyFunction(
+      "cs_func", "cs_texture", "cs_var", "cs_coords", "cs_depth", ty.f32(), {});
+
+  MakeCallerBodyFunction(
+      "ep_func", {"ub_func", "sb_func", "ro_func", "s_func", "cs_func"},
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+      });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(6u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[1].resource_type);
+  EXPECT_EQ(1u, result[1].bind_group);
+  EXPECT_EQ(0u, result[1].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
+            result[2].resource_type);
+  EXPECT_EQ(1u, result[2].bind_group);
+  EXPECT_EQ(1u, result[2].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[3].resource_type);
+  EXPECT_EQ(3u, result[3].bind_group);
+  EXPECT_EQ(0u, result[3].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler,
+            result[4].resource_type);
+  EXPECT_EQ(3u, result[4].bind_group);
+  EXPECT_EQ(1u, result[4].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture,
+            result[5].resource_type);
+  EXPECT_EQ(2u, result[5].bind_group);
+  EXPECT_EQ(0u, result[5].binding);
+}
+
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
   Inspector& inspector = Build();
 
@@ -1320,7 +1419,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "ub_func",
+      "ep_func", {"ub_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1345,7 +1444,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "ub_func",
+      "ep_func", {"ub_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1367,7 +1466,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "ub_func",
+      "ep_func", {"ub_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1378,6 +1477,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(16u, result[0].min_buffer_binding_size);
@@ -1394,7 +1495,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
       "ub_func", "foo_ub", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "ub_func",
+      "ep_func", {"ub_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1405,6 +1506,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(16u, result[0].min_buffer_binding_size);
@@ -1446,14 +1549,20 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(3u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(16u, result[0].min_buffer_binding_size);
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[1].resource_type);
   EXPECT_EQ(0u, result[1].bind_group);
   EXPECT_EQ(1u, result[1].binding);
   EXPECT_EQ(16u, result[1].min_buffer_binding_size);
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[2].resource_type);
   EXPECT_EQ(2u, result[2].bind_group);
   EXPECT_EQ(0u, result[2].binding);
   EXPECT_EQ(16u, result[2].min_buffer_binding_size);
@@ -1469,7 +1578,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "ub_func",
+      "ep_func", {"ub_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1480,6 +1589,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(32u, result[0].min_buffer_binding_size);
@@ -1495,7 +1606,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1506,6 +1617,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(4u, result[0].min_buffer_binding_size);
@@ -1522,7 +1635,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
       "sb_func", "foo_sb", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1533,6 +1646,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].min_buffer_binding_size);
@@ -1577,14 +1692,20 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(3u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].min_buffer_binding_size);
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[1].resource_type);
   EXPECT_EQ(0u, result[1].bind_group);
   EXPECT_EQ(1u, result[1].binding);
   EXPECT_EQ(12u, result[1].min_buffer_binding_size);
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[2].resource_type);
   EXPECT_EQ(2u, result[2].bind_group);
   EXPECT_EQ(0u, result[2].binding);
   EXPECT_EQ(12u, result[2].min_buffer_binding_size);
@@ -1600,7 +1721,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1611,6 +1732,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(20u, result[0].min_buffer_binding_size);
@@ -1626,7 +1749,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1637,6 +1760,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(8u, result[0].min_buffer_binding_size);
@@ -1652,7 +1777,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1674,7 +1799,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1685,6 +1810,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(4u, result[0].min_buffer_binding_size);
@@ -1730,14 +1857,20 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(3u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].min_buffer_binding_size);
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
+            result[1].resource_type);
   EXPECT_EQ(0u, result[1].bind_group);
   EXPECT_EQ(1u, result[1].binding);
   EXPECT_EQ(12u, result[1].min_buffer_binding_size);
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
+            result[2].resource_type);
   EXPECT_EQ(2u, result[2].bind_group);
   EXPECT_EQ(0u, result[2].binding);
   EXPECT_EQ(12u, result[2].min_buffer_binding_size);
@@ -1753,7 +1886,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1764,6 +1897,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(20u, result[0].min_buffer_binding_size);
@@ -1780,7 +1915,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1791,6 +1926,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(8u, result[0].min_buffer_binding_size);
@@ -1806,7 +1943,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
   MakeCallerBodyFunction(
-      "ep_func", "sb_func",
+      "ep_func", {"sb_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1836,6 +1973,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
   auto result = inspector.GetSamplerResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[0].resource_type);
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(1u, result[0].binding);
@@ -1866,7 +2004,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
                                    "foo_coords", ty.f32(), {});
 
   MakeCallerBodyFunction(
-      "ep_func", "foo_func",
+      "ep_func", {"foo_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1876,6 +2014,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
   auto result = inspector.GetSamplerResourceBindings("ep_func");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kSampler, result[0].resource_type);
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(1u, result[0].binding);
@@ -1939,6 +2078,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
   auto result = inspector.GetComparisonSamplerResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler,
+            result[0].resource_type);
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(1u, result[0].binding);
@@ -1970,7 +2111,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
                                              "foo_depth", ty.f32(), {});
 
   MakeCallerBodyFunction(
-      "ep_func", "foo_func",
+      "ep_func", {"foo_func"},
       ast::FunctionDecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1980,6 +2121,8 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
   auto result = inspector.GetComparisonSamplerResourceBindings("ep_func");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler,
+            result[0].resource_type);
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(1u, result[0].binding);
@@ -2059,6 +2202,8 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
   auto result = inspector.GetSampledTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture,
+            result[0].resource_type);
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
@@ -2115,8 +2260,10 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
 
   auto result = inspector.GetSampledTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
   ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
@@ -2163,6 +2310,8 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
   auto result = inspector.GetMultisampledTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+  EXPECT_EQ(ResourceBinding::ResourceType::kMulitsampledTexture,
+            result[0].resource_type);
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
@@ -2229,8 +2378,10 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
 
   auto result = inspector.GetMultisampledTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
-
   ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kMulitsampledTexture,
+            result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(GetParam().inspector_dim, result[0].dim);

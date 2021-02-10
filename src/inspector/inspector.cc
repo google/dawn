@@ -47,6 +47,21 @@
 namespace tint {
 namespace inspector {
 
+namespace {
+
+void AppendResourceBindings(std::vector<ResourceBinding>* dest,
+                            const std::vector<ResourceBinding>& orig) {
+  assert(dest);
+  if (!dest) {
+    return;
+  }
+
+  dest->reserve(dest->size() + orig.size());
+  dest->insert(dest->end(), orig.begin(), orig.end());
+}
+
+}  // namespace
+
 Inspector::Inspector(const Program* program) : program_(program) {}
 
 Inspector::~Inspector() = default;
@@ -180,6 +195,32 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   return result;
 }
 
+std::vector<ResourceBinding> Inspector::GetResourceBindings(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+
+  AppendResourceBindings(&result,
+                         GetUniformBufferResourceBindings(entry_point));
+  AppendResourceBindings(&result,
+                         GetStorageBufferResourceBindings(entry_point));
+  AppendResourceBindings(&result,
+                         GetReadOnlyStorageBufferResourceBindings(entry_point));
+  AppendResourceBindings(&result, GetSamplerResourceBindings(entry_point));
+  AppendResourceBindings(&result,
+                         GetComparisonSamplerResourceBindings(entry_point));
+  AppendResourceBindings(&result,
+                         GetSampledTextureResourceBindings(entry_point));
+  AppendResourceBindings(&result,
+                         GetMultisampledTextureResourceBindings(entry_point));
+
+  return result;
+}
+
 std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     const std::string& entry_point) {
   auto* func = FindEntryPointByName(entry_point);
@@ -210,6 +251,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     }
 
     ResourceBinding entry;
+    entry.resource_type = ResourceBinding::ResourceType::kUniformBuffer;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.min_buffer_binding_size =
@@ -246,6 +288,7 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
     auto binding_info = rs.second;
 
     ResourceBinding entry;
+    entry.resource_type = ResourceBinding::ResourceType::kSampler;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
@@ -269,6 +312,7 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
     auto binding_info = rcs.second;
 
     ResourceBinding entry;
+    entry.resource_type = ResourceBinding::ResourceType::kComparisonSampler;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
@@ -332,6 +376,9 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     }
 
     ResourceBinding entry;
+    entry.resource_type =
+        read_only ? ResourceBinding::ResourceType::kReadOnlyStorageBuffer
+                  : ResourceBinding::ResourceType::kStorageBuffer;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.min_buffer_binding_size =
@@ -362,6 +409,9 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     auto binding_info = ref.second;
 
     ResourceBinding entry;
+    entry.resource_type =
+        multisampled_only ? ResourceBinding::ResourceType::kMulitsampledTexture
+                          : ResourceBinding::ResourceType::kSampledTexture;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 

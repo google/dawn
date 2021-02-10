@@ -55,6 +55,19 @@ struct ResourceBinding {
   /// in SPIR-V OpTypeImage.
   enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
 
+  /// kXXX maps to entries returned by GetXXXResourceBindings call.
+  enum class ResourceType {
+    kUniformBuffer,
+    kStorageBuffer,
+    kReadOnlyStorageBuffer,
+    kSampler,
+    kComparisonSampler,
+    kSampledTexture,
+    kMulitsampledTexture
+  };
+
+  /// Type of resource that is bound.
+  ResourceType resource_type;
   /// Bind group the binding belongs
   uint32_t bind_group;
   /// Identifier to identify this binding within the bind group
@@ -92,6 +105,11 @@ class Inspector {
 
   /// @returns map of const_id to initial value
   std::map<uint32_t, Scalar> GetConstantIDs();
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the resource bindings.
+  std::vector<ResourceBinding> GetResourceBindings(
+      const std::string& entry_point);
 
   /// @param entry_point name of the entry point to get information about.
   /// @returns vector of all of the bindings for uniform buffers.
