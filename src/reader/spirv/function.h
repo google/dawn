@@ -729,6 +729,21 @@ class FunctionEmitter {
   /// @returns an AST expression for the instruction, or nullptr.
   TypedExpression MakeCompositeExtract(const spvtools::opt::Instruction& inst);
 
+  /// Creates an expression for indexing into a composite value.  The literal
+  /// indices that step into the value start at instruction input operand
+  /// `start_index` and run to the end of the instruction.
+  /// @param inst the original instruction
+  /// @param composite the typed expression for the composite
+  /// @param composite_type_id the SPIR-V type ID for the composite
+  /// @param index_start the index of the first operand in `inst` that is an
+  /// index into the composite type
+  /// @returns an AST expression for the decomposed composite, or {} on error
+  TypedExpression MakeCompositeValueDecomposition(
+      const spvtools::opt::Instruction& inst,
+      TypedExpression composite,
+      uint32_t composite_type_id,
+      int index_start);
+
   /// Creates an expression for OpVectorShuffle
   /// @param inst an OpVectorShuffle instruction.
   /// @returns an AST expression for the instruction, or nullptr.
@@ -910,6 +925,12 @@ class FunctionEmitter {
   /// @param inst the SPIR-V instruction
   /// @returns an expression
   bool MakeVectorInsertDynamic(const spvtools::opt::Instruction& inst);
+
+  /// Generates statements for a SPIR-V OpComposite instruction.
+  /// Registers a const declaration for the result.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  bool MakeCompositeInsert(const spvtools::opt::Instruction& inst);
 
   /// Get the SPIR-V instruction for the image memory object declaration for
   /// the image operand to the given instruction.

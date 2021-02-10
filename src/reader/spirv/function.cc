@@ -3135,6 +3135,10 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // Synthesize a vector insertion in its own statements.
       return MakeVectorInsertDynamic(inst);
 
+    case SpvOpCompositeInsert:
+      // Synthesize a composite insertion in its own statements.
+      return MakeCompositeInsert(inst);
+
     case SpvOpFunctionCall:
       return EmitFunctionCall(inst);
 
@@ -3307,7 +3311,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpGenericCastToPtrExplicit // Not in Vulkan
   //
   //    OpArrayLength
-  //    OpCompositeInsert
 
   return {};
 }
@@ -3577,34 +3580,67 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   // This is structurally similar to creating an access chain, but
   // the SPIR-V instruction has literal indices instead of IDs for indices.
 
-  // A SPIR-V composite extract is a single instruction with multiple
-  // literal indices walking down into composites. The Tint AST represents
-  // this as ever-deeper nested indexing expressions. Start off with an
-  // expression for the composite, and then bury that inside nested indexing
-  // expressions.
-  auto source = GetSourceForInst(inst);
-  TypedExpression current_expr(MakeOperand(inst, 0));
+  auto composite_index = 0;
+  auto first_index_position = 1;
+  TypedExpression current_expr(MakeOperand(inst, composite_index));
+  const auto composite_id = inst.GetSingleWordInOperand(composite_index);
+  auto current_type_id = def_use_mgr_->GetDef(composite_id)->type_id();
 
-  auto make_index = [this, source](uint32_t literal) {
+  return MakeCompositeValueDecomposition(inst, current_expr, current_type_id,
+                                         first_index_position);
+}
+
+TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
+    const spvtools::opt::Instruction& inst,
+    TypedExpression composite,
+    uint32_t composite_type_id,
+    int index_start) {
+  // This is structurally similar to creating an access chain, but
+  // the SPIR-V instruction has literal indices instead of IDs for indices.
+
+  // A SPIR-V composite extract is a single instruction with multiple
+  // literal indices walking down into composites.
+  // A SPIR-V composite insert is similar but also tells you what component
+  // to inject. This function is respnosible for the the walking-into part
+  // of composite-insert.
+  //
+  // The Tint AST represents this as ever-deeper nested indexing expressions.
+  // Start off with an expression for the composite, and then bury that inside
+  // nested indexing expressions.
+
+  auto current_expr = composite;
+  auto current_type_id = composite_type_id;
+
+  auto make_index = [this](uint32_t literal) {
     return create<ast::ScalarConstructorExpression>(
-        source, create<ast::UintLiteral>(source, u32_, literal));
+        Source{}, create<ast::UintLiteral>(Source{}, u32_, literal));
   };
 
-  const auto composite = inst.GetSingleWordInOperand(0);
-  auto current_type_id = def_use_mgr_->GetDef(composite)->type_id();
-  // Build up a nested expression for the access chain by walking down the type
+  // Build up a nested expression for the decomposition by walking down the type
   // hierarchy, maintaining |current_type_id| as the SPIR-V ID of the type of
   // the object pointed to after processing the previous indices.
   const auto num_in_operands = inst.NumInOperands();
-  for (uint32_t index = 1; index < num_in_operands; ++index) {
+  for (uint32_t index = index_start; index < num_in_operands; ++index) {
     const uint32_t index_val = inst.GetSingleWordInOperand(index);
 
     const auto* current_type_inst = def_use_mgr_->GetDef(current_type_id);
     if (!current_type_inst) {
       Fail() << "composite type %" << current_type_id
-             << " is invalid after following " << (index - 1)
+             << " is invalid after following " << (index - index_start)
              << " indices: " << inst.PrettyPrint();
       return {};
+    }
+    const char* operation_name = nullptr;
+    switch (inst.opcode()) {
+      case SpvOpCompositeExtract:
+        operation_name = "OpCompositeExtract";
+        break;
+      case SpvOpCompositeInsert:
+        operation_name = "OpCompositeInsert";
+        break;
+      default:
+        Fail() << "internal error: unhandled " << inst.PrettyPrint();
+        return {};
     }
     ast::Expression* next_expr = nullptr;
     switch (current_type_inst->opcode()) {
@@ -3613,8 +3649,9 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         // like  "foo.z", which is more idiomatic than "foo[2]".
         const auto num_elems = current_type_inst->GetSingleWordInOperand(1);
         if (num_elems <= index_val) {
-          Fail() << "CompositeExtract %" << inst.result_id() << " index value "
-                 << index_val << " is out of bounds for vector of " << num_elems
+          Fail() << operation_name << " %" << inst.result_id()
+                 << " index value " << index_val
+                 << " is out of bounds for vector of " << num_elems
                  << " elements";
           return {};
         }
@@ -3632,8 +3669,9 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         // Check bounds
         const auto num_elems = current_type_inst->GetSingleWordInOperand(1);
         if (num_elems <= index_val) {
-          Fail() << "CompositeExtract %" << inst.result_id() << " index value "
-                 << index_val << " is out of bounds for matrix of " << num_elems
+          Fail() << operation_name << " %" << inst.result_id()
+                 << " index value " << index_val
+                 << " is out of bounds for matrix of " << num_elems
                  << " elements";
           return {};
         }
@@ -3657,14 +3695,16 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         current_type_id = current_type_inst->GetSingleWordInOperand(0);
         break;
       case SpvOpTypeRuntimeArray:
-        Fail() << "can't do OpCompositeExtract on a runtime array";
+        Fail() << "can't do " << operation_name
+               << " on a runtime array: " << inst.PrettyPrint();
         return {};
       case SpvOpTypeStruct: {
         const auto num_members = current_type_inst->NumInOperands();
         if (num_members <= index_val) {
-          Fail() << "CompositeExtract %" << inst.result_id() << " index value "
-                 << index_val << " is out of bounds for structure %"
-                 << current_type_id << " having " << num_members << " members";
+          Fail() << operation_name << " %" << inst.result_id()
+                 << " index value " << index_val
+                 << " is out of bounds for structure %" << current_type_id
+                 << " having " << num_members << " members";
           return {};
         }
         auto name = namer_.GetMemberName(current_type_id, uint32_t(index_val));
@@ -3677,8 +3717,8 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         break;
       }
       default:
-        Fail() << "CompositeExtract with bad type %" << current_type_id << ": "
-               << current_type_inst->PrettyPrint();
+        Fail() << operation_name << " with bad type %" << current_type_id
+               << ": " << current_type_inst->PrettyPrint();
         return {};
     }
     current_expr =
@@ -4903,6 +4943,59 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
       index.expr);
 
   AddStatement(create<ast::AssignmentStatement>(Source{}, lhs, component.expr));
+
+  return EmitConstDefinition(
+      inst,
+      {ast_type, create<ast::IdentifierExpression>(registered_temp_name)});
+}
+
+bool FunctionEmitter::MakeCompositeInsert(
+    const spvtools::opt::Instruction& inst) {
+  // For
+  //    %result = OpCompositeInsert %type %object %composite 1 2 3 ...
+  // generate statements like this:
+  //
+  //    var temp : type = composite;
+  //    temp[index].x = object;
+  //    const result : type = temp;
+  //
+  // Then use result everywhere the original SPIR-V id is used.  Using a const
+  // like this avoids constantly reloading the value many times.
+  //
+  // This technique is a combination of:
+  // - making a temporary variable and constant declaration, like  what we do
+  //   for VectorInsertDynamic, and
+  // - building up an access-chain like access like for CompositeExtract, but
+  //   on the left-hand side of the assignment.
+
+  auto* ast_type = parser_impl_.ConvertType(inst.type_id());
+  auto component = MakeOperand(inst, 0);
+  auto src_composite = MakeOperand(inst, 1);
+
+  // Synthesize the temporary variable.
+  // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
+  // API in parser_impl_.
+  auto result_name = namer_.Name(inst.result_id());
+  auto temp_name = namer_.MakeDerivedName(result_name);
+  auto registered_temp_name = builder_.Symbols().Register(temp_name);
+
+  auto* temp_var = create<ast::Variable>(
+      Source{}, registered_temp_name, ast::StorageClass::kFunction, ast_type,
+      false, src_composite.expr, ast::VariableDecorationList{});
+  AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
+
+  TypedExpression seed_expr{ast_type, create<ast::IdentifierExpression>(
+                                          Source{}, registered_temp_name)};
+
+  // The left-hand side of the assignment *looks* like a decomposition.
+  TypedExpression lhs =
+      MakeCompositeValueDecomposition(inst, seed_expr, inst.type_id(), 2);
+  if (!lhs.expr) {
+    return false;
+  }
+
+  AddStatement(
+      create<ast::AssignmentStatement>(Source{}, lhs.expr, component.expr));
 
   return EmitConstDefinition(
       inst,

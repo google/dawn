@@ -287,7 +287,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("CompositeExtract %1 index value 900 is out of "
+  EXPECT_THAT(p->error(), Eq("OpCompositeExtract %1 index value 900 is out of "
                              "bounds for vector of 2 elements"));
 }
 
@@ -338,7 +338,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_FALSE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(p->error(), Eq("CompositeExtract %2 index value 3 is out of "
+  EXPECT_THAT(p->error(), Eq("OpCompositeExtract %2 index value 3 is out of "
                              "bounds for matrix of 3 elements"));
 }
 
@@ -424,7 +424,8 @@ TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_FALSE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(p->error(), Eq("can't do OpCompositeExtract on a runtime array"));
+  EXPECT_THAT(p->error(),
+              HasSubstr("can't do OpCompositeExtract on a runtime array: "));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct) {
@@ -530,7 +531,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("CompositeExtract %2 index value 40 is out of "
+  EXPECT_THAT(p->error(), Eq("OpCompositeExtract %2 index value 40 is out of "
                              "bounds for structure %26 having 3 members"));
 }
 
@@ -574,6 +575,465 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
     }
   })"))
       << ToString(p->builder(), fe.ast_body());
+}
+
+using SpvParserTest_CompositeInsert = SpvParserTest;
+
+TEST_F(SpvParserTest_CompositeInsert, Vector) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCompositeInsert %v2float %float_70 %v2float_50_60 1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1_1
+    function
+    __vec_2__f32
+    {
+      TypeConstructor[not set]{
+        __vec_2__f32
+        ScalarConstructor[not set]{50.000000}
+        ScalarConstructor[not set]{60.000000}
+      }
+    }
+  }
+}
+Assignment{
+  MemberAccessor[not set]{
+    Identifier[not set]{x_1_1}
+    Identifier[not set]{y}
+  }
+  ScalarConstructor[not set]{70.000000}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Identifier[not set]{x_1_1}
+    }
+  }
+})")) << body_str;
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Vector_IndexTooBigError) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCompositeInsert %v2float %float_70 %v2float_50_60 900
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_FALSE(fe.EmitBody());
+  EXPECT_THAT(p->error(), Eq("OpCompositeInsert %1 index value 900 is out of "
+                             "bounds for vector of 2 elements"));
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Matrix) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %m3v2float
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %m3v2float %var
+     %2 = OpCompositeInsert %m3v2float %v2float_50_60 %1 2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2_1
+    function
+    __mat_2_3__f32
+    {
+      Identifier[not set]{x_1}
+    }
+  }
+}
+Assignment{
+  ArrayAccessor[not set]{
+    Identifier[not set]{x_2_1}
+    ScalarConstructor[not set]{2}
+  }
+  TypeConstructor[not set]{
+    __vec_2__f32
+    ScalarConstructor[not set]{50.000000}
+    ScalarConstructor[not set]{60.000000}
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    __mat_2_3__f32
+    {
+      Identifier[not set]{x_2_1}
+    }
+  }
+})")) << body_str;
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Matrix_IndexTooBigError) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %m3v2float
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %m3v2float %var
+     %2 = OpCompositeInsert %m3v2float %v2float_50_60 %1 3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_FALSE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(p->error(), Eq("OpCompositeInsert %2 index value 3 is out of "
+                             "bounds for matrix of 3 elements"));
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %m3v2float
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %m3v2float %var
+     %2 = OpCompositeInsert %m3v2float %v2float_50_60 %1 2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2_1
+    function
+    __mat_2_3__f32
+    {
+      Identifier[not set]{x_1}
+    }
+  }
+}
+Assignment{
+  ArrayAccessor[not set]{
+    Identifier[not set]{x_2_1}
+    ScalarConstructor[not set]{2}
+  }
+  TypeConstructor[not set]{
+    __vec_2__f32
+    ScalarConstructor[not set]{50.000000}
+    ScalarConstructor[not set]{60.000000}
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    __mat_2_3__f32
+    {
+      Identifier[not set]{x_2_1}
+    }
+  }
+})")) << body_str;
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Array) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %a_u_5
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %a_u_5 %var
+     %2 = OpCompositeInsert %a_u_5 %uint_20 %1 3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2_1
+    function
+    __array__u32_5
+    {
+      Identifier[not set]{x_1}
+    }
+  }
+}
+Assignment{
+  ArrayAccessor[not set]{
+    Identifier[not set]{x_2_1}
+    ScalarConstructor[not set]{3}
+  }
+  ScalarConstructor[not set]{20}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    __array__u32_5
+    {
+      Identifier[not set]{x_2_1}
+    }
+  }
+})")) << body_str;
+}
+
+TEST_F(SpvParserTest_CompositeInsert, RuntimeArray_IsError) {
+  const auto assembly = Preamble() + R"(
+     %rtarr = OpTypeRuntimeArray %uint
+     %ptr = OpTypePointer Function %rtarr
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %rtarr %var
+     %2 = OpCompositeInsert %rtarr %uint_20 %1 3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_FALSE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(p->error(),
+              HasSubstr("can't do OpCompositeInsert on a runtime array: "));
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Struct) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %s_v2f_u_i
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %s_v2f_u_i %var
+     %2 = OpCompositeInsert %s_v2f_u_i %int_30 %1 2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2_1
+    function
+    __struct_S
+    {
+      Identifier[not set]{x_1}
+    }
+  }
+}
+Assignment{
+  MemberAccessor[not set]{
+    Identifier[not set]{x_2_1}
+    Identifier[not set]{field2}
+  }
+  ScalarConstructor[not set]{30}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    __struct_S
+    {
+      Identifier[not set]{x_2_1}
+    }
+  }
+})")) << body_str;
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
+  const auto assembly =
+      R"(
+      OpMemberName %s0 0 "algo"
+      OpMemberName %s1 0 "rithm"
+)" + Preamble() +
+      R"(
+     %s0 = OpTypeStruct %uint
+     %s1 = OpTypeStruct %uint
+     %ptr0 = OpTypePointer Function %s0
+     %ptr1 = OpTypePointer Function %s1
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var0 = OpVariable %ptr0 Function
+     %var1 = OpVariable %ptr1 Function
+     %1 = OpLoad %s0 %var0
+     %2 = OpCompositeInsert %s0 %uint_10 %1 0
+     %3 = OpLoad %s1 %var1
+     %4 = OpCompositeInsert %s1 %uint_10 %3 0
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2_1
+    function
+    __struct_S_1
+    {
+      Identifier[not set]{x_1}
+    }
+  }
+}
+Assignment{
+  MemberAccessor[not set]{
+    Identifier[not set]{x_2_1}
+    Identifier[not set]{algo}
+  }
+  ScalarConstructor[not set]{10}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    __struct_S_1
+    {
+      Identifier[not set]{x_2_1}
+    }
+  }
+}
+)")) << body_str;
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_4_1
+    function
+    __struct_S_2
+    {
+      Identifier[not set]{x_3}
+    }
+  }
+}
+Assignment{
+  MemberAccessor[not set]{
+    Identifier[not set]{x_4_1}
+    Identifier[not set]{rithm}
+  }
+  ScalarConstructor[not set]{10}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_4
+    none
+    __struct_S_2
+    {
+      Identifier[not set]{x_4_1}
+    }
+  }
+})")) << body_str;
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Struct_IndexTooBigError) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %s_v2f_u_i
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %s_v2f_u_i %var
+     %2 = OpCompositeInsert %s_v2f_u_i %uint_10 %1 40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_FALSE(fe.EmitBody());
+  EXPECT_THAT(p->error(), Eq("OpCompositeInsert %2 index value 40 is out of "
+                             "bounds for structure %26 having 3 members"));
+}
+
+TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
+  const auto assembly = Preamble() + R"(
+     %a_mat = OpTypeArray %m3v2float %uint_3
+     %s = OpTypeStruct %uint %a_mat
+     %ptr = OpTypePointer Function %s
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %var = OpVariable %ptr Function
+     %1 = OpLoad %s %var
+     %2 = OpCompositeInsert %s %float_70 %1 1 2 0 1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2_1
+    function
+    __struct_S_1
+    {
+      Identifier[not set]{x_1}
+    }
+  }
+}
+Assignment{
+  MemberAccessor[not set]{
+    ArrayAccessor[not set]{
+      ArrayAccessor[not set]{
+        MemberAccessor[not set]{
+          Identifier[not set]{x_2_1}
+          Identifier[not set]{field1}
+        }
+        ScalarConstructor[not set]{2}
+      }
+      ScalarConstructor[not set]{0}
+    }
+    Identifier[not set]{y}
+  }
+  ScalarConstructor[not set]{70.000000}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    __struct_S_1
+    {
+      Identifier[not set]{x_2_1}
+    }
+  }
+})")) << body_str;
 }
 
 using SpvParserTest_CopyObject = SpvParserTest;
