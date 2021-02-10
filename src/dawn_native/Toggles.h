@@ -41,6 +41,7 @@ namespace dawn_native {
         DisableBaseInstance,
         DisableIndexedDrawBuffers,
         DisableSnormRead,
+        DisableDepthStencilRead,
         UseD3D12SmallShaderVisibleHeapForTesting,
         UseDXC,
         DisableRobustness,

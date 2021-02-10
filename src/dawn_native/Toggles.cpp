@@ -129,6 +129,11 @@ namespace dawn_native {
              {"disable_snorm_read",
               "Disables reading from Snorm textures which is unsupported on some platforms.",
               "https://crbug.com/dawn/667"}},
+            {Toggle::DisableDepthStencilRead,
+             {"disable_depth_stencil_read",
+              "Disables reading from depth/stencil textures which is unsupported on some "
+              "platforms.",
+              "https://crbug.com/dawn/667"}},
             {Toggle::UseD3D12SmallShaderVisibleHeapForTesting,
              {"use_d3d12_small_shader_visible_heap",
               "Enable use of a small D3D12 shader visible heap, instead of using a large one by "
