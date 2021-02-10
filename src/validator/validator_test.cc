@@ -422,31 +422,6 @@ TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
   EXPECT_FALSE(v.Validate()) << v.error();
 }
 
-TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Fail) {
-  // var global_var: f32 = 2.1;
-  // fn my_func() -> f32 {
-  //   not_global_var = 3.14f;
-  // }
-  Global("global_var", ast::StorageClass::kPrivate, ty.f32(), Expr(2.1f),
-         ast::VariableDecorationList{});
-
-  SetSource(Source{Source::Location{12, 34}});
-  auto* lhs = Expr("not_global_var");
-  auto* rhs = Expr(3.14f);
-
-  Func("my_func", ast::VariableList{}, ty.f32(),
-       ast::StatementList{
-           create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
-                                            lhs, rhs),
-       },
-       ast::FunctionDecorationList{});
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(), "12:34 v-0006: 'not_global_var' is not declared");
-}
-
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
   // fn my_func() -> void {
   //   global_var = 3.14f;

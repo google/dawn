@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
 #include "src/type/void_type.h"
@@ -44,6 +45,10 @@ class ValidatorTestHelper : public ProgramBuilder {
       return *val_;
     }
     program_ = std::make_unique<Program>(std::move(*this));
+    [&]() {
+      ASSERT_TRUE(program_->IsValid())
+          << diag::Formatter().format(program_->Diagnostics());
+    }();
     val_ = std::make_unique<ValidatorImpl>(program_.get());
     for (auto* var : vars_for_testing_) {
       val_->RegisterVariableForTesting(var);
