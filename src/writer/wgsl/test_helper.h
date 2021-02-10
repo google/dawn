@@ -33,7 +33,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
  public:
   TestHelperBase() : td(this) {}
 
-  ~TestHelperBase() = default;
+  ~TestHelperBase() override = default;
 
   /// Builds and returns a GeneratorImpl from the program.
   /// @note The generator is only built once. Multiple calls to Build() will

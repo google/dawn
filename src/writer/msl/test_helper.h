@@ -34,7 +34,7 @@ template <typename BASE>
 class TestHelperBase : public BASE, public ProgramBuilder {
  public:
   TestHelperBase() = default;
-  ~TestHelperBase() = default;
+  ~TestHelperBase() override = default;
 
   /// Builds and returns a GeneratorImpl from the program.
   /// @note The generator is only built once. Multiple calls to Build() will
