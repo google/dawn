@@ -657,8 +657,10 @@ if(${TINT_BUILD_TESTS})
       writer/wgsl/generator_impl_constructor_test.cc
       writer/wgsl/generator_impl_continue_test.cc
       writer/wgsl/generator_impl_discard_test.cc
+      writer/wgsl/generator_impl_entry_point_test.cc
       writer/wgsl/generator_impl_fallthrough_test.cc
       writer/wgsl/generator_impl_function_test.cc
+      writer/wgsl/generator_impl_global_decl_test.cc
       writer/wgsl/generator_impl_identifier_test.cc
       writer/wgsl/generator_impl_if_test.cc
       writer/wgsl/generator_impl_loop_test.cc

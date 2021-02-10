@@ -76,14 +76,15 @@ fn entry() -> void {
 )";
 
   auto* expect = R"(
+[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
+
+[[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
 [[block]]
 struct TintFirstIndexOffsetData {
   [[offset(0)]]
   tint_first_vertex_index : u32;
 };
-
-[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
-[[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn test() -> u32 {
   const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
@@ -116,14 +117,15 @@ fn entry() -> void {
 )";
 
   auto* expect = R"(
+[[builtin(instance_index)]] var<in> tint_first_index_offset_inst_idx : u32;
+
+[[binding(1), group(7)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
 [[block]]
 struct TintFirstIndexOffsetData {
   [[offset(0)]]
   tint_first_instance_index : u32;
 };
-
-[[builtin(instance_index)]] var<in> tint_first_index_offset_inst_idx : u32;
-[[binding(1), group(7)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn test() -> u32 {
   const inst_idx : u32 = (tint_first_index_offset_inst_idx + tint_first_index_data.tint_first_instance_index);
@@ -157,6 +159,12 @@ fn entry() -> void {
 )";
 
   auto* expect = R"(
+[[builtin(instance_index)]] var<in> tint_first_index_offset_instance_idx : u32;
+
+[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
+
+[[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
 [[block]]
 struct TintFirstIndexOffsetData {
   [[offset(0)]]
@@ -164,10 +172,6 @@ struct TintFirstIndexOffsetData {
   [[offset(4)]]
   tint_first_instance_index : u32;
 };
-
-[[builtin(instance_index)]] var<in> tint_first_index_offset_instance_idx : u32;
-[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
-[[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn test() -> u32 {
   const instance_idx : u32 = (tint_first_index_offset_instance_idx + tint_first_index_data.tint_first_instance_index);
@@ -205,14 +209,15 @@ fn entry() -> void {
 )";
 
   auto* expect = R"(
+[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
+
+[[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
+
 [[block]]
 struct TintFirstIndexOffsetData {
   [[offset(0)]]
   tint_first_vertex_index : u32;
 };
-
-[[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
-[[binding(1), group(2)]] var<uniform> tint_first_index_data : TintFirstIndexOffsetData;
 
 fn func1() -> u32 {
   const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);

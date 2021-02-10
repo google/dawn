@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,29 +88,43 @@ GeneratorImpl::GeneratorImpl(const Program* program)
 
 GeneratorImpl::~GeneratorImpl() = default;
 
-bool GeneratorImpl::Generate() {
-  for (auto* const ty : program_->AST().ConstructedTypes()) {
-    if (!EmitConstructedType(ty)) {
-      return false;
+bool GeneratorImpl::Generate(const ast::Function* entry) {
+  // Generate global declarations in the order they appear in the module.
+  for (auto* decl : program_->AST().GlobalDeclarations()) {
+    if (auto* ty = decl->As<type::Type>()) {
+      if (!EmitConstructedType(ty)) {
+        return false;
+      }
+    } else if (auto* func = decl->As<ast::Function>()) {
+      if (entry && func != entry) {
+        // Skip functions that are not reachable by the target entry point.
+        auto* sem = program_->Sem().Get(func);
+        if (!sem->HasAncestorEntryPoint(entry->symbol())) {
+          continue;
+        }
+      }
+      if (!EmitFunction(func)) {
+        return false;
+      }
+    } else if (auto* var = decl->As<ast::Variable>()) {
+      if (entry && !var->is_const()) {
+        // Skip variables that are not referenced by the target entry point.
+        auto& refs = program_->Sem().Get(entry)->ReferencedModuleVariables();
+        if (std::find(refs.begin(), refs.end(), program_->Sem().Get(var)) ==
+            refs.end()) {
+          continue;
+        }
+      }
+      if (!EmitVariable(var)) {
+        return false;
+      }
+    } else {
+      assert(false /* unreachable */);
     }
-  }
-  if (!program_->AST().ConstructedTypes().empty())
-    out_ << std::endl;
 
-  for (auto* var : program_->AST().GlobalVariables()) {
-    if (!EmitVariable(var)) {
-      return false;
+    if (decl != program_->AST().GlobalDeclarations().back()) {
+      out_ << std::endl;
     }
-  }
-  if (!program_->AST().GlobalVariables().empty()) {
-    out_ << std::endl;
-  }
-
-  for (auto* func : program_->AST().Functions()) {
-    if (!EmitFunction(func)) {
-      return false;
-    }
-    out_ << std::endl;
   }
 
   return true;
@@ -124,58 +138,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
     error_ = "Unable to find requested entry point: " + name;
     return false;
   }
-
-  // TODO(dsinclair): We always emit constructed types even if they aren't
-  // strictly needed
-  for (auto* const ty : program_->AST().ConstructedTypes()) {
-    if (!EmitConstructedType(ty)) {
-      return false;
-    }
-  }
-  if (!program_->AST().ConstructedTypes().empty()) {
-    out_ << std::endl;
-  }
-
-  // TODO(dsinclair): This should be smarter and only emit needed const
-  // variables
-  for (auto* var : program_->AST().GlobalVariables()) {
-    if (!var->is_const()) {
-      continue;
-    }
-    if (!EmitVariable(var)) {
-      return false;
-    }
-  }
-
-  bool found_func_variable = false;
-  for (auto* var : program_->Sem().Get(func)->ReferencedModuleVariables()) {
-    if (!EmitVariable(var->Declaration())) {
-      return false;
-    }
-    found_func_variable = true;
-  }
-  if (found_func_variable) {
-    out_ << std::endl;
-  }
-
-  for (auto* f : program_->AST().Functions()) {
-    auto* f_sem = program_->Sem().Get(f);
-    if (!f_sem->HasAncestorEntryPoint(program_->Symbols().Get(name))) {
-      continue;
-    }
-
-    if (!EmitFunction(f)) {
-      return false;
-    }
-    out_ << std::endl;
-  }
-
-  if (!EmitFunction(func)) {
-    return false;
-  }
-  out_ << std::endl;
-
-  return true;
+  return Generate(func);
 }
 
 bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {

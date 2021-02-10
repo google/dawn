@@ -57,9 +57,10 @@ class GeneratorImpl : public TextGenerator {
   explicit GeneratorImpl(const Program* program);
   ~GeneratorImpl();
 
-  /// Generates the result data
+  /// Generates the result data, optionally restricted to a single entry point
+  /// @param entry entry point to target, or nullptr
   /// @returns true on successful generation; false otherwise
-  bool Generate();
+  bool Generate(const ast::Function* entry);
 
   /// Generates a single entry point
   /// @param stage the pipeline stage

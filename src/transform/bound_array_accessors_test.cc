@@ -25,6 +25,7 @@ using BoundArrayAccessorsTest = TransformTest;
 TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   auto* src = R"(
 var a : array<f32, 3>;
+
 const c : u32 = 1u;
 
 fn f() -> void {
@@ -34,6 +35,7 @@ fn f() -> void {
 
   auto* expect = R"(
 var a : array<f32, 3>;
+
 const c : u32 = 1u;
 
 fn f() -> void {
@@ -49,7 +51,9 @@ fn f() -> void {
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   auto* src = R"(
 var a : array<f32, 3>;
+
 var b : array<f32, 5>;
+
 var i : u32;
 
 fn f() -> void {
@@ -59,7 +63,9 @@ fn f() -> void {
 
   auto* expect = R"(
 var a : array<f32, 3>;
+
 var b : array<f32, 5>;
+
 var i : u32;
 
 fn f() -> void {
@@ -97,6 +103,7 @@ fn f() -> void {
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   auto* src = R"(
 var a : array<f32, 3>;
+
 var c : u32;
 
 fn f() -> void {
@@ -106,6 +113,7 @@ fn f() -> void {
 
   auto* expect = R"(
 var a : array<f32, 3>;
+
 var c : u32;
 
 fn f() -> void {
@@ -187,6 +195,7 @@ fn f() -> void {
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   auto* src = R"(
 var a : vec3<f32>;
+
 var c : u32;
 
 fn f() -> void {
@@ -196,6 +205,7 @@ fn f() -> void {
 
   auto* expect = R"(
 var a : vec3<f32>;
+
 var c : u32;
 
 fn f() -> void {
@@ -277,6 +287,7 @@ fn f() -> void {
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   auto* src = R"(
 var a : mat3x2<f32>;
+
 var c : u32;
 
 fn f() -> void {
@@ -286,6 +297,7 @@ fn f() -> void {
 
   auto* expect = R"(
 var a : mat3x2<f32>;
+
 var c : u32;
 
 fn f() -> void {
@@ -301,6 +313,7 @@ fn f() -> void {
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   auto* src = R"(
 var a : mat3x2<f32>;
+
 var c : u32;
 
 fn f() -> void {
@@ -310,6 +323,7 @@ fn f() -> void {
 
   auto* expect = R"(
 var a : mat3x2<f32>;
+
 var c : u32;
 
 fn f() -> void {

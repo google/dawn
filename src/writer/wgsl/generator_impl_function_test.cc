@@ -183,14 +183,13 @@ TEST_F(WgslGeneratorImplTest,
 
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  AST().AddConstructedType(s);
 
   Global("data", ast::StorageClass::kStorage, &ac, nullptr,
          ast::VariableDecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
-
-  AST().AddConstructedType(s);
 
   {
     auto* var =
@@ -226,7 +225,7 @@ TEST_F(WgslGeneratorImplTest,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
+  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]
 struct Data {
   [[offset(0)]]
@@ -247,7 +246,6 @@ fn b() -> void {
   var v : f32 = data.d;
   return;
 }
-
 )");
 }
 
