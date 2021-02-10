@@ -134,6 +134,11 @@ namespace dawn_native {
               "Disables reading from depth/stencil textures which is unsupported on some "
               "platforms.",
               "https://crbug.com/dawn/667"}},
+            {Toggle::DisableSampleVariables,
+             {"disable_sample_variables",
+              "Disables gl_SampleMask and related functionality which is unsupported on some "
+              "platforms.",
+              "https://crbug.com/dawn/673"}},
             {Toggle::UseD3D12SmallShaderVisibleHeapForTesting,
              {"use_d3d12_small_shader_visible_heap",
               "Enable use of a small D3D12 shader visible heap, instead of using a large one by "

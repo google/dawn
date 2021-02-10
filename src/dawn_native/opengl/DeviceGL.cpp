@@ -74,6 +74,9 @@ namespace dawn_native { namespace opengl {
         bool supportsDepthStencilRead =
             gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth_stencil");
 
+        bool supportsSampleVariables = gl.IsAtLeastGL(4, 0) || gl.IsAtLeastGLES(3, 2) ||
+                                       gl.IsGLExtensionSupported("GL_OES_sample_variables");
+
         // TODO(crbug.com/dawn/343): We can support the extension variants, but need to load the EXT
         // procs without the extension suffix.
         // We'll also need emulation of shader builtins gl_BaseVertex and gl_BaseInstance.
@@ -94,6 +97,7 @@ namespace dawn_native { namespace opengl {
         SetToggle(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
         SetToggle(Toggle::DisableSnormRead, !supportsSnormRead);
         SetToggle(Toggle::DisableDepthStencilRead, !supportsDepthStencilRead);
+        SetToggle(Toggle::DisableSampleVariables, !supportsSampleVariables);
         SetToggle(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
     }
 
