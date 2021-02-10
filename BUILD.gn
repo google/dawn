@@ -539,6 +539,8 @@ source_set("libtint_spv_reader_src") {
 
 source_set("libtint_spv_writer_src") {
   sources = [
+    "src/transform/spirv.cc",
+    "src/transform/spirv.h",
     "src/writer/spirv/binary_writer.cc",
     "src/writer/spirv/binary_writer.h",
     "src/writer/spirv/builder.cc",
@@ -609,6 +611,8 @@ source_set("libtint_wgsl_writer_src") {
 
 source_set("libtint_msl_writer_src") {
   sources = [
+    "src/transform/msl.cc",
+    "src/transform/msl.h",
     "src/writer/msl/generator.cc",
     "src/writer/msl/generator.h",
     "src/writer/msl/generator_impl.cc",
@@ -630,6 +634,8 @@ source_set("libtint_msl_writer_src") {
 
 source_set("libtint_hlsl_writer_src") {
   sources = [
+    "src/transform/hlsl.cc",
+    "src/transform/hlsl.h",
     "src/writer/hlsl/generator.cc",
     "src/writer/hlsl/generator.h",
     "src/writer/hlsl/generator_impl.cc",

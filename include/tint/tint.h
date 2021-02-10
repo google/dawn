@@ -44,6 +44,7 @@
 
 #if TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
+#include "src/transform/spirv.h"
 #include "src/writer/spirv/generator.h"
 #endif  // TINT_BUILD_SPV_WRITER
 
@@ -52,10 +53,12 @@
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
+#include "src/transform/msl.h"
 #include "src/writer/msl/generator.h"
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
+#include "src/transform/hlsl.h"
 #include "src/writer/hlsl/generator.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 

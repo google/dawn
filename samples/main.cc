@@ -538,6 +538,27 @@ int main(int argc, const char** argv) {
     }
   }
 
+  switch (options.format) {
+#if TINT_BUILD_SPV_WRITER
+    case Format::kSpirv:
+    case Format::kSpvAsm:
+      transform_manager.append(std::make_unique<tint::transform::Spirv>());
+      break;
+#endif  // TINT_BUILD_SPV_WRITER
+#if TINT_BUILD_MSL_WRITER
+    case Format::kMsl:
+      transform_manager.append(std::make_unique<tint::transform::Msl>());
+      break;
+#endif  // TINT_BUILD_MSL_WRITER
+#if TINT_BUILD_HLSL_WRITER
+    case Format::kHlsl:
+      transform_manager.append(std::make_unique<tint::transform::Hlsl>());
+      break;
+#endif  // TINT_BUILD_HLSL_WRITER
+    default:
+      break;
+  }
+
   auto out = transform_manager.Run(program.get());
   if (out.diagnostics.contains_errors()) {
     diag_formatter.format(out.diagnostics, diag_printer.get());

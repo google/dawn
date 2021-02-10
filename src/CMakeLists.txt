@@ -329,6 +329,8 @@ endif()
 
 if(${TINT_BUILD_SPV_WRITER})
   list(APPEND TINT_LIB_SRCS
+    transform/spirv.cc
+    transform/spirv.h
     writer/spirv/binary_writer.cc
     writer/spirv/binary_writer.h
     writer/spirv/builder.cc
@@ -355,6 +357,8 @@ endif()
 
 if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_LIB_SRCS
+    transform/msl.cc
+    transform/msl.h
     writer/msl/generator.cc
     writer/msl/generator.h
     writer/msl/generator_impl.cc
@@ -366,6 +370,8 @@ endif()
 
 if(${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_LIB_SRCS
+    transform/hlsl.cc
+    transform/hlsl.h
     writer/hlsl/generator.cc
     writer/hlsl/generator.h
     writer/hlsl/generator_impl.cc
