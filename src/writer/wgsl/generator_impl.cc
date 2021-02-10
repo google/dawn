@@ -14,6 +14,7 @@
 
 #include "src/writer/wgsl/generator_impl.h"
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
 
