@@ -284,11 +284,11 @@ TEST_F(VertexStateTest, SetAttributeOffsetOutOfBounds) {
     utils::ComboVertexStateDescriptor state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
-    state.cAttributes[0].offset = kMaxVertexAttributeEnd - sizeof(wgpu::VertexFormat::Float);
+    state.cAttributes[0].offset = kMaxVertexBufferStride - sizeof(wgpu::VertexFormat::Float);
     CreatePipeline(true, state, kDummyVertexShader);
 
     // Test attribute offset out of bounds
-    state.cAttributes[0].offset = kMaxVertexAttributeEnd - 1;
+    state.cAttributes[0].offset = kMaxVertexBufferStride - 1;
     CreatePipeline(false, state, kDummyVertexShader);
 }
 

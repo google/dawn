@@ -37,15 +37,15 @@ namespace dawn_native {
             }
 
             // No underflow is possible because the max vertex format size is smaller than
-            // kMaxVertexAttributeEnd.
-            ASSERT(kMaxVertexAttributeEnd >= VertexFormatSize(attribute->format));
-            if (attribute->offset > kMaxVertexAttributeEnd - VertexFormatSize(attribute->format)) {
+            // kMaxVertexBufferStride.
+            ASSERT(kMaxVertexBufferStride >= VertexFormatSize(attribute->format));
+            if (attribute->offset > kMaxVertexBufferStride - VertexFormatSize(attribute->format)) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
 
             // No overflow is possible because the offset is already validated to be less
-            // than kMaxVertexAttributeEnd.
-            ASSERT(attribute->offset < kMaxVertexAttributeEnd);
+            // than kMaxVertexBufferStride.
+            ASSERT(attribute->offset < kMaxVertexBufferStride);
             if (vertexBufferStride > 0 &&
                 attribute->offset + VertexFormatSize(attribute->format) > vertexBufferStride) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
