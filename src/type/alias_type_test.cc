@@ -225,6 +225,13 @@ TEST_F(AliasTest, BaseAlignmentStruct) {
   EXPECT_EQ(4u, alias->BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
+TEST_F(AliasTest, UnwrapAliasIfNeeded) {
+  auto* alias1 = ty.alias("alias1", ty.f32());
+  auto* alias2 = ty.alias("alias2", alias1);
+  auto* alias3 = ty.alias("alias3", alias2);
+  EXPECT_EQ(alias3->UnwrapAliasIfNeeded(), ty.f32());
+}
+
 }  // namespace
 }  // namespace type
 }  // namespace tint

@@ -64,6 +64,10 @@ class Type : public Castable<Type> {
   /// @returns the pointee type if this is a pointer, `this` otherwise
   Type* UnwrapPtrIfNeeded();
 
+  /// @returns the most deeply nested aliased type if this is an alias, `this`
+  /// otherwise
+  Type* UnwrapAliasIfNeeded();
+
   /// Removes all levels of aliasing and access control.
   /// This is just enough to assist with WGSL translation
   /// in that you want see through one level of pointer to get from an

@@ -96,10 +96,7 @@ class Matcher {
   /// Match may add to, or compare against the open types and numbers in state.
   /// @returns true if the argument type is as expected.
   bool Match(MatchState& state, type::Type* argument_type) const {
-    auto* unwrapped = argument_type;
-    while (auto* alias = unwrapped->As<type::Alias>()) {
-      unwrapped = alias->type();
-    }
+    auto* unwrapped = argument_type->UnwrapAliasIfNeeded();
     return MatchUnwrapped(state, unwrapped);
   }
 

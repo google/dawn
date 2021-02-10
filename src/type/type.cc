@@ -49,6 +49,14 @@ Type* Type::UnwrapPtrIfNeeded() {
   return this;
 }
 
+Type* Type::UnwrapAliasIfNeeded() {
+  Type* unwrapped = this;
+  while (auto* ptr = unwrapped->As<type::Alias>()) {
+    unwrapped = ptr->type();
+  }
+  return unwrapped;
+}
+
 Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
