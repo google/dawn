@@ -91,56 +91,6 @@ type::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
 
-ast::Variable* ProgramBuilder::Var(const std::string& name,
-                                   ast::StorageClass storage,
-                                   type::Type* type) {
-  return Var(name, storage, type, nullptr, {});
-}
-
-ast::Variable* ProgramBuilder::Var(const std::string& name,
-                                   ast::StorageClass storage,
-                                   type::Type* type,
-                                   ast::Expression* constructor,
-                                   ast::VariableDecorationList decorations) {
-  return create<ast::Variable>(Symbols().Register(name), storage, type, false,
-                               constructor, decorations);
-}
-
-ast::Variable* ProgramBuilder::Var(const Source& source,
-                                   const std::string& name,
-                                   ast::StorageClass storage,
-                                   type::Type* type,
-                                   ast::Expression* constructor,
-                                   ast::VariableDecorationList decorations) {
-  return create<ast::Variable>(source, Symbols().Register(name), storage, type,
-                               false, constructor, decorations);
-}
-
-ast::Variable* ProgramBuilder::Const(const std::string& name,
-                                     ast::StorageClass storage,
-                                     type::Type* type) {
-  return Const(name, storage, type, nullptr, {});
-}
-
-ast::Variable* ProgramBuilder::Const(const std::string& name,
-                                     ast::StorageClass storage,
-                                     type::Type* type,
-                                     ast::Expression* constructor,
-                                     ast::VariableDecorationList decorations) {
-  return create<ast::Variable>(Symbols().Register(name), storage, type, true,
-                               constructor, decorations);
-}
-
-ast::Variable* ProgramBuilder::Const(const Source& source,
-                                     const std::string& name,
-                                     ast::StorageClass storage,
-                                     type::Type* type,
-                                     ast::Expression* constructor,
-                                     ast::VariableDecorationList decorations) {
-  return create<ast::Variable>(source, Symbols().Register(name), storage, type,
-                               true, constructor, decorations);
-}
-
 ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
   return create<ast::VariableDeclStatement>(v);
 }
