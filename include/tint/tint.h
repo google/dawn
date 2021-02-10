@@ -30,7 +30,6 @@
 #include "src/transform/manager.h"
 #include "src/transform/vertex_pulling.h"
 #include "src/type/type_manager.h"
-#include "src/type_determiner.h"
 #include "src/validator/validator.h"
 #include "src/writer/writer.h"
 
