@@ -58,6 +58,9 @@ class SymbolTable {
   /// @returns the symbol name or "" if not found
   std::string NameFor(const Symbol symbol) const;
 
+  /// @returns a new, unnamed symbol
+  Symbol New();
+
  private:
   // The value to be associated to the next registered symbol table entry.
   uint32_t next_symbol_ = 1;

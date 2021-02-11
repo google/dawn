@@ -52,10 +52,15 @@ Symbol SymbolTable::Get(const std::string& name) const {
 
 std::string SymbolTable::NameFor(const Symbol symbol) const {
   auto it = symbol_to_name_.find(symbol);
-  if (it == symbol_to_name_.end())
-    return "";
+  if (it == symbol_to_name_.end()) {
+    return symbol.to_str();
+  }
 
   return it->second;
+}
+
+Symbol SymbolTable::New() {
+  return Symbol(next_symbol_++);
 }
 
 }  // namespace tint
