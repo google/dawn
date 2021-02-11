@@ -534,4 +534,6 @@ DAWN_INSTANTIATE_TEST(DeviceLostTest,
                       D3D12Backend(),
                       MetalBackend(),
                       NullBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());

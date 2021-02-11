@@ -289,6 +289,8 @@ TEST_P(PipelineStatisticsQueryTests, QuerySetCreation) {
 DAWN_INSTANTIATE_TEST(PipelineStatisticsQueryTests,
                       D3D12Backend(),
                       MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 class TimestampExpectation : public detail::Expectation {
@@ -531,4 +533,9 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(TimestampQueryTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(TimestampQueryTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
