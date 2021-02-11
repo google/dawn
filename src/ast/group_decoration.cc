@@ -35,7 +35,9 @@ void GroupDecoration::to_str(const semantic::Info&,
 }
 
 GroupDecoration* GroupDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<GroupDecoration>(ctx->Clone(source()), value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<GroupDecoration>(src, value_);
 }
 
 }  // namespace ast

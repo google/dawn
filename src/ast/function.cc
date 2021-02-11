@@ -70,9 +70,14 @@ const Statement* Function::get_last_statement() const {
 }
 
 Function* Function::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Function>(
-      ctx->Clone(source()), ctx->Clone(symbol()), ctx->Clone(params_),
-      ctx->Clone(return_type_), ctx->Clone(body_), ctx->Clone(decorations_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto sym = ctx->Clone(symbol());
+  auto p = ctx->Clone(params_);
+  auto* ret = ctx->Clone(return_type_);
+  auto* b = ctx->Clone(body_);
+  auto decos = ctx->Clone(decorations_);
+  return ctx->dst->create<Function>(src, sym, p, ret, b, decos);
 }
 
 bool Function::IsValid() const {

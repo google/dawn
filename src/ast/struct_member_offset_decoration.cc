@@ -37,8 +37,9 @@ void StructMemberOffsetDecoration::to_str(const semantic::Info&,
 
 StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
     CloneContext* ctx) const {
-  return ctx->dst->create<StructMemberOffsetDecoration>(ctx->Clone(source()),
-                                                        offset_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<StructMemberOffsetDecoration>(src, offset_);
 }
 
 }  // namespace ast

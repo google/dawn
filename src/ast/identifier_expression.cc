@@ -30,8 +30,10 @@ IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 IdentifierExpression::~IdentifierExpression() = default;
 
 IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<IdentifierExpression>(ctx->Clone(source()),
-                                                ctx->Clone(symbol()));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto sym = ctx->Clone(symbol());
+  return ctx->dst->create<IdentifierExpression>(src, sym);
 }
 
 bool IdentifierExpression::IsValid() const {

@@ -36,8 +36,10 @@ std::string UintLiteral::name() const {
 }
 
 UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<UintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
-                                       value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<UintLiteral>(src, ty, value_);
 }
 
 }  // namespace ast

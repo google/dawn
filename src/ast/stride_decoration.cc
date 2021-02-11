@@ -35,7 +35,9 @@ void StrideDecoration::to_str(const semantic::Info&,
 }
 
 StrideDecoration* StrideDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<StrideDecoration>(ctx->Clone(source()), stride_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<StrideDecoration>(src, stride_);
 }
 
 }  // namespace ast

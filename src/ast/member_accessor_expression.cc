@@ -34,8 +34,11 @@ MemberAccessorExpression::~MemberAccessorExpression() = default;
 
 MemberAccessorExpression* MemberAccessorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->dst->create<MemberAccessorExpression>(
-      ctx->Clone(source()), ctx->Clone(struct_), ctx->Clone(member_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* str = ctx->Clone(structure());
+  auto* mem = ctx->Clone(member());
+  return ctx->dst->create<MemberAccessorExpression>(src, str, mem);
 }
 
 bool MemberAccessorExpression::IsValid() const {

@@ -43,8 +43,10 @@ std::string FloatLiteral::name() const {
 }
 
 FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<FloatLiteral>(ctx->Clone(source()),
-                                        ctx->Clone(type()), value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<FloatLiteral>(src, ty, value_);
 }
 
 }  // namespace ast

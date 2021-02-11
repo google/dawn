@@ -31,8 +31,10 @@ VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 VariableDeclStatement::~VariableDeclStatement() = default;
 
 VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<VariableDeclStatement>(ctx->Clone(source()),
-                                                 ctx->Clone(variable_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* var = ctx->Clone(variable());
+  return ctx->dst->create<VariableDeclStatement>(src, var);
 }
 
 bool VariableDeclStatement::IsValid() const {

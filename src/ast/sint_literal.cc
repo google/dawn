@@ -36,8 +36,10 @@ std::string SintLiteral::name() const {
 }
 
 SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<SintLiteral>(ctx->Clone(source()), ctx->Clone(type()),
-                                       value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<SintLiteral>(src, ty, value_);
 }
 
 }  // namespace ast

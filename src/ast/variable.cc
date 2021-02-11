@@ -92,10 +92,13 @@ uint32_t Variable::constant_id() const {
 }
 
 Variable* Variable::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Variable>(
-      ctx->Clone(source()), ctx->Clone(symbol_), declared_storage_class(),
-      ctx->Clone(type()), is_const_, ctx->Clone(constructor()),
-      ctx->Clone(decorations_));
+  auto src = ctx->Clone(source());
+  auto sym = ctx->Clone(symbol());
+  auto* ty = ctx->Clone(type());
+  auto* ctor = ctx->Clone(constructor());
+  auto decos = ctx->Clone(decorations());
+  return ctx->dst->create<Variable>(src, sym, declared_storage_class(), ty,
+                                    is_const_, ctor, decos);
 }
 
 bool Variable::IsValid() const {

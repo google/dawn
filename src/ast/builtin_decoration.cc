@@ -35,7 +35,9 @@ void BuiltinDecoration::to_str(const semantic::Info&,
 }
 
 BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<BuiltinDecoration>(ctx->Clone(source()), builtin_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<BuiltinDecoration>(src, builtin_);
 }
 
 }  // namespace ast

@@ -32,8 +32,11 @@ LoopStatement::LoopStatement(LoopStatement&&) = default;
 LoopStatement::~LoopStatement() = default;
 
 LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<LoopStatement>(
-      ctx->Clone(source()), ctx->Clone(body_), ctx->Clone(continuing_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* b = ctx->Clone(body_);
+  auto* cont = ctx->Clone(continuing_);
+  return ctx->dst->create<LoopStatement>(src, b, cont);
 }
 
 bool LoopStatement::IsValid() const {

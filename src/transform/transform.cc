@@ -40,12 +40,16 @@ ast::Function* Transform::CloneWithStatementsAtStart(
   for (auto* s : *in->body()) {
     statements.emplace_back(ctx->Clone(s));
   }
-  return ctx->dst->create<ast::Function>(
-      ctx->Clone(in->source()), ctx->Clone(in->symbol()),
-      ctx->Clone(in->params()), ctx->Clone(in->return_type()),
-      ctx->dst->create<ast::BlockStatement>(ctx->Clone(in->body()->source()),
-                                            statements),
-      ctx->Clone(in->decorations()));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto source = ctx->Clone(in->source());
+  auto symbol = ctx->Clone(in->symbol());
+  auto params = ctx->Clone(in->params());
+  auto* return_type = ctx->Clone(in->return_type());
+  auto* body = ctx->dst->create<ast::BlockStatement>(
+      ctx->Clone(in->body()->source()), statements);
+  auto decos = ctx->Clone(in->decorations());
+  return ctx->dst->create<ast::Function>(source, symbol, params, return_type,
+                                         body, decos);
 }
 
 }  // namespace transform

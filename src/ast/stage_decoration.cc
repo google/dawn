@@ -35,7 +35,9 @@ void StageDecoration::to_str(const semantic::Info&,
 }
 
 StageDecoration* StageDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<StageDecoration>(ctx->Clone(source()), stage_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<StageDecoration>(src, stage_);
 }
 
 }  // namespace ast

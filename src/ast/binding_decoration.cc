@@ -35,7 +35,9 @@ void BindingDecoration::to_str(const semantic::Info&,
 }
 
 BindingDecoration* BindingDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<BindingDecoration>(ctx->Clone(source()), value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<BindingDecoration>(src, value_);
 }
 
 }  // namespace ast

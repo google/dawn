@@ -49,7 +49,9 @@ std::string MultisampledTexture::FriendlyName(
 }
 
 MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<MultisampledTexture>(dim(), ctx->Clone(type_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<MultisampledTexture>(dim(), ty);
 }
 
 }  // namespace type

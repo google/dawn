@@ -31,8 +31,11 @@ BitcastExpression::BitcastExpression(BitcastExpression&&) = default;
 BitcastExpression::~BitcastExpression() = default;
 
 BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<BitcastExpression>(
-      ctx->Clone(source()), ctx->Clone(type_), ctx->Clone(expr_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ty = ctx->Clone(type_);
+  auto* e = ctx->Clone(expr_);
+  return ctx->dst->create<BitcastExpression>(src, ty, e);
 }
 
 bool BitcastExpression::IsValid() const {

@@ -55,9 +55,12 @@ uint32_t StructMember::offset() const {
 }
 
 StructMember* StructMember::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<StructMember>(ctx->Clone(source()),
-                                        ctx->Clone(symbol_), ctx->Clone(type_),
-                                        ctx->Clone(decorations_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto sym = ctx->Clone(symbol_);
+  auto* ty = ctx->Clone(type_);
+  auto decos = ctx->Clone(decorations_);
+  return ctx->dst->create<StructMember>(src, sym, ty, decos);
 }
 
 bool StructMember::IsValid() const {

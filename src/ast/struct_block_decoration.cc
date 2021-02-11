@@ -35,7 +35,9 @@ void StructBlockDecoration::to_str(const semantic::Info&,
 }
 
 StructBlockDecoration* StructBlockDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<StructBlockDecoration>(ctx->Clone(source()));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<StructBlockDecoration>(src);
 }
 
 }  // namespace ast

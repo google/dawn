@@ -36,8 +36,10 @@ std::string BoolLiteral::name() const {
 }
 
 BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<BoolLiteral>(ctx->Clone(source()), ctx->Clone(type()),
-                                       value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<BoolLiteral>(src, ty, value_);
 }
 
 }  // namespace ast

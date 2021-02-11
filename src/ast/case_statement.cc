@@ -32,8 +32,11 @@ CaseStatement::CaseStatement(CaseStatement&&) = default;
 CaseStatement::~CaseStatement() = default;
 
 CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<CaseStatement>(
-      ctx->Clone(source()), ctx->Clone(selectors_), ctx->Clone(body_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto sel = ctx->Clone(selectors_);
+  auto* b = ctx->Clone(body_);
+  return ctx->dst->create<CaseStatement>(src, sel, b);
 }
 
 bool CaseStatement::IsValid() const {

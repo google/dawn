@@ -109,8 +109,10 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
 }
 
 Array* Array::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Array>(ctx->Clone(subtype_), size_,
-                                 ctx->Clone(decorations()));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto* ty = ctx->Clone(type());
+  auto decos = ctx->Clone(decorations());
+  return ctx->dst->create<Array>(ty, size_, decos);
 }
 
 }  // namespace type

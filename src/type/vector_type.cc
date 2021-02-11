@@ -59,7 +59,9 @@ uint64_t Vector::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Vector* Vector::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Vector>(ctx->Clone(subtype_), size_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<Vector>(ty, size_);
 }
 
 }  // namespace type

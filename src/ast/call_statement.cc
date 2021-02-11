@@ -31,8 +31,10 @@ CallStatement::CallStatement(CallStatement&&) = default;
 CallStatement::~CallStatement() = default;
 
 CallStatement* CallStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<CallStatement>(ctx->Clone(source()),
-                                         ctx->Clone(call_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* call = ctx->Clone(call_);
+  return ctx->dst->create<CallStatement>(src, call);
 }
 
 bool CallStatement::IsValid() const {

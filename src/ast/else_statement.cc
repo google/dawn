@@ -32,8 +32,11 @@ ElseStatement::ElseStatement(ElseStatement&&) = default;
 ElseStatement::~ElseStatement() = default;
 
 ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<ElseStatement>(
-      ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* cond = ctx->Clone(condition_);
+  auto* b = ctx->Clone(body_);
+  return ctx->dst->create<ElseStatement>(src, cond, b);
 }
 
 bool ElseStatement::IsValid() const {

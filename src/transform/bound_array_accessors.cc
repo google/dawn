@@ -120,12 +120,14 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
       return nullptr;
     }
   } else {
-    new_idx =
-        b.Call("min", b.Construct<u32>(ctx->Clone(old_idx)), b.Expr(size - 1));
+    auto* cloned_idx = ctx->Clone(old_idx);
+    new_idx = b.Call("min", b.Construct<u32>(cloned_idx), b.Expr(size - 1));
   }
 
-  return b.create<ast::ArrayAccessorExpression>(
-      ctx->Clone(expr->source()), ctx->Clone(expr->array()), new_idx);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(expr->source());
+  auto* arr = ctx->Clone(expr->array());
+  return b.create<ast::ArrayAccessorExpression>(src, arr, new_idx);
 }
 
 }  // namespace transform

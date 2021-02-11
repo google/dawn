@@ -63,7 +63,9 @@ uint64_t Matrix::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Matrix* Matrix::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Matrix>(ctx->Clone(subtype_), rows_, columns_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<Matrix>(ty, rows_, columns_);
 }
 
 }  // namespace type

@@ -31,8 +31,10 @@ BlockStatement::BlockStatement(BlockStatement&&) = default;
 BlockStatement::~BlockStatement() = default;
 
 BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<BlockStatement>(ctx->Clone(source()),
-                                          ctx->Clone(statements_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto stmts = ctx->Clone(statements_);
+  return ctx->dst->create<BlockStatement>(src, stmts);
 }
 
 bool BlockStatement::IsValid() const {

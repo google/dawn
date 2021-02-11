@@ -47,8 +47,9 @@ void WorkgroupDecoration::to_str(const semantic::Info&,
 }
 
 WorkgroupDecoration* WorkgroupDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<WorkgroupDecoration>(ctx->Clone(source()), x_, y_,
-                                               z_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<WorkgroupDecoration>(src, x_, y_, z_);
 }
 
 }  // namespace ast

@@ -33,8 +33,11 @@ BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
 BinaryExpression::~BinaryExpression() = default;
 
 BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<BinaryExpression>(ctx->Clone(source()), op_,
-                                            ctx->Clone(lhs_), ctx->Clone(rhs_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* l = ctx->Clone(lhs_);
+  auto* r = ctx->Clone(rhs_);
+  return ctx->dst->create<BinaryExpression>(src, op_, l, r);
 }
 
 bool BinaryExpression::IsValid() const {

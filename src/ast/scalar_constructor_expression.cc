@@ -33,8 +33,10 @@ ScalarConstructorExpression::~ScalarConstructorExpression() = default;
 
 ScalarConstructorExpression* ScalarConstructorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->dst->create<ScalarConstructorExpression>(ctx->Clone(source()),
-                                                       ctx->Clone(literal_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* lit = ctx->Clone(literal());
+  return ctx->dst->create<ScalarConstructorExpression>(src, lit);
 }
 
 bool ScalarConstructorExpression::IsValid() const {

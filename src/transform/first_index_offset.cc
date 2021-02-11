@@ -67,14 +67,15 @@ constexpr char kIndexOffsetPrefix[] = "tint_first_index_offset_";
 ast::Variable* clone_variable_with_new_name(CloneContext* ctx,
                                             ast::Variable* in,
                                             std::string new_name) {
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto source = ctx->Clone(in->source());
+  auto symbol = ctx->dst->Symbols().Register(new_name);
+  auto* type = ctx->Clone(in->type());
+  auto* constructor = ctx->Clone(in->constructor());
+  auto decorations = ctx->Clone(in->decorations());
   return ctx->dst->create<ast::Variable>(
-      ctx->Clone(in->source()),                // source
-      ctx->dst->Symbols().Register(new_name),  // symbol
-      in->declared_storage_class(),            // declared_storage_class
-      ctx->Clone(in->type()),                  // type
-      in->is_const(),                          // is_const
-      ctx->Clone(in->constructor()),           // constructor
-      ctx->Clone(in->decorations()));          // decorations
+      source, symbol, in->declared_storage_class(), type, in->is_const(),
+      constructor, decorations);
 }
 
 }  // namespace

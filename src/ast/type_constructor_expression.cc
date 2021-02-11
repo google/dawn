@@ -34,8 +34,11 @@ TypeConstructorExpression::~TypeConstructorExpression() = default;
 
 TypeConstructorExpression* TypeConstructorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->dst->create<TypeConstructorExpression>(
-      ctx->Clone(source()), ctx->Clone(type_), ctx->Clone(values_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ty = ctx->Clone(type());
+  auto vals = ctx->Clone(values());
+  return ctx->dst->create<TypeConstructorExpression>(src, ty, vals);
 }
 
 bool TypeConstructorExpression::IsValid() const {

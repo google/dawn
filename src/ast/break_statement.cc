@@ -29,7 +29,9 @@ BreakStatement::BreakStatement(BreakStatement&&) = default;
 BreakStatement::~BreakStatement() = default;
 
 BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<BreakStatement>(ctx->Clone(source()));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<BreakStatement>(src);
 }
 
 bool BreakStatement::IsValid() const {

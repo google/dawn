@@ -46,7 +46,9 @@ Pointer::Pointer(Pointer&&) = default;
 Pointer::~Pointer() = default;
 
 Pointer* Pointer::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Pointer>(ctx->Clone(subtype_), storage_class_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<Pointer>(ty, storage_class_);
 }
 
 }  // namespace type

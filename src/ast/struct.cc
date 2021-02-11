@@ -53,8 +53,11 @@ bool Struct::IsBlockDecorated() const {
 }
 
 Struct* Struct::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Struct>(ctx->Clone(source()), ctx->Clone(members_),
-                                  ctx->Clone(decorations_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto mem = ctx->Clone(members());
+  auto decos = ctx->Clone(decorations());
+  return ctx->dst->create<Struct>(src, mem, decos);
 }
 
 bool Struct::IsValid() const {

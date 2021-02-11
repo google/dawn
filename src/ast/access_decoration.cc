@@ -35,7 +35,9 @@ void AccessDecoration::to_str(const semantic::Info&,
 }
 
 AccessDecoration* AccessDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<AccessDecoration>(ctx->Clone(source()), value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<AccessDecoration>(src, value_);
 }
 
 }  // namespace ast

@@ -33,8 +33,10 @@ ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 ReturnStatement::~ReturnStatement() = default;
 
 ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<ReturnStatement>(ctx->Clone(source()),
-                                           ctx->Clone(value_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ret = ctx->Clone(value());
+  return ctx->dst->create<ReturnStatement>(src, ret);
 }
 
 bool ReturnStatement::IsValid() const {

@@ -32,8 +32,11 @@ CallExpression::CallExpression(CallExpression&&) = default;
 CallExpression::~CallExpression() = default;
 
 CallExpression* CallExpression::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<CallExpression>(
-      ctx->Clone(source()), ctx->Clone(func_), ctx->Clone(params_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* fn = ctx->Clone(func_);
+  auto p = ctx->Clone(params_);
+  return ctx->dst->create<CallExpression>(src, fn, p);
 }
 
 bool CallExpression::IsValid() const {

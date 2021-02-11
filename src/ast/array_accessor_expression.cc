@@ -34,8 +34,11 @@ ArrayAccessorExpression::~ArrayAccessorExpression() = default;
 
 ArrayAccessorExpression* ArrayAccessorExpression::Clone(
     CloneContext* ctx) const {
-  return ctx->dst->create<ArrayAccessorExpression>(
-      ctx->Clone(source()), ctx->Clone(array_), ctx->Clone(idx_expr_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* arr = ctx->Clone(array_);
+  auto* idx = ctx->Clone(idx_expr_);
+  return ctx->dst->create<ArrayAccessorExpression>(src, arr, idx);
 }
 
 bool ArrayAccessorExpression::IsValid() const {

@@ -36,8 +36,10 @@ std::string NullLiteral::name() const {
 }
 
 NullLiteral* NullLiteral::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<NullLiteral>(ctx->Clone(source()),
-                                       ctx->Clone(type()));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<NullLiteral>(src, ty);
 }
 
 }  // namespace ast

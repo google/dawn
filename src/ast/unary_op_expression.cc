@@ -32,8 +32,10 @@ UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 UnaryOpExpression::~UnaryOpExpression() = default;
 
 UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<UnaryOpExpression>(ctx->Clone(source()), op_,
-                                             ctx->Clone(expr_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* e = ctx->Clone(expr());
+  return ctx->dst->create<UnaryOpExpression>(src, op_, e);
 }
 
 bool UnaryOpExpression::IsValid() const {

@@ -37,10 +37,12 @@ IfStatement::IfStatement(IfStatement&&) = default;
 IfStatement::~IfStatement() = default;
 
 IfStatement* IfStatement::Clone(CloneContext* ctx) const {
-  auto* cloned = ctx->dst->create<IfStatement>(
-      ctx->Clone(source()), ctx->Clone(condition_), ctx->Clone(body_),
-      ctx->Clone(else_statements_));
-  return cloned;
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  auto* cond = ctx->Clone(condition_);
+  auto* b = ctx->Clone(body_);
+  auto el = ctx->Clone(else_statements_);
+  return ctx->dst->create<IfStatement>(src, cond, b, el);
 }
 
 bool IfStatement::IsValid() const {

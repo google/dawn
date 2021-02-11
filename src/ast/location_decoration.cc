@@ -35,7 +35,9 @@ void LocationDecoration::to_str(const semantic::Info&,
 }
 
 LocationDecoration* LocationDecoration::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<LocationDecoration>(ctx->Clone(source()), value_);
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto src = ctx->Clone(source());
+  return ctx->dst->create<LocationDecoration>(src, value_);
 }
 
 }  // namespace ast

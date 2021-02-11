@@ -50,7 +50,10 @@ uint64_t Alias::BaseAlignment(MemoryLayout mem_layout) const {
 }
 
 Alias* Alias::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Alias>(ctx->Clone(symbol()), ctx->Clone(subtype_));
+  // Clone arguments outside of create() call to have deterministic ordering
+  auto sym = ctx->Clone(symbol());
+  auto* ty = ctx->Clone(type());
+  return ctx->dst->create<Alias>(sym, ty);
 }
 
 }  // namespace type
