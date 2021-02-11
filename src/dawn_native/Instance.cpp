@@ -19,6 +19,10 @@
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Surface.h"
 
+#if defined(DAWN_USE_X11)
+#    include "dawn_native/XlibXcbFunctions.h"
+#endif  // defined(DAWN_USE_X11)
+
 namespace dawn_native {
 
     // Forward definitions of each backend's "Connect" function that creates new BackendConnection.
@@ -221,6 +225,17 @@ namespace dawn_native {
 
     dawn_platform::Platform* InstanceBase::GetPlatform() const {
         return mPlatform;
+    }
+
+    const XlibXcbFunctions* InstanceBase::GetOrCreateXlibXcbFunctions() {
+#if defined(DAWN_USE_X11)
+        if (mXlibXcbFunctions == nullptr) {
+            mXlibXcbFunctions = std::make_unique<XlibXcbFunctions>();
+        }
+        return mXlibXcbFunctions.get();
+#else
+        UNREACHABLE();
+#endif  // defined(DAWN_USE_X11)
     }
 
     Surface* InstanceBase::CreateSurface(const SurfaceDescriptor* descriptor) {

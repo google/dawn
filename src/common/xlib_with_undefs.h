@@ -26,6 +26,10 @@
 // interface.
 #include <X11/Xlib.h>
 
+// Xlib-xcb.h technically includes Xlib.h but we separate the includes to make it more clear what
+// the problem is if one of these two includes fail.
+#include <X11/Xlib-xcb.h>
+
 #undef Success
 #undef None
 #undef Always

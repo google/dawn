@@ -100,10 +100,8 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // anonymous namespace
 
-    PlatformFunctions::PlatformFunctions() {
-    }
-    PlatformFunctions::~PlatformFunctions() {
-    }
+    PlatformFunctions::PlatformFunctions() = default;
+    PlatformFunctions::~PlatformFunctions() = default;
 
     MaybeError PlatformFunctions::LoadFunctions() {
         DAWN_TRY(LoadD3D12());

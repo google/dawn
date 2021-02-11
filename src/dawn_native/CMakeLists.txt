@@ -181,6 +181,7 @@ target_link_libraries(dawn_native
 if (DAWN_USE_X11)
     find_package(X11 REQUIRED)
     target_link_libraries(dawn_native PRIVATE ${X11_LIBRARIES})
+    target_include_directories(dawn_native PRIVATE ${X11_INCLUDE_DIR})
 endif()
 
 if (WIN32)

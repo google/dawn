@@ -296,6 +296,10 @@ source_set("dawn_native_sources") {
 
   if (dawn_use_x11) {
     libs += [ "X11" ]
+    sources += [
+      "XlibXcbFunctions.cpp",
+      "XlibXcbFunctions.h",
+    ]
   }
 
   if (is_win) {

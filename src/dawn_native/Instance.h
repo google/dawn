@@ -30,6 +30,7 @@
 namespace dawn_native {
 
     class Surface;
+    class XlibXcbFunctions;
 
     // This is called InstanceBase for consistency across the frontend, even if the backends don't
     // specialize this class.
@@ -67,6 +68,9 @@ namespace dawn_native {
         void SetPlatform(dawn_platform::Platform* platform);
         dawn_platform::Platform* GetPlatform() const;
 
+        // Get backend-independent libraries that need to be loaded dynamically.
+        const XlibXcbFunctions* GetOrCreateXlibXcbFunctions();
+
         // Dawn API
         Surface* CreateSurface(const SurfaceDescriptor* descriptor);
 
@@ -97,6 +101,10 @@ namespace dawn_native {
 
         ExtensionsInfo mExtensionsInfo;
         TogglesInfo mTogglesInfo;
+
+#if defined(DAWN_USE_X11)
+        std::unique_ptr<XlibXcbFunctions> mXlibXcbFunctions;
+#endif  // defined(DAWN_USE_X11)
     };
 
 }  // namespace dawn_native
