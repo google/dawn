@@ -91,20 +91,24 @@ bool Module::IsValid() const {
 }
 
 Module* Module::Clone(CloneContext* ctx) const {
-  std::vector<CastableBase*> global_decls;
-  for (auto* decl : global_declarations_) {
+  auto* out = ctx->dst->create<Module>();
+  out->Copy(ctx, this);
+  return out;
+}
+
+void Module::Copy(CloneContext* ctx, const Module* src) {
+  for (auto* decl : src->global_declarations_) {
     assert(decl);
     if (auto* ty = decl->As<type::Type>()) {
-      global_decls.push_back(ctx->Clone(ty));
+      AddConstructedType(ctx->Clone(ty));
     } else if (auto* func = decl->As<Function>()) {
-      global_decls.push_back(ctx->Clone(func));
+      AddFunction(ctx->Clone(func));
     } else if (auto* var = decl->As<Variable>()) {
-      global_decls.push_back(ctx->Clone(var));
+      AddGlobalVariable(ctx->Clone(var));
     } else {
       assert(false /* unreachable */);
     }
   }
-  return ctx->dst->create<Module>(global_decls);
 }
 
 void Module::to_str(const semantic::Info& sem,

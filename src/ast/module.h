@@ -95,6 +95,11 @@ class Module : public Castable<Module, Node> {
   /// @return the newly cloned node
   Module* Clone(CloneContext* ctx) const override;
 
+  /// Copy copies the content of the Module src into this module.
+  /// @param ctx the clone context
+  /// @param src the module to copy into this module
+  void Copy(CloneContext* ctx, const Module* src);
+
   /// Writes a representation of the node to the output stream
   /// @param sem the semantic info for the program
   /// @param out the stream to write to

@@ -38,11 +38,11 @@ struct S {
   m1 : array<u32>;
 };
 
-type t0 = [[stride(16)]] array<vec4<f32>>;
-type t1 = [[stride(32)]] array<vec4<f32>>;
-
 const c0 : i32 = 10;
 const c1 : bool = true;
+
+type t0 = [[stride(16)]] array<vec4<f32>>;
+type t1 = [[stride(32)]] array<vec4<f32>>;
 
 var<uniform> g0 : u32 = 20u;
 var<out> g1 : f32 = 123.0;
@@ -106,6 +106,16 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
 fn main() -> void {
   f1(1.0, 2);
 }
+
+const declaration_order_check_0 : i32 = 1;
+
+type declaration_order_check_1 = f32;
+
+fn declaration_order_check_2() -> void {}
+
+type declaration_order_check_2 = f32;
+
+const declaration_order_check_3 : i32 = 1;
 
 )");
 

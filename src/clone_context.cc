@@ -30,15 +30,7 @@ Symbol CloneContext::Clone(const Symbol& s) const {
 }
 
 void CloneContext::Clone() {
-  for (auto* ty : src->AST().ConstructedTypes()) {
-    dst->AST().AddConstructedType(Clone(ty));
-  }
-  for (auto* var : src->AST().GlobalVariables()) {
-    dst->AST().AddGlobalVariable(Clone(var));
-  }
-  for (auto* func : src->AST().Functions()) {
-    dst->AST().AddFunction(Clone(func));
-  }
+  dst->AST().Copy(this, &src->AST());
 }
 
 ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
