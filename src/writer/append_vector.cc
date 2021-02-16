@@ -56,8 +56,8 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
 
   // Cast scalar to the vector element type
   auto* scalar_cast = b->Construct(packed_el_ty, scalar);
-  b->Sem().Add(scalar_cast,
-               b->create<semantic::Expression>(packed_el_ty, statement));
+  b->Sem().Add(scalar_cast, b->create<semantic::Expression>(
+                                scalar_cast, packed_el_ty, statement));
 
   auto* packed_ty = b->create<type::Vector>(packed_el_ty, packed_size);
 
@@ -76,8 +76,8 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   }
 
   auto* constructor = b->Construct(packed_ty, std::move(packed));
-  b->Sem().Add(constructor,
-               b->create<semantic::Expression>(packed_ty, statement));
+  b->Sem().Add(constructor, b->create<semantic::Expression>(
+                                constructor, packed_ty, statement));
 
   return constructor;
 }

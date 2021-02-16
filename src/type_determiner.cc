@@ -524,14 +524,14 @@ bool TypeDeterminer::DetermineIntrinsicCall(
     }
     auto* intrinsic = builder_->create<semantic::Intrinsic>(intrinsic_type,
                                                             ret_ty, parameters);
-    builder_->Sem().Add(
-        call, builder_->create<semantic::Call>(intrinsic, current_statement_));
+    builder_->Sem().Add(call, builder_->create<semantic::Call>(
+                                  call, intrinsic, current_statement_));
     SetType(call, ret_ty);
     return false;
   }
 
   builder_->Sem().Add(call, builder_->create<semantic::Call>(
-                                result.intrinsic, current_statement_));
+                                call, result.intrinsic, current_statement_));
   SetType(call, result.intrinsic->ReturnType());
   return true;
 }
@@ -566,6 +566,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
                                                     var->storage_class));
     }
 
+    var->users.push_back(expr);
     set_referenced_from_function_if_needed(var, true);
     return true;
   }
@@ -818,7 +819,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
 
   builder_->Sem().Add(expr,
                       builder_->create<semantic::MemberAccessorExpression>(
-                          ret, current_statement_, is_swizzle));
+                          expr, ret, current_statement_, is_swizzle));
   SetType(expr, ret);
 
   return true;
@@ -934,8 +935,20 @@ void TypeDeterminer::CreateSemanticNodes() const {
   for (auto it : variable_to_info_) {
     auto* var = it.first;
     auto* info = it.second;
-    sem.Add(var,
-            builder_->create<semantic::Variable>(var, info->storage_class));
+    std::vector<const semantic::Expression*> users;
+    for (auto* user : info->users) {
+      // Create semantic node for the identifier expression if necessary
+      auto* sem_expr = sem.Get(user);
+      if (sem_expr == nullptr) {
+        auto* type = expr_info_.at(user).type;
+        auto* stmt = expr_info_.at(user).statement;
+        sem_expr = builder_->create<semantic::Expression>(user, type, stmt);
+        sem.Add(user, sem_expr);
+      }
+      users.push_back(sem_expr);
+    }
+    sem.Add(var, builder_->create<semantic::Variable>(var, info->storage_class,
+                                                      std::move(users)));
   }
 
   auto remap_vars = [&sem](const std::vector<VariableInfo*>& in) {
@@ -965,7 +978,8 @@ void TypeDeterminer::CreateSemanticNodes() const {
     auto* call = it.first;
     auto info = it.second;
     auto* sem_func = func_info_to_sem_func.at(info.function);
-    sem.Add(call, builder_->create<semantic::Call>(sem_func, info.statement));
+    sem.Add(call,
+            builder_->create<semantic::Call>(call, sem_func, info.statement));
   }
 
   // Create semantic nodes for all remaining expression types
@@ -976,8 +990,8 @@ void TypeDeterminer::CreateSemanticNodes() const {
       // Expression has already been assigned a semantic node
       continue;
     }
-    sem.Add(expr,
-            builder_->create<semantic::Expression>(info.type, info.statement));
+    sem.Add(expr, builder_->create<semantic::Expression>(expr, info.type,
+                                                         info.statement));
   }
 }
 

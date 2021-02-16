@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "src/ast/storage_class.h"
+#include "src/semantic/expression.h"
 #include "src/semantic/node.h"
 #include "src/type/sampler_type.h"
 
@@ -40,8 +41,10 @@ class Variable : public Castable<Variable, Node> {
   /// Constructor
   /// @param declaration the AST declaration node
   /// @param storage_class the variable storage class
+  /// @param users the expressions that use the variable
   explicit Variable(ast::Variable* declaration,
-                    ast::StorageClass storage_class);
+                    ast::StorageClass storage_class,
+                    std::vector<const Expression*> users);
 
   /// Destructor
   ~Variable() override;
@@ -52,9 +55,13 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the storage class for the variable
   ast::StorageClass StorageClass() const { return storage_class_; }
 
+  /// @returns the expressions that use the variable
+  const std::vector<const Expression*>& Users() const { return users_; }
+
  private:
   ast::Variable* const declaration_;
   ast::StorageClass const storage_class_;
+  std::vector<const Expression*> const users_;
 };
 
 }  // namespace semantic

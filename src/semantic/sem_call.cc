@@ -19,8 +19,10 @@ TINT_INSTANTIATE_CLASS_ID(tint::semantic::Call);
 namespace tint {
 namespace semantic {
 
-Call::Call(const CallTarget* target, Statement* statement)
-    : Base(target->ReturnType(), statement), target_(target) {}
+Call::Call(ast::Expression* declaration,
+           const CallTarget* target,
+           Statement* statement)
+    : Base(declaration, target->ReturnType(), statement), target_(target) {}
 
 Call::~Call() = default;
 

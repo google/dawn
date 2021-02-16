@@ -26,10 +26,12 @@ class MemberAccessorExpression
     : public Castable<MemberAccessorExpression, Expression> {
  public:
   /// Constructor
+  /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
   /// @param is_swizzle true if this member access is for a vector swizzle
-  MemberAccessorExpression(type::Type* type,
+  MemberAccessorExpression(ast::Expression* declaration,
+                           type::Type* type,
                            Statement* statement,
                            bool is_swizzle);
 

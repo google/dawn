@@ -19,8 +19,12 @@ TINT_INSTANTIATE_CLASS_ID(tint::semantic::Variable);
 namespace tint {
 namespace semantic {
 
-Variable::Variable(ast::Variable* declaration, ast::StorageClass storage_class)
-    : declaration_(declaration), storage_class_(storage_class) {}
+Variable::Variable(ast::Variable* declaration,
+                   ast::StorageClass storage_class,
+                   std::vector<const Expression*> users)
+    : declaration_(declaration),
+      storage_class_(storage_class),
+      users_(std::move(users)) {}
 
 Variable::~Variable() = default;
 

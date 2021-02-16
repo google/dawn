@@ -26,9 +26,12 @@ namespace semantic {
 class Call : public Castable<Call, Expression> {
  public:
   /// Constructor
+  /// @param declaration the AST node
   /// @param target the call target
   /// @param statement the statement that owns this expression
-  explicit Call(const CallTarget* target, Statement* statement);
+  explicit Call(ast::Expression* declaration,
+                const CallTarget* target,
+                Statement* statement);
 
   /// Destructor
   ~Call() override;

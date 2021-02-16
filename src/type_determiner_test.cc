@@ -111,6 +111,20 @@ class TypeDeterminerHelper : public ProgramBuilder {
     return sem_stmt ? sem_stmt->Declaration() : nullptr;
   }
 
+  bool CheckVarUsers(ast::Variable* var,
+                     std::vector<ast::Expression*>&& expected_users) {
+    auto& var_users = Sem().Get(var)->Users();
+    if (var_users.size() != expected_users.size()) {
+      return false;
+    }
+    for (size_t i = 0; i < var_users.size(); i++) {
+      if (var_users[i]->Declaration() != expected_users[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
  private:
   std::unique_ptr<TypeDeterminer> td_;
 };
@@ -468,6 +482,8 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   EXPECT_EQ(StmtOf(bar_i32_init), bar_i32_decl);
   EXPECT_EQ(StmtOf(foo_f32_init), foo_f32_decl);
   EXPECT_EQ(StmtOf(bar_f32_init), bar_f32_decl);
+  EXPECT_TRUE(CheckVarUsers(foo_i32, {bar_i32->constructor()}));
+  EXPECT_TRUE(CheckVarUsers(foo_f32, {bar_f32->constructor()}));
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
@@ -513,6 +529,8 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   EXPECT_EQ(StmtOf(fn_i32_init), fn_i32_decl);
   EXPECT_EQ(StmtOf(mod_init), nullptr);
   EXPECT_EQ(StmtOf(fn_f32_init), fn_f32_decl);
+  EXPECT_TRUE(CheckVarUsers(fn_i32, {}));
+  EXPECT_TRUE(CheckVarUsers(mod_f32, {fn_f32->constructor()}));
 }
 
 TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
@@ -716,7 +734,7 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
-  Global("my_var", ast::StorageClass::kNone, ty.f32());
+  auto* my_var = Global("my_var", ast::StorageClass::kNone, ty.f32());
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
@@ -726,10 +744,11 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::Pointer>());
   EXPECT_TRUE(TypeOf(ident)->As<type::Pointer>()->type()->Is<type::F32>());
+  EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
-  GlobalConst("my_var", ast::StorageClass::kNone, ty.f32());
+  auto* my_var = GlobalConst("my_var", ast::StorageClass::kNone, ty.f32());
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
@@ -738,6 +757,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
 
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
+  EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
@@ -761,6 +781,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   ASSERT_NE(TypeOf(my_var_b), nullptr);
   EXPECT_TRUE(TypeOf(my_var_b)->Is<type::F32>());
   EXPECT_EQ(StmtOf(my_var_b), assign);
+  EXPECT_TRUE(CheckVarUsers(var, {my_var_a, my_var_b}));
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
@@ -768,10 +789,11 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   auto* my_var_b = Expr("my_var");
   auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
 
+  auto* var = Var("my_var", ast::StorageClass::kNone, ty.f32());
+
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(
-               Var("my_var", ast::StorageClass::kNone, ty.f32())),
+           create<ast::VariableDeclStatement>(var),
            assign,
        },
        ast::FunctionDecorationList{});
@@ -786,6 +808,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   EXPECT_TRUE(TypeOf(my_var_b)->Is<type::Pointer>());
   EXPECT_TRUE(TypeOf(my_var_b)->As<type::Pointer>()->type()->Is<type::F32>());
   EXPECT_EQ(StmtOf(my_var_b), assign);
+  EXPECT_TRUE(CheckVarUsers(var, {my_var_a, my_var_b}));
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {

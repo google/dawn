@@ -21,8 +21,12 @@ TINT_INSTANTIATE_CLASS_ID(tint::semantic::Expression);
 namespace tint {
 namespace semantic {
 
-Expression::Expression(type::Type* type, Statement* statement)
-    : type_(type->UnwrapIfNeeded()), statement_(statement) {}
+Expression::Expression(ast::Expression* declaration,
+                       type::Type* type,
+                       Statement* statement)
+    : declaration_(declaration),
+      type_(type->UnwrapIfNeeded()),
+      statement_(statement) {}
 
 }  // namespace semantic
 }  // namespace tint

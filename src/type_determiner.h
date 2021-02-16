@@ -99,13 +99,14 @@ class TypeDeterminer {
   };
 
   /// Structure holding semantic information about a variable.
-  /// Used to build the semantic::Function nodes at the end of resolving.
+  /// Used to build the semantic::Variable nodes at the end of resolving.
   struct VariableInfo {
     explicit VariableInfo(ast::Variable* decl);
     ~VariableInfo();
 
     ast::Variable* const declaration;
     ast::StorageClass storage_class;
+    std::vector<ast::IdentifierExpression*> users;
   };
 
   /// Structure holding semantic information about a function.

@@ -19,10 +19,11 @@ TINT_INSTANTIATE_CLASS_ID(tint::semantic::MemberAccessorExpression);
 namespace tint {
 namespace semantic {
 
-MemberAccessorExpression::MemberAccessorExpression(type::Type* type,
+MemberAccessorExpression::MemberAccessorExpression(ast::Expression* declaration,
+                                                   type::Type* type,
                                                    Statement* statement,
                                                    bool is_swizzle)
-    : Base(type, statement), is_swizzle_(is_swizzle) {}
+    : Base(declaration, type, statement), is_swizzle_(is_swizzle) {}
 
 }  // namespace semantic
 }  // namespace tint

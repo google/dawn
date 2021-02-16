@@ -15,6 +15,7 @@
 #ifndef SRC_SEMANTIC_EXPRESSION_H_
 #define SRC_SEMANTIC_EXPRESSION_H_
 
+#include "src/ast/expression.h"
 #include "src/semantic/node.h"
 
 namespace tint {
@@ -33,9 +34,12 @@ namespace semantic {
 class Expression : public Castable<Expression, Node> {
  public:
   /// Constructor
+  /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
-  explicit Expression(type::Type* type, Statement* statement);
+  explicit Expression(ast::Expression* declaration,
+                      type::Type* type,
+                      Statement* statement);
 
   /// @return the resolved type of the expression
   type::Type* Type() const { return type_; }
@@ -43,7 +47,11 @@ class Expression : public Castable<Expression, Node> {
   /// @return the statement that owns this expression
   Statement* Stmt() const { return statement_; }
 
+  /// @returns the AST node
+  ast::Expression* Declaration() const { return declaration_; }
+
  private:
+  ast::Expression* declaration_;
   type::Type* const type_;
   Statement* const statement_;
 };
