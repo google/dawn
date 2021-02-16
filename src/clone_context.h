@@ -152,6 +152,30 @@ class CloneContext {
   }
 
   /// Clones each of the elements of the vector `v` into the ProgramBuilder
+  /// #dst, inserting any additional elements into the list that were registered
+  /// with calls to InsertBefore().
+  ///
+  /// All the elements of the vector `v` must be owned by the Program #src.
+  ///
+  /// @param v the vector to clone
+  /// @return the cloned vector
+  template <typename T>
+  std::vector<T*> Clone(const std::vector<T*>& v) {
+    std::vector<T*> out;
+    out.reserve(v.size());
+    for (auto& el : v) {
+      auto it = insert_before_.find(el);
+      if (it != insert_before_.end()) {
+        for (auto insert : it->second) {
+          out.emplace_back(CheckedCast<T>(insert));
+        }
+      }
+      out.emplace_back(Clone(el));
+    }
+    return out;
+  }
+
+  /// Clones each of the elements of the vector `v` into the ProgramBuilder
   /// #dst.
   ///
   /// All the elements of the vector `v` must be owned by the Program #src.
@@ -219,6 +243,19 @@ class CloneContext {
     return *this;
   }
 
+  /// Inserts `object` before `before` whenever a vector containing `object` is
+  /// cloned.
+  /// @param before a pointer to the object in #src
+  /// @param object a pointer to the object in #dst that will be inserted before
+  /// any occurrence of the clone of `before`
+  /// @returns this CloneContext so calls can be chained
+  template <typename BEFORE, typename OBJECT>
+  CloneContext& InsertBefore(BEFORE* before, OBJECT* object) {
+    auto& list = insert_before_[before];
+    list.emplace_back(object);
+    return *this;
+  }
+
   /// Clone performs the clone of the entire Program #src to #dst.
   void Clone();
 
@@ -266,7 +303,18 @@ class CloneContext {
     return cast;
   }
 
+  /// A vector of CastableBase*
+  using CastableList = std::vector<CastableBase*>;
+
+  /// A map of object in #src to their cloned equivalent in #dst
   std::unordered_map<CastableBase*, CastableBase*> cloned_;
+
+  /// A map of object in #src to the list of cloned objects in #dst.
+  /// Clone(const std::vector<T*>& v) will use this to insert the map-value list
+  /// into the target vector/ before cloning and inserting the map-key.
+  std::unordered_map<CastableBase*, CastableList> insert_before_;
+
+  /// Transform functions registered with ReplaceAll()
   std::vector<Transform> transforms_;
 };
 
