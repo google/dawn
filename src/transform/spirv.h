@@ -18,6 +18,10 @@
 #include "src/transform/transform.h"
 
 namespace tint {
+
+// Forward declarations
+class CloneContext;
+
 namespace transform {
 
 /// Spirv is a transform used to sanitize a Program for use with the Spirv
@@ -36,6 +40,10 @@ class Spirv : public Transform {
   /// @param program the source program to transform
   /// @returns the transformation result
   Output Run(const Program* program) override;
+
+ private:
+  /// Change type of sample mask builtin variables to single element arrays.
+  void HandleSampleMaskBuiltins(CloneContext& ctx) const;
 };
 
 }  // namespace transform

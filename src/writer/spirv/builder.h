@@ -216,10 +216,10 @@ class Builder {
   /// @param klass the storage class to convert
   /// @returns the SPIR-V storage class or SpvStorageClassMax on error.
   SpvStorageClass ConvertStorageClass(ast::StorageClass klass) const;
-  /// Converts a builtin to a SPIR-V builtin
+  /// Converts a builtin to a SPIR-V builtin and pushes a capability if needed.
   /// @param builtin the builtin to convert
   /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
-  SpvBuiltIn ConvertBuiltin(ast::Builtin builtin) const;
+  SpvBuiltIn ConvertBuiltin(ast::Builtin builtin);
 
   /// Generates a label for the given id. Emits an error and returns false if
   /// we're currently outside a function.

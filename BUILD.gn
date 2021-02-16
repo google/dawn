@@ -355,8 +355,6 @@ source_set("libtint_core_src") {
     "src/clone_context.h",
     "src/demangler.cc",
     "src/demangler.h",
-    "src/intrinsic_table.cc",
-    "src/intrinsic_table.h",
     "src/diagnostic/diagnostic.cc",
     "src/diagnostic/diagnostic.h",
     "src/diagnostic/formatter.cc",
@@ -369,6 +367,8 @@ source_set("libtint_core_src") {
     "src/inspector/inspector.h",
     "src/inspector/scalar.cc",
     "src/inspector/scalar.h",
+    "src/intrinsic_table.cc",
+    "src/intrinsic_table.h",
     "src/namer.cc",
     "src/namer.h",
     "src/program.cc",
@@ -953,6 +953,7 @@ source_set("tint_unittests_spv_reader_src") {
 
 source_set("tint_unittests_spv_writer_src") {
   sources = [
+    "src/transform/spirv_test.cc",
     "src/writer/spirv/binary_writer_test.cc",
     "src/writer/spirv/builder_accessor_expression_test.cc",
     "src/writer/spirv/builder_assign_test.cc",

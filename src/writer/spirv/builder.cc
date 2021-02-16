@@ -3172,7 +3172,7 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
   return SpvStorageClassMax;
 }
 
-SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
+SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) {
   switch (builtin) {
     case ast::Builtin::kPosition:
       return SpvBuiltInPosition;
@@ -3194,9 +3194,13 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
       return SpvBuiltInGlobalInvocationId;
     case ast::Builtin::kPointSize:
       return SpvBuiltInPointSize;
-    case ast::Builtin::kSampleIndex:    // TODO(dneto)
-    case ast::Builtin::kSampleMaskIn:   // TODO(dneto)
-    case ast::Builtin::kSampleMaskOut:  // TODO(dneto)
+    case ast::Builtin::kSampleIndex:
+      push_capability(SpvCapabilitySampleRateShading);
+      return SpvBuiltInSampleId;
+    case ast::Builtin::kSampleMaskIn:
+      return SpvBuiltInSampleMask;
+    case ast::Builtin::kSampleMaskOut:
+      return SpvBuiltInSampleMask;
     case ast::Builtin::kNone:
       break;
   }

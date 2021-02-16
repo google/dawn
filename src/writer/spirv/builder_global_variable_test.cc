@@ -24,6 +24,7 @@
 #include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/struct.h"
 #include "src/ast/type_constructor_expression.h"
@@ -401,7 +402,10 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{ast::Builtin::kLocalInvocationIndex,
                     SpvBuiltInLocalInvocationIndex},
         BuiltinData{ast::Builtin::kGlobalInvocationId,
-                    SpvBuiltInGlobalInvocationId}));
+                    SpvBuiltInGlobalInvocationId},
+        BuiltinData{ast::Builtin::kSampleIndex, SpvBuiltInSampleId},
+        BuiltinData{ast::Builtin::kSampleMaskIn, SpvBuiltInSampleMask},
+        BuiltinData{ast::Builtin::kSampleMaskOut, SpvBuiltInSampleMask}));
 
 TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   // struct A {
@@ -626,6 +630,95 @@ OpDecorate %5 NonReadable
 %1 = OpVariable %2 UniformConstant
 %6 = OpTypePointer UniformConstant %3
 %5 = OpVariable %6 UniformConstant
+)");
+}
+
+TEST_F(BuilderTest, SampleIndex) {
+  auto* var =
+      Global("sample_index", ast::StorageClass::kInput, ty.u32(), nullptr,
+             ast::VariableDecorationList{
+                 create<ast::BuiltinDecoration>(ast::Builtin::kSampleIndex),
+             });
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            "OpCapability SampleRateShading\n");
+  EXPECT_EQ(DumpInstructions(b.annots()), "OpDecorate %1 BuiltIn SampleId\n");
+  EXPECT_EQ(DumpInstructions(b.types()),
+            "%3 = OpTypeInt 32 0\n"
+            "%2 = OpTypePointer Input %3\n"
+            "%1 = OpVariable %2 Input\n");
+}
+
+TEST_F(BuilderTest, SampleMask) {
+  // Input:
+  // [[builtin(sample_mask_in)]] var<in> mask_in : u32;
+  // [[builtin(sample_mask_out)]] var<out> mask_out : u32;
+  // [[stage(fragment)]]
+  // fn main() -> void {
+  //   mask_out = mask_in;
+  // }
+
+  // After sanitization:
+  // [[builtin(sample_mask_in)]] var<in> mask_in : array<u32, 1>;
+  // [[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
+  // [[stage(fragment)]]
+  // fn main() -> void {
+  //   mask_out[0] = mask_in[0];
+  // }
+
+  Global("mask_in", ast::StorageClass::kInput, ty.u32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMaskIn),
+         });
+  Global("mask_out", ast::StorageClass::kOutput, ty.u32(), nullptr,
+         ast::VariableDecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMaskOut),
+         });
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Expr("mask_out"), Expr("mask_in")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
+
+  spirv::Builder& b = SanitizeAndBuild();
+
+  ASSERT_TRUE(b.Build());
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %11 "main" %6 %1
+OpExecutionMode %11 LocalSize 1 1 1
+OpName %1 "mask_in"
+OpName %6 "mask_out"
+OpName %11 "main"
+OpDecorate %1 BuiltIn SampleMask
+OpDecorate %6 BuiltIn SampleMask
+%4 = OpTypeInt 32 0
+%5 = OpConstant %4 1
+%3 = OpTypeArray %4 %5
+%2 = OpTypePointer Input %3
+%1 = OpVariable %2 Input
+%7 = OpTypePointer Output %3
+%8 = OpConstantNull %3
+%6 = OpVariable %7 Output %8
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+%13 = OpTypeInt 32 1
+%14 = OpConstant %13 0
+%15 = OpTypePointer Output %4
+%17 = OpTypePointer Input %4
+%11 = OpFunction %10 None %9
+%12 = OpLabel
+%16 = OpAccessChain %15 %6 %14
+%18 = OpAccessChain %17 %1 %14
+%19 = OpLoad %4 %18
+OpStore %16 %19
+OpReturn
+OpFunctionEnd
 )");
 }
 

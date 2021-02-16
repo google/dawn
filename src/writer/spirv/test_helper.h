@@ -24,6 +24,7 @@
 #include "src/ast/module.h"
 #include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
+#include "src/transform/spirv.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/binary_writer.h"
 #include "src/writer/spirv/builder.h"
@@ -56,6 +57,34 @@ class TestHelperBase : public ProgramBuilder, public BASE {
       ASSERT_TRUE(program->IsValid())
           << diag::Formatter().format(program->Diagnostics());
     }();
+    spirv_builder = std::make_unique<spirv::Builder>(program.get());
+    return *spirv_builder;
+  }
+
+  /// Builds the program, runs the program through the transform::Spirv
+  /// sanitizer and returns a spirv::Builder from the sanitized program.
+  /// @note The spirv::Builder is only built once. Multiple calls to Build()
+  /// will return the same spirv::Builder without rebuilding.
+  /// @return the built spirv::Builder
+  spirv::Builder& SanitizeAndBuild() {
+    if (spirv_builder) {
+      return *spirv_builder;
+    }
+    [&]() {
+      ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
+                             << diag::Formatter().format(Diagnostics());
+    }();
+    program = std::make_unique<Program>(std::move(*this));
+    [&]() {
+      ASSERT_TRUE(program->IsValid())
+          << diag::Formatter().format(program->Diagnostics());
+    }();
+    auto result = transform::Spirv().Run(program.get());
+    [&]() {
+      ASSERT_FALSE(result.diagnostics.contains_errors())
+          << diag::Formatter().format(result.diagnostics);
+    }();
+    *program = std::move(result.program);
     spirv_builder = std::make_unique<spirv::Builder>(program.get());
     return *spirv_builder;
   }
