@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 #include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
+#include "src/transform/hlsl.h"
 #include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
 
@@ -37,7 +38,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
   TestHelperBase() = default;
   ~TestHelperBase() override = default;
 
-  /// Builds and returns a GeneratorImpl from the program.
+  /// Builds the program and returns a GeneratorImpl from the program.
   /// @note The generator is only built once. Multiple calls to Build() will
   /// return the same GeneratorImpl without rebuilding.
   /// @return the built generator
@@ -45,15 +46,45 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     if (gen_) {
       return *gen_;
     }
+    diag::Formatter formatter;
     [&]() {
       ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
-                             << diag::Formatter().format(Diagnostics());
+                             << formatter.format(Diagnostics());
     }();
     program = std::make_unique<Program>(std::move(*this));
     [&]() {
       ASSERT_TRUE(program->IsValid())
-          << diag::Formatter().format(program->Diagnostics());
+          << formatter.format(program->Diagnostics());
     }();
+    gen_ = std::make_unique<GeneratorImpl>(program.get());
+    return *gen_;
+  }
+
+  /// Builds the program, runs the program through the transform::Hlsl sanitizer
+  /// and returns a GeneratorImpl from the sanitized program.
+  /// @note The generator is only built once. Multiple calls to Build() will
+  /// return the same GeneratorImpl without rebuilding.
+  /// @return the built generator
+  GeneratorImpl& SanitizeAndBuild() {
+    if (gen_) {
+      return *gen_;
+    }
+    diag::Formatter formatter;
+    [&]() {
+      ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
+                             << formatter.format(Diagnostics());
+    }();
+    program = std::make_unique<Program>(std::move(*this));
+    [&]() {
+      ASSERT_TRUE(program->IsValid())
+          << formatter.format(program->Diagnostics());
+    }();
+    auto result = transform::Hlsl().Run(program.get());
+    [&]() {
+      ASSERT_FALSE(result.diagnostics.contains_errors())
+          << formatter.format(result.diagnostics);
+    }();
+    *program = std::move(result.program);
     gen_ = std::make_unique<GeneratorImpl>(program.get());
     return *gen_;
   }

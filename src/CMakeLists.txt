@@ -732,6 +732,7 @@ if(${TINT_BUILD_TESTS})
 
   if (${TINT_BUILD_HLSL_WRITER})
     list(APPEND TINT_TEST_SRCS
+      transform/hlsl_test.cc
       writer/hlsl/generator_impl_alias_type_test.cc
       writer/hlsl/generator_impl_array_accessor_test.cc
       writer/hlsl/generator_impl_assign_test.cc
@@ -756,6 +757,7 @@ if(${TINT_BUILD_TESTS})
       writer/hlsl/generator_impl_member_accessor_test.cc
       writer/hlsl/generator_impl_module_constant_test.cc
       writer/hlsl/generator_impl_return_test.cc
+      writer/hlsl/generator_impl_sanitizer_tests.cc
       writer/hlsl/generator_impl_switch_test.cc
       writer/hlsl/generator_impl_test.cc
       writer/hlsl/generator_impl_type_test.cc

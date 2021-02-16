@@ -1213,6 +1213,7 @@ source_set("tint_unittests_msl_writer_src") {
 
 source_set("tint_unittests_hlsl_writer_src") {
   sources = [
+    "src/transform/hlsl_test.cc",
     "src/writer/hlsl/generator_impl_alias_type_test.cc",
     "src/writer/hlsl/generator_impl_array_accessor_test.cc",
     "src/writer/hlsl/generator_impl_assign_test.cc",
@@ -1237,6 +1238,7 @@ source_set("tint_unittests_hlsl_writer_src") {
     "src/writer/hlsl/generator_impl_member_accessor_test.cc",
     "src/writer/hlsl/generator_impl_module_constant_test.cc",
     "src/writer/hlsl/generator_impl_return_test.cc",
+    "src/writer/hlsl/generator_impl_sanitizer_tests.cc",
     "src/writer/hlsl/generator_impl_switch_test.cc",
     "src/writer/hlsl/generator_impl_test.cc",
     "src/writer/hlsl/generator_impl_type_test.cc",

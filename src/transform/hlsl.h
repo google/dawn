@@ -18,6 +18,10 @@
 #include "src/transform/transform.h"
 
 namespace tint {
+
+// Forward declarations
+class CloneContext;
+
 namespace transform {
 
 /// Hlsl is a transform used to sanitize a Program for use with the Hlsl writer.
@@ -36,6 +40,12 @@ class Hlsl : public Transform {
   /// @param program the source program to transform
   /// @returns the transformation result
   Output Run(const Program* program) override;
+
+ private:
+  /// Hoists the array initializer to a constant variable, declared just before
+  /// the array usage statement.
+  /// See crbug.com/tint/406 for more details
+  void PromoteArrayInitializerToConstVar(CloneContext& ctx) const;
 };
 
 }  // namespace transform
