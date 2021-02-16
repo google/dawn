@@ -217,6 +217,37 @@ TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
   ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 }
 
+TEST_F(ParserImplTest, PostfixExpression_Array_NestedArrayAccessor) {
+  auto p = parser("a[b[c]]");
+  auto e = p->postfix_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+
+  const auto* outer_accessor = e->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(outer_accessor);
+
+  const auto* outer_array =
+      outer_accessor->array()->As<ast::IdentifierExpression>();
+  ASSERT_TRUE(outer_array);
+  EXPECT_EQ(outer_array->symbol(), p->builder().Symbols().Get("a"));
+
+  const auto* inner_accessor =
+      outer_accessor->idx_expr()->As<ast::ArrayAccessorExpression>();
+  ASSERT_TRUE(inner_accessor);
+
+  const auto* inner_array =
+      inner_accessor->array()->As<ast::IdentifierExpression>();
+  ASSERT_TRUE(inner_array);
+  EXPECT_EQ(inner_array->symbol(), p->builder().Symbols().Get("b"));
+
+  const auto* index_expr =
+      inner_accessor->idx_expr()->As<ast::IdentifierExpression>();
+  ASSERT_TRUE(index_expr);
+  EXPECT_EQ(index_expr->symbol(), p->builder().Symbols().Get("c"));
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

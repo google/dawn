@@ -3055,6 +3055,17 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
     return true;
   }
 
+  // Handle the case when `]` is expected but the actual token is `]]`.
+  // For example, in `arr1[arr2[0]]`.
+  if (tok == Token::Type::kBracketRight && t.IsAttrRight()) {
+    next();
+    auto source = t.source();
+    source.range.begin.column++;
+    token_queue_.push_front({Token::Type::kBracketRight, source});
+    synchronized_ = true;
+    return true;
+  }
+
   std::stringstream err;
   err << "expected '" << Token::TypeToName(tok) << "'";
   if (!use.empty()) {
