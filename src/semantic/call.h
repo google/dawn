@@ -27,7 +27,8 @@ class Call : public Castable<Call, Expression> {
  public:
   /// Constructor
   /// @param target the call target
-  explicit Call(const CallTarget* target);
+  /// @param statement the statement that owns this expression
+  explicit Call(const CallTarget* target, Statement* statement);
 
   /// Destructor
   ~Call() override;

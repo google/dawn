@@ -20,8 +20,9 @@ namespace tint {
 namespace semantic {
 
 MemberAccessorExpression::MemberAccessorExpression(type::Type* type,
+                                                   Statement* statement,
                                                    bool is_swizzle)
-    : Base(type), is_swizzle_(is_swizzle) {}
+    : Base(type, statement), is_swizzle_(is_swizzle) {}
 
 }  // namespace semantic
 }  // namespace tint

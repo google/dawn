@@ -55,6 +55,7 @@
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/statement.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
@@ -105,6 +106,11 @@ class TypeDeterminerHelper : public ProgramBuilder {
 
   TypeDeterminer* td() const { return td_.get(); }
 
+  ast::Statement* StmtOf(ast::Expression* expr) {
+    auto* sem_stmt = Sem().Get(expr)->Stmt();
+    return sem_stmt ? sem_stmt->Declaration() : nullptr;
+  }
+
  private:
   std::unique_ptr<TypeDeterminer> td_;
 };
@@ -149,14 +155,17 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
 
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(lhs), assign);
+  EXPECT_EQ(StmtOf(rhs), assign);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Case) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
+      assign,
   });
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(ty.i32(), 3));
@@ -169,14 +178,17 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   ASSERT_NE(TypeOf(rhs), nullptr);
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(lhs), assign);
+  EXPECT_EQ(StmtOf(rhs), assign);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Block) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
   auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
+      assign,
   });
   WrapInFunction(block);
 
@@ -186,16 +198,20 @@ TEST_F(TypeDeterminerTest, Stmt_Block) {
   ASSERT_NE(TypeOf(rhs), nullptr);
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(lhs), assign);
+  EXPECT_EQ(StmtOf(rhs), assign);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Else) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
+      assign,
   });
-  auto* stmt = create<ast::ElseStatement>(Expr(3), body);
+  auto* cond = Expr(3);
+  auto* stmt = create<ast::ElseStatement>(cond, body);
   WrapInFunction(stmt);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -206,6 +222,9 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   EXPECT_TRUE(TypeOf(stmt->condition())->Is<type::I32>());
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(lhs), assign);
+  EXPECT_EQ(StmtOf(rhs), assign);
+  EXPECT_EQ(StmtOf(cond), stmt);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_If) {
@@ -216,16 +235,17 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
       create<ast::AssignmentStatement>(else_lhs, else_rhs),
   });
 
-  auto* else_stmt = create<ast::ElseStatement>(Expr(3), else_body);
+  auto* else_cond = Expr(3);
+  auto* else_stmt = create<ast::ElseStatement>(else_cond, else_body);
 
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
-  auto* stmt = create<ast::IfStatement>(Expr(3), body,
-                                        ast::ElseStatementList{else_stmt});
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{assign});
+  auto* cond = Expr(3);
+  auto* stmt =
+      create<ast::IfStatement>(cond, body, ast::ElseStatementList{else_stmt});
   WrapInFunction(stmt);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -240,6 +260,10 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   EXPECT_TRUE(TypeOf(else_rhs)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(lhs), assign);
+  EXPECT_EQ(StmtOf(rhs), assign);
+  EXPECT_EQ(StmtOf(cond), stmt);
+  EXPECT_EQ(StmtOf(else_cond), else_stmt);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Loop) {
@@ -332,6 +356,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(expr), call);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
@@ -376,14 +401,15 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
-  auto* var = Global("my_var", ast::StorageClass::kNone, ty.i32(), Expr(2),
-                     ast::VariableDecorationList{});
-  auto* init = var->constructor();
+  auto* init = Expr(2);
+  Global("my_var", ast::StorageClass::kNone, ty.i32(), init,
+         ast::VariableDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
   ASSERT_NE(TypeOf(init), nullptr);
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
+  EXPECT_EQ(StmtOf(init), nullptr);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
@@ -438,6 +464,10 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   EXPECT_TRUE(TypeOf(bar_i32_init)->UnwrapAll()->Is<type::I32>());
   ASSERT_NE(TypeOf(bar_f32_init), nullptr);
   EXPECT_TRUE(TypeOf(bar_f32_init)->UnwrapAll()->Is<type::F32>());
+  EXPECT_EQ(StmtOf(foo_i32_init), foo_i32_decl);
+  EXPECT_EQ(StmtOf(bar_i32_init), bar_i32_decl);
+  EXPECT_EQ(StmtOf(foo_f32_init), foo_f32_decl);
+  EXPECT_EQ(StmtOf(bar_f32_init), bar_f32_decl);
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
@@ -480,6 +510,9 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   EXPECT_TRUE(TypeOf(fn_i32_init)->Is<type::I32>());
   ASSERT_NE(TypeOf(fn_f32_init), nullptr);
   EXPECT_TRUE(TypeOf(fn_f32_init)->UnwrapAll()->Is<type::F32>());
+  EXPECT_EQ(StmtOf(fn_i32_init), fn_i32_decl);
+  EXPECT_EQ(StmtOf(mod_init), nullptr);
+  EXPECT_EQ(StmtOf(fn_f32_init), fn_f32_decl);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
@@ -708,59 +741,77 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
-  auto* my_var = Expr("my_var");
-
+  auto* my_var_a = Expr("my_var");
+  auto* my_var_b = Expr("my_var");
   auto* var = Const("my_var", ast::StorageClass::kNone, ty.f32());
+  auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
 
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(var),
-           create<ast::AssignmentStatement>(my_var, Expr("my_var")),
+           assign,
        },
        ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(my_var), nullptr);
-  EXPECT_TRUE(TypeOf(my_var)->Is<type::F32>());
+  ASSERT_NE(TypeOf(my_var_a), nullptr);
+  EXPECT_TRUE(TypeOf(my_var_a)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(my_var_a), assign);
+  ASSERT_NE(TypeOf(my_var_b), nullptr);
+  EXPECT_TRUE(TypeOf(my_var_b)->Is<type::F32>());
+  EXPECT_EQ(StmtOf(my_var_b), assign);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
-  auto* my_var = Expr("my_var");
+  auto* my_var_a = Expr("my_var");
+  auto* my_var_b = Expr("my_var");
+  auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
 
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(
                Var("my_var", ast::StorageClass::kNone, ty.f32())),
-           create<ast::AssignmentStatement>(my_var, Expr("my_var")),
+           assign,
        },
        ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(my_var), nullptr);
-  EXPECT_TRUE(TypeOf(my_var)->Is<type::Pointer>());
-  EXPECT_TRUE(TypeOf(my_var)->As<type::Pointer>()->type()->Is<type::F32>());
+  ASSERT_NE(TypeOf(my_var_a), nullptr);
+  EXPECT_TRUE(TypeOf(my_var_a)->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(my_var_a)->As<type::Pointer>()->type()->Is<type::F32>());
+  EXPECT_EQ(StmtOf(my_var_a), assign);
+  ASSERT_NE(TypeOf(my_var_b), nullptr);
+  EXPECT_TRUE(TypeOf(my_var_b)->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(my_var_b)->As<type::Pointer>()->type()->Is<type::F32>());
+  EXPECT_EQ(StmtOf(my_var_b), assign);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
-  type::Pointer ptr(ty.f32(), ast::StorageClass::kFunction);
-
-  auto* my_var = Expr("my_var");
+  auto* my_var_a = Expr("my_var");
+  auto* my_var_b = Expr("my_var");
+  auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
 
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(
-               Var("my_var", ast::StorageClass::kNone, &ptr)),
-           create<ast::AssignmentStatement>(my_var, Expr("my_var")),
+               Var("my_var", ast::StorageClass::kNone,
+                   ty.pointer<f32>(ast::StorageClass::kFunction))),
+           assign,
        },
        ast::FunctionDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
-  ASSERT_NE(TypeOf(my_var), nullptr);
-  EXPECT_TRUE(TypeOf(my_var)->Is<type::Pointer>());
-  EXPECT_TRUE(TypeOf(my_var)->As<type::Pointer>()->type()->Is<type::F32>());
+  ASSERT_NE(TypeOf(my_var_a), nullptr);
+  EXPECT_TRUE(TypeOf(my_var_a)->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(my_var_a)->As<type::Pointer>()->type()->Is<type::F32>());
+  EXPECT_EQ(StmtOf(my_var_a), assign);
+  ASSERT_NE(TypeOf(my_var_b), nullptr);
+  EXPECT_TRUE(TypeOf(my_var_b)->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(my_var_b)->As<type::Pointer>()->type()->Is<type::F32>());
+  EXPECT_EQ(StmtOf(my_var_b), assign);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Call_Function) {

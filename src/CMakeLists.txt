@@ -205,6 +205,7 @@ set(TINT_LIB_SRCS
   semantic/sem_info.cc
   semantic/sem_intrinsic.cc
   semantic/sem_node.cc
+  semantic/sem_statement.cc
   semantic/sem_variable.cc
   semantic/type_mappings.h
   source.cc

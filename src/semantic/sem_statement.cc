@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/expression.h"
+#include "src/semantic/statement.h"
 
 #include "src/type/type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Expression);
+TINT_INSTANTIATE_CLASS_ID(tint::semantic::Statement);
 
 namespace tint {
 namespace semantic {
 
-Expression::Expression(type::Type* type, Statement* statement)
-    : type_(type->UnwrapIfNeeded()), statement_(statement) {}
+Statement::Statement(ast::Statement* declaration) : declaration_(declaration) {}
 
 }  // namespace semantic
 }  // namespace tint

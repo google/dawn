@@ -47,6 +47,7 @@
 #include "src/semantic/function.h"
 #include "src/semantic/intrinsic.h"
 #include "src/semantic/member_accessor_expression.h"
+#include "src/semantic/statement.h"
 #include "src/semantic/variable.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -68,6 +69,23 @@ namespace tint {
 namespace {
 
 using IntrinsicType = tint::semantic::IntrinsicType;
+
+// Helper class that temporarily assigns a value to a reference for the scope of
+// the object. Once the ScopedAssignment is destructed, the original value is
+// restored.
+template <typename T>
+class ScopedAssignment {
+ public:
+  ScopedAssignment(T& ref, T val) : ref_(ref) {
+    old_value_ = ref;
+    ref = val;
+  }
+  ~ScopedAssignment() { ref_ = old_value_; }
+
+ private:
+  T& ref_;
+  T old_value_;
+};
 
 }  // namespace
 
@@ -171,9 +189,11 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 }
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
-  current_function_ = function_infos_.Create<FunctionInfo>(func);
-  symbol_to_function_[func->symbol()] = current_function_;
-  function_to_info_.emplace(func, current_function_);
+  auto* func_info = function_infos_.Create<FunctionInfo>(func);
+  symbol_to_function_[func->symbol()] = func_info;
+  function_to_info_.emplace(func, func_info);
+
+  ScopedAssignment<FunctionInfo*> sa(current_function_, func_info);
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
@@ -184,8 +204,6 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
     return false;
   }
   variable_stack_.pop_scope();
-
-  current_function_ = nullptr;
 
   return true;
 }
@@ -234,6 +252,10 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
 }
 
 bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
+  auto* sem_statement = builder_->create<semantic::Statement>(stmt);
+
+  ScopedAssignment<semantic::Statement*> sa(current_statement_, sem_statement);
+
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return DetermineResultType(a->lhs()) && DetermineResultType(a->rhs());
   }
@@ -451,7 +473,8 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
     }
 
     auto* function = iter->second;
-    function_calls_.emplace(call, function);
+    function_calls_.emplace(call,
+                            FunctionCallInfo{function, current_statement_});
     SetType(call, function->declaration->return_type());
   }
 
@@ -501,12 +524,14 @@ bool TypeDeterminer::DetermineIntrinsicCall(
     }
     auto* intrinsic = builder_->create<semantic::Intrinsic>(intrinsic_type,
                                                             ret_ty, parameters);
-    builder_->Sem().Add(call, builder_->create<semantic::Call>(intrinsic));
+    builder_->Sem().Add(
+        call, builder_->create<semantic::Call>(intrinsic, current_statement_));
     SetType(call, ret_ty);
     return false;
   }
 
-  builder_->Sem().Add(call, builder_->create<semantic::Call>(result.intrinsic));
+  builder_->Sem().Add(call, builder_->create<semantic::Call>(
+                                result.intrinsic, current_statement_));
   SetType(call, result.intrinsic->ReturnType());
   return true;
 }
@@ -791,9 +816,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
 
-  builder_->Sem().Add(
-      expr,
-      builder_->create<semantic::MemberAccessorExpression>(ret, is_swizzle));
+  builder_->Sem().Add(expr,
+                      builder_->create<semantic::MemberAccessorExpression>(
+                          ret, current_statement_, is_swizzle));
   SetType(expr, ret);
 
   return true;
@@ -890,16 +915,16 @@ TypeDeterminer::VariableInfo* TypeDeterminer::CreateVariableInfo(
 }
 
 type::Type* TypeDeterminer::TypeOf(ast::Expression* expr) {
-  auto it = expr_types_.find(expr);
-  if (it != expr_types_.end()) {
-    return it->second;
+  auto it = expr_info_.find(expr);
+  if (it != expr_info_.end()) {
+    return it->second.type;
   }
   return nullptr;
 }
 
 void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) {
-  assert(expr_types_.count(expr) == 0);
-  expr_types_.emplace(expr, type);
+  assert(expr_info_.count(expr) == 0);
+  expr_info_.emplace(expr, ExpressionInfo{type, current_statement_});
 }
 
 void TypeDeterminer::CreateSemanticNodes() const {
@@ -938,20 +963,21 @@ void TypeDeterminer::CreateSemanticNodes() const {
   // Create semantic nodes for all ast::CallExpressions
   for (auto it : function_calls_) {
     auto* call = it.first;
-    auto* func_info = it.second;
-    auto* sem_func = func_info_to_sem_func.at(func_info);
-    sem.Add(call, builder_->create<semantic::Call>(sem_func));
+    auto info = it.second;
+    auto* sem_func = func_info_to_sem_func.at(info.function);
+    sem.Add(call, builder_->create<semantic::Call>(sem_func, info.statement));
   }
 
   // Create semantic nodes for all remaining expression types
-  for (auto it : expr_types_) {
+  for (auto it : expr_info_) {
     auto* expr = it.first;
-    auto* type = it.second;
+    auto& info = it.second;
     if (sem.Get(expr)) {
       // Expression has already been assigned a semantic node
       continue;
     }
-    sem.Add(expr, builder_->create<semantic::Expression>(type));
+    sem.Add(expr,
+            builder_->create<semantic::Expression>(info.type, info.statement));
   }
 }
 

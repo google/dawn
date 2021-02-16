@@ -27,8 +27,11 @@ class MemberAccessorExpression
  public:
   /// Constructor
   /// @param type the resolved type of the expression
+  /// @param statement the statement that owns this expression
   /// @param is_swizzle true if this member access is for a vector swizzle
-  MemberAccessorExpression(type::Type* type, bool is_swizzle);
+  MemberAccessorExpression(type::Type* type,
+                           Statement* statement,
+                           bool is_swizzle);
 
   /// @return true if this member access is for a vector swizzle
   bool IsSwizzle() const { return is_swizzle_; }

@@ -20,10 +20,11 @@
 namespace tint {
 
 // Forward declarations
+namespace semantic {
+class Statement;
+}  // namespace semantic
 namespace type {
-
 class Type;
-
 }  // namespace type
 
 namespace semantic {
@@ -33,13 +34,18 @@ class Expression : public Castable<Expression, Node> {
  public:
   /// Constructor
   /// @param type the resolved type of the expression
-  explicit Expression(type::Type* type);
+  /// @param statement the statement that owns this expression
+  explicit Expression(type::Type* type, Statement* statement);
 
   /// @return the resolved type of the expression
   type::Type* Type() const { return type_; }
 
+  /// @return the statement that owns this expression
+  Statement* Stmt() const { return statement_; }
+
  private:
   type::Type* const type_;
+  Statement* const statement_;
 };
 
 }  // namespace semantic

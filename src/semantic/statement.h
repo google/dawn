@@ -12,17 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/expression.h"
+#ifndef SRC_SEMANTIC_STATEMENT_H_
+#define SRC_SEMANTIC_STATEMENT_H_
 
-#include "src/type/type.h"
-
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Expression);
+#include "src/semantic/node.h"
 
 namespace tint {
+
+// Forward declarations
+namespace ast {
+class Statement;
+}  // namespace ast
+
 namespace semantic {
 
-Expression::Expression(type::Type* type, Statement* statement)
-    : type_(type->UnwrapIfNeeded()), statement_(statement) {}
+/// Statement holds the semantic information for a statement.
+class Statement : public Castable<Statement, Node> {
+ public:
+  /// Constructor
+  /// @param declaration the AST node for this statement
+  explicit Statement(ast::Statement* declaration);
+
+  /// @return the AST node for this statement
+  ast::Statement* Declaration() const { return declaration_; }
+
+ private:
+  ast::Statement* const declaration_;
+};
 
 }  // namespace semantic
 }  // namespace tint
+
+#endif  // SRC_SEMANTIC_STATEMENT_H_

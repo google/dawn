@@ -30,8 +30,9 @@
 #include "src/type/storage_texture_type.h"
 
 namespace tint {
-namespace ast {
 
+// Forward declarations
+namespace ast {
 class ArrayAccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
@@ -42,8 +43,10 @@ class IdentifierExpression;
 class MemberAccessorExpression;
 class UnaryOpExpression;
 class Variable;
-
 }  // namespace ast
+namespace semantic {
+class Statement;
+}  // namespace semantic
 
 /// Determines types for all items in the given tint program
 class TypeDeterminer {
@@ -95,7 +98,7 @@ class TypeDeterminer {
     std::unordered_set<T> set;
   };
 
-  /// Structure holding semantic information about a function.
+  /// Structure holding semantic information about a variable.
   /// Used to build the semantic::Function nodes at the end of resolving.
   struct VariableInfo {
     explicit VariableInfo(ast::Variable* decl);
@@ -115,6 +118,21 @@ class TypeDeterminer {
     UniqueVector<VariableInfo*> referenced_module_vars;
     UniqueVector<VariableInfo*> local_referenced_module_vars;
     UniqueVector<Symbol> ancestor_entry_points;
+  };
+
+  /// Structure holding semantic information about an expression.
+  /// Used to build the semantic::Expression nodes at the end of resolving.
+  struct ExpressionInfo {
+    type::Type* type;
+    semantic::Statement* statement;
+  };
+
+  /// Structure holding semantic information about a call expression to an
+  /// ast::Function.
+  /// Used to build the semantic::Call nodes at the end of resolving.
+  struct FunctionCallInfo {
+    FunctionInfo* function;
+    semantic::Statement* statement;
   };
 
   /// Determines type information for the program, without creating final the
@@ -203,9 +221,10 @@ class TypeDeterminer {
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<ast::Variable*, VariableInfo*> variable_to_info_;
-  std::unordered_map<ast::CallExpression*, FunctionInfo*> function_calls_;
-  std::unordered_map<ast::Expression*, type::Type*> expr_types_;
+  std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
+  std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
   FunctionInfo* current_function_ = nullptr;
+  semantic::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
 
