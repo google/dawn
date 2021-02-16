@@ -128,6 +128,15 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "global_invocation_id") {
     return ast::Builtin::kGlobalInvocationId;
   }
+  if (str == "sample_index") {
+    return ast::Builtin::kSampleIndex;
+  }
+  if (str == "sample_mask_in") {
+    return ast::Builtin::kSampleMaskIn;
+  }
+  if (str == "sample_mask_out") {
+    return ast::Builtin::kSampleMaskOut;
+  }
   return ast::Builtin::kNone;
 }
 
