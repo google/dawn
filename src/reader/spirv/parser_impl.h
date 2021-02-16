@@ -242,6 +242,13 @@ class ParserImpl : Reader {
   /// @returns true if its an SpvOpExtInst for GLSL.std.450
   bool IsGlslExtendedInstruction(const spvtools::opt::Instruction& inst) const;
 
+  /// Returns true when the given instruction is an extended instruction
+  /// from an ignored extended instruction set.
+  /// @param inst a SPIR-V instruction
+  /// @returns true if its an SpvOpExtInst for an ignored extended instruction
+  bool IsIgnoredExtendedInstruction(
+      const spvtools::opt::Instruction& inst) const;
+
   /// Registers user names for SPIR-V objects, from OpName, and OpMemberName.
   /// Also synthesizes struct field names.  Ensures uniqueness for names for
   /// SPIR-V IDs, and uniqueness of names of fields within any single struct.
@@ -596,6 +603,9 @@ class ParserImpl : Reader {
   // The set of IDs that are imports of the GLSL.std.450 extended instruction
   // sets.
   std::unordered_set<uint32_t> glsl_std_450_imports_;
+  // The set of IDs of imports that are ignored. For example, any
+  // "NonSemanticInfo." import is ignored.
+  std::unordered_set<uint32_t> ignored_imports_;
 
   // Maps a SPIR-V type ID to the corresponding Tint type.
   std::unordered_map<uint32_t, type::Type*> id_to_type_;

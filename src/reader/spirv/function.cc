@@ -3142,6 +3142,12 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     case SpvOpFunctionCall:
       return EmitFunctionCall(inst);
 
+    case SpvOpExtInst:
+      if (parser_impl_.IsIgnoredExtendedInstruction(inst)) {
+        return true;
+      }
+      break;
+
     default:
       break;
   }
@@ -3246,9 +3252,13 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   if (opcode == SpvOpExtInst) {
-    const auto import = inst.GetSingleWordInOperand(0);
-    if (parser_impl_.glsl_std_450_imports().count(import) == 0) {
-      Fail() << "unhandled extended instruction import with ID " << import;
+    if (parser_impl_.IsIgnoredExtendedInstruction(inst)) {
+      // Ignore it but don't error out.
+      return {};
+    }
+    if (!parser_impl_.IsGlslExtendedInstruction(inst)) {
+      Fail() << "unhandled extended instruction import with ID "
+             << inst.GetSingleWordInOperand(0);
       return {};
     }
     return EmitGlslStd450ExtInst(inst);

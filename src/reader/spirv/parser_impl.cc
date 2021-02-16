@@ -613,6 +613,8 @@ bool ParserImpl::RegisterExtendedInstructionImports() {
     // TODO(dneto): Handle other extended instruction sets when needed.
     if (name == "GLSL.std.450") {
       glsl_std_450_imports_.insert(import.result_id());
+    } else if (name.find("NonSemantic.") == 0) {
+      ignored_imports_.insert(import.result_id());
     } else {
       return Fail() << "Unrecognized extended instruction set: " << name;
     }
@@ -624,6 +626,12 @@ bool ParserImpl::IsGlslExtendedInstruction(
     const spvtools::opt::Instruction& inst) const {
   return (inst.opcode() == SpvOpExtInst) &&
          (glsl_std_450_imports_.count(inst.GetSingleWordInOperand(0)) > 0);
+}
+
+bool ParserImpl::IsIgnoredExtendedInstruction(
+    const spvtools::opt::Instruction& inst) const {
+  return (inst.opcode() == SpvOpExtInst) &&
+         (ignored_imports_.count(inst.GetSingleWordInOperand(0)) > 0);
 }
 
 bool ParserImpl::RegisterUserAndStructMemberNames() {

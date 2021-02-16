@@ -46,6 +46,70 @@ TEST_F(SpvParserTest, Import_ImportGlslStd450) {
   EXPECT_THAT(p->glsl_std_450_imports(), ElementsAre(1));
 }
 
+TEST_F(SpvParserTest, Import_NonSemantic_IgnoredImport) {
+  auto p = parser(test::Assemble(
+      R"(%40 = OpExtInstImport "NonSemantic.ClspvReflection.1")"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, Import_NonSemantic_IgnoredExtInsts) {
+  // This is the clspv-compiled output of this OpenCL C:
+  //    kernel void foo(global int*A) { A=A; }
+  // It emits NonSemantic.ClspvReflection.1 extended instructions.
+  // But *tweaked*:
+  //    - to remove gl_WorkgroupSize
+  //    - to move one of the ExtInsts into the globals-and-constants
+  //      section
+  //    - to move one of the ExtInsts into the function body.
+  auto p = parser(test::Assemble(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpExtension "SPV_KHR_non_semantic_info"
+         %20 = OpExtInstImport "NonSemantic.ClspvReflection.1"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %15 "foo"
+               OpSource OpenCL_C 120
+         %21 = OpString "foo"
+         %23 = OpString "A"
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %_struct_3 0 Offset 0
+               OpDecorate %_struct_3 Block
+               OpDecorate %12 DescriptorSet 0
+               OpDecorate %12 Binding 0
+               OpDecorate %7 SpecId 0
+               OpDecorate %8 SpecId 1
+               OpDecorate %9 SpecId 2
+         %24 = OpExtInst %void %20 ArgumentInfo %23
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+  %_struct_3 = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer__struct_3 = OpTypePointer StorageBuffer %_struct_3
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
+          %7 = OpSpecConstant %uint 1
+          %8 = OpSpecConstant %uint 1
+          %9 = OpSpecConstant %uint 1
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+         %12 = OpVariable %_ptr_StorageBuffer__struct_3 StorageBuffer
+         %15 = OpFunction %void Const %14
+         %16 = OpLabel
+         %19 = OpAccessChain %_ptr_StorageBuffer_uint %12 %uint_0 %uint_0
+         %22 = OpExtInst %void %20 Kernel %15 %21
+               OpReturn
+               OpFunctionEnd
+         %25 = OpExtInst %void %20 ArgumentStorageBuffer %22 %uint_0 %uint_0 %uint_0 %24
+         %28 = OpExtInst %void %20 SpecConstantWorkgroupSize %uint_0 %uint_1 %uint_2
+)"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+}
+
 // TODO(dneto): We don't currently support other kinds of extended instruction
 // imports.
 
