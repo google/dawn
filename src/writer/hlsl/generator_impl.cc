@@ -1626,7 +1626,7 @@ bool GeneratorImpl::EmitEntryPointData(
   }
 
   bool emitted_storagebuffer = false;
-  for (auto data : func_sem->ReferencedStoragebufferVariables()) {
+  for (auto data : func_sem->ReferencedStorageBufferVariables()) {
     auto* var = data.first;
     auto* decl = var->Declaration();
     auto* binding = data.second.binding;

@@ -332,6 +332,18 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
   return GetSampledTextureResourceBindingsImpl(entry_point, true);
 }
 
+std::vector<ResourceBinding>
+Inspector::GetReadOnlyStorageTextureResourceBindings(
+    const std::string& entry_point) {
+  return GetStorageTextureResourceBindingsImpl(entry_point, true);
+}
+
+std::vector<ResourceBinding>
+Inspector::GetWriteOnlyStorageTextureResourceBindings(
+    const std::string& entry_point) {
+  return GetStorageTextureResourceBindingsImpl(entry_point, false);
+}
+
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
   auto* func = program_->AST().Functions().Find(program_->Symbols().Get(name));
   if (!func) {
@@ -357,7 +369,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
 
   auto* func_sem = program_->Sem().Get(func);
   std::vector<ResourceBinding> result;
-  for (auto& rsv : func_sem->ReferencedStoragebufferVariables()) {
+  for (auto& rsv : func_sem->ReferencedStorageBufferVariables()) {
     auto* var = rsv.first;
     auto* decl = var->Declaration();
     auto binding_info = rsv.second;
@@ -470,6 +482,43 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     } else {
       entry.sampled_kind = ResourceBinding::SampledKind::kUnknown;
     }
+
+    result.push_back(entry);
+  }
+
+  return result;
+}
+
+std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
+    const std::string& entry_point,
+    bool read_only) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  auto* func_sem = program_->Sem().Get(func);
+  std::vector<ResourceBinding> result;
+  for (auto& ref : func_sem->ReferencedStorageTextureVariables()) {
+    auto* var = ref.first;
+    auto* decl = var->Declaration();
+    auto binding_info = ref.second;
+
+    auto* ac_type = decl->type()->As<type::AccessControl>();
+    if (ac_type == nullptr) {
+      continue;
+    }
+
+    if (read_only != ac_type->IsReadOnly()) {
+      continue;
+    }
+
+    ResourceBinding entry;
+    entry.resource_type =
+        read_only ? ResourceBinding::ResourceType::kReadOnlyStorageTexture
+                  : ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
+    entry.bind_group = binding_info.group->value();
+    entry.binding = binding_info.binding->value();
 
     result.push_back(entry);
   }

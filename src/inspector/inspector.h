@@ -63,7 +63,9 @@ struct ResourceBinding {
     kSampler,
     kComparisonSampler,
     kSampledTexture,
-    kMulitsampledTexture
+    kMulitsampledTexture,
+    kReadOnlyStorageTexture,
+    kWriteOnlyStorageTexture,
   };
 
   /// Type of resource that is bound.
@@ -146,6 +148,16 @@ class Inspector {
   std::vector<ResourceBinding> GetMultisampledTextureResourceBindings(
       const std::string& entry_point);
 
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for read-only storage textures.
+  std::vector<ResourceBinding> GetReadOnlyStorageTextureResourceBindings(
+      const std::string& entry_point);
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for write-only storage textures.
+  std::vector<ResourceBinding> GetWriteOnlyStorageTextureResourceBindings(
+      const std::string& entry_point);
+
  private:
   const Program* program_;
   std::string error_;
@@ -156,9 +168,9 @@ class Inspector {
   ast::Function* FindEntryPointByName(const std::string& name);
 
   /// @param entry_point name of the entry point to get information about.
-  /// @param read_only get only read only if true, otherwise get everything
-  ///                  else.
-  /// @returns vector of all of the bindings for the request storage buffers.
+  /// @param read_only if true get only read-only bindings, if false get
+  ///                  write-only bindings.
+  /// @returns vector of all of the bindings for the requested storage buffers.
   std::vector<ResourceBinding> GetStorageBufferResourceBindingsImpl(
       const std::string& entry_point,
       bool read_only);
@@ -170,6 +182,14 @@ class Inspector {
   std::vector<ResourceBinding> GetSampledTextureResourceBindingsImpl(
       const std::string& entry_point,
       bool multisampled_only);
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @param read_only if true get only read-only bindings, otherwise get
+  ///                  write-only bindings.
+  /// @returns vector of all of the bindings for the requested storage textures.
+  std::vector<ResourceBinding> GetStorageTextureResourceBindingsImpl(
+      const std::string& entry_point,
+      bool read_only);
 };
 
 }  // namespace inspector

@@ -601,6 +601,85 @@ class InspectorHelper : public ProgramBuilder {
     return nullptr;
   }
 
+  /// Generates appropriate types for a StorageTexture
+  /// @param dim the texture dimension of the storage texture
+  /// @param format the image format of the storage texture
+  /// @returns the storage texture type and subtype
+  std::tuple<type::StorageTexture*, type::Type*> MakeStorageTextureTypes(
+      type::TextureDimension dim,
+      type::ImageFormat format) {
+    type::Type* subtype = type::StorageTexture::SubtypeFor(format, Types());
+    return {create<type::StorageTexture>(dim, format, subtype), subtype};
+  }
+
+  /// Generates appropriate types for a Read-Only StorageTexture
+  /// @param dim the texture dimension of the storage texture
+  /// @param format the image format of the storage texture
+  /// @param read_only should the access type be read only, otherwise write only
+  /// @returns the storage texture type, subtype & access control type
+  std::tuple<type::StorageTexture*, type::Type*, type::AccessControl*>
+  MakeStorageTextureTypes(type::TextureDimension dim,
+                          type::ImageFormat format,
+                          bool read_only) {
+    type::StorageTexture* texture_type;
+    type::Type* subtype;
+    std::tie(texture_type, subtype) = MakeStorageTextureTypes(dim, format);
+    auto* access_control =
+        create<type::AccessControl>(read_only ? ast::AccessControl::kReadOnly
+                                              : ast::AccessControl::kWriteOnly,
+                                    texture_type);
+    return {texture_type, subtype, access_control};
+  }
+
+  /// Generates appropriate types for a Write-Only StorageTexture
+  /// @param dim the texture dimension of the storage texture
+  /// @param format the image format of the storage texture
+  /// @returns the storage texture type, subtype & access control type
+  std::tuple<type::StorageTexture*, type::Type*, type::AccessControl*>
+  MakeWriteOnlyStorageTextureTypes(type::TextureDimension dim,
+                                   type::ImageFormat format) {
+    type::StorageTexture* texture_type;
+    type::Type* subtype;
+    std::tie(texture_type, subtype) = MakeStorageTextureTypes(dim, format);
+    auto* access_control = create<type::AccessControl>(
+        ast::AccessControl::kWriteOnly, texture_type);
+    return {texture_type, subtype, access_control};
+  }
+
+  /// Adds a storage texture variable to the program
+  /// @param name the name of the variable
+  /// @param type the type to use
+  /// @param group the binding/group to use for the sampled texture
+  /// @param binding the binding number to use for the sampled texture
+  void AddStorageTexture(const std::string& name,
+                         type::Type* type,
+                         uint32_t group,
+                         uint32_t binding) {
+    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
+  }
+
+  /// Generates a function that references a storage texture variable.
+  /// @param func_name name of the function created
+  /// @param st_name name of the storage texture to use
+  /// @param dim_type type expected by textureDimensons to return
+  /// @param decorations the function decorations
+  /// @returns a function that references all of the values specified
+  ast::Function* MakeStorageTextureBodyFunction(
+      const std::string& func_name,
+      const std::string& st_name,
+      type::Type* dim_type,
+      ast::FunctionDecorationList decorations) {
+    ast::StatementList stmts;
+
+    stmts.emplace_back(create<ast::VariableDeclStatement>(
+        Var("dim", ast::StorageClass::kFunction, dim_type)));
+    stmts.emplace_back(create<ast::AssignmentStatement>(
+        Expr("dim"), Call("textureDimensions", st_name)));
+    stmts.emplace_back(create<ast::ReturnStatement>());
+
+    return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
+  }
+
   Inspector& Build() {
     if (inspector_) {
       return *inspector_;
@@ -694,6 +773,13 @@ class InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam
 class InspectorGetMultisampledTextureResourceBindingsTestWithParam
     : public InspectorHelper,
       public testing::TestWithParam<GetMultisampledTextureTestParams> {};
+class InspectorGetStorageTextureResourceBindingsTest : public InspectorHelper,
+                                                       public testing::Test {};
+typedef std::tuple<bool, type::TextureDimension, type::ImageFormat>
+    GetStorageTextureTestParams;
+class InspectorGetStorageTextureResourceBindingsTestWithParam
+    : public InspectorHelper,
+      public testing::TestWithParam<GetStorageTextureTestParams> {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   Inspector& inspector = Build();
@@ -2416,6 +2502,126 @@ INSTANTIATE_TEST_SUITE_P(
             type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kUInt}));
+
+TEST_F(InspectorGetStorageTextureResourceBindingsTest, Empty) {
+  MakeEmptyBodyFunction(
+      "ep", ast::FunctionDecorationList{
+                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+            });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetReadOnlyStorageTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  EXPECT_EQ(0u, result.size());
+
+  result = inspector.GetWriteOnlyStorageTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  EXPECT_EQ(0u, result.size());
+}
+
+TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
+  bool read_only;
+  type::TextureDimension dim;
+  type::ImageFormat format;
+  std::tie(read_only, dim, format) = GetParam();
+
+  type::StorageTexture* st_type;
+  type::Type* st_subtype;
+  type::AccessControl* ac;
+  std::tie(st_type, st_subtype, ac) =
+      MakeStorageTextureTypes(dim, format, read_only);
+  AddStorageTexture("st_var", ac, 0, 0);
+
+  type::Type* dim_type = nullptr;
+  switch (dim) {
+    case type::TextureDimension::k1d:
+    case type::TextureDimension::k1dArray:
+      dim_type = ty.i32();
+      break;
+    case type::TextureDimension::k2d:
+    case type::TextureDimension::k2dArray:
+      dim_type = ty.vec2<i32>();
+      break;
+    case type::TextureDimension::k3d:
+      dim_type = ty.vec3<i32>();
+      break;
+    default:
+      break;
+  }
+
+  ASSERT_FALSE(dim_type == nullptr);
+
+  MakeStorageTextureBodyFunction(
+      "ep", "st_var", dim_type,
+      ast::FunctionDecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
+  Inspector& inspector = Build();
+
+  auto result =
+      read_only ? inspector.GetReadOnlyStorageTextureResourceBindings("ep")
+                : inspector.GetWriteOnlyStorageTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(read_only ? ResourceBinding::ResourceType::kReadOnlyStorageTexture
+                      : ResourceBinding::ResourceType::kWriteOnlyStorageTexture,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+
+  result = read_only
+               ? inspector.GetWriteOnlyStorageTextureResourceBindings("ep")
+               : inspector.GetReadOnlyStorageTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(0u, result.size());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    InspectorGetStorageTextureResourceBindingsTest,
+    InspectorGetStorageTextureResourceBindingsTestWithParam,
+    testing::Combine(testing::Bool(),
+                     testing::Values(type::TextureDimension::k1d,
+                                     type::TextureDimension::k1dArray,
+                                     type::TextureDimension::k2d,
+                                     type::TextureDimension::k2dArray,
+                                     type::TextureDimension::k3d),
+                     testing::Values(type::ImageFormat::kR8Uint,
+                                     type::ImageFormat::kR16Uint,
+                                     type::ImageFormat::kRg8Uint,
+                                     type::ImageFormat::kR32Uint,
+                                     type::ImageFormat::kRg16Uint,
+                                     type::ImageFormat::kRgba8Uint,
+                                     type::ImageFormat::kRg32Uint,
+                                     type::ImageFormat::kRgba16Uint,
+                                     type::ImageFormat::kRgba32Uint,
+                                     type::ImageFormat::kR8Sint,
+                                     type::ImageFormat::kR16Sint,
+                                     type::ImageFormat::kRg8Sint,
+                                     type::ImageFormat::kR32Sint,
+                                     type::ImageFormat::kRg16Sint,
+                                     type::ImageFormat::kRgba8Sint,
+                                     type::ImageFormat::kRg32Sint,
+                                     type::ImageFormat::kRgba16Sint,
+                                     type::ImageFormat::kRgba32Sint,
+                                     type::ImageFormat::kR8Unorm,
+                                     type::ImageFormat::kRg8Unorm,
+                                     type::ImageFormat::kRgba8Unorm,
+                                     type::ImageFormat::kRgba8UnormSrgb,
+                                     type::ImageFormat::kBgra8Unorm,
+                                     type::ImageFormat::kBgra8UnormSrgb,
+                                     type::ImageFormat::kRgb10A2Unorm,
+                                     type::ImageFormat::kR8Snorm,
+                                     type::ImageFormat::kRg8Snorm,
+                                     type::ImageFormat::kRgba8Snorm,
+                                     type::ImageFormat::kR16Float,
+                                     type::ImageFormat::kR32Float,
+                                     type::ImageFormat::kRg16Float,
+                                     type::ImageFormat::kRg11B10Float,
+                                     type::ImageFormat::kRg32Float,
+                                     type::ImageFormat::kRgba16Float,
+                                     type::ImageFormat::kRgba32Float)));
 
 }  // namespace
 }  // namespace inspector

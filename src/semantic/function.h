@@ -95,7 +95,7 @@ class Function : public Castable<Function, CallTarget> {
   /// must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
   const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedStoragebufferVariables() const;
+  ReferencedStorageBufferVariables() const;
 
   /// Retrieves any referenced regular Sampler variables. Note, the
   /// variables must be decorated with both binding and group decorations.
@@ -120,6 +120,12 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the referenced sampled textures
   const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedMultisampledTextureVariables() const;
+
+  /// Retrieves any referenced storage texture variables. Note, the variables
+  /// must be decorated with both binding and group decorations.
+  /// @returns the referenced storage textures
+  const std::vector<std::pair<const Variable*, BindingInfo>>
+  ReferencedStorageTextureVariables() const;
 
   /// Retrieves any locally referenced builtin variables
   /// @returns the <variable, decoration> pairs.

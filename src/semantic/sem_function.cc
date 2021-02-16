@@ -24,6 +24,7 @@
 #include "src/semantic/variable.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
+#include "src/type/storage_texture_type.h"
 #include "src/type/texture_type.h"
 
 TINT_INSTANTIATE_CLASS_ID(tint::semantic::Function);
@@ -98,7 +99,7 @@ Function::ReferencedUniformVariables() const {
 }
 
 const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedStoragebufferVariables() const {
+Function::ReferencedStorageBufferVariables() const {
   std::vector<std::pair<const Variable*, Function::BindingInfo>> ret;
 
   for (auto* var : ReferencedModuleVariables()) {
@@ -157,6 +158,35 @@ Function::ReferencedSampledTextureVariables() const {
 const std::vector<std::pair<const Variable*, Function::BindingInfo>>
 Function::ReferencedMultisampledTextureVariables() const {
   return ReferencedSampledTextureVariablesImpl(true);
+}
+
+const std::vector<std::pair<const Variable*, Function::BindingInfo>>
+Function::ReferencedStorageTextureVariables() const {
+  std::vector<std::pair<const Variable*, Function::BindingInfo>> ret;
+
+  for (auto* var : ReferencedModuleVariables()) {
+    auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
+    auto* storage_texture = unwrapped_type->As<type::StorageTexture>();
+    if (storage_texture == nullptr) {
+      continue;
+    }
+
+    ast::BindingDecoration* binding = nullptr;
+    ast::GroupDecoration* group = nullptr;
+    for (auto* deco : var->Declaration()->decorations()) {
+      if (auto* b = deco->As<ast::BindingDecoration>()) {
+        binding = b;
+      } else if (auto* s = deco->As<ast::GroupDecoration>()) {
+        group = s;
+      }
+    }
+    if (binding == nullptr || group == nullptr) {
+      continue;
+    }
+
+    ret.push_back({var, BindingInfo{binding, group}});
+  }
+  return ret;
 }
 
 const std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>

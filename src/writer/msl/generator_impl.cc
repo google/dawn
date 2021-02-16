@@ -546,7 +546,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     out_ << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
-  for (const auto& data : func_sem->ReferencedStoragebufferVariables()) {
+  for (const auto& data : func_sem->ReferencedStorageBufferVariables()) {
     auto* var = data.first;
     if (!first) {
       out_ << ", ";
@@ -1384,7 +1384,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
-  for (const auto& data : func_sem->ReferencedStoragebufferVariables()) {
+  for (const auto& data : func_sem->ReferencedStorageBufferVariables()) {
     auto* var = data.first;
     if (!first) {
       out_ << ", ";
@@ -1551,7 +1551,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
          << " [[buffer(" << binding->value() << ")]]";
   }
 
-  for (auto data : func_sem->ReferencedStoragebufferVariables()) {
+  for (auto data : func_sem->ReferencedStorageBufferVariables()) {
     if (!first) {
       out_ << ", ";
     }
