@@ -87,7 +87,7 @@ TEST_F(BuilderTest, UnaryOp_Not) {
 }
 
 TEST_F(BuilderTest, UnaryOp_LoadRequired) {
-  auto* var = Global("param", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("param", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr =
       create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("param"));

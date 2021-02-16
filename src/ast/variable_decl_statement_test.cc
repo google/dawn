@@ -25,14 +25,14 @@ namespace {
 using VariableDeclStatementTest = TestHelper;
 
 TEST_F(VariableDeclStatementTest, Creation) {
-  auto* var = Var("a", StorageClass::kNone, ty.f32());
+  auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
   auto* stmt = create<VariableDeclStatement>(var);
   EXPECT_EQ(stmt->variable(), var);
 }
 
 TEST_F(VariableDeclStatementTest, Creation_WithSource) {
-  auto* var = Var("a", StorageClass::kNone, ty.f32());
+  auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
   auto* stmt =
       create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
@@ -42,20 +42,20 @@ TEST_F(VariableDeclStatementTest, Creation_WithSource) {
 }
 
 TEST_F(VariableDeclStatementTest, IsVariableDecl) {
-  auto* var = Var("a", StorageClass::kNone, ty.f32());
+  auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
   auto* stmt = create<VariableDeclStatement>(var);
   EXPECT_TRUE(stmt->Is<VariableDeclStatement>());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid) {
-  auto* var = Var("a", StorageClass::kNone, ty.f32());
+  auto* var = Var("a", ty.f32(), StorageClass::kNone);
   auto* stmt = create<VariableDeclStatement>(var);
   EXPECT_TRUE(stmt->IsValid());
 }
 
 TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
-  auto* var = Var("", StorageClass::kNone, ty.f32());
+  auto* var = Var("", ty.f32(), StorageClass::kNone);
   auto* stmt = create<VariableDeclStatement>(var);
   EXPECT_FALSE(stmt->IsValid());
 }
@@ -66,7 +66,7 @@ TEST_F(VariableDeclStatementTest, IsValid_NullVariable) {
 }
 
 TEST_F(VariableDeclStatementTest, ToStr) {
-  auto* var = Var("a", StorageClass::kNone, ty.f32());
+  auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
   auto* stmt =
       create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);

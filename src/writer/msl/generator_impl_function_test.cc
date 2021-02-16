@@ -99,8 +99,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ast::VariableList params;
-  params.push_back(Var("a", ast::StorageClass::kNone, ty.f32()));
-  params.push_back(Var("b", ast::StorageClass::kNone, ty.i32()));
+  params.push_back(Var("a", ty.f32(), ast::StorageClass::kNone));
+  params.push_back(Var("b", ty.i32(), ast::StorageClass::kNone));
 
   Func("my_func", params, ty.void_(),
        ast::StatementList{
@@ -142,10 +142,10 @@ fragment void main_tint_0() {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_NoReturn_InOut) {
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   Func("main", ast::VariableList{}, ty.void_(),
@@ -178,10 +178,10 @@ fragment main_out main_tint_0(main_in tint_in [[stage_in]]) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
@@ -216,11 +216,11 @@ fragment frag_main_out frag_main(frag_main_in tint_in [[stage_in]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_WithInOut_Builtins) {
-  Global("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
 
-  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
@@ -254,11 +254,11 @@ fragment frag_main_out frag_main(float4 coord [[position]]) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
-  Global("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kUniform, nullptr,
          ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                      create<ast::GroupDecoration>(1)});
 
-  auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   MemberAccessor("coord", "x"), ast::VariableDecorationList{});
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -295,11 +295,11 @@ TEST_F(MslGeneratorImplTest,
 
   AST().AddConstructedType(s);
 
-  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                      create<ast::GroupDecoration>(1)});
 
-  auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -340,11 +340,11 @@ TEST_F(MslGeneratorImplTest,
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
   AST().AddConstructedType(s);
 
-  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                      create<ast::GroupDecoration>(1)});
 
-  auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   MemberAccessor("coord", "b"), ast::VariableDecorationList{});
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -377,17 +377,17 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 TEST_F(
     MslGeneratorImplTest,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
-  Global("val", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("val", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32()));
+  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
@@ -437,12 +437,12 @@ fragment ep_1_out ep_1(ep_1_in tint_in [[stage_in]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoints_NoUsedGlobals) {
-  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32()));
+  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
 
   Func("sub_func", params, ty.f32(),
        ast::StatementList{
@@ -485,16 +485,16 @@ fragment ep_1_out ep_1() {
 TEST_F(
     MslGeneratorImplTest,
     Emit_FunctionDecoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  Global("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
 
-  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32()));
+  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("depth"),
@@ -539,12 +539,12 @@ fragment ep_1_out ep_1(float4 coord [[position]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_Uniform) {
-  Global("coord", ast::StorageClass::kUniform, ty.vec4<f32>(), nullptr,
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kUniform, nullptr,
          ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                      create<ast::GroupDecoration>(1)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32()));
+  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "x")),
@@ -555,7 +555,7 @@ TEST_F(MslGeneratorImplTest,
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
 
-  auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -595,19 +595,19 @@ TEST_F(MslGeneratorImplTest,
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
   AST().AddConstructedType(s);
 
-  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                      create<ast::GroupDecoration>(1)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32()));
+  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "b"))};
 
   Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
-  auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -652,12 +652,12 @@ TEST_F(MslGeneratorImplTest,
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
   AST().AddConstructedType(s);
 
-  Global("coord", ast::StorageClass::kStorage, &ac, nullptr,
+  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                      create<ast::GroupDecoration>(1)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ast::StorageClass::kFunction, ty.f32()));
+  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "b"))};
@@ -667,7 +667,7 @@ TEST_F(MslGeneratorImplTest,
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
 
-  auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   Call("sub_func", 1.0f), ast::VariableDecorationList{});
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -703,7 +703,7 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoints_WithGlobal_Nested_Return) {
-  Global("bar", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto* list = create<ast::BlockStatement>(ast::StatementList{
@@ -765,7 +765,7 @@ kernel void main_tint_0() {
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ast::VariableList params;
-  params.push_back(Var("a", ast::StorageClass::kNone, ty.array<f32, 5>()));
+  params.push_back(Var("a", ty.array<f32, 5>(), ast::StorageClass::kNone));
 
   Func("my_func", params, ty.void_(),
        ast::StatementList{
@@ -814,14 +814,14 @@ TEST_F(MslGeneratorImplTest,
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  Global("data", ast::StorageClass::kStorage, &ac, nullptr,
+  Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{create<ast::BindingDecoration>(0),
                                      create<ast::GroupDecoration>(0)});
 
   AST().AddConstructedType(s);
 
   {
-    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     Func("a", ast::VariableList{}, ty.void_(),
@@ -835,7 +835,7 @@ TEST_F(MslGeneratorImplTest,
   }
 
   {
-    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     Func("b", ast::VariableList{}, ty.void_(),

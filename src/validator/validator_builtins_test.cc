@@ -144,7 +144,7 @@ TEST_F(ValidatorBuiltinsTest, Determinant_Mat4x4) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Frexp_Scalar) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.i32());
+  auto* a = Var("a", ty.i32(), ast::StorageClass::kWorkgroup);
   RegisterVariable(a);
   auto* builtin = Call("frexp", 1.0f, Expr("a"));
   WrapInFunction(builtin);
@@ -157,11 +157,11 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Scalar) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Frexp_Vec2) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.vec2<int>());
-  auto* b = Const("b", ast::StorageClass::kWorkgroup,
+  auto* a = Var("a", ty.vec2<int>(), ast::StorageClass::kWorkgroup);
+  auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 2),
                                         ast::StorageClass::kWorkgroup),
-                  Expr("a"), {});
+                  ast::StorageClass::kWorkgroup, Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec2<float>(1.0f, 1.0f), Expr("b"));
@@ -176,11 +176,11 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec2) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Frexp_Vec3) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.vec3<int>());
-  auto* b = Const("b", ast::StorageClass::kWorkgroup,
+  auto* a = Var("a", ty.vec3<int>(), ast::StorageClass::kWorkgroup);
+  auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 3),
                                         ast::StorageClass::kWorkgroup),
-                  Expr("a"), {});
+                  ast::StorageClass::kWorkgroup, Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
@@ -194,11 +194,11 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec3) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Frexp_Vec4) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.vec4<int>());
-  auto* b = Const("b", ast::StorageClass::kWorkgroup,
+  auto* a = Var("a", ty.vec4<int>(), ast::StorageClass::kWorkgroup);
+  auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 4),
                                         ast::StorageClass::kWorkgroup),
-                  Expr("a"), {});
+                  ast::StorageClass::kWorkgroup, Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
@@ -212,10 +212,9 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec4) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Modf_Scalar) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.f32());
-  auto* b =
-      Const("b", ast::StorageClass::kWorkgroup,
-            ty.pointer<float>(ast::StorageClass::kWorkgroup), Expr("a"), {});
+  auto* a = Var("a", ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* b = Const("b", ty.pointer<float>(ast::StorageClass::kWorkgroup),
+                  ast::StorageClass::kWorkgroup, Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", 1.0f, Expr("b"));
@@ -229,11 +228,11 @@ TEST_F(ValidatorBuiltinsTest, Modf_Scalar) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Modf_Vec2) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.vec2<float>());
-  auto* b = Const("b", ast::StorageClass::kWorkgroup,
+  auto* a = Var("a", ty.vec2<float>(), ast::StorageClass::kWorkgroup);
+  auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 2),
                                         ast::StorageClass::kWorkgroup),
-                  Expr("a"), {});
+                  ast::StorageClass::kWorkgroup, Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec2<float>(1.0f, 1.0f), Expr("b"));
@@ -247,11 +246,11 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec2) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Modf_Vec3) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.vec3<float>());
-  auto* b = Const("b", ast::StorageClass::kWorkgroup,
+  auto* a = Var("a", ty.vec3<float>(), ast::StorageClass::kWorkgroup);
+  auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 3),
                                         ast::StorageClass::kWorkgroup),
-                  Expr("a"), {});
+                  ast::StorageClass::kWorkgroup, Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
@@ -265,11 +264,11 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec3) {
 }
 
 TEST_F(ValidatorBuiltinsTest, Modf_Vec4) {
-  auto* a = Var("a", ast::StorageClass::kWorkgroup, ty.vec4<float>());
-  auto* b = Const("b", ast::StorageClass::kWorkgroup,
+  auto* a = Var("a", ty.vec4<float>(), ast::StorageClass::kWorkgroup);
+  auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 4),
                                         ast::StorageClass::kWorkgroup),
-                  Expr("a"), {});
+                  ast::StorageClass::kWorkgroup, Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));

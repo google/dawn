@@ -31,7 +31,7 @@ using FunctionTest = TestHelper;
 
 TEST_F(FunctionTest, Creation) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
   auto* var = params[0];
 
   auto* f = Func("func", params, ty.void_(), StatementList{},
@@ -44,7 +44,7 @@ TEST_F(FunctionTest, Creation) {
 
 TEST_F(FunctionTest, Creation_WithSource) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
 
   auto* f = Func(Source{Source::Location{20, 2}}, "func", params, ty.void_(),
                  StatementList{}, FunctionDecorationList{});
@@ -55,7 +55,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
 
 TEST_F(FunctionTest, IsValid) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
 
   auto* f = Func("func", params, ty.void_(),
                  StatementList{
@@ -67,7 +67,7 @@ TEST_F(FunctionTest, IsValid) {
 
 TEST_F(FunctionTest, IsValid_InvalidName) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
 
   auto* f =
       Func("", params, ty.void_(), StatementList{}, FunctionDecorationList{});
@@ -76,7 +76,7 @@ TEST_F(FunctionTest, IsValid_InvalidName) {
 
 TEST_F(FunctionTest, IsValid_MissingReturnType) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
 
   auto* f =
       Func("func", params, nullptr, StatementList{}, FunctionDecorationList{});
@@ -85,7 +85,7 @@ TEST_F(FunctionTest, IsValid_MissingReturnType) {
 
 TEST_F(FunctionTest, IsValid_NullParam) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
   params.push_back(nullptr);
 
   auto* f = Func("func", params, ty.void_(), StatementList{},
@@ -95,7 +95,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
 
 TEST_F(FunctionTest, IsValid_InvalidParam) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, nullptr));
+  params.push_back(Var("var", nullptr, StorageClass::kNone));
 
   auto* f = Func("func", params, ty.void_(), StatementList{},
                  FunctionDecorationList{});
@@ -104,7 +104,7 @@ TEST_F(FunctionTest, IsValid_InvalidParam) {
 
 TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
 
   auto* f = Func("func", params, ty.void_(),
                  StatementList{
@@ -118,7 +118,7 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
 
 TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
 
   auto* f = Func("func", params, ty.void_(),
                  StatementList{
@@ -162,7 +162,7 @@ WorkgroupDecoration{2 4 6}
 
 TEST_F(FunctionTest, ToStr_WithParams) {
   VariableList params;
-  params.push_back(Var("var", StorageClass::kNone, ty.i32()));
+  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
 
   auto* f = Func("func", params, ty.void_(),
                  StatementList{
@@ -192,8 +192,8 @@ TEST_F(FunctionTest, TypeName) {
 
 TEST_F(FunctionTest, TypeName_WithParams) {
   VariableList params;
-  params.push_back(Var("var1", StorageClass::kNone, ty.i32()));
-  params.push_back(Var("var2", StorageClass::kNone, ty.f32()));
+  params.push_back(Var("var1", ty.i32(), StorageClass::kNone));
+  params.push_back(Var("var2", ty.f32(), StorageClass::kNone));
 
   auto* f = Func("func", params, ty.void_(), StatementList{},
                  FunctionDecorationList{});

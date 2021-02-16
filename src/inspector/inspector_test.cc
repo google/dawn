@@ -109,10 +109,10 @@ class InspectorHelper : public ProgramBuilder {
       std::string in, out;
       std::tie(in, out) = inout;
 
-      Global(in, ast::StorageClass::kInput, ty.u32(), nullptr,
+      Global(in, ty.u32(), ast::StorageClass::kInput, nullptr,
              ast::VariableDecorationList{
                  create<ast::LocationDecoration>(location++)});
-      Global(out, ast::StorageClass::kOutput, ty.u32(), nullptr,
+      Global(out, ty.u32(), ast::StorageClass::kOutput, nullptr,
              ast::VariableDecorationList{
                  create<ast::LocationDecoration>(location++)});
     }
@@ -175,7 +175,7 @@ class InspectorHelper : public ProgramBuilder {
       constructor =
           create<ast::ScalarConstructorExpression>(MakeLiteral(type, val));
     }
-    GlobalConst(name, ast::StorageClass::kNone, type, constructor,
+    GlobalConst(name, type, ast::StorageClass::kNone, constructor,
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(id),
                 });
@@ -319,7 +319,7 @@ class InspectorHelper : public ProgramBuilder {
                   ast::StorageClass storage_class,
                   uint32_t group,
                   uint32_t binding) {
-    GlobalConst(name, storage_class, type, nullptr,
+    GlobalConst(name, type, storage_class, nullptr,
                 ast::VariableDecorationList{
                     create<ast::BindingDecoration>(binding),
                     create<ast::GroupDecoration>(group),
@@ -366,7 +366,7 @@ class InspectorHelper : public ProgramBuilder {
       std::string member_name = StructMemberName(member_idx, member_type);
 
       stmts.emplace_back(create<ast::VariableDeclStatement>(
-          Var("local" + member_name, ast::StorageClass::kNone, member_type)));
+          Var("local" + member_name, member_type, ast::StorageClass::kNone)));
     }
 
     for (auto member : members) {
@@ -457,14 +457,14 @@ class InspectorHelper : public ProgramBuilder {
   }
 
   void AddGlobalVariable(const std::string& name, type::Type* type) {
-    Global(name, ast::StorageClass::kUniformConstant, type);
+    Global(name, type, ast::StorageClass::kUniformConstant);
   }
 
   /// Adds a depth texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
   void AddDepthTexture(const std::string& name, type::Type* type) {
-    Global(name, ast::StorageClass::kUniformConstant, type);
+    Global(name, type, ast::StorageClass::kUniformConstant);
   }
 
   /// Generates a function that references a specific sampler variable
@@ -486,8 +486,8 @@ class InspectorHelper : public ProgramBuilder {
 
     ast::StatementList stmts;
     stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("sampler_result", ast::StorageClass::kFunction,
-            vec_type(base_type, 4))));
+        Var("sampler_result", vec_type(base_type, 4),
+            ast::StorageClass::kFunction)));
 
     stmts.emplace_back(create<ast::AssignmentStatement>(
         Expr("sampler_result"),
@@ -519,8 +519,8 @@ class InspectorHelper : public ProgramBuilder {
     ast::StatementList stmts;
 
     stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("sampler_result", ast::StorageClass::kFunction,
-            vec_type(base_type, 4))));
+        Var("sampler_result", vec_type(base_type, 4),
+            ast::StorageClass::kFunction)));
 
     stmts.emplace_back(create<ast::AssignmentStatement>(
         Expr("sampler_result"), Call("textureSample", texture_name,
@@ -553,7 +553,7 @@ class InspectorHelper : public ProgramBuilder {
     ast::StatementList stmts;
 
     stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("sampler_result", ast::StorageClass::kFunction, base_type)));
+        Var("sampler_result", base_type, ast::StorageClass::kFunction)));
     stmts.emplace_back(create<ast::AssignmentStatement>(
         Expr("sampler_result"), Call("textureSampleCompare", texture_name,
                                      sampler_name, coords_name, depth_name)));
@@ -657,7 +657,7 @@ class InspectorHelper : public ProgramBuilder {
     ast::StatementList stmts;
 
     stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("dim", ast::StorageClass::kFunction, dim_type)));
+        Var("dim", dim_type, ast::StorageClass::kFunction)));
     stmts.emplace_back(create<ast::AssignmentStatement>(
         Expr("dim"), Call("textureDimensions", st_name)));
     stmts.emplace_back(create<ast::ReturnStatement>());
@@ -1176,10 +1176,10 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
-  Global("in_var", ast::StorageClass::kInput, ty.u32(), nullptr,
+  Global("in_var", ty.u32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
-  Global("out_var", ast::StorageClass::kOutput, ty.u32(), nullptr,
+  Global("out_var", ty.u32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});

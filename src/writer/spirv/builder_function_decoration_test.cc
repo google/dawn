@@ -97,9 +97,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  auto* v_in = Global("my_in", ast::StorageClass::kInput, ty.f32());
-  auto* v_out = Global("my_out", ast::StorageClass::kOutput, ty.f32());
-  auto* v_wg = Global("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
+  auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
+  auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
+  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
 
   spirv::Builder& b = Build();
 
@@ -142,9 +142,9 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  auto* v_in = Global("my_in", ast::StorageClass::kInput, ty.f32());
-  auto* v_out = Global("my_out", ast::StorageClass::kOutput, ty.f32());
-  auto* v_wg = Global("my_wg", ast::StorageClass::kWorkgroup, ty.f32());
+  auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
+  auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
+  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
 
   spirv::Builder& b = Build();
 
@@ -258,7 +258,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
-  Global("fragdepth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("fragdepth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
          });

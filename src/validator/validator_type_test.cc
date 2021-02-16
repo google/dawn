@@ -162,7 +162,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
   /// [[stage(vertex)]]
   // fn func -> void { var a : array<i32>; }
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.array<i32>());
+  auto* var = Var("a", ty.array<i32>(), ast::StorageClass::kNone);
 
   Func("func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -186,8 +186,8 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
   // [[stage(vertex)]] fn main() {}
 
   auto* param =
-      Var(Source{Source::Location{12, 34}}, "a", ast::StorageClass::kNone,
-          ty.array<i32>(), nullptr, ast::VariableDecorationList{});
+      Var(Source{Source::Location{12, 34}}, "a", ty.array<i32>(),
+          ast::StorageClass::kNone, nullptr, ast::VariableDecorationList{});
 
   Func("func", ast::VariableList{param}, ty.void_(),
        ast::StatementList{

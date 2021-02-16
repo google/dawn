@@ -401,7 +401,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.i32(), Expr(2),
+  auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2),
                   ast::VariableDecorationList{});
   auto* init = var->constructor();
 
@@ -416,7 +416,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
   auto* init = Expr(2);
-  Global("my_var", ast::StorageClass::kNone, ty.i32(), init,
+  Global("my_var", ty.i32(), ast::StorageClass::kNone, init,
          ast::VariableDecorationList{});
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -439,13 +439,13 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   ast::VariableList params;
 
   // Declare i32 "foo" inside a block
-  auto* foo_i32 = Var("foo", ast::StorageClass::kNone, ty.i32(), Expr(2),
+  auto* foo_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2),
                       ast::VariableDecorationList{});
   auto* foo_i32_init = foo_i32->constructor();
   auto* foo_i32_decl = create<ast::VariableDeclStatement>(foo_i32);
 
   // Reference "foo" inside the block
-  auto* bar_i32 = Var("bar", ast::StorageClass::kNone, ty.i32(), Expr("foo"),
+  auto* bar_i32 = Var("bar", ty.i32(), ast::StorageClass::kNone, Expr("foo"),
                       ast::VariableDecorationList{});
   auto* bar_i32_init = bar_i32->constructor();
   auto* bar_i32_decl = create<ast::VariableDeclStatement>(bar_i32);
@@ -454,13 +454,13 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
       ast::StatementList{foo_i32_decl, bar_i32_decl});
 
   // Declare f32 "foo" at function scope
-  auto* foo_f32 = Var("foo", ast::StorageClass::kNone, ty.f32(), Expr(2.f),
+  auto* foo_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f),
                       ast::VariableDecorationList{});
   auto* foo_f32_init = foo_f32->constructor();
   auto* foo_f32_decl = create<ast::VariableDeclStatement>(foo_f32);
 
   // Reference "foo" at function scope
-  auto* bar_f32 = Var("bar", ast::StorageClass::kNone, ty.f32(), Expr("foo"),
+  auto* bar_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"),
                       ast::VariableDecorationList{});
   auto* bar_f32_init = bar_f32->constructor();
   auto* bar_f32_decl = create<ast::VariableDeclStatement>(bar_f32);
@@ -498,7 +498,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   ast::VariableList params;
 
   // Declare i32 "foo" inside a function
-  auto* fn_i32 = Var("foo", ast::StorageClass::kNone, ty.i32(), Expr(2),
+  auto* fn_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2),
                      ast::VariableDecorationList{});
   auto* fn_i32_init = fn_i32->constructor();
   auto* fn_i32_decl = create<ast::VariableDeclStatement>(fn_i32);
@@ -506,13 +506,13 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
        ast::FunctionDecorationList{});
 
   // Declare f32 "foo" at module scope
-  auto* mod_f32 = Var("foo", ast::StorageClass::kNone, ty.f32(), Expr(2.f),
+  auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f),
                       ast::VariableDecorationList{});
   auto* mod_init = mod_f32->constructor();
   AST().AddGlobalVariable(mod_f32);
 
   // Reference "foo" in another function
-  auto* fn_f32 = Var("bar", ast::StorageClass::kNone, ty.f32(), Expr("foo"),
+  auto* fn_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"),
                      ast::VariableDecorationList{});
   auto* fn_f32_init = fn_f32->constructor();
   auto* fn_f32_decl = create<ast::VariableDeclStatement>(fn_f32);
@@ -544,7 +544,7 @@ TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   auto* idx = Expr(2);
-  Global("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
+  Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kFunction);
 
   auto* acc = IndexAccessor("my_var", idx);
   WrapInFunction(acc);
@@ -561,7 +561,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   auto* aary = ty.alias("myarrty", ty.array<f32, 3>());
 
-  Global("my_var", ast::StorageClass::kFunction, aary);
+  Global("my_var", aary, ast::StorageClass::kFunction);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -576,7 +576,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
-  GlobalConst("my_var", ast::StorageClass::kFunction, ty.array<f32, 3>());
+  GlobalConst("my_var", ty.array<f32, 3>(), ast::StorageClass::kFunction);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -588,7 +588,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
-  Global("my_var", ast::StorageClass::kNone, ty.mat2x3<f32>());
+  Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -604,7 +604,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
-  Global("my_var", ast::StorageClass::kNone, ty.mat2x3<f32>());
+  Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* acc = IndexAccessor(IndexAccessor("my_var", 2), 1);
   WrapInFunction(acc);
@@ -619,7 +619,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
-  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -637,7 +637,7 @@ TEST_F(TypeDeterminerTest, Expr_Bitcast) {
   auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("name"));
   WrapInFunction(bitcast);
 
-  Global("name", ast::StorageClass::kPrivate, ty.f32());
+  Global("name", ty.f32(), ast::StorageClass::kPrivate);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -700,7 +700,7 @@ TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Cast) {
-  Global("name", ast::StorageClass::kPrivate, ty.f32());
+  Global("name", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* cast = Construct(ty.f32(), "name");
   WrapInFunction(cast);
@@ -734,7 +734,7 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
-  auto* my_var = Global("my_var", ast::StorageClass::kNone, ty.f32());
+  auto* my_var = Global("my_var", ty.f32(), ast::StorageClass::kNone);
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
@@ -748,7 +748,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
-  auto* my_var = GlobalConst("my_var", ast::StorageClass::kNone, ty.f32());
+  auto* my_var = GlobalConst("my_var", ty.f32(), ast::StorageClass::kNone);
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
@@ -763,7 +763,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   auto* my_var_a = Expr("my_var");
   auto* my_var_b = Expr("my_var");
-  auto* var = Const("my_var", ast::StorageClass::kNone, ty.f32());
+  auto* var = Const("my_var", ty.f32(), ast::StorageClass::kNone);
   auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
 
   Func("my_func", ast::VariableList{}, ty.f32(),
@@ -789,7 +789,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   auto* my_var_b = Expr("my_var");
   auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
 
-  auto* var = Var("my_var", ast::StorageClass::kNone, ty.f32());
+  auto* var = Var("my_var", ty.f32(), ast::StorageClass::kNone);
 
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
@@ -819,8 +819,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(
-               Var("my_var", ast::StorageClass::kNone,
-                   ty.pointer<f32>(ast::StorageClass::kFunction))),
+               Var("my_var", ty.pointer<f32>(ast::StorageClass::kFunction),
+                   ast::StorageClass::kNone)),
            assign,
        },
        ast::FunctionDecorationList{});
@@ -858,11 +858,11 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
 }
 
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
-  auto* in_var = Global("in_var", ast::StorageClass::kInput, ty.f32());
-  auto* out_var = Global("out_var", ast::StorageClass::kOutput, ty.f32());
-  auto* sb_var = Global("sb_var", ast::StorageClass::kStorage, ty.f32());
-  auto* wg_var = Global("wg_var", ast::StorageClass::kWorkgroup, ty.f32());
-  auto* priv_var = Global("priv_var", ast::StorageClass::kPrivate, ty.f32());
+  auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
+  auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
+  auto* sb_var = Global("sb_var", ty.f32(), ast::StorageClass::kStorage);
+  auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* func = Func(
       "my_func", ast::VariableList{}, ty.f32(),
@@ -889,11 +889,11 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
-  auto* in_var = Global("in_var", ast::StorageClass::kInput, ty.f32());
-  auto* out_var = Global("out_var", ast::StorageClass::kOutput, ty.f32());
-  auto* sb_var = Global("sb_var", ast::StorageClass::kStorage, ty.f32());
-  auto* wg_var = Global("wg_var", ast::StorageClass::kWorkgroup, ty.f32());
-  auto* priv_var = Global("priv_var", ast::StorageClass::kPrivate, ty.f32());
+  auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
+  auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
+  auto* sb_var = Global("sb_var", ty.f32(), ast::StorageClass::kStorage);
+  auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
   Func("my_func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
@@ -926,7 +926,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
 }
 
 TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
-  auto* var = Var("in_var", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Var("in_var", ty.f32(), ast::StorageClass::kFunction);
 
   auto* func =
       Func("my_func", ast::VariableList{}, ty.f32(),
@@ -936,7 +936,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
            },
            ast::FunctionDecorationList{});
 
-  Global("var", ast::StorageClass::kFunction, ty.f32());
+  Global("var", ty.f32(), ast::StorageClass::kFunction);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -953,7 +953,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
       ast::StructDecorationList{});
 
   auto* st = ty.struct_("S", strct);
-  Global("my_struct", ast::StorageClass::kNone, st);
+  Global("my_struct", st, ast::StorageClass::kNone);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
@@ -975,7 +975,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 
   auto* st = ty.struct_("alias", strct);
   auto* alias = ty.alias("alias", st);
-  Global("my_struct", ast::StorageClass::kNone, alias);
+  Global("my_struct", alias, ast::StorageClass::kNone);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
@@ -990,7 +990,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
-  Global("my_vec", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* mem = MemberAccessor("my_vec", "xy");
   WrapInFunction(mem);
@@ -1004,7 +1004,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
-  Global("my_vec", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* mem = MemberAccessor("my_vec", "x");
   WrapInFunction(mem);
@@ -1054,7 +1054,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
       ast::StructMemberList{Member("mem", &vecB)}, ast::StructDecorationList{});
 
   auto* stA = ty.struct_("A", strctA);
-  Global("c", ast::StorageClass::kNone, stA);
+  Global("c", stA, ast::StorageClass::kNone);
 
   auto* mem = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("c", "mem"), 0), "foo"),
@@ -1076,7 +1076,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_InBinaryOp) {
       ast::StructDecorationList{});
 
   auto* st = ty.struct_("S", strct);
-  Global("my_struct", ast::StorageClass::kNone, st);
+  Global("my_struct", st, ast::StorageClass::kNone);
 
   auto* expr = Add(MemberAccessor("my_struct", "first_member"),
                    MemberAccessor("my_struct", "second_member"));
@@ -1092,7 +1092,7 @@ using Expr_Binary_BitwiseTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   auto op = GetParam();
 
-  Global("val", ast::StorageClass::kNone, ty.i32());
+  Global("val", ty.i32(), ast::StorageClass::kNone);
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
@@ -1105,7 +1105,7 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
 TEST_P(Expr_Binary_BitwiseTest, Vector) {
   auto op = GetParam();
 
-  Global("val", ast::StorageClass::kNone, ty.vec3<i32>());
+  Global("val", ty.vec3<i32>(), ast::StorageClass::kNone);
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
@@ -1132,7 +1132,7 @@ using Expr_Binary_LogicalTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_LogicalTest, Scalar) {
   auto op = GetParam();
 
-  Global("val", ast::StorageClass::kNone, ty.bool_());
+  Global("val", ty.bool_(), ast::StorageClass::kNone);
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
@@ -1145,7 +1145,7 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
 TEST_P(Expr_Binary_LogicalTest, Vector) {
   auto op = GetParam();
 
-  Global("val", ast::StorageClass::kNone, ty.vec3<bool>());
+  Global("val", ty.vec3<bool>(), ast::StorageClass::kNone);
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
@@ -1165,7 +1165,7 @@ using Expr_Binary_CompareTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_CompareTest, Scalar) {
   auto op = GetParam();
 
-  Global("val", ast::StorageClass::kNone, ty.i32());
+  Global("val", ty.i32(), ast::StorageClass::kNone);
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
@@ -1178,7 +1178,7 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
 TEST_P(Expr_Binary_CompareTest, Vector) {
   auto op = GetParam();
 
-  Global("val", ast::StorageClass::kNone, ty.vec3<i32>());
+  Global("val", ty.vec3<i32>(), ast::StorageClass::kNone);
 
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
@@ -1199,7 +1199,7 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          ast::BinaryOp::kGreaterThanEqual));
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
-  Global("val", ast::StorageClass::kNone, ty.i32());
+  Global("val", ty.i32(), ast::StorageClass::kNone);
 
   auto* expr = Mul("val", "val");
   WrapInFunction(expr);
@@ -1210,8 +1210,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
-  Global("scalar", ast::StorageClass::kNone, ty.f32());
-  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("scalar", ty.f32(), ast::StorageClass::kNone);
+  Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("vector", "scalar");
   WrapInFunction(expr);
@@ -1224,8 +1224,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
-  Global("scalar", ast::StorageClass::kNone, ty.f32());
-  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("scalar", ty.f32(), ast::StorageClass::kNone);
+  Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("scalar", "vector");
   WrapInFunction(expr);
@@ -1238,7 +1238,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
-  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("vector", "vector");
   WrapInFunction(expr);
@@ -1251,8 +1251,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
-  Global("scalar", ast::StorageClass::kNone, ty.f32());
-  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
+  Global("scalar", ty.f32(), ast::StorageClass::kNone);
+  Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("matrix", "scalar");
   WrapInFunction(expr);
@@ -1268,8 +1268,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
-  Global("scalar", ast::StorageClass::kNone, ty.f32());
-  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
+  Global("scalar", ty.f32(), ast::StorageClass::kNone);
+  Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("scalar", "matrix");
   WrapInFunction(expr);
@@ -1285,8 +1285,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
-  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
-  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
+  Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("matrix", "vector");
   WrapInFunction(expr);
@@ -1299,8 +1299,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
-  Global("vector", ast::StorageClass::kNone, ty.vec3<f32>());
-  Global("matrix", ast::StorageClass::kNone, ty.mat2x3<f32>());
+  Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("vector", "matrix");
   WrapInFunction(expr);
@@ -1313,8 +1313,8 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
-  Global("mat3x4", ast::StorageClass::kNone, ty.mat3x4<f32>());
-  Global("mat4x3", ast::StorageClass::kNone, ty.mat4x3<f32>());
+  Global("mat3x4", ty.mat3x4<f32>(), ast::StorageClass::kNone);
+  Global("mat4x3", ty.mat4x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("mat3x4", "mat4x3");
   WrapInFunction(expr);
@@ -1333,7 +1333,7 @@ using IntrinsicDerivativeTest = TypeDeterminerTestWithParam<std::string>;
 TEST_P(IntrinsicDerivativeTest, Scalar) {
   auto name = GetParam();
 
-  Global("ident", ast::StorageClass::kNone, ty.f32());
+  Global("ident", ty.f32(), ast::StorageClass::kNone);
 
   auto* expr = Call(name, "ident");
   WrapInFunction(expr);
@@ -1346,7 +1346,7 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
 
 TEST_P(IntrinsicDerivativeTest, Vector) {
   auto name = GetParam();
-  Global("ident", ast::StorageClass::kNone, ty.vec4<f32>());
+  Global("ident", ty.vec4<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call(name, "ident");
   WrapInFunction(expr);
@@ -1390,7 +1390,7 @@ using Intrinsic = TypeDeterminerTestWithParam<std::string>;
 TEST_P(Intrinsic, Test) {
   auto name = GetParam();
 
-  Global("my_var", ast::StorageClass::kNone, ty.vec3<bool>());
+  Global("my_var", ty.vec3<bool>(), ast::StorageClass::kNone);
 
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
@@ -1408,7 +1408,7 @@ using Intrinsic_FloatMethod = TypeDeterminerTestWithParam<std::string>;
 TEST_P(Intrinsic_FloatMethod, Vector) {
   auto name = GetParam();
 
-  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
@@ -1424,7 +1424,7 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
 TEST_P(Intrinsic_FloatMethod, Scalar) {
   auto name = GetParam();
 
-  Global("my_var", ast::StorageClass::kNone, ty.f32());
+  Global("my_var", ty.f32(), ast::StorageClass::kNone);
 
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
@@ -1438,7 +1438,7 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
 TEST_P(Intrinsic_FloatMethod, MissingParam) {
   auto name = GetParam();
 
-  Global("my_var", ast::StorageClass::kNone, ty.f32());
+  Global("my_var", ty.f32(), ast::StorageClass::kNone);
 
   auto* expr = Call(name);
   WrapInFunction(expr);
@@ -1455,7 +1455,7 @@ TEST_P(Intrinsic_FloatMethod, MissingParam) {
 TEST_P(Intrinsic_FloatMethod, TooManyParams) {
   auto name = GetParam();
 
-  Global("my_var", ast::StorageClass::kNone, ty.f32());
+  Global("my_var", ty.f32(), ast::StorageClass::kNone);
 
   auto* expr = Call(name, "my_var", 1.23f);
   WrapInFunction(expr);
@@ -1524,7 +1524,7 @@ class Intrinsic_TextureOperation
   void add_call_param(std::string name,
                       type::Type* type,
                       ast::ExpressionList* call_params) {
-    Global(name, ast::StorageClass::kNone, type);
+    Global(name, type, ast::StorageClass::kNone);
     call_params->push_back(Expr(name));
   }
   type::Type* subtype(Texture type) {
@@ -1654,7 +1654,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TextureTestParams{type::TextureDimension::k3d}));
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec2) {
-  Global("my_var", ast::StorageClass::kNone, ty.vec2<f32>());
+  Global("my_var", ty.vec2<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -1666,7 +1666,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec2) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec3) {
-  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -1678,7 +1678,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec3) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec4) {
-  Global("my_var", ast::StorageClass::kNone, ty.vec4<f32>());
+  Global("my_var", ty.vec4<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -1704,7 +1704,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_Scalar) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_VectorInt) {
-  Global("my_var", ast::StorageClass::kNone, ty.vec4<i32>());
+  Global("my_var", ty.vec4<i32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -1720,9 +1720,9 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_VectorInt) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Select) {
-  Global("my_var", ast::StorageClass::kNone, ty.vec3<f32>());
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
 
-  Global("bool_var", ast::StorageClass::kNone, ty.vec3<bool>());
+  Global("bool_var", ty.vec3<bool>(), ast::StorageClass::kNone);
 
   auto* expr = Call("select", "my_var", "my_var", "bool_var");
   WrapInFunction(expr);
@@ -1816,7 +1816,7 @@ using UnaryOpExpressionTest = TypeDeterminerTestWithParam<ast::UnaryOp>;
 TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto op = GetParam();
 
-  Global("ident", ast::StorageClass::kNone, ty.vec4<f32>());
+  Global("ident", ty.vec4<f32>(), ast::StorageClass::kNone);
   auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
   WrapInFunction(der);
 
@@ -1833,7 +1833,7 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          ast::UnaryOp::kNot));
 
 TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
-  auto* var = Var("var", ast::StorageClass::kNone, ty.i32());
+  auto* var = Var("var", ty.i32(), ast::StorageClass::kNone);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
@@ -1845,7 +1845,7 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 }
 
 TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
-  auto* var = Const("var", ast::StorageClass::kNone, ty.i32());
+  auto* var = Const("var", ty.i32(), ast::StorageClass::kNone);
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
        ast::FunctionDecorationList{});
@@ -1856,7 +1856,7 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
 }
 
 TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
-  auto* var = Var("var", ast::StorageClass::kWorkgroup, ty.i32());
+  auto* var = Var("var", ty.i32(), ast::StorageClass::kWorkgroup);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
@@ -2148,7 +2148,7 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"trunc", IntrinsicType::kTrunc}));
 
 TEST_F(IntrinsicDataTest, ArrayLength_Vector) {
-  Global("arr", ast::StorageClass::kNone, ty.array<int>());
+  Global("arr", ty.array<int>(), ast::StorageClass::kNone);
   auto* call = Call("arrayLength", "arr");
   WrapInFunction(call);
 
@@ -2159,7 +2159,7 @@ TEST_F(IntrinsicDataTest, ArrayLength_Vector) {
 }
 
 TEST_F(IntrinsicDataTest, ArrayLength_Error_ArraySized) {
-  Global("arr", ast::StorageClass::kNone, ty.array<int, 4>());
+  Global("arr", ty.array<int, 4>(), ast::StorageClass::kNone);
   auto* call = Call("arrayLength", "arr");
   WrapInFunction(call);
 
@@ -2195,7 +2195,7 @@ TEST_F(IntrinsicDataTest, Normalize_Error_NoParams) {
 }
 
 TEST_F(IntrinsicDataTest, FrexpScalar) {
-  Global("exp", ast::StorageClass::kWorkgroup, ty.i32());
+  Global("exp", ty.i32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("frexp", 1.0f, "exp");
   WrapInFunction(call);
 
@@ -2206,7 +2206,7 @@ TEST_F(IntrinsicDataTest, FrexpScalar) {
 }
 
 TEST_F(IntrinsicDataTest, FrexpVector) {
-  Global("exp", ast::StorageClass::kWorkgroup, ty.vec3<i32>());
+  Global("exp", ty.vec3<i32>(), ast::StorageClass::kWorkgroup);
   auto* call = Call("frexp", vec3<f32>(1.0f, 2.0f, 3.0f), "exp");
   WrapInFunction(call);
 
@@ -2218,7 +2218,7 @@ TEST_F(IntrinsicDataTest, FrexpVector) {
 }
 
 TEST_F(IntrinsicDataTest, Frexp_Error_FirstParamInt) {
-  Global("exp", ast::StorageClass::kWorkgroup, ty.i32());
+  Global("exp", ty.i32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("frexp", 1, "exp");
   WrapInFunction(call);
 
@@ -2233,7 +2233,7 @@ TEST_F(IntrinsicDataTest, Frexp_Error_FirstParamInt) {
 }
 
 TEST_F(IntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
-  Global("exp", ast::StorageClass::kWorkgroup, ty.f32());
+  Global("exp", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("frexp", 1.0f, "exp");
   WrapInFunction(call);
 
@@ -2262,7 +2262,7 @@ TEST_F(IntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
 }
 
 TEST_F(IntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
-  Global("exp", ast::StorageClass::kWorkgroup, ty.vec4<i32>());
+  Global("exp", ty.vec4<i32>(), ast::StorageClass::kWorkgroup);
   auto* call = Call("frexp", vec2<f32>(1.0f, 2.0f), "exp");
   WrapInFunction(call);
 
@@ -2278,7 +2278,7 @@ TEST_F(IntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
 }
 
 TEST_F(IntrinsicDataTest, ModfScalar) {
-  Global("whole", ast::StorageClass::kWorkgroup, ty.f32());
+  Global("whole", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("modf", 1.0f, "whole");
   WrapInFunction(call);
 
@@ -2289,7 +2289,7 @@ TEST_F(IntrinsicDataTest, ModfScalar) {
 }
 
 TEST_F(IntrinsicDataTest, ModfVector) {
-  Global("whole", ast::StorageClass::kWorkgroup, ty.vec3<f32>());
+  Global("whole", ty.vec3<f32>(), ast::StorageClass::kWorkgroup);
   auto* call = Call("modf", vec3<f32>(1.0f, 2.0f, 3.0f), "whole");
   WrapInFunction(call);
 
@@ -2301,7 +2301,7 @@ TEST_F(IntrinsicDataTest, ModfVector) {
 }
 
 TEST_F(IntrinsicDataTest, Modf_Error_FirstParamInt) {
-  Global("whole", ast::StorageClass::kWorkgroup, ty.f32());
+  Global("whole", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("modf", 1, "whole");
   WrapInFunction(call);
 
@@ -2315,7 +2315,7 @@ TEST_F(IntrinsicDataTest, Modf_Error_FirstParamInt) {
 }
 
 TEST_F(IntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
-  Global("whole", ast::StorageClass::kWorkgroup, ty.i32());
+  Global("whole", ty.i32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("modf", 1.0f, "whole");
   WrapInFunction(call);
 
@@ -2342,7 +2342,7 @@ TEST_F(IntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
 }
 
 TEST_F(IntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
-  Global("whole", ast::StorageClass::kWorkgroup, ty.vec4<f32>());
+  Global("whole", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
   auto* call = Call("modf", vec2<f32>(1.0f, 2.0f), "whole");
   WrapInFunction(call);
 
@@ -2993,7 +2993,7 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"max", IntrinsicType::kMax}));
 
 TEST_F(TypeDeterminerTest, Intrinsic_Determinant_2x2) {
-  Global("var", ast::StorageClass::kFunction, ty.mat2x2<f32>());
+  Global("var", ty.mat2x2<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -3005,7 +3005,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Determinant_2x2) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Determinant_3x3) {
-  Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("var", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -3017,7 +3017,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Determinant_3x3) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Determinant_4x4) {
-  Global("var", ast::StorageClass::kFunction, ty.mat4x4<f32>());
+  Global("var", ty.mat4x4<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -3029,7 +3029,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Determinant_4x4) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotSquare) {
-  Global("var", ast::StorageClass::kFunction, ty.mat2x3<f32>());
+  Global("var", ty.mat2x3<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -3043,7 +3043,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotSquare) {
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotMatrix) {
-  Global("var", ast::StorageClass::kFunction, ty.f32());
+  Global("var", ty.f32(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -3105,11 +3105,11 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
-  Global("first", ast::StorageClass::kPrivate, ty.f32());
-  Global("second", ast::StorageClass::kPrivate, ty.f32());
-  Global("call_a", ast::StorageClass::kPrivate, ty.f32());
-  Global("call_b", ast::StorageClass::kPrivate, ty.f32());
-  Global("call_c", ast::StorageClass::kPrivate, ty.f32());
+  Global("first", ty.f32(), ast::StorageClass::kPrivate);
+  Global("second", ty.f32(), ast::StorageClass::kPrivate);
+  Global("call_a", ty.f32(), ast::StorageClass::kPrivate);
+  Global("call_b", ty.f32(), ast::StorageClass::kPrivate);
+  Global("call_c", ty.f32(), ast::StorageClass::kPrivate);
 
   ASSERT_TRUE(td()->Determine()) << td()->error();
 

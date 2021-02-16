@@ -100,7 +100,7 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   auto param = GetParam();
 
-  auto* var = Global("param", ast::StorageClass::kFunction, ty.i32());
+  auto* var = Global("param", ty.i32(), ast::StorageClass::kFunction);
   auto* expr =
       create<ast::BinaryExpression>(param.op, Expr("param"), Expr("param"));
 
@@ -491,7 +491,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
-  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr("mat"), Expr(1.f));
@@ -519,7 +519,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
-  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr(1.f), Expr("mat"));
@@ -547,7 +547,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
-  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
   auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
   auto* expr =
@@ -577,7 +577,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
-  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
 
   auto* expr =
@@ -607,7 +607,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
-  auto* var = Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr("mat"), Expr("mat"));
@@ -674,9 +674,9 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
-  auto* a_var = Global("a", ast::StorageClass::kFunction, ty.bool_(),
+  auto* a_var = Global("a", ty.bool_(), ast::StorageClass::kFunction,
                        Expr(true), ast::VariableDecorationList{});
-  auto* b_var = Global("b", ast::StorageClass::kFunction, ty.bool_(),
+  auto* b_var = Global("b", ty.bool_(), ast::StorageClass::kFunction,
                        Expr(false), ast::VariableDecorationList{});
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
@@ -833,9 +833,9 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
-  auto* a_var = Global("a", ast::StorageClass::kFunction, ty.bool_(),
+  auto* a_var = Global("a", ty.bool_(), ast::StorageClass::kFunction,
                        Expr(true), ast::VariableDecorationList{});
-  auto* b_var = Global("b", ast::StorageClass::kFunction, ty.bool_(),
+  auto* b_var = Global("b", ty.bool_(), ast::StorageClass::kFunction,
                        Expr(false), ast::VariableDecorationList{});
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,

@@ -38,7 +38,7 @@ class ValidateFunctionTest : public ValidatorTestHelper,
 TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { var a:i32 = 2; }
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
                   ast::VariableDecorationList{});
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
@@ -74,7 +74,7 @@ TEST_F(ValidateFunctionTest,
 TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), Expr(2),
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
                   ast::VariableDecorationList{});
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
@@ -201,7 +201,7 @@ TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
   ast::ExpressionList call_params;
   auto* call_expr = create<ast::CallExpression>(
       Source{Source::Location{12, 34}}, Expr("func"), call_params);
-  auto* var = Var("a", ast::StorageClass::kNone, ty.i32(), call_expr,
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, call_expr,
                   ast::VariableDecorationList{});
 
   Func("func", ast::VariableList{}, ty.i32(),
@@ -242,7 +242,7 @@ TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
   // fn vtx_func(a : i32) -> void { return; }
 
   Func(Source{Source::Location{12, 34}}, "vtx_func",
-       ast::VariableList{Var("a", ast::StorageClass::kNone, ty.i32(), nullptr,
+       ast::VariableList{Var("a", ty.i32(), ast::StorageClass::kNone, nullptr,
                              ast::VariableDecorationList{})},
        ty.void_(),
        ast::StatementList{

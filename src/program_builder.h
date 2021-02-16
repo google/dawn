@@ -750,14 +750,14 @@ class ProgramBuilder {
   }
 
   /// @param name the variable name
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor constructor expression
   /// @param decorations variable decorations
   /// @returns a `ast::Variable` with the given name, storage and type
   ast::Variable* Var(const std::string& name,
-                     ast::StorageClass storage,
                      type::Type* type,
+                     ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(Symbols().Register(name), storage, type, false,
@@ -766,15 +766,15 @@ class ProgramBuilder {
 
   /// @param source the variable source
   /// @param name the variable name
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor constructor expression
   /// @param decorations variable decorations
   /// @returns a `ast::Variable` with the given name, storage and type
   ast::Variable* Var(const Source& source,
                      const std::string& name,
-                     ast::StorageClass storage,
                      type::Type* type,
+                     ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(source, Symbols().Register(name), storage,
@@ -782,14 +782,14 @@ class ProgramBuilder {
   }
 
   /// @param symbol the variable symbol
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor constructor expression
   /// @param decorations variable decorations
   /// @returns a `ast::Variable` with the given symbol, storage and type
   ast::Variable* Var(Symbol symbol,
-                     ast::StorageClass storage,
                      type::Type* type,
+                     ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(symbol, storage, type, false, constructor,
@@ -798,15 +798,15 @@ class ProgramBuilder {
 
   /// @param source the variable source
   /// @param symbol the variable symbol
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor constructor expression
   /// @param decorations variable decorations
   /// @returns a `ast::Variable` with the given symbol, storage and type
   ast::Variable* Var(const Source& source,
                      Symbol symbol,
-                     ast::StorageClass storage,
                      type::Type* type,
+                     ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(source, symbol, storage, type, false,
@@ -814,14 +814,14 @@ class ProgramBuilder {
   }
 
   /// @param name the variable name
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given name, storage and type
   ast::Variable* Const(const std::string& name,
-                       ast::StorageClass storage,
                        type::Type* type,
+                       ast::StorageClass storage,
                        ast::Expression* constructor = nullptr,
                        ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(Symbols().Register(name), storage, type, true,
@@ -830,15 +830,15 @@ class ProgramBuilder {
 
   /// @param source the variable source
   /// @param name the variable name
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given name, storage and type
   ast::Variable* Const(const Source& source,
                        const std::string& name,
-                       ast::StorageClass storage,
                        type::Type* type,
+                       ast::StorageClass storage,
                        ast::Expression* constructor = nullptr,
                        ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(source, Symbols().Register(name), storage,
@@ -846,15 +846,15 @@ class ProgramBuilder {
   }
 
   /// @param symbol the variable symbol
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given symbol, storage and
   /// type
   ast::Variable* Const(Symbol symbol,
-                       ast::StorageClass storage,
                        type::Type* type,
+                       ast::StorageClass storage,
                        ast::Expression* constructor = nullptr,
                        ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(symbol, storage, type, true, constructor,
@@ -863,21 +863,22 @@ class ProgramBuilder {
 
   /// @param source the variable source
   /// @param symbol the variable symbol
-  /// @param storage the variable storage class
   /// @param type the variable type
+  /// @param storage the variable storage class
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given symbol, storage and
   /// type
   ast::Variable* Const(const Source& source,
                        Symbol symbol,
-                       ast::StorageClass storage,
                        type::Type* type,
+                       ast::StorageClass storage,
                        ast::Expression* constructor = nullptr,
                        ast::VariableDecorationList decorations = {}) {
     return create<ast::Variable>(source, symbol, storage, type, true,
                                  constructor, decorations);
   }
+
   /// @param args the arguments to pass to Var()
   /// @returns a `ast::Variable` constructed by calling Var() with the arguments
   /// of `args`, which is automatically registered as a global variable with the

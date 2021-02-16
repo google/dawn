@@ -71,7 +71,7 @@ TEST_F(BuilderTest, Return_WithValue) {
 }
 
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
-  auto* var = Global("param", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Global("param", ty.f32(), ast::StorageClass::kFunction);
 
   auto* ret = create<ast::ReturnStatement>(Expr("param"));
   WrapInFunction(ret);

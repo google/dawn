@@ -45,7 +45,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Str", strct);
-  auto* str_var = Global("str", ast::StorageClass::kPrivate, s);
+  auto* str_var = Global("str", s, ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("str", "mem");
   WrapInFunction(expr);
@@ -75,7 +75,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "b");
   WrapInFunction(expr);
@@ -104,7 +104,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                             Member("b", ty.f32(), {MemberOffset(4)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
   WrapInFunction(expr);
@@ -137,8 +137,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* b_var = Global("b", ast::StorageClass::kPrivate, ty.mat2x3<f32>());
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* b_var = Global("b", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr("b");
@@ -178,7 +178,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
@@ -217,7 +217,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
   WrapInFunction(expr);
@@ -255,7 +255,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
   WrapInFunction(expr);
@@ -286,7 +286,7 @@ TEST_F(
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
   WrapInFunction(expr);
@@ -318,7 +318,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(
       IndexAccessor(MemberAccessor("data", "a"), Expr(2)), Expr(1));
@@ -350,7 +350,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
   WrapInFunction(expr);
@@ -381,7 +381,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
       ast::StructDecorationList{});
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"),
                              Sub(Add(Expr(2), Expr(4)), Expr(3)));
@@ -412,7 +412,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "b");
   auto* rhs = Expr(2.0f);
@@ -448,7 +448,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
   auto* rhs = Expr(2);
@@ -481,7 +481,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "a");
   auto* rhs = Expr(2);
@@ -514,7 +514,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "b");
   WrapInFunction(expr);
@@ -544,7 +544,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* s = ty.struct_("Data", str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, s);
+  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "b");
   auto* rhs = vec3<f32>(1.f, 2.f, 3.f);
@@ -596,7 +596,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
+  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr =
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
@@ -641,7 +641,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
+  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
@@ -690,7 +690,7 @@ TEST_F(
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
+  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
@@ -738,7 +738,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
+  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
@@ -786,7 +786,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
+  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* lhs =
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
@@ -839,7 +839,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
       ast::StructDecorationList{});
 
   auto* pre_struct = ty.struct_("Pre", pre_str);
-  auto* coord_var = Global("data", ast::StorageClass::kStorage, pre_struct);
+  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
@@ -862,7 +862,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_Swizzle_xyz) {
-  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
+  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("my_vec", "xyz");
   WrapInFunction(expr);
@@ -874,7 +874,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_Swizzle_gbr) {
-  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
+  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("my_vec", "gbr");
   WrapInFunction(expr);

@@ -40,7 +40,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = GlobalConst("var", ast::StorageClass::kOutput, ty.f32(), init,
+  auto* v = GlobalConst("var", ty.f32(), ast::StorageClass::kOutput, init,
                         ast::VariableDecorationList{});
 
   auto* expr = Expr("var");
@@ -62,7 +62,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-  auto* v = Global("var", ast::StorageClass::kOutput, ty.f32());
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput);
 
   auto* expr = Expr("var");
   WrapInFunction(expr);
@@ -85,7 +85,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Const("var", ast::StorageClass::kOutput, ty.f32(), init,
+  auto* v = Const("var", ty.f32(), ast::StorageClass::kOutput, init,
                   ast::VariableDecorationList{});
 
   auto* expr = Expr("var");
@@ -107,7 +107,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
-  auto* v = Var("var", ast::StorageClass::kNone, ty.f32());
+  auto* v = Var("var", ty.f32(), ast::StorageClass::kNone);
   auto* expr = Expr("var");
   WrapInFunction(v, expr);
 
@@ -131,7 +131,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-  auto* var = Global("var", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("var", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* expr = Add("var", "var");
   WrapInFunction(expr);
@@ -156,7 +156,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-  auto* var = GlobalConst("var", ast::StorageClass::kNone, ty.i32(), Expr(2),
+  auto* var = GlobalConst("var", ty.i32(), ast::StorageClass::kNone, Expr(2),
                           ast::VariableDecorationList{});
 
   auto* expr = Add("var", "var");

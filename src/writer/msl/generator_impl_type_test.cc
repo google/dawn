@@ -429,7 +429,7 @@ TEST_P(MslStorageTexturesTest, Emit) {
       create<type::AccessControl>(params.ro ? ast::AccessControl::kReadOnly
                                             : ast::AccessControl::kWriteOnly,
                                   s);
-  Global("test_var", ast::StorageClass::kNone, ac);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   GeneratorImpl& gen = Build();
 

@@ -85,7 +85,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-  Global("a", ast::StorageClass::kPrivate, ty.f32());
+  Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
   Func("a_func", {}, ty.void_(),
        ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
@@ -136,8 +136,8 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithParams) {
-  ast::VariableList params = {Var("a", ast::StorageClass::kFunction, ty.f32()),
-                              Var("b", ast::StorageClass::kFunction, ty.i32())};
+  ast::VariableList params = {Var("a", ty.f32(), ast::StorageClass::kFunction),
+                              Var("b", ty.i32(), ast::StorageClass::kFunction)};
 
   Func("a_func", params, ty.f32(),
        ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
@@ -238,7 +238,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
-  Global("data", ast::StorageClass::kStorage, &ac, nullptr,
+  Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -247,7 +247,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   AST().AddConstructedType(s);
 
   {
-    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     Func("a", ast::VariableList{}, ty.void_(),
@@ -261,7 +261,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   }
 
   {
-    auto* var = Var("v", ast::StorageClass::kFunction, ty.f32(),
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                     MemberAccessor("data", "d"), ast::VariableDecorationList{});
 
     Func("b", ast::VariableList{}, ty.void_(),

@@ -30,11 +30,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
-  auto* func_var = Var("a", ast::StorageClass::kFunction, ty.f32(), nullptr,
+  auto* func_var = Var("a", ty.f32(), ast::StorageClass::kFunction, nullptr,
                        ast::VariableDecorationList{});
   WrapInFunction(create<ast::VariableDeclStatement>(func_var));
 
-  auto* global_var = Global("a", ast::StorageClass::kInput, ty.f32());
+  auto* global_var = Global("a", ty.f32(), ast::StorageClass::kInput);
   create<ast::VariableDeclStatement>(global_var);
 
   GeneratorImpl& gen = Build();
@@ -51,7 +51,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
-  auto* global0 = Global("a0", ast::StorageClass::kInput, ty.f32());
+  auto* global0 = Global("a0", ty.f32(), ast::StorageClass::kInput);
   create<ast::VariableDeclStatement>(global0);
 
   auto* str0 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
@@ -65,7 +65,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
        },
        ast::FunctionDecorationList{});
 
-  auto* global1 = Global("a1", ast::StorageClass::kOutput, ty.f32());
+  auto* global1 = Global("a1", ty.f32(), ast::StorageClass::kOutput);
   create<ast::VariableDeclStatement>(global1);
 
   auto* str1 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
@@ -78,9 +78,9 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(
-               Var("s0", ast::StorageClass::kFunction, s0)),
+               Var("s0", s0, ast::StorageClass::kFunction)),
            create<ast::VariableDeclStatement>(
-               Var("s1", ast::StorageClass::kFunction, s1)),
+               Var("s1", s1, ast::StorageClass::kFunction)),
            create<ast::AssignmentStatement>(Expr("a1"), Expr(call_func)),
        },
        ast::FunctionDecorationList{

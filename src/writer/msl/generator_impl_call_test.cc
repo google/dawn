@@ -47,8 +47,8 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::FunctionDecorationList{});
-  Global("param1", ast::StorageClass::kNone, ty.f32());
-  Global("param2", ast::StorageClass::kNone, ty.f32());
+  Global("param1", ty.f32(), ast::StorageClass::kNone);
+  Global("param2", ty.f32(), ast::StorageClass::kNone);
 
   auto* call = Call("my_func", "param1", "param2");
   WrapInFunction(call);
@@ -62,8 +62,8 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
 TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::FunctionDecorationList{});
-  Global("param1", ast::StorageClass::kNone, ty.f32());
-  Global("param2", ast::StorageClass::kNone, ty.f32());
+  Global("param1", ty.f32(), ast::StorageClass::kNone);
+  Global("param2", ty.f32(), ast::StorageClass::kNone);
 
   auto* call = Call("my_func", "param1", "param2");
   auto* stmt = create<ast::CallStatement>(call);

@@ -33,7 +33,7 @@ namespace {
 using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
-  auto* var = Global("a", ast::StorageClass::kNone, ty.f32());
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kNone);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -46,7 +46,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
-  auto* var = Const("a", ast::StorageClass::kNone, ty.f32());
+  auto* var = Const("a", ty.f32(), ast::StorageClass::kNone);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -59,7 +59,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
-  auto* var = Global("a", ast::StorageClass::kNone, ty.array<f32, 5>());
+  auto* var = Global("a", ty.array<f32, 5>(), ast::StorageClass::kNone);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -73,7 +73,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Function) {
-  auto* var = Global("a", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kFunction);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -86,7 +86,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
-  auto* var = Global("a", ast::StorageClass::kPrivate, ty.f32());
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -100,8 +100,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_Private) {
-  Global("initializer", ast::StorageClass::kNone, ty.f32());
-  auto* var = Global("a", ast::StorageClass::kPrivate, ty.f32(),
+  Global("initializer", ty.f32(), ast::StorageClass::kNone);
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kPrivate,
                      Expr("initializer"), ast::VariableDecorationList{});
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
@@ -115,7 +115,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroVec) {
-  auto* var = Var("a", ast::StorageClass::kFunction, ty.vec3<f32>(),
+  auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kFunction,
                   vec3<f32>(), ast::VariableDecorationList{});
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
@@ -130,7 +130,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroMat) {
-  auto* var = Var("a", ast::StorageClass::kFunction, ty.mat2x3<f32>(),
+  auto* var = Var("a", ty.mat2x3<f32>(), ast::StorageClass::kFunction,
                   mat2x3<f32>(), ast::VariableDecorationList{});
 
   auto* stmt = create<ast::VariableDeclStatement>(var);

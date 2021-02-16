@@ -92,7 +92,7 @@ TEST_F(BuilderTest, If_WithStatements) {
   //   v = 2;
   // }
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* expr =
@@ -130,7 +130,7 @@ TEST_F(BuilderTest, If_WithElse) {
   //   v = 3;
   // }
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
@@ -176,7 +176,7 @@ TEST_F(BuilderTest, If_WithElseIf) {
   //   v = 3;
   // }
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* else_body = create<ast::BlockStatement>(
@@ -233,7 +233,7 @@ TEST_F(BuilderTest, If_WithMultiple) {
   //   v = 5;
   // }
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
   auto* elseif_1_body = create<ast::BlockStatement>(
@@ -560,7 +560,7 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // if (a) {
   // }
 
-  auto* var = Global("a", ast::StorageClass::kFunction, ty.bool_());
+  auto* var = Global("a", ty.bool_(), ast::StorageClass::kFunction);
 
   auto* expr = create<ast::IfStatement>(
       Expr("a"), create<ast::BlockStatement>(ast::StatementList{}),

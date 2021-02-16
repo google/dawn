@@ -72,7 +72,7 @@ using IntrinsicBoolTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicBoolTest, Call_Bool) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.vec3<bool>());
+  auto* var = Global("v", ty.vec3<bool>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -103,7 +103,7 @@ using IntrinsicFloatTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.f32());
+  auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -129,7 +129,7 @@ TEST_P(IntrinsicFloatTest, Call_Float_Scalar) {
 TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -162,7 +162,7 @@ using IntrinsicIntTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.i32());
+  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -187,7 +187,7 @@ TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.vec3<i32>());
+  auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -213,7 +213,7 @@ TEST_P(IntrinsicIntTest, Call_SInt_Vector) {
 TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.u32());
+  auto* var = Global("v", ty.u32(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -238,7 +238,7 @@ TEST_P(IntrinsicIntTest, Call_UInt_Scalar) {
 TEST_P(IntrinsicIntTest, Call_UInt_Vector) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.vec3<u32>());
+  auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -267,7 +267,7 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"reverseBits", "OpBitReverse"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Dot) {
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call("dot", "v", "v");
   WrapInFunction(expr);
@@ -295,7 +295,7 @@ using IntrinsicDeriveTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.f32());
+  auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -320,7 +320,7 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
 TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto param = GetParam();
 
-  auto* var = Global("v", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
   WrapInFunction(expr);
@@ -363,10 +363,10 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"fwidthCoarse", "OpFwidthCoarse"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Select) {
-  auto* v3 = Global("v3", ast::StorageClass::kPrivate, ty.vec3<f32>());
+  auto* v3 = Global("v3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* bool_v3 =
-      Global("bool_v3", ast::StorageClass::kPrivate, ty.vec3<bool>());
+      Global("bool_v3", ty.vec3<bool>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call("select", "v3", "v3", "bool_v3");
   WrapInFunction(expr);
@@ -403,9 +403,9 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   type::Sampler s(type::SamplerKind::kComparisonSampler);
   type::DepthTexture t(type::TextureDimension::k2d);
 
-  auto* tex = Global("texture", ast::StorageClass::kNone, &t);
+  auto* tex = Global("texture", &t, ast::StorageClass::kNone);
 
-  auto* sampler = Global("sampler", ast::StorageClass::kNone, &s);
+  auto* sampler = Global("sampler", &s, ast::StorageClass::kNone);
 
   auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);
@@ -453,7 +453,7 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_GLSLMethod_WithLoad) {
-  auto* var = Global("ident", ast::StorageClass::kPrivate, ty.f32());
+  auto* var = Global("ident", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* expr = Call("round", "ident");
   WrapInFunction(expr);
@@ -1283,7 +1283,7 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          testing::Values(IntrinsicData{"clamp", "UClamp"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Modf) {
-  auto* out = Var("out", ast::StorageClass::kFunction, ty.vec2<f32>());
+  auto* out = Var("out", ty.vec2<f32>(), ast::StorageClass::kFunction);
   auto* expr = Call("modf", vec2<f32>(1.0f, 2.0f), "out");
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -1326,7 +1326,7 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Frexp) {
-  auto* out = Var("out", ast::StorageClass::kFunction, ty.vec2<i32>());
+  auto* out = Var("out", ty.vec2<i32>(), ast::StorageClass::kFunction);
   auto* expr = Call("frexp", vec2<f32>(1.0f, 2.0f), "out");
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -1371,7 +1371,7 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Determinant) {
-  auto* var = Global("var", ast::StorageClass::kPrivate, ty.mat3x3<f32>());
+  auto* var = Global("var", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call("determinant", "var");
   WrapInFunction(expr);
@@ -1413,7 +1413,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
           create<ast::StructBlockDecoration>(),
       });
   auto* s_type = ty.struct_("my_struct", s);
-  Global("b", ast::StorageClass::kStorage, s_type, nullptr,
+  Global("b", s_type, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
@@ -1464,7 +1464,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
       });
 
   auto* s_type = ty.struct_("my_struct", s);
-  Global("b", ast::StorageClass::kStorage, s_type, nullptr,
+  Global("b", s_type, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),

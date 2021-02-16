@@ -62,7 +62,7 @@ TEST_F(ModuleTest, IsValid_Empty) {
 }
 
 TEST_F(ModuleTest, IsValid_GlobalVariable) {
-  Global("var", StorageClass::kInput, ty.f32());
+  Global("var", ty.f32(), StorageClass::kInput);
   Program program(std::move(*this));
   EXPECT_TRUE(program.AST().IsValid());
 }
@@ -74,7 +74,7 @@ TEST_F(ModuleTest, IsValid_Null_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, IsValid_Invalid_GlobalVariable) {
-  Global("var", StorageClass::kInput, nullptr);
+  Global("var", nullptr, StorageClass::kInput);
   Program program(std::move(*this));
   EXPECT_FALSE(program.AST().IsValid());
 }

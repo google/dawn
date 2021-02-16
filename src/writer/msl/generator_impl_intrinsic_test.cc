@@ -176,13 +176,13 @@ TEST_P(MslIntrinsicTest, Emit) {
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
   WrapInFunction(call);
 
-  Global("f2", ast::StorageClass::kFunction, ty.vec2<float>());
-  Global("f3", ast::StorageClass::kFunction, ty.vec3<float>());
-  Global("f4", ast::StorageClass::kFunction, ty.vec4<float>());
-  Global("u1", ast::StorageClass::kFunction, ty.u32());
-  Global("u2", ast::StorageClass::kFunction, ty.vec2<unsigned int>());
-  Global("b2", ast::StorageClass::kFunction, ty.vec2<bool>());
-  Global("m2x2", ast::StorageClass::kFunction, ty.mat2x2<float>());
+  Global("f2", ty.vec2<float>(), ast::StorageClass::kFunction);
+  Global("f3", ty.vec3<float>(), ast::StorageClass::kFunction);
+  Global("f4", ty.vec4<float>(), ast::StorageClass::kFunction);
+  Global("u1", ty.u32(), ast::StorageClass::kFunction);
+  Global("u2", ty.vec2<unsigned int>(), ast::StorageClass::kFunction);
+  Global("b2", ty.vec2<bool>(), ast::StorageClass::kFunction);
+  Global("m2x2", ty.mat2x2<float>(), ast::StorageClass::kFunction);
 
   GeneratorImpl& gen = Build();
 
@@ -293,8 +293,8 @@ INSTANTIATE_TEST_SUITE_P(
                       "metal::unpack_unorm2x16_to_float"}));
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
-  Global("param1", ast::StorageClass::kFunction, ty.vec2<f32>());
-  Global("param2", ast::StorageClass::kFunction, ty.vec2<f32>());
+  Global("param1", ty.vec2<f32>(), ast::StorageClass::kFunction);
+  Global("param2", ty.vec2<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("dot", "param1", "param2");
   WrapInFunction(call);
@@ -308,7 +308,7 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
 
 TEST_F(MslGeneratorImplTest, Pack2x16Float) {
   auto* call = Call("pack2x16float", "p1");
-  Global("p1", ast::StorageClass::kFunction, ty.vec2<f32>());
+  Global("p1", ty.vec2<f32>(), ast::StorageClass::kFunction);
   WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
@@ -320,7 +320,7 @@ TEST_F(MslGeneratorImplTest, Pack2x16Float) {
 
 TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
   auto* call = Call("unpack2x16float", "p1");
-  Global("p1", ast::StorageClass::kFunction, ty.u32());
+  Global("p1", ty.u32(), ast::StorageClass::kFunction);
   WrapInFunction(call);
 
   GeneratorImpl& gen = Build();

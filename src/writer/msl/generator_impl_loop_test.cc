@@ -84,8 +84,8 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
-  Global("lhs", ast::StorageClass::kNone, ty.f32());
-  Global("rhs", ast::StorageClass::kNone, ty.f32());
+  Global("lhs", ty.f32(), ast::StorageClass::kNone);
+  Global("rhs", ty.f32(), ast::StorageClass::kNone);
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
@@ -157,15 +157,15 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   //   }
   // }
 
-  Global("rhs", ast::StorageClass::kNone, ty.f32());
+  Global("rhs", ty.f32(), ast::StorageClass::kNone);
 
-  auto* var = Var("lhs", ast::StorageClass::kFunction, ty.f32(), Expr(2.4f),
+  auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f),
                   ast::VariableDecorationList{});
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
       create<ast::VariableDeclStatement>(
-          Var("other", ast::StorageClass::kFunction, ty.f32()))});
+          Var("other", ty.f32(), ast::StorageClass::kFunction))});
 
   auto* continuing = create<ast::BlockStatement>(ast::StatementList{
       create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs")),

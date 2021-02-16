@@ -41,8 +41,8 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
   ast::VariableList func_params;
-  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32()));
-  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32()));
+  func_params.push_back(Var("a", ty.f32(), ast::StorageClass::kFunction));
+  func_params.push_back(Var("b", ty.f32(), ast::StorageClass::kFunction));
 
   auto* a_func =
       Func("a_func", func_params, ty.f32(),
@@ -90,8 +90,8 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Statement_Call) {
   ast::VariableList func_params;
-  func_params.push_back(Var("a", ast::StorageClass::kFunction, ty.f32()));
-  func_params.push_back(Var("b", ast::StorageClass::kFunction, ty.f32()));
+  func_params.push_back(Var("a", ty.f32(), ast::StorageClass::kFunction));
+  func_params.push_back(Var("b", ty.f32(), ast::StorageClass::kFunction));
 
   auto* a_func =
       Func("a_func", func_params, ty.void_(),

@@ -72,8 +72,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
   //     v = 2;
   // }
 
-  auto* v = Global("v", ast::StorageClass::kPrivate, ty.i32());
-  auto* a = Global("a", ast::StorageClass::kPrivate, ty.i32());
+  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
@@ -142,8 +142,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   //     v = 1;
   //  }
 
-  auto* v = Global("v", ast::StorageClass::kPrivate, ty.i32());
-  auto* a = Global("a", ast::StorageClass::kPrivate, ty.i32());
+  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* default_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
@@ -201,8 +201,8 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //      v = 3;
   //  }
 
-  auto* v = Global("v", ast::StorageClass::kPrivate, ty.i32());
-  auto* a = Global("a", ast::StorageClass::kPrivate, ty.i32());
+  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
@@ -284,8 +284,8 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //      v = 3;
   //  }
 
-  auto* v = Global("v", ast::StorageClass::kPrivate, ty.i32());
-  auto* a = Global("a", ast::StorageClass::kPrivate, ty.i32());
+  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
@@ -363,8 +363,8 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   //      fallthrough;
   //  }
 
-  auto* v = Global("v", ast::StorageClass::kPrivate, ty.i32());
-  auto* a = Global("a", ast::StorageClass::kPrivate, ty.i32());
+  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* case_1_body = create<ast::BlockStatement>(
       ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
@@ -402,8 +402,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //     v = 1;
   //  }
 
-  auto* v = Global("v", ast::StorageClass::kPrivate, ty.i32());
-  auto* a = Global("a", ast::StorageClass::kPrivate, ty.i32());
+  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* if_body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::BreakStatement>(),

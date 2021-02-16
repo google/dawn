@@ -63,8 +63,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   auto* func =
       Func("my_func",
-           ast::VariableList{Var("a", ast::StorageClass::kNone, ty.f32()),
-                             Var("b", ast::StorageClass::kNone, ty.i32())},
+           ast::VariableList{Var("a", ty.f32(), ast::StorageClass::kNone),
+                             Var("b", ty.i32(), ast::StorageClass::kNone)},
            ty.void_(),
            ast::StatementList{
                create<ast::DiscardStatement>(),
@@ -185,7 +185,7 @@ TEST_F(WgslGeneratorImplTest,
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
   AST().AddConstructedType(s);
 
-  Global("data", ast::StorageClass::kStorage, &ac, nullptr,
+  Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::VariableDecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -193,7 +193,7 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     auto* var =
-        Var("v", ast::StorageClass::kFunction, ty.f32(),
+        Var("v", ty.f32(), ast::StorageClass::kFunction,
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 
@@ -209,7 +209,7 @@ TEST_F(WgslGeneratorImplTest,
 
   {
     auto* var =
-        Var("v", ast::StorageClass::kFunction, ty.f32(),
+        Var("v", ty.f32(), ast::StorageClass::kFunction,
             create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
             ast::VariableDecorationList{});
 

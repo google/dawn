@@ -47,10 +47,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   //   int bar [[attribute(1)]];
   // };
 
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
@@ -84,10 +84,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   //   int bar [[user(locn1)]];
   // };
 
-  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
@@ -121,10 +121,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   //   int bar [[user(locn1)]];
   // };
 
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
@@ -158,10 +158,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   //   int bar [[color(1)]];
   // };
 
-  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
@@ -192,10 +192,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   //
   // -> Error, not allowed
 
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
@@ -221,10 +221,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   //
   // -> Error not allowed
 
-  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
 
-  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
@@ -255,11 +255,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   //   float depth [[depth(any)]];
   // };
 
-  Global("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
 
-  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 

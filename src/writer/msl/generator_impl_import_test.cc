@@ -204,7 +204,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                                          MslImportData{"clamp", "clamp"}));
 
 TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
-  Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("var", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = Call("determinant", "var");
 

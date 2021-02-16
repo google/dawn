@@ -60,8 +60,8 @@ using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit_f32) {
   auto params = GetParam();
 
-  Global("left", ast::StorageClass::kFunction, ty.f32());
-  Global("right", ast::StorageClass::kFunction, ty.f32());
+  Global("left", ty.f32(), ast::StorageClass::kFunction);
+  Global("right", ty.f32(), ast::StorageClass::kFunction);
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -78,8 +78,8 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 TEST_P(HlslBinaryTest, Emit_u32) {
   auto params = GetParam();
 
-  Global("left", ast::StorageClass::kFunction, ty.u32());
-  Global("right", ast::StorageClass::kFunction, ty.u32());
+  Global("left", ty.u32(), ast::StorageClass::kFunction);
+  Global("right", ty.u32(), ast::StorageClass::kFunction);
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -96,8 +96,8 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 TEST_P(HlslBinaryTest, Emit_i32) {
   auto params = GetParam();
 
-  Global("left", ast::StorageClass::kFunction, ty.i32());
-  Global("right", ast::StorageClass::kFunction, ty.i32());
+  Global("left", ty.i32(), ast::StorageClass::kFunction);
+  Global("right", ty.i32(), ast::StorageClass::kFunction);
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -167,7 +167,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
-  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
   auto* lhs = Expr("mat");
   auto* rhs = Expr(1.f);
 
@@ -182,7 +182,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
-  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
   auto* lhs = Expr(1.f);
   auto* rhs = Expr("mat");
 
@@ -197,7 +197,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
-  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
   auto* lhs = Expr("mat");
   auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
@@ -212,7 +212,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
-  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
   auto* rhs = Expr("mat");
 
@@ -227,7 +227,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
-  Global("mat", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
   auto* lhs = Expr("mat");
   auto* rhs = Expr("mat");
 
@@ -427,7 +427,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   auto* d = Expr("d");
 
   auto* var = Var(
-      "a", ast::StorageClass::kFunction, ty.bool_(),
+      "a", ty.bool_(), ast::StorageClass::kFunction,
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalOr,
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d),
@@ -483,10 +483,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::FunctionDecorationList{});
-  Global("a", ast::StorageClass::kNone, ty.bool_());
-  Global("b", ast::StorageClass::kNone, ty.bool_());
-  Global("c", ast::StorageClass::kNone, ty.bool_());
-  Global("d", ast::StorageClass::kNone, ty.bool_());
+  Global("a", ty.bool_(), ast::StorageClass::kNone);
+  Global("b", ty.bool_(), ast::StorageClass::kNone);
+  Global("c", ty.bool_(), ast::StorageClass::kNone);
+  Global("d", ty.bool_(), ast::StorageClass::kNone);
 
   ast::ExpressionList params;
   params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,

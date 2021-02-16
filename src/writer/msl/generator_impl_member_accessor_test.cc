@@ -29,12 +29,13 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  Global("str", ast::StorageClass::kPrivate,
+  Global("str",
          ty.struct_("my_str", create<ast::Struct>(
                                   ast::StructMemberList{
                                       Member("mem", ty.f32()),
                                   },
-                                  ast::StructDecorationList{})));
+                                  ast::StructDecorationList{})),
+         ast::StorageClass::kPrivate);
   auto* expr = MemberAccessor("str", "mem");
   WrapInFunction(expr);
 
@@ -45,7 +46,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
-  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
+  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("my_vec", "xyz");
   WrapInFunction(expr);
@@ -56,7 +57,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
-  Global("my_vec", ast::StorageClass::kPrivate, ty.vec4<f32>());
+  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("my_vec", "gbr");
   WrapInFunction(expr);

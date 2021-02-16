@@ -49,7 +49,7 @@ TEST_F(BuilderTest, ArrayAccessor) {
   // vec3<f32> ary;
   // ary[1]  -> ptr<f32>
 
-  auto* var = Global("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ary", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* ary = Expr("ary");
   auto* idx_expr = Expr(1);
@@ -85,8 +85,8 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   // idx : i32;
   // ary[idx]  -> ptr<f32>
 
-  auto* var = Global("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
-  auto* idx = Global("idx", ast::StorageClass::kFunction, ty.i32());
+  auto* var = Global("ary", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* idx = Global("idx", ty.i32(), ast::StorageClass::kFunction);
 
   auto* ary = Expr("ary");
   auto* idx_expr = Expr("idx");
@@ -125,7 +125,7 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   // vec3<f32> ary;
   // ary[1 + 2]  -> ptr<f32>
 
-  auto* var = Global("ary", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ary", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* ary = Expr("ary");
 
@@ -163,7 +163,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
 
-  auto* var = Global("ary", ast::StorageClass::kFunction, &ary4);
+  auto* var = Global("ary", &ary4, ast::StorageClass::kFunction);
 
   auto* expr = IndexAccessor(IndexAccessor("ary", 3), 2);
   WrapInFunction(expr);
@@ -201,7 +201,7 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
 
-  auto* var = Global("ary", ast::StorageClass::kFunction, &ary4);
+  auto* var = Global("ary", &ary4, ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor(IndexAccessor("ary", 2), "xy");
   WrapInFunction(expr);
@@ -247,7 +247,7 @@ TEST_F(BuilderTest, MemberAccessor) {
       ast::StructDecorationList{});
 
   auto* s_type = ty.struct_("my_struct", s);
-  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor("ident", "b");
   WrapInFunction(expr);
@@ -295,7 +295,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
                           ast::StructDecorationList{}));
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
   WrapInFunction(expr);
 
@@ -345,7 +345,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", alias)},
                           ast::StructDecorationList{}));
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
   WrapInFunction(expr);
 
@@ -393,7 +393,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
                           ast::StructDecorationList{}));
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
+  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = create<ast::AssignmentStatement>(
       MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2.0f));
   WrapInFunction(expr);
@@ -445,8 +445,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
       create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
                           ast::StructDecorationList{}));
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, s_type);
-  auto* store = Global("store", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
+  auto* store = Global("store", ty.f32(), ast::StorageClass::kFunction);
 
   auto* rhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
   auto* expr = create<ast::AssignmentStatement>(Expr("store"), rhs);
@@ -484,7 +484,7 @@ OpStore %7 %13
 TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
   // ident.y
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor("ident", "y");
   WrapInFunction(expr);
@@ -515,7 +515,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
   // ident.yx
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor("ident", "yx");
   WrapInFunction(expr);
@@ -545,7 +545,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
   // ident.yxz.xz
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "xz");
   WrapInFunction(expr);
@@ -576,7 +576,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
   // ident.yxz.x
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "x");
   WrapInFunction(expr);
@@ -606,7 +606,7 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
   // index.yxz[1]
 
-  auto* var = Global("ident", ast::StorageClass::kFunction, ty.vec3<f32>());
+  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = IndexAccessor(MemberAccessor("ident", "yxz"), 1);
   WrapInFunction(expr);
@@ -662,7 +662,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   auto* a_type = ty.struct_("A", s);
 
   type::Array a_ary_type(a_type, 2, ast::ArrayDecorationList{});
-  auto* var = Global("index", ast::StorageClass::kFunction, &a_ary_type);
+  auto* var = Global("index", &a_ary_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(
       MemberAccessor(
           MemberAccessor(
@@ -719,7 +719,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   type::Array arr(ty.vec2<f32>(), 3, ast::ArrayDecorationList{});
 
   auto* var =
-      GlobalConst("pos", ast::StorageClass::kPrivate, &arr,
+      GlobalConst("pos", &arr, ast::StorageClass::kPrivate,
                   Construct(&arr, vec2<f32>(0.0f, 0.5f),
                             vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)),
                   ast::VariableDecorationList{});
@@ -763,7 +763,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   // const pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
-  auto* var = GlobalConst("pos", ast::StorageClass::kPrivate, ty.vec2<f32>(),
+  auto* var = GlobalConst("pos", ty.vec2<f32>(), ast::StorageClass::kPrivate,
                           vec2<f32>(0.0f, 0.5f), ast::VariableDecorationList{});
 
   auto* expr = IndexAccessor("pos", 1u);

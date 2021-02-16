@@ -32,7 +32,7 @@ using HlslSanitizerTest = TestHelper;
 TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
   auto* array_init = array<i32, 4>(1, 2, 3, 4);
   auto* array_index = IndexAccessor(array_init, 3);
-  auto* pos = Var("pos", ast::StorageClass::kFunction, ty.i32(), array_index);
+  auto* pos = Var("pos", ty.i32(), ast::StorageClass::kFunction, array_index);
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{

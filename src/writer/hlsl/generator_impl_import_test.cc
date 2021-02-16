@@ -242,7 +242,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          testing::Values(HlslImportData{"clamp", "clamp"}));
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
-  Global("var", ast::StorageClass::kFunction, ty.mat3x3<f32>());
+  Global("var", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
 
   auto* expr = Call("determinant", "var");
   WrapInFunction(expr);

@@ -44,12 +44,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(0),
          });
 
-  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(1),
          });
@@ -87,12 +87,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(0),
          });
 
-  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(1),
          });
@@ -130,12 +130,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : TEXCOORD1;
   // };
 
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(0),
          });
 
-  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(1),
          });
@@ -173,12 +173,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   int bar : SV_Target1;
   // };
 
-  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(0),
          });
 
-  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(1),
          });
@@ -213,12 +213,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //
   // -> Error, not allowed
 
-  Global("foo", ast::StorageClass::kInput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(0),
          });
 
-  Global("bar", ast::StorageClass::kInput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(1),
          });
@@ -248,12 +248,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //
   // -> Error not allowed
 
-  Global("foo", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(0),
          });
 
-  Global("bar", ast::StorageClass::kOutput, ty.i32(), nullptr,
+  Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::LocationDecoration>(1),
          });
@@ -289,12 +289,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   //   float depth : SV_Depth;
   // };
 
-  Global("coord", ast::StorageClass::kInput, ty.vec4<f32>(), nullptr,
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
          });
 
-  Global("depth", ast::StorageClass::kOutput, ty.f32(), nullptr,
+  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::VariableDecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
          });

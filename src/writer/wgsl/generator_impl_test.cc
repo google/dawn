@@ -55,7 +55,7 @@ using WgslBuiltinConversionTest = TestParamHelper<WgslBuiltinData>;
 TEST_P(WgslBuiltinConversionTest, Emit) {
   auto params = GetParam();
 
-  auto* var = Global("a", ast::StorageClass::kNone, ty.f32(), nullptr,
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kNone, nullptr,
                      ast::VariableDecorationList{
                          create<ast::BuiltinDecoration>(params.builtin),
                      });

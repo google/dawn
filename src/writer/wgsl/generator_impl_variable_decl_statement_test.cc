@@ -33,7 +33,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Global("a", ast::StorageClass::kNone, ty.f32());
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kNone);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
@@ -51,7 +51,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   // storage class.  Rely on defaulting.
   // https://github.com/gpuweb/gpuweb/issues/654
 
-  auto* var = Global("a", ast::StorageClass::kFunction, ty.f32());
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kFunction);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
@@ -65,7 +65,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  auto* var = Global("a", ast::StorageClass::kPrivate, ty.f32());
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
@@ -79,8 +79,8 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Sampler) {
-  auto* var = Global("s", ast::StorageClass::kUniformConstant,
-                     create<type::Sampler>(type::SamplerKind::kSampler));
+  auto* var = Global("s", create<type::Sampler>(type::SamplerKind::kSampler),
+                     ast::StorageClass::kUniformConstant);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -95,9 +95,9 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Sampler) {
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Texture) {
   auto* st =
       create<type::SampledTexture>(type::TextureDimension::k1d, ty.f32());
-  auto* var =
-      Global("t", ast::StorageClass::kUniformConstant,
-             create<type::AccessControl>(ast::AccessControl::kReadOnly, st));
+  auto* var = Global(
+      "t", create<type::AccessControl>(ast::AccessControl::kReadOnly, st),
+      ast::StorageClass::kUniformConstant);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
