@@ -68,11 +68,16 @@ namespace dawn_native {
         TexelBlockInfo block;
         wgpu::TextureComponentType baseType;
         ComponentTypeBit supportedComponentTypes;
+        wgpu::TextureFormat format;
     };
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
     // exact number of known format.
-    static constexpr size_t kKnownFormatCount = 54;
+    static constexpr size_t kKnownFormatCount = 55;
+
+    // The maximum number of planes per format Dawn knows about. Asserts in BuildFormatTable that
+    // the per plane index does not exceed the known maximum plane count
+    static constexpr uint32_t kMaxPlanesPerFormat = 2;
 
     struct Format;
     using FormatTable = std::array<Format, kKnownFormatCount>;
@@ -103,14 +108,12 @@ namespace dawn_native {
         // in [0, kKnownFormatCount)
         size_t GetIndex() const;
 
-        // Used to lookup the compatible view format using an aspect which corresponds to the
-        // plane index. Returns Undefined if the wrong plane aspect is requested.
-        wgpu::TextureFormat GetAspectFormat(wgpu::TextureAspect aspect) const;
-
       private:
-        // The most common aspect: the color aspect for color texture, the depth aspect for
-        // depth[-stencil] textures.
-        AspectInfo firstAspect;
+        // Used to store the aspectInfo for one or more planes. For single plane "color" formats,
+        // only the first aspect info or aspectInfo[0] is valid. For depth-stencil, the first aspect
+        // info is depth and the second aspect info is stencil. For multi-planar formats,
+        // aspectInfo[i] is the ith plane.
+        std::array<AspectInfo, kMaxPlanesPerFormat> aspectInfo;
 
         friend FormatTable BuildFormatTable(const DeviceBase* device);
     };

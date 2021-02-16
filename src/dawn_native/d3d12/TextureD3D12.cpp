@@ -203,6 +203,7 @@ namespace dawn_native { namespace d3d12 {
                     return DXGI_FORMAT_BC7_TYPELESS;
 
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+                case wgpu::TextureFormat::Stencil8:
                 case wgpu::TextureFormat::Undefined:
                     UNREACHABLE();
             }
@@ -328,6 +329,7 @@ namespace dawn_native { namespace d3d12 {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return DXGI_FORMAT_NV12;
 
+            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
@@ -1098,7 +1100,9 @@ namespace dawn_native { namespace d3d12 {
         // Per plane view formats must have the plane slice number be the index of the plane in the
         // array of textures.
         if (texture->GetFormat().IsMultiPlanar()) {
-            planeSlice = GetAspectIndex(ConvertViewAspect(GetFormat(), descriptor->aspect));
+            const Aspect planeAspect = ConvertViewAspect(GetFormat(), descriptor->aspect);
+            planeSlice = GetAspectIndex(planeAspect);
+            mSrvDesc.Format = D3D12TextureFormat(GetFormat().GetAspectInfo(planeAspect).format);
         }
 
         // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer

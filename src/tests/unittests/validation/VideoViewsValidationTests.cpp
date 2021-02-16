@@ -43,9 +43,6 @@ namespace {
         wgpu::Texture videoTexture = CreateVideoTextureForTest(
             wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::None);
 
-        // Create a default view with no plane selected.
-        ASSERT_DEVICE_ERROR(videoTexture.CreateView());
-
         wgpu::TextureViewDescriptor viewDesc = {};
 
         // Correct plane index but incompatible view format.

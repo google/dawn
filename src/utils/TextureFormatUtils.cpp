@@ -113,6 +113,7 @@ namespace utils {
             // Block size of a multi-planar format depends on aspect.
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
 
+            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
@@ -180,6 +181,7 @@ namespace utils {
             // Block size of a multi-planar format depends on aspect.
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
 
+            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
@@ -247,6 +249,7 @@ namespace utils {
             // Block size of a multi-planar format depends on aspect.
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
 
+            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }

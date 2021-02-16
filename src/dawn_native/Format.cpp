@@ -15,28 +15,13 @@
 #include "dawn_native/Format.h"
 
 #include "dawn_native/Device.h"
+#include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Extensions.h"
 #include "dawn_native/Texture.h"
 
 #include <bitset>
 
 namespace dawn_native {
-
-    namespace {
-
-        static const AspectInfo kStencil8AspectInfo = {{1, 1, 1},
-                                                       wgpu::TextureComponentType::Uint,
-                                                       ComponentTypeBit::Uint};
-
-        // R8BG8Biplanar420Unorm must be specialized since it represents planar data and cannot be
-        // used without a per plane format. In particular, the component type is float since
-        // Dawn does not allow texture format reinterpretion (ex. using R8BG82plane420 with Uint or
-        // Unorm). Block size is always zero since the format is not renderable or copyable.
-        static const AspectInfo kR8BG8Biplanar420UnormAspectInfo = {
-            {0, 0, 0},
-            wgpu::TextureComponentType::Float,
-            ComponentTypeBit::Float};
-    }
 
     // Format
 
@@ -113,48 +98,19 @@ namespace dawn_native {
     }
 
     const AspectInfo& Format::GetAspectInfo(wgpu::TextureAspect aspect) const {
-        return GetAspectInfo(ConvertAspect(*this, aspect));
+        return GetAspectInfo(SelectFormatAspects(*this, aspect));
     }
 
     const AspectInfo& Format::GetAspectInfo(Aspect aspect) const {
         ASSERT(HasOneBit(aspect));
         ASSERT(aspects & aspect);
-
-        // The stencil aspect is the only aspect that's not the first aspect. Since it is always the
-        // same aspect information, special case it to return a constant AspectInfo.
-        if (aspect == Aspect::Stencil) {
-            return kStencil8AspectInfo;
-            // multi-planar formats are specified per plane aspect. Since it does not support
-            // non-planar access, it can always be the same aspect information, special cased to
-            // return a constant AspectInfo.
-            // TODO(dawn:551): Refactor and remove GetAspectFormat.
-        } else if (format == wgpu::TextureFormat::R8BG8Biplanar420Unorm) {
-            return kR8BG8Biplanar420UnormAspectInfo;
-        } else {
-            return firstAspect;
-        }
+        const size_t aspectIndex = GetAspectIndex(aspect);
+        ASSERT(aspectIndex < GetAspectCount(aspects));
+        return aspectInfo[aspectIndex];
     }
 
     size_t Format::GetIndex() const {
         return ComputeFormatIndex(format);
-    }
-
-    wgpu::TextureFormat Format::GetAspectFormat(wgpu::TextureAspect aspect) const {
-        switch (format) {
-            case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-                switch (aspect) {
-                    case wgpu::TextureAspect::Plane0Only:
-                        return wgpu::TextureFormat::R8Unorm;
-                    case wgpu::TextureAspect::Plane1Only:
-                        return wgpu::TextureFormat::RG8Unorm;
-                    default:
-                        return wgpu::TextureFormat::Undefined;
-                }
-                break;
-            // TODO(dawn:551): Consider using for depth-stencil formats.
-            default:
-                return format;
-        }
     }
 
     // Implementation details of the format table of the DeviceBase
@@ -185,9 +141,9 @@ namespace dawn_native {
 
             // Vulkan describes bytesPerRow in units of texels. If there's any format for which this
             // ASSERT isn't true, then additional validation on bytesPerRow must be added.
-            // Multi-planar formats are not copyable and have no first aspect.
-            ASSERT(format.IsMultiPlanar() ||
-                   (kTextureBytesPerRowAlignment % format.firstAspect.block.byteSize) == 0);
+            const bool hasMultipleAspects = !HasOneBit(format.aspects);
+            ASSERT(hasMultipleAspects ||
+                   (kTextureBytesPerRowAlignment % format.aspectInfo[0].block.byteSize) == 0);
 
             table[index] = format;
             formatsSet.set(index);
@@ -203,29 +159,50 @@ namespace dawn_native {
             internalFormat.isSupported = true;
             internalFormat.supportsStorageUsage = supportsStorageUsage;
             internalFormat.aspects = Aspect::Color;
-            internalFormat.firstAspect.block.byteSize = byteSize;
-            internalFormat.firstAspect.block.width = 1;
-            internalFormat.firstAspect.block.height = 1;
-            internalFormat.firstAspect.baseType = type;
-            internalFormat.firstAspect.supportedComponentTypes = ToComponentTypeBit(type);
+            AspectInfo* firstAspect = internalFormat.aspectInfo.data();
+            firstAspect->block.byteSize = byteSize;
+            firstAspect->block.width = 1;
+            firstAspect->block.height = 1;
+            firstAspect->baseType = type;
+            firstAspect->supportedComponentTypes = ToComponentTypeBit(type);
+            firstAspect->format = format;
             AddFormat(internalFormat);
         };
 
-        auto AddDepthStencilFormat = [&AddFormat](wgpu::TextureFormat format, Aspect aspects,
-                                                  uint32_t byteSize) {
+        auto AddDepthFormat = [&AddFormat](wgpu::TextureFormat format, uint32_t byteSize) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = true;
             internalFormat.isCompressed = false;
             internalFormat.isSupported = true;
             internalFormat.supportsStorageUsage = false;
-            internalFormat.aspects = aspects;
-            internalFormat.firstAspect.block.byteSize = byteSize;
-            internalFormat.firstAspect.block.width = 1;
-            internalFormat.firstAspect.block.height = 1;
-            internalFormat.firstAspect.baseType = wgpu::TextureComponentType::Float;
-            internalFormat.firstAspect.supportedComponentTypes =
+            internalFormat.aspects = Aspect::Depth;
+            AspectInfo* firstAspect = internalFormat.aspectInfo.data();
+            firstAspect->block.byteSize = byteSize;
+            firstAspect->block.width = 1;
+            firstAspect->block.height = 1;
+            firstAspect->baseType = wgpu::TextureComponentType::Float;
+            firstAspect->supportedComponentTypes =
                 ComponentTypeBit::Float | ComponentTypeBit::DepthComparison;
+            firstAspect->format = format;
+            AddFormat(internalFormat);
+        };
+
+        auto AddStencilFormat = [&AddFormat](wgpu::TextureFormat format) {
+            Format internalFormat;
+            internalFormat.format = format;
+            internalFormat.isRenderable = true;
+            internalFormat.isCompressed = false;
+            internalFormat.isSupported = false;
+            internalFormat.supportsStorageUsage = false;
+            internalFormat.aspects = Aspect::Stencil;
+            AspectInfo* firstAspect = internalFormat.aspectInfo.data();
+            firstAspect->block.byteSize = 1;
+            firstAspect->block.width = 1;
+            firstAspect->block.height = 1;
+            firstAspect->baseType = wgpu::TextureComponentType::Uint;
+            firstAspect->supportedComponentTypes = ComponentTypeBit::Uint;
+            firstAspect->format = format;
             AddFormat(internalFormat);
         };
 
@@ -238,23 +215,34 @@ namespace dawn_native {
             internalFormat.isSupported = isSupported;
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Color;
-            internalFormat.firstAspect.block.byteSize = byteSize;
-            internalFormat.firstAspect.block.width = width;
-            internalFormat.firstAspect.block.height = height;
-            internalFormat.firstAspect.baseType = wgpu::TextureComponentType::Float;
-            internalFormat.firstAspect.supportedComponentTypes = ComponentTypeBit::Float;
+            AspectInfo* firstAspect = internalFormat.aspectInfo.data();
+            firstAspect->block.byteSize = byteSize;
+            firstAspect->block.width = width;
+            firstAspect->block.height = height;
+            firstAspect->baseType = wgpu::TextureComponentType::Float;
+            firstAspect->supportedComponentTypes = ComponentTypeBit::Float;
+            firstAspect->format = format;
             AddFormat(internalFormat);
         };
 
-        auto AddMultiPlanarFormat = [&AddFormat](wgpu::TextureFormat format, Aspect aspects,
-                                                 bool isSupported) {
+        auto AddMultiAspectFormat = [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
+                                                         wgpu::TextureFormat firstFormat,
+                                                         wgpu::TextureFormat secondFormat,
+                                                         bool isRenderable, bool isSupported) {
             Format internalFormat;
             internalFormat.format = format;
-            internalFormat.isRenderable = false;
+            internalFormat.isRenderable = isRenderable;
             internalFormat.isCompressed = false;
             internalFormat.isSupported = isSupported;
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = aspects;
+
+            const size_t firstFormatIndex = ComputeFormatIndex(firstFormat);
+            const size_t secondFormatIndex = ComputeFormatIndex(secondFormat);
+
+            internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
+            internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
+
             AddFormat(internalFormat);
         };
 
@@ -308,12 +296,14 @@ namespace dawn_native {
         AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, Type::Float);
 
         // Depth-stencil formats
-        AddDepthStencilFormat(wgpu::TextureFormat::Depth32Float, Aspect::Depth, 4);
-        AddDepthStencilFormat(wgpu::TextureFormat::Depth24Plus, Aspect::Depth, 4);
+        AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4);
+        AddDepthFormat(wgpu::TextureFormat::Depth24Plus, 4);
+        // TODO(dawn:666): Implement the stencil8 format
+        AddStencilFormat(wgpu::TextureFormat::Stencil8);
         // TODO(cwallez@chromium.org): It isn't clear if this format should be copyable
         // because its size isn't well defined, is it 4, 5 or 8?
-        AddDepthStencilFormat(wgpu::TextureFormat::Depth24PlusStencil8,
-                              Aspect::Depth | Aspect::Stencil, 4);
+        AddMultiAspectFormat(wgpu::TextureFormat::Depth24PlusStencil8,
+                              Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8, true, true);
 
         // BC compressed formats
         bool isBCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionBC);
@@ -334,7 +324,8 @@ namespace dawn_native {
 
         // multi-planar formats
         const bool isMultiPlanarFormatSupported = device->IsExtensionEnabled(Extension::MultiPlanarFormats);
-        AddMultiPlanarFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1, isMultiPlanarFormatSupported);
+        AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,
+            wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, false, isMultiPlanarFormatSupported);
 
         // clang-format on
 

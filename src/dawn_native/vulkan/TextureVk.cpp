@@ -339,6 +339,7 @@ namespace dawn_native { namespace vulkan {
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return VK_FORMAT_BC7_SRGB_BLOCK;
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+            case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
