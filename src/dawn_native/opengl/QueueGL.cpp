@@ -73,7 +73,45 @@ namespace dawn_native { namespace opengl {
         gl.BindTexture(target, texture->GetHandle());
         const TexelBlockInfo& blockInfo =
             texture->GetFormat().GetAspectInfo(destination.aspect).block;
-        if (dataLayout.bytesPerRow % blockInfo.byteSize == 0) {
+
+        if (texture->GetFormat().isCompressed) {
+            size_t imageSize = writeSizePixel.width / blockInfo.width * blockInfo.byteSize;
+            Extent3D virtSize = texture->GetMipLevelVirtualSize(destination.mipLevel);
+            uint32_t width = std::min(writeSizePixel.width, virtSize.width - destination.origin.x);
+            uint32_t x = destination.origin.x;
+
+            // For now, we use row-by-row texture uploads of compressed textures in all cases.
+            // TODO(crbug.com/dawn/684): For contiguous cases, we should be able to use a single
+            // texture upload per layer, as we do in the non-compressed case.
+            if (texture->GetArrayLayers() == 1) {
+                const uint8_t* d = static_cast<const uint8_t*>(data);
+
+                for (uint32_t y = destination.origin.y;
+                     y < destination.origin.y + writeSizePixel.height; y += blockInfo.height) {
+                    uint32_t height = std::min(blockInfo.height, virtSize.height - y);
+                    gl.CompressedTexSubImage2D(target, destination.mipLevel, x, y, width, height,
+                                               format.internalFormat, imageSize, d);
+                    d += dataLayout.bytesPerRow;
+                }
+            } else {
+                const uint8_t* slice = static_cast<const uint8_t*>(data);
+
+                for (uint32_t z = destination.origin.z;
+                     z < destination.origin.z + writeSizePixel.depth; ++z) {
+                    const uint8_t* d = slice;
+
+                    for (uint32_t y = destination.origin.y;
+                         y < destination.origin.y + writeSizePixel.height; y += blockInfo.height) {
+                        uint32_t height = std::min(blockInfo.height, virtSize.height - y);
+                        gl.CompressedTexSubImage3D(target, destination.mipLevel, x, y, z, width,
+                                                   height, 1, format.internalFormat, imageSize, d);
+                        d += dataLayout.bytesPerRow;
+                    }
+
+                    slice += dataLayout.rowsPerImage * dataLayout.bytesPerRow;
+                }
+            }
+        } else if (dataLayout.bytesPerRow % blockInfo.byteSize == 0) {
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
                            dataLayout.bytesPerRow / blockInfo.byteSize * blockInfo.width);
             if (texture->GetArrayLayers() == 1) {

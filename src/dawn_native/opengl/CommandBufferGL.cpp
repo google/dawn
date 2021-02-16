@@ -713,6 +713,11 @@ namespace dawn_native { namespace opengl {
                                     copyDataSize,
                                     reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
                             }
+
+                            gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, 0);
+                            gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, 0);
+                            gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, 0);
+                            gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 0);
                         }
                     } else {
                         switch (texture->GetDimension()) {

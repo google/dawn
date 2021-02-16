@@ -1232,4 +1232,6 @@ TEST_P(CompressedTextureWriteTextureTest,
 DAWN_INSTANTIATE_TEST(CompressedTextureWriteTextureTest,
                       D3D12Backend(),
                       MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
