@@ -32,7 +32,7 @@ enum class Builtin {
   kLocalInvocationId,
   kLocalInvocationIndex,
   kGlobalInvocationId,
-  kSampleId,
+  kSampleIndex,
   kSampleMaskIn,
   kSampleMaskOut,
 

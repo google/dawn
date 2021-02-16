@@ -1455,7 +1455,7 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "thread_index_in_threadgroup";
     case ast::Builtin::kGlobalInvocationId:
       return "thread_position_in_grid";
-    case ast::Builtin::kSampleId:
+    case ast::Builtin::kSampleIndex:
       return "sample_id";
     case ast::Builtin::kSampleMaskIn:
       return "sample_mask";

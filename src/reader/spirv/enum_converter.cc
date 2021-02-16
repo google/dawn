@@ -87,7 +87,7 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b, ast::StorageClass sc) {
     case SpvBuiltInGlobalInvocationId:
       return ast::Builtin::kGlobalInvocationId;
     case SpvBuiltInSampleId:
-      return ast::Builtin::kSampleId;
+      return ast::Builtin::kSampleIndex;
     case SpvBuiltInSampleMask:
       return sc == ast::StorageClass::kInput ? ast::Builtin::kSampleMaskIn
                                              : ast::Builtin::kSampleMaskOut;

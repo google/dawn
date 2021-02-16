@@ -59,8 +59,8 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
       out << "global_invocation_id";
       break;
     }
-    case Builtin::kSampleId: {
-      out << "sample_id";
+    case Builtin::kSampleIndex: {
+      out << "sample_index";
       break;
     }
     case Builtin::kSampleMaskIn: {

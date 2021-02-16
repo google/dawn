@@ -18,7 +18,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/function.h"
+#include "src/ast/variable.h"
 #include "src/program.h"
+#include "src/semantic/variable.h"
 #include "src/type/void_type.h"
 #include "src/writer/wgsl/test_helper.h"
 
@@ -40,6 +42,50 @@ TEST_F(WgslGeneratorImplTest, Generate) {
 }
 )");
 }
+
+struct WgslBuiltinData {
+  ast::Builtin builtin;
+  const char* attribute_name;
+};
+inline std::ostream& operator<<(std::ostream& out, WgslBuiltinData data) {
+  out << data.builtin;
+  return out;
+}
+using WgslBuiltinConversionTest = TestParamHelper<WgslBuiltinData>;
+TEST_P(WgslBuiltinConversionTest, Emit) {
+  auto params = GetParam();
+
+  auto* var = Global("a", ast::StorageClass::kNone, ty.f32(), nullptr,
+                     ast::VariableDecorationList{
+                         create<ast::BuiltinDecoration>(params.builtin),
+                     });
+
+  GeneratorImpl& gen = Build();
+
+  gen.EmitVariableDecorations(program->Sem().Get(var));
+
+  EXPECT_EQ(gen.result(),
+            "[[builtin(" + std::string(params.attribute_name) + ")]] ");
+}
+INSTANTIATE_TEST_SUITE_P(
+    WgslGeneratorImplTest,
+    WgslBuiltinConversionTest,
+    testing::Values(
+        WgslBuiltinData{ast::Builtin::kPosition, "position"},
+        WgslBuiltinData{ast::Builtin::kVertexIndex, "vertex_index"},
+        WgslBuiltinData{ast::Builtin::kInstanceIndex, "instance_index"},
+        WgslBuiltinData{ast::Builtin::kFrontFacing, "front_facing"},
+        WgslBuiltinData{ast::Builtin::kFragCoord, "frag_coord"},
+        WgslBuiltinData{ast::Builtin::kFragDepth, "frag_depth"},
+        WgslBuiltinData{ast::Builtin::kLocalInvocationId,
+                        "local_invocation_id"},
+        WgslBuiltinData{ast::Builtin::kLocalInvocationIndex,
+                        "local_invocation_index"},
+        WgslBuiltinData{ast::Builtin::kGlobalInvocationId,
+                        "global_invocation_id"},
+        WgslBuiltinData{ast::Builtin::kSampleIndex, "sample_index"},
+        WgslBuiltinData{ast::Builtin::kSampleMaskIn, "sample_mask_in"},
+        WgslBuiltinData{ast::Builtin::kSampleMaskOut, "sample_mask_out"}));
 
 }  // namespace
 }  // namespace wgsl

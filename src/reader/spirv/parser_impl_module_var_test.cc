@@ -2062,7 +2062,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_Direct) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_id}
+      BuiltinDecoration{sample_index}
     }
     x_1
     in
@@ -2104,7 +2104,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_id}
+      BuiltinDecoration{sample_index}
     }
     x_1
     in
@@ -2146,7 +2146,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_id}
+      BuiltinDecoration{sample_index}
     }
     x_1
     in
@@ -2213,7 +2213,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_Direct) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_id}
+      BuiltinDecoration{sample_index}
     }
     x_1
     in
@@ -2252,7 +2252,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_id}
+      BuiltinDecoration{sample_index}
     }
     x_1
     in
@@ -2301,7 +2301,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_AccessChain) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_id}
+      BuiltinDecoration{sample_index}
     }
     x_1
     in
@@ -2349,7 +2349,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_FunctParam) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_id}
+      BuiltinDecoration{sample_index}
     }
     x_1
     in

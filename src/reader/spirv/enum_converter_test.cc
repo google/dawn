@@ -225,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{SpvBuiltInGlobalInvocationId, ast::StorageClass::kInput,
                     true, ast::Builtin::kGlobalInvocationId},
         BuiltinCase{SpvBuiltInSampleId, ast::StorageClass::kInput, true,
-                    ast::Builtin::kSampleId},
+                    ast::Builtin::kSampleIndex},
         BuiltinCase{SpvBuiltInSampleMask, ast::StorageClass::kInput, true,
                     ast::Builtin::kSampleMaskIn}));
 

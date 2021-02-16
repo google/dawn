@@ -3194,7 +3194,7 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
       return SpvBuiltInGlobalInvocationId;
     case ast::Builtin::kPointSize:
       return SpvBuiltInPointSize;
-    case ast::Builtin::kSampleId:       // TODO(dneto)
+    case ast::Builtin::kSampleIndex:    // TODO(dneto)
     case ast::Builtin::kSampleMaskIn:   // TODO(dneto)
     case ast::Builtin::kSampleMaskOut:  // TODO(dneto)
     case ast::Builtin::kNone:

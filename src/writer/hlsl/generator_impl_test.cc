@@ -96,7 +96,7 @@ INSTANTIATE_TEST_SUITE_P(
         HlslBuiltinData{ast::Builtin::kLocalInvocationIndex, "SV_GroupIndex"},
         HlslBuiltinData{ast::Builtin::kGlobalInvocationId,
                         "SV_DispatchThreadID"},
-        HlslBuiltinData{ast::Builtin::kSampleId, "SV_SampleIndex"},
+        HlslBuiltinData{ast::Builtin::kSampleIndex, "SV_SampleIndex"},
         HlslBuiltinData{ast::Builtin::kSampleMaskIn, "SV_Coverage"},
         HlslBuiltinData{ast::Builtin::kSampleMaskOut, "SV_Coverage"}));
 
