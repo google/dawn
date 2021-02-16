@@ -69,17 +69,6 @@ if (build_with_chromium) {
   }
 }
 
-static_library("dawn_spirv_cross_fuzzer_common") {
-  sources = [
-    "DawnSPIRVCrossFuzzer.cpp",
-    "DawnSPIRVCrossFuzzer.h",
-  ]
-  public_deps = [
-    "${dawn_root}/third_party/gn/spirv_cross:spirv_cross",
-    "${dawn_spirv_tools_dir}:spvtools_val",
-  ]
-}
-
 static_library("dawn_wire_server_fuzzer_common") {
   sources = [
     "DawnWireServerFuzzer.cpp",
@@ -93,15 +82,6 @@ static_library("dawn_wire_server_fuzzer_common") {
     "${dawn_root}/src/dawn_wire:dawn_wire_static",
     "${dawn_root}/src/utils:dawn_utils",
   ]
-}
-
-# TODO(rharrison): Remove asan_options once signal trap is no longer
-#                  needed.
-# Uses Dawn specific options and varies input data
-dawn_fuzzer_test("dawn_spirv_cross_glsl_fast_fuzzer") {
-  sources = [ "DawnSPIRVCrossGLSLFastFuzzer.cpp" ]
-  deps = [ ":dawn_spirv_cross_fuzzer_common" ]
-  asan_options = [ "allow_user_segv_handler=1" ]
 }
 
 dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
@@ -134,7 +114,6 @@ dawn_fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
 group("dawn_fuzzers") {
   testonly = true
   deps = [
-    ":dawn_spirv_cross_glsl_fast_fuzzer",
     ":dawn_wire_server_and_frontend_fuzzer",
     ":dawn_wire_server_and_vulkan_backend_fuzzer",
   ]
