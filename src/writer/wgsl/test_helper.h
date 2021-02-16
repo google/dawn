@@ -50,7 +50,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
 
   /// The type determiner
   TypeDeterminer td;
-  // The program built with a call to Build()
+  /// The program built with a call to Build()
   std::unique_ptr<Program> program;
 
  private:

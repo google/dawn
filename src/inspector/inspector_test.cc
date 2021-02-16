@@ -631,21 +631,6 @@ class InspectorHelper : public ProgramBuilder {
     return {texture_type, subtype, access_control};
   }
 
-  /// Generates appropriate types for a Write-Only StorageTexture
-  /// @param dim the texture dimension of the storage texture
-  /// @param format the image format of the storage texture
-  /// @returns the storage texture type, subtype & access control type
-  std::tuple<type::StorageTexture*, type::Type*, type::AccessControl*>
-  MakeWriteOnlyStorageTextureTypes(type::TextureDimension dim,
-                                   type::ImageFormat format) {
-    type::StorageTexture* texture_type;
-    type::Type* subtype;
-    std::tie(texture_type, subtype) = MakeStorageTextureTypes(dim, format);
-    auto* access_control = create<type::AccessControl>(
-        ast::AccessControl::kWriteOnly, texture_type);
-    return {texture_type, subtype, access_control};
-  }
-
   /// Adds a storage texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
