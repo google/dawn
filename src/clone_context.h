@@ -15,6 +15,7 @@
 #ifndef SRC_CLONE_CONTEXT_H_
 #define SRC_CLONE_CONTEXT_H_
 
+#include <cassert>
 #include <functional>
 #include <unordered_map>
 #include <vector>
@@ -72,14 +73,49 @@ class CloneContext {
     // previously cloned pointer.
     // If we haven't cloned this before, try cloning using a replacer transform.
     if (auto* c = LookupOrTransform(a)) {
-      return static_cast<T*>(c);
+      return CheckedCast<T>(c);
     }
 
     // First time clone and no replacer transforms matched.
     // Clone with T::Clone().
     auto* c = a->Clone(this);
     cloned_.emplace(a, c);
-    return static_cast<T*>(c);
+    return CheckedCast<T>(c);
+  }
+
+  /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
+  /// not null. If `a` is null, then Clone() returns null. If `a` has been
+  /// cloned already by this CloneContext then the same cloned pointer is
+  /// returned.
+  ///
+  /// Unlike Clone(), this method does not invoke or use any transformations
+  /// registered by ReplaceAll().
+  ///
+  /// The Node or type::Type `a` must be owned by the Program #src.
+  ///
+  /// @note Semantic information such as resolved expression type and intrinsic
+  /// information is not cloned.
+  /// @param a the `Node` or `type::Type` to clone
+  /// @return the cloned node
+  template <typename T>
+  T* CloneWithoutTransform(T* a) {
+    // If the input is nullptr, there's nothing to clone - just return nullptr.
+    if (a == nullptr) {
+      return nullptr;
+    }
+
+    // Have we seen this object before? If so, return the previously cloned
+    // version instead of making yet another copy.
+    auto it = cloned_.find(a);
+    if (it != cloned_.end()) {
+      return CheckedCast<T>(it->second);
+    }
+
+    // First time clone and no replacer transforms matched.
+    // Clone with T::Clone().
+    auto* c = a->Clone(this);
+    cloned_.emplace(a, c);
+    return CheckedCast<T>(c);
   }
 
   /// Clones the Source `s` into `dst`
@@ -150,6 +186,9 @@ class CloneContext {
   ///     }).Clone();
   /// ```
   ///
+  /// @warning The replacement object must be of the correct type for all
+  /// references of the original object. A type mismatch will result in an
+  /// assertion in debug builds, and undefined behavior in release builds.
   /// @param replacer a function or function-like object with the signature
   ///        `T* (CloneContext*, T*)`, where `T` derives from CastableBase
   /// @returns this CloneContext so calls can be chained
@@ -168,12 +207,15 @@ class CloneContext {
   /// when calling Clone().
   /// @param what a pointer to the object in #src that will be replaced with
   /// `with`
-  /// @param with a pointer to the replacement object that will be used when
-  /// cloning into #dst
+  /// @param with a pointer to the replacement object owned by #dst that will be
+  /// used as a replacement for `what`
+  /// @warning The replacement object must be of the correct type for all
+  /// references of the original object. A type mismatch will result in an
+  /// assertion in debug builds, and undefined behavior in release builds.
   /// @returns this CloneContext so calls can be chained
-  template <typename T>
-  CloneContext& Replace(T* what, T* with) {
-    cloned_.emplace(what, with);
+  template <typename WHAT, typename WITH>
+  CloneContext& Replace(WHAT* what, WITH* with) {
+    cloned_[what] = with;
     return *this;
   }
 
@@ -213,6 +255,15 @@ class CloneContext {
 
     // No luck, Clone() will have to call T::Clone().
     return nullptr;
+  }
+
+  /// Cast `obj` from type `FROM` to type `TO`, returning the cast object.
+  /// Asserts if the cast failed.
+  template <typename TO, typename FROM>
+  TO* CheckedCast(FROM* obj) {
+    TO* cast = obj->template As<TO>();
+    assert(cast /* cloned object was not of the expected type */);
+    return cast;
   }
 
   std::unordered_map<CastableBase*, CastableBase*> cloned_;

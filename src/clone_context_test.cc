@@ -49,6 +49,17 @@ struct Replacement : public Castable<Replacement, Replaceable> {
   explicit Replacement(const Source& source) : Base(source) {}
 };
 
+struct NotACloneable : public Castable<NotACloneable, ast::Node> {
+  explicit NotACloneable(const Source& source) : Base(source) {}
+
+  NotACloneable* Clone(CloneContext* ctx) const override {
+    return ctx->dst->create<NotACloneable>();
+  }
+
+  bool IsValid() const override { return true; }
+  void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
+};
+
 TEST(CloneContext, Clone) {
   ProgramBuilder builder;
   auto* original_root = builder.create<Cloneable>();
@@ -193,10 +204,41 @@ TEST(CloneContext, CloneWithReplace) {
   EXPECT_NE(cloned_root->c, replacement);
 }
 
+TEST(CloneContext, CloneWithReplace_WithNotACloneable) {
+  ProgramBuilder builder;
+  auto* original_root = builder.create<Cloneable>();
+  original_root->a = builder.create<Cloneable>();
+  original_root->b = builder.create<Cloneable>();
+  original_root->c = builder.create<Cloneable>();
+  Program original(std::move(builder));
+
+  //                          root
+  //        ╭──────────────────┼──────────────────╮
+  //       (a)                (b)                (c)
+  //                        Replaced
+
+  ProgramBuilder cloned;
+  auto* replacement = cloned.create<NotACloneable>();
+
+  CloneContext ctx(&cloned, &original);
+  ctx.Replace(original_root->b, replacement);
+
+#ifndef NDEBUG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wused-but-marked-unused"
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
+
+  EXPECT_DEATH_IF_SUPPORTED(ctx.Clone(original_root), "");
+
+#pragma clang diagnostic pop
+#endif  // NDEBUG
+}
+
 }  // namespace
 
 TINT_INSTANTIATE_CLASS_ID(Cloneable);
 TINT_INSTANTIATE_CLASS_ID(Replaceable);
 TINT_INSTANTIATE_CLASS_ID(Replacement);
+TINT_INSTANTIATE_CLASS_ID(NotACloneable);
 
 }  // namespace tint
