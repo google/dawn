@@ -68,14 +68,13 @@ class TextureZeroInitTest : public DawnTest {
     wgpu::RenderPipeline CreatePipelineForTest(float depth = 0.f) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest(depth);
-        const char* fs =
-            R"(#version 450
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-               fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-            })";
-        pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
+        const char* fs = R"(
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+               fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            }
+        )";
+        pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, fs);
 
         pipelineDescriptor.cDepthStencilState.depthCompare = wgpu::CompareFunction::Equal;
         pipelineDescriptor.cDepthStencilState.stencilFront.compare = wgpu::CompareFunction::Equal;
@@ -84,30 +83,34 @@ class TextureZeroInitTest : public DawnTest {
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
     wgpu::ShaderModule CreateBasicVertexShaderForTest(float depth = 0.f) {
-        std::string source = R"(#version 450
-            const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
-                                    vec2(-1.0f,  1.0f),
-                                    vec2( 1.0f, -1.0f),
-                                    vec2( 1.0f,  1.0f),
-                                    vec2(-1.0f,  1.0f),
-                                    vec2( 1.0f, -1.0f)
-                                    );
+        std::string source = R"(
+            const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                vec2<f32>(-1.0, -1.0),
+                vec2<f32>(-1.0,  1.0),
+                vec2<f32>( 1.0, -1.0),
+                vec2<f32>( 1.0,  1.0),
+                vec2<f32>(-1.0,  1.0),
+                vec2<f32>( 1.0, -1.0)
+            );
 
-            void main() {
-                gl_Position = vec4(pos[gl_VertexIndex], )" +
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+
+            [[stage(vertex)]] fn main() -> void {
+                Position = vec4<f32>(pos[VertexIndex], )" +
                              std::to_string(depth) + R"(, 1.0);
             })";
-        return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, source.c_str());
+        return utils::CreateShaderModuleFromWGSL(device, source.c_str());
     }
     wgpu::ShaderModule CreateSampledTextureFragmentShaderForTest() {
-        return utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
-                                         R"(#version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform texture2D texture0;
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-                fragColor = texelFetch(sampler2D(texture0, sampler0), ivec2(gl_FragCoord), 0);
-            })");
+        return utils::CreateShaderModuleFromWGSL(device, R"(
+            [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
+            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0);
+            }
+        )");
     }
 
     constexpr static uint32_t kSize = 128;
@@ -853,8 +856,6 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
-    wgpu::Sampler sampler = device.CreateSampler();
-
     // Create render pipeline
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
     renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
@@ -864,7 +865,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 
     // Create bindgroup
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
-                                                     {{0, sampler}, {1, texture.CreateView()}});
+                                                     {{0, texture.CreateView()}});
 
     // Encode pass and submit
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -921,11 +922,8 @@ TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
     renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
-    // Create bindgroup
-    wgpu::Sampler sampler = device.CreateSampler();
-
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
-                                                     {{0, sampler}, {1, sampleView}});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0), {{0, sampleView}});
 
     // Encode pass and submit
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -975,27 +973,25 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Create compute pipeline
     wgpu::ComputePipelineDescriptor computePipelineDescriptor;
     wgpu::ProgrammableStageDescriptor computeStage;
-    const char* cs =
-        R"(#version 450
-        layout(binding = 0) uniform texture2D sampleTex;
-        layout(std430, binding = 1) buffer BufferTex {
-           vec4 result;
-        } bufferTex;
-        layout(binding = 2) uniform sampler sampler0;
-        void main() {
-           bufferTex.result =
-                 texelFetch(sampler2D(sampleTex, sampler0), ivec2(0,0), 0);
-        })";
-    computePipelineDescriptor.computeStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs);
+    const char* cs = R"(
+        [[group(0), binding(0)]] var tex : texture_2d<f32>;
+        [[block]] struct Result {
+            [[offset(0)]] value : vec4<f32>;
+        };
+        [[group(0), binding(1)]] var<storage> result : Result;
+        [[stage(compute)]] fn main() -> void {
+           result.value = textureLoad(tex, vec2<i32>(0,0), 0);
+        }
+    )";
+    computePipelineDescriptor.computeStage.module = utils::CreateShaderModuleFromWGSL(device, cs);
     computePipelineDescriptor.computeStage.entryPoint = "main";
     wgpu::ComputePipeline computePipeline =
         device.CreateComputePipeline(&computePipelineDescriptor);
 
     // Create bindgroup
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-        device, computePipeline.GetBindGroupLayout(0),
-        {{0, texture.CreateView()}, {1, bufferTex, 0, bufferSize}, {2, sampler}});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, computePipeline.GetBindGroupLayout(0),
+                             {{0, texture.CreateView()}, {1, bufferTex, 0, bufferSize}});
 
     // Encode the pass and submit
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -1131,8 +1127,6 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
-    wgpu::Sampler sampler = device.CreateSampler();
-
     // Fill the sample texture with data
     std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 1);
     wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
@@ -1156,7 +1150,7 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
 
     // Create bindgroup
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
-                                                     {{0, sampler}, {1, texture.CreateView()}});
+                                                     {{0, texture.CreateView()}});
 
     // Encode pass and submit
     encoder = device.CreateCommandEncoder();
@@ -1273,8 +1267,6 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
         kColorFormat);
     wgpu::Texture sampleTexture = device.CreateTexture(&sampleTextureDescriptor);
 
-    wgpu::Sampler sampler = device.CreateSampler();
-
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
@@ -1303,9 +1295,8 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     // Create bindgroup
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
-                             {{0, sampler}, {1, sampleTexture.CreateView()}});
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                                     {{0, sampleTexture.CreateView()}});
 
     // Encode pass and submit
     encoder = device.CreateCommandEncoder();
@@ -1354,8 +1345,6 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
         kColorFormat);
     wgpu::Texture sampleTexture = device.CreateTexture(&sampleTextureDescriptor);
 
-    wgpu::Sampler sampler = device.CreateSampler();
-
     wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment, kColorFormat);
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
@@ -1390,7 +1379,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     // Create bindgroup
     wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
-                             {{0, sampler}, {1, sampleTexture.CreateView(&textureViewDescriptor)}});
+                             {{0, sampleTexture.CreateView(&textureViewDescriptor)}});
 
     // Encode pass and submit
     encoder = device.CreateCommandEncoder();
@@ -1808,13 +1797,11 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
                 device.CreateRenderPipeline(&renderPipelineDescriptor);
             pass.SetPipeline(renderPipeline);
 
-            wgpu::Sampler sampler = device.CreateSampler();
-
             wgpu::TextureViewDescriptor textureViewDescriptor = CreateTextureViewDescriptor(
                 viewMipmapLevel, baseArrayLayer, textureDescriptor.format);
-            wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-                device, renderPipeline.GetBindGroupLayout(0),
-                {{0, sampler}, {1, bcTexture.CreateView(&textureViewDescriptor)}});
+            wgpu::BindGroup bindGroup =
+                utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                     {{0, bcTexture.CreateView(&textureViewDescriptor)}});
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6);
             pass.EndPass();

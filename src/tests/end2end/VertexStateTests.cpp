@@ -70,41 +70,45 @@ class VertexStateTest : public DawnTest {
                                           int multiplier,
                                           const std::vector<ShaderTestSpec>& testSpec) {
         std::ostringstream vs;
-        vs << "#version 450\n";
 
         // TODO(cwallez@chromium.org): this only handles float attributes, we should extend it to
         // other types Adds line of the form
-        //    layout(location=1) in vec4 input1;
+        //    [[location(1) var<in> input1 : vec4<f32>;
         for (const auto& input : testSpec) {
-            vs << "layout(location=" << input.location << ") in vec4 input" << input.location
-               << ";\n";
+            vs << "[[location(" << input.location << ")]] var<in> input" << input.location
+               << " : vec4<f32>;\n";
         }
 
-        vs << "layout(location = 0) out vec4 color;\n";
-        vs << "void main() {\n";
+        vs << "[[builtin(vertex_index)]] var<in> VertexIndex : u32;\n";
+        vs << "[[builtin(instance_index)]] var<in> InstanceIndex : u32;\n";
+        vs << "[[location(0)]] var<out> color : vec4<f32>;\n";
+        vs << "[[builtin(position)]] var<out> Position : vec4<f32>;\n";
+        vs << "[[stage(vertex)]] fn main() -> void {\n";
 
         // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
         // Also this places the triangle in the grid based on its VertexID and InstanceID
-        vs << "    const vec2 pos[3] = vec2[3](vec2(0.5f, 1.0f), vec2(0.0f, 0.0f), vec2(1.0f, "
-              "0.0f));\n";
-        vs << "    vec2 offset = vec2(float(gl_VertexIndex / 3), float(gl_InstanceIndex));\n";
-        vs << "    vec2 worldPos = pos[gl_VertexIndex % 3] + offset;\n";
-        vs << "    vec4 position = vec4(worldPos / 2 - vec2(1.0f), 0.0f, 1.0f);\n";
-        vs << "    gl_Position = vec4(position.x, -position.y, position.z, position.w);\n";
+        vs << "    const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
+              "         vec2<f32>(0.5, 1.0), vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 0.0));\n";
+        vs << "    var offset : vec2<f32> = vec2<f32>(f32(VertexIndex / 3u), "
+              "f32(InstanceIndex));\n";
+        vs << "    var worldPos : vec2<f32> = pos[VertexIndex % 3u] + offset;\n";
+        vs << "    var position : vec4<f32> = vec4<f32>(0.5 * worldPos - vec2<f32>(1.0, 1.0), 0.0, "
+              "1.0);\n";
+        vs << "    Position = vec4<f32>(position.x, -position.y, position.z, position.w);\n";
 
         // Perform the checks by successively ANDing a boolean
-        vs << "    bool success = true;\n";
+        vs << "    var success : bool = true;\n";
         for (const auto& input : testSpec) {
             for (int component = 0; component < 4; ++component) {
                 vs << "    success = success && (input" << input.location << "[" << component
                    << "] == ";
                 if (ShouldComponentBeDefault(input.format, component)) {
-                    vs << (component == 3 ? "1.0f" : "0.0f");
+                    vs << (component == 3 ? "1.0" : "0.0");
                 } else {
                     if (input.step == InputStepMode::Vertex) {
-                        vs << multiplier << " * gl_VertexIndex + " << component << ".0f";
+                        vs << "f32(" << multiplier << " * VertexIndex) + " << component << ".0";
                     } else {
-                        vs << multiplier << " * gl_InstanceIndex + " << component << ".0f";
+                        vs << "f32(" << multiplier << " * InstanceIndex) + " << component << ".0";
                     }
                 }
                 vs << ");\n";
@@ -113,22 +117,20 @@ class VertexStateTest : public DawnTest {
 
         // Choose the color
         vs << "    if (success) {\n";
-        vs << "        color = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n";
+        vs << "        color = vec4<f32>(0.0, 1.0, 0.0, 1.0);\n";
         vs << "    } else {\n";
-        vs << "        color = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n";
-        vs << "    }\n;";
+        vs << "        color = vec4<f32>(1.0, 0.0, 0.0, 1.0);\n";
+        vs << "    }\n";
         vs << "}\n";
 
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs.str().c_str());
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) in vec4 color;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = color;
-                })");
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vs.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<in> color : vec4<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = color;
+            }
+        )");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
@@ -534,9 +536,6 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
 
 // Test that overlapping vertex attributes are permitted and load data correctly
 TEST_P(VertexStateTest, OverlappingVertexAttributes) {
-    // TODO(crbug.com/tint/114): Tint needs to support 1.4 version of OpSelect
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     utils::ComboVertexStateDescriptor vertexState;
@@ -563,38 +562,38 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
         utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Vertex);
 
     utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-    pipelineDesc.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-                #version 450
-                layout(location = 0) in vec4 attr0;
-                layout(location = 1) in uvec2 attr1;
-                layout(location = 2) in vec4 attr2;
-                layout(location = 3) in float attr3;
+    pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<in> attr0 : vec4<f32>;
+        [[location(1)]] var<in> attr1 : vec2<u32>;
+        [[location(2)]] var<in> attr2 : vec4<f32>;
+        [[location(3)]] var<in> attr3 : f32;
 
-                layout(location = 0) out vec4 color;
+        [[location(0)]] var<out> color : vec4<f32>;
+        [[builtin(position)]] var<out> Position : vec4<f32>;
 
-                void main() {
-                    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
-                    gl_PointSize = 1.0;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 
-                    bool success = (
-                        attr0.x == 1.0f &&
-                        attr1.x == 2u &&
-                        attr1.y == 3u &&
-                        attr2.z == 4.0f &&
-                        attr2.w == 5.0f &&
-                        attr3 == 1.0f
-                    );
-                    color = success ? vec4(0.0, 1.0, 0.0, 1.0) : vec4(1.0, 0.0, 0.0, 1.0);
-                })");
-    pipelineDesc.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) in vec4 color;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = color;
-                })");
+            var success : bool = (
+                attr0.x == 1.0 &&
+                attr1.x == 2u &&
+                attr1.y == 3u &&
+                attr2.z == 4.0 &&
+                attr2.w == 5.0 &&
+                attr3 == 1.0
+            );
+            if (success) {
+                color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            } else {
+                color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            }
+        })");
+    pipelineDesc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<in> color : vec4<f32>;
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = color;
+        })");
     pipelineDesc.vertexState = &vertexState;
     pipelineDesc.cColorStates[0].format = renderPass.colorFormat;
     pipelineDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
@@ -634,21 +633,17 @@ class OptionalVertexStateTest : public DawnTest {};
 TEST_P(OptionalVertexStateTest, Basic) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
-    wgpu::ShaderModule vsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                gl_Position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-                gl_PointSize = 1.0;
-            })");
+    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
 
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-            #version 450
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-                fragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-            })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.vertexStage.module = vsModule;

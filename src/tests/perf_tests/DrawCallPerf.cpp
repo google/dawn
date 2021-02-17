@@ -33,34 +33,37 @@ namespace {
     };
 
     constexpr char kVertexShader[] = R"(
-                #version 450
-                layout(location = 0) in vec4 pos;
-                void main() {
-                    gl_Position = pos;
-                })";
+        [[location(0)]] var<in> pos : vec4<f32>;
+        [[builtin(position)]] var<out> Position : vec4<f32>;
+        [[stage(vertex)]] fn main() -> void {
+            Position = pos;
+        })";
 
     constexpr char kFragmentShaderA[] = R"(
-                #version 450
-                layout (std140, set = 0, binding = 0) uniform Uniforms {
-                    vec3 color;
-                };
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = vec4(color / 5000., 1.0);
-                })";
+        [[block]] struct Uniforms {
+            [[offset(0)]] color : vec3<f32>;
+        };
+        [[group(0), binding(0)]] var<uniform> uniforms : Uniforms;
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>(uniforms.color * (1.0 / 5000.0), 1.0);
+        })";
 
     constexpr char kFragmentShaderB[] = R"(
-                #version 450
-                layout (std140, set = 0, binding = 0) uniform Constants {
-                    vec3 colorA;
-                };
-                layout (std140, set = 1, binding = 0) uniform Uniforms {
-                    vec3 colorB;
-                };
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = vec4((colorA + colorB) / 5000., 1.0);
-                })";
+        [[block]] struct Constants {
+            [[offset(0)]] color : vec3<f32>;
+        };
+        [[block]] struct Uniforms {
+            [[offset(0)]] color : vec3<f32>;
+        };
+        [[group(0), binding(0)]] var<uniform> constants : Constants;
+        [[group(1), binding(0)]] var<uniform> uniforms : Uniforms;
+
+        [[location(0)]] var<out> fragColor : vec4<f32>;
+
+        [[stage(fragment)]] fn main() -> void {
+            fragColor = vec4<f32>((constants.color + uniforms.color) * (1.0 / 5000.0), 1.0);
+        })";
 
     enum class Pipeline {
         Static,     // Keep the same pipeline for all draws.
@@ -364,10 +367,8 @@ void DrawCallPerf::SetUp() {
     wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
     // Create the shaders for the first pipeline.
-    wgpu::ShaderModule vsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, kVertexShader);
-    wgpu::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, kFragmentShaderA);
+    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, kVertexShader);
+    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, kFragmentShaderA);
 
     // Create the first pipeline.
     renderPipelineDesc.layout = pipelineLayout;
@@ -395,8 +396,7 @@ void DrawCallPerf::SetUp() {
 
         // Create the fragment shader module. This shader matches the pipeline layout described
         // above.
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, kFragmentShaderB);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, kFragmentShaderB);
 
         // Create the pipeline.
         renderPipelineDesc.layout = pipelineLayout;
