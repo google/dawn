@@ -26,13 +26,6 @@ namespace {
 
 using ParserTest = testing::Test;
 
-TEST_F(ParserTest, Uint32VecEmptyOld) {
-  std::vector<uint32_t> data;
-  Parser p(data);
-  EXPECT_FALSE(p.Parse());
-  // TODO(dneto): What message?
-}
-
 TEST_F(ParserTest, DataEmpty) {
   std::vector<uint32_t> data;
   auto program = Parse(data);

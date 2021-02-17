@@ -15,39 +15,13 @@
 #ifndef SRC_READER_SPIRV_PARSER_H_
 #define SRC_READER_SPIRV_PARSER_H_
 
-#include <cstdint>
-#include <memory>
 #include <vector>
 
-#include "src/reader/reader.h"
+#include "src/program.h"
 
 namespace tint {
 namespace reader {
 namespace spirv {
-
-class ParserImpl;
-
-/// Parser for SPIR-V source data
-/// [DEPRECATED] - Use Parse()
-class Parser : public Reader {
- public:
-  /// Creates a new parser
-  /// @param input the input data to parse
-  explicit Parser(const std::vector<uint32_t>& input);
-  /// Destructor
-  ~Parser() override;
-
-  /// Run the parser
-  /// @returns true if the parse was successful, false otherwise.
-  bool Parse() override;
-
-  /// @returns the program. The program builder in the parser will be reset
-  /// after this.
-  Program program() override;
-
- private:
-  std::unique_ptr<ParserImpl> impl_;
-};
 
 /// Parses the SPIR-V source data, returning the parsed program.
 /// If the source data fails to parse then the returned

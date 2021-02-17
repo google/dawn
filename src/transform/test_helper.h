@@ -42,16 +42,12 @@ class TransformTest : public testing::Test {
   std::string Transform(
       std::string in,
       std::vector<std::unique_ptr<transform::Transform>> transforms) {
-    Source::File file("test", in);
-    reader::wgsl::Parser parser(&file);
-    if (!parser.Parse()) {
-      return "WGSL reader failed:\n" + parser.error();
-    }
-
     diag::Formatter::Style style;
     style.print_newline_at_end = false;
 
-    auto program = parser.program();
+    Source::File file("test", in);
+    auto program = reader::wgsl::Parse(&file);
+
     if (!program.IsValid()) {
       return diag::Formatter(style).format(program.Diagnostics());
     }

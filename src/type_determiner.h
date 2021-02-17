@@ -59,14 +59,6 @@ class TypeDeterminer {
   /// Destructor
   ~TypeDeterminer();
 
-  /// Run the type determiner on `program`, replacing the Program with a new
-  /// program containing type information.
-  /// [TEMPORARY] - Exists for making incremental changes.
-  /// @param program a pointer to the program variable that will be read from
-  /// and assigned to.
-  /// @returns a list of diagnostic messages
-  static diag::List Run(Program* program);
-
   /// @returns error messages from the type determiner
   std::string error() const { return diagnostics_.str(); }
 

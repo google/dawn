@@ -25,41 +25,6 @@ namespace {
 
 using ParserTest = testing::Test;
 
-TEST_F(ParserTest, EmptyOld) {
-  Source::File file("test.wgsl", "");
-  Parser p(&file);
-  ASSERT_TRUE(p.Parse()) << p.error();
-}
-
-TEST_F(ParserTest, ParsesOld) {
-  Source::File file("test.wgsl", R"(
-[[location(0)]] var<out> gl_FragColor : vec4<f32>;
-
-[[stage(vertex)]]
-fn main() -> void {
-  gl_FragColor = vec4<f32>(.4, .2, .3, 1);
-}
-)");
-  Parser p(&file);
-  ASSERT_TRUE(p.Parse()) << p.error();
-
-  auto program = p.program();
-  ASSERT_EQ(1u, program.AST().Functions().size());
-  ASSERT_EQ(1u, program.AST().GlobalVariables().size());
-}
-
-TEST_F(ParserTest, HandlesErrorOld) {
-  Source::File file("test.wgsl", R"(
-fn main() ->  {  // missing return type
-  return;
-})");
-  Parser p(&file);
-
-  ASSERT_FALSE(p.Parse());
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "2:15: unable to determine function return type");
-}
-
 TEST_F(ParserTest, Empty) {
   Source::File file("test.wgsl", "");
   auto program = Parse(&file);
@@ -76,7 +41,6 @@ fn main() -> void {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1);
 }
 )");
-  Parser p(&file);
   auto program = Parse(&file);
   auto errs = diag::Formatter().format(program.Diagnostics());
   ASSERT_TRUE(program.IsValid()) << errs;

@@ -120,9 +120,7 @@ const declaration_order_check_3 : i32 = 1;
 )");
 
   // Parse the wgsl, create the src program
-  reader::wgsl::Parser parser(&file);
-  ASSERT_TRUE(parser.Parse()) << parser.error();
-  auto src = parser.program();
+  auto src = reader::wgsl::Parse(&file);
 
   ASSERT_TRUE(src.IsValid()) << diag::Formatter().format(src.Diagnostics());
 

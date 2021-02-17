@@ -22,27 +22,6 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
-Parser::Parser(const std::vector<uint32_t>& spv_binary)
-    : Reader(), impl_(std::make_unique<ParserImpl>(spv_binary)) {}
-
-Parser::~Parser() = default;
-
-bool Parser::Parse() {
-  const auto result = impl_->Parse();
-  auto err_msg = impl_->error();
-  if (!err_msg.empty()) {
-    // TODO(bclayton): Migrate spirv::ParserImpl to using diagnostics.
-    diag::List diagnostics;
-    diagnostics.add_error(err_msg);
-    set_diagnostics(std::move(diagnostics));
-  }
-  return result;
-}
-
-Program Parser::program() {
-  return impl_->program();
-}
-
 Program Parse(const std::vector<uint32_t>& input) {
   ParserImpl parser(input);
   bool parsed = parser.Parse();

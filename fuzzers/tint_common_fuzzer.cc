@@ -35,7 +35,8 @@ CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
 CommonFuzzer::~CommonFuzzer() = default;
 
 int CommonFuzzer::Run(const uint8_t* data, size_t size) {
-  std::unique_ptr<reader::Reader> parser;
+  Program program;
+
 #if TINT_BUILD_WGSL_READER
   std::unique_ptr<Source::File> file;
 #endif  // TINT_BUILD_WGSL_READER
@@ -47,7 +48,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       std::string str(reinterpret_cast<const char*>(data), size);
 
       file = std::make_unique<Source::File>("test.wgsl", str);
-      parser = std::make_unique<reader::wgsl::Parser>(file.get());
+      program = reader::wgsl::Parse(file.get());
     }
 #endif  // TINT_BUILD_WGSL_READER
     break;
@@ -59,7 +60,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
 
       if (input.size() != 0) {
-        parser = std::make_unique<reader::spirv::Parser>(input);
+        program = reader::spirv::Parse(input);
       }
     }
 #endif  // TINT_BUILD_WGSL_READER
@@ -68,19 +69,10 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       break;
   }
 
-  if (!parser) {
-    return 0;
-  }
-
-  if (!parser->Parse()) {
-    return 0;
-  }
-
   if (output_ == OutputFormat::kNone) {
     return 0;
   }
 
-  auto program = parser->program();
   if (!program.IsValid()) {
     return 0;
   }

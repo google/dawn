@@ -95,18 +95,6 @@ TypeDeterminer::TypeDeterminer(ProgramBuilder* builder)
 
 TypeDeterminer::~TypeDeterminer() = default;
 
-diag::List TypeDeterminer::Run(Program* program) {
-  ProgramBuilder builder = program->CloneAsBuilder();
-  TypeDeterminer td(&builder);
-  if (!td.Determine()) {
-    diag::List diagnostics;
-    diagnostics.add_error(td.error());
-    return diagnostics;
-  }
-  *program = Program(std::move(builder));
-  return {};
-}
-
 void TypeDeterminer::set_referenced_from_function_if_needed(VariableInfo* var,
                                                             bool local) {
   if (current_function_ == nullptr) {

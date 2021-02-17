@@ -22,23 +22,6 @@ namespace tint {
 namespace reader {
 namespace wgsl {
 
-Parser::Parser(Source::File const* file)
-    : Reader(), impl_(std::make_unique<ParserImpl>(file)) {}
-
-Parser::~Parser() = default;
-
-bool Parser::Parse() {
-  bool ret = impl_->Parse();
-
-  set_diagnostics(std::move(impl_->diagnostics()));
-
-  return ret;
-}
-
-Program Parser::program() {
-  return impl_->program();
-}
-
 Program Parse(Source::File const* file) {
   ParserImpl parser(file);
   parser.Parse();
