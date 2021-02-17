@@ -33,9 +33,7 @@ namespace {
 using HlslGeneratorImplTest_ModuleConstant = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
-  auto* var =
-      Const("pos", ty.array<f32, 3>(), ast::StorageClass::kNone,
-            array<f32, 3>(1.f, 2.f, 3.f), ast::VariableDecorationList{});
+  auto* var = Const("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
 
   GeneratorImpl& gen = Build();
 
@@ -44,7 +42,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
-  auto* var = Const("pos", ty.f32(), ast::StorageClass::kNone, Expr(3.0f),
+  auto* var = Const("pos", ty.f32(), Expr(3.0f),
                     ast::VariableDecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });
@@ -61,7 +59,7 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
-  auto* var = Const("pos", ty.f32(), ast::StorageClass::kNone, nullptr,
+  auto* var = Const("pos", ty.f32(), nullptr,
                     ast::VariableDecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });

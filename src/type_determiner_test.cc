@@ -401,8 +401,7 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
-  auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
 
   auto* decl = create<ast::VariableDeclStatement>(var);
@@ -416,8 +415,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
   auto* init = Expr(2);
-  Global("my_var", ty.i32(), ast::StorageClass::kNone, init,
-         ast::VariableDecorationList{});
+  Global("my_var", ty.i32(), ast::StorageClass::kNone, init);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
 
@@ -439,14 +437,12 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   ast::VariableList params;
 
   // Declare i32 "foo" inside a block
-  auto* foo_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                      ast::VariableDecorationList{});
+  auto* foo_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2));
   auto* foo_i32_init = foo_i32->constructor();
   auto* foo_i32_decl = create<ast::VariableDeclStatement>(foo_i32);
 
   // Reference "foo" inside the block
-  auto* bar_i32 = Var("bar", ty.i32(), ast::StorageClass::kNone, Expr("foo"),
-                      ast::VariableDecorationList{});
+  auto* bar_i32 = Var("bar", ty.i32(), ast::StorageClass::kNone, Expr("foo"));
   auto* bar_i32_init = bar_i32->constructor();
   auto* bar_i32_decl = create<ast::VariableDeclStatement>(bar_i32);
 
@@ -454,14 +450,12 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
       ast::StatementList{foo_i32_decl, bar_i32_decl});
 
   // Declare f32 "foo" at function scope
-  auto* foo_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f),
-                      ast::VariableDecorationList{});
+  auto* foo_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f));
   auto* foo_f32_init = foo_f32->constructor();
   auto* foo_f32_decl = create<ast::VariableDeclStatement>(foo_f32);
 
   // Reference "foo" at function scope
-  auto* bar_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"),
-                      ast::VariableDecorationList{});
+  auto* bar_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"));
   auto* bar_f32_init = bar_f32->constructor();
   auto* bar_f32_decl = create<ast::VariableDeclStatement>(bar_f32);
 
@@ -498,22 +492,19 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   ast::VariableList params;
 
   // Declare i32 "foo" inside a function
-  auto* fn_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                     ast::VariableDecorationList{});
+  auto* fn_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2));
   auto* fn_i32_init = fn_i32->constructor();
   auto* fn_i32_decl = create<ast::VariableDeclStatement>(fn_i32);
   Func("func_i32", params, ty.i32(), ast::StatementList{fn_i32_decl},
        ast::FunctionDecorationList{});
 
   // Declare f32 "foo" at module scope
-  auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f),
-                      ast::VariableDecorationList{});
+  auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f));
   auto* mod_init = mod_f32->constructor();
   AST().AddGlobalVariable(mod_f32);
 
   // Reference "foo" in another function
-  auto* fn_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"),
-                     ast::VariableDecorationList{});
+  auto* fn_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"));
   auto* fn_f32_init = fn_f32->constructor();
   auto* fn_f32_decl = create<ast::VariableDeclStatement>(fn_f32);
   Func("func_f32", params, ty.f32(), ast::StatementList{fn_f32_decl},
@@ -576,7 +567,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
-  GlobalConst("my_var", ty.array<f32, 3>(), ast::StorageClass::kFunction);
+  GlobalConst("my_var", ty.array<f32, 3>());
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -748,7 +739,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
-  auto* my_var = GlobalConst("my_var", ty.f32(), ast::StorageClass::kNone);
+  auto* my_var = GlobalConst("my_var", ty.f32());
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
@@ -763,7 +754,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   auto* my_var_a = Expr("my_var");
   auto* my_var_b = Expr("my_var");
-  auto* var = Const("my_var", ty.f32(), ast::StorageClass::kNone);
+  auto* var = Const("my_var", ty.f32());
   auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
 
   Func("my_func", ast::VariableList{}, ty.f32(),
@@ -1845,7 +1836,7 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 }
 
 TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
-  auto* var = Const("var", ty.i32(), ast::StorageClass::kNone);
+  auto* var = Const("var", ty.i32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
        ast::FunctionDecorationList{});

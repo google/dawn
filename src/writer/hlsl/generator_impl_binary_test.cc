@@ -430,8 +430,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
       "a", ty.bool_(), ast::StorageClass::kFunction,
       create<ast::BinaryExpression>(
           ast::BinaryOp::kLogicalOr,
-          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d),
-      ast::VariableDecorationList{});
+          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d));
 
   auto* expr = create<ast::VariableDeclStatement>(var);
 

@@ -719,10 +719,9 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   type::Array arr(ty.vec2<f32>(), 3, ast::ArrayDecorationList{});
 
   auto* var =
-      GlobalConst("pos", &arr, ast::StorageClass::kPrivate,
+      GlobalConst("pos", &arr,
                   Construct(&arr, vec2<f32>(0.0f, 0.5f),
-                            vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)),
-                  ast::VariableDecorationList{});
+                            vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
 
   auto* expr = IndexAccessor("pos", 1u);
   WrapInFunction(expr);
@@ -763,8 +762,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   // const pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
-  auto* var = GlobalConst("pos", ty.vec2<f32>(), ast::StorageClass::kPrivate,
-                          vec2<f32>(0.0f, 0.5f), ast::VariableDecorationList{});
+  auto* var = GlobalConst("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
 
   auto* expr = IndexAccessor("pos", 1u);
   WrapInFunction(expr);

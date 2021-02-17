@@ -30,8 +30,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
-  auto* func_var = Var("a", ty.f32(), ast::StorageClass::kFunction, nullptr,
-                       ast::VariableDecorationList{});
+  auto* func_var = Var("a", ty.f32(), ast::StorageClass::kFunction);
   WrapInFunction(create<ast::VariableDeclStatement>(func_var));
 
   auto* global_var = Global("a", ty.f32(), ast::StorageClass::kInput);

@@ -67,8 +67,7 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, init,
-                   ast::VariableDecorationList{});
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, init);
 
   spirv::Builder& b = Build();
 
@@ -97,8 +96,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   auto* init = vec2<f32>(1.f, Add(3.f, 3.f));
 
-  auto* v = Global("var", ty.vec2<f32>(), ast::StorageClass::kFunction, init,
-                   ast::VariableDecorationList{});
+  auto* v = Global("var", ty.vec2<f32>(), ast::StorageClass::kFunction, init);
 
   spirv::Builder& b = Build();
 
@@ -129,11 +127,9 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   // var v : f32 = 1.0;
   // var v2 : f32 = v; // Should generate the load and store automatically.
 
-  auto* v = Global("v", ty.f32(), ast::StorageClass::kFunction, Expr(1.f),
-                   ast::VariableDecorationList{});
+  auto* v = Global("v", ty.f32(), ast::StorageClass::kFunction, Expr(1.f));
 
-  auto* v2 = Global("v2", ty.f32(), ast::StorageClass::kFunction, Expr("v"),
-                    ast::VariableDecorationList{});
+  auto* v2 = Global("v2", ty.f32(), ast::StorageClass::kFunction, Expr("v"));
 
   spirv::Builder& b = Build();
 
@@ -165,11 +161,9 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   // var v : f32 = 1.0;
   // const v2 : f32 = v; // Should generate the load
 
-  auto* v = Global("v", ty.f32(), ast::StorageClass::kFunction, Expr(1.f),
-                   ast::VariableDecorationList{});
+  auto* v = Global("v", ty.f32(), ast::StorageClass::kFunction, Expr(1.f));
 
-  auto* v2 = Global("v2", ty.f32(), ast::StorageClass::kFunction, Expr("v"),
-                    ast::VariableDecorationList{});
+  auto* v2 = Global("v2", ty.f32(), ast::StorageClass::kFunction, Expr("v"));
 
   spirv::Builder& b = Build();
 
@@ -200,8 +194,7 @@ OpStore %7 %6
 TEST_F(BuilderTest, FunctionVar_Const) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Const("var", ty.f32(), ast::StorageClass::kOutput, init,
-                  ast::VariableDecorationList{});
+  auto* v = Const("var", ty.f32(), init);
 
   WrapInFunction(v);
 

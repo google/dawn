@@ -159,8 +159,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
 
   Global("rhs", ty.f32(), ast::StorageClass::kNone);
 
-  auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f),
-                  ast::VariableDecorationList{});
+  auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f));
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),

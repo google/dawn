@@ -86,8 +86,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
-  auto* v = Global("a", ty.f32(), ast::StorageClass::kNone, Expr("initializer"),
-                   ast::VariableDecorationList{});
+  auto* v =
+      Global("a", ty.f32(), ast::StorageClass::kNone, Expr("initializer"));
 
   GeneratorImpl& gen = Build();
 
@@ -97,8 +97,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
-  auto* v = Const("a", ty.f32(), ast::StorageClass::kNone, Expr("initializer"),
-                  ast::VariableDecorationList{});
+  auto* v = Const("a", ty.f32(), Expr("initializer"));
 
   GeneratorImpl& gen = Build();
 

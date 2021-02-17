@@ -259,7 +259,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
                                      create<ast::GroupDecoration>(1)});
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  MemberAccessor("coord", "x"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "x"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -300,7 +300,7 @@ TEST_F(MslGeneratorImplTest,
                                      create<ast::GroupDecoration>(1)});
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  MemberAccessor("coord", "b"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "b"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -345,7 +345,7 @@ TEST_F(MslGeneratorImplTest,
                                      create<ast::GroupDecoration>(1)});
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  MemberAccessor("coord", "b"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "b"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -555,8 +555,8 @@ TEST_F(MslGeneratorImplTest,
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  Call("sub_func", 1.0f), ast::VariableDecorationList{});
+  auto* var =
+      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -607,8 +607,8 @@ TEST_F(MslGeneratorImplTest,
 
   Func("sub_func", params, ty.f32(), body, ast::FunctionDecorationList{});
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  Call("sub_func", 1.0f), ast::VariableDecorationList{});
+  auto* var =
+      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -667,8 +667,8 @@ TEST_F(MslGeneratorImplTest,
   ast::ExpressionList expr;
   expr.push_back(Expr(1.0f));
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  Call("sub_func", 1.0f), ast::VariableDecorationList{});
+  auto* var =
+      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -822,7 +822,7 @@ TEST_F(MslGeneratorImplTest,
 
   {
     auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
+                    MemberAccessor("data", "d"));
 
     Func("a", ast::VariableList{}, ty.void_(),
          ast::StatementList{
@@ -836,7 +836,7 @@ TEST_F(MslGeneratorImplTest,
 
   {
     auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
+                    MemberAccessor("data", "d"));
 
     Func("b", ast::VariableList{}, ty.void_(),
          ast::StatementList{create<ast::VariableDeclStatement>(var),

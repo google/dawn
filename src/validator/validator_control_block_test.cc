@@ -42,8 +42,7 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
   // switch (a) {
   //   default: {}
   // }
-  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.14f),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.14f));
 
   ast::CaseStatementList body;
   auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
@@ -71,8 +70,7 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
   // switch (a) {
   //   case 1: {}
   // }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseSelectorList csl;
   csl.push_back(Literal(1));
@@ -104,8 +102,7 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
   //   case 1: {}
   //   default: {}
   // }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList default_csl_1;
@@ -146,8 +143,7 @@ TEST_F(ValidateControlBlockTest,
   //   case 1: {}
   //   default: {}
   // }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl;
@@ -181,8 +177,7 @@ TEST_F(ValidateControlBlockTest,
   //   case -1: {}
   //   default: {}
   // }
-  auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(2u),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(2u));
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl;
@@ -216,8 +211,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   //   case 2, 2: {}
   //   default: {}
   // }
-  auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(3u),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(3u));
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl_1;
@@ -257,8 +251,7 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   //   case 0,1,2,10: {}
   //   default: {}
   // }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl_1;
@@ -298,8 +291,7 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   // switch (a) {
   //   default: { fallthrough; }
   // }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>(
@@ -330,8 +322,7 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   //   default: {}
   //   case 5: {}
   // }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
@@ -362,8 +353,7 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
   // }
 
   auto* my_int = ty.alias("MyInt", ty.u32());
-  auto* var = Var("a", my_int, ast::StorageClass::kNone, Expr(2u),
-                  ast::VariableDecorationList{});
+  auto* var = Var("a", my_int, ast::StorageClass::kNone, Expr(2u));
 
   ast::CaseSelectorList default_csl;
   auto* block_default = create<ast::BlockStatement>(ast::StatementList{});

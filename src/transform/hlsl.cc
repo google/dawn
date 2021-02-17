@@ -83,8 +83,7 @@ void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
           // Clone the array initializer
           auto* dst_init = ctx.Clone(src_init);
           // Construct the constant that holds the array
-          auto* dst_var = ctx.dst->Const(
-              dst_symbol, dst_array_ty, ast::StorageClass::kFunction, dst_init);
+          auto* dst_var = ctx.dst->Const(dst_symbol, dst_array_ty, dst_init);
           // Construct the variable declaration statement
           auto* dst_var_decl =
               ctx.dst->create<ast::VariableDeclStatement>(dst_var);

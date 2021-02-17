@@ -262,7 +262,7 @@ TEST_F(HlslGeneratorImplTest_Function,
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  MemberAccessor("coord", "x"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "x"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -306,8 +306,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   create<ast::MemberAccessorExpression>(
-                      MemberAccessor("uniforms", "coord"), Expr("x")),
-                  ast::VariableDecorationList{});
+                      MemberAccessor("uniforms", "coord"), Expr("x")));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -352,7 +351,7 @@ TEST_F(HlslGeneratorImplTest_Function,
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  MemberAccessor("coord", "b"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "b"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -393,7 +392,7 @@ TEST_F(HlslGeneratorImplTest_Function,
          });
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  MemberAccessor("coord", "b"), ast::VariableDecorationList{});
+                  MemberAccessor("coord", "b"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -679,8 +678,8 @@ TEST_F(HlslGeneratorImplTest_Function,
        },
        ast::FunctionDecorationList{});
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  Call("sub_func", 1.0f), ast::VariableDecorationList{});
+  auto* var =
+      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -727,8 +726,8 @@ TEST_F(HlslGeneratorImplTest_Function,
        },
        ast::FunctionDecorationList{});
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  Call("sub_func", 1.0f), ast::VariableDecorationList{});
+  auto* var =
+      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -916,7 +915,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   {
     auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
+                    MemberAccessor("data", "d"));
 
     Func("a", ast::VariableList{}, ty.void_(),
          ast::StatementList{
@@ -930,7 +929,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   {
     auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                    MemberAccessor("data", "d"), ast::VariableDecorationList{});
+                    MemberAccessor("data", "d"));
 
     Func("b", ast::VariableList{}, ty.void_(),
          ast::StatementList{

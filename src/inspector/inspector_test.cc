@@ -175,7 +175,7 @@ class InspectorHelper : public ProgramBuilder {
       constructor =
           create<ast::ScalarConstructorExpression>(MakeLiteral(type, val));
     }
-    GlobalConst(name, type, ast::StorageClass::kNone, constructor,
+    GlobalConst(name, type, constructor,
                 ast::VariableDecorationList{
                     create<ast::ConstantIdDecoration>(id),
                 });
@@ -319,11 +319,11 @@ class InspectorHelper : public ProgramBuilder {
                   ast::StorageClass storage_class,
                   uint32_t group,
                   uint32_t binding) {
-    GlobalConst(name, type, storage_class, nullptr,
-                ast::VariableDecorationList{
-                    create<ast::BindingDecoration>(binding),
-                    create<ast::GroupDecoration>(group),
-                });
+    Global(name, type, storage_class, nullptr,
+           ast::VariableDecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Adds an uniform buffer variable to the program

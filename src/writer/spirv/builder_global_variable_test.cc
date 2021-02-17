@@ -97,8 +97,7 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
 TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, init,
-                   ast::VariableDecorationList{});
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, init);
 
   spirv::Builder& b = Build();
 
@@ -120,8 +119,7 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 TEST_F(BuilderTest, GlobalVar_Const) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = GlobalConst("var", ty.f32(), ast::StorageClass::kOutput, init,
-                        ast::VariableDecorationList{});
+  auto* v = GlobalConst("var", ty.f32(), init);
 
   spirv::Builder& b = Build();
 
@@ -141,8 +139,7 @@ TEST_F(BuilderTest, GlobalVar_Const) {
 TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
   auto* init = vec3<f32>(ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)});
 
-  auto* v = GlobalConst("var", ty.f32(), ast::StorageClass::kOutput, init,
-                        ast::VariableDecorationList{});
+  auto* v = GlobalConst("var", ty.f32(), init);
 
   spirv::Builder& b = Build();
 
@@ -161,8 +158,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
 TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
   auto* init = vec3<f32>(vec2<f32>(1.f, 2.f), 3.f);
 
-  auto* v = GlobalConst("var", ty.f32(), ast::StorageClass::kOutput, init,
-                        ast::VariableDecorationList{});
+  auto* v = GlobalConst("var", ty.f32(), init);
 
   spirv::Builder& b = Build();
 

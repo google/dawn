@@ -161,7 +161,7 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec2) {
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 2),
                                         ast::StorageClass::kWorkgroup),
-                  ast::StorageClass::kWorkgroup, Expr("a"), {});
+                  Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec2<float>(1.0f, 1.0f), Expr("b"));
@@ -180,7 +180,7 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec3) {
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 3),
                                         ast::StorageClass::kWorkgroup),
-                  ast::StorageClass::kWorkgroup, Expr("a"), {});
+                  Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
@@ -198,7 +198,7 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec4) {
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 4),
                                         ast::StorageClass::kWorkgroup),
-                  ast::StorageClass::kWorkgroup, Expr("a"), {});
+                  Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("frexp", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
@@ -214,7 +214,7 @@ TEST_F(ValidatorBuiltinsTest, Frexp_Vec4) {
 TEST_F(ValidatorBuiltinsTest, Modf_Scalar) {
   auto* a = Var("a", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* b = Const("b", ty.pointer<float>(ast::StorageClass::kWorkgroup),
-                  ast::StorageClass::kWorkgroup, Expr("a"), {});
+                  Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", 1.0f, Expr("b"));
@@ -232,7 +232,7 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec2) {
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 2),
                                         ast::StorageClass::kWorkgroup),
-                  ast::StorageClass::kWorkgroup, Expr("a"), {});
+                  Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec2<float>(1.0f, 1.0f), Expr("b"));
@@ -250,7 +250,7 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec3) {
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 3),
                                         ast::StorageClass::kWorkgroup),
-                  ast::StorageClass::kWorkgroup, Expr("a"), {});
+                  Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
@@ -268,7 +268,7 @@ TEST_F(ValidatorBuiltinsTest, Modf_Vec4) {
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 4),
                                         ast::StorageClass::kWorkgroup),
-                  ast::StorageClass::kWorkgroup, Expr("a"), {});
+                  Expr("a"), {});
   RegisterVariable(a);
   RegisterVariable(b);
   auto* builtin = Call("modf", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));

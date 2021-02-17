@@ -194,8 +194,7 @@ TEST_F(WgslGeneratorImplTest,
   {
     auto* var =
         Var("v", ty.f32(), ast::StorageClass::kFunction,
-            create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
-            ast::VariableDecorationList{});
+            create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")));
 
     Func("a", ast::VariableList{}, ty.void_(),
          ast::StatementList{
@@ -210,8 +209,7 @@ TEST_F(WgslGeneratorImplTest,
   {
     auto* var =
         Var("v", ty.f32(), ast::StorageClass::kFunction,
-            create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")),
-            ast::VariableDecorationList{});
+            create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")));
 
     Func("b", ast::VariableList{}, ty.void_(),
          ast::StatementList{

@@ -40,8 +40,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = GlobalConst("var", ty.f32(), ast::StorageClass::kOutput, init,
-                        ast::VariableDecorationList{});
+  auto* v = GlobalConst("var", ty.f32(), init);
 
   auto* expr = Expr("var");
   WrapInFunction(expr);
@@ -85,8 +84,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Const("var", ty.f32(), ast::StorageClass::kOutput, init,
-                  ast::VariableDecorationList{});
+  auto* v = Const("var", ty.f32(), init);
 
   auto* expr = Expr("var");
   WrapInFunction(v, expr);
@@ -156,8 +154,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-  auto* var = GlobalConst("var", ty.i32(), ast::StorageClass::kNone, Expr(2),
-                          ast::VariableDecorationList{});
+  auto* var = GlobalConst("var", ty.i32(), Expr(2));
 
   auto* expr = Add("var", "var");
   WrapInFunction(expr);

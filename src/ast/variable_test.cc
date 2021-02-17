@@ -73,8 +73,7 @@ TEST_F(VariableTest, IsValid) {
 }
 
 TEST_F(VariableTest, IsValid_WithConstructor) {
-  auto* v = Var("my_var", ty.i32(), StorageClass::kNone, Expr("ident"),
-                ast::VariableDecorationList{});
+  auto* v = Var("my_var", ty.i32(), StorageClass::kNone, Expr("ident"));
   EXPECT_TRUE(v->IsValid());
 }
 
@@ -94,14 +93,12 @@ TEST_F(VariableTest, IsValid_MissingBoth) {
 }
 
 TEST_F(VariableTest, IsValid_InvalidConstructor) {
-  auto* v = Var("my_var", ty.i32(), StorageClass::kNone, Expr(""),
-                ast::VariableDecorationList{});
+  auto* v = Var("my_var", ty.i32(), StorageClass::kNone, Expr(""));
   EXPECT_FALSE(v->IsValid());
 }
 
 TEST_F(VariableTest, to_str) {
-  auto* v = Var("my_var", ty.f32(), StorageClass::kFunction, nullptr,
-                ast::VariableDecorationList{});
+  auto* v = Var("my_var", ty.f32(), StorageClass::kFunction);
   EXPECT_EQ(str(v), R"(Variable{
   my_var
   function
