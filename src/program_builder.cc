@@ -28,11 +28,10 @@
 namespace tint {
 
 ProgramBuilder::ProgramBuilder()
-    : ty(this), ast_(ast_nodes_.Create<ast::Module>(Source{})) {}
+    : ast_(ast_nodes_.Create<ast::Module>(Source{})) {}
 
 ProgramBuilder::ProgramBuilder(ProgramBuilder&& rhs)
-    : ty(std::move(rhs.ty)),
-      types_(std::move(rhs.types_)),
+    : types_(std::move(rhs.types_)),
       ast_nodes_(std::move(rhs.ast_nodes_)),
       sem_nodes_(std::move(rhs.sem_nodes_)),
       ast_(rhs.ast_),
@@ -46,7 +45,6 @@ ProgramBuilder::~ProgramBuilder() = default;
 ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
   rhs.MarkAsMoved();
   AssertNotMoved();
-  ty = std::move(rhs.ty);
   types_ = std::move(rhs.types_);
   ast_nodes_ = std::move(rhs.ast_nodes_);
   sem_nodes_ = std::move(rhs.sem_nodes_);

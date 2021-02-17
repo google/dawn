@@ -477,7 +477,7 @@ class ProgramBuilder {
     template <typename T>
     struct CToAST {};
 
-    ProgramBuilder* builder;
+    ProgramBuilder* const builder;
   };
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1101,7 +1101,7 @@ class ProgramBuilder {
   void WrapInFunction(ast::StatementList stmts);
 
   /// The builder types
-  TypesBuilder ty;
+  TypesBuilder const ty{this};
 
  protected:
   /// Asserts that the builder has not been moved.
