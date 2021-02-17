@@ -58,7 +58,7 @@ deps = {
 
   # SPIRV compiler dependencies: shaderc
   'third_party/shaderc': {
-    'url': '{chromium_git}/external/github.com/google/shaderc@6216d098d8abe3ccda8781016c4f69372c48afb9',
+    'url': '{chromium_git}/external/github.com/google/shaderc@8d081127ee28ff5df8123c994c00bc66a57e9e9c',
     'condition': 'dawn_standalone',
   },
 
@@ -96,7 +96,7 @@ deps = {
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@c493c61120215a00f54cc59f067f7419dabad066',
+    'url': '{chromium_git}/vulkan-deps@0d42e83928f788fd432bdf35079940fd9cd930d8',
   },
 
   'third_party/zlib': {
