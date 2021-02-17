@@ -329,11 +329,37 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
+        constexpr const char kBackendArg[] = "--backend=";
+        argLen = sizeof(kBackendArg) - 1;
+        if (strncmp(argv[i], kBackendArg, argLen) == 0) {
+            const char* param = argv[i] + argLen;
+            if (strcmp("d3d12", param) == 0) {
+                mBackendTypeFilter = wgpu::BackendType::D3D12;
+            } else if (strcmp("metal", param) == 0) {
+                mBackendTypeFilter = wgpu::BackendType::Metal;
+            } else if (strcmp("null", param) == 0) {
+                mBackendTypeFilter = wgpu::BackendType::Null;
+            } else if (strcmp("opengl", param) == 0) {
+                mBackendTypeFilter = wgpu::BackendType::OpenGL;
+            } else if (strcmp("opengles", param) == 0) {
+                mBackendTypeFilter = wgpu::BackendType::OpenGLES;
+            } else if (strcmp("vulkan", param) == 0) {
+                mBackendTypeFilter = wgpu::BackendType::Vulkan;
+            } else {
+                dawn::ErrorLog()
+                    << "Invalid backend \"" << param
+                    << "\". Valid backends are: d3d12, metal, null, opengl, opengles, vulkan.";
+                UNREACHABLE();
+            }
+            mHasBackendTypeFilter = true;
+            continue;
+        }
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             dawn::InfoLog()
                 << "\n\nUsage: " << argv[0]
                 << " [GTEST_FLAGS...] [-w] [-c]\n"
                    "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
+                   "    [--backend=x]\n"
                    "    [--adapter-vendor-id=x] "
                    "[--enable-backend-validation[=full,partial,disabled]]\n"
                    "    [--exclusive-device-type-preference=integrated,cpu,discrete]\n\n"
@@ -349,6 +375,8 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n"
+                   "  --backend: Select adapter by backend type. Valid backends are: d3d12, metal, "
+                   "null, opengl, opengles, vulkan\n"
                    "  --exclusive-device-type-preference: Comma-delimited list of preferred device "
                    "types. For each backend, tests will run only on adapters that match the first "
                    "available device type\n";
@@ -437,20 +465,26 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::In
         wgpu::AdapterProperties properties;
         adapter.GetProperties(&properties);
 
-        // The adapter is selected if:
-        bool selected = false;
+        // All adapters are selected by default.
+        bool selected = true;
+        // The adapter is deselected if:
+        if (mHasBackendTypeFilter) {
+            // It doesn't match the backend type, if present.
+            selected &= properties.backendType == mBackendTypeFilter;
+        }
         if (mHasVendorIdFilter) {
-            // It matches the vendor id, if present.
-            selected = mVendorIdFilter == properties.vendorID;
+            // It doesn't match the vendor id, if present.
+            selected &= mVendorIdFilter == properties.vendorID;
 
             if (!mDevicePreferences.empty()) {
                 dawn::WarningLog() << "Vendor ID filter provided. Ignoring device type preference.";
             }
-        } else if (hasDevicePreference) {
+        }
+        if (hasDevicePreference) {
             // There is a device preference and:
-            selected =
-                // The device type matches the first available preferred type for that backend, if
-                // present.
+            selected &=
+                // The device type doesn't match the first available preferred type for that
+                // backend, if present.
                 (adapter.GetDeviceType() == preferredDeviceType) ||
                 // Always select Unknown OpenGL adapters if we don't want a CPU adapter.
                 // OpenGL will usually be unknown because we can't query the device type.
@@ -463,9 +497,6 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::In
                 // quickly. This is temporary as to not lose coverage. We can group it with
                 // Swiftshader as a CPU adapter when we have Swiftshader tests.
                 (properties.backendType == wgpu::BackendType::Null);
-        } else {
-            // No vendor id or device preference was provided (select all).
-            selected = true;
         }
 
         // In Windows Remote Desktop sessions we may be able to discover multiple adapters that
@@ -608,6 +639,14 @@ bool DawnTestEnvironment::HasVendorIdFilter() const {
 
 uint32_t DawnTestEnvironment::GetVendorIdFilter() const {
     return mVendorIdFilter;
+}
+
+bool DawnTestEnvironment::HasBackendTypeFilter() const {
+    return mHasBackendTypeFilter;
+}
+
+wgpu::BackendType DawnTestEnvironment::GetBackendTypeFilter() const {
+    return mBackendTypeFilter;
 }
 
 const char* DawnTestEnvironment::GetWireTraceDir() const {
@@ -763,6 +802,14 @@ bool DawnTestBase::HasVendorIdFilter() const {
 
 uint32_t DawnTestBase::GetVendorIdFilter() const {
     return gTestEnv->GetVendorIdFilter();
+}
+
+bool DawnTestBase::HasBackendTypeFilter() const {
+    return gTestEnv->HasBackendTypeFilter();
+}
+
+wgpu::BackendType DawnTestBase::GetBackendTypeFilter() const {
+    return gTestEnv->GetBackendTypeFilter();
 }
 
 wgpu::Instance DawnTestBase::GetInstance() const {

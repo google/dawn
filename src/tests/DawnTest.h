@@ -210,6 +210,8 @@ class DawnTestEnvironment : public testing::Environment {
     dawn_native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
+    bool HasBackendTypeFilter() const;
+    wgpu::BackendType GetBackendTypeFilter() const;
     const char* GetWireTraceDir() const;
     GLFWwindow* GetOpenGLWindow() const;
     GLFWwindow* GetOpenGLESWindow() const;
@@ -232,6 +234,8 @@ class DawnTestEnvironment : public testing::Environment {
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
+    bool mHasBackendTypeFilter = false;
+    wgpu::BackendType mBackendTypeFilter;
     std::string mWireTraceDir;
 
     std::vector<std::string> mEnabledToggles;
@@ -288,6 +292,9 @@ class DawnTestBase {
 
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
+
+    bool HasBackendTypeFilter() const;
+    wgpu::BackendType GetBackendTypeFilter() const;
 
     wgpu::Instance GetInstance() const;
     dawn_native::Adapter GetAdapter() const;
