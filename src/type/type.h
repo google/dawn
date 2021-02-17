@@ -17,7 +17,6 @@
 
 #include <string>
 
-#include "src/castable.h"
 #include "src/clone_context.h"
 
 namespace tint {
@@ -32,16 +31,11 @@ namespace type {
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
 
 /// Base class for a type in the system
-class Type : public Castable<Type> {
+class Type : public Castable<Type, Cloneable> {
  public:
   /// Move constructor
   Type(Type&&);
   ~Type() override;
-
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  virtual Type* Clone(CloneContext* ctx) const = 0;
 
   /// @returns the name for this type. The type name is unique over all types.
   virtual std::string type_name() const = 0;
@@ -114,16 +108,6 @@ class Type : public Castable<Type> {
 
  protected:
   Type();
-
-  /// A helper method for cloning the `Type` `t` if it is not null.
-  /// If `t` is null, then `Clone()` returns null.
-  /// @param b the program builder to clone `n` into
-  /// @param t the `Type` to clone (if not null)
-  /// @return the cloned type
-  template <typename T>
-  static T* Clone(ProgramBuilder* b, const T* t) {
-    return (t != nullptr) ? static_cast<T*>(t->Clone(b)) : nullptr;
-  }
 };
 
 }  // namespace type

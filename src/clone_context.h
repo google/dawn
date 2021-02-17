@@ -28,14 +28,22 @@
 namespace tint {
 
 // Forward declarations
+class CloneContext;
 class Program;
 class ProgramBuilder;
 
 namespace ast {
-
 class FunctionList;
-
 }  // namespace ast
+
+/// Cloneable is the base class for all objects that can be cloned
+class Cloneable : public Castable<Cloneable> {
+ public:
+  /// Performs a deep clone of this object using the CloneContext `ctx`.
+  /// @param ctx the clone context
+  /// @return the newly cloned object
+  virtual Cloneable* Clone(CloneContext* ctx) const = 0;
+};
 
 /// CloneContext holds the state used while cloning AST nodes and types.
 class CloneContext {
@@ -186,7 +194,7 @@ class CloneContext {
   ///
   /// `replacer` must be function-like with the signature:
   ///   `T* (CloneContext*, T*)`
-  ///  where `T` is a type deriving from CastableBase.
+  ///  where `T` is a type deriving from Cloneable.
   ///
   /// If `replacer` returns a nullptr then Clone() will attempt the next
   /// registered replacer function that matches the object type. If no replacers
@@ -210,13 +218,13 @@ class CloneContext {
   /// references of the original object. A type mismatch will result in an
   /// assertion in debug builds, and undefined behavior in release builds.
   /// @param replacer a function or function-like object with the signature
-  ///        `T* (CloneContext*, T*)`, where `T` derives from CastableBase
+  ///        `T* (CloneContext*, T*)`, where `T` derives from Cloneable
   /// @returns this CloneContext so calls can be chained
   template <typename F>
   CloneContext& ReplaceAll(F replacer) {
     using TPtr = traits::ParamTypeT<F, 1>;
     using T = typename std::remove_pointer<TPtr>::type;
-    transforms_.emplace_back([=](CastableBase* in) {
+    transforms_.emplace_back([=](Cloneable* in) {
       auto* in_as_t = in->As<T>();
       return in_as_t != nullptr ? replacer(this, in_as_t) : nullptr;
     });
@@ -264,7 +272,7 @@ class CloneContext {
   Program const* const src;
 
  private:
-  using Transform = std::function<CastableBase*(CastableBase*)>;
+  using Transform = std::function<Cloneable*(Cloneable*)>;
 
   CloneContext(const CloneContext&) = delete;
   CloneContext& operator=(const CloneContext&) = delete;
@@ -272,7 +280,7 @@ class CloneContext {
   /// LookupOrTransform is the template-independent logic of Clone().
   /// This is outside of Clone() to reduce the amount of template-instantiated
   /// code.
-  CastableBase* LookupOrTransform(CastableBase* a) {
+  Cloneable* LookupOrTransform(Cloneable* a) {
     // Have we seen this object before? If so, return the previously cloned
     // version instead of making yet another copy.
     auto it = cloned_.find(a);
@@ -282,7 +290,7 @@ class CloneContext {
 
     // Attempt to clone using the registered replacer functions.
     for (auto& f : transforms_) {
-      if (CastableBase* c = f(a)) {
+      if (Cloneable* c = f(a)) {
         cloned_.emplace(a, c);
         return c;
       }
@@ -301,16 +309,16 @@ class CloneContext {
     return cast;
   }
 
-  /// A vector of CastableBase*
-  using CastableList = std::vector<CastableBase*>;
+  /// A vector of Cloneable*
+  using CloneableList = std::vector<Cloneable*>;
 
   /// A map of object in #src to their cloned equivalent in #dst
-  std::unordered_map<CastableBase*, CastableBase*> cloned_;
+  std::unordered_map<Cloneable*, Cloneable*> cloned_;
 
   /// A map of object in #src to the list of cloned objects in #dst.
   /// Clone(const std::vector<T*>& v) will use this to insert the map-value list
   /// into the target vector/ before cloning and inserting the map-key.
-  std::unordered_map<CastableBase*, CastableList> insert_before_;
+  std::unordered_map<Cloneable*, CloneableList> insert_before_;
 
   /// Transform functions registered with ReplaceAll()
   std::vector<Transform> transforms_;

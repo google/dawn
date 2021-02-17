@@ -25,18 +25,17 @@
 namespace tint {
 namespace {
 
-struct Cloneable : public Castable<Cloneable, ast::Node> {
-  explicit Cloneable(const Source& source, std::string n)
-      : Base(source), name(n) {}
+struct Node : public Castable<Node, ast::Node> {
+  explicit Node(const Source& source, std::string n) : Base(source), name(n) {}
 
   std::string name;
-  Cloneable* a = nullptr;
-  Cloneable* b = nullptr;
-  Cloneable* c = nullptr;
-  std::vector<Cloneable*> vec;
+  Node* a = nullptr;
+  Node* b = nullptr;
+  Node* c = nullptr;
+  std::vector<Node*> vec;
 
-  Cloneable* Clone(CloneContext* ctx) const override {
-    auto* out = ctx->dst->create<Cloneable>(name);
+  Node* Clone(CloneContext* ctx) const override {
+    auto* out = ctx->dst->create<Node>(name);
     out->a = ctx->Clone(a);
     out->b = ctx->Clone(b);
     out->c = ctx->Clone(c);
@@ -48,18 +47,18 @@ struct Cloneable : public Castable<Cloneable, ast::Node> {
   void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
 
-struct Replaceable : public Castable<Replaceable, Cloneable> {
+struct Replaceable : public Castable<Replaceable, Node> {
   explicit Replaceable(const Source& source, std::string n) : Base(source, n) {}
 };
 struct Replacement : public Castable<Replacement, Replaceable> {
   explicit Replacement(const Source& source, std::string n) : Base(source, n) {}
 };
 
-struct NotACloneable : public Castable<NotACloneable, ast::Node> {
-  explicit NotACloneable(const Source& source) : Base(source) {}
+struct NotANode : public Castable<NotANode, ast::Node> {
+  explicit NotANode(const Source& source) : Base(source) {}
 
-  NotACloneable* Clone(CloneContext* ctx) const override {
-    return ctx->dst->create<NotACloneable>();
+  NotANode* Clone(CloneContext* ctx) const override {
+    return ctx->dst->create<NotANode>();
   }
 
   bool IsValid() const override { return true; }
@@ -68,24 +67,24 @@ struct NotACloneable : public Castable<NotACloneable, ast::Node> {
 
 TEST(CloneContext, Clone) {
   ProgramBuilder builder;
-  auto* original_root = builder.create<Cloneable>("root");
-  original_root->a = builder.create<Cloneable>("a");
-  original_root->a->b = builder.create<Cloneable>("a->b");
-  original_root->b = builder.create<Cloneable>("b");
+  auto* original_root = builder.create<Node>("root");
+  original_root->a = builder.create<Node>("a");
+  original_root->a->b = builder.create<Node>("a->b");
+  original_root->b = builder.create<Node>("b");
   original_root->b->a = original_root->a;  // Aliased
-  original_root->b->b = builder.create<Cloneable>("b->b");
+  original_root->b->b = builder.create<Node>("b->b");
   original_root->c = original_root->b;  // Aliased
   Program original(std::move(builder));
 
   //                          root
   //        ╭──────────────────┼──────────────────╮
   //       (a)                (b)                (c)
-  //        C  <──────┐        C  <───────────────┘
+  //        N  <──────┐        N  <───────────────┘
   //   ╭────┼────╮    │   ╭────┼────╮
   //  (a)  (b)  (c)   │  (a)  (b)  (c)
-  //        C         └───┘    C
+  //        N         └───┘    N
   //
-  // C: Clonable
+  // N: Node
 
   ProgramBuilder cloned;
   auto* cloned_root = CloneContext(&cloned, &original).Clone(original_root);
@@ -119,8 +118,8 @@ TEST(CloneContext, Clone) {
 
 TEST(CloneContext, CloneWithReplacements) {
   ProgramBuilder builder;
-  auto* original_root = builder.create<Cloneable>("root");
-  original_root->a = builder.create<Cloneable>("a");
+  auto* original_root = builder.create<Node>("root");
+  original_root->a = builder.create<Node>("a");
   original_root->a->b = builder.create<Replaceable>("a->b");
   original_root->b = builder.create<Replaceable>("b");
   original_root->b->a = original_root->a;  // Aliased
@@ -130,12 +129,12 @@ TEST(CloneContext, CloneWithReplacements) {
   //                          root
   //        ╭──────────────────┼──────────────────╮
   //       (a)                (b)                (c)
-  //        C  <──────┐        R  <───────────────┘
+  //        N  <──────┐        R  <───────────────┘
   //   ╭────┼────╮    │   ╭────┼────╮
   //  (a)  (b)  (c)   │  (a)  (b)  (c)
   //        R         └───┘
   //
-  // C: Clonable
+  // N: Node
   // R: Replaceable
 
   ProgramBuilder cloned;
@@ -143,7 +142,7 @@ TEST(CloneContext, CloneWithReplacements) {
       CloneContext(&cloned, &original)
           .ReplaceAll([&](CloneContext* ctx, Replaceable* in) {
             auto* out = cloned.create<Replacement>("replacement:" + in->name);
-            out->b = cloned.create<Cloneable>("replacement-child:" + in->name);
+            out->b = cloned.create<Node>("replacement-child:" + in->name);
             out->c = ctx->Clone(in->a);
             return out;
           })
@@ -152,15 +151,15 @@ TEST(CloneContext, CloneWithReplacements) {
   //                         root
   //        ╭─────────────────┼──────────────────╮
   //       (a)               (b)                (c)
-  //        C  <──────┐       R  <───────────────┘
+  //        N  <──────┐       R  <───────────────┘
   //   ╭────┼────╮    │  ╭────┼────╮
   //  (a)  (b)  (c)   │ (a)  (b)  (c)
-  //        R         │       C    |
+  //        R         │       N    |
   //   ╭────┼────╮    └────────────┘
   //  (a)  (b)  (c)
-  //        C
+  //        N
   //
-  // C: Clonable
+  // N: Node
   // R: Replacement
 
   EXPECT_NE(cloned_root->a, nullptr);
@@ -201,10 +200,10 @@ TEST(CloneContext, CloneWithReplacements) {
 
 TEST(CloneContext, CloneWithReplace) {
   ProgramBuilder builder;
-  auto* original_root = builder.create<Cloneable>("root");
-  original_root->a = builder.create<Cloneable>("a");
-  original_root->b = builder.create<Cloneable>("b");
-  original_root->c = builder.create<Cloneable>("c");
+  auto* original_root = builder.create<Node>("root");
+  original_root->a = builder.create<Node>("a");
+  original_root->b = builder.create<Node>("b");
+  original_root->c = builder.create<Node>("c");
   Program original(std::move(builder));
 
   //                          root
@@ -213,7 +212,7 @@ TEST(CloneContext, CloneWithReplace) {
   //                        Replaced
 
   ProgramBuilder cloned;
-  auto* replacement = cloned.create<Cloneable>("replacement");
+  auto* replacement = cloned.create<Node>("replacement");
 
   auto* cloned_root = CloneContext(&cloned, &original)
                           .Replace(original_root->b, replacement)
@@ -231,15 +230,15 @@ TEST(CloneContext, CloneWithReplace) {
 
 TEST(CloneContext, CloneWithInsertBefore) {
   ProgramBuilder builder;
-  auto* original_root = builder.create<Cloneable>("root");
-  original_root->a = builder.create<Cloneable>("a");
-  original_root->b = builder.create<Cloneable>("b");
-  original_root->c = builder.create<Cloneable>("c");
+  auto* original_root = builder.create<Node>("root");
+  original_root->a = builder.create<Node>("a");
+  original_root->b = builder.create<Node>("b");
+  original_root->c = builder.create<Node>("c");
   original_root->vec = {original_root->a, original_root->b, original_root->c};
   Program original(std::move(builder));
 
   ProgramBuilder cloned;
-  auto* insertion = cloned.create<Cloneable>("insertion");
+  auto* insertion = cloned.create<Node>("insertion");
 
   auto* cloned_root = CloneContext(&cloned, &original)
                           .InsertBefore(original_root->b, insertion)
@@ -257,12 +256,12 @@ TEST(CloneContext, CloneWithInsertBefore) {
   EXPECT_EQ(cloned_root->vec[3]->name, "c");
 }
 
-TEST(CloneContext, CloneWithReplace_WithNotACloneable) {
+TEST(CloneContext, CloneWithReplace_WithNotANode) {
   ProgramBuilder builder;
-  auto* original_root = builder.create<Cloneable>("root");
-  original_root->a = builder.create<Cloneable>("a");
-  original_root->b = builder.create<Cloneable>("b");
-  original_root->c = builder.create<Cloneable>("c");
+  auto* original_root = builder.create<Node>("root");
+  original_root->a = builder.create<Node>("a");
+  original_root->b = builder.create<Node>("b");
+  original_root->c = builder.create<Node>("c");
   Program original(std::move(builder));
 
   //                          root
@@ -271,7 +270,7 @@ TEST(CloneContext, CloneWithReplace_WithNotACloneable) {
   //                        Replaced
 
   ProgramBuilder cloned;
-  auto* replacement = cloned.create<NotACloneable>();
+  auto* replacement = cloned.create<NotANode>();
 
   CloneContext ctx(&cloned, &original);
   ctx.Replace(original_root->b, replacement);
@@ -289,9 +288,9 @@ TEST(CloneContext, CloneWithReplace_WithNotACloneable) {
 
 }  // namespace
 
-TINT_INSTANTIATE_CLASS_ID(Cloneable);
+TINT_INSTANTIATE_CLASS_ID(Node);
 TINT_INSTANTIATE_CLASS_ID(Replaceable);
 TINT_INSTANTIATE_CLASS_ID(Replacement);
-TINT_INSTANTIATE_CLASS_ID(NotACloneable);
+TINT_INSTANTIATE_CLASS_ID(NotANode);
 
 }  // namespace tint

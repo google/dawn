@@ -19,6 +19,8 @@
 #include "src/program.h"
 #include "src/program_builder.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::Cloneable);
+
 namespace tint {
 
 CloneContext::CloneContext(ProgramBuilder* to, Program const* from)

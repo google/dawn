@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "src/castable.h"
+#include "src/clone_context.h"
 #include "src/source.h"
 
 namespace tint {
@@ -36,15 +36,9 @@ class Info;
 namespace ast {
 
 /// AST base class node
-class Node : public Castable<Node> {
+class Node : public Castable<Node, Cloneable> {
  public:
   ~Node() override;
-
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  virtual Node* Clone(CloneContext* ctx) const = 0;
 
   /// @returns the node source data
   const Source& source() const { return source_; }
