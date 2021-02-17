@@ -353,6 +353,8 @@ source_set("libtint_core_src") {
     "src/castable.h",
     "src/clone_context.cc",
     "src/clone_context.h",
+    "src/debug.cc",
+    "src/debug.h",
     "src/demangler.cc",
     "src/demangler.h",
     "src/diagnostic/diagnostic.cc",
@@ -728,7 +730,6 @@ if (!build_with_chromium) {
     testonly = true
     sources = [
       "${tint_googletest_dir}/googlemock/src/gmock-all.cc",
-      "${tint_googletest_dir}/googlemock/src/gmock_main.cc",
     ]
     public_configs = [ ":gmock_config" ]
   }
@@ -833,6 +834,7 @@ source_set("tint_unittests_core_src") {
     "src/block_allocator_test.cc",
     "src/castable_test.cc",
     "src/clone_context_test.cc",
+    "src/debug_test.cc",
     "src/demangler_test.cc",
     "src/diagnostic/formatter_test.cc",
     "src/diagnostic/printer_test.cc",
@@ -844,6 +846,7 @@ source_set("tint_unittests_core_src") {
     "src/scope_stack_test.cc",
     "src/symbol_table_test.cc",
     "src/symbol_test.cc",
+    "src/test_main.cc",
     "src/traits_test.cc",
     "src/transform/bound_array_accessors_test.cc",
     "src/transform/emit_vertex_point_size_test.cc",

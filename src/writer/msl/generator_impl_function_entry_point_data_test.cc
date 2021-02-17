@@ -212,7 +212,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
 
   auto* func = program->AST().Functions()[0];
   ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
-  EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
+  EXPECT_EQ(gen.error(),
+            R"(error: invalid location variable for pipeline stage)");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
@@ -241,7 +242,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
 
   auto* func = program->AST().Functions()[0];
   ASSERT_FALSE(gen.EmitEntryPointData(func)) << gen.error();
-  EXPECT_EQ(gen.error(), R"(invalid location variable for pipeline stage)");
+  EXPECT_EQ(gen.error(),
+            R"(error: invalid location variable for pipeline stage)");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {

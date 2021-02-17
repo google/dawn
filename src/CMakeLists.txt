@@ -167,8 +167,10 @@ set(TINT_LIB_SRCS
   castable.h
   clone_context.cc
   clone_context.h
+  debug.cc
+  debug.h
   demangler.cc
-  demangler.h;
+  demangler.h
   intrinsic_table.cc
   intrinsic_table.h
   diagnostic/diagnostic.cc
@@ -463,6 +465,7 @@ if(${TINT_BUILD_TESTS})
     block_allocator_test.cc
     castable_test.cc
     clone_context_test.cc
+    debug_test.cc
     demangler_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
@@ -474,6 +477,7 @@ if(${TINT_BUILD_TESTS})
     symbol_table_test.cc
     symbol_test.cc
     traits_test.cc
+    test_main.cc
     type_determiner_test.cc
     type/access_control_type_test.cc
     type/alias_type_test.cc
@@ -782,7 +786,7 @@ if(${TINT_BUILD_TESTS})
   ## Test executable
   target_include_directories(
       tint_unittests PRIVATE ${gmock_SOURCE_DIR}/include)
-  target_link_libraries(tint_unittests libtint gmock_main)
+  target_link_libraries(tint_unittests libtint gmock)
   tint_default_compile_options(tint_unittests)
 
   if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})

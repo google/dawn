@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "src/block_allocator.h"
+#include "src/debug.h"
 #include "src/program_builder.h"
 #include "src/semantic/intrinsic.h"
 #include "src/type/access_control_type.h"
@@ -641,10 +642,10 @@ class Impl : public IntrinsicTable {
  public:
   Impl();
 
-  IntrinsicTable::Result Lookup(
-      ProgramBuilder& builder,
-      semantic::IntrinsicType type,
-      const std::vector<type::Type*>& args) const override;
+  IntrinsicTable::Result Lookup(ProgramBuilder& builder,
+                                semantic::IntrinsicType type,
+                                const std::vector<type::Type*>& args,
+                                const Source& source) const override;
 
   /// Holds the information about a single overload parameter used for matching
   struct Parameter {
@@ -660,9 +661,6 @@ class Impl : public IntrinsicTable {
 
   /// A single overload definition.
   struct Overload {
-    /// @returns a human readable string representation of the overload
-    std::string str() const;
-
     /// Attempts to match this overload given the IntrinsicType and argument
     /// types. If a match is made, the build intrinsic is returned, otherwise
     /// `match_score` is assigned a score of how closely the overload matched
@@ -670,6 +668,7 @@ class Impl : public IntrinsicTable {
     semantic::Intrinsic* Match(ProgramBuilder& builder,
                                semantic::IntrinsicType type,
                                const std::vector<type::Type*>& arg_types,
+                               diag::List& diagnostics,
                                int& match_score) const;
 
     semantic::IntrinsicType type;
@@ -1288,12 +1287,13 @@ Impl::Impl() {
   // clang-format on
 }
 
-std::string Impl::Overload::str() const {
+/// @returns a human readable string representation of the overload
+std::string str(const Impl::Overload& overload) {
   std::stringstream ss;
-  ss << type << "(";
+  ss << overload.type << "(";
   {
     bool first = true;
-    for (auto param : parameters) {
+    for (auto param : overload.parameters) {
       if (!first) {
         ss << ", ";
       }
@@ -1305,15 +1305,15 @@ std::string Impl::Overload::str() const {
     }
   }
   ss << ") -> ";
-  ss << return_type->str();
+  ss << overload.return_type->str();
 
-  if (!open_type_matchers.empty()) {
+  if (!overload.open_type_matchers.empty()) {
     ss << "  where: ";
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(OpenType::Count); i++) {
       auto open_type = static_cast<OpenType>(i);
-      auto it = open_type_matchers.find(open_type);
-      if (it != open_type_matchers.end()) {
+      auto it = overload.open_type_matchers.find(open_type);
+      if (it != overload.open_type_matchers.end()) {
         if (i > 0) {
           ss << ", ";
         }
@@ -1324,10 +1324,33 @@ std::string Impl::Overload::str() const {
   return ss.str();
 }
 
-IntrinsicTable::Result Impl::Lookup(
-    ProgramBuilder& builder,
-    semantic::IntrinsicType type,
-    const std::vector<type::Type*>& args) const {
+/// @return a string representing a call to an intrinsic with the given argument
+/// types.
+std::string CallSignature(ProgramBuilder& builder,
+                          semantic::IntrinsicType type,
+                          const std::vector<type::Type*>& args) {
+  std::stringstream ss;
+  ss << semantic::str(type) << "(";
+  {
+    bool first = true;
+    for (auto* arg : args) {
+      if (!first) {
+        ss << ", ";
+      }
+      first = false;
+      ss << arg->FriendlyName(builder.Symbols());
+    }
+  }
+  ss << ")";
+
+  return ss.str();
+}
+
+IntrinsicTable::Result Impl::Lookup(ProgramBuilder& builder,
+                                    semantic::IntrinsicType type,
+                                    const std::vector<type::Type*>& args,
+                                    const Source& source) const {
+  diag::List diagnostics;
   // Candidate holds information about a mismatched overload that could be what
   // the user intended to call.
   struct Candidate {
@@ -1342,8 +1365,9 @@ IntrinsicTable::Result Impl::Lookup(
   // type. This is horribly inefficient.
   for (auto& overload : overloads_) {
     int match_score = 0;
-    if (auto* intrinsic = overload.Match(builder, type, args, match_score)) {
-      return Result{intrinsic, ""};  // Match found
+    if (auto* intrinsic =
+            overload.Match(builder, type, args, diagnostics, match_score)) {
+      return Result{intrinsic, {}};  // Match found
     }
     if (match_score > 0) {
       candidates.emplace_back(Candidate{&overload, match_score});
@@ -1357,34 +1381,25 @@ IntrinsicTable::Result Impl::Lookup(
 
   // Generate an error message
   std::stringstream ss;
-  ss << "no matching call to " << semantic::str(type) << "(";
-  {
-    bool first = true;
-    for (auto* arg : args) {
-      if (!first) {
-        ss << ", ";
-      }
-      first = false;
-      ss << arg->FriendlyName(builder.Symbols());
-    }
-  }
-  ss << ")" << std::endl;
-
+  ss << "no matching call to " << CallSignature(builder, type, args)
+     << std::endl;
   if (!candidates.empty()) {
     ss << std::endl;
     ss << candidates.size() << " candidate function"
        << (candidates.size() > 1 ? "s:" : ":") << std::endl;
     for (auto& candidate : candidates) {
-      ss << "  " << candidate.overload->str() << std::endl;
+      ss << "  " << str(*candidate.overload) << std::endl;
     }
   }
+  diagnostics.add_error(ss.str(), source);
 
-  return Result{nullptr, ss.str()};
+  return Result{nullptr, std::move(diagnostics)};
 }
 
 semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
                                            semantic::IntrinsicType intrinsic,
                                            const std::vector<type::Type*>& args,
+                                           diag::List& diagnostics,
                                            int& match_score) const {
   if (type != intrinsic) {
     match_score = std::numeric_limits<int>::min();
@@ -1433,14 +1448,20 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
     if (type_it == matcher_state.open_types.end()) {
       // We have an overload that claims to have matched, but didn't actually
       // resolve the open type. This is a bug that needs fixing.
-      assert(false);
+      TINT_ICE(diagnostics, "IntrinsicTable overload matched for " +
+                                CallSignature(builder, intrinsic, args) +
+                                ", but didn't resolve the open type " +
+                                str(open_type));
       return nullptr;
     }
     auto* resolved_type = type_it->second;
     if (resolved_type == nullptr) {
       // We have an overload that claims to have matched, but has a nullptr
       // resolved open type. This is a bug that needs fixing.
-      assert(false);
+      TINT_ICE(diagnostics, "IntrinsicTable overload matched for " +
+                                CallSignature(builder, intrinsic, args) +
+                                ", but open type " + str(open_type) +
+                                " is nullptr");
       return nullptr;
     }
     if (!matcher->Match(matcher_state, resolved_type)) {

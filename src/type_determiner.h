@@ -68,7 +68,7 @@ class TypeDeterminer {
   static diag::List Run(Program* program);
 
   /// @returns error messages from the type determiner
-  const std::string& error() { return error_; }
+  std::string error() const { return diagnostics_.str(); }
 
   /// @returns true if the type determiner was successful
   bool Determine();
@@ -169,7 +169,6 @@ class TypeDeterminer {
                             const ast::ExpressionList& params,
                             uint32_t* id);
 
-  void set_error(const Source& src, const std::string& msg);
   void set_referenced_from_function_if_needed(VariableInfo* var, bool local);
   void set_entry_points(const Symbol& fn_sym, Symbol ep_sym);
 
@@ -198,7 +197,7 @@ class TypeDeterminer {
 
   ProgramBuilder* const builder_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
-  std::string error_;
+  diag::List diagnostics_;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;

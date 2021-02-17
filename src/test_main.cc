@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/writer/text_generator.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "src/debug.h"
 
-#include <assert.h>
+namespace {
 
-#include <utility>
-
-namespace tint {
-namespace writer {
-
-TextGenerator::TextGenerator() = default;
-
-TextGenerator::~TextGenerator() = default;
-
-void TextGenerator::make_indent() {
-  make_indent(out_);
+void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
+  FAIL() << diagnostics.str();
 }
 
-void TextGenerator::make_indent(std::ostream& out) const {
-  for (size_t i = 0; i < indent_; i++) {
-    out << " ";
-  }
-}
+}  // namespace
 
-}  // namespace writer
-}  // namespace tint
+// Entry point for tint unit tests
+int main(int argc, char** argv) {
+  testing::InitGoogleMock(&argc, argv);
+
+  tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
+
+  auto res = RUN_ALL_TESTS();
+
+  tint::FreeInternalCompilerErrors();
+
+  return res;
+}

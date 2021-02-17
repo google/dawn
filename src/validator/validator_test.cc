@@ -96,7 +96,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
 
   EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
-            "12:34: v-0006: identifier must be declared before use: b");
+            "12:34 error: v-0006: identifier must be declared before use: b");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
@@ -115,7 +115,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
 
   EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
-            "12:34: v-0006: identifier must be declared before use: b");
+            "12:34 error: v-0006: identifier must be declared before use: b");
 }
 
 TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {

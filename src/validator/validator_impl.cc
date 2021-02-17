@@ -29,6 +29,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/debug.h"
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
@@ -92,7 +93,8 @@ bool ValidatorImpl::Validate() {
         return false;
       }
     } else {
-      assert(false /* unreachable */);
+      TINT_UNREACHABLE(diags_);
+      return false;
     }
   }
   if (!ValidateEntryPoint(program_->AST().Functions())) {

@@ -55,46 +55,51 @@ void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
 
   for (auto* src_node : ctx.src->ASTNodes().Objects()) {
     if (auto* src_init = src_node->As<ast::TypeConstructorExpression>()) {
-      if (auto* src_sem_expr = ctx.src->Sem().Get(src_init)) {
-        auto* src_sem_stmt = src_sem_expr->Stmt();
-        if (!src_sem_stmt) {
-          // Expression is outside of a statement. This usually means the
-          // expression is part of a global (module-scope) constant declaration.
-          // These must be constexpr, and so cannot contain the type of
-          // expressions that must be sanitized.
+      auto* src_sem_expr = ctx.src->Sem().Get(src_init);
+      if (!src_sem_expr) {
+        TINT_ICE(
+            ctx.dst->Diagnostics(),
+            "ast::TypeConstructorExpression has no semantic expression node");
+        continue;
+      }
+      auto* src_sem_stmt = src_sem_expr->Stmt();
+      if (!src_sem_stmt) {
+        // Expression is outside of a statement. This usually means the
+        // expression is part of a global (module-scope) constant declaration.
+        // These must be constexpr, and so cannot contain the type of
+        // expressions that must be sanitized.
+        continue;
+      }
+      auto* src_stmt = src_sem_stmt->Declaration();
+
+      if (auto* src_var_decl = src_stmt->As<ast::VariableDeclStatement>()) {
+        if (src_var_decl->variable()->constructor() == src_init) {
+          // This statement is just a variable declaration with the array
+          // initializer as the constructor value. This is what we're
+          // attempting to transform to, and so ignore.
           continue;
         }
-        auto* src_stmt = src_sem_stmt->Declaration();
+      }
 
-        if (auto* src_var_decl = src_stmt->As<ast::VariableDeclStatement>()) {
-          if (src_var_decl->variable()->constructor() == src_init) {
-            // This statement is just a variable declaration with the array
-            // initializer as the constructor value. This is what we're
-            // attempting to transform to, and so ignore.
-            continue;
-          }
-        }
+      if (auto* src_array_ty = src_sem_expr->Type()->As<type::Array>()) {
+        // Create a new symbol for the constant
+        auto dst_symbol = ctx.dst->Symbols().New();
+        // Clone the array type
+        auto* dst_array_ty = ctx.Clone(src_array_ty);
+        // Clone the array initializer
+        auto* dst_init = ctx.Clone(src_init);
+        // Construct the constant that holds the array
+        auto* dst_var = ctx.dst->Const(dst_symbol, dst_array_ty, dst_init);
+        // Construct the variable declaration statement
+        auto* dst_var_decl =
+            ctx.dst->create<ast::VariableDeclStatement>(dst_var);
+        // Construct the identifier for referencing the constant
+        auto* dst_ident = ctx.dst->Expr(dst_symbol);
 
-        if (auto* src_array_ty = src_sem_expr->Type()->As<type::Array>()) {
-          // Create a new symbol for the constant
-          auto dst_symbol = ctx.dst->Symbols().New();
-          // Clone the array type
-          auto* dst_array_ty = ctx.Clone(src_array_ty);
-          // Clone the array initializer
-          auto* dst_init = ctx.Clone(src_init);
-          // Construct the constant that holds the array
-          auto* dst_var = ctx.dst->Const(dst_symbol, dst_array_ty, dst_init);
-          // Construct the variable declaration statement
-          auto* dst_var_decl =
-              ctx.dst->create<ast::VariableDeclStatement>(dst_var);
-          // Construct the identifier for referencing the constant
-          auto* dst_ident = ctx.dst->Expr(dst_symbol);
-
-          // Insert the constant before the usage
-          ctx.InsertBefore(src_stmt, dst_var_decl);
-          // Replace the inlined array with a reference to the constant
-          ctx.Replace(src_init, dst_ident);
-        }
+        // Insert the constant before the usage
+        ctx.InsertBefore(src_stmt, dst_var_decl);
+        // Replace the inlined array with a reference to the constant
+        ctx.Replace(src_init, dst_ident);
       }
     }
   }

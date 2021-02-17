@@ -44,4 +44,8 @@ ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
   return out;
 }
 
+diag::List& CloneContext::Diagnostics() const {
+  return dst->Diagnostics();
+}
+
 }  // namespace tint

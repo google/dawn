@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "src/diagnostic/diagnostic.h"
 #include "src/semantic/intrinsic.h"
 
 namespace tint {
@@ -39,18 +40,20 @@ class IntrinsicTable {
   struct Result {
     /// The intrinsic, if the lookup succeeded, otherwise nullptr
     semantic::Intrinsic* intrinsic;
-    /// The error message, if the lookup failed, otherwise empty
-    std::string error;
+    /// Diagnostic messages
+    diag::List diagnostics;
   };
 
   /// Lookup looks for the intrinsic overload with the given signature.
   /// @param builder the program builder
   /// @param type the intrinsic type
   /// @param args the argument types passed to the intrinsic function
+  /// @param source the source of the intrinsic call
   /// @return the semantic intrinsic if found, otherwise nullptr
   virtual Result Lookup(ProgramBuilder& builder,
                         semantic::IntrinsicType type,
-                        const std::vector<type::Type*>& args) const = 0;
+                        const std::vector<type::Type*>& args,
+                        const Source& source) const = 0;
 };
 
 }  // namespace tint

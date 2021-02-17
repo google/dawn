@@ -43,6 +43,7 @@
 #include "src/semantic/intrinsic.h"
 #include "src/type/struct_type.h"
 #include "src/writer/hlsl/namer.h"
+#include "src/writer/text_generator.h"
 
 namespace tint {
 
@@ -56,30 +57,12 @@ namespace writer {
 namespace hlsl {
 
 /// Implementation class for HLSL generator
-class GeneratorImpl {
+class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
   /// @param program the program to generate
   explicit GeneratorImpl(const Program* program);
   ~GeneratorImpl();
-
-  /// Increment the emitter indent level
-  void increment_indent() { indent_ += 2; }
-  /// Decrement the emiter indent level
-  void decrement_indent() {
-    if (indent_ < 2) {
-      indent_ = 0;
-      return;
-    }
-    indent_ -= 2;
-  }
-
-  /// Writes the current indent to the output stream
-  /// @param out the output stream
-  void make_indent(std::ostream& out);
-
-  /// @returns the error
-  std::string error() const { return error_; }
 
   /// @param out the output stream
   /// @returns true on successful generation; false otherwise
@@ -420,9 +403,6 @@ class GeneratorImpl {
   type::Type* TypeOf(ast::Expression* expr) const {
     return builder_.TypeOf(expr);
   }
-
-  std::string error_;
-  size_t indent_ = 0;
 
   Namer namer_;
   ProgramBuilder builder_;

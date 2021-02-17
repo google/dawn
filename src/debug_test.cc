@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/diagnostic/diagnostic.h"
+#include "src/debug.h"
 
-#include "src/diagnostic/formatter.h"
+#include "gtest/gtest-spi.h"
 
 namespace tint {
-namespace diag {
+namespace {
 
-List::List() = default;
-List::List(std::initializer_list<Diagnostic> list) : entries_(list) {}
-List::List(const List&) = default;
-List::List(List&&) = default;
-
-List::~List() = default;
-
-List& List::operator=(const List&) = default;
-List& List::operator=(List&&) = default;
-
-std::string List::str() const {
-  diag::Formatter::Style style;
-  style.print_newline_at_end = false;
-  return Formatter{style}.format(*this);
+TEST(DebugTest, Unreachable) {
+  EXPECT_FATAL_FAILURE(
+      {
+        diag::List diagnostics;
+        TINT_UNREACHABLE(diagnostics);
+      },
+      "internal compiler error");
 }
 
-}  // namespace diag
+}  // namespace
 }  // namespace tint

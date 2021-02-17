@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "src/debug.h"
 #include "src/program_builder.h"
 #include "src/type/alias_type.h"
 #include "src/type/struct_type.h"
@@ -43,7 +44,8 @@ Module::Module(const Source& source, std::vector<CastableBase*> global_decls)
     } else if (auto* var = decl->As<Variable>()) {
       global_variables_.push_back(var);
     } else {
-      assert(false /* unreachable */);
+      diag::List diagnostics;
+      TINT_ICE(diagnostics, "Unknown global declaration type");
     }
   }
 }
@@ -106,7 +108,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
     } else if (auto* var = decl->As<Variable>()) {
       AddGlobalVariable(ctx->Clone(var));
     } else {
-      assert(false /* unreachable */);
+      TINT_ICE(ctx->dst->Diagnostics(), "Unknown global declaration type");
     }
   }
 }

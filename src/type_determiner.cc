@@ -41,6 +41,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
@@ -104,15 +105,6 @@ diag::List TypeDeterminer::Run(Program* program) {
   }
   *program = Program(std::move(builder));
   return {};
-}
-
-void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
-  error_ = "";
-  if (src.range.begin.line > 0) {
-    error_ += std::to_string(src.range.begin.line) + ":" +
-              std::to_string(src.range.begin.column) + ": ";
-  }
-  error_ += msg;
 }
 
 void TypeDeterminer::set_referenced_from_function_if_needed(VariableInfo* var,
@@ -242,8 +234,8 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
   }
 
   if (info->storage_class != ast::StorageClass::kNone) {
-    set_error(stmt->source(),
-              "function variable has a non-function storage class");
+    diagnostics_.add_error("function variable has a non-function storage class",
+                           stmt->source());
     return false;
   }
 
@@ -321,8 +313,9 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(v->variable()->constructor());
   }
 
-  set_error(stmt->source(), "unknown statement type for type determination: " +
-                                builder_->str(stmt));
+  diagnostics_.add_error(
+      "unknown statement type for type determination: " + builder_->str(stmt),
+      stmt->source());
   return false;
 }
 
@@ -370,7 +363,8 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
     return DetermineUnaryOp(u);
   }
 
-  set_error(expr->source(), "unknown expression for type determination");
+  diagnostics_.add_error("unknown expression for type determination",
+                         expr->source());
   return false;
 }
 
@@ -393,9 +387,9 @@ bool TypeDeterminer::DetermineArrayAccessor(
   } else if (auto* mat = parent_type->As<type::Matrix>()) {
     ret = builder_->create<type::Vector>(mat->type(), mat->rows());
   } else {
-    set_error(expr->source(), "invalid parent type (" +
-                                  parent_type->type_name() +
-                                  ") in array accessor");
+    diagnostics_.add_error("invalid parent type (" + parent_type->type_name() +
+                               ") in array accessor",
+                           expr->source());
     return false;
   }
 
@@ -436,7 +430,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
   // the safe side.
   auto* ident = call->func()->As<ast::IdentifierExpression>();
   if (!ident) {
-    set_error(call->source(), "call target is not an identifier");
+    diagnostics_.add_error("call target is not an identifier", call->source());
     return false;
   }
 
@@ -454,7 +448,8 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
       auto callee_func_it = symbol_to_function_.find(ident->symbol());
       if (callee_func_it == symbol_to_function_.end()) {
-        set_error(call->source(), "unable to find called function: " + name);
+        diagnostics_.add_error("unable to find called function: " + name,
+                               call->source());
         return false;
       }
       auto* callee_func = callee_func_it->second;
@@ -467,8 +462,9 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
     auto iter = symbol_to_function_.find(ident->symbol());
     if (iter == symbol_to_function_.end()) {
-      set_error(call->source(),
-                "v-0005: function must be declared before use: '" + name + "'");
+      diagnostics_.add_error(
+          "v-0005: function must be declared before use: '" + name + "'",
+          call->source());
       return false;
     }
 
@@ -490,10 +486,11 @@ bool TypeDeterminer::DetermineIntrinsicCall(
     arg_tys.emplace_back(TypeOf(expr));
   }
 
-  auto result = intrinsic_table_->Lookup(*builder_, intrinsic_type, arg_tys);
+  auto result = intrinsic_table_->Lookup(*builder_, intrinsic_type, arg_tys,
+                                         call->source());
   if (!result.intrinsic) {
     // Intrinsic lookup failed.
-    set_error(call->source(), result.error);
+    diagnostics_.add(result.diagnostics);
 
     // TODO(bclayton): https://crbug.com/tint/487
     // The Validator expects intrinsic signature mismatches to still produce
@@ -583,8 +580,9 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     return true;
   }
 
-  set_error(expr->source(),
-            "v-0006: identifier must be declared before use: " + name);
+  diagnostics_.add_error(
+      "v-0006: identifier must be declared before use: " + name,
+      expr->source());
   return false;
 }
 
@@ -781,9 +779,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
     }
 
     if (ret == nullptr) {
-      set_error(expr->source(), "struct member " +
-                                    builder_->Symbols().NameFor(symbol) +
-                                    " not found");
+      diagnostics_.add_error(
+          "struct member " + builder_->Symbols().NameFor(symbol) + " not found",
+          expr->source());
       return false;
     }
 
@@ -810,10 +808,10 @@ bool TypeDeterminer::DetermineMemberAccessor(
                                            static_cast<uint32_t>(size));
     }
   } else {
-    set_error(
-        expr->source(),
+    diagnostics_.add_error(
         "v-0007: invalid use of member accessor on a non-vector/non-struct " +
-            data_type->type_name());
+            data_type->type_name(),
+        expr->source());
     return false;
   }
 
@@ -893,7 +891,7 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     return true;
   }
 
-  set_error(expr->source(), "Unknown binary expression");
+  diagnostics_.add_error("Unknown binary expression", expr->source());
   return false;
 }
 

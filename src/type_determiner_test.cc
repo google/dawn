@@ -142,7 +142,7 @@ TEST_F(TypeDeterminerTest, Error_WithEmptySource) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "unknown statement type for type determination: Fake");
+            "error: unknown statement type for type determination: Fake");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
@@ -152,7 +152,7 @@ TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "2:30: unknown statement type for type determination: Fake");
+            "2:30 error: unknown statement type for type determination: Fake");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Assign) {
@@ -396,8 +396,9 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(),
-            "12:34: v-0006: identifier must be declared before use: func");
+  EXPECT_EQ(
+      td()->error(),
+      "12:34 error: v-0006: identifier must be declared before use: func");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
@@ -530,7 +531,8 @@ TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "2:30: unknown expression for type determination");
+  EXPECT_EQ(td()->error(),
+            "2:30 error: unknown expression for type determination");
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
@@ -1358,7 +1360,7 @@ TEST_P(IntrinsicDerivativeTest, MissingParam) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "no matching call to " + name +
+  EXPECT_EQ(td()->error(), "error: no matching call to " + name +
                                "()\n\n"
                                "2 candidate functions:\n  " +
                                name + "(f32) -> f32\n  " + name +
@@ -1436,7 +1438,7 @@ TEST_P(Intrinsic_FloatMethod, MissingParam) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "no matching call to " + name +
+  EXPECT_EQ(td()->error(), "error: no matching call to " + name +
                                "()\n\n"
                                "2 candidate functions:\n  " +
                                name + "(f32) -> bool\n  " + name +
@@ -1453,7 +1455,7 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "no matching call to " + name +
+  EXPECT_EQ(td()->error(), "error: no matching call to " + name +
                                "(ptr<f32>, f32)\n\n"
                                "2 candidate functions:\n  " +
                                name + "(f32) -> bool\n  " + name +
@@ -1687,7 +1689,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_Scalar) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to dot(f32, f32)
+            R"(error: no matching call to dot(f32, f32)
 
 1 candidate function:
   dot(vecN<f32>, vecN<f32>) -> f32
@@ -1703,7 +1705,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_VectorInt) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to dot(ptr<vec4<i32>>, ptr<vec4<i32>>)
+            R"(error: no matching call to dot(ptr<vec4<i32>>, ptr<vec4<i32>>)
 
 1 candidate function:
   dot(vecN<f32>, vecN<f32>) -> f32
@@ -1733,7 +1735,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to select()
+            R"(error: no matching call to select()
 
 2 candidate functions:
   select(T, T, bool) -> T  where: T is scalar
@@ -1748,7 +1750,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_SelectorInt) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to select(i32, i32, i32)
+            R"(error: no matching call to select(i32, i32, i32)
 
 2 candidate functions:
   select(T, T, bool) -> T  where: T is scalar
@@ -1764,7 +1766,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_Matrix) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to select(mat2x2<f32>, mat2x2<f32>, bool)
+            R"(error: no matching call to select(mat2x2<f32>, mat2x2<f32>, bool)
 
 2 candidate functions:
   select(T, T, bool) -> T  where: T is scalar
@@ -1779,7 +1781,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_MismatchTypes) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to select(f32, vec2<f32>, bool)
+            R"(error: no matching call to select(f32, vec2<f32>, bool)
 
 2 candidate functions:
   select(T, T, bool) -> T  where: T is scalar
@@ -1795,7 +1797,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_MismatchVectorSize) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to select(vec2<f32>, vec3<f32>, bool)
+            R"(error: no matching call to select(vec2<f32>, vec3<f32>, bool)
 
 2 candidate functions:
   select(T, T, bool) -> T  where: T is scalar
@@ -1856,7 +1858,7 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "function variable has a non-function storage class");
+            "error: function variable has a non-function storage class");
 }
 
 struct IntrinsicData {
@@ -1983,8 +1985,8 @@ TEST_P(Intrinsic_DataPackingTest, Error_IncorrectParamType) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_THAT(td()->error(),
-              HasSubstr("no matching call to " + std::string(param.name)));
+  EXPECT_THAT(td()->error(), HasSubstr("error: no matching call to " +
+                                       std::string(param.name)));
 }
 
 TEST_P(Intrinsic_DataPackingTest, Error_NoParams) {
@@ -1995,8 +1997,8 @@ TEST_P(Intrinsic_DataPackingTest, Error_NoParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_THAT(td()->error(),
-              HasSubstr("no matching call to " + std::string(param.name)));
+  EXPECT_THAT(td()->error(), HasSubstr("error: no matching call to " +
+                                       std::string(param.name)));
 }
 
 TEST_P(Intrinsic_DataPackingTest, Error_TooManyParams) {
@@ -2011,8 +2013,8 @@ TEST_P(Intrinsic_DataPackingTest, Error_TooManyParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_THAT(td()->error(),
-              HasSubstr("no matching call to " + std::string(param.name)));
+  EXPECT_THAT(td()->error(), HasSubstr("error: no matching call to " +
+                                       std::string(param.name)));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2089,12 +2091,12 @@ TEST_P(Intrinsic_SingleParamTest, Error_NoParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "no matching call to " + std::string(param.name) +
-                               "()\n\n"
-                               "2 candidate functions:\n  " +
-                               std::string(param.name) + "(f32) -> f32\n  " +
-                               std::string(param.name) +
-                               "(vecN<f32>) -> vecN<f32>\n");
+  EXPECT_EQ(td()->error(),
+            "error: no matching call to " + std::string(param.name) +
+                "()\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) + "(f32) -> f32\n  " +
+                std::string(param.name) + "(vecN<f32>) -> vecN<f32>\n");
 }
 
 TEST_P(Intrinsic_SingleParamTest, Error_TooManyParams) {
@@ -2105,12 +2107,12 @@ TEST_P(Intrinsic_SingleParamTest, Error_TooManyParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "no matching call to " + std::string(param.name) +
-                               "(i32, i32, i32)\n\n"
-                               "2 candidate functions:\n  " +
-                               std::string(param.name) + "(f32) -> f32\n  " +
-                               std::string(param.name) +
-                               "(vecN<f32>) -> vecN<f32>\n");
+  EXPECT_EQ(td()->error(),
+            "error: no matching call to " + std::string(param.name) +
+                "(i32, i32, i32)\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) + "(f32) -> f32\n  " +
+                std::string(param.name) + "(vecN<f32>) -> vecN<f32>\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2157,7 +2159,7 @@ TEST_F(IntrinsicDataTest, ArrayLength_Error_ArraySized) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to arrayLength(ptr<array<i32, 4>>)\n\n"
+            "error: no matching call to arrayLength(ptr<array<i32, 4>>)\n\n"
             "1 candidate function:\n"
             "  arrayLength(array<T>) -> u32\n");
 }
@@ -2180,7 +2182,7 @@ TEST_F(IntrinsicDataTest, Normalize_Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to normalize()\n\n"
+            "error: no matching call to normalize()\n\n"
             "1 candidate function:\n"
             "  normalize(vecN<f32>) -> vecN<f32>\n");
 }
@@ -2216,7 +2218,7 @@ TEST_F(IntrinsicDataTest, Frexp_Error_FirstParamInt) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to frexp(i32, ptr<workgroup, i32>)\n\n"
+            "error: no matching call to frexp(i32, ptr<workgroup, i32>)\n\n"
             "2 candidate functions:\n"
             "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
             "  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  "
@@ -2231,7 +2233,7 @@ TEST_F(IntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to frexp(f32, ptr<workgroup, f32>)\n\n"
+            "error: no matching call to frexp(f32, ptr<workgroup, f32>)\n\n"
             "2 candidate functions:\n"
             "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
             "  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  "
@@ -2245,7 +2247,7 @@ TEST_F(IntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to frexp(f32, i32)\n\n"
+            "error: no matching call to frexp(f32, i32)\n\n"
             "2 candidate functions:\n"
             "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
             "  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  "
@@ -2259,13 +2261,13 @@ TEST_F(IntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(
-      td()->error(),
-      "no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>>)\n\n"
-      "2 candidate functions:\n"
-      "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
-      "  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  "
-      "where: T is i32 or u32\n");
+  EXPECT_EQ(td()->error(),
+            "error: no matching call to frexp(vec2<f32>, ptr<workgroup, "
+            "vec4<i32>>)\n\n"
+            "2 candidate functions:\n"
+            "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
+            "  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  "
+            "where: T is i32 or u32\n");
 }
 
 TEST_F(IntrinsicDataTest, ModfScalar) {
@@ -2299,7 +2301,7 @@ TEST_F(IntrinsicDataTest, Modf_Error_FirstParamInt) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to modf(i32, ptr<workgroup, f32>)\n\n"
+            "error: no matching call to modf(i32, ptr<workgroup, f32>)\n\n"
             "2 candidate functions:\n"
             "  modf(f32, ptr<f32>) -> f32\n"
             "  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>\n");
@@ -2313,7 +2315,7 @@ TEST_F(IntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to modf(f32, ptr<workgroup, i32>)\n\n"
+            "error: no matching call to modf(f32, ptr<workgroup, i32>)\n\n"
             "2 candidate functions:\n"
             "  modf(f32, ptr<f32>) -> f32\n"
             "  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>\n");
@@ -2326,7 +2328,7 @@ TEST_F(IntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to modf(f32, f32)\n\n"
+            "error: no matching call to modf(f32, f32)\n\n"
             "2 candidate functions:\n"
             "  modf(f32, ptr<f32>) -> f32\n"
             "  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>\n");
@@ -2340,7 +2342,8 @@ TEST_F(IntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>>)\n\n"
+            "error: no matching call to modf(vec2<f32>, ptr<workgroup, "
+            "vec4<f32>>)\n\n"
             "2 candidate functions:\n"
             "  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>\n"
             "  modf(f32, ptr<f32>) -> f32\n");
@@ -2443,7 +2446,7 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to " + std::string(param.name) +
+            "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
                 std::string(param.name) +
@@ -2515,13 +2518,13 @@ TEST_P(Intrinsic_TwoParamTest, Error_NoTooManyParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "no matching call to " + std::string(param.name) +
-                               "(i32, i32, i32)\n\n"
-                               "2 candidate functions:\n  " +
-                               std::string(param.name) +
-                               "(f32, f32) -> f32\n  " +
-                               std::string(param.name) +
-                               "(vecN<f32>, vecN<f32>) -> vecN<f32>\n");
+  EXPECT_EQ(td()->error(),
+            "error: no matching call to " + std::string(param.name) +
+                "(i32, i32, i32)\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) + "(f32, f32) -> f32\n  " +
+                std::string(param.name) +
+                "(vecN<f32>, vecN<f32>) -> vecN<f32>\n");
 }
 
 TEST_P(Intrinsic_TwoParamTest, Error_NoParams) {
@@ -2532,13 +2535,13 @@ TEST_P(Intrinsic_TwoParamTest, Error_NoParams) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), "no matching call to " + std::string(param.name) +
-                               "()\n\n"
-                               "2 candidate functions:\n  " +
-                               std::string(param.name) +
-                               "(f32, f32) -> f32\n  " +
-                               std::string(param.name) +
-                               "(vecN<f32>, vecN<f32>) -> vecN<f32>\n");
+  EXPECT_EQ(td()->error(),
+            "error: no matching call to " + std::string(param.name) +
+                "()\n\n"
+                "2 candidate functions:\n  " +
+                std::string(param.name) + "(f32, f32) -> f32\n  " +
+                std::string(param.name) +
+                "(vecN<f32>, vecN<f32>) -> vecN<f32>\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -2588,7 +2591,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_NoArgs) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), R"(no matching call to cross()
+  EXPECT_EQ(td()->error(), R"(error: no matching call to cross()
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
@@ -2601,7 +2604,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Scalar) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), R"(no matching call to cross(f32, f32)
+  EXPECT_EQ(td()->error(), R"(error: no matching call to cross(f32, f32)
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
@@ -2614,7 +2617,8 @@ TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Vec3Int) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), R"(no matching call to cross(vec3<i32>, vec3<i32>)
+  EXPECT_EQ(td()->error(),
+            R"(error: no matching call to cross(vec3<i32>, vec3<i32>)
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
@@ -2629,7 +2633,8 @@ TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Vec4) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), R"(no matching call to cross(vec4<f32>, vec4<f32>)
+  EXPECT_EQ(td()->error(),
+            R"(error: no matching call to cross(vec4<f32>, vec4<f32>)
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
@@ -2645,7 +2650,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_TooManyParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            R"(no matching call to cross(vec3<f32>, vec3<f32>, vec3<f32>)
+            R"(error: no matching call to cross(vec3<f32>, vec3<f32>, vec3<f32>)
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
@@ -2668,7 +2673,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Normalize_NoArgs) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(), R"(no matching call to normalize()
+  EXPECT_EQ(td()->error(), R"(error: no matching call to normalize()
 
 1 candidate function:
   normalize(vecN<f32>) -> vecN<f32>
@@ -2710,7 +2715,7 @@ TEST_P(Intrinsic_ThreeParamTest, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to " + std::string(param.name) +
+            "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
                 std::string(param.name) + "(f32, f32, f32) -> f32\n  " +
@@ -2815,7 +2820,7 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to " + std::string(param.name) +
+            "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
                 std::string(param.name) +
@@ -2866,7 +2871,7 @@ TEST_P(Intrinsic_Int_SingleParamTest, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to " + std::string(param.name) +
+            "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
                 std::string(param.name) +
@@ -2968,7 +2973,7 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Error_NoParams) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to " + std::string(param.name) +
+            "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
                 std::string(param.name) +
@@ -3027,10 +3032,11 @@ TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotSquare) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(td()->error(),
-            "no matching call to determinant(ptr<function, mat2x3<f32>>)\n\n"
-            "1 candidate function:\n"
-            "  determinant(matNxN<f32>) -> f32\n");
+  EXPECT_EQ(
+      td()->error(),
+      "error: no matching call to determinant(ptr<function, mat2x3<f32>>)\n\n"
+      "1 candidate function:\n"
+      "  determinant(matNxN<f32>) -> f32\n");
 }
 
 TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotMatrix) {
@@ -3042,7 +3048,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotMatrix) {
   EXPECT_FALSE(td()->Determine());
 
   EXPECT_EQ(td()->error(),
-            "no matching call to determinant(ptr<function, f32>)\n\n"
+            "error: no matching call to determinant(ptr<function, f32>)\n\n"
             "1 candidate function:\n"
             "  determinant(matNxN<f32>) -> f32\n");
 }

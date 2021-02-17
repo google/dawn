@@ -39,6 +39,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
+#include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/struct_type.h"

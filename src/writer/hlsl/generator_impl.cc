@@ -44,6 +44,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/debug.h"
 #include "src/program_builder.h"
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
@@ -136,12 +137,6 @@ GeneratorImpl::GeneratorImpl(const Program* program)
     : builder_(ProgramBuilder::Wrap(program)) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
-
-void GeneratorImpl::make_indent(std::ostream& out) {
-  for (size_t i = 0; i < indent_; i++) {
-    out << " ";
-  }
-}
 
 bool GeneratorImpl::Generate(std::ostream& out) {
   for (auto* global : builder_.AST().GlobalVariables()) {
@@ -258,7 +253,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
       return false;
     }
   } else {
-    error_ = "unknown constructed type: " + ty->type_name();
+    diagnostics_.add_error("unknown constructed type: " + ty->type_name());
     return false;
   }
 
@@ -290,7 +285,8 @@ bool GeneratorImpl::EmitBitcast(std::ostream& pre,
                                 std::ostream& out,
                                 ast::BitcastExpression* expr) {
   if (!expr->type()->is_integer_scalar() && !expr->type()->is_float_scalar()) {
-    error_ = "Unable to do bitcast to type " + expr->type()->type_name();
+    diagnostics_.add_error("Unable to do bitcast to type " +
+                           expr->type()->type_name());
     return false;
   }
 
@@ -429,7 +425,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
     case ast::BinaryOp::kLogicalAnd:
     case ast::BinaryOp::kLogicalOr: {
       // These are both handled above.
-      assert(false);
+      TINT_UNREACHABLE(diagnostics_);
       return false;
     }
     case ast::BinaryOp::kEqual:
@@ -477,7 +473,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
       out << "%";
       break;
     case ast::BinaryOp::kNone:
-      error_ = "missing binary operation type";
+      diagnostics_.add_error("missing binary operation type");
       return false;
   }
   out << " ";
@@ -538,7 +534,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
                              ast::CallExpression* expr) {
   auto* ident = expr->func()->As<ast::IdentifierExpression>();
   if (ident == nullptr) {
-    error_ = "invalid function name";
+    diagnostics_.add_error("invalid function name");
     return 0;
   }
 
@@ -549,10 +545,10 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     }
     const auto& params = expr->params();
     if (intrinsic->Type() == semantic::IntrinsicType::kSelect) {
-      error_ = "select not supported in HLSL backend yet";
+      diagnostics_.add_error("select not supported in HLSL backend yet");
       return false;
     } else if (intrinsic->Type() == semantic::IntrinsicType::kIsNormal) {
-      error_ = "is_normal not supported in HLSL backend yet";
+      diagnostics_.add_error("is_normal not supported in HLSL backend yet");
       return false;
     } else if (intrinsic->IsDataPacking()) {
       return EmitDataPackingCall(pre, out, expr, intrinsic);
@@ -593,8 +589,8 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
   auto* func = builder_.AST().Functions().Find(ident->symbol());
   if (func == nullptr) {
-    error_ = "Unable to find function: " +
-             builder_.Symbols().NameFor(ident->symbol());
+    diagnostics_.add_error("Unable to find function: " +
+                           builder_.Symbols().NameFor(ident->symbol()));
     return false;
   }
 
@@ -689,7 +685,8 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
       out << "(" << tmp_name << ".x | " << tmp_name << ".y << 16)";
       break;
     default:
-      error_ = "Internal error: unhandled data packing intrinsic";
+      diagnostics_.add_error(
+          "Internal error: unhandled data packing intrinsic");
       return false;
   }
 
@@ -760,7 +757,8 @@ bool GeneratorImpl::EmitDataUnpackingCall(
           << " >> 16))";
       break;
     default:
-      error_ = "Internal error: unhandled data packing intrinsic";
+      diagnostics_.add_error(
+          "Internal error: unhandled data packing intrinsic");
       return false;
   }
 
@@ -801,7 +799,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case semantic::IntrinsicType::kTextureDimensions:
           switch (texture_type->dim()) {
             case type::TextureDimension::kNone:
-              error_ = "texture dimension is kNone";
+              diagnostics_.add_error("texture dimension is kNone");
               return false;
             case type::TextureDimension::k1d:
               num_dimensions = 1;
@@ -837,7 +835,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case semantic::IntrinsicType::kTextureNumLayers:
           switch (texture_type->dim()) {
             default:
-              error_ = "texture dimension is not arrayed";
+              diagnostics_.add_error("texture dimension is not arrayed");
               return false;
             case type::TextureDimension::k1dArray:
               num_dimensions = 2;
@@ -854,7 +852,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           add_mip_level_in = true;
           switch (texture_type->dim()) {
             default:
-              error_ = "texture dimension does not support mips";
+              diagnostics_.add_error("texture dimension does not support mips");
               return false;
             case type::TextureDimension::k2d:
             case type::TextureDimension::kCube:
@@ -872,7 +870,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case semantic::IntrinsicType::kTextureNumSamples:
           switch (texture_type->dim()) {
             default:
-              error_ = "texture dimension does not support multisampling";
+              diagnostics_.add_error(
+                  "texture dimension does not support multisampling");
               return false;
             case type::TextureDimension::k2d:
               num_dimensions = 3;
@@ -885,7 +884,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           }
           break;
         default:
-          error_ = "unexpected intrinsic";
+          diagnostics_.add_error("unexpected intrinsic");
           return false;
       }
 
@@ -967,8 +966,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       out << "[";
       break;
     default:
-      error_ = "Internal compiler error: Unhandled texture intrinsic '" +
-               std::string(intrinsic->str()) + "'";
+      diagnostics_.add_error(
+          "Internal compiler error: Unhandled texture intrinsic '" +
+          std::string(intrinsic->str()) + "'");
       return false;
   }
 
@@ -1127,7 +1127,8 @@ std::string GeneratorImpl::generate_builtin_name(
       out = "smoothstep";
       break;
     default:
-      error_ = "Unknown builtin method: " + std::string(intrinsic->str());
+      diagnostics_.add_error("Unknown builtin method: " +
+                             std::string(intrinsic->str()));
       return "";
   }
 
@@ -1277,7 +1278,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
     return EmitUnaryOp(pre, out, u);
   }
 
-  error_ = "unknown expression type: " + builder_.str(expr);
+  diagnostics_.add_error("unknown expression type: " + builder_.str(expr));
   return false;
 }
 
@@ -1302,7 +1303,7 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
                           : VarType::kOut;
       auto name = current_ep_var_name(var_type);
       if (name.empty()) {
-        error_ = "unable to find entry point data for variable";
+        diagnostics_.add_error("unable to find entry point data for variable");
         return false;
       }
       out << name << ".";
@@ -1581,8 +1582,9 @@ bool GeneratorImpl::EmitEntryPointData(
     // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
     auto* binding = data.second.binding;
     if (binding == nullptr) {
-      error_ = "unable to find binding information for uniform: " +
-               builder_.Symbols().NameFor(decl->symbol());
+      diagnostics_.add_error(
+          "unable to find binding information for uniform: " +
+          builder_.Symbols().NameFor(decl->symbol()));
       return false;
     }
     // auto* set = data.second.set;
@@ -1642,7 +1644,7 @@ bool GeneratorImpl::EmitEntryPointData(
 
     auto* ac = decl->type()->As<type::AccessControl>();
     if (ac == nullptr) {
-      error_ = "access control type required for storage buffer";
+      diagnostics_.add_error("access control type required for storage buffer");
       return false;
     }
 
@@ -1682,19 +1684,21 @@ bool GeneratorImpl::EmitEntryPointData(
       out << " " << builder_.Symbols().NameFor(var->symbol()) << " : ";
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-          error_ = "invalid location variable for pipeline stage";
+          diagnostics_.add_error(
+              "invalid location variable for pipeline stage");
           return false;
         }
         out << "TEXCOORD" << location->value();
       } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
-          error_ = "unsupported builtin";
+          diagnostics_.add_error("unsupported builtin");
           return false;
         }
         out << attr;
       } else {
-        error_ = "unsupported variable decoration for entry point output";
+        diagnostics_.add_error(
+            "unsupported variable decoration for entry point output");
         return false;
       }
       out << ";" << std::endl;
@@ -1734,18 +1738,20 @@ bool GeneratorImpl::EmitEntryPointData(
         } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
           out << "SV_Target" << loc << "";
         } else {
-          error_ = "invalid location variable for pipeline stage";
+          diagnostics_.add_error(
+              "invalid location variable for pipeline stage");
           return false;
         }
       } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
-          error_ = "unsupported builtin";
+          diagnostics_.add_error("unsupported builtin");
           return false;
         }
         out << attr;
       } else {
-        error_ = "unsupported variable decoration for entry point output";
+        diagnostics_.add_error(
+            "unsupported variable decoration for entry point output");
         return false;
       }
       out << ";" << std::endl;
@@ -1866,7 +1872,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {
     out << ul->value() << "u";
   } else {
-    error_ = "unknown literal type";
+    diagnostics_.add_error("unknown literal type");
     return false;
   }
   return true;
@@ -1893,7 +1899,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
       }
     }
   } else {
-    error_ = "Invalid type for zero emission: " + type->type_name();
+    diagnostics_.add_error("Invalid type for zero emission: " +
+                           type->type_name());
     return false;
   }
   return true;
@@ -2016,7 +2023,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         auto* str_member = str_type->get_member(mem->member()->symbol());
 
         if (!str_member->has_offset_decoration()) {
-          error_ = "missing offset decoration for struct member";
+          diagnostics_.add_error("missing offset decoration for struct member");
           return "";
         }
         out << str_member->offset();
@@ -2027,9 +2034,9 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // This must be a single element swizzle if we've got a vector at this
         // point.
         if (builder_.Symbols().NameFor(mem->member()->symbol()).size() != 1) {
-          error_ =
+          diagnostics_.add_error(
               "Encountered multi-element swizzle when should have only one "
-              "level";
+              "level");
           return "";
         }
 
@@ -2041,8 +2048,8 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
                    builder_.Symbols().NameFor(mem->member()->symbol()))
             << ")";
       } else {
-        error_ =
-            "Invalid result type for member accessor: " + res_type->type_name();
+        diagnostics_.add_error("Invalid result type for member accessor: " +
+                               res_type->type_name());
         return "";
       }
 
@@ -2065,7 +2072,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
           out << "16";
         }
       } else {
-        error_ = "Invalid array type in storage buffer access";
+        diagnostics_.add_error("Invalid array type in storage buffer access");
         return "";
       }
       out << " * ";
@@ -2076,7 +2083,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
 
       expr = ary->array();
     } else {
-      error_ = "error emitting storage buffer access";
+      diagnostics_.add_error("error emitting storage buffer access");
       return "";
     }
   }
@@ -2119,7 +2126,7 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
 
   auto buffer_name = get_buffer_name(expr);
   if (buffer_name.empty()) {
-    error_ = "error emitting storage buffer access";
+    diagnostics_.add_error("error emitting storage buffer access");
     return false;
   }
 
@@ -2336,7 +2343,7 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
     return EmitVariable(out, v->variable(), false);
   }
 
-  error_ = "unknown statement type: " + builder_.str(stmt);
+  diagnostics_.add_error("unknown statement type: " + builder_.str(stmt));
   return false;
 }
 
@@ -2385,7 +2392,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       if (arr->IsRuntimeArray()) {
         // TODO(dsinclair): Support runtime arrays
         // https://bugs.chromium.org/p/tint/issues/detail?id=185
-        error_ = "runtime array not supported yet.";
+        diagnostics_.add_error("runtime array not supported yet.");
         return false;
       } else {
         sizes.push_back(arr->size());
@@ -2415,7 +2422,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (type->Is<type::Pointer>()) {
     // TODO(dsinclair): What do we do with pointers in HLSL?
     // https://bugs.chromium.org/p/tint/issues/detail?id=183
-    error_ = "pointers not supported in HLSL";
+    diagnostics_.add_error("pointers not supported in HLSL");
     return false;
   } else if (auto* sampler = type->As<type::Sampler>()) {
     out << "Sampler";
@@ -2454,15 +2461,16 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         out << "CubeArray";
         break;
       default:
-        error_ = "Invalid texture dimensions";
+        diagnostics_.add_error("Invalid texture dimensions");
         return false;
     }
 
     if (auto* st = tex->As<type::StorageTexture>()) {
       auto* component = image_format_to_rwtexture_type(st->image_format());
       if (component == nullptr) {
-        error_ = "Unsupported StorageTexture ImageFormat: " +
-                 std::to_string(static_cast<int>(st->image_format()));
+        diagnostics_.add_error(
+            "Unsupported StorageTexture ImageFormat: " +
+            std::to_string(static_cast<int>(st->image_format())));
         return false;
       }
       out << "<" << component << ">";
@@ -2487,7 +2495,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (type->Is<type::Void>()) {
     out << "void";
   } else {
-    error_ = "unknown type in EmitType";
+    diagnostics_.add_error("unknown type in EmitType");
     return false;
   }
 
@@ -2555,7 +2563,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
 
   // TODO(dsinclair): Handle variable decorations
   if (!var->decorations().empty()) {
-    error_ = "Variable decorations are not handled yet";
+    diagnostics_.add_error("Variable decorations are not handled yet");
     return false;
   }
 
@@ -2590,12 +2598,12 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
 
   for (auto* d : var->decorations()) {
     if (!d->Is<ast::ConstantIdDecoration>()) {
-      error_ = "Decorated const values not valid";
+      diagnostics_.add_error("Decorated const values not valid");
       return false;
     }
   }
   if (!var->is_const()) {
-    error_ = "Expected a const value";
+    diagnostics_.add_error("Expected a const value");
     return false;
   }
 

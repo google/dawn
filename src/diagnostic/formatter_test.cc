@@ -39,6 +39,9 @@ class DiagFormatterTest : public testing::Test {
   Diagnostic diag_err{Severity::Error,
                       Source{Source::Range{{3, 16}, {3, 21}}, &file}, "hiss",
                       "abc123"};
+  Diagnostic diag_ice{Severity::InternalCompilerError,
+                      Source{Source::Range{{4, 16}, {4, 19}}, &file},
+                      "unreachable"};
   Diagnostic diag_fatal{Severity::Fatal,
                         Source{Source::Range{{4, 16}, {4, 19}}, &file},
                         "nothing"};
@@ -46,21 +49,19 @@ class DiagFormatterTest : public testing::Test {
 
 TEST_F(DiagFormatterTest, Simple) {
   Formatter fmt{{false, false, false, false}};
-  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err});
   auto* expect = R"(1:14: purr
 2:14: grrr
-3:16 abc123: hiss
-4:16: nothing)";
+3:16 abc123: hiss)";
   ASSERT_EQ(expect, got);
 }
 
 TEST_F(DiagFormatterTest, SimpleNewlineAtEnd) {
   Formatter fmt{{false, false, false, true}};
-  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err});
   auto* expect = R"(1:14: purr
 2:14: grrr
 3:16 abc123: hiss
-4:16: nothing
 )";
   ASSERT_EQ(expect, got);
 }
@@ -75,27 +76,25 @@ TEST_F(DiagFormatterTest, SimpleNoSource) {
 
 TEST_F(DiagFormatterTest, WithFile) {
   Formatter fmt{{true, false, false, false}};
-  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err});
   auto* expect = R"(file.name:1:14: purr
 file.name:2:14: grrr
-file.name:3:16 abc123: hiss
-file.name:4:16: nothing)";
+file.name:3:16 abc123: hiss)";
   ASSERT_EQ(expect, got);
 }
 
 TEST_F(DiagFormatterTest, WithSeverity) {
   Formatter fmt{{false, true, false, false}};
-  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err});
   auto* expect = R"(1:14 info: purr
 2:14 warning: grrr
-3:16 error abc123: hiss
-4:16 fatal: nothing)";
+3:16 error abc123: hiss)";
   ASSERT_EQ(expect, got);
 }
 
 TEST_F(DiagFormatterTest, WithLine) {
   Formatter fmt{{false, false, true, false}};
-  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err});
   auto* expect = R"(1:14: purr
 the cat says meow
              ^
@@ -107,17 +106,13 @@ the dog says woof
 3:16 abc123: hiss
 the snake says quack
                ^^^^^
-
-4:16: nothing
-the snail says ???
-               ^^^
 )";
   ASSERT_EQ(expect, got);
 }
 
 TEST_F(DiagFormatterTest, BasicWithFileSeverityLine) {
   Formatter fmt{{true, true, true, false}};
-  auto got = fmt.format(List{diag_info, diag_warn, diag_err, diag_fatal});
+  auto got = fmt.format(List{diag_info, diag_warn, diag_err});
   auto* expect = R"(file.name:1:14 info: purr
 the cat says meow
              ^
@@ -129,10 +124,6 @@ the dog says woof
 file.name:3:16 error abc123: hiss
 the snake says quack
                ^^^^^
-
-file.name:4:16 fatal: nothing
-the snail says ???
-               ^^^
 )";
   ASSERT_EQ(expect, got);
 }
@@ -150,6 +141,42 @@ the snake says quack
 ^^^^^^^^^^^^^^^^^^^^
 the snail says ???
 ^^^^^^^^^^^^^^
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(DiagFormatterTest, ICE) {
+  Formatter fmt{{}};
+  auto got = fmt.format(List{diag_ice});
+  auto* expect = R"(file.name:4:16 internal compiler error: unreachable
+the snail says ???
+               ^^^
+
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(DiagFormatterTest, Fatal) {
+  Formatter fmt{{}};
+  auto got = fmt.format(List{diag_fatal});
+  auto* expect = R"(file.name:4:16 fatal: nothing
+the snail says ???
+               ^^^
+
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+
 )";
   ASSERT_EQ(expect, got);
 }

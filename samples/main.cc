@@ -28,6 +28,13 @@
 
 namespace {
 
+[[noreturn]]
+void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
+  auto printer = tint::diag::Printer::create(stderr, true);
+  tint::diag::Formatter{}.format(diagnostics, printer.get());
+  exit(1);
+}
+
 enum class Format {
   kNone = -1,
   kSpirv,
@@ -418,6 +425,8 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 int main(int argc, const char** argv) {
   std::vector<std::string> args(argv, argv + argc);
   Options options;
+
+  tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
   if (!ParseArgs(args, &options)) {
     std::cerr << "Failed to parse arguments." << std::endl;

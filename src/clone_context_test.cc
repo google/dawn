@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 #include "src/program_builder.h"
 
@@ -257,33 +257,29 @@ TEST(CloneContext, CloneWithInsertBefore) {
 }
 
 TEST(CloneContext, CloneWithReplace_WithNotANode) {
-  ProgramBuilder builder;
-  auto* original_root = builder.create<Node>("root");
-  original_root->a = builder.create<Node>("a");
-  original_root->b = builder.create<Node>("b");
-  original_root->c = builder.create<Node>("c");
-  Program original(std::move(builder));
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder builder;
+        auto* original_root = builder.create<Node>("root");
+        original_root->a = builder.create<Node>("a");
+        original_root->b = builder.create<Node>("b");
+        original_root->c = builder.create<Node>("c");
+        Program original(std::move(builder));
 
-  //                          root
-  //        ╭──────────────────┼──────────────────╮
-  //       (a)                (b)                (c)
-  //                        Replaced
+        //                          root
+        //        ╭──────────────────┼──────────────────╮
+        //       (a)                (b)                (c)
+        //                        Replaced
 
-  ProgramBuilder cloned;
-  auto* replacement = cloned.create<NotANode>();
+        ProgramBuilder cloned;
+        auto* replacement = cloned.create<NotANode>();
 
-  CloneContext ctx(&cloned, &original);
-  ctx.Replace(original_root->b, replacement);
+        CloneContext ctx(&cloned, &original);
+        ctx.Replace(original_root->b, replacement);
 
-#ifndef NDEBUG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wused-but-marked-unused"
-#pragma clang diagnostic ignored "-Wcovered-switch-default"
-
-  EXPECT_DEATH_IF_SUPPORTED(ctx.Clone(original_root), "");
-
-#pragma clang diagnostic pop
-#endif  // NDEBUG
+        ctx.Clone(original_root);
+      },
+      "internal compiler error");
 }
 
 }  // namespace

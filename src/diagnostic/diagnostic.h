@@ -15,6 +15,7 @@
 #ifndef SRC_DIAGNOSTIC_DIAGNOSTIC_H_
 #define SRC_DIAGNOSTIC_DIAGNOSTIC_H_
 
+#include <cassert>
 #include <initializer_list>
 #include <string>
 #include <utility>
@@ -26,7 +27,7 @@ namespace tint {
 namespace diag {
 
 /// Severity is an enumerator of diagnostic severities.
-enum class Severity { Info, Warning, Error, Fatal };
+enum class Severity { Info, Warning, Error, InternalCompilerError, Fatal };
 
 /// @return true iff `a` is more than, or of equal severity to `b`
 inline bool operator>=(Severity a, Severity b) {
@@ -118,6 +119,17 @@ class List {
     add(std::move(error));
   }
 
+  /// adds an internal compiler error message to the end of this list.
+  /// @param err_msg the error message
+  /// @param source the source of the internal compiler error
+  void add_ice(const std::string& err_msg, const Source& source) {
+    diag::Diagnostic ice{};
+    ice.severity = diag::Severity::InternalCompilerError;
+    ice.source = source;
+    ice.message = err_msg;
+    add(std::move(ice));
+  }
+
   /// @returns true iff the diagnostic list contains errors diagnostics (or of
   /// higher severity).
   bool contains_errors() const { return error_count_ > 0; }
@@ -129,6 +141,9 @@ class List {
   iterator begin() const { return entries_.begin(); }
   /// @returns the last diagnostic in the list.
   iterator end() const { return entries_.end(); }
+
+  /// @returns a formatted string of all the diagnostics in this list.
+  std::string str() const;
 
  private:
   std::vector<Diagnostic> entries_;

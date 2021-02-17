@@ -15,6 +15,7 @@
 #include "src/ast/intrinsic_texture_helper_test.h"
 
 #include "src/ast/type_constructor_expression.h"
+#include "src/debug.h"
 #include "src/program_builder.h"
 #include "src/type/access_control_type.h"
 #include "src/type/depth_texture_type.h"
@@ -146,7 +147,7 @@ type::Type* TextureOverloadCase::resultVectorComponentType(
       return b->ty.i32();
   }
 
-  assert(false /* unreachable */);
+  TINT_UNREACHABLE(b->Diagnostics());
   return nullptr;
 }
 
@@ -186,7 +187,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
     }
   }
 
-  assert(false /* unreachable */);
+  TINT_UNREACHABLE(b->Diagnostics());
   return nullptr;
 }
 

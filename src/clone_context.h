@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/castable.h"
+#include "src/debug.h"
 #include "src/source.h"
 #include "src/symbol.h"
 #include "src/traits.h"
@@ -301,13 +302,18 @@ class CloneContext {
   }
 
   /// Cast `obj` from type `FROM` to type `TO`, returning the cast object.
-  /// Asserts if the cast failed.
+  /// Reports an internal compiler error if the cast failed.
   template <typename TO, typename FROM>
   TO* CheckedCast(FROM* obj) {
     TO* cast = obj->template As<TO>();
-    assert(cast /* cloned object was not of the expected type */);
+    if (!cast) {
+      TINT_ICE(Diagnostics(), "Cloned object was not of the expected type");
+    }
     return cast;
   }
+
+  /// @returns the diagnostic list of #dst
+  diag::List& Diagnostics() const;
 
   /// A vector of Cloneable*
   using CloneableList = std::vector<Cloneable*>;

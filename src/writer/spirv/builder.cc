@@ -57,6 +57,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/debug.h"
 #include "src/program.h"
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
@@ -2408,7 +2409,8 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
       break;
     }
     default:
-      break;  // unreachable
+      TINT_UNREACHABLE(builder_.Diagnostics());
+      return false;
   }
 
   if (auto* offset = arg(Usage::kOffset)) {

@@ -33,6 +33,8 @@ const char* to_str(Severity severity) {
       return "warning";
     case Severity::Error:
       return "error";
+    case Severity::InternalCompilerError:
+      return "internal compiler error";
     case Severity::Fatal:
       return "fatal";
   }
@@ -112,6 +114,7 @@ Formatter::Formatter(const Style& style) : style_(style) {}
 void Formatter::format(const List& list, Printer* printer) const {
   State state{printer};
 
+  bool please_report_bug = false;
   bool first = true;
   for (auto diag : list) {
     state.set_style({});
@@ -120,7 +123,23 @@ void Formatter::format(const List& list, Printer* printer) const {
     }
     format(diag, state);
     first = false;
+
+    if (static_cast<int>(diag.severity) > static_cast<int>(Severity::Error)) {
+      please_report_bug = true;
+    }
   }
+  if (please_report_bug) {
+    state.set_style({Color::kRed, true});
+    state << R"(
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+)";
+  }
+
   if (style_.print_newline_at_end) {
     state.newline();
   }
@@ -154,14 +173,17 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
 
   Color severity_color = Color::kDefault;
   switch (diag.severity) {
+    case Severity::Info:
+      break;
     case Severity::Warning:
       severity_color = Color::kYellow;
       break;
     case Severity::Error:
-    case Severity::Fatal:
       severity_color = Color::kRed;
       break;
-    default:
+    case Severity::Fatal:
+    case Severity::InternalCompilerError:
+      severity_color = Color::kMagenta;
       break;
   }
   if (style_.print_severity) {

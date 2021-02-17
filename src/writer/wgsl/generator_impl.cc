@@ -58,6 +58,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/debug.h"
 #include "src/program.h"
 #include "src/semantic/function.h"
 #include "src/semantic/variable.h"
@@ -120,7 +121,8 @@ bool GeneratorImpl::Generate(const ast::Function* entry) {
         return false;
       }
     } else {
-      assert(false /* unreachable */);
+      TINT_UNREACHABLE(diagnostics_);
+      return false;
     }
 
     if (decl != program_->AST().GlobalDeclarations().back()) {
@@ -136,7 +138,7 @@ bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
   auto* func =
       program_->AST().Functions().Find(program_->Symbols().Get(name), stage);
   if (func == nullptr) {
-    error_ = "Unable to find requested entry point: " + name;
+    diagnostics_.add_error("Unable to find requested entry point: " + name);
     return false;
   }
   return Generate(func);
@@ -155,7 +157,7 @@ bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
       return false;
     }
   } else {
-    error_ = "unknown constructed type: " + ty->type_name();
+    diagnostics_.add_error("unknown constructed type: " + ty->type_name());
     return false;
   }
 
@@ -188,7 +190,7 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
     return EmitUnaryOp(u);
   }
 
-  error_ = "unknown expression type";
+  diagnostics_.add_error("unknown expression type");
   return false;
 }
 
@@ -300,7 +302,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {
     out_ << ul->value() << "u";
   } else {
-    error_ = "unknown literal type";
+    diagnostics_.add_error("unknown literal type");
     return false;
   }
   return true;
@@ -360,7 +362,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 bool GeneratorImpl::EmitImageFormat(const type::ImageFormat fmt) {
   switch (fmt) {
     case type::ImageFormat::kNone:
-      error_ = "unknown image format";
+      diagnostics_.add_error("unknown image format");
       return false;
     default:
       out_ << fmt;
@@ -379,7 +381,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
     } else if (ac->IsReadWrite()) {
       out_ << "read_write";
     } else {
-      error_ = "invalid access control";
+      diagnostics_.add_error("invalid access control");
       return false;
     }
     out_ << ")]]" << std::endl;
@@ -444,7 +446,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
     } else if (texture->Is<type::StorageTexture>()) {
       out_ << "storage_";
     } else {
-      error_ = "unknown texture type";
+      diagnostics_.add_error("unknown texture type");
       return false;
     }
 
@@ -471,7 +473,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
         out_ << "cube_array";
         break;
       default:
-        error_ = "unknown texture dimension";
+        diagnostics_.add_error("unknown texture dimension");
         return false;
     }
 
@@ -506,7 +508,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
   } else if (type->Is<type::Void>()) {
     out_ << "void";
   } else {
-    error_ = "unknown type in EmitType: " + type->type_name();
+    diagnostics_.add_error("unknown type in EmitType: " + type->type_name());
     return false;
   }
 
@@ -605,7 +607,7 @@ bool GeneratorImpl::EmitVariableDecorations(const semantic::Variable* var) {
     } else if (auto* constant = deco->As<ast::ConstantIdDecoration>()) {
       out_ << "constant_id(" << constant->value() << ")";
     } else {
-      error_ = "unknown variable decoration";
+      diagnostics_.add_error("unknown variable decoration");
       return false;
     }
   }
@@ -678,7 +680,7 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
       out_ << "%";
       break;
     case ast::BinaryOp::kNone:
-      error_ = "missing binary operation type";
+      diagnostics_.add_error("missing binary operation type");
       return false;
   }
   out_ << " ";
@@ -789,7 +791,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(v->variable());
   }
 
-  error_ = "unknown statement type: " + program_->str(stmt);
+  diagnostics_.add_error("unknown statement type: " + program_->str(stmt));
   return false;
 }
 
