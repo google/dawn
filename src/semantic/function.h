@@ -48,18 +48,21 @@ class Function : public Castable<Function, CallTarget> {
   };
 
   /// Constructor
-  /// @param ast the ast::Function
+  /// @param declaration the ast::Function
   /// @param referenced_module_vars the referenced module variables
   /// @param local_referenced_module_vars the locally referenced module
   /// variables
   /// @param ancestor_entry_points the ancestor entry points
-  Function(ast::Function* ast,
+  Function(ast::Function* declaration,
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,
            std::vector<Symbol> ancestor_entry_points);
 
   /// Destructor
   ~Function() override;
+
+  /// @returns the ast::Function declaration
+  ast::Function* Declaration() const { return declaration_; }
 
   /// Note: If this function calls other functions, the return will also include
   /// all of the referenced variables from the callees.
@@ -143,6 +146,7 @@ class Function : public Castable<Function, CallTarget> {
   const std::vector<std::pair<const Variable*, BindingInfo>>
   ReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
+  ast::Function* const declaration_;
   std::vector<const Variable*> const referenced_module_vars_;
   std::vector<const Variable*> const local_referenced_module_vars_;
   std::vector<Symbol> const ancestor_entry_points_;

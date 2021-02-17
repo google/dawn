@@ -31,6 +31,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
+#include "src/semantic/function.h"
 #include "src/semantic/intrinsic.h"
 #include "src/semantic/variable.h"
 #include "src/type/alias_type.h"
@@ -46,225 +47,6 @@
 #include "src/type/void_type.h"
 
 namespace tint {
-
-namespace {
-
-using IntrinsicType = semantic::IntrinsicType;
-
-enum class IntrinsicDataType {
-  kMixed,
-  kFloatOrIntScalarOrVector,
-  kFloatScalarOrVector,
-  kIntScalarOrVector,
-  kFloatVector,
-  kFloatScalar,
-  kMatrix,
-  kBoolVector,
-  kBoolScalar,
-  kBoolScalarOrVector,
-};
-
-struct IntrinsicData {
-  IntrinsicType intrinsic;
-  uint32_t param_count;
-  IntrinsicDataType data_type;
-  uint32_t vector_size;
-  bool all_types_match;
-};
-
-// Note, this isn't all the intrinsics. Some are handled specially before
-// we get to the generic code. See the ValidateCallExpr code below.
-constexpr const IntrinsicData kIntrinsicData[] = {
-    {IntrinsicType::kAbs, 1, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
-     true},
-    {IntrinsicType::kAcos, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kAll, 1, IntrinsicDataType::kBoolVector, 0, false},
-    {IntrinsicType::kAny, 1, IntrinsicDataType::kBoolVector, 0, false},
-    {IntrinsicType::kArrayLength, 1, IntrinsicDataType::kMixed, 0, false},
-    {IntrinsicType::kAsin, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kAtan, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kAtan2, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kCeil, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kClamp, 3, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
-     true},
-    {IntrinsicType::kCos, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kCosh, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kCountOneBits, 1, IntrinsicDataType::kIntScalarOrVector, 0,
-     true},
-    {IntrinsicType::kCross, 2, IntrinsicDataType::kFloatVector, 3, true},
-    {IntrinsicType::kDeterminant, 1, IntrinsicDataType::kMatrix, 0, false},
-    {IntrinsicType::kDistance, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
-     false},
-    {IntrinsicType::kDot, 2, IntrinsicDataType::kFloatVector, 0, false},
-    {IntrinsicType::kDpdx, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kDpdxCoarse, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kDpdxFine, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kDpdy, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kDpdyCoarse, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kDpdyFine, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kExp, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kExp2, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kFaceForward, 3, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kFloor, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kFma, 3, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kFract, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kFrexp, 2, IntrinsicDataType::kMixed, 0, false},
-    {IntrinsicType::kFwidth, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kFwidthCoarse, 1, IntrinsicDataType::kFloatScalarOrVector,
-     0, true},
-    {IntrinsicType::kFwidthFine, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kInverseSqrt, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kLdexp, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kLength, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     false},
-    {IntrinsicType::kLog, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kLog2, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kMax, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
-     true},
-    {IntrinsicType::kMin, 2, IntrinsicDataType::kFloatOrIntScalarOrVector, 0,
-     true},
-    {IntrinsicType::kMix, 3, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kModf, 2, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kNormalize, 1, IntrinsicDataType::kFloatVector, 0, true},
-    {IntrinsicType::kPack4x8Snorm, 1, IntrinsicDataType::kFloatVector, 4,
-     false},
-    {IntrinsicType::kPack4x8Unorm, 1, IntrinsicDataType::kFloatVector, 4,
-     false},
-    {IntrinsicType::kPack2x16Snorm, 1, IntrinsicDataType::kFloatVector, 2,
-     false},
-    {IntrinsicType::kPack2x16Unorm, 1, IntrinsicDataType::kFloatVector, 2,
-     false},
-    {IntrinsicType::kPack2x16Float, 1, IntrinsicDataType::kFloatVector, 2,
-     false},
-    {IntrinsicType::kPow, 2, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kReflect, 2, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kReverseBits, 1, IntrinsicDataType::kIntScalarOrVector, 0,
-     true},
-    {IntrinsicType::kRound, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kSelect, 3, IntrinsicDataType::kMixed, 0, false},
-    {IntrinsicType::kSign, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kSin, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kSinh, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kSmoothStep, 3, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-    {IntrinsicType::kSqrt, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kStep, 2, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kTan, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kTanh, 1, IntrinsicDataType::kFloatScalarOrVector, 0, true},
-    {IntrinsicType::kTrunc, 1, IntrinsicDataType::kFloatScalarOrVector, 0,
-     true},
-};
-
-constexpr const uint32_t kIntrinsicDataCount =
-    sizeof(kIntrinsicData) / sizeof(IntrinsicData);
-
-bool IsValidType(type::Type* type,
-                 const Source& source,
-                 const std::string& name,
-                 const IntrinsicDataType& data_type,
-                 uint32_t vector_size,
-                 ValidatorImpl* impl) {
-  type = type->UnwrapPtrIfNeeded();
-  switch (data_type) {
-    case IntrinsicDataType::kFloatOrIntScalarOrVector:
-      if (!type->is_float_scalar_or_vector() &&
-          !type->is_integer_scalar_or_vector()) {
-        impl->add_error(source,
-                        "incorrect type for " + name +
-                            ". Requires int or float, scalar or vector value");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kFloatScalarOrVector:
-      if (!type->is_float_scalar_or_vector()) {
-        impl->add_error(source, "incorrect type for " + name +
-                                    ". Requires float scalar or vector value");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kIntScalarOrVector:
-      if (!type->is_integer_scalar_or_vector()) {
-        impl->add_error(source, "incorrect type for " + name +
-                                    ". Requires int scalar or vector value");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kFloatVector:
-      if (!type->is_float_vector()) {
-        impl->add_error(source, "incorrect type for " + name +
-                                    ". Requires float vector value");
-        return false;
-      }
-      if (vector_size > 0 && vector_size != type->As<type::Vector>()->size()) {
-        impl->add_error(source, "incorrect vector size for " + name +
-                                    ". Requires " +
-                                    std::to_string(vector_size) + " elements");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kFloatScalar:
-      if (!type->Is<type::F32>()) {
-        impl->add_error(source, "incorrect type for " + name +
-                                    ". Requires float scalar value");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kMatrix:
-      if (!type->Is<type::Matrix>()) {
-        impl->add_error(
-            source, "incorrect type for " + name + ". Requires matrix value");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kBoolVector:
-      if (!type->is_bool_vector()) {
-        impl->add_error(source, "incorrect type for " + name +
-                                    ". Requires bool vector value");
-        return false;
-      }
-      if (vector_size > 0 && vector_size != type->As<type::Vector>()->size()) {
-        impl->add_error(source, "incorrect vector size for " + name +
-                                    ". Requires " +
-                                    std::to_string(vector_size) + " elements");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kBoolScalar:
-      if (!type->Is<type::Bool>()) {
-        impl->add_error(source, "incorrect type for " + name +
-                                    ". Requires bool scalar value");
-        return false;
-      }
-      break;
-    case IntrinsicDataType::kBoolScalarOrVector:
-      if (!type->is_bool_scalar_or_vector()) {
-        impl->add_error(source, "incorrect type for " + name +
-                                    ". Requires bool scalar or vector value");
-        return false;
-      }
-      break;
-    default:
-      break;
-  }
-
-  return true;
-}
-
-}  // namespace
 
 ValidatorImpl::ValidatorImpl(const Program* program) : program_(program) {}
 
@@ -286,6 +68,13 @@ void ValidatorImpl::add_error(const Source& src, const std::string& msg) {
 }
 
 bool ValidatorImpl::Validate() {
+  if (!program_->IsValid()) {
+    // If we're attempting to validate an invalid program, fail with the
+    // program's diagnostics.
+    diags_.add(program_->Diagnostics());
+    return false;
+  }
+
   // Validate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
     if (auto* ty = decl->As<type::Type>()) {
@@ -643,253 +432,26 @@ bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
     return false;
   }
 
-  if (auto* intrinsic = call->Target()->As<semantic::Intrinsic>()) {
-    const IntrinsicData* data = nullptr;
-    for (uint32_t i = 0; i < kIntrinsicDataCount; ++i) {
-      if (intrinsic->Type() == kIntrinsicData[i].intrinsic) {
-        data = &kIntrinsicData[i];
-        break;
-      }
-    }
+  auto* target = call->Target();
 
-    if (data != nullptr) {
-      std::string builtin = intrinsic->str();
-      if (expr->params().size() != data->param_count) {
-        add_error(expr->source(),
-                  "incorrect number of parameters for " + builtin +
-                      " expected " + std::to_string(data->param_count) +
-                      " got " + std::to_string(expr->params().size()));
-        return false;
-      }
+  if (target->Is<semantic::Intrinsic>()) {
+    // TODO(bclayton): Add intrinsic validation checks here.
+    return true;
+  }
 
-      if (data->all_types_match) {
-        // Check that the type is an acceptable one.
-        if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
-                         data->data_type, data->vector_size, this)) {
-          return false;
-        }
-
-        // Check that all params match the result type.
-        for (uint32_t i = 0; i < data->param_count; ++i) {
-          if (program_->TypeOf(expr)->UnwrapPtrIfNeeded() !=
-              program_->TypeOf(expr->params()[i])->UnwrapPtrIfNeeded()) {
-            add_error(expr->params()[i]->source(),
-                      "expected parameter " + std::to_string(i) +
-                          "'s unwrapped type to match result type for " +
-                          builtin);
-            return false;
-          }
-        }
-      } else {
-        if (data->data_type != IntrinsicDataType::kMixed) {
-          auto* p0 = expr->params()[0];
-          if (!IsValidType(program_->TypeOf(p0), p0->source(), builtin,
-                           data->data_type, data->vector_size, this)) {
-            return false;
-          }
-
-          // Check that parameters are valid types.
-          for (uint32_t i = 1; i < expr->params().size(); ++i) {
-            if (program_->TypeOf(p0)->UnwrapPtrIfNeeded() !=
-                program_->TypeOf(expr->params()[i])->UnwrapPtrIfNeeded()) {
-              add_error(expr->source(),
-                        "parameter " + std::to_string(i) +
-                            "'s unwrapped type must match parameter 0's type");
-              return false;
-            }
-          }
-        } else {
-          // Special cases.
-          if (data->intrinsic == IntrinsicType::kFrexp) {
-            auto* p0 = expr->params()[0];
-            auto* p1 = expr->params()[1];
-            auto* t0 = program_->TypeOf(p0)->UnwrapPtrIfNeeded();
-            auto* t1 = program_->TypeOf(p1)->UnwrapPtrIfNeeded();
-            if (!IsValidType(t0, p0->source(), builtin,
-                             IntrinsicDataType::kFloatScalarOrVector, 0,
-                             this)) {
-              return false;
-            }
-            if (!IsValidType(t1, p1->source(), builtin,
-                             IntrinsicDataType::kIntScalarOrVector, 0, this)) {
-              return false;
-            }
-
-            if (t0->is_scalar()) {
-              if (!t1->is_scalar()) {
-                add_error(
-                    expr->source(),
-                    "incorrect types for " + builtin +
-                        ". Parameters must be matched scalars or vectors");
-                return false;
-              }
-            } else {
-              if (t1->is_integer_scalar()) {
-                add_error(
-                    expr->source(),
-                    "incorrect types for " + builtin +
-                        ". Parameters must be matched scalars or vectors");
-                return false;
-              }
-              const auto* v0 = t0->As<type::Vector>();
-              const auto* v1 = t1->As<type::Vector>();
-              if (v0->size() != v1->size()) {
-                add_error(expr->source(),
-                          "incorrect types for " + builtin +
-                              ". Parameter vector sizes must match");
-                return false;
-              }
-            }
-          }
-
-          if (data->intrinsic == IntrinsicType::kSelect) {
-            auto* type = program_->TypeOf(expr);
-            auto* t0 = program_->TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
-            auto* t1 = program_->TypeOf(expr->params()[1])->UnwrapPtrIfNeeded();
-            auto* t2 = program_->TypeOf(expr->params()[2])->UnwrapPtrIfNeeded();
-            if (!type->is_scalar() && !type->Is<type::Vector>()) {
-              add_error(expr->source(),
-                        "incorrect type for " + builtin +
-                            ". Requires bool, int or float scalar or vector");
-              return false;
-            }
-
-            if (type != t0 || type != t1) {
-              add_error(expr->source(),
-                        "incorrect type for " + builtin +
-                            ". Value parameter types must match result type");
-              return false;
-            }
-
-            if (!t2->is_bool_scalar_or_vector()) {
-              add_error(expr->params()[2]->source(),
-                        "incorrect type for " + builtin +
-                            ". Selector must be a bool scalar or vector value");
-              return false;
-            }
-
-            if (type->Is<type::Vector>()) {
-              auto size = type->As<type::Vector>()->size();
-              if (t2->is_scalar() || size != t2->As<type::Vector>()->size()) {
-                add_error(expr->params()[2]->source(),
-                          "incorrect type for " + builtin +
-                              ". Selector must be a vector with the same "
-                              "number of elements as the result type");
-                return false;
-              }
-            } else {
-              if (!t2->is_scalar()) {
-                add_error(expr->params()[2]->source(),
-                          "incorrect type for " + builtin +
-                              ". Selector must be a bool scalar to match "
-                              "scalar result type");
-                return false;
-              }
-            }
-          }
-
-          if (data->intrinsic == IntrinsicType::kArrayLength) {
-            if (!program_->TypeOf(expr)->UnwrapPtrIfNeeded()->Is<type::U32>()) {
-              add_error(
-                  expr->source(),
-                  "incorrect type for " + builtin +
-                      ". Result type must be an unsigned int scalar value");
-              return false;
-            }
-
-            auto* p0 = program_->TypeOf(expr->params()[0])->UnwrapPtrIfNeeded();
-            if (!p0->Is<type::Array>() ||
-                !p0->As<type::Array>()->IsRuntimeArray()) {
-              add_error(expr->params()[0]->source(),
-                        "incorrect type for " + builtin +
-                            ". Input must be a runtime array");
-              return false;
-            }
-          }
-        }
-
-        // Result types don't match parameter types.
-        if (data->intrinsic == IntrinsicType::kAll ||
-            data->intrinsic == IntrinsicType::kAny) {
-          if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
-                           IntrinsicDataType::kBoolScalar, 0, this)) {
-            return false;
-          }
-        }
-
-        if (data->intrinsic == IntrinsicType::kDot) {
-          if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
-                           IntrinsicDataType::kFloatScalar, 0, this)) {
-            return false;
-          }
-        }
-
-        if (semantic::IsDataPackingIntrinsic(data->intrinsic)) {
-          if (!program_->TypeOf(expr)->Is<type::U32>()) {
-            add_error(expr->source(),
-                      "incorrect type for " + builtin +
-                          ". Result type must be an unsigned int scalar");
-            return false;
-          }
-        }
-
-        if (data->intrinsic == IntrinsicType::kLength ||
-            data->intrinsic == IntrinsicType::kDistance ||
-            data->intrinsic == IntrinsicType::kDeterminant) {
-          if (!IsValidType(program_->TypeOf(expr), expr->source(), builtin,
-                           IntrinsicDataType::kFloatScalar, 0, this)) {
-            return false;
-          }
-        }
-
-        // Must be a square matrix.
-        if (data->intrinsic == IntrinsicType::kDeterminant) {
-          const auto* matrix =
-              program_->TypeOf(expr->params()[0])->As<type::Matrix>();
-          if (matrix->rows() != matrix->columns()) {
-            add_error(
-                expr->params()[0]->source(),
-                "incorrect type for " + builtin + ". Requires a square matrix");
-            return false;
-          }
-        }
-      }
-
-      // Last parameter must be a pointer.
-      if (data->intrinsic == IntrinsicType::kFrexp ||
-          data->intrinsic == IntrinsicType::kModf) {
-        auto* last_param = expr->params()[data->param_count - 1];
-        if (!program_->TypeOf(last_param)->Is<type::Pointer>()) {
-          add_error(last_param->source(), "incorrect type for " + builtin +
-                                              ". Requires pointer value");
-          return false;
-        }
-      }
+  if (auto* func = target->As<semantic::Function>()) {
+    if (current_function_ == func->Declaration()) {
+      add_error(expr->source(), "v-0004",
+                "recursion is not allowed: '" +
+                    program_->Symbols().NameFor(current_function_->symbol()) +
+                    "'");
+      return false;
     }
     return true;
   }
 
-  if (auto* ident = expr->func()->As<ast::IdentifierExpression>()) {
-    auto symbol = ident->symbol();
-    if (!function_stack_.has(symbol)) {
-      add_error(expr->source(), "v-0005",
-                "function must be declared before use: '" +
-                    program_->Symbols().NameFor(symbol) + "'");
-      return false;
-    }
-    if (symbol == current_function_->symbol()) {
-      add_error(expr->source(), "v-0004",
-                "recursion is not allowed: '" +
-                    program_->Symbols().NameFor(symbol) + "'");
-      return false;
-    }
-
-  } else {
-    add_error(expr->source(), "Invalid function call expression");
-    return false;
-  }
-
-  return true;
+  add_error(expr->source(), "Invalid function call expression");
+  return false;
 }
 
 bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
