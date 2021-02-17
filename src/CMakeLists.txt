@@ -269,6 +269,7 @@ set(TINT_LIB_SRCS
   type/vector_type.h
   type/void_type.cc
   type/void_type.h
+  utils/unique_vector.h
   validator/validator.cc
   validator/validator.h
   validator/validator_impl.cc
@@ -492,6 +493,7 @@ if(${TINT_BUILD_TESTS})
     type/type_manager_test.cc
     type/u32_type_test.cc
     type/vector_type_test.cc
+    utils/unique_vector_test.cc
     validator/validator_builtins_test.cc
     validator/validator_control_block_test.cc
     validator/validator_function_test.cc

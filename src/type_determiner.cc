@@ -125,9 +125,9 @@ void TypeDeterminer::set_referenced_from_function_if_needed(VariableInfo* var,
     return;
   }
 
-  current_function_->referenced_module_vars.Add(var);
+  current_function_->referenced_module_vars.add(var);
   if (local) {
-    current_function_->local_referenced_module_vars.Add(var);
+    current_function_->local_referenced_module_vars.add(var);
   }
 }
 
@@ -172,7 +172,7 @@ bool TypeDeterminer::DetermineInternal() {
 
 void TypeDeterminer::set_entry_points(const Symbol& fn_sym, Symbol ep_sym) {
   auto* info = symbol_to_function_.at(fn_sym);
-  info->ancestor_entry_points.Add(ep_sym);
+  info->ancestor_entry_points.add(ep_sym);
 
   for (const auto& callee : caller_to_callee_[fn_sym]) {
     set_entry_points(callee, ep_sym);

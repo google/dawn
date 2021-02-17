@@ -28,6 +28,7 @@
 #include "src/scope_stack.h"
 #include "src/semantic/intrinsic.h"
 #include "src/type/storage_texture_type.h"
+#include "src/utils/unique_vector.h"
 
 namespace tint {
 
@@ -78,26 +79,6 @@ class TypeDeterminer {
   static semantic::IntrinsicType MatchIntrinsicType(const std::string& name);
 
  private:
-  template <typename T>
-  struct UniqueVector {
-    using ConstIterator = typename std::vector<T>::const_iterator;
-
-    void Add(const T& val) {
-      if (set.count(val) == 0) {
-        vector.emplace_back(val);
-        set.emplace(val);
-      }
-    }
-    size_t size() const { return vector.size(); }
-    ConstIterator begin() const { return vector.begin(); }
-    ConstIterator end() const { return vector.end(); }
-    operator const std::vector<T> &() const { return vector; }
-
-   private:
-    std::vector<T> vector;
-    std::unordered_set<T> set;
-  };
-
   /// Structure holding semantic information about a variable.
   /// Used to build the semantic::Variable nodes at the end of resolving.
   struct VariableInfo {
