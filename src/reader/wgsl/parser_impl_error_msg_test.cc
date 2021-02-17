@@ -526,17 +526,17 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteral) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
-  uint32_t kMaxConstExprDepth = 128;
+  uint32_t kMaxDepth = 128;
 
   std::stringstream src;
   std::stringstream mkr;
   src << "const i : i32 = ";
   mkr << "                ";
-  for (size_t i = 0; i < kMaxConstExprDepth + 8; i++) {
+  for (size_t i = 0; i < kMaxDepth + 8; i++) {
     src << "f32(";
-    if (i < kMaxConstExprDepth + 1) {
+    if (i < kMaxDepth) {
       mkr << "    ";
-    } else if (i == kMaxConstExprDepth + 1) {
+    } else if (i == kMaxDepth) {
       mkr << "^^^";
     }
   }
@@ -546,7 +546,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
   }
   src << ";";
   std::stringstream err;
-  err << "test.wgsl:1:533 error: max const_expr depth reached\n"
+  err << "test.wgsl:1:529 error: maximum parser recursive depth reached\n"
       << src.str() << "\n"
       << mkr.str() << "\n";
   EXPECT(src.str().c_str(), err.str().c_str());

@@ -144,7 +144,7 @@ TEST_F(ParserImplTest, ConstExpr_Recursion) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
   ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:517: max const_expr depth reached");
+  EXPECT_EQ(p->error(), "1:517: maximum parser recursive depth reached");
 }
 
 }  // namespace

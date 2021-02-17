@@ -812,9 +812,6 @@ class ParserImpl {
   Expect<type::Type*> expect_type_decl_array(ast::ArrayDecorationList decos);
   Expect<type::Type*> expect_type_decl_matrix(Token t);
 
-  Expect<ast::ConstructorExpression*> expect_const_expr_internal(
-      uint32_t depth);
-
   Expect<type::Type*> expect_type(const std::string& use);
 
   Maybe<ast::Statement*> non_block_statement();
@@ -834,6 +831,7 @@ class ParserImpl {
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;
   bool synchronized_ = true;
+  uint32_t sync_depth_ = 0;
   std::vector<Token::Type> sync_tokens_;
   int silence_errors_ = 0;
   std::unordered_map<std::string, type::Type*> registered_constructs_;

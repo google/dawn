@@ -83,10 +83,10 @@ using Expect = ParserImpl::Expect<T>;
 template <typename T>
 using Maybe = ParserImpl::Maybe<T>;
 
-/// Controls the maximum number of times we'll call into the const_expr function
+/// Controls the maximum number of times we'll call into the sync() function
 /// from itself. This is to guard against stack overflow when there is an
-/// excessive number of type constructors inside the const_expr.
-constexpr uint32_t kMaxConstExprDepth = 128;
+/// excessive number of blocks.
+constexpr uint32_t kMaxSyncDepth = 128;
 
 /// The maximum number of tokens to look ahead to try and sync the
 /// parser on error.
@@ -2709,16 +2709,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
 //   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
 //   | const_literal
 Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
-  return expect_const_expr_internal(0);
-}
-
-Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr_internal(
-    uint32_t depth) {
   auto t = peek();
-
-  if (depth > kMaxConstExprDepth) {
-    return add_error(t, "max const_expr depth reached");
-  }
 
   auto source = t.source();
 
@@ -2726,21 +2717,21 @@ Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr_internal(
   if (type.errored)
     return Failure::kErrored;
   if (type.matched) {
-    auto params = expect_paren_block(
-        "type constructor", [&]() -> Expect<ast::ExpressionList> {
-          ast::ExpressionList list;
-          auto param = expect_const_expr_internal(depth + 1);
-          if (param.errored)
-            return Failure::kErrored;
-          list.emplace_back(param.value);
-          while (match(Token::Type::kComma)) {
-            param = expect_const_expr_internal(depth + 1);
-            if (param.errored)
-              return Failure::kErrored;
-            list.emplace_back(param.value);
-          }
-          return list;
-        });
+    auto params = expect_paren_block("type constructor",
+                                     [&]() -> Expect<ast::ExpressionList> {
+                                       ast::ExpressionList list;
+                                       auto param = expect_const_expr();
+                                       if (param.errored)
+                                         return Failure::kErrored;
+                                       list.emplace_back(param.value);
+                                       while (match(Token::Type::kComma)) {
+                                         param = expect_const_expr();
+                                         if (param.errored)
+                                           return Failure::kErrored;
+                                         list.emplace_back(param.value);
+                                       }
+                                       return list;
+                                     });
 
     if (params.errored)
       return Failure::kErrored;
@@ -3170,9 +3161,15 @@ T ParserImpl::expect_lt_gt_block(const std::string& use, F&& body) {
 
 template <typename F, typename T>
 T ParserImpl::sync(Token::Type tok, F&& body) {
+  if (sync_depth_ >= kMaxSyncDepth) {
+    return add_error(peek(), "maximum parser recursive depth reached");
+  }
+
   sync_tokens_.push_back(tok);
 
+  ++sync_depth_;
   auto result = body();
+  --sync_depth_;
 
   assert(sync_tokens_.back() == tok);
   sync_tokens_.pop_back();
