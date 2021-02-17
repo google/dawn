@@ -63,6 +63,7 @@ dawn_component("dawn_wire") {
     "ChunkedCommandHandler.h",
     "ChunkedCommandSerializer.cpp",
     "ChunkedCommandSerializer.h",
+    "Wire.cpp",
     "WireClient.cpp",
     "WireDeserializeAllocator.cpp",
     "WireDeserializeAllocator.h",

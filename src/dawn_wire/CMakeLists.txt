@@ -35,6 +35,7 @@ target_sources(dawn_wire PRIVATE
     "ChunkedCommandHandler.h"
     "ChunkedCommandSerializer.cpp"
     "ChunkedCommandSerializer.h"
+    "Wire.cpp"
     "WireClient.cpp"
     "WireDeserializeAllocator.cpp"
     "WireDeserializeAllocator.h"

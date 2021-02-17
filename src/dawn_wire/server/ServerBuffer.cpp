@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "common/Assert.h"
+#include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/server/Server.h"
 
 #include <memory>
@@ -242,11 +243,15 @@ namespace dawn_wire { namespace server {
                 data->readHandle->SerializeInitialDataSize(readData, data->size);
         }
 
-        SerializeCommand(cmd, cmd.readInitialDataInfoLength, [&](char* cmdSpace) {
+        SerializeCommand(cmd, cmd.readInitialDataInfoLength, [&](SerializeBuffer* serializeBuffer) {
             if (isSuccess) {
                 if (isRead) {
+                    if (serializeBuffer->AvailableSize() != cmd.readInitialDataInfoLength) {
+                        return false;
+                    }
                     // Serialize the initialization message into the space after the command.
-                    data->readHandle->SerializeInitialData(readData, data->size, cmdSpace);
+                    data->readHandle->SerializeInitialData(readData, data->size,
+                                                           serializeBuffer->Buffer());
                     // The in-flight map request returned successfully.
                     // Move the ReadHandle so it is owned by the buffer.
                     bufferData->readHandle = std::move(data->readHandle);
@@ -261,6 +266,7 @@ namespace dawn_wire { namespace server {
                         data->size);
                 }
             }
+            return true;
         });
     }
 

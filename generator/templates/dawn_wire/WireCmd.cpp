@@ -201,8 +201,8 @@ namespace {
 
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
-    DAWN_DECLARE_UNUSED void {{Return}}{{name}}Serialize(const {{Return}}{{name}}{{Cmd}}& record, {{Return}}{{name}}Transfer* transfer,
-                           char** buffer
+    DAWN_DECLARE_UNUSED bool {{Return}}{{name}}Serialize(const {{Return}}{{name}}{{Cmd}}& record, {{Return}}{{name}}Transfer* transfer,
+                           SerializeBuffer* buffer
         {%- if record.may_have_dawn_object -%}
             , const ObjectIdProvider& provider
         {%- endif -%}
@@ -223,7 +223,7 @@ namespace {
         {% if record.extensible %}
             if (record.nextInChain != nullptr) {
                 transfer->hasNextInChain = true;
-                SerializeChainedStruct(record.nextInChain, buffer, provider);
+                SERIALIZE_TRY(SerializeChainedStruct(record.nextInChain, buffer, provider));
             } else {
                 transfer->hasNextInChain = false;
             }
@@ -245,10 +245,11 @@ namespace {
                 if (has_{{memberName}})
             {% endif %}
             {
-            transfer->{{memberName}}Strlen = std::strlen(record.{{memberName}});
+                transfer->{{memberName}}Strlen = std::strlen(record.{{memberName}});
 
-            memcpy(*buffer, record.{{memberName}}, transfer->{{memberName}}Strlen);
-            *buffer += transfer->{{memberName}}Strlen;
+                char* stringInBuffer;
+                SERIALIZE_TRY(buffer->NextN(transfer->{{memberName}}Strlen, &stringInBuffer));
+                memcpy(stringInBuffer, record.{{memberName}}, transfer->{{memberName}}Strlen);
             }
         {% endfor %}
 
@@ -263,14 +264,16 @@ namespace {
             {% endif %}
             {
                 size_t memberLength = {{member_length(member, "record.")}};
-                auto memberBuffer = reinterpret_cast<{{member_transfer_type(member)}}*>(*buffer);
-                *buffer += memberLength * {{member_transfer_sizeof(member)}};
+
+                {{member_transfer_type(member)}}* memberBuffer;
+                SERIALIZE_TRY(buffer->NextN(memberLength, &memberBuffer));
 
                 for (size_t i = 0; i < memberLength; ++i) {
                     {{serialize_member(member, "record." + memberName + "[i]", "memberBuffer[i]" )}}
                 }
             }
         {% endfor %}
+        return true;
     }
     DAWN_UNUSED_FUNC({{Return}}{{name}}Serialize);
 
@@ -386,20 +389,21 @@ namespace {
         return size;
     }
 
-    void {{Cmd}}::Serialize(size_t commandSize, char* buffer
+    bool {{Cmd}}::Serialize(size_t commandSize, SerializeBuffer* buffer
         {%- if not is_return -%}
             , const ObjectIdProvider& objectIdProvider
         {%- endif -%}
     ) const {
-        auto transfer = reinterpret_cast<{{Name}}Transfer*>(buffer);
+        {{Name}}Transfer* transfer;
+        SERIALIZE_TRY(buffer->Next(&transfer));
         transfer->commandSize = commandSize;
-        buffer += sizeof({{Name}}Transfer);
 
-        {{Name}}Serialize(*this, transfer, &buffer
+        SERIALIZE_TRY({{Name}}Serialize(*this, transfer, buffer
             {%- if command.may_have_dawn_object -%}
                 , objectIdProvider
             {%- endif -%}
-        );
+        ));
+        return true;
     }
 
     DeserializeResult {{Cmd}}::Deserialize(const volatile char** buffer, size_t* size, DeserializeAllocator* allocator
@@ -429,6 +433,13 @@ namespace dawn_wire {
         } \
     } while (0)
 
+#define SERIALIZE_TRY(EXPR) \
+    do { \
+        if (!(EXPR)) { \
+            return false; \
+        } \
+    } while (0)
+
     ObjectHandle::ObjectHandle() = default;
     ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
         : id(id), generation(generation) {
@@ -454,27 +465,53 @@ namespace dawn_wire {
         return *this;
     }
 
+    template <typename BufferT>
+    template <typename T>
+    bool BufferConsumer<BufferT>::Next(T** data) {
+        if (sizeof(T) > mSize) {
+            return false;
+        }
+
+        *data = reinterpret_cast<T*>(mBuffer);
+        mBuffer += sizeof(T);
+        mSize -= sizeof(T);
+        return true;
+    }
+
+    template <typename BufferT>
+    template <typename T, typename N>
+    bool BufferConsumer<BufferT>::NextN(N count, T** data) {
+        static_assert(std::is_unsigned<N>::value, "|count| argument of NextN must be unsigned.");
+
+        constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
+        if (count > kMaxCountWithoutOverflows) {
+            return false;
+        }
+
+        // Cannot overflow because |count| is not greater than |kMaxCountWithoutOverflows|.
+        size_t totalSize = sizeof(T) * count;
+        if (totalSize > mSize) {
+            return false;
+        }
+
+        *data = reinterpret_cast<T*>(mBuffer);
+        mBuffer += totalSize;
+        mSize -= totalSize;
+        return true;
+    }
     namespace {
 
         // Consumes from (buffer, size) enough memory to contain T[count] and return it in data.
         // Returns FatalError if not enough memory was available
         template <typename T>
         DeserializeResult GetPtrFromBuffer(const volatile char** buffer, size_t* size, size_t count, const volatile T** data) {
-            constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
-            if (count > kMaxCountWithoutOverflows) {
-                return DeserializeResult::FatalError;
+            DeserializeBuffer deserializeBuffer(*buffer, *size);
+            DeserializeResult result = deserializeBuffer.ReadN(count, data);
+            if (result == DeserializeResult::Success) {
+                *buffer = deserializeBuffer.Buffer();
+                *size = deserializeBuffer.AvailableSize();
             }
-
-            size_t totalSize = sizeof(T) * count;
-            if (totalSize > *size) {
-                return DeserializeResult::FatalError;
-            }
-
-            *data = reinterpret_cast<const volatile T*>(*buffer);
-            *buffer += totalSize;
-            *size -= totalSize;
-
-            return DeserializeResult::Success;
+            return result;
         }
 
         // Allocates enough space from allocator to countain T[count] and return it in out.
@@ -496,9 +533,9 @@ namespace dawn_wire {
         }
 
         size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct);
-        void SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
-                                    char** buffer,
-                                    const ObjectIdProvider& provider);
+        DAWN_NO_DISCARD bool SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
+                                                    SerializeBuffer* buffer,
+                                                    const ObjectIdProvider& provider);
         DeserializeResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
                                                    const volatile char** buffer,
                                                    size_t* size,
@@ -538,9 +575,9 @@ namespace dawn_wire {
             return result;
         }
 
-        void SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
-                                    char** buffer,
-                                    const ObjectIdProvider& provider) {
+        DAWN_NO_DISCARD bool SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
+                                                    SerializeBuffer* buffer,
+                                                    const ObjectIdProvider& provider) {
             ASSERT(chainedStruct != nullptr);
             ASSERT(buffer != nullptr);
             do {
@@ -549,16 +586,16 @@ namespace dawn_wire {
                         {% set CType = as_cType(sType.name) %}
                         case {{as_cEnum(types["s type"].name, sType.name)}}: {
 
-                            auto* transfer = reinterpret_cast<{{CType}}Transfer*>(*buffer);
+                            {{CType}}Transfer* transfer;
+                            SERIALIZE_TRY(buffer->Next(&transfer));
                             transfer->chain.sType = chainedStruct->sType;
                             transfer->chain.hasNext = chainedStruct->next != nullptr;
 
-                            *buffer += sizeof({{CType}}Transfer);
-                            {{CType}}Serialize(*reinterpret_cast<{{CType}} const*>(chainedStruct), transfer, buffer
+                            SERIALIZE_TRY({{CType}}Serialize(*reinterpret_cast<{{CType}} const*>(chainedStruct), transfer, buffer
                                 {%- if types[sType.name.get()].may_have_dawn_object -%}
                                 , provider
                                 {%- endif -%}
-                            );
+                            ));
 
                             chainedStruct = chainedStruct->next;
                         } break;
@@ -570,11 +607,10 @@ namespace dawn_wire {
                             dawn::WarningLog() << "Unknown sType " << chainedStruct->sType << " discarded.";
                         }
 
-                        WGPUChainedStructTransfer* transfer = reinterpret_cast<WGPUChainedStructTransfer*>(*buffer);
+                        WGPUChainedStructTransfer* transfer;
+                        SERIALIZE_TRY(buffer->Next(&transfer));
                         transfer->sType = WGPUSType_Invalid;
                         transfer->hasNext = chainedStruct->next != nullptr;
-
-                        *buffer += sizeof(WGPUChainedStructTransfer);
 
                         // Still move on in case there are valid structs after this.
                         chainedStruct = chainedStruct->next;
@@ -582,6 +618,7 @@ namespace dawn_wire {
                     }
                 }
             } while (chainedStruct != nullptr);
+            return true;
         }
 
         DeserializeResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
@@ -677,13 +714,14 @@ namespace dawn_wire {
         }
 
         void SerializeWGPUDeviceProperties(const WGPUDeviceProperties* deviceProperties,
-                                           char* serializeBuffer) {
-            size_t devicePropertiesSize = SerializedWGPUDevicePropertiesSize(deviceProperties);
-            WGPUDevicePropertiesTransfer* transfer =
-                reinterpret_cast<WGPUDevicePropertiesTransfer*>(serializeBuffer);
-            serializeBuffer += devicePropertiesSize;
+                                           char* buffer) {
+            SerializeBuffer serializeBuffer(buffer, SerializedWGPUDevicePropertiesSize(deviceProperties));
 
-            WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
+            WGPUDevicePropertiesTransfer* transfer;
+            bool success =
+                serializeBuffer.Next(&transfer) &&
+                WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
+            ASSERT(success);
         }
 
         bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,

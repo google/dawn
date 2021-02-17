@@ -48,6 +48,52 @@ namespace dawn_wire {
         FatalError,
     };
 
+    template <typename BufferT>
+    class BufferConsumer {
+      public:
+        BufferConsumer(BufferT* buffer, size_t size) : mBuffer(buffer), mSize(size) {}
+
+        BufferT* Buffer() const { return mBuffer; }
+        size_t AvailableSize() const { return mSize; }
+
+      protected:
+        template <typename T, typename N>
+        DAWN_NO_DISCARD bool NextN(N count, T** data);
+
+        template <typename T>
+        DAWN_NO_DISCARD bool Next(T** data);
+
+      private:
+        BufferT* mBuffer;
+        size_t mSize;
+    };
+
+    class SerializeBuffer : public BufferConsumer<char> {
+      public:
+        using BufferConsumer::BufferConsumer;
+        using BufferConsumer::NextN;
+        using BufferConsumer::Next;
+    };
+
+    class DeserializeBuffer : public BufferConsumer<const volatile char> {
+      public:
+        using BufferConsumer::BufferConsumer;
+
+        template <typename T, typename N>
+        DAWN_NO_DISCARD DeserializeResult ReadN(N count, const volatile T** data) {
+            return NextN(count, data)
+                ? DeserializeResult::Success
+                : DeserializeResult::FatalError;
+        }
+
+        template <typename T>
+        DAWN_NO_DISCARD DeserializeResult Read(const volatile T** data) {
+            return Next(data)
+                ? DeserializeResult::Success
+                : DeserializeResult::FatalError;
+        }
+    };
+
     // Interface to allocate more space to deserialize pointed-to data.
     // nullptr is treated as an error.
     class DeserializeAllocator {
@@ -101,7 +147,7 @@ namespace dawn_wire {
 
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
-        void Serialize(size_t commandSize, char* serializeBuffer
+        DAWN_NO_DISCARD bool Serialize(size_t commandSize, SerializeBuffer* serializeBuffer
             {%- if not is_return_command -%}
                 , const ObjectIdProvider& objectIdProvider
             {%- endif -%}
