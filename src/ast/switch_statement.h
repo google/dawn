@@ -50,8 +50,6 @@ class SwitchStatement : public Castable<SwitchStatement, Statement> {
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
-  /// @note Semantic information such as resolved expression type and intrinsic
-  /// information is not cloned.
   /// @param ctx the clone context
   /// @return the newly cloned node
   SwitchStatement* Clone(CloneContext* ctx) const override;

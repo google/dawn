@@ -40,8 +40,6 @@ class CallStatement : public Castable<CallStatement, Statement> {
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
-  /// @note Semantic information such as resolved expression type and intrinsic
-  /// information is not cloned.
   /// @param ctx the clone context
   /// @return the newly cloned node
   CallStatement* Clone(CloneContext* ctx) const override;

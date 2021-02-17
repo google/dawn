@@ -58,8 +58,6 @@ class CloneContext {
   ///
   /// The Node or type::Type `a` must be owned by the Program #src.
   ///
-  /// @note Semantic information such as resolved expression type and intrinsic
-  /// information is not cloned.
   /// @param a the `Node` or `type::Type` to clone
   /// @return the cloned node
   template <typename T>
@@ -93,8 +91,6 @@ class CloneContext {
   ///
   /// The Node or type::Type `a` must be owned by the Program #src.
   ///
-  /// @note Semantic information such as resolved expression type and intrinsic
-  /// information is not cloned.
   /// @param a the `Node` or `type::Type` to clone
   /// @return the cloned node
   template <typename T>
@@ -256,7 +252,9 @@ class CloneContext {
     return *this;
   }
 
-  /// Clone performs the clone of the entire Program #src to #dst.
+  /// Clone performs the clone of the Program's AST nodes, types and symbols
+  /// from #src to #dst. Semantic nodes are not cloned, as these will be rebuilt
+  /// when the ProgramBuilder #dst builds its Program.
   void Clone();
 
   /// The target ProgramBuilder to clone into.
