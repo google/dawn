@@ -55,6 +55,45 @@ struct ResourceBinding {
   /// in SPIR-V OpTypeImage.
   enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
 
+  enum class ImageFormat {
+    kNone = -1,
+    kR8Unorm,
+    kR8Snorm,
+    kR8Uint,
+    kR8Sint,
+    kR16Uint,
+    kR16Sint,
+    kR16Float,
+    kRg8Unorm,
+    kRg8Snorm,
+    kRg8Uint,
+    kRg8Sint,
+    kR32Uint,
+    kR32Sint,
+    kR32Float,
+    kRg16Uint,
+    kRg16Sint,
+    kRg16Float,
+    kRgba8Unorm,
+    kRgba8UnormSrgb,
+    kRgba8Snorm,
+    kRgba8Uint,
+    kRgba8Sint,
+    kBgra8Unorm,
+    kBgra8UnormSrgb,
+    kRgb10A2Unorm,
+    kRg11B10Float,
+    kRg32Uint,
+    kRg32Sint,
+    kRg32Float,
+    kRgba16Uint,
+    kRgba16Sint,
+    kRgba16Float,
+    kRgba32Uint,
+    kRgba32Sint,
+    kRgba32Float,
+  };
+
   /// kXXX maps to entries returned by GetXXXResourceBindings call.
   enum class ResourceType {
     kUniformBuffer,
@@ -80,6 +119,8 @@ struct ResourceBinding {
   TextureDimension dim;
   /// Kind of data being sampled, if defined.
   SampledKind sampled_kind;
+  /// Format of data, if defined.
+  ImageFormat image_format;
 };
 
 /// Extracts information from a program

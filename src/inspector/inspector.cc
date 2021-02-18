@@ -38,6 +38,7 @@
 #include "src/type/matrix_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
+#include "src/type/storage_texture_type.h"
 #include "src/type/struct_type.h"
 #include "src/type/texture_type.h"
 #include "src/type/type.h"
@@ -58,6 +59,131 @@ void AppendResourceBindings(std::vector<ResourceBinding>* dest,
 
   dest->reserve(dest->size() + orig.size());
   dest->insert(dest->end(), orig.begin(), orig.end());
+}
+
+ResourceBinding::TextureDimension
+TypeTextureDimensionToResourceBindingTextureDimension(
+    const type::TextureDimension& type_dim) {
+  switch (type_dim) {
+    case type::TextureDimension::k1d:
+      return ResourceBinding::TextureDimension::k1d;
+    case type::TextureDimension::k1dArray:
+      return ResourceBinding::TextureDimension::k1dArray;
+    case type::TextureDimension::k2d:
+      return ResourceBinding::TextureDimension::k2d;
+    case type::TextureDimension::k2dArray:
+      return ResourceBinding::TextureDimension::k2dArray;
+    case type::TextureDimension::k3d:
+      return ResourceBinding::TextureDimension::k3d;
+    case type::TextureDimension::kCube:
+      return ResourceBinding::TextureDimension::kCube;
+    case type::TextureDimension::kCubeArray:
+      return ResourceBinding::TextureDimension::kCubeArray;
+    default:
+      return ResourceBinding::TextureDimension::kNone;
+  }
+}
+
+ResourceBinding::SampledKind BaseTypeToSampledKind(type::Type* base_type) {
+  if (!base_type) {
+    return ResourceBinding::SampledKind::kUnknown;
+  }
+
+  if (auto* at = base_type->As<type::Array>()) {
+    base_type = at->type();
+  } else if (auto* mt = base_type->As<type::Matrix>()) {
+    base_type = mt->type();
+  } else if (auto* vt = base_type->As<type::Vector>()) {
+    base_type = vt->type();
+  }
+
+  if (base_type->Is<type::F32>()) {
+    return ResourceBinding::SampledKind::kFloat;
+  } else if (base_type->Is<type::U32>()) {
+    return ResourceBinding::SampledKind::kUInt;
+  } else if (base_type->Is<type::I32>()) {
+    return ResourceBinding::SampledKind::kSInt;
+  } else {
+    return ResourceBinding::SampledKind::kUnknown;
+  }
+}
+
+ResourceBinding::ImageFormat TypeImageFormatToResourceBindingImageFormat(
+    const type::ImageFormat& image_format) {
+  switch (image_format) {
+    case type::ImageFormat::kR8Unorm:
+      return ResourceBinding::ImageFormat::kR8Unorm;
+    case type::ImageFormat::kR8Snorm:
+      return ResourceBinding::ImageFormat::kR8Snorm;
+    case type::ImageFormat::kR8Uint:
+      return ResourceBinding::ImageFormat::kR8Uint;
+    case type::ImageFormat::kR8Sint:
+      return ResourceBinding::ImageFormat::kR8Sint;
+    case type::ImageFormat::kR16Uint:
+      return ResourceBinding::ImageFormat::kR16Uint;
+    case type::ImageFormat::kR16Sint:
+      return ResourceBinding::ImageFormat::kR16Sint;
+    case type::ImageFormat::kR16Float:
+      return ResourceBinding::ImageFormat::kR16Float;
+    case type::ImageFormat::kRg8Unorm:
+      return ResourceBinding::ImageFormat::kRg8Unorm;
+    case type::ImageFormat::kRg8Snorm:
+      return ResourceBinding::ImageFormat::kRg8Snorm;
+    case type::ImageFormat::kRg8Uint:
+      return ResourceBinding::ImageFormat::kRg8Uint;
+    case type::ImageFormat::kRg8Sint:
+      return ResourceBinding::ImageFormat::kRg8Sint;
+    case type::ImageFormat::kR32Uint:
+      return ResourceBinding::ImageFormat::kR32Uint;
+    case type::ImageFormat::kR32Sint:
+      return ResourceBinding::ImageFormat::kR32Sint;
+    case type::ImageFormat::kR32Float:
+      return ResourceBinding::ImageFormat::kR32Float;
+    case type::ImageFormat::kRg16Uint:
+      return ResourceBinding::ImageFormat::kRg16Uint;
+    case type::ImageFormat::kRg16Sint:
+      return ResourceBinding::ImageFormat::kRg16Sint;
+    case type::ImageFormat::kRg16Float:
+      return ResourceBinding::ImageFormat::kRg16Float;
+    case type::ImageFormat::kRgba8Unorm:
+      return ResourceBinding::ImageFormat::kRgba8Unorm;
+    case type::ImageFormat::kRgba8UnormSrgb:
+      return ResourceBinding::ImageFormat::kRgba8UnormSrgb;
+    case type::ImageFormat::kRgba8Snorm:
+      return ResourceBinding::ImageFormat::kRgba8Snorm;
+    case type::ImageFormat::kRgba8Uint:
+      return ResourceBinding::ImageFormat::kRgba8Uint;
+    case type::ImageFormat::kRgba8Sint:
+      return ResourceBinding::ImageFormat::kRgba8Sint;
+    case type::ImageFormat::kBgra8Unorm:
+      return ResourceBinding::ImageFormat::kBgra8Unorm;
+    case type::ImageFormat::kBgra8UnormSrgb:
+      return ResourceBinding::ImageFormat::kBgra8UnormSrgb;
+    case type::ImageFormat::kRgb10A2Unorm:
+      return ResourceBinding::ImageFormat::kRgb10A2Unorm;
+    case type::ImageFormat::kRg11B10Float:
+      return ResourceBinding::ImageFormat::kRg11B10Float;
+    case type::ImageFormat::kRg32Uint:
+      return ResourceBinding::ImageFormat::kRg32Uint;
+    case type::ImageFormat::kRg32Sint:
+      return ResourceBinding::ImageFormat::kRg32Sint;
+    case type::ImageFormat::kRg32Float:
+      return ResourceBinding::ImageFormat::kRg32Float;
+    case type::ImageFormat::kRgba16Uint:
+      return ResourceBinding::ImageFormat::kRgba16Uint;
+    case type::ImageFormat::kRgba16Sint:
+      return ResourceBinding::ImageFormat::kRgba16Sint;
+    case type::ImageFormat::kRgba16Float:
+      return ResourceBinding::ImageFormat::kRgba16Float;
+    case type::ImageFormat::kRgba32Uint:
+      return ResourceBinding::ImageFormat::kRgba32Uint;
+    case type::ImageFormat::kRgba32Sint:
+      return ResourceBinding::ImageFormat::kRgba32Sint;
+    case type::ImageFormat::kRgba32Float:
+      return ResourceBinding::ImageFormat::kRgba32Float;
+    default:
+      return ResourceBinding::ImageFormat::kNone;
+  }
 }
 
 }  // namespace
@@ -428,32 +554,8 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.binding = binding_info.binding->value();
 
     auto* texture_type = decl->type()->UnwrapIfNeeded()->As<type::Texture>();
-    switch (texture_type->dim()) {
-      case type::TextureDimension::k1d:
-        entry.dim = ResourceBinding::TextureDimension::k1d;
-        break;
-      case type::TextureDimension::k1dArray:
-        entry.dim = ResourceBinding::TextureDimension::k1dArray;
-        break;
-      case type::TextureDimension::k2d:
-        entry.dim = ResourceBinding::TextureDimension::k2d;
-        break;
-      case type::TextureDimension::k2dArray:
-        entry.dim = ResourceBinding::TextureDimension::k2dArray;
-        break;
-      case type::TextureDimension::k3d:
-        entry.dim = ResourceBinding::TextureDimension::k3d;
-        break;
-      case type::TextureDimension::kCube:
-        entry.dim = ResourceBinding::TextureDimension::kCube;
-        break;
-      case type::TextureDimension::kCubeArray:
-        entry.dim = ResourceBinding::TextureDimension::kCubeArray;
-        break;
-      default:
-        entry.dim = ResourceBinding::TextureDimension::kNone;
-        break;
-    }
+    entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
+        texture_type->dim());
 
     type::Type* base_type = nullptr;
     if (multisampled_only) {
@@ -464,24 +566,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
       base_type =
           texture_type->As<type::SampledTexture>()->type()->UnwrapIfNeeded();
     }
-
-    if (auto* at = base_type->As<type::Array>()) {
-      base_type = at->type();
-    } else if (auto* mt = base_type->As<type::Matrix>()) {
-      base_type = mt->type();
-    } else if (auto* vt = base_type->As<type::Vector>()) {
-      base_type = vt->type();
-    }
-
-    if (base_type->Is<type::F32>()) {
-      entry.sampled_kind = ResourceBinding::SampledKind::kFloat;
-    } else if (base_type->Is<type::U32>()) {
-      entry.sampled_kind = ResourceBinding::SampledKind::kUInt;
-    } else if (base_type->Is<type::I32>()) {
-      entry.sampled_kind = ResourceBinding::SampledKind::kSInt;
-    } else {
-      entry.sampled_kind = ResourceBinding::SampledKind::kUnknown;
-    }
+    entry.sampled_kind = BaseTypeToSampledKind(base_type);
 
     result.push_back(entry);
   }
@@ -519,6 +604,16 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
                   : ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
+
+    auto* texture_type = decl->type()->UnwrapIfNeeded()->As<type::Texture>();
+    entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
+        texture_type->dim());
+
+    type::Type* base_type =
+        texture_type->As<type::StorageTexture>()->type()->UnwrapIfNeeded();
+    entry.sampled_kind = BaseTypeToSampledKind(base_type);
+    entry.image_format = TypeImageFormatToResourceBindingImageFormat(
+        texture_type->As<type::StorageTexture>()->image_format());
 
     result.push_back(entry);
   }
