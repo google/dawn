@@ -79,9 +79,10 @@ TypeTextureDimensionToResourceBindingTextureDimension(
       return ResourceBinding::TextureDimension::kCube;
     case type::TextureDimension::kCubeArray:
       return ResourceBinding::TextureDimension::kCubeArray;
-    default:
+    case type::TextureDimension::kNone:
       return ResourceBinding::TextureDimension::kNone;
   }
+  return ResourceBinding::TextureDimension::kNone;
 }
 
 ResourceBinding::SampledKind BaseTypeToSampledKind(type::Type* base_type) {
@@ -181,9 +182,10 @@ ResourceBinding::ImageFormat TypeImageFormatToResourceBindingImageFormat(
       return ResourceBinding::ImageFormat::kRgba32Sint;
     case type::ImageFormat::kRgba32Float:
       return ResourceBinding::ImageFormat::kRgba32Float;
-    default:
+    case type::ImageFormat::kNone:
       return ResourceBinding::ImageFormat::kNone;
   }
+  return ResourceBinding::ImageFormat::kNone;
 }
 
 }  // namespace
@@ -605,15 +607,15 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = decl->type()->UnwrapIfNeeded()->As<type::Texture>();
+    auto* texture_type =
+        decl->type()->UnwrapIfNeeded()->As<type::StorageTexture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
-    type::Type* base_type =
-        texture_type->As<type::StorageTexture>()->type()->UnwrapIfNeeded();
+    type::Type* base_type = texture_type->type()->UnwrapIfNeeded();
     entry.sampled_kind = BaseTypeToSampledKind(base_type);
     entry.image_format = TypeImageFormatToResourceBindingImageFormat(
-        texture_type->As<type::StorageTexture>()->image_format());
+        texture_type->image_format());
 
     result.push_back(entry);
   }
