@@ -50,6 +50,7 @@ namespace dawn_native {
         DisallowUnsafeAPIs,
         UseTintGenerator,
         FlushBeforeClientWaitSync,
+        ConvertTimestampsToNanoseconds,
 
         EnumCount,
         InvalidEnum = EnumCount,
