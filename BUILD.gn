@@ -872,6 +872,8 @@ source_set("tint_unittests_core_src") {
     "src/type/u32_type_test.cc",
     "src/type/vector_type_test.cc",
     "src/type_determiner_test.cc",
+    "src/utils/tmpfile_test.cc",
+    "src/utils/tmpfile.h",
     "src/utils/unique_vector_test.cc",
     "src/validator/validator_builtins_test.cc",
     "src/validator/validator_control_block_test.cc",
@@ -881,6 +883,14 @@ source_set("tint_unittests_core_src") {
     "src/validator/validator_test_helper.h",
     "src/writer/float_to_string_test.cc",
   ]
+
+  if (is_linux || is_mac) {
+    sources += [ "src/utils/tmpfile_posix.cc" ]
+  } else if (is_win) {
+    sources += [ "src/utils/tmpfile_windows.cc" ]
+  } else {
+    sources += [ "src/utils/tmpfile_other.cc" ]
+  }
 
   configs += [
     ":tint_common_config",
