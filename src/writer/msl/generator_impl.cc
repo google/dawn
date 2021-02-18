@@ -699,8 +699,8 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       out_ << ".write(";
       break;
     default:
-      TINT_ICE(diagnostics_, "Unhandled texture intrinsic '" +
-                                 std::string(intrinsic->str()) + "'");
+      TINT_UNREACHABLE(diagnostics_)
+          << "Unhandled texture intrinsic '" << intrinsic->str() << "'";
       return false;
   }
 

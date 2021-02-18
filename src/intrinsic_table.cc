@@ -1448,20 +1448,20 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
     if (type_it == matcher_state.open_types.end()) {
       // We have an overload that claims to have matched, but didn't actually
       // resolve the open type. This is a bug that needs fixing.
-      TINT_ICE(diagnostics, "IntrinsicTable overload matched for " +
-                                CallSignature(builder, intrinsic, args) +
-                                ", but didn't resolve the open type " +
-                                str(open_type));
+      TINT_ICE(diagnostics)
+          << "IntrinsicTable overload matched for "
+          << CallSignature(builder, intrinsic, args)
+          << ", but didn't resolve the open type " << str(open_type);
       return nullptr;
     }
     auto* resolved_type = type_it->second;
     if (resolved_type == nullptr) {
       // We have an overload that claims to have matched, but has a nullptr
       // resolved open type. This is a bug that needs fixing.
-      TINT_ICE(diagnostics, "IntrinsicTable overload matched for " +
-                                CallSignature(builder, intrinsic, args) +
-                                ", but open type " + str(open_type) +
-                                " is nullptr");
+      TINT_ICE(diagnostics)
+          << "IntrinsicTable overload matched for "
+          << CallSignature(builder, intrinsic, args) << ", but open type "
+          << str(open_type) << " is nullptr";
       return nullptr;
     }
     if (!matcher->Match(matcher_state, resolved_type)) {

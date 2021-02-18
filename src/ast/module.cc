@@ -45,7 +45,7 @@ Module::Module(const Source& source, std::vector<CastableBase*> global_decls)
       global_variables_.push_back(var);
     } else {
       diag::List diagnostics;
-      TINT_ICE(diagnostics, "Unknown global declaration type");
+      TINT_ICE(diagnostics) << "Unknown global declaration type";
     }
   }
 }
@@ -108,7 +108,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
     } else if (auto* var = decl->As<Variable>()) {
       AddGlobalVariable(ctx->Clone(var));
     } else {
-      TINT_ICE(ctx->dst->Diagnostics(), "Unknown global declaration type");
+      TINT_ICE(ctx->dst->Diagnostics()) << "Unknown global declaration type";
     }
   }
 }

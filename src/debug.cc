@@ -64,19 +64,21 @@ void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter) {
   ice_reporter = reporter;
 }
 
-void InternalCompilerError(const char* filepath,
-                           size_t line,
-                           const std::string& msg,
-                           diag::List& diagnostics) {
-  auto* file = new Source::File(filepath, "");
+InternalCompilerError::InternalCompilerError(const char* file,
+                                             size_t line,
+                                             diag::List& diagnostics)
+    : file_(file), line_(line), diagnostics_(diagnostics) {}
+
+InternalCompilerError::~InternalCompilerError() {
+  auto* file = new Source::File(file_, "");
 
   SourceFileToDelete::Get().Add(file);
 
-  Source source{Source::Range{Source::Location{line}}, file};
-  diagnostics.add_ice(msg, source);
+  Source source{Source::Range{Source::Location{line_}}, file};
+  diagnostics_.add_ice(msg_.str(), source);
 
   if (ice_reporter) {
-    ice_reporter(diagnostics);
+    ice_reporter(diagnostics_);
   }
 }
 

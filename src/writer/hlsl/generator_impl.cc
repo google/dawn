@@ -799,7 +799,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case semantic::IntrinsicType::kTextureDimensions:
           switch (texture_type->dim()) {
             case type::TextureDimension::kNone:
-              diagnostics_.add_error("texture dimension is kNone");
+              TINT_ICE(diagnostics_) << "texture dimension is kNone";
               return false;
             case type::TextureDimension::k1d:
               num_dimensions = 1;
@@ -835,7 +835,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case semantic::IntrinsicType::kTextureNumLayers:
           switch (texture_type->dim()) {
             default:
-              diagnostics_.add_error("texture dimension is not arrayed");
+              TINT_ICE(diagnostics_) << "texture dimension is not arrayed";
               return false;
             case type::TextureDimension::k1dArray:
               num_dimensions = 2;
@@ -852,7 +852,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           add_mip_level_in = true;
           switch (texture_type->dim()) {
             default:
-              diagnostics_.add_error("texture dimension does not support mips");
+              TINT_ICE(diagnostics_)
+                  << "texture dimension does not support mips";
               return false;
             case type::TextureDimension::k2d:
             case type::TextureDimension::kCube:
@@ -870,8 +871,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case semantic::IntrinsicType::kTextureNumSamples:
           switch (texture_type->dim()) {
             default:
-              diagnostics_.add_error(
-                  "texture dimension does not support multisampling");
+              TINT_ICE(diagnostics_)
+                  << "texture dimension does not support multisampling";
               return false;
             case type::TextureDimension::k2d:
               num_dimensions = 3;
@@ -884,7 +885,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           }
           break;
         default:
-          diagnostics_.add_error("unexpected intrinsic");
+          TINT_ICE(diagnostics_) << "unexpected intrinsic";
           return false;
       }
 
@@ -2468,9 +2469,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     if (auto* st = tex->As<type::StorageTexture>()) {
       auto* component = image_format_to_rwtexture_type(st->image_format());
       if (component == nullptr) {
-        diagnostics_.add_error(
-            "Unsupported StorageTexture ImageFormat: " +
-            std::to_string(static_cast<int>(st->image_format())));
+        TINT_ICE(diagnostics_) << "Unsupported StorageTexture ImageFormat: "
+                               << static_cast<int>(st->image_format());
         return false;
       }
       out << "<" << component << ">";

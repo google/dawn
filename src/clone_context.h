@@ -307,7 +307,7 @@ class CloneContext {
   TO* CheckedCast(FROM* obj) {
     TO* cast = obj->template As<TO>();
     if (!cast) {
-      TINT_ICE(Diagnostics(), "Cloned object was not of the expected type");
+      TINT_ICE(Diagnostics()) << "Cloned object was not of the expected type";
     }
     return cast;
   }

@@ -15,7 +15,8 @@
 #ifndef SRC_DEBUG_H_
 #define SRC_DEBUG_H_
 
-#include <string>
+#include <sstream>
+#include <utility>
 
 #include "src/diagnostic/diagnostic.h"
 #include "src/diagnostic/formatter.h"
@@ -37,17 +38,42 @@ void FreeInternalCompilerErrors();
 /// @param reporter the error reporter
 void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter);
 
-/// InternalCompilerError adds the internal compiler error message to the
-/// diagnostics list, and then calls the InternalCompilerErrorReporter if one is
-/// set.
-/// @param file the file containing the ICE
-/// @param line the line containing the ICE
-/// @param msg the ICE message
-/// @param diagnostics the list of diagnostics to append the ICE message to
-void InternalCompilerError(const char* file,
-                           size_t line,
-                           const std::string& msg,
-                           diag::List& diagnostics);
+/// InternalCompilerError is a helper for reporting internal compiler errors.
+/// Construct the InternalCompilerError with the source location of the ICE
+/// fault and append any error details with the `<<` operator.
+/// When the InternalCompilerError is destructed, the concatenated error message
+/// is appended to the diagnostics list with the severity of
+/// tint::diag::Severity::InternalCompilerError, and if a
+/// InternalCompilerErrorReporter is set, then it is called with the diagnostic
+/// list.
+class InternalCompilerError {
+ public:
+  /// Constructor
+  /// @param file the file containing the ICE
+  /// @param line the line containing the ICE
+  /// @param diagnostics the list of diagnostics to append the ICE message to
+  InternalCompilerError(const char* file, size_t line, diag::List& diagnostics);
+
+  /// Destructor.
+  /// Adds the internal compiler error message to the diagnostics list, and then
+  /// calls the InternalCompilerErrorReporter if one is set.
+  ~InternalCompilerError();
+
+  /// Appends `arg` to the ICE message.
+  /// @param arg the argument to append to the ICE message
+  /// @returns this object so calls can be chained
+  template <typename T>
+  InternalCompilerError& operator<<(T&& arg) {
+    msg_ << std::forward<T>(arg);
+    return *this;
+  }
+
+ private:
+  char const* const file_;
+  size_t const line_;
+  diag::List& diagnostics_;
+  std::stringstream msg_;
+};
 
 }  // namespace tint
 
@@ -56,14 +82,17 @@ void InternalCompilerError(const char* file,
 /// InternalCompilerErrorReporter with the full diagnostic list if a reporter is
 /// set.
 /// The ICE message contains the callsite's file and line.
-#define TINT_ICE(diagnostics, msg) \
-  tint::InternalCompilerError(__FILE__, __LINE__, msg, diagnostics)
+/// Use the `<<` operator to append an error message to the ICE.
+#define TINT_ICE(diagnostics) \
+  tint::InternalCompilerError(__FILE__, __LINE__, diagnostics)
 
 /// TINT_UNREACHABLE() is a macro for appending a "TINT_UNREACHABLE"
 /// internal compiler error message to the diagnostics list `diagnostics`, and
 /// calling the InternalCompilerErrorReporter with the full diagnostic list if a
 /// reporter is set.
 /// The ICE message contains the callsite's file and line.
-#define TINT_UNREACHABLE(diagnostics) TINT_ICE(diagnostics, "TINT_UNREACHABLE")
+/// Use the `<<` operator to append an error message to the ICE.
+#define TINT_UNREACHABLE(diagnostics) \
+  TINT_ICE(diagnostics) << "TINT_UNREACHABLE "
 
 #endif  // SRC_DEBUG_H_
