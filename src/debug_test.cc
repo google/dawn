@@ -26,13 +26,6 @@ TEST(DebugTest, Unreachable) {
         TINT_UNREACHABLE(diagnostics);
       },
       "internal compiler error");
-
-  // Ensure that this test does not leak memory.
-  // This will be automatically called by main() in src/test_main.cc, but
-  // chromium uses it's own test entry point.
-  // TODO(ben-clayton): Add this call to the end of Chromium's main(), and we
-  // can remove this call.
-  FreeInternalCompilerErrors();
 }
 
 }  // namespace

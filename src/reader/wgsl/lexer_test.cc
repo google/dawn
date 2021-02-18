@@ -26,15 +26,15 @@ namespace {
 using LexerTest = testing::Test;
 
 TEST_F(LexerTest, Empty) {
-  Source::File file("test.wgsl", "");
-  Lexer l(&file);
+  Source::FileContent content("");
+  Lexer l("test.wgsl", &content);
   auto t = l.next();
   EXPECT_TRUE(t.IsEof());
 }
 
 TEST_F(LexerTest, Skips_Whitespace) {
-  Source::File file("test.wgsl", "\t\r\n\t    ident\t\n\t  \r ");
-  Lexer l(&file);
+  Source::FileContent content("\t\r\n\t    ident\t\n\t  \r ");
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsIdentifier());
@@ -49,11 +49,11 @@ TEST_F(LexerTest, Skips_Whitespace) {
 }
 
 TEST_F(LexerTest, Skips_Comments) {
-  Source::File file("test.wgsl", R"(//starts with comment
+  Source::FileContent content(R"(//starts with comment
 ident1 //ends with comment
 // blank line
  ident2)");
-  Lexer l(&file);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsIdentifier());
@@ -76,8 +76,8 @@ ident1 //ends with comment
 }
 
 TEST_F(LexerTest, StringTest_Parse) {
-  Source::File file("test.wgsl", R"(id "this is string content" id2)");
-  Lexer l(&file);
+  Source::FileContent content(R"(id "this is string content" id2)");
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsIdentifier());
@@ -105,8 +105,8 @@ TEST_F(LexerTest, StringTest_Parse) {
 }
 
 TEST_F(LexerTest, StringTest_Unterminated) {
-  Source::File file("test.wgsl", R"(id "this is string content)");
-  Lexer l(&file);
+  Source::FileContent content(R"(id "this is string content)");
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsIdentifier());
@@ -139,8 +139,8 @@ inline std::ostream& operator<<(std::ostream& out, FloatData data) {
 using FloatTest = testing::TestWithParam<FloatData>;
 TEST_P(FloatTest, Parse) {
   auto params = GetParam();
-  Source::File file("test.wgsl", params.input);
-  Lexer l(&file);
+  Source::FileContent content(params.input);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsFloatLiteral());
@@ -175,8 +175,8 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
 
 using FloatTest_Invalid = testing::TestWithParam<const char*>;
 TEST_P(FloatTest_Invalid, Handles) {
-  Source::File file("test.wgsl", GetParam());
-  Lexer l(&file);
+  Source::FileContent content(GetParam());
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_FALSE(t.IsFloatLiteral());
@@ -193,8 +193,8 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
 
 using IdentifierTest = testing::TestWithParam<const char*>;
 TEST_P(IdentifierTest, Parse) {
-  Source::File file("test.wgsl", GetParam());
-  Lexer l(&file);
+  Source::FileContent content(GetParam());
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsIdentifier());
@@ -210,8 +210,8 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values("test01", "_test_", "test_", "_test", "_01", "_test01"));
 
 TEST_F(LexerTest, IdentifierTest_DoesNotStartWithNumber) {
-  Source::File file("test.wgsl", "01test");
-  Lexer l(&file);
+  Source::FileContent content("01test");
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_FALSE(t.IsIdentifier());
@@ -229,8 +229,8 @@ inline std::ostream& operator<<(std::ostream& out, HexSignedIntData data) {
 using IntegerTest_HexSigned = testing::TestWithParam<HexSignedIntData>;
 TEST_P(IntegerTest_HexSigned, Matches) {
   auto params = GetParam();
-  Source::File file("test.wgsl", params.input);
-  Lexer l(&file);
+  Source::FileContent content(params.input);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsSintLiteral());
@@ -252,16 +252,18 @@ INSTANTIATE_TEST_SUITE_P(
         HexSignedIntData{"0x7FFFFFFF", std::numeric_limits<int32_t>::max()}));
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooLarge) {
-  Source::File file("test.wgsl", "0x80000000");
-  Lexer l(&file);
+  Source::FileContent content("0x80000000");
+  Lexer l("test.wgsl", &content);
+
   auto t = l.next();
   ASSERT_TRUE(t.IsError());
   EXPECT_EQ(t.to_str(), "i32 (0x80000000) too large");
 }
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
-  Source::File file("test.wgsl", "-0x8000000F");
-  Lexer l(&file);
+  Source::FileContent content("-0x8000000F");
+  Lexer l("test.wgsl", &content);
+
   auto t = l.next();
   ASSERT_TRUE(t.IsError());
   EXPECT_EQ(t.to_str(), "i32 (-0x8000000F) too small");
@@ -278,8 +280,8 @@ inline std::ostream& operator<<(std::ostream& out, HexUnsignedIntData data) {
 using IntegerTest_HexUnsigned = testing::TestWithParam<HexUnsignedIntData>;
 TEST_P(IntegerTest_HexUnsigned, Matches) {
   auto params = GetParam();
-  Source::File file("test.wgsl", params.input);
-  Lexer l(&file);
+  Source::FileContent content(params.input);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsUintLiteral());
@@ -304,8 +306,9 @@ INSTANTIATE_TEST_SUITE_P(
                                        std::numeric_limits<uint32_t>::max()}));
 
 TEST_F(LexerTest, IntegerTest_HexUnsignedTooLarge) {
-  Source::File file("test.wgsl", "0xffffffffffu");
-  Lexer l(&file);
+  Source::FileContent content("0xffffffffffu");
+  Lexer l("test.wgsl", &content);
+
   auto t = l.next();
   ASSERT_TRUE(t.IsError());
   EXPECT_EQ(t.to_str(), "u32 (0xffffffffff) too large");
@@ -322,8 +325,8 @@ inline std::ostream& operator<<(std::ostream& out, UnsignedIntData data) {
 using IntegerTest_Unsigned = testing::TestWithParam<UnsignedIntData>;
 TEST_P(IntegerTest_Unsigned, Matches) {
   auto params = GetParam();
-  Source::File file("test.wgsl", params.input);
-  Lexer l(&file);
+  Source::FileContent content(params.input);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsUintLiteral());
@@ -351,8 +354,8 @@ inline std::ostream& operator<<(std::ostream& out, SignedIntData data) {
 using IntegerTest_Signed = testing::TestWithParam<SignedIntData>;
 TEST_P(IntegerTest_Signed, Matches) {
   auto params = GetParam();
-  Source::File file("test.wgsl", params.input);
-  Lexer l(&file);
+  Source::FileContent content(params.input);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsSintLiteral());
@@ -374,8 +377,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 using IntegerTest_Invalid = testing::TestWithParam<const char*>;
 TEST_P(IntegerTest_Invalid, Parses) {
-  Source::File file("test.wgsl", GetParam());
-  Lexer l(&file);
+  Source::FileContent content(GetParam());
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_FALSE(t.IsSintLiteral());
@@ -396,8 +399,8 @@ inline std::ostream& operator<<(std::ostream& out, TokenData data) {
 using PunctuationTest = testing::TestWithParam<TokenData>;
 TEST_P(PunctuationTest, Parses) {
   auto params = GetParam();
-  Source::File file("test.wgsl", params.input);
-  Lexer l(&file);
+  Source::FileContent content(params.input);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.Is(params.type));
@@ -450,8 +453,8 @@ INSTANTIATE_TEST_SUITE_P(
 using KeywordTest = testing::TestWithParam<TokenData>;
 TEST_P(KeywordTest, Parses) {
   auto params = GetParam();
-  Source::File file("test.wgsl", params.input);
-  Lexer l(&file);
+  Source::FileContent content(params.input);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.Is(params.type)) << params.input;
@@ -582,8 +585,8 @@ INSTANTIATE_TEST_SUITE_P(
 using KeywordTest_Reserved = testing::TestWithParam<const char*>;
 TEST_P(KeywordTest_Reserved, Parses) {
   auto* keyword = GetParam();
-  Source::File file("test.wgsl", keyword);
-  Lexer l(&file);
+  Source::FileContent content(keyword);
+  Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   EXPECT_TRUE(t.IsReservedKeyword());

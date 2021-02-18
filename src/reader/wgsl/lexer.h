@@ -28,8 +28,9 @@ namespace wgsl {
 class Lexer {
  public:
   /// Creates a new Lexer
-  /// @param file the input file to parse
-  explicit Lexer(Source::File const* file);
+  /// @param file_path the path to the file containing the source
+  /// @param content the source content
+  Lexer(const std::string& file_path, const Source::FileContent* content);
   ~Lexer();
 
   /// Returns the next token in the input stream
@@ -63,8 +64,10 @@ class Lexer {
   bool is_alphanum(char ch) const;
   bool matches(size_t pos, const std::string& substr);
 
-  /// The source to parse
-  Source::File const* file_;
+  /// The source file path
+  std::string const file_path_;
+  /// The source file content
+  Source::FileContent const* const content_;
   /// The length of the input
   uint32_t len_ = 0;
   /// The current position within the input

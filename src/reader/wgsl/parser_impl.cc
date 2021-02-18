@@ -216,7 +216,7 @@ ParserImpl::FunctionHeader& ParserImpl::FunctionHeader::operator=(
     const FunctionHeader& rhs) = default;
 
 ParserImpl::ParserImpl(Source::File const* file)
-    : lexer_(std::make_unique<Lexer>(file)) {}
+    : lexer_(std::make_unique<Lexer>(file->path, &file->content)) {}
 
 ParserImpl::~ParserImpl() = default;
 
@@ -294,7 +294,7 @@ void ParserImpl::translation_unit() {
     }
     expect_global_decl();
     if (diags_.error_count() >= max_errors_) {
-      add_error(Source{{}, p.source().file},
+      add_error(Source{{}, p.source().file_path},
                 "stopping after " + std::to_string(max_errors_) + " errors");
       break;
     }

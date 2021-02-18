@@ -30,9 +30,10 @@ std::vector<std::string> split_lines(const std::string& str) {
 }
 }  // namespace
 
-Source::File::File(const std::string& file_path,
-                   const std::string& file_content)
-    : path(file_path), content(file_content), lines(split_lines(content)) {}
+Source::FileContent::FileContent(const std::string& body)
+    : data(body), lines(split_lines(body)) {}
+
+Source::FileContent::~FileContent() = default;
 
 Source::File::~File() = default;
 

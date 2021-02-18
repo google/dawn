@@ -32,9 +32,10 @@ bool is_whitespace(char c) {
 
 }  // namespace
 
-Lexer::Lexer(Source::File const* file)
-    : file_(file),
-      len_(static_cast<uint32_t>(file->content.size())),
+Lexer::Lexer(const std::string& file_path, const Source::FileContent* content)
+    : file_path_(file_path),
+      content_(content),
+      len_(static_cast<uint32_t>(content->data.size())),
       location_{1, 1} {}
 
 Lexer::~Lexer() = default;
@@ -82,7 +83,8 @@ Token Lexer::next() {
 
 Source Lexer::begin_source() const {
   Source src{};
-  src.file = file_;
+  src.file_path = file_path_;
+  src.file_content = content_;
   src.range.begin = location_;
   src.range.end = location_;
   return src;
@@ -115,13 +117,13 @@ bool Lexer::is_hex(char ch) const {
 bool Lexer::matches(size_t pos, const std::string& substr) {
   if (pos >= len_)
     return false;
-  return file_->content.substr(pos, substr.size()) == substr;
+  return content_->data.substr(pos, substr.size()) == substr;
 }
 
 void Lexer::skip_whitespace() {
   for (;;) {
     auto pos = pos_;
-    while (!is_eof() && is_whitespace(file_->content[pos_])) {
+    while (!is_eof() && is_whitespace(content_->data[pos_])) {
       if (matches(pos_, "\n")) {
         pos_++;
         location_.line++;
@@ -162,7 +164,7 @@ Token Lexer::try_float() {
   if (matches(end, "-")) {
     end++;
   }
-  while (end < len_ && is_digit(file_->content[end])) {
+  while (end < len_ && is_digit(content_->data[end])) {
     end++;
   }
 
@@ -171,7 +173,7 @@ Token Lexer::try_float() {
   }
   end++;
 
-  while (end < len_ && is_digit(file_->content[end])) {
+  while (end < len_ && is_digit(content_->data[end])) {
     end++;
   }
 
@@ -183,7 +185,7 @@ Token Lexer::try_float() {
     }
 
     auto exp_start = end;
-    while (end < len_ && isdigit(file_->content[end])) {
+    while (end < len_ && isdigit(content_->data[end])) {
       end++;
     }
 
@@ -192,7 +194,7 @@ Token Lexer::try_float() {
       return {};
   }
 
-  auto str = file_->content.substr(start, end - start);
+  auto str = content_->data.substr(start, end - start);
   if (str == "." || str == "-.")
     return {};
 
@@ -201,7 +203,7 @@ Token Lexer::try_float() {
 
   end_source(source);
 
-  auto res = strtod(file_->content.c_str() + start, nullptr);
+  auto res = strtod(content_->data.c_str() + start, nullptr);
   // This handles if the number is a really small in the exponent
   if (res > 0 && res < static_cast<double>(std::numeric_limits<float>::min())) {
     return {Token::Type::kError, source, "f32 (" + str + " too small"};
@@ -221,13 +223,13 @@ Token Lexer::build_token_from_int_if_possible(Source source,
                                               size_t start,
                                               size_t end,
                                               int32_t base) {
-  auto res = strtoll(file_->content.c_str() + start, nullptr, base);
+  auto res = strtoll(content_->data.c_str() + start, nullptr, base);
   if (matches(pos_, "u")) {
     if (static_cast<uint64_t>(res) >
         static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
       return {
           Token::Type::kError, source,
-          "u32 (" + file_->content.substr(start, end - start) + ") too large"};
+          "u32 (" + content_->data.substr(start, end - start) + ") too large"};
     }
     pos_ += 1;
     location_.column += 1;
@@ -238,12 +240,12 @@ Token Lexer::build_token_from_int_if_possible(Source source,
   if (res < static_cast<int64_t>(std::numeric_limits<int32_t>::min())) {
     return {
         Token::Type::kError, source,
-        "i32 (" + file_->content.substr(start, end - start) + ") too small"};
+        "i32 (" + content_->data.substr(start, end - start) + ") too small"};
   }
   if (res > static_cast<int64_t>(std::numeric_limits<int32_t>::max())) {
     return {
         Token::Type::kError, source,
-        "i32 (" + file_->content.substr(start, end - start) + ") too large"};
+        "i32 (" + content_->data.substr(start, end - start) + ") too large"};
   }
   end_source(source);
   return {source, static_cast<int32_t>(res)};
@@ -263,7 +265,7 @@ Token Lexer::try_hex_integer() {
   }
   end += 2;
 
-  while (!is_eof() && is_hex(file_->content[end])) {
+  while (!is_eof() && is_hex(content_->data[end])) {
     end += 1;
   }
 
@@ -282,18 +284,18 @@ Token Lexer::try_integer() {
   if (matches(end, "-")) {
     end++;
   }
-  if (end >= len_ || !is_digit(file_->content[end])) {
+  if (end >= len_ || !is_digit(content_->data[end])) {
     return {};
   }
 
   auto first = end;
-  while (end < len_ && is_digit(file_->content[end])) {
+  while (end < len_ && is_digit(content_->data[end])) {
     end++;
   }
 
   // If the first digit is a zero this must only be zero as leading zeros
   // are not allowed.
-  if (file_->content[first] == '0' && (end - first != 1))
+  if (content_->data[first] == '0' && (end - first != 1))
     return {};
 
   pos_ = end;
@@ -304,19 +306,19 @@ Token Lexer::try_integer() {
 
 Token Lexer::try_ident() {
   // Must begin with an a-zA-Z_
-  if (!is_alpha(file_->content[pos_])) {
+  if (!is_alpha(content_->data[pos_])) {
     return {};
   }
 
   auto source = begin_source();
 
   auto s = pos_;
-  while (!is_eof() && is_alphanum(file_->content[pos_])) {
+  while (!is_eof() && is_alphanum(content_->data[pos_])) {
     pos_++;
     location_.column++;
   }
 
-  auto str = file_->content.substr(s, pos_ - s);
+  auto str = content_->data.substr(s, pos_ - s);
   auto t = check_reserved(source, str);
   if (!t.IsUninitialized()) {
     return t;
@@ -352,7 +354,7 @@ Token Lexer::try_string() {
   end_source(source);
 
   return {Token::Type::kStringLiteral, source,
-          file_->content.substr(start, end - start)};
+          content_->data.substr(start, end - start)};
 }
 
 Token Lexer::try_punctuation() {

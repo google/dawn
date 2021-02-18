@@ -27,12 +27,6 @@ namespace tint {
 /// Function type used for registering an internal compiler error reporter
 using InternalCompilerErrorReporter = void(const diag::List&);
 
-/// Frees any memory allocated for reporting internal compiler errors.
-/// Must only be called on application termination.
-/// If an internal compiler error is raised and this function is not called,
-/// then memory will leak.
-void FreeInternalCompilerErrors();
-
 /// Sets the global error reporter to be called in case of internal compiler
 /// errors.
 /// @param reporter the error reporter
