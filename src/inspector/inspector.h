@@ -55,6 +55,7 @@ struct ResourceBinding {
   /// in SPIR-V OpTypeImage.
   enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
 
+  /// Enumerator of texture image formats
   enum class ImageFormat {
     kNone = -1,
     kR8Unorm,
