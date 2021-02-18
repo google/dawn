@@ -497,6 +497,8 @@ if(${TINT_BUILD_TESTS})
     type/type_manager_test.cc
     type/u32_type_test.cc
     type/vector_type_test.cc
+    utils/command_test.cc
+    utils/command.h
     utils/tmpfile_test.cc
     utils/tmpfile.h
     utils/unique_vector_test.cc
@@ -512,9 +514,12 @@ if(${TINT_BUILD_TESTS})
 
   if(UNIX OR APPLE)
     list(APPEND TINT_TEST_SRCS utils/tmpfile_posix.cc)
+    list(APPEND TINT_TEST_SRCS utils/command_posix.cc)
   elseif(WIN32)
+    list(APPEND TINT_TEST_SRCS utils/command_windows.cc)
     list(APPEND TINT_TEST_SRCS utils/tmpfile_windows.cc)
   else()
+    list(APPEND TINT_TEST_SRCS utils/command_other.cc)
     list(APPEND TINT_TEST_SRCS utils/tmpfile_other.cc)
   endif()
 
