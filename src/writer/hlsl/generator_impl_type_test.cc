@@ -389,7 +389,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
-  EXPECT_EQ(result(), "Texture2D");
+  EXPECT_EQ(result(), "Texture2DMS<float4>");
 }
 
 struct HlslStorageTextureData {

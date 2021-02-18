@@ -58,7 +58,9 @@
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
+#include "src/type/multisampled_texture_type.h"
 #include "src/type/pointer_type.h"
+#include "src/type/sampled_texture_type.h"
 #include "src/type/sampler_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/struct_type.h"
@@ -161,7 +163,10 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     }
   }
 
+  // emitted_globals is a set used to ensure that globals are emitted once even
+  // if they are used by multiple entry points.
   std::unordered_set<Symbol> emitted_globals;
+
   // Make sure all entry point data is emitted before the entry point functions
   for (auto* func : builder_.AST().Functions()) {
     if (!func->IsEntryPoint()) {
@@ -791,9 +796,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     case semantic::IntrinsicType::kTextureNumLevels:
     case semantic::IntrinsicType::kTextureNumSamples: {
       // All of these intrinsics use the GetDimensions() method on the texture
+      bool is_ms = texture_type->Is<type::MultisampledTexture>();
       int num_dimensions = 0;
-      const char* swizzle = "";
-      bool add_mip_level_in = false;
+      std::string swizzle;
 
       switch (intrinsic->Type()) {
         case semantic::IntrinsicType::kTextureDimensions:
@@ -809,10 +814,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               swizzle = ".x";
               break;
             case type::TextureDimension::k2d:
-              num_dimensions = 2;
+              num_dimensions = is_ms ? 3 : 2;
+              swizzle = is_ms ? ".xy" : "";
               break;
             case type::TextureDimension::k2dArray:
-              num_dimensions = 3;
+              num_dimensions = is_ms ? 4 : 3;
               swizzle = ".xy";
               break;
             case type::TextureDimension::k3d:
@@ -838,10 +844,13 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               TINT_ICE(diagnostics_) << "texture dimension is not arrayed";
               return false;
             case type::TextureDimension::k1dArray:
-              num_dimensions = 2;
+              num_dimensions = is_ms ? 3 : 2;
               swizzle = ".y";
               break;
             case type::TextureDimension::k2dArray:
+              num_dimensions = is_ms ? 4 : 3;
+              swizzle = ".z";
+              break;
             case type::TextureDimension::kCubeArray:
               num_dimensions = 3;
               swizzle = ".z";
@@ -849,7 +858,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           }
           break;
         case semantic::IntrinsicType::kTextureNumLevels:
-          add_mip_level_in = true;
           switch (texture_type->dim()) {
             default:
               TINT_ICE(diagnostics_)
@@ -889,34 +897,63 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           return false;
       }
 
+      auto* level_arg = arg(Usage::kLevel);
+
+      if (level_arg) {
+        // `NumberOfLevels` is a non-optional argument if `MipLevel` was passed.
+        // Increment the number of dimensions for the temporary vector to
+        // accommodate this.
+        num_dimensions++;
+
+        // If the swizzle was empty, the expression will evaluate to the whole
+        // vector. As we've grown the vector by one element, we now need to
+        // swizzle to keep the result expression equivalent.
+        if (swizzle.empty()) {
+          static constexpr const char* swizzles[] = {"", ".x", ".xy", ".xyz"};
+          swizzle = swizzles[num_dimensions - 1];
+        }
+      }
+
+      if (num_dimensions > 4) {
+        TINT_ICE(diagnostics_)
+            << "Texture query intrinsic temporary vector has " << num_dimensions
+            << " dimensions";
+        return false;
+      }
+
       // Declare a variable to hold the queried texture info
       auto dims = generate_name(kTempNamePrefix);
 
       if (num_dimensions == 1) {
-        pre << "int " << dims << ";\n";
+        pre << "int " << dims << ";";
       } else {
-        pre << "int" << num_dimensions << " " << dims << ";\n";
+        pre << "int" << num_dimensions << " " << dims << ";";
       }
+
+      pre << std::endl;
+      make_indent(pre);
 
       if (!EmitExpression(pre, pre, texture)) {
         return false;
       }
       pre << ".GetDimensions(";
-      if (auto* level = arg(Usage::kLevel)) {
-        if (!EmitExpression(pre, pre, level)) {
+
+      if (level_arg) {
+        if (!EmitExpression(pre, pre, level_arg)) {
           return false;
         }
         pre << ", ";
-      } else if (add_mip_level_in) {
+      } else if (intrinsic->Type() ==
+                 semantic::IntrinsicType::kTextureNumLevels) {
         pre << "0, ";
       }
 
       if (num_dimensions == 1) {
         pre << dims;
       } else {
+        static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
         assert(num_dimensions > 0);
         assert(num_dimensions <= 4);
-        static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
         for (int i = 0; i < num_dimensions; i++) {
           if (i > 0) {
             pre << ", ";
@@ -924,7 +961,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           pre << dims << "." << xyzw[i];
         }
       }
-      pre << ");";
+
+      pre << ");" << std::endl;
+      make_indent(pre);
 
       // The out parameters of the GetDimensions() call is now in temporary
       // `dims` variable. This may be packed with other data, so the final
@@ -1578,6 +1617,11 @@ bool GeneratorImpl::EmitEntryPointData(
   for (auto data : func_sem->ReferencedUniformVariables()) {
     auto* var = data.first;
     auto* decl = var->Declaration();
+
+    if (!emitted_globals.emplace(decl->symbol()).second) {
+      continue;  // Global already emitted
+    }
+
     // TODO(dsinclair): We're using the binding to make up the buffer number but
     // we should instead be using a provided mapping that uses both buffer and
     // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
@@ -1589,13 +1633,6 @@ bool GeneratorImpl::EmitEntryPointData(
       return false;
     }
     // auto* set = data.second.set;
-
-    // If the global has already been emitted we skip it, it's been emitted by
-    // a previous entry point.
-    if (emitted_globals.count(decl->symbol()) != 0) {
-      continue;
-    }
-    emitted_globals.insert(decl->symbol());
 
     auto* type = decl->type()->UnwrapIfNeeded();
     if (auto* strct = type->As<type::Struct>()) {
@@ -1634,15 +1671,12 @@ bool GeneratorImpl::EmitEntryPointData(
   for (auto data : func_sem->ReferencedStorageBufferVariables()) {
     auto* var = data.first;
     auto* decl = var->Declaration();
-    auto* binding = data.second.binding;
 
-    // If the global has already been emitted we skip it, it's been emitted by
-    // a previous entry point.
-    if (emitted_globals.count(decl->symbol()) != 0) {
-      continue;
+    if (!emitted_globals.emplace(decl->symbol()).second) {
+      continue;  // Global already emitted
     }
-    emitted_globals.insert(decl->symbol());
 
+    auto* binding = data.second.binding;
     auto* ac = decl->type()->As<type::AccessControl>();
     if (ac == nullptr) {
       diagnostics_.add_error("access control type required for storage buffer");
@@ -1760,6 +1794,34 @@ bool GeneratorImpl::EmitEntryPointData(
     decrement_indent();
     make_indent(out);
     out << "};" << std::endl << std::endl;
+  }
+
+  {
+    bool add_newline = false;
+    for (auto* var : func_sem->ReferencedModuleVariables()) {
+      auto* decl = var->Declaration();
+
+      auto* unwrapped_type = decl->type()->UnwrapAll();
+      if (!unwrapped_type->Is<type::Texture>() &&
+          !unwrapped_type->Is<type::Sampler>()) {
+        continue;  // Not interested in this type
+      }
+
+      if (!emitted_globals.emplace(decl->symbol()).second) {
+        continue;  // Global already emitted
+      }
+
+      if (!EmitType(out, decl->type(), "")) {
+        return false;
+      }
+      out << " " << namer_.NameFor(builder_.Symbols().NameFor(decl->symbol()))
+          << ";" << std::endl;
+
+      add_newline = true;
+    }
+    if (add_newline) {
+      out << std::endl;
+    }
   }
 
   return true;
@@ -2314,6 +2376,9 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
       return false;
     }
     out << pre.str();
+    if (!TypeOf(c->expr())->Is<type::Void>()) {
+      out << "(void) ";
+    }
     out << call_out.str() << ";" << std::endl;
     return true;
   }
@@ -2439,6 +2504,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
     out << "Texture";
 
+    auto* ms = tex->As<type::MultisampledTexture>();
+
     switch (tex->dim()) {
       case type::TextureDimension::k1d:
         out << "1D";
@@ -2447,10 +2514,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         out << "1DArray";
         break;
       case type::TextureDimension::k2d:
-        out << "2D";
+        out << (ms ? "2DMS" : "2D");
         break;
       case type::TextureDimension::k2dArray:
-        out << "2DArray";
+        out << (ms ? "2DMSArray" : "2DArray");
         break;
       case type::TextureDimension::k3d:
         out << "3D";
@@ -2462,11 +2529,31 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         out << "CubeArray";
         break;
       default:
-        diagnostics_.add_error("Invalid texture dimensions");
+        TINT_UNREACHABLE(diagnostics_)
+            << "unexpected TextureDimension " << tex->dim();
         return false;
     }
 
-    if (auto* st = tex->As<type::StorageTexture>()) {
+    if (ms) {
+      out << "<";
+      if (ms->type()->Is<type::F32>()) {
+        out << "float4";
+      } else if (ms->type()->Is<type::I32>()) {
+        out << "int4";
+      } else if (ms->type()->Is<type::U32>()) {
+        out << "uint4";
+      } else {
+        TINT_ICE(diagnostics_) << "Unsupported multisampled texture type";
+        return false;
+      }
+
+      // TODO(ben-clayton): The HLSL docs claim that the MS texture type should
+      // also contain the number of samples, which is not part of the WGSL type.
+      // However, DXC seems to consider this optional.
+      // See: https://github.com/gpuweb/gpuweb/issues/1445
+
+      out << ">";
+    } else if (auto* st = tex->As<type::StorageTexture>()) {
       auto* component = image_format_to_rwtexture_type(st->image_format());
       if (component == nullptr) {
         TINT_ICE(diagnostics_) << "Unsupported StorageTexture ImageFormat: "
