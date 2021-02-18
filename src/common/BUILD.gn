@@ -110,7 +110,6 @@ config("dawn_internal") {
       "-Wnon-c-typedef-for-linkage",
       "-Wpessimizing-move",
       "-Wrange-loop-analysis",
-      "-Wreturn-std-move-in-c++11",
       "-Wshadow-field",
       "-Wstrict-prototypes",
       "-Wtautological-unsigned-zero-compare",
