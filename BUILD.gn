@@ -762,11 +762,13 @@ if (!build_with_chromium) {
 # These targets are separated because they are Chromium sources files that
 # can't use the tint_internal config, otherwise Tint's warning flags get
 # applied while compiling a bunch of Chromium's //base (via header inclusion)
-if (build_with_chromium) {
-  source_set("tint_unittests_main") {
-    testonly = true
-    deps = [ ":gmock_and_gtest" ]
+source_set("tint_unittests_main") {
+  testonly = true
+  deps = [ ":gmock_and_gtest" ]
+  if (build_with_chromium) {
     sources = [ "//gpu/tint_unittests_main.cc" ]
+  } else {
+    sources = [ "src/test_main.cc" ]
   }
 }
 
@@ -846,7 +848,6 @@ source_set("tint_unittests_core_src") {
     "src/scope_stack_test.cc",
     "src/symbol_table_test.cc",
     "src/symbol_test.cc",
-    "src/test_main.cc",
     "src/traits_test.cc",
     "src/transform/bound_array_accessors_test.cc",
     "src/transform/emit_vertex_point_size_test.cc",
@@ -1339,9 +1340,7 @@ test("tint_unittests") {
     "${tint_spirv_tools_dir}/:spvtools_val",
   ]
 
-  if (build_with_chromium) {
-    deps += [ ":tint_unittests_main" ]
-  }
+  deps += [ ":tint_unittests_main" ]
 
   configs += [
     ":tint_common_config",

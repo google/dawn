@@ -28,7 +28,7 @@ namespace tint {
 using InternalCompilerErrorReporter = void(const diag::List&);
 
 /// Frees any memory allocated for reporting internal compiler errors.
-/// Must only be called once on application termination.
+/// Must only be called on application termination.
 /// If an internal compiler error is raised and this function is not called,
 /// then memory will leak.
 void FreeInternalCompilerErrors();

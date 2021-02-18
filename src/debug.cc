@@ -27,37 +27,43 @@ namespace {
 
 InternalCompilerErrorReporter* ice_reporter = nullptr;
 
+/// Note - this class is _not_ thread safe. If we have multiple internal
+/// compiler errors occurring at the same time on different threads, then
+/// we're in serious trouble.
 class SourceFileToDelete {
+  static SourceFileToDelete* instance;
+
  public:
-  static SourceFileToDelete& Get() {
-    static SourceFileToDelete* instance = new SourceFileToDelete();
-    return *instance;
+  /// Adds file to the list that will be deleted on call to Free()
+  static void Add(Source::File* file) {
+    if (!instance) {
+      instance = new SourceFileToDelete();
+    }
+    instance->files.emplace_back(file);
   }
 
-  /// Adds file to the list that will be deleted on call to Free()
-  /// Note - this function is _not_ thread safe. If we have multiple internal
-  /// compiler errors occurring at the same time on different threads, then
-  /// we're in serious trouble.
-  void Add(Source::File* file) { files.emplace_back(file); }
-
   /// Free deletes all the source files added by calls to Add() and then this
-  /// SourceFileToDelete object. The SourceFileToDelete must not be used after
-  /// calling.
-  void Free() {
-    for (auto* file : files) {
-      delete file;
+  /// SourceFileToDelete object.
+  static void Free() {
+    if (instance) {
+      for (auto* file : instance->files) {
+        delete file;
+      }
+      delete instance;
+      instance = nullptr;
     }
-    delete this;
   }
 
  private:
   std::vector<Source::File*> files;
 };
 
+SourceFileToDelete* SourceFileToDelete::instance = nullptr;
+
 }  // namespace
 
 void FreeInternalCompilerErrors() {
-  SourceFileToDelete::Get().Free();
+  SourceFileToDelete::Free();
 }
 
 void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter) {
@@ -72,7 +78,7 @@ InternalCompilerError::InternalCompilerError(const char* file,
 InternalCompilerError::~InternalCompilerError() {
   auto* file = new Source::File(file_, "");
 
-  SourceFileToDelete::Get().Add(file);
+  SourceFileToDelete::Add(file);
 
   Source source{Source::Range{Source::Location{line_}}, file};
   diagnostics_.add_ice(msg_.str(), source);
