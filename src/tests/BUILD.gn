@@ -199,6 +199,7 @@ test("dawn_unittests") {
     "unittests/validation/MultipleDeviceTests.cpp",
     "unittests/validation/QueryValidationTests.cpp",
     "unittests/validation/QueueSubmitValidationTests.cpp",
+    "unittests/validation/QueueWriteBufferValidationTests.cpp",
     "unittests/validation/QueueWriteTextureValidationTests.cpp",
     "unittests/validation/RenderBundleValidationTests.cpp",
     "unittests/validation/RenderPassDescriptorValidationTests.cpp",
