@@ -15,7 +15,7 @@
 // Command handlers & doers
 {% for command in cmd_records["command"] %}
     {% set Suffix = command.name.CamelCase() %}
-    bool Handle{{Suffix}}(const volatile char** commands, size_t* size);
+    bool Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer);
 
     bool Do{{Suffix}}(
         {%- for member in command.members -%}

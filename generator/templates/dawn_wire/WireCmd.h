@@ -63,6 +63,9 @@ namespace dawn_wire {
         template <typename T>
         DAWN_NO_DISCARD bool Next(T** data);
 
+        template <typename T>
+        DAWN_NO_DISCARD bool Peek(T** data);
+
       private:
         BufferT* mBuffer;
         size_t mSize;
@@ -89,6 +92,13 @@ namespace dawn_wire {
         template <typename T>
         DAWN_NO_DISCARD DeserializeResult Read(const volatile T** data) {
             return Next(data)
+                ? DeserializeResult::Success
+                : DeserializeResult::FatalError;
+        }
+
+        template <typename T>
+        DAWN_NO_DISCARD DeserializeResult Peek(const volatile T** data) {
+            return BufferConsumer::Peek(data)
                 ? DeserializeResult::Success
                 : DeserializeResult::FatalError;
         }
@@ -160,7 +170,7 @@ namespace dawn_wire {
         //* Deserialize returns:
         //*  - Success if everything went well (yay!)
         //*  - FatalError is something bad happened (buffer too small for example)
-        DeserializeResult Deserialize(const volatile char** buffer, size_t* size, DeserializeAllocator* allocator
+        DeserializeResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator
             {%- if command.may_have_dawn_object -%}
                 , const ObjectIdResolver& resolver
             {%- endif -%}
