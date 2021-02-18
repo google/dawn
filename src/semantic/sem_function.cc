@@ -57,7 +57,7 @@ Function::Function(ast::Function* declaration,
 
 Function::~Function() = default;
 
-const std::vector<std::pair<const Variable*, ast::LocationDecoration*>>
+std::vector<std::pair<const Variable*, ast::LocationDecoration*>>
 Function::ReferencedLocationVariables() const {
   std::vector<std::pair<const Variable*, ast::LocationDecoration*>> ret;
 
@@ -72,9 +72,8 @@ Function::ReferencedLocationVariables() const {
   return ret;
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedUniformVariables() const {
-  std::vector<std::pair<const Variable*, Function::BindingInfo>> ret;
+Function::VariableBindings Function::ReferencedUniformVariables() const {
+  VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
     if (var->StorageClass() != ast::StorageClass::kUniform) {
@@ -99,9 +98,8 @@ Function::ReferencedUniformVariables() const {
   return ret;
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedStorageBufferVariables() const {
-  std::vector<std::pair<const Variable*, Function::BindingInfo>> ret;
+Function::VariableBindings Function::ReferencedStorageBufferVariables() const {
+  VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
     if (var->StorageClass() != ast::StorageClass::kStorage) {
@@ -126,7 +124,7 @@ Function::ReferencedStorageBufferVariables() const {
   return ret;
 }
 
-const std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
+std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
 Function::ReferencedBuiltinVariables() const {
   std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>> ret;
 
@@ -141,29 +139,26 @@ Function::ReferencedBuiltinVariables() const {
   return ret;
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedSamplerVariables() const {
+Function::VariableBindings Function::ReferencedSamplerVariables() const {
   return ReferencedSamplerVariablesImpl(type::SamplerKind::kSampler);
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedComparisonSamplerVariables() const {
+Function::VariableBindings Function::ReferencedComparisonSamplerVariables()
+    const {
   return ReferencedSamplerVariablesImpl(type::SamplerKind::kComparisonSampler);
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedSampledTextureVariables() const {
+Function::VariableBindings Function::ReferencedSampledTextureVariables() const {
   return ReferencedSampledTextureVariablesImpl(false);
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedMultisampledTextureVariables() const {
+Function::VariableBindings Function::ReferencedMultisampledTextureVariables()
+    const {
   return ReferencedSampledTextureVariablesImpl(true);
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedStorageTextureVariables() const {
-  std::vector<std::pair<const Variable*, Function::BindingInfo>> ret;
+Function::VariableBindings Function::ReferencedStorageTextureVariables() const {
+  VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
     auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
@@ -190,7 +185,7 @@ Function::ReferencedStorageTextureVariables() const {
   return ret;
 }
 
-const std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
+std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
 Function::LocalReferencedBuiltinVariables() const {
   std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>> ret;
 
@@ -214,9 +209,9 @@ bool Function::HasAncestorEntryPoint(Symbol symbol) const {
   return false;
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
-  std::vector<std::pair<const Variable*, Function::BindingInfo>> ret;
+Function::VariableBindings Function::ReferencedSamplerVariablesImpl(
+    type::SamplerKind kind) const {
+  VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
     auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
@@ -244,9 +239,9 @@ Function::ReferencedSamplerVariablesImpl(type::SamplerKind kind) const {
   return ret;
 }
 
-const std::vector<std::pair<const Variable*, Function::BindingInfo>>
-Function::ReferencedSampledTextureVariablesImpl(bool multisampled) const {
-  std::vector<std::pair<const Variable*, Function::BindingInfo>> ret;
+Function::VariableBindings Function::ReferencedSampledTextureVariablesImpl(
+    bool multisampled) const {
+  VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
     auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();

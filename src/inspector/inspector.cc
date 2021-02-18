@@ -412,7 +412,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
 
   std::vector<ResourceBinding> result;
   auto* func_sem = program_->Sem().Get(func);
-  auto& referenced_variables =
+  auto referenced_variables =
       multisampled_only ? func_sem->ReferencedMultisampledTextureVariables()
                         : func_sem->ReferencedSampledTextureVariables();
   for (auto& ref : referenced_variables) {

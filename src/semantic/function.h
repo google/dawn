@@ -47,6 +47,9 @@ class Function : public Castable<Function, CallTarget> {
     ast::GroupDecoration* group = nullptr;
   };
 
+  /// A vector of [Variable*, BindingInfo] pairs
+  using VariableBindings = std::vector<std::pair<const Variable*, BindingInfo>>;
+
   /// Constructor
   /// @param declaration the ast::Function
   /// @param referenced_module_vars the referenced module variables
@@ -80,59 +83,52 @@ class Function : public Castable<Function, CallTarget> {
   }
   /// Retrieves any referenced location variables
   /// @returns the <variable, decoration> pair.
-  const std::vector<std::pair<const Variable*, ast::LocationDecoration*>>
+  std::vector<std::pair<const Variable*, ast::LocationDecoration*>>
   ReferencedLocationVariables() const;
 
   /// Retrieves any referenced builtin variables
   /// @returns the <variable, decoration> pair.
-  const std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
+  std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
   ReferencedBuiltinVariables() const;
 
   /// Retrieves any referenced uniform variables. Note, the variables must be
   /// decorated with both binding and group decorations.
   /// @returns the referenced uniforms
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedUniformVariables() const;
+  VariableBindings ReferencedUniformVariables() const;
 
   /// Retrieves any referenced storagebuffer variables. Note, the variables
   /// must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedStorageBufferVariables() const;
+  VariableBindings ReferencedStorageBufferVariables() const;
 
   /// Retrieves any referenced regular Sampler variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedSamplerVariables() const;
+  VariableBindings ReferencedSamplerVariables() const;
 
   /// Retrieves any referenced comparison Sampler variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced storagebuffers
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedComparisonSamplerVariables() const;
+  VariableBindings ReferencedComparisonSamplerVariables() const;
 
   /// Retrieves any referenced sampled textures variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedSampledTextureVariables() const;
+  VariableBindings ReferencedSampledTextureVariables() const;
 
   /// Retrieves any referenced multisampled textures variables. Note, the
   /// variables must be decorated with both binding and group decorations.
   /// @returns the referenced sampled textures
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedMultisampledTextureVariables() const;
+  VariableBindings ReferencedMultisampledTextureVariables() const;
 
   /// Retrieves any referenced storage texture variables. Note, the variables
   /// must be decorated with both binding and group decorations.
   /// @returns the referenced storage textures
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedStorageTextureVariables() const;
+  VariableBindings ReferencedStorageTextureVariables() const;
 
   /// Retrieves any locally referenced builtin variables
   /// @returns the <variable, decoration> pairs.
-  const std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
+  std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
   LocalReferencedBuiltinVariables() const;
 
   /// Checks if the given entry point is an ancestor
@@ -141,10 +137,9 @@ class Function : public Castable<Function, CallTarget> {
   bool HasAncestorEntryPoint(Symbol sym) const;
 
  private:
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedSamplerVariablesImpl(type::SamplerKind kind) const;
-  const std::vector<std::pair<const Variable*, BindingInfo>>
-  ReferencedSampledTextureVariablesImpl(bool multisampled) const;
+  VariableBindings ReferencedSamplerVariablesImpl(type::SamplerKind kind) const;
+  VariableBindings ReferencedSampledTextureVariablesImpl(
+      bool multisampled) const;
 
   ast::Function* const declaration_;
   std::vector<const Variable*> const referenced_module_vars_;
