@@ -42,6 +42,7 @@
     {%- elif member.type.category == "bitmask" -%}
         {{as_cType(member.type.name)}}Flags
     {%- else -%}
+        {{ assert(as_cType(member.type.name) != "size_t") }}
         {{as_cType(member.type.name)}}
     {%- endif -%}
 {%- endmacro %}
@@ -80,6 +81,7 @@
             {%- endif -%}
         ));
     {%- else -%}
+        static_assert(sizeof({{out}}) >= sizeof({{in}}), "Deserialize assignment may not narrow.");
         {{out}} = {{in}};
     {%- endif -%}
 {% endmacro %}
@@ -124,7 +126,7 @@ namespace {
 
         //* const char* have their length embedded directly in the command.
         {% for member in members if member.length == "strlen" %}
-            size_t {{as_varName(member.name)}}Strlen;
+            uint64_t {{as_varName(member.name)}}Strlen;
         {% endfor %}
 
         {% for member in members if member.optional and member.annotation != "value" and member.type.category != "object" %}
@@ -327,19 +329,21 @@ namespace {
                 if (has_{{memberName}})
             {% endif %}
             {
-                size_t stringLength = transfer->{{memberName}}Strlen;
-                if (stringLength == std::numeric_limits<size_t>::max()) {
-                    //* Cannot allocate enough space for the null terminator.
+                uint64_t stringLength64 = transfer->{{memberName}}Strlen;
+                if (stringLength64 >= std::numeric_limits<size_t>::max()) {
+                    //* Cannot allocate space for the string. It can be at most
+                    //* size_t::max() - 1. We need 1 byte for the null-terminator.
                     return DeserializeResult::FatalError;
                 }
+                size_t stringLength = static_cast<size_t>(stringLength64);
 
                 const volatile char* stringInBuffer;
                 DESERIALIZE_TRY(deserializeBuffer->ReadN(stringLength, &stringInBuffer));
 
                 char* copiedString;
                 DESERIALIZE_TRY(GetSpace(allocator, stringLength + 1, &copiedString));
-                //* We can cast away the volatile qualifier because GetPtrFromBuffer already validated
-                //* that the range [stringInBuffer, stringInBuffer + stringLength) is valid.
+                //* We can cast away the volatile qualifier because DeserializeBuffer::ReadN already
+                //* validated that the range [stringInBuffer, stringInBuffer + stringLength) is valid.
                 //* memcpy may have an unknown access pattern, but this is fine since the string is only
                 //* data and won't affect control flow of this function.
                 memcpy(copiedString, const_cast<const char*>(stringInBuffer), stringLength);

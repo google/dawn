@@ -48,8 +48,8 @@ namespace dawn_wire { namespace server {
     bool Server::DoBufferMapAsync(ObjectId bufferId,
                                   uint32_t requestSerial,
                                   WGPUMapModeFlags mode,
-                                  size_t offset,
-                                  size_t size,
+                                  uint64_t offset64,
+                                  uint64_t size64,
                                   uint64_t handleCreateInfoLength,
                                   const uint8_t* handleCreateInfo) {
         // These requests are just forwarded to the buffer, with userdata containing what the
@@ -72,19 +72,24 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        if (handleCreateInfoLength > std::numeric_limits<size_t>::max()) {
-            // This is the size of data deserialized from the command stream, which must be
-            // CPU-addressable.
-            return false;
-        }
-
         std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
         userdata->buffer = ObjectHandle{bufferId, buffer->generation};
         userdata->bufferObj = buffer->handle;
         userdata->requestSerial = requestSerial;
+        userdata->mode = mode;
+
+        if (offset64 > std::numeric_limits<size_t>::max() ||
+            size64 > std::numeric_limits<size_t>::max() ||
+            handleCreateInfoLength > std::numeric_limits<size_t>::max()) {
+            OnBufferMapAsyncCallback(WGPUBufferMapAsyncStatus_Error, userdata.get());
+            return true;
+        }
+
+        size_t offset = static_cast<size_t>(offset64);
+        size_t size = static_cast<size_t>(size64);
+
         userdata->offset = offset;
         userdata->size = size;
-        userdata->mode = mode;
 
         // The handle will point to the mapped memory or staging memory for the mapping.
         // Store it on the map request.

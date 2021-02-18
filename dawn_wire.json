@@ -14,16 +14,13 @@
         "See the License for the specific language governing permissions and",
         "limitations under the License."
     ],
-    "_todos": [
-        "Remove usage of size_t because it is not network transparent"
-    ],
     "commands": {
         "buffer map async": [
             { "name": "buffer id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint32_t" },
             { "name": "mode", "type": "map mode" },
-            { "name": "offset", "type": "size_t"},
-            { "name": "size", "type": "size_t"},
+            { "name": "offset", "type": "uint64_t"},
+            { "name": "size", "type": "uint64_t"},
             { "name": "handle create info length", "type": "uint64_t" },
             { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
         ],
@@ -69,13 +66,13 @@
             {"name": "buffer id", "type": "ObjectId" },
             {"name": "buffer offset", "type": "uint64_t"},
             {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size"},
-            {"name": "size", "type": "size_t"}
+            {"name": "size", "type": "uint64_t"}
         ],
         "queue write texture internal": [
             {"name": "queue id", "type": "ObjectId" },
             {"name": "destination", "type": "texture copy view", "annotation": "const*"},
             {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "data size"},
-            {"name": "data size", "type": "size_t"},
+            {"name": "data size", "type": "uint64_t"},
             {"name": "data layout", "type": "texture data layout", "annotation": "const*"},
             {"name": "writeSize", "type": "extent 3D", "annotation": "const*"}
         ]

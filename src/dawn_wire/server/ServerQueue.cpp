@@ -44,7 +44,7 @@ namespace dawn_wire { namespace server {
                                             ObjectId bufferId,
                                             uint64_t bufferOffset,
                                             const uint8_t* data,
-                                            size_t size) {
+                                            uint64_t size) {
         // The null object isn't valid as `self` or `buffer` so we can combine the check with the
         // check that the ID is valid.
         auto* queue = QueueObjects().Get(queueId);
@@ -53,14 +53,25 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        mProcs.queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data, size);
+        if (size > std::numeric_limits<size_t>::max()) {
+            auto* device = DeviceObjects().Get(queue->deviceInfo->self.id);
+            if (device == nullptr) {
+                return false;
+            }
+            return DoDeviceInjectError(reinterpret_cast<WGPUDevice>(device),
+                                       WGPUErrorType_OutOfMemory,
+                                       "Data size too large for write texture.");
+        }
+
+        mProcs.queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data,
+                                static_cast<size_t>(size));
         return true;
     }
 
     bool Server::DoQueueWriteTextureInternal(ObjectId queueId,
                                              const WGPUTextureCopyView* destination,
                                              const uint8_t* data,
-                                             size_t dataSize,
+                                             uint64_t dataSize,
                                              const WGPUTextureDataLayout* dataLayout,
                                              const WGPUExtent3D* writeSize) {
         // The null object isn't valid as `self` so we can combine the check with the
@@ -70,7 +81,18 @@ namespace dawn_wire { namespace server {
             return false;
         }
 
-        mProcs.queueWriteTexture(queue->handle, destination, data, dataSize, dataLayout, writeSize);
+        if (dataSize > std::numeric_limits<size_t>::max()) {
+            auto* device = DeviceObjects().Get(queue->deviceInfo->self.id);
+            if (device == nullptr) {
+                return false;
+            }
+            return DoDeviceInjectError(reinterpret_cast<WGPUDevice>(device),
+                                       WGPUErrorType_OutOfMemory,
+                                       "Data size too large for write texture.");
+        }
+
+        mProcs.queueWriteTexture(queue->handle, destination, data, static_cast<size_t>(dataSize),
+                                 dataLayout, writeSize);
         return true;
     }
 
