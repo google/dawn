@@ -330,12 +330,21 @@ namespace {
             {% endif %}
             {
                 size_t stringLength = transfer->{{memberName}}Strlen;
+                if (stringLength == std::numeric_limits<size_t>::max()) {
+                    //* Cannot allocate space for the null terminator.
+                    return DeserializeResult::FatalError;
+                }
+
                 const volatile char* stringInBuffer = nullptr;
                 DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, stringLength, &stringInBuffer));
 
                 char* copiedString = nullptr;
                 DESERIALIZE_TRY(GetSpace(allocator, stringLength + 1, &copiedString));
-                std::copy(stringInBuffer, stringInBuffer + stringLength, copiedString);
+                //* We can cast away the volatile qualifier because GetPtrFromBuffer already validated
+                //* that the range [stringInBuffer, stringInBuffer + stringLength) is valid.
+                //* memcpy may have an unknown access pattern, but this is fine since the string is only
+                //* data and won't affect control flow of this function.
+                memcpy(copiedString, const_cast<const char*>(stringInBuffer), stringLength);
                 copiedString[stringLength] = '\0';
                 record->{{memberName}} = copiedString;
             }
