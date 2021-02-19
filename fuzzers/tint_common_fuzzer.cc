@@ -42,19 +42,17 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_WGSL_READER
 
   switch (input_) {
-    case InputFormat::kWGSL:
 #if TINT_BUILD_WGSL_READER
-    {
+    case InputFormat::kWGSL: {
       std::string str(reinterpret_cast<const char*>(data), size);
 
       file = std::make_unique<Source::File>("test.wgsl", str);
       program = reader::wgsl::Parse(file.get());
+      break;
     }
 #endif  // TINT_BUILD_WGSL_READER
-    break;
-    case InputFormat::kSpv:
 #if TINT_BUILD_SPV_READER
-    {
+    case InputFormat::kSpv: {
       size_t sizeInU32 = size / sizeof(uint32_t);
       const uint32_t* u32Data = reinterpret_cast<const uint32_t*>(data);
       std::vector<uint32_t> input(u32Data, u32Data + sizeInU32);
@@ -62,11 +60,11 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       if (input.size() != 0) {
         program = reader::spirv::Parse(input);
       }
+      break;
     }
 #endif  // TINT_BUILD_WGSL_READER
-    break;
     default:
-      break;
+      return 0;
   }
 
   if (output_ == OutputFormat::kNone) {

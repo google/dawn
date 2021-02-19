@@ -31,6 +31,11 @@ namespace {
 
 using ProgramTest = ast::TestHelper;
 
+TEST_F(ProgramTest, Unbuilt) {
+  Program program;
+  EXPECT_FALSE(program.IsValid());
+}
+
 TEST_F(ProgramTest, Creation) {
   Program program(std::move(*this));
   EXPECT_EQ(program.AST().Functions().size(), 0u);

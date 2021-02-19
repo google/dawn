@@ -160,11 +160,11 @@ class Program {
   type::Manager types_;
   ASTNodeAllocator ast_nodes_;
   SemNodeAllocator sem_nodes_;
-  ast::Module* ast_;
+  ast::Module* ast_ = nullptr;
   semantic::Info sem_;
   SymbolTable symbols_;
   diag::List diagnostics_;
-  bool is_valid_ = true;
+  bool is_valid_ = false;  // Not valid until it is built
   bool moved_ = false;
 };
 
