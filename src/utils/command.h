@@ -52,6 +52,9 @@ class Command {
   /// constructor
   bool Found() const;
 
+  /// @returns the path of the command
+  const std::string& Path() const { return path_; }
+
   /// Invokes the command with the given argument strings, blocking until the
   /// process has returned.
   /// @param args the string arguments to pass to the process

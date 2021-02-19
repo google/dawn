@@ -21,12 +21,28 @@ namespace tint {
 namespace writer {
 namespace hlsl {
 
+namespace {
+
+const char* dxc_path = nullptr;
+
+}  // namespace
+
+void EnableHLSLValidation(const char* dxc) {
+  dxc_path = dxc;
+}
+
 CompileResult Compile(Program* program, GeneratorImpl* generator) {
   CompileResult result;
 
-  auto dxc = utils::Command::LookPath("dxc");
+  if (!dxc_path) {
+    result.status = CompileResult::Status::kVerificationNotEnabled;
+    return result;
+  }
+
+  auto dxc = utils::Command(dxc_path);
   if (!dxc.Found()) {
-    result.status = CompileResult::Status::kDXCNotFound;
+    result.output = "DXC not found at '" + std::string(dxc_path) + "'";
+    result.status = CompileResult::Status::kFailed;
     return result;
   }
 

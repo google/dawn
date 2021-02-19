@@ -31,10 +31,15 @@ namespace tint {
 namespace writer {
 namespace hlsl {
 
+/// EnableHLSLValidation enables verification of HLSL shaders by running DXC and
+/// checking no errors are reported.
+/// @param dxc_path the path to the DXC executable
+void EnableHLSLValidation(const char* dxc_path);
+
 /// The return structure of Compile()
 struct CompileResult {
   /// Status is an enumerator of status codes from Compile()
-  enum class Status { kSuccess, kFailed, kDXCNotFound };
+  enum class Status { kSuccess, kFailed, kVerificationNotEnabled };
   /// The resulting status of the compile
   Status status;
   /// Output of DXC.
