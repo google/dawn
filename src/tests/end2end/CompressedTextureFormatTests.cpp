@@ -1187,6 +1187,9 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
 
 // Test writing to multiple 2D texture array layers with BC formats.
 TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
     config.textureDescriptor.size = {20, 24, 9};
@@ -1206,6 +1209,9 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
 // subresource is different from its virtual size.
 TEST_P(CompressedTextureWriteTextureTest,
        WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     // Texture virtual size at mipLevel 2 will be {15, 15, 1} while the physical
     // size will be {16, 16, 1}.
     // Setting copyExtent.width or copyExtent.height to 16 fits in

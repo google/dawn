@@ -630,9 +630,6 @@ namespace dawn_native { namespace opengl {
 
                     const Format& formatInfo = texture->GetFormat();
                     const TexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(dst.aspect).block;
-                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
-                                   src.bytesPerRow / blockInfo.byteSize * blockInfo.width);
-                    gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.rowsPerImage * blockInfo.height);
 
                     if (formatInfo.isCompressed) {
                         ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
@@ -691,6 +688,10 @@ namespace dawn_native { namespace opengl {
                             }
 
                         } else {
+                            gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                                           src.bytesPerRow / blockInfo.byteSize * blockInfo.width);
+                            gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT,
+                                           src.rowsPerImage * blockInfo.height);
                             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, blockInfo.byteSize);
                             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, blockInfo.width);
                             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, blockInfo.height);
@@ -714,12 +715,17 @@ namespace dawn_native { namespace opengl {
                                     reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
                             }
 
+                            gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+                            gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
                             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, 0);
                             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, 0);
                             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, 0);
                             gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 0);
                         }
                     } else {
+                        gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                                       src.bytesPerRow / blockInfo.byteSize * blockInfo.width);
+                        gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.rowsPerImage * blockInfo.height);
                         switch (texture->GetDimension()) {
                             case wgpu::TextureDimension::e2D:
                                 if (texture->GetArrayLayers() > 1) {
@@ -742,10 +748,10 @@ namespace dawn_native { namespace opengl {
                             case wgpu::TextureDimension::e3D:
                                 UNREACHABLE();
                         }
-                    }
 
-                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-                    gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+                        gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+                        gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+                    }
 
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
                     break;

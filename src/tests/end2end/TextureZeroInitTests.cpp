@@ -1846,7 +1846,7 @@ TEST_P(CompressedTextureZeroInitTest, FullMipCopy) {
 // Test that 1 lazy clear count happens when we copy to half the texture
 TEST_P(CompressedTextureZeroInitTest, HalfCopyBufferToTexture) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1865,6 +1865,9 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyBufferToTexture) {
 // Test that 0 lazy clear count happens when we copy buffer to texture to a nonzero mip level
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
@@ -1888,7 +1891,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroMipLevel) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1911,6 +1914,9 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroMipLevel) {
 
 // Test that 0 lazy clear count happens when we copy buffer to nonzero array layer
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroArrayLayer) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
@@ -1929,7 +1935,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroArrayLayer) {
 // Test that 1 lazy clear count happens when we copy buffer to half texture to a nonzero array layer
 TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroArrayLayer) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1948,6 +1954,9 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroArrayLayer) {
 
 // full copy texture to texture, 0 lazy clears are needed
 TEST_P(CompressedTextureZeroInitTest, FullCopyTextureToTextureMipLevel) {
+    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
     // create srcTexture and fill it with data
     wgpu::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
         3, 1,
@@ -1993,7 +2002,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyTextureToTextureMipLevel) {
 // half copy texture to texture, lazy clears are needed for noncopied half
 TEST_P(CompressedTextureZeroInitTest, HalfCopyTextureToTextureMipLevel) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     // create srcTexture with data
     wgpu::TextureDescriptor srcDescriptor = CreateTextureDescriptor(

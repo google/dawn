@@ -208,7 +208,10 @@ namespace dawn_native { namespace opengl {
             {
                 // BC1, BC2 and BC3 are not supported in OpenGL or OpenGL ES core features.
                 bool supportsS3TC =
-                    mFunctions.IsGLExtensionSupported("GL_EXT_texture_compression_s3tc");
+                    mFunctions.IsGLExtensionSupported("GL_EXT_texture_compression_s3tc") ||
+                    (mFunctions.IsGLExtensionSupported("GL_EXT_texture_compression_dxt1") &&
+                     mFunctions.IsGLExtensionSupported("GL_ANGLE_texture_compression_dxt3") &&
+                     mFunctions.IsGLExtensionSupported("GL_ANGLE_texture_compression_dxt5"));
 
                 // COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT, COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT and
                 // COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT requires both GL_EXT_texture_sRGB and
@@ -217,8 +220,14 @@ namespace dawn_native { namespace opengl {
                 bool supportsTextureSRGB = mFunctions.IsGLExtensionSupported("GL_EXT_texture_sRGB");
 
                 // GL_EXT_texture_compression_s3tc_srgb is an extension in OpenGL ES.
+                // NVidia GLES drivers don't support this extension, but they do support
+                // GL_NV_sRGB_formats. (Note that GL_EXT_texture_sRGB does not exist on ES.
+                // GL_EXT_sRGB does (core in ES 3.0), but it does not automatically provide S3TC
+                // SRGB support even if S3TC is supported; see
+                // https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_sRGB.txt.)
                 bool supportsS3TCSRGB =
-                    mFunctions.IsGLExtensionSupported("GL_EXT_texture_compression_s3tc_srgb");
+                    mFunctions.IsGLExtensionSupported("GL_EXT_texture_compression_s3tc_srgb") ||
+                    mFunctions.IsGLExtensionSupported("GL_NV_sRGB_formats");
 
                 // BC4 and BC5
                 bool supportsRGTC =
