@@ -575,6 +575,17 @@ namespace {
         }
     }
 
+    TEST_F(CompressedTextureFormatsValidationTests, MipLevelCount) {
+        for (wgpu::TextureFormat format : utils::kBCFormats) {
+            for (uint32_t mipLevels : {1, 3, 6}) {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.mipLevelCount = mipLevels;
+                device.CreateTexture(&descriptor);
+            }
+        }
+    }
+
     // Test the validation of sample count when creating textures in compressed texture formats.
     // It is invalid to specify SampleCount > 1 when we create a texture in BC formats.
     TEST_F(CompressedTextureFormatsValidationTests, SampleCount) {
