@@ -567,6 +567,7 @@ if(${TINT_BUILD_TESTS})
       reader/wgsl/parser_impl_assignment_stmt_test.cc
       reader/wgsl/parser_impl_body_stmt_test.cc
       reader/wgsl/parser_impl_break_stmt_test.cc
+      reader/wgsl/parser_impl_bug_cases_test.cc
       reader/wgsl/parser_impl_call_stmt_test.cc
       reader/wgsl/parser_impl_case_body_test.cc
       reader/wgsl/parser_impl_const_expr_test.cc

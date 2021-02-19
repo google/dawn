@@ -1036,6 +1036,7 @@ source_set("tint_unittests_wgsl_reader_src") {
     "src/reader/wgsl/parser_impl_assignment_stmt_test.cc",
     "src/reader/wgsl/parser_impl_body_stmt_test.cc",
     "src/reader/wgsl/parser_impl_break_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_bug_cases_test.cc",
     "src/reader/wgsl/parser_impl_call_stmt_test.cc",
     "src/reader/wgsl/parser_impl_case_body_test.cc",
     "src/reader/wgsl/parser_impl_const_expr_test.cc",

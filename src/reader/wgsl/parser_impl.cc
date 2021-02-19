@@ -3162,7 +3162,15 @@ T ParserImpl::expect_lt_gt_block(const std::string& use, F&& body) {
 template <typename F, typename T>
 T ParserImpl::sync(Token::Type tok, F&& body) {
   if (sync_depth_ >= kMaxSyncDepth) {
-    return add_error(peek(), "maximum parser recursive depth reached");
+    // We've hit a maximum parser recursive depth.
+    // We can't call into body() as we might stack overflow.
+    // Instead, report an error...
+    add_error(peek(), "maximum parser recursive depth reached");
+    // ...and try to resynchronize. If we cannot resynchronize to `tok` then
+    // synchronized_ is set to false, and the parser knows that forward progress
+    // is not being made.
+    sync_to(tok, /* consume: */ true);
+    return Failure::kErrored;
   }
 
   sync_tokens_.push_back(tok);
