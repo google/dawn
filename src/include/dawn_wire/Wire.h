@@ -25,7 +25,9 @@ namespace dawn_wire {
 
     class DAWN_WIRE_EXPORT CommandSerializer {
       public:
+        CommandSerializer();
         virtual ~CommandSerializer();
+        CommandSerializer(const CommandSerializer& rhs) = delete;
         CommandSerializer& operator=(const CommandSerializer& rhs) = delete;
 
         // Get space for serializing commands.
@@ -40,7 +42,9 @@ namespace dawn_wire {
 
     class DAWN_WIRE_EXPORT CommandHandler {
       public:
+        CommandHandler();
         virtual ~CommandHandler();
+        CommandHandler(const CommandHandler& rhs) = delete;
         CommandHandler& operator=(const CommandHandler& rhs) = delete;
 
         virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;

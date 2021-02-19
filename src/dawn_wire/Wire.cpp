@@ -16,11 +16,13 @@
 
 namespace dawn_wire {
 
+    CommandSerializer::CommandSerializer() = default;
     CommandSerializer::~CommandSerializer() = default;
 
     void CommandSerializer::OnSerializeError() {
     }
 
+    CommandHandler::CommandHandler() = default;
     CommandHandler::~CommandHandler() = default;
 
 }  // namespace dawn_wire
