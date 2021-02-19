@@ -150,11 +150,14 @@ namespace dawn_native { namespace vulkan {
 
         void* mappedPointer = nullptr;
         if (mappable) {
-            DAWN_TRY(
+            DAWN_TRY_WITH_CLEANUP(
                 CheckVkSuccess(mDevice->fn.MapMemory(mDevice->GetVkDevice(),
                                                      ToBackend(resourceHeap.get())->GetMemory(), 0,
                                                      size, 0, &mappedPointer),
-                               "vkMapMemory"));
+                               "vkMapMemory"),
+                {
+                    mAllocatorsPerType[memoryType]->DeallocateResourceHeap(std::move(resourceHeap));
+                });
         }
 
         AllocationInfo info;
