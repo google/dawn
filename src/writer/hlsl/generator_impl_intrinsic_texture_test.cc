@@ -15,7 +15,9 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
+#include "src/ast/stage_decoration.h"
 #include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
@@ -439,7 +441,14 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   param.buildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
-  WrapInFunction(call);
+
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(call),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -449,6 +458,8 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
 
   EXPECT_EQ(expected.pre, pre_result());
   EXPECT_EQ(expected.out, result());
+
+  Validate();
 }
 
 INSTANTIATE_TEST_SUITE_P(
