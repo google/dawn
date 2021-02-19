@@ -18,136 +18,77 @@
 
 namespace dawn_native {
 
-    ErrorScope::ErrorScope() : mIsRoot(true) {
-    }
+    namespace {
 
-    ErrorScope::ErrorScope(wgpu::ErrorFilter errorFilter, ErrorScope* parent)
-        : RefCounted(), mErrorFilter(errorFilter), mParent(parent), mIsRoot(false) {
-        ASSERT(mParent != nullptr);
-    }
-
-    ErrorScope::~ErrorScope() {
-        if (!IsRoot()) {
-            RunNonRootCallback();
+        wgpu::ErrorType ErrorFilterToErrorType(wgpu::ErrorFilter filter) {
+            switch (filter) {
+                case wgpu::ErrorFilter::None:
+                    return wgpu::ErrorType::NoError;
+                case wgpu::ErrorFilter::Validation:
+                    return wgpu::ErrorType::Validation;
+                case wgpu::ErrorFilter::OutOfMemory:
+                    return wgpu::ErrorType::OutOfMemory;
+            }
         }
+
+    }  // namespace
+
+    ErrorScope::ErrorScope(wgpu::ErrorFilter errorFilter)
+        : mMatchedErrorType(ErrorFilterToErrorType(errorFilter)) {
     }
 
-    void ErrorScope::SetCallback(wgpu::ErrorCallback callback, void* userdata) {
-        mCallback = callback;
-        mUserdata = userdata;
+    wgpu::ErrorType ErrorScope::GetErrorType() const {
+        return mCapturedError;
     }
 
-    ErrorScope* ErrorScope::GetParent() {
-        return mParent.Get();
+    const char* ErrorScope::GetErrorMessage() const {
+        return mErrorMessage.c_str();
     }
 
-    bool ErrorScope::IsRoot() const {
-        return mIsRoot;
+    void ErrorScopeStack::Push(wgpu::ErrorFilter filter) {
+        mScopes.push_back(ErrorScope(filter));
     }
 
-    void ErrorScope::RunNonRootCallback() {
-        ASSERT(!IsRoot());
-
-        if (mCallback != nullptr) {
-            // For non-root error scopes, the callback can run at most once.
-            mCallback(static_cast<WGPUErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
-            mCallback = nullptr;
-        }
+    ErrorScope ErrorScopeStack::Pop() {
+        ASSERT(!mScopes.empty());
+        ErrorScope scope = std::move(mScopes.back());
+        mScopes.pop_back();
+        return scope;
     }
 
-    void ErrorScope::HandleError(wgpu::ErrorType type, const char* message) {
-        HandleErrorImpl(this, type, message);
+    bool ErrorScopeStack::Empty() const {
+        return mScopes.empty();
     }
 
-    void ErrorScope::UnlinkForShutdown() {
-        UnlinkForShutdownImpl(this);
-    }
-
-    // static
-    void ErrorScope::HandleErrorImpl(ErrorScope* scope, wgpu::ErrorType type, const char* message) {
-        ErrorScope* currentScope = scope;
-        for (; !currentScope->IsRoot(); currentScope = currentScope->GetParent()) {
-            ASSERT(currentScope != nullptr);
-
-            bool consumed = false;
-            switch (type) {
-                case wgpu::ErrorType::Validation:
-                    if (currentScope->mErrorFilter != wgpu::ErrorFilter::Validation) {
-                        // Error filter does not match. Move on to the next scope.
-                        continue;
-                    }
-                    consumed = true;
-                    break;
-
-                case wgpu::ErrorType::OutOfMemory:
-                    if (currentScope->mErrorFilter != wgpu::ErrorFilter::OutOfMemory) {
-                        // Error filter does not match. Move on to the next scope.
-                        continue;
-                    }
-                    consumed = true;
-                    break;
-
-                // DeviceLost is fatal. All error scopes capture them.
-                // |consumed| is false because these should bubble to all scopes.
-                case wgpu::ErrorType::DeviceLost:
-                    consumed = false;
-                    if (currentScope->mErrorType != wgpu::ErrorType::DeviceLost) {
-                        // DeviceLost overrides any other error that is not a DeviceLost.
-                        currentScope->mErrorType = type;
-                        currentScope->mErrorMessage = message;
-                    }
-                    break;
-
-                case wgpu::ErrorType::Unknown:
-                    // Means the scope was destroyed before contained work finished.
-                    // This happens when you destroy the device while there's pending work.
-                    // That's handled in ErrorScope::UnlinkForShutdownImpl, not here.
-                case wgpu::ErrorType::NoError:
-                    // Not considered an error, and should never be passed to HandleError.
-                    UNREACHABLE();
-                    return;
+    bool ErrorScopeStack::HandleError(wgpu::ErrorType type, const char* message) {
+        ASSERT(type != wgpu::ErrorType::NoError);
+        for (auto it = mScopes.rbegin(); it != mScopes.rend(); ++it) {
+            if (it->mMatchedErrorType != type) {
+                // Error filter does not match. Move on to the next scope.
+                continue;
             }
 
+            // Filter matches.
             // Record the error if the scope doesn't have one yet.
-            if (currentScope->mErrorType == wgpu::ErrorType::NoError) {
-                currentScope->mErrorType = type;
-                currentScope->mErrorMessage = message;
+            if (it->mCapturedError == wgpu::ErrorType::NoError) {
+                it->mCapturedError = type;
+                it->mErrorMessage = message;
             }
 
-            if (consumed) {
-                return;
+            if (type == wgpu::ErrorType::DeviceLost) {
+                if (it->mCapturedError != wgpu::ErrorType::DeviceLost) {
+                    // DeviceLost overrides any other error that is not a DeviceLost.
+                    it->mCapturedError = type;
+                    it->mErrorMessage = message;
+                }
+            } else {
+                // Errors that are not device lost are captured and stop propogating.
+                return true;
             }
         }
 
-        // The root error scope captures all uncaptured errors.
-        // Except, it should not capture device lost errors since those go to
-        // the device lost callback.
-        ASSERT(currentScope->IsRoot());
-        if (currentScope->mCallback && type != wgpu::ErrorType::DeviceLost) {
-            currentScope->mCallback(static_cast<WGPUErrorType>(type), message,
-                                    currentScope->mUserdata);
-        }
-    }
-
-    // static
-    void ErrorScope::UnlinkForShutdownImpl(ErrorScope* scope) {
-        Ref<ErrorScope> currentScope = scope;
-        Ref<ErrorScope> parentScope = nullptr;
-        for (; !currentScope->IsRoot(); currentScope = parentScope.Get()) {
-            ASSERT(!currentScope->IsRoot());
-            ASSERT(currentScope != nullptr);
-            parentScope = std::move(currentScope->mParent);
-            ASSERT(parentScope != nullptr);
-
-            // On shutdown, error scopes that have yet to have a status get Unknown.
-            if (currentScope->mErrorType == wgpu::ErrorType::NoError) {
-                currentScope->mErrorType = wgpu::ErrorType::Unknown;
-                currentScope->mErrorMessage = "Error scope destroyed";
-            }
-
-            // Run the callback if it hasn't run already.
-            currentScope->RunNonRootCallback();
-        }
+        // The error was not captured.
+        return false;
     }
 
 }  // namespace dawn_native

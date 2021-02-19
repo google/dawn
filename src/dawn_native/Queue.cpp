@@ -23,8 +23,6 @@
 #include "dawn_native/CopyTextureForBrowserHelper.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
-#include "dawn_native/ErrorScope.h"
-#include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderPassEncoder.h"
@@ -176,8 +174,6 @@ namespace dawn_native {
 
         fence->SetSignaledValue(signalValue);
         fence->UpdateFenceOnComplete(fence, signalValue);
-        device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
-            device->GetCurrentErrorScope());
     }
 
     void QueueBase::TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial) {
@@ -487,9 +483,6 @@ namespace dawn_native {
         if (device->ConsumedError(SubmitImpl(commandCount, commands))) {
             return;
         }
-
-        device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
-            device->GetCurrentErrorScope());
     }
 
 }  // namespace dawn_native

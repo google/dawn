@@ -35,8 +35,7 @@ namespace dawn_native {
     class BindGroupLayoutBase;
     class CreateReadyPipelineTracker;
     class DynamicUploader;
-    class ErrorScope;
-    class ErrorScopeTracker;
+    class ErrorScopeStack;
     class PersistentCache;
     class StagingBufferBase;
     struct InternalPipelineStore;
@@ -71,8 +70,6 @@ namespace dawn_native {
 
         AdapterBase* GetAdapter() const;
         dawn_platform::Platform* GetPlatform() const;
-
-        ErrorScopeTracker* GetErrorScopeTracker() const;
 
         // Returns the Format corresponding to the wgpu::TextureFormat or an error if the format
         // isn't a valid wgpu::TextureFormat or isn't supported by this device.
@@ -182,8 +179,6 @@ namespace dawn_native {
         bool PopErrorScope(wgpu::ErrorCallback callback, void* userdata);
 
         MaybeError ValidateIsAlive() const;
-
-        ErrorScope* GetCurrentErrorScope();
 
         PersistentCache* GetPersistentCache();
 
@@ -363,8 +358,13 @@ namespace dawn_native {
         // resources.
         virtual MaybeError WaitForIdleForDestruction() = 0;
 
+        wgpu::ErrorCallback mUncapturedErrorCallback = nullptr;
+        void* mUncapturedErrorUserdata = nullptr;
+
         wgpu::DeviceLostCallback mDeviceLostCallback = nullptr;
         void* mDeviceLostUserdata = nullptr;
+
+        std::unique_ptr<ErrorScopeStack> mErrorScopeStack;
 
         // The Device keeps a ref to the Instance so that any live Device keeps the Instance alive.
         // The Instance shouldn't need to ref child objects so this shouldn't introduce ref cycles.
@@ -372,9 +372,6 @@ namespace dawn_native {
         // Instance.
         Ref<InstanceBase> mInstance;
         AdapterBase* mAdapter = nullptr;
-
-        Ref<ErrorScope> mRootErrorScope;
-        Ref<ErrorScope> mCurrentErrorScope;
 
         // The object caches aren't exposed in the header as they would require a lot of
         // additional includes.
@@ -384,7 +381,6 @@ namespace dawn_native {
         Ref<BindGroupLayoutBase> mEmptyBindGroupLayout;
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;
-        std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;
         std::unique_ptr<CreateReadyPipelineTracker> mCreateReadyPipelineTracker;
         Ref<QueueBase> mQueue;
 

@@ -90,8 +90,6 @@ target_sources(dawn_native PRIVATE
     "ErrorInjector.h"
     "ErrorScope.cpp"
     "ErrorScope.h"
-    "ErrorScopeTracker.cpp"
-    "ErrorScopeTracker.h"
     "Extensions.cpp"
     "Extensions.h"
     "ObjectContentHasher.cpp"

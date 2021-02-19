@@ -217,8 +217,6 @@ source_set("dawn_native_sources") {
     "ErrorInjector.h",
     "ErrorScope.cpp",
     "ErrorScope.h",
-    "ErrorScopeTracker.cpp",
-    "ErrorScopeTracker.h",
     "Extensions.cpp",
     "Extensions.h",
     "Fence.cpp",

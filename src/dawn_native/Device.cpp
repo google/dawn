@@ -27,7 +27,6 @@
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/ErrorScope.h"
-#include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/InternalPipelineStore.h"
@@ -98,22 +97,17 @@ namespace dawn_native {
 
     MaybeError DeviceBase::Initialize(QueueBase* defaultQueue) {
         mQueue = AcquireRef(defaultQueue);
-        mRootErrorScope = AcquireRef(new ErrorScope());
-        mCurrentErrorScope = mRootErrorScope.Get();
 
 #if defined(DAWN_ENABLE_ASSERTS)
-        mRootErrorScope->SetCallback(
-            [](WGPUErrorType, char const*, void*) {
-                static bool calledOnce = false;
-                if (!calledOnce) {
-                    calledOnce = true;
-                    dawn::WarningLog()
-                        << "No Dawn device uncaptured error callback was set. This is "
-                           "probably not intended. If you really want to ignore errors "
-                           "and suppress this message, set the callback to null.";
-                }
-            },
-            nullptr);
+        mUncapturedErrorCallback = [](WGPUErrorType, char const*, void*) {
+            static bool calledOnce = false;
+            if (!calledOnce) {
+                calledOnce = true;
+                dawn::WarningLog() << "No Dawn device uncaptured error callback was set. This is "
+                                      "probably not intended. If you really want to ignore errors "
+                                      "and suppress this message, set the callback to null.";
+            }
+        };
 
         mDeviceLostCallback = [](char const*, void*) {
             static bool calledOnce = false;
@@ -127,7 +121,7 @@ namespace dawn_native {
 #endif  // DAWN_ENABLE_ASSERTS
 
         mCaches = std::make_unique<DeviceBase::Caches>();
-        mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
+        mErrorScopeStack = std::make_unique<ErrorScopeStack>();
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
         mCreateReadyPipelineTracker = std::make_unique<CreateReadyPipelineTracker>(this);
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
@@ -146,9 +140,6 @@ namespace dawn_native {
     void DeviceBase::ShutDownBase() {
         // Skip handling device facilities if they haven't even been created (or failed doing so)
         if (mState != State::BeingCreated) {
-            // Reject all error scope callbacks.
-            mErrorScopeTracker->ClearForShutDown();
-
             // Reject all async pipeline creations.
             mCreateReadyPipelineTracker->ClearForShutDown();
         }
@@ -194,11 +185,6 @@ namespace dawn_native {
         // At this point GPU operations are always finished, so we are in the disconnected state.
         mState = State::Disconnected;
 
-        // mCurrentErrorScope can be null if we failed device initialization.
-        if (mCurrentErrorScope != nullptr) {
-            mCurrentErrorScope->UnlinkForShutdown();
-        }
-        mErrorScopeTracker = nullptr;
         mDynamicUploader = nullptr;
         mCreateReadyPipelineTracker = nullptr;
         mPersistentCache = nullptr;
@@ -242,16 +228,27 @@ namespace dawn_native {
             type = InternalErrorType::DeviceLost;
         }
 
-        // The device was lost, call the application callback.
-        if (type == InternalErrorType::DeviceLost && mDeviceLostCallback != nullptr) {
+        if (type == InternalErrorType::DeviceLost) {
+            // The device was lost, call the application callback.
+            if (mDeviceLostCallback != nullptr) {
+                mDeviceLostCallback(message, mDeviceLostUserdata);
+                mDeviceLostCallback = nullptr;
+            }
+
             mQueue->HandleDeviceLoss();
 
-            mDeviceLostCallback(message, mDeviceLostUserdata);
-            mDeviceLostCallback = nullptr;
+            // Still forward device loss errors to the error scopes so they all reject.
+            mErrorScopeStack->HandleError(ToWGPUErrorType(type), message);
+        } else {
+            // Pass the error to the error scope stack and call the uncaptured error callback
+            // if it isn't handled. DeviceLost is not handled here because it should be
+            // handled by the lost callback.
+            bool captured = mErrorScopeStack->HandleError(ToWGPUErrorType(type), message);
+            if (!captured && mUncapturedErrorCallback != nullptr) {
+                mUncapturedErrorCallback(static_cast<WGPUErrorType>(ToWGPUErrorType(type)), message,
+                                         mUncapturedErrorUserdata);
+            }
         }
-
-        // Still forward device loss errors to the error scopes so they all reject.
-        mCurrentErrorScope->HandleError(ToWGPUErrorType(type), message);
     }
 
     void DeviceBase::InjectError(wgpu::ErrorType type, const char* message) {
@@ -282,7 +279,8 @@ namespace dawn_native {
     }
 
     void DeviceBase::SetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
-        mRootErrorScope->SetCallback(callback, userdata);
+        mUncapturedErrorCallback = callback;
+        mUncapturedErrorUserdata = userdata;
     }
 
     void DeviceBase::SetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata) {
@@ -294,22 +292,20 @@ namespace dawn_native {
         if (ConsumedError(ValidateErrorFilter(filter))) {
             return;
         }
-        mCurrentErrorScope = AcquireRef(new ErrorScope(filter, mCurrentErrorScope.Get()));
+        mErrorScopeStack->Push(filter);
     }
 
     bool DeviceBase::PopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
-        if (DAWN_UNLIKELY(mCurrentErrorScope.Get() == mRootErrorScope.Get())) {
+        if (mErrorScopeStack->Empty()) {
             return false;
         }
-        mCurrentErrorScope->SetCallback(callback, userdata);
-        mCurrentErrorScope = Ref<ErrorScope>(mCurrentErrorScope->GetParent());
+        ErrorScope scope = mErrorScopeStack->Pop();
+        if (callback != nullptr) {
+            callback(static_cast<WGPUErrorType>(scope.GetErrorType()), scope.GetErrorMessage(),
+                     userdata);
+        }
 
         return true;
-    }
-
-    ErrorScope* DeviceBase::GetCurrentErrorScope() {
-        ASSERT(mCurrentErrorScope != nullptr);
-        return mCurrentErrorScope.Get();
     }
 
     PersistentCache* DeviceBase::GetPersistentCache() {
@@ -358,10 +354,6 @@ namespace dawn_native {
 
     dawn_platform::Platform* DeviceBase::GetPlatform() const {
         return GetAdapter()->GetInstance()->GetPlatform();
-    }
-
-    ErrorScopeTracker* DeviceBase::GetErrorScopeTracker() const {
-        return mErrorScopeTracker.get();
     }
 
     ExecutionSerial DeviceBase::GetCompletedCommandSerial() const {
@@ -868,7 +860,6 @@ namespace dawn_native {
             // tick the dynamic uploader before the backend resource allocators. This would allow
             // reclaiming resources one tick earlier.
             mDynamicUploader->Deallocate(mCompletedSerial);
-            mErrorScopeTracker->Tick(mCompletedSerial);
             GetQueue()->Tick(mCompletedSerial);
 
             mCreateReadyPipelineTracker->Tick(mCompletedSerial);
