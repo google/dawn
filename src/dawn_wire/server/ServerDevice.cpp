@@ -19,10 +19,10 @@ namespace dawn_wire { namespace server {
     namespace {
 
         template <ObjectType objectType, typename Pipeline>
-        void HandleCreateReadyRenderPipelineCallbackResult(KnownObjects<Pipeline>* knownObjects,
-                                                           WGPUCreateReadyPipelineStatus status,
+        void HandleCreateRenderPipelineAsyncCallbackResult(KnownObjects<Pipeline>* knownObjects,
+                                                           WGPUCreatePipelineAsyncStatus status,
                                                            Pipeline pipeline,
-                                                           CreateReadyPipelineUserData* data) {
+                                                           CreatePipelineAsyncUserData* data) {
             // May be null if the device was destroyed. Device destruction destroys child
             // objects on the wire.
             auto* pipelineObject =
@@ -31,7 +31,7 @@ namespace dawn_wire { namespace server {
             // they move from Reserved to Allocated, or if they are destroyed here.
             ASSERT(pipelineObject != nullptr);
 
-            if (status == WGPUCreateReadyPipelineStatus_Success) {
+            if (status == WGPUCreatePipelineAsyncStatus_Success) {
                 // Assign the handle and allocated status if the pipeline is created successfully.
                 pipelineObject->state = AllocationState::Allocated;
                 pipelineObject->handle = pipeline;
@@ -101,7 +101,7 @@ namespace dawn_wire { namespace server {
         SerializeCommand(cmd);
     }
 
-    bool Server::DoDeviceCreateReadyComputePipeline(
+    bool Server::DoDeviceCreateComputePipelineAsync(
         ObjectId deviceId,
         uint64_t requestSerial,
         ObjectHandle pipelineObjectHandle,
@@ -120,27 +120,27 @@ namespace dawn_wire { namespace server {
         resultData->generation = pipelineObjectHandle.generation;
         resultData->deviceInfo = device->info.get();
 
-        auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
+        auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
         userdata->device = ObjectHandle{deviceId, device->generation};
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
 
-        mProcs.deviceCreateReadyComputePipeline(
+        mProcs.deviceCreateComputePipelineAsync(
             device->handle, descriptor,
-            ForwardToServer<decltype(&Server::OnCreateReadyComputePipelineCallback)>::Func<
-                &Server::OnCreateReadyComputePipelineCallback>(),
+            ForwardToServer<decltype(&Server::OnCreateComputePipelineAsyncCallback)>::Func<
+                &Server::OnCreateComputePipelineAsyncCallback>(),
             userdata.release());
         return true;
     }
 
-    void Server::OnCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus status,
+    void Server::OnCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
                                                       WGPUComputePipeline pipeline,
                                                       const char* message,
-                                                      CreateReadyPipelineUserData* data) {
-        HandleCreateReadyRenderPipelineCallbackResult<ObjectType::ComputePipeline>(
+                                                      CreatePipelineAsyncUserData* data) {
+        HandleCreateRenderPipelineAsyncCallbackResult<ObjectType::ComputePipeline>(
             &ComputePipelineObjects(), status, pipeline, data);
 
-        ReturnDeviceCreateReadyComputePipelineCallbackCmd cmd;
+        ReturnDeviceCreateComputePipelineAsyncCallbackCmd cmd;
         cmd.device = data->device;
         cmd.status = status;
         cmd.requestSerial = data->requestSerial;
@@ -149,7 +149,7 @@ namespace dawn_wire { namespace server {
         SerializeCommand(cmd);
     }
 
-    bool Server::DoDeviceCreateReadyRenderPipeline(ObjectId deviceId,
+    bool Server::DoDeviceCreateRenderPipelineAsync(ObjectId deviceId,
                                                    uint64_t requestSerial,
                                                    ObjectHandle pipelineObjectHandle,
                                                    const WGPURenderPipelineDescriptor* descriptor) {
@@ -167,27 +167,27 @@ namespace dawn_wire { namespace server {
         resultData->generation = pipelineObjectHandle.generation;
         resultData->deviceInfo = device->info.get();
 
-        auto userdata = MakeUserdata<CreateReadyPipelineUserData>();
+        auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
         userdata->device = ObjectHandle{deviceId, device->generation};
         userdata->requestSerial = requestSerial;
         userdata->pipelineObjectID = pipelineObjectHandle.id;
 
-        mProcs.deviceCreateReadyRenderPipeline(
+        mProcs.deviceCreateRenderPipelineAsync(
             device->handle, descriptor,
-            ForwardToServer<decltype(&Server::OnCreateReadyRenderPipelineCallback)>::Func<
-                &Server::OnCreateReadyRenderPipelineCallback>(),
+            ForwardToServer<decltype(&Server::OnCreateRenderPipelineAsyncCallback)>::Func<
+                &Server::OnCreateRenderPipelineAsyncCallback>(),
             userdata.release());
         return true;
     }
 
-    void Server::OnCreateReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus status,
+    void Server::OnCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
                                                      WGPURenderPipeline pipeline,
                                                      const char* message,
-                                                     CreateReadyPipelineUserData* data) {
-        HandleCreateReadyRenderPipelineCallbackResult<ObjectType::RenderPipeline>(
+                                                     CreatePipelineAsyncUserData* data) {
+        HandleCreateRenderPipelineAsyncCallbackResult<ObjectType::RenderPipeline>(
             &RenderPipelineObjects(), status, pipeline, data);
 
-        ReturnDeviceCreateReadyRenderPipelineCallbackCmd cmd;
+        ReturnDeviceCreateRenderPipelineAsyncCallbackCmd cmd;
         cmd.device = data->device;
         cmd.status = status;
         cmd.requestSerial = data->requestSerial;

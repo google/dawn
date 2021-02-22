@@ -18,7 +18,7 @@
 #include "utils/WGPUHelpers.h"
 
 namespace {
-    struct CreateReadyPipelineTask {
+    struct CreatePipelineAsyncTask {
         wgpu::ComputePipeline computePipeline = nullptr;
         wgpu::RenderPipeline renderPipeline = nullptr;
         bool isCompleted = false;
@@ -26,13 +26,13 @@ namespace {
     };
 }  // anonymous namespace
 
-class CreateReadyPipelineTest : public DawnTest {
+class CreatePipelineAsyncTest : public DawnTest {
   protected:
-    CreateReadyPipelineTask task;
+    CreatePipelineAsyncTask task;
 };
 
-// Verify the basic use of CreateReadyComputePipeline works on all backends.
-TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
+// Verify the basic use of CreateComputePipelineAsync works on all backends.
+TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct SSBO {
@@ -45,13 +45,13 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
         })");
     csDesc.computeStage.entryPoint = "main";
 
-    device.CreateReadyComputePipeline(
+    device.CreateComputePipelineAsync(
         &csDesc,
-        [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
+        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Success, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
 
-            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
             task->isCompleted = true;
             task->message = message;
@@ -93,11 +93,11 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyComputePipeline) {
     EXPECT_BUFFER_U32_EQ(kExpected, ssbo, 0);
 }
 
-// Verify CreateReadyComputePipeline() works as expected when there is any error that happens during
+// Verify CreateComputePipelineAsync() works as expected when there is any error that happens during
 // the creation of the compute pipeline. The SPEC requires that during the call of
-// CreateReadyComputePipeline() any error won't be forwarded to the error scope / unhandled error
+// CreateComputePipelineAsync() any error won't be forwarded to the error scope / unhandled error
 // callback.
-TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
+TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
     DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::ComputePipelineDescriptor csDesc;
@@ -112,13 +112,13 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
         })");
     csDesc.computeStage.entryPoint = "main0";
 
-    device.CreateReadyComputePipeline(
+    device.CreateComputePipelineAsync(
         &csDesc,
-        [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
+        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Error, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Error, status);
 
-            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
             task->isCompleted = true;
             task->message = message;
@@ -133,8 +133,8 @@ TEST_P(CreateReadyPipelineTest, CreateComputePipelineFailed) {
     ASSERT_EQ(nullptr, task.computePipeline.Get());
 }
 
-// Verify the basic use of CreateReadyRenderPipeline() works on all backends.
-TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
+// Verify the basic use of CreateRenderPipelineAsync() works on all backends.
+TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
@@ -153,13 +153,13 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
     renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
     renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
 
-    device.CreateReadyRenderPipeline(
+    device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor,
-        [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
+        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Success, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
 
-            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
             task->isCompleted = true;
             task->message = message;
@@ -198,11 +198,11 @@ TEST_P(CreateReadyPipelineTest, BasicUseOfCreateReadyRenderPipeline) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
 }
 
-// Verify CreateReadyRenderPipeline() works as expected when there is any error that happens during
+// Verify CreateRenderPipelineAsync() works as expected when there is any error that happens during
 // the creation of the render pipeline. The SPEC requires that during the call of
-// CreateReadyRenderPipeline() any error won't be forwarded to the error scope / unhandled error
+// CreateRenderPipelineAsync() any error won't be forwarded to the error scope / unhandled error
 // callback.
-TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
+TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
     DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
@@ -223,13 +223,13 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
     renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
     renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
 
-    device.CreateReadyRenderPipeline(
+    device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor,
-        [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
+        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_Error, status);
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Error, status);
 
-            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
             task->isCompleted = true;
             task->message = message;
@@ -245,22 +245,22 @@ TEST_P(CreateReadyPipelineTest, CreateRenderPipelineFailed) {
 }
 
 // Verify there is no error when the device is released before the callback of
-// CreateReadyComputePipeline() is called.
-TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyComputePipeline) {
+// CreateComputePipelineAsync() is called.
+TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[stage(compute)]] fn main() -> void {
         })");
     csDesc.computeStage.entryPoint = "main";
 
-    device.CreateReadyComputePipeline(
+    device.CreateComputePipelineAsync(
         &csDesc,
-        [](WGPUCreateReadyPipelineStatus status, WGPUComputePipeline returnPipeline,
+        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_DeviceDestroyed,
                       status);
 
-            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
             task->isCompleted = true;
             task->message = message;
@@ -269,8 +269,8 @@ TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyComputeP
 }
 
 // Verify there is no error when the device is released before the callback of
-// CreateReadyRenderPipeline() is called.
-TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyRenderPipeline) {
+// CreateRenderPipelineAsync() is called.
+TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateRenderPipelineAsync) {
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
@@ -287,14 +287,14 @@ TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyRenderPi
     renderPipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
     renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
 
-    device.CreateReadyRenderPipeline(
+    device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor,
-        [](WGPUCreateReadyPipelineStatus status, WGPURenderPipeline returnPipeline,
+        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
            const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreateReadyPipelineStatus::WGPUCreateReadyPipelineStatus_DeviceDestroyed,
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_DeviceDestroyed,
                       status);
 
-            CreateReadyPipelineTask* task = static_cast<CreateReadyPipelineTask*>(userdata);
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
             task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
             task->isCompleted = true;
             task->message = message;
@@ -302,7 +302,7 @@ TEST_P(CreateReadyPipelineTest, ReleaseDeviceBeforeCallbackOfCreateReadyRenderPi
         &task);
 }
 
-DAWN_INSTANTIATE_TEST(CreateReadyPipelineTest,
+DAWN_INSTANTIATE_TEST(CreatePipelineAsyncTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

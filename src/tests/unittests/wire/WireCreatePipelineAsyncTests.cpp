@@ -22,78 +22,78 @@ using namespace dawn_wire;
 namespace {
 
     // Mock class to add expectations on the wire calling callbacks
-    class MockCreateReadyComputePipelineCallback {
+    class MockCreateComputePipelineAsyncCallback {
       public:
         MOCK_METHOD(void,
                     Call,
-                    (WGPUCreateReadyPipelineStatus status,
+                    (WGPUCreatePipelineAsyncStatus status,
                      WGPUComputePipeline pipeline,
                      const char* message,
                      void* userdata));
     };
 
-    std::unique_ptr<StrictMock<MockCreateReadyComputePipelineCallback>>
-        mockCreateReadyComputePipelineCallback;
-    void ToMockCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus status,
+    std::unique_ptr<StrictMock<MockCreateComputePipelineAsyncCallback>>
+        mockCreateComputePipelineAsyncCallback;
+    void ToMockCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
                                                   WGPUComputePipeline pipeline,
                                                   const char* message,
                                                   void* userdata) {
-        mockCreateReadyComputePipelineCallback->Call(status, pipeline, message, userdata);
+        mockCreateComputePipelineAsyncCallback->Call(status, pipeline, message, userdata);
     }
 
-    class MockCreateReadyRenderPipelineCallback {
+    class MockCreateRenderPipelineAsyncCallback {
       public:
         MOCK_METHOD(void,
                     Call,
-                    (WGPUCreateReadyPipelineStatus status,
+                    (WGPUCreatePipelineAsyncStatus status,
                      WGPURenderPipeline pipeline,
                      const char* message,
                      void* userdata));
     };
 
-    std::unique_ptr<StrictMock<MockCreateReadyRenderPipelineCallback>>
-        mockCreateReadyRenderPipelineCallback;
-    void ToMockCreateReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus status,
+    std::unique_ptr<StrictMock<MockCreateRenderPipelineAsyncCallback>>
+        mockCreateRenderPipelineAsyncCallback;
+    void ToMockCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
                                                  WGPURenderPipeline pipeline,
                                                  const char* message,
                                                  void* userdata) {
-        mockCreateReadyRenderPipelineCallback->Call(status, pipeline, message, userdata);
+        mockCreateRenderPipelineAsyncCallback->Call(status, pipeline, message, userdata);
     }
 
 }  // anonymous namespace
 
-class WireCreateReadyPipelineTest : public WireTest {
+class WireCreatePipelineAsyncTest : public WireTest {
   public:
     void SetUp() override {
         WireTest::SetUp();
 
-        mockCreateReadyComputePipelineCallback =
-            std::make_unique<StrictMock<MockCreateReadyComputePipelineCallback>>();
-        mockCreateReadyRenderPipelineCallback =
-            std::make_unique<StrictMock<MockCreateReadyRenderPipelineCallback>>();
+        mockCreateComputePipelineAsyncCallback =
+            std::make_unique<StrictMock<MockCreateComputePipelineAsyncCallback>>();
+        mockCreateRenderPipelineAsyncCallback =
+            std::make_unique<StrictMock<MockCreateRenderPipelineAsyncCallback>>();
     }
 
     void TearDown() override {
         WireTest::TearDown();
 
         // Delete mock so that expectations are checked
-        mockCreateReadyComputePipelineCallback = nullptr;
-        mockCreateReadyRenderPipelineCallback = nullptr;
+        mockCreateComputePipelineAsyncCallback = nullptr;
+        mockCreateRenderPipelineAsyncCallback = nullptr;
     }
 
     void FlushClient() {
         WireTest::FlushClient();
-        Mock::VerifyAndClearExpectations(&mockCreateReadyComputePipelineCallback);
+        Mock::VerifyAndClearExpectations(&mockCreateComputePipelineAsyncCallback);
     }
 
     void FlushServer() {
         WireTest::FlushServer();
-        Mock::VerifyAndClearExpectations(&mockCreateReadyComputePipelineCallback);
+        Mock::VerifyAndClearExpectations(&mockCreateComputePipelineAsyncCallback);
     }
 };
 
-// Test when creating a compute pipeline with CreateReadyComputePipeline() successfully.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineSuccess) {
+// Test when creating a compute pipeline with CreateComputePipelineAsync() successfully.
+TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncSuccess) {
     WGPUShaderModuleDescriptor csDescriptor{};
     WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
     WGPUShaderModule apiCsModule = api.GetNewShaderModule();
@@ -103,26 +103,26 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineSuccess) {
     descriptor.computeStage.module = csModule;
     descriptor.computeStage.entryPoint = "main";
 
-    wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
-                                         ToMockCreateReadyComputePipelineCallback, this);
+    wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
+                                         ToMockCreateComputePipelineAsyncCallback, this);
 
-    EXPECT_CALL(api, OnDeviceCreateReadyComputePipeline(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallDeviceCreateReadyComputePipelineCallback(
-                apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, nullptr, "");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateReadyComputePipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_Success, _, StrEq(""), this))
+    EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_Success, _, StrEq(""), this))
         .Times(1);
 
     FlushServer();
 }
 
-// Test when creating a compute pipeline with CreateReadyComputePipeline() results in an error.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineError) {
+// Test when creating a compute pipeline with CreateComputePipelineAsync() results in an error.
+TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncError) {
     WGPUShaderModuleDescriptor csDescriptor{};
     WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
     WGPUShaderModule apiCsModule = api.GetNewShaderModule();
@@ -132,26 +132,26 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineError) {
     descriptor.computeStage.module = csModule;
     descriptor.computeStage.entryPoint = "main";
 
-    wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
-                                         ToMockCreateReadyComputePipelineCallback, this);
+    wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
+                                         ToMockCreateComputePipelineAsyncCallback, this);
 
-    EXPECT_CALL(api, OnDeviceCreateReadyComputePipeline(apiDevice, _, _, _))
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallDeviceCreateReadyComputePipelineCallback(
-                apiDevice, WGPUCreateReadyPipelineStatus_Error, nullptr, "Some error message");
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Error, nullptr, "Some error message");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateReadyComputePipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_Error, _, StrEq("Some error message"), this))
+    EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_Error, _, StrEq("Some error message"), this))
         .Times(1);
 
     FlushServer();
 }
 
-// Test when creating a render pipeline with CreateReadyRenderPipeline() successfully.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineSuccess) {
+// Test when creating a render pipeline with CreateRenderPipelineAsync() successfully.
+TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncSuccess) {
     WGPUShaderModuleDescriptor vertexDescriptor = {};
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
@@ -166,25 +166,25 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineSuccess) {
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
-    wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
-                                        ToMockCreateReadyRenderPipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _))
+    wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
+                                        ToMockCreateRenderPipelineAsyncCallback, this);
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallDeviceCreateReadyRenderPipelineCallback(
-                apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, nullptr, "");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateReadyRenderPipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_Success, _, StrEq(""), this))
+    EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_Success, _, StrEq(""), this))
         .Times(1);
 
     FlushServer();
 }
 
-// Test when creating a render pipeline with CreateReadyRenderPipeline() results in an error.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineError) {
+// Test when creating a render pipeline with CreateRenderPipelineAsync() results in an error.
+TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncError) {
     WGPUShaderModuleDescriptor vertexDescriptor = {};
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
@@ -199,18 +199,18 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineError) {
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
-    wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
-                                        ToMockCreateReadyRenderPipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _))
+    wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
+                                        ToMockCreateRenderPipelineAsyncCallback, this);
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallDeviceCreateReadyRenderPipelineCallback(
-                apiDevice, WGPUCreateReadyPipelineStatus_Error, nullptr, "Some error message");
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Error, nullptr, "Some error message");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateReadyRenderPipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_Error, _, StrEq("Some error message"), this))
+    EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_Error, _, StrEq("Some error message"), this))
         .Times(1);
 
     FlushServer();
@@ -218,7 +218,7 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineError) {
 
 // Test that registering a callback then wire disconnect calls the callback with
 // DeviceLost.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineThenDisconnect) {
+TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncThenDisconnect) {
     WGPUShaderModuleDescriptor vertexDescriptor = {};
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
@@ -233,25 +233,25 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineThenDisconnect) {
     pipelineDescriptor.vertexStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
-    wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
-                                        ToMockCreateReadyRenderPipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _))
+    wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
+                                        ToMockCreateRenderPipelineAsyncCallback, this);
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallDeviceCreateReadyRenderPipelineCallback(
-                apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, nullptr, "");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateReadyRenderPipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_DeviceLost, _, _, this))
+    EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, _, _, this))
         .Times(1);
     GetWireClient()->Disconnect();
 }
 
 // Test that registering a callback then wire disconnect calls the callback with
 // DeviceLost.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineThenDisconnect) {
+TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncThenDisconnect) {
     WGPUShaderModuleDescriptor csDescriptor{};
     WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
     WGPUShaderModule apiCsModule = api.GetNewShaderModule();
@@ -261,25 +261,25 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineThenDisconnect) {
     descriptor.computeStage.module = csModule;
     descriptor.computeStage.entryPoint = "main";
 
-    wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
-                                         ToMockCreateReadyComputePipelineCallback, this);
-    EXPECT_CALL(api, OnDeviceCreateReadyComputePipeline(apiDevice, _, _, _))
+    wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
+                                         ToMockCreateComputePipelineAsyncCallback, this);
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallDeviceCreateReadyComputePipelineCallback(
-                apiDevice, WGPUCreateReadyPipelineStatus_Success, nullptr, "");
+            api.CallDeviceCreateComputePipelineAsyncCallback(
+                apiDevice, WGPUCreatePipelineAsyncStatus_Success, nullptr, "");
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockCreateReadyComputePipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_DeviceLost, _, _, this))
+    EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, _, _, this))
         .Times(1);
     GetWireClient()->Disconnect();
 }
 
 // Test that registering a callback after wire disconnect calls the callback with
 // DeviceLost.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineAfterDisconnect) {
+TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncAfterDisconnect) {
     WGPUShaderModuleDescriptor vertexDescriptor = {};
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
@@ -298,16 +298,16 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyRenderPipelineAfterDisconnect) {
 
     GetWireClient()->Disconnect();
 
-    EXPECT_CALL(*mockCreateReadyRenderPipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_DeviceLost, nullptr, _, this))
+    EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr, _, this))
         .Times(1);
-    wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
-                                        ToMockCreateReadyRenderPipelineCallback, this);
+    wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
+                                        ToMockCreateRenderPipelineAsyncCallback, this);
 }
 
 // Test that registering a callback after wire disconnect calls the callback with
 // DeviceLost.
-TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineAfterDisconnect) {
+TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncAfterDisconnect) {
     WGPUShaderModuleDescriptor csDescriptor{};
     WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
     WGPUShaderModule apiCsModule = api.GetNewShaderModule();
@@ -321,15 +321,15 @@ TEST_F(WireCreateReadyPipelineTest, CreateReadyComputePipelineAfterDisconnect) {
 
     GetWireClient()->Disconnect();
 
-    EXPECT_CALL(*mockCreateReadyComputePipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_DeviceLost, nullptr, _, this))
+    EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr, _, this))
         .Times(1);
 
-    wgpuDeviceCreateReadyComputePipeline(device, &descriptor,
-                                         ToMockCreateReadyComputePipelineCallback, this);
+    wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
+                                         ToMockCreateComputePipelineAsyncCallback, this);
 }
 
-TEST_F(WireCreateReadyPipelineTest, DeviceDeletedBeforeCallback) {
+TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
     WGPUShaderModuleDescriptor vertexDescriptor = {};
     WGPUShaderModule module = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
     WGPUShaderModule apiModule = api.GetNewShaderModule();
@@ -344,14 +344,14 @@ TEST_F(WireCreateReadyPipelineTest, DeviceDeletedBeforeCallback) {
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;
 
-    wgpuDeviceCreateReadyRenderPipeline(device, &pipelineDescriptor,
-                                        ToMockCreateReadyRenderPipelineCallback, this);
+    wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
+                                        ToMockCreateRenderPipelineAsyncCallback, this);
 
-    EXPECT_CALL(api, OnDeviceCreateReadyRenderPipeline(apiDevice, _, _, _));
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _, _));
     FlushClient();
 
-    EXPECT_CALL(*mockCreateReadyRenderPipelineCallback,
-                Call(WGPUCreateReadyPipelineStatus_DeviceDestroyed, nullptr, _, this))
+    EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
+                Call(WGPUCreatePipelineAsyncStatus_DeviceDestroyed, nullptr, _, this))
         .Times(1);
 
     wgpuDeviceRelease(device);

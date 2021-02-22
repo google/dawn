@@ -28,9 +28,9 @@ TEST_F(MultipleDeviceTest, ValidatesSameDevice) {
     ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commandBuffer));
 }
 
-// Test that CreateReadyPipeline fails creation with an Error status if it uses
+// Test that CreatePipelineAsync fails creation with an Error status if it uses
 // objects from a different device.
-TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreateReadyPipeline) {
+TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
     wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
     wgslDesc.source = R"(
         [[stage(compute)]] fn main() -> void {
@@ -40,7 +40,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreateReadyPipeline) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
 
-    // Base case: CreateReadyComputePipeline succeeds.
+    // Base case: CreateComputePipelineAsync succeeds.
     {
         wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
 
@@ -48,18 +48,18 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreateReadyPipeline) {
         pipelineDesc.computeStage.module = shaderModule;
         pipelineDesc.computeStage.entryPoint = "main";
 
-        StrictMock<MockCallback<WGPUCreateReadyComputePipelineCallback>> creationCallback;
+        StrictMock<MockCallback<WGPUCreateComputePipelineAsyncCallback>> creationCallback;
         EXPECT_CALL(creationCallback,
-                    Call(WGPUCreateReadyPipelineStatus_Success, NotNull(), _, this))
+                    Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), _, this))
             .WillOnce(WithArg<1>(Invoke(
                 [](WGPUComputePipeline pipeline) { wgpu::ComputePipeline::Acquire(pipeline); })));
-        device.CreateReadyComputePipeline(&pipelineDesc, creationCallback.Callback(),
+        device.CreateComputePipelineAsync(&pipelineDesc, creationCallback.Callback(),
                                           creationCallback.MakeUserdata(this));
 
         WaitForAllOperations(device);
     }
 
-    // CreateReadyComputePipeline errors if the shader module is created on a different device.
+    // CreateComputePipelineAsync errors if the shader module is created on a different device.
     {
         wgpu::Device device2 = RegisterDevice(CreateTestDevice());
         wgpu::ShaderModule shaderModule = device2.CreateShaderModule(&shaderModuleDesc);
@@ -68,11 +68,11 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreateReadyPipeline) {
         pipelineDesc.computeStage.module = shaderModule;
         pipelineDesc.computeStage.entryPoint = "main";
 
-        StrictMock<MockCallback<WGPUCreateReadyComputePipelineCallback>> creationCallback;
+        StrictMock<MockCallback<WGPUCreateComputePipelineAsyncCallback>> creationCallback;
         EXPECT_CALL(creationCallback,
-                    Call(WGPUCreateReadyPipelineStatus_Error, nullptr, _, this + 1))
+                    Call(WGPUCreatePipelineAsyncStatus_Error, nullptr, _, this + 1))
             .Times(1);
-        device.CreateReadyComputePipeline(&pipelineDesc, creationCallback.Callback(),
+        device.CreateComputePipelineAsync(&pipelineDesc, creationCallback.Callback(),
                                           creationCallback.MakeUserdata(this + 1));
 
         WaitForAllOperations(device);

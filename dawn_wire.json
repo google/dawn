@@ -36,13 +36,13 @@
             { "name": "handle create info length", "type": "uint64_t" },
             { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
         ],
-        "device create ready compute pipeline": [
+        "device create compute pipeline async": [
             { "name": "device id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "compute pipeline"},
             { "name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
         ],
-        "device create ready render pipeline": [
+        "device create render pipeline async": [
             { "name": "device id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "render pipeline"},
@@ -85,16 +85,16 @@
             { "name": "read initial data info length", "type": "uint64_t" },
             { "name": "read initial data info", "type": "uint8_t", "annotation": "const*", "length": "read initial data info length", "skip_serialize": true }
         ],
-        "device create ready compute pipeline callback": [
+        "device create compute pipeline async callback": [
             { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "request serial", "type": "uint64_t" },
-            { "name": "status", "type": "create ready pipeline status" },
+            { "name": "status", "type": "create pipeline async status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
-        "device create ready render pipeline callback": [
+        "device create render pipeline async callback": [
             { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "request serial", "type": "uint64_t" },
-            { "name": "status", "type": "create ready pipeline status" },
+            { "name": "status", "type": "create pipeline async status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device uncaptured error callback": [
@@ -133,8 +133,8 @@
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
             "DeviceCreateBuffer",
-            "DeviceCreateReadyComputePipeline",
-            "DeviceCreateReadyRenderPipeline",
+            "DeviceCreateComputePipelineAsync",
+            "DeviceCreateRenderPipelineAsync",
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",

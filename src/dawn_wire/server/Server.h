@@ -141,7 +141,7 @@ namespace dawn_wire { namespace server {
         uint64_t requestSerial;
     };
 
-    struct CreateReadyPipelineUserData : CallbackUserdata {
+    struct CreatePipelineAsyncUserData : CallbackUserdata {
         using CallbackUserdata::CallbackUserdata;
 
         ObjectHandle device;
@@ -202,14 +202,14 @@ namespace dawn_wire { namespace server {
                                           FenceCompletionUserdata* userdata);
         void OnFenceOnCompletion(WGPUFenceCompletionStatus status,
                                  FenceOnCompletionUserdata* userdata);
-        void OnCreateReadyComputePipelineCallback(WGPUCreateReadyPipelineStatus status,
+        void OnCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
                                                   WGPUComputePipeline pipeline,
                                                   const char* message,
-                                                  CreateReadyPipelineUserData* userdata);
-        void OnCreateReadyRenderPipelineCallback(WGPUCreateReadyPipelineStatus status,
+                                                  CreatePipelineAsyncUserData* userdata);
+        void OnCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
                                                  WGPURenderPipeline pipeline,
                                                  const char* message,
-                                                 CreateReadyPipelineUserData* userdata);
+                                                 CreatePipelineAsyncUserData* userdata);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inc"
 

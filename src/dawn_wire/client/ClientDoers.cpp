@@ -93,26 +93,26 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
-    bool Client::DoDeviceCreateReadyComputePipelineCallback(Device* device,
+    bool Client::DoDeviceCreateComputePipelineAsyncCallback(Device* device,
                                                             uint64_t requestSerial,
-                                                            WGPUCreateReadyPipelineStatus status,
+                                                            WGPUCreatePipelineAsyncStatus status,
                                                             const char* message) {
         // The device might have been deleted or recreated so this isn't an error.
         if (device == nullptr) {
             return true;
         }
-        return device->OnCreateReadyComputePipelineCallback(requestSerial, status, message);
+        return device->OnCreateComputePipelineAsyncCallback(requestSerial, status, message);
     }
 
-    bool Client::DoDeviceCreateReadyRenderPipelineCallback(Device* device,
+    bool Client::DoDeviceCreateRenderPipelineAsyncCallback(Device* device,
                                                            uint64_t requestSerial,
-                                                           WGPUCreateReadyPipelineStatus status,
+                                                           WGPUCreatePipelineAsyncStatus status,
                                                            const char* message) {
         // The device might have been deleted or recreated so this isn't an error.
         if (device == nullptr) {
             return true;
         }
-        return device->OnCreateReadyRenderPipelineCallback(requestSerial, status, message);
+        return device->OnCreateRenderPipelineAsyncCallback(requestSerial, status, message);
     }
 
 }}  // namespace dawn_wire::client

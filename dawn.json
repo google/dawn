@@ -597,16 +597,16 @@
             {"name": "flipY", "type": "bool", "default": "false"}
         ]
     },
-    "create ready compute pipeline callback": {
+    "create compute pipeline async callback": {
         "category": "callback",
         "args": [
-            {"name": "status", "type": "create ready pipeline status"},
+            {"name": "status", "type": "create pipeline async status"},
             {"name": "pipeline", "type": "compute pipeline"},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "userdata", "type": "void", "annotation": "*"}
         ]
     },
-    "create ready pipeline status": {
+    "create pipeline async status": {
         "category": "enum",
         "values": [
             {"value": 0, "name": "success"},
@@ -616,10 +616,10 @@
             {"value": 4, "name": "unknown"}
         ]
     },
-    "create ready render pipeline callback": {
+    "create render pipeline async callback": {
         "category": "callback",
         "args": [
-            {"name": "status", "type": "create ready pipeline status"},
+            {"name": "status", "type": "create pipeline async status"},
             {"name": "pipeline", "type": "render pipeline"},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "userdata", "type": "void", "annotation": "*"}
@@ -677,11 +677,11 @@
                 ]
             },
             {
-                "name": "create ready compute pipeline",
+                "name": "create compute pipeline async",
                 "returns": "void",
                 "args": [
                     {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create ready compute pipeline callback"},
+                    {"name": "callback", "type": "create compute pipeline async callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
@@ -700,11 +700,11 @@
                 ]
             },
             {
-                "name": "create ready render pipeline",
+                "name": "create render pipeline async",
                 "returns": "void",
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create ready render pipeline callback"},
+                    {"name": "callback", "type": "create render pipeline async callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },

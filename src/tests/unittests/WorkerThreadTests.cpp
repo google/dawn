@@ -149,7 +149,7 @@ namespace {
 
 class WorkerThreadTest : public testing::Test {};
 
-// Emulate the basic usage of worker thread pool in CreateReady*Pipeline().
+// Emulate the basic usage of worker thread pool in Create*PipelineAsync().
 TEST_F(WorkerThreadTest, Basic) {
     dawn_platform::Platform platform;
     std::unique_ptr<dawn_platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();

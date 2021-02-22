@@ -42,11 +42,11 @@ namespace dawn_wire { namespace client {
         bool PopErrorScope(WGPUErrorCallback callback, void* userdata);
         WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
         WGPUBuffer CreateErrorBuffer();
-        void CreateReadyComputePipeline(WGPUComputePipelineDescriptor const* descriptor,
-                                        WGPUCreateReadyComputePipelineCallback callback,
+        void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
+                                        WGPUCreateComputePipelineAsyncCallback callback,
                                         void* userdata);
-        void CreateReadyRenderPipeline(WGPURenderPipelineDescriptor const* descriptor,
-                                       WGPUCreateReadyRenderPipelineCallback callback,
+        void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
+                                       WGPUCreateRenderPipelineAsyncCallback callback,
                                        void* userdata);
 
         void HandleError(WGPUErrorType errorType, const char* message);
@@ -54,11 +54,11 @@ namespace dawn_wire { namespace client {
         bool OnPopErrorScopeCallback(uint64_t requestSerial,
                                      WGPUErrorType type,
                                      const char* message);
-        bool OnCreateReadyComputePipelineCallback(uint64_t requestSerial,
-                                                  WGPUCreateReadyPipelineStatus status,
+        bool OnCreateComputePipelineAsyncCallback(uint64_t requestSerial,
+                                                  WGPUCreatePipelineAsyncStatus status,
                                                   const char* message);
-        bool OnCreateReadyRenderPipelineCallback(uint64_t requestSerial,
-                                                 WGPUCreateReadyPipelineStatus status,
+        bool OnCreateRenderPipelineAsyncCallback(uint64_t requestSerial,
+                                                 WGPUCreatePipelineAsyncStatus status,
                                                  const char* message);
 
         // TODO(dawn:22): Remove once the deprecation period is finished.
@@ -78,14 +78,14 @@ namespace dawn_wire { namespace client {
         uint64_t mErrorScopeRequestSerial = 0;
         uint64_t mErrorScopeStackSize = 0;
 
-        struct CreateReadyPipelineRequest {
-            WGPUCreateReadyComputePipelineCallback createReadyComputePipelineCallback = nullptr;
-            WGPUCreateReadyRenderPipelineCallback createReadyRenderPipelineCallback = nullptr;
+        struct CreatePipelineAsyncRequest {
+            WGPUCreateComputePipelineAsyncCallback createComputePipelineAsyncCallback = nullptr;
+            WGPUCreateRenderPipelineAsyncCallback createRenderPipelineAsyncCallback = nullptr;
             void* userdata = nullptr;
             ObjectId pipelineObjectID;
         };
-        std::map<uint64_t, CreateReadyPipelineRequest> mCreateReadyPipelineRequests;
-        uint64_t mCreateReadyPipelineRequestSerial = 0;
+        std::map<uint64_t, CreatePipelineAsyncRequest> mCreatePipelineAsyncRequests;
+        uint64_t mCreatePipelineAsyncRequestSerial = 0;
 
         WGPUErrorCallback mErrorCallback = nullptr;
         WGPUDeviceLostCallback mDeviceLostCallback = nullptr;
