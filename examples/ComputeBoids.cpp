@@ -150,7 +150,7 @@ void initRender() {
 
 void initSim() {
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
-        [[block]] struct Particle {
+        struct Particle {
             [[offset(0)]] pos : vec2<f32>;
             [[offset(8)]] vel : vec2<f32>;
         };
